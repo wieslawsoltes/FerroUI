@@ -302,6 +302,7 @@ control_tests! {
     refresh_visualizer => "RefreshVisualizer";
     slider => "Slider";
     split_button => "SplitButton";
+    swipe_control => "SwipeControl";
     toggle_switch => "ToggleSwitch";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";

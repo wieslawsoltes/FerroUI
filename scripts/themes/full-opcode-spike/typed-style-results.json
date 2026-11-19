@@ -1,0 +1,1889 @@
+{
+  "host": "macOS arm64, rustc 1.99.1; dist/fat LTO, Apple strip + ad-hoc codesign",
+  "snapshot": {
+    "base": "933fd46325772fd1cdec81add9d4912dda2fe931",
+    "directories": [
+      "src/FerroUI.Build.Scan",
+      "src/FerroUI.Build.Tasks",
+      "src/Markup/FerroUI.Markup",
+      "src/Markup/FerroUI.Markup.Xaml",
+      "src/Markup/FerroUI.Markup.Xaml.Loader"
+    ],
+    "sha256": "bae6aaf0c3318d056d175f85a6229714764d83d46edf443a71a8299d37dc22e5",
+    "patch_sha256": "e27730ed768b2e404f53f35b21d9a38e56d04ac8a0e8ece9c75cf339d620c512"
+  },
+  "sample_columns_ns": [
+    "theme_construction",
+    "first_Button_lookup",
+    "first_Button_build",
+    "mean_of_128_Button_builds"
+  ],
+  "cases": {
+    "winui": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 277,
+        "native_control_theme_constructors": 3,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "style_members": {
+          "TargetType": 277,
+          "Setter": 3423,
+          "Style": 1525,
+          "BasedOn": 126
+        },
+        "setter_values": {
+          "Computed": 177,
+          "Dynamic": 1922,
+          "Expression": 440,
+          "Template": 175,
+          "Absent": 2,
+          "Null": 15,
+          "Thickness": 98,
+          "Bool": 229,
+          "Double": 191,
+          "Static": 123,
+          "CornerRadius": 5,
+          "Int": 39,
+          "Text": 7
+        },
+        "selector_steps": {
+          "Nesting": 651,
+          "Class": 575,
+          "Template": 553,
+          "OfType": 607,
+          "Name": 576,
+          "PropertyEquals": 69,
+          "Not": 24,
+          "Child": 9,
+          "NthLastChild": 2,
+          "Descendant": 30,
+          "Or": 57
+        },
+        "bytes": 18578256,
+        "sha256": "3137cf80828be11f14e7c875e941460b582c272118f1eddc1e9a8ec3b3cb549e",
+        "samples_ns": [
+          [
+            3921000,
+            106875,
+            47625,
+            2689
+          ],
+          [
+            3657875,
+            100958,
+            44625,
+            2810
+          ],
+          [
+            3694375,
+            103625,
+            46209,
+            2783
+          ],
+          [
+            4297042,
+            127417,
+            54042,
+            2771
+          ],
+          [
+            3834583,
+            119666,
+            57125,
+            2862
+          ],
+          [
+            4550208,
+            125416,
+            51750,
+            3017
+          ],
+          [
+            3832458,
+            103208,
+            45125,
+            3129
+          ],
+          [
+            3795791,
+            106667,
+            46333,
+            2794
+          ],
+          [
+            3982583,
+            112666,
+            49625,
+            2891
+          ],
+          [
+            3630458,
+            102416,
+            44167,
+            2836
+          ],
+          [
+            3731750,
+            106542,
+            45666,
+            2733
+          ]
+        ],
+        "median_ns": [
+          3832458,
+          106667,
+          46333,
+          2810
+        ],
+        "linked_style_factories": 277,
+        "linked_style_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de"
+      },
+      "bytecode": {
+        "resource_programs": 897,
+        "resource_instruction_bytes": 53315,
+        "style_programs": 277,
+        "style_instruction_bytes": 36956,
+        "resources": {
+          "alias": 3634,
+          "literal_brush": 738,
+          "dynamic_brush": 714,
+          "static_brush": 338,
+          "double": 502,
+          "thickness": 568,
+          "corner_radius": 34,
+          "color": 470,
+          "text": 72
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "bytes": 18700768,
+        "sha256": "649b95f3559bd65ab9c4aa6993d8279606f79ad433e06eabaf16bd1347686381",
+        "samples_ns": [
+          [
+            3956708,
+            106417,
+            48834,
+            2839
+          ],
+          [
+            3831625,
+            115750,
+            52125,
+            2942
+          ],
+          [
+            3855792,
+            109958,
+            49083,
+            2872
+          ],
+          [
+            4026083,
+            123666,
+            51292,
+            3165
+          ],
+          [
+            4028416,
+            111166,
+            52834,
+            2869
+          ],
+          [
+            4001667,
+            114209,
+            49916,
+            3210
+          ],
+          [
+            3964333,
+            139167,
+            90625,
+            4185
+          ],
+          [
+            3878959,
+            115084,
+            51875,
+            2908
+          ],
+          [
+            4771417,
+            121458,
+            65083,
+            2957
+          ],
+          [
+            3926583,
+            117417,
+            52458,
+            2857
+          ],
+          [
+            4084042,
+            115667,
+            51583,
+            2827
+          ]
+        ],
+        "median_ns": [
+          3964333,
+          115667,
+          51875,
+          2908
+        ],
+        "linked_style_factories": 277,
+        "linked_style_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de"
+      },
+      "available_unit_count": 166,
+      "linked_units": [
+        "ambient",
+        "Resources/SystemResources.xaml",
+        "Resources/Generic.xaml",
+        "Resources/Common_themeresources.xaml",
+        "Resources/Common_themeresources_any.xaml",
+        "Resources/Deprecated_themeresources_any.xaml",
+        "Resources/RichEditBox_themeresources.xaml",
+        "Resources/PasswordBox_themeresources.xaml",
+        "Resources/TextBox_themeresources.xaml",
+        "Resources/MenuFlyout_themeresources.xaml",
+        "Resources/AcrylicBrush_themeresources.xaml",
+        "Resources/RevealBrush_themeresources.xaml",
+        "Resources/Deprecated_themeresources.xaml",
+        "Resources/Hyperlink_themeresources.xaml",
+        "Resources/HyperlinkButton_themeresources.xaml",
+        "Resources/RadioButton_themeresources.xaml",
+        "Resources/AppBarButton_themeresources.xaml",
+        "Resources/AppBarSeparator_themeresources.xaml",
+        "Resources/AppBarToggleButton_themeresources.xaml",
+        "Resources/ListBox_themeresources.xaml",
+        "Resources/ToggleSwitch_themeresources.xaml",
+        "Resources/CommandBar_themeresources.xaml",
+        "Resources/ListViewItem_themeresources.xaml",
+        "Resources/TextBlock_themeresources.xaml",
+        "Resources/TextBlock_themeresources_v2.5.xaml",
+        "Resources/FlyoutPresenter_themeresources.xaml",
+        "Resources/Button_themeresources.xaml",
+        "Resources/ToggleButton_themeresources.xaml",
+        "Resources/CornerRadius_themeresources.xaml",
+        "Resources/RepeatButton_themeresources.xaml",
+        "Resources/CalendarDatePicker_themeresources.xaml",
+        "Resources/CalendarView_themeresources.xaml",
+        "Resources/CheckBox_themeresources.xaml",
+        "Resources/ContentDialog_themeresources.xaml",
+        "Resources/DatePicker_themeresources.xaml",
+        "Resources/DateTimePickerFlyout_themeresources.xaml",
+        "Resources/FlipView_themeresources.xaml",
+        "Resources/FlipViewItem_themeresources.xaml",
+        "Resources/ScrollBar_themeresources.xaml",
+        "Resources/ScrollViewer_themeresources.xaml",
+        "Resources/Slider_themeresources.xaml",
+        "Resources/TimePicker_themeresources.xaml",
+        "Resources/ToolTip_themeresources.xaml",
+        "Resources/RatingControl_themeresources.xaml",
+        "Resources/InfoBadge_themeresources.xaml",
+        "Resources/NavigationView_themeresources.xaml",
+        "Resources/NavigationBackButton_themeresources.xaml",
+        "Resources/PersonPicture_themeresources.xaml",
+        "Resources/RefreshContainer_themeresources.xaml",
+        "Resources/RefreshVisualizer_themeresources.xaml",
+        "Resources/MenuBar_themeresources.xaml",
+        "Resources/TreeView_themeresources.xaml",
+        "Resources/SplitButton_themeresources.xaml",
+        "Resources/DropDownButton_themeresources.xaml",
+        "Resources/RadioButtons_themeresources.xaml",
+        "Resources/TabView_themeresources.xaml",
+        "Resources/AutoSuggestBox_themeresources.xaml",
+        "Resources/ComboBox_themeresources.xaml",
+        "Resources/SplitView_themeresources.xaml",
+        "Resources/ProgressBar_themeresources.xaml",
+        "Resources/ProgressRing_themeresources.xaml",
+        "Resources/NumberBox_themeresources.xaml",
+        "Resources/Expander_themeresources.xaml",
+        "Resources/PagerControl_themeresources.xaml",
+        "Resources/InfoBar_themeresources.xaml",
+        "Resources/PipsPager_themeresources.xaml",
+        "Resources/SelectorBar_themeresources.xaml",
+        "Resources/TitleBar_themeresources.xaml",
+        "Resources/TabularSurfaces_themeresources.xaml",
+        "Resources/TableView_themeresources.xaml",
+        "Resources/ResizeGripper_themeresources.xaml",
+        "Resources/ThemeShadows.xaml",
+        "Resources/Glyphs.xaml",
+        "Strings/InvariantResources.xaml",
+        "Controls/TextBlock.xaml",
+        "Controls/Button.xaml",
+        "Controls/RepeatButton.xaml",
+        "Controls/ToggleButton.xaml",
+        "Controls/RevealStyles.xaml",
+        "Controls/HyperlinkButton.xaml",
+        "Controls/CheckBox.xaml",
+        "Controls/RadioButton.xaml",
+        "Controls/Thumb.xaml",
+        "Controls/ScrollBar.xaml",
+        "Controls/ScrollViewer.xaml",
+        "Controls/TextBox.xaml",
+        "Controls/ToolTip.xaml",
+        "Controls/ProgressBar.xaml",
+        "Controls/Separator.xaml",
+        "Controls/PathIcon.xaml",
+        "Controls/FontIcon.xaml",
+        "Controls/SymbolIcon.xaml",
+        "Controls/Label.xaml",
+        "Controls/ItemsControl.xaml",
+        "Controls/HeaderedContentControl.xaml",
+        "Controls/GroupBox.xaml",
+        "Controls/SelectableTextBlock.xaml",
+        "Controls/TransitioningContentControl.xaml",
+        "Controls/TextSelectionHandle.xaml",
+        "Controls/DataValidationErrors.xaml",
+        "Controls/GridSplitter.xaml",
+        "Controls/DateTimePickerShared.xaml",
+        "Controls/CalendarDayButton.xaml",
+        "Controls/CalendarButton.xaml",
+        "Controls/CalendarItem.xaml",
+        "Controls/Calendar.xaml",
+        "Controls/CalendarDatePicker.xaml",
+        "Controls/DatePicker.xaml",
+        "Controls/TimePicker.xaml",
+        "Controls/NotificationCard.xaml",
+        "Controls/InfoBar.xaml",
+        "Controls/InfoBadge.xaml",
+        "Controls/TitleBar.xaml",
+        "Controls/ProgressRing.xaml",
+        "Controls/WindowNotificationManager.xaml",
+        "Controls/TableView.xaml",
+        "Controls/TableViewCell.xaml",
+        "Controls/TableViewColumnHeader.xaml",
+        "Controls/TableViewRow.xaml",
+        "Controls/ManagedFileChooser.xaml",
+        "Controls/TabStrip.xaml",
+        "Controls/TabStripItem.xaml",
+        "Controls/TabControl.xaml",
+        "Controls/TabItem.xaml",
+        "Controls/SplitView.xaml",
+        "Controls/ContentPage.xaml",
+        "Controls/TabbedPage.xaml",
+        "Controls/NavigationPage.xaml",
+        "Controls/DrawerPage.xaml",
+        "Controls/Frame.xaml",
+        "Controls/NavigationView.xaml",
+        "Controls/Carousel.xaml",
+        "Controls/CarouselPage.xaml",
+        "Controls/CommandBar.xaml",
+        "Controls/DropDownButton.xaml",
+        "Controls/SplitButton.xaml",
+        "Controls/ToggleSwitch.xaml",
+        "Controls/Slider.xaml",
+        "Controls/MediaTransportControls.xaml",
+        "Controls/CameraCaptureUI.xaml",
+        "Controls/NumericUpDown.xaml",
+        "Controls/NumberBox.xaml",
+        "Controls/ButtonSpinner.xaml",
+        "Controls/Expander.xaml",
+        "Controls/PipsPager.xaml",
+        "Controls/RatingControl.xaml",
+        "Controls/PersonPicture.xaml",
+        "Controls/PagerControl.xaml",
+        "Controls/RefreshContainer.xaml",
+        "Controls/RefreshVisualizer.xaml",
+        "Controls/FlyoutPresenter.xaml",
+        "Controls/MenuScrollViewer.xaml",
+        "Controls/MenuFlyoutPresenter.xaml",
+        "Controls/ContextMenu.xaml",
+        "Controls/MenuItem.xaml",
+        "Controls/Menu.xaml",
+        "Controls/ListBoxItem.xaml",
+        "Controls/ListBox.xaml",
+        "Controls/ComboBoxItem.xaml",
+        "Controls/ComboBox.xaml",
+        "Controls/TreeViewItem.xaml",
+        "Controls/TreeView.xaml",
+        "Controls/AutoCompleteBox.xaml",
+        "Controls/AutoSuggestBox.xaml",
+        "Controls/RadioButtons.xaml",
+        "Controls/RichEditBox.xaml"
+      ],
+      "inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c",
+      "verified_resource_inventory": "104 type keys and 2984 distinct string keys"
+    },
+    "fluent": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 117,
+        "native_control_theme_constructors": 5,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "style_members": {
+          "TargetType": 117,
+          "Setter": 1592,
+          "Style": 625,
+          "BasedOn": 12
+        },
+        "setter_values": {
+          "Dynamic": 897,
+          "Expression": 196,
+          "Computed": 109,
+          "Template": 107,
+          "Bool": 97,
+          "Thickness": 32,
+          "Absent": 2,
+          "Null": 4,
+          "Static": 15,
+          "Double": 58,
+          "Int": 70,
+          "Text": 5
+        },
+        "selector_steps": {
+          "Nesting": 337,
+          "Template": 287,
+          "OfType": 317,
+          "Name": 275,
+          "Class": 273,
+          "Child": 14,
+          "PropertyEquals": 69,
+          "Descendant": 13,
+          "Or": 8,
+          "Not": 14
+        },
+        "bytes": 15567920,
+        "sha256": "ab33d5a8d4f0948c9061e62cd248d4d1dd37c1d016bdc3034421320c7cd55015",
+        "samples_ns": [
+          [
+            1171667,
+            241750,
+            19292,
+            1750
+          ],
+          [
+            1198500,
+            292333,
+            22458,
+            1925
+          ],
+          [
+            1235500,
+            245458,
+            20458,
+            1941
+          ],
+          [
+            1203583,
+            253250,
+            21667,
+            1730
+          ],
+          [
+            1249834,
+            304333,
+            23000,
+            1766
+          ],
+          [
+            1208583,
+            244667,
+            19083,
+            1739
+          ],
+          [
+            1165708,
+            248958,
+            20000,
+            1771
+          ],
+          [
+            1182125,
+            250875,
+            22250,
+            2123
+          ],
+          [
+            1187625,
+            242791,
+            18041,
+            1697
+          ],
+          [
+            1190500,
+            247208,
+            18917,
+            1741
+          ],
+          [
+            1170167,
+            241666,
+            21750,
+            1715
+          ]
+        ],
+        "median_ns": [
+          1190500,
+          247208,
+          20458,
+          1750
+        ],
+        "linked_style_factories": 117,
+        "linked_style_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f"
+      },
+      "bytecode": {
+        "resource_programs": 372,
+        "resource_instruction_bytes": 13906,
+        "style_programs": 117,
+        "style_instruction_bytes": 15670,
+        "resources": {
+          "alias": 1023,
+          "literal_brush": 147,
+          "dynamic_brush": 77,
+          "static_brush": 170,
+          "double": 149,
+          "thickness": 158,
+          "corner_radius": 6,
+          "color": 60,
+          "text": 34
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "bytes": 15778640,
+        "sha256": "b1b7e0ff5ca85a36e614b0954de7eb22d23fc52bbda65ee705a275e07887b476",
+        "samples_ns": [
+          [
+            1242209,
+            240417,
+            22250,
+            2045
+          ],
+          [
+            1252375,
+            242375,
+            21292,
+            1924
+          ],
+          [
+            1404792,
+            293666,
+            30333,
+            1921
+          ],
+          [
+            1239333,
+            237708,
+            21125,
+            1903
+          ],
+          [
+            1253417,
+            244584,
+            21458,
+            1912
+          ],
+          [
+            1280167,
+            237667,
+            20875,
+            1895
+          ],
+          [
+            1249292,
+            234833,
+            21042,
+            1976
+          ],
+          [
+            1239209,
+            238000,
+            21125,
+            1929
+          ],
+          [
+            1396666,
+            245250,
+            21916,
+            1913
+          ],
+          [
+            1226250,
+            237833,
+            21750,
+            1918
+          ],
+          [
+            1216583,
+            235958,
+            20834,
+            1901
+          ]
+        ],
+        "median_ns": [
+          1249292,
+          238000,
+          21292,
+          1918
+        ],
+        "linked_style_factories": 117,
+        "linked_style_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f"
+      },
+      "available_unit_count": 75,
+      "linked_units": [
+        "ambient",
+        "Accents/BaseResources.xaml",
+        "Accents/FluentControlResources.xaml",
+        "Strings/InvariantResources.xaml",
+        "Controls/Button.xaml",
+        "Controls/CommandBar.xaml",
+        "Controls/CarouselPage.xaml",
+        "Controls/ContentPage.xaml",
+        "Controls/DrawerPage.xaml",
+        "Controls/NavigationPage.xaml",
+        "Controls/TabbedPage.xaml",
+        "Controls/RadioButton.xaml",
+        "Controls/Expander.xaml",
+        "Controls/ProgressBar.xaml",
+        "Controls/AutoCompleteBox.xaml",
+        "Controls/ButtonSpinner.xaml",
+        "Controls/Calendar.xaml",
+        "Controls/CalendarButton.xaml",
+        "Controls/CalendarDatePicker.xaml",
+        "Controls/CalendarDayButton.xaml",
+        "Controls/CalendarItem.xaml",
+        "Controls/Carousel.xaml",
+        "Controls/CheckBox.xaml",
+        "Controls/FlyoutPresenter.xaml",
+        "Controls/GroupBox.xaml",
+        "Controls/GridSplitter.xaml",
+        "Controls/HyperlinkButton.xaml",
+        "Controls/ItemsControl.xaml",
+        "Controls/Label.xaml",
+        "Controls/ListBox.xaml",
+        "Controls/ListBoxItem.xaml",
+        "Controls/MenuScrollViewer.xaml",
+        "Controls/Menu.xaml",
+        "Controls/MenuItem.xaml",
+        "Controls/MenuFlyoutPresenter.xaml",
+        "Controls/NotificationCard.xaml",
+        "Controls/NumericUpDown.xaml",
+        "Controls/PathIcon.xaml",
+        "Controls/PipsPager.xaml",
+        "Controls/RepeatButton.xaml",
+        "Controls/ScrollBar.xaml",
+        "Controls/ScrollViewer.xaml",
+        "Controls/Separator.xaml",
+        "Controls/SplitButton.xaml",
+        "Controls/SplitView.xaml",
+        "Controls/TabControl.xaml",
+        "Controls/TabItem.xaml",
+        "Controls/TableView.xaml",
+        "Controls/TableViewCell.xaml",
+        "Controls/TableViewColumnHeader.xaml",
+        "Controls/TableViewRow.xaml",
+        "Controls/TabStrip.xaml",
+        "Controls/TabStripItem.xaml",
+        "Controls/TextBox.xaml",
+        "Controls/ToggleButton.xaml",
+        "Controls/ToggleSwitch.xaml",
+        "Controls/ToolTip.xaml",
+        "Controls/TransitioningContentControl.xaml",
+        "Controls/TreeView.xaml",
+        "Controls/TreeViewItem.xaml",
+        "Controls/WindowNotificationManager.xaml",
+        "Controls/ComboBox.xaml",
+        "Controls/ComboBoxItem.xaml",
+        "Controls/ContextMenu.xaml",
+        "Controls/DataValidationErrors.xaml",
+        "Controls/DateTimePickerShared.xaml",
+        "Controls/DatePicker.xaml",
+        "Controls/TimePicker.xaml",
+        "Controls/DropDownButton.xaml",
+        "Controls/Slider.xaml",
+        "Controls/ManagedFileChooser.xaml",
+        "Controls/SelectableTextBlock.xaml",
+        "Controls/RefreshContainer.xaml",
+        "Controls/HeaderedContentControl.xaml",
+        "Controls/TextSelectionHandle.xaml"
+      ],
+      "inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3",
+      "verified_resource_inventory": "83 type keys and 1111 distinct string keys"
+    },
+    "fluent-button": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 117,
+        "native_control_theme_constructors": 5,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "style_members": {
+          "TargetType": 117,
+          "Setter": 1592,
+          "Style": 625,
+          "BasedOn": 12
+        },
+        "setter_values": {
+          "Dynamic": 897,
+          "Expression": 196,
+          "Computed": 109,
+          "Template": 107,
+          "Bool": 97,
+          "Thickness": 32,
+          "Absent": 2,
+          "Null": 4,
+          "Static": 15,
+          "Double": 58,
+          "Int": 70,
+          "Text": 5
+        },
+        "selector_steps": {
+          "Nesting": 337,
+          "Template": 287,
+          "OfType": 317,
+          "Name": 275,
+          "Class": 273,
+          "Child": 14,
+          "PropertyEquals": 69,
+          "Descendant": 13,
+          "Or": 8,
+          "Not": 14
+        },
+        "bytes": 9973904,
+        "sha256": "50384ecb12b1b9d1b43889b23c7250611cb57bcb29228cea5478a36800549603",
+        "samples_ns": [
+          [
+            343750,
+            250375,
+            19667,
+            2006
+          ],
+          [
+            319667,
+            227625,
+            19834,
+            1819
+          ],
+          [
+            362500,
+            234208,
+            19250,
+            1802
+          ],
+          [
+            332000,
+            256042,
+            19458,
+            1844
+          ],
+          [
+            321084,
+            242709,
+            20209,
+            1811
+          ],
+          [
+            346625,
+            246334,
+            22250,
+            1881
+          ],
+          [
+            318541,
+            289750,
+            543041,
+            1917
+          ],
+          [
+            319625,
+            238958,
+            19000,
+            1803
+          ],
+          [
+            325125,
+            238375,
+            19625,
+            1843
+          ],
+          [
+            320083,
+            234625,
+            22000,
+            1845
+          ],
+          [
+            329708,
+            244292,
+            19333,
+            1777
+          ]
+        ],
+        "median_ns": [
+          325125,
+          242709,
+          19667,
+          1843
+        ],
+        "linked_style_factories": 10,
+        "linked_style_names_sha256": "9fbba2de9a6ee37d4f849551c10c12ab5d1ceae1b9298c0ea8a4c20e28802ba0"
+      },
+      "bytecode": {
+        "resource_programs": 372,
+        "resource_instruction_bytes": 13906,
+        "style_programs": 117,
+        "style_instruction_bytes": 15670,
+        "resources": {
+          "alias": 1023,
+          "literal_brush": 147,
+          "dynamic_brush": 77,
+          "static_brush": 170,
+          "double": 149,
+          "thickness": 158,
+          "corner_radius": 6,
+          "color": 60,
+          "text": 34
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "bytes": 10023616,
+        "sha256": "fcce235eddfa544eaabc5112d70385c655da94d226eb137c161d9a0aff65a9d3",
+        "samples_ns": [
+          [
+            350208,
+            244708,
+            18959,
+            1991
+          ],
+          [
+            359250,
+            243833,
+            19958,
+            1982
+          ],
+          [
+            340292,
+            238167,
+            18667,
+            1949
+          ],
+          [
+            337916,
+            247958,
+            19791,
+            1977
+          ],
+          [
+            332000,
+            227584,
+            18459,
+            1983
+          ],
+          [
+            336166,
+            230667,
+            19708,
+            1959
+          ],
+          [
+            338250,
+            255583,
+            20708,
+            2143
+          ],
+          [
+            331667,
+            233541,
+            21000,
+            1964
+          ],
+          [
+            371083,
+            274167,
+            30125,
+            1983
+          ],
+          [
+            332958,
+            258667,
+            22083,
+            2035
+          ],
+          [
+            332083,
+            230917,
+            19458,
+            2212
+          ]
+        ],
+        "median_ns": [
+          337916,
+          243833,
+          19791,
+          1983
+        ],
+        "linked_style_factories": 10,
+        "linked_style_names_sha256": "9fbba2de9a6ee37d4f849551c10c12ab5d1ceae1b9298c0ea8a4c20e28802ba0"
+      },
+      "available_unit_count": 75,
+      "linked_units": [
+        "ambient",
+        "Controls/Button.xaml"
+      ],
+      "inventory_sha256": null
+    }
+  },
+  "isolated_style_ab": {
+    "probe": {
+      "rows-styles": {
+        "bytes": 18137792,
+        "sha256": "355217343e4572b42011610ec74d1d151c03de934170e28f5b3d8b0116e4ade9",
+        "samples_ns": [
+          [
+            37076750,
+            3354708,
+            2338750,
+            3097
+          ],
+          [
+            4206417,
+            112459,
+            49084,
+            2592
+          ],
+          [
+            4047375,
+            117833,
+            49666,
+            2594
+          ],
+          [
+            4295875,
+            116250,
+            48334,
+            2752
+          ],
+          [
+            4209542,
+            133792,
+            57375,
+            2718
+          ],
+          [
+            4469833,
+            130333,
+            55208,
+            2628
+          ],
+          [
+            4583042,
+            273750,
+            66208,
+            2732
+          ],
+          [
+            4238875,
+            124125,
+            58958,
+            2778
+          ],
+          [
+            3886542,
+            113084,
+            48375,
+            2610
+          ],
+          [
+            3824833,
+            112584,
+            47250,
+            2614
+          ],
+          [
+            3886750,
+            113625,
+            49000,
+            2605
+          ],
+          [
+            3843792,
+            111500,
+            47500,
+            2674
+          ],
+          [
+            6221208,
+            110125,
+            50459,
+            2855
+          ],
+          [
+            4439709,
+            112292,
+            48625,
+            6299
+          ],
+          [
+            6412500,
+            118417,
+            52041,
+            2736
+          ],
+          [
+            3905625,
+            112959,
+            49375,
+            2590
+          ],
+          [
+            20892375,
+            215833,
+            81458,
+            92853
+          ],
+          [
+            9936667,
+            5454541,
+            77958,
+            2655
+          ],
+          [
+            4136416,
+            113875,
+            47208,
+            2706
+          ],
+          [
+            5423792,
+            113708,
+            53083,
+            2639
+          ],
+          [
+            4135875,
+            107917,
+            50334,
+            2603
+          ],
+          [
+            4264042,
+            106625,
+            52166,
+            3919
+          ],
+          [
+            5047500,
+            140875,
+            49917,
+            3167
+          ],
+          [
+            4833917,
+            119625,
+            51417,
+            4206
+          ],
+          [
+            6217959,
+            121584,
+            52584,
+            7979
+          ],
+          [
+            5073709,
+            146291,
+            66833,
+            3739
+          ],
+          [
+            4037708,
+            113458,
+            46459,
+            2618
+          ],
+          [
+            4577584,
+            194125,
+            78958,
+            5470
+          ],
+          [
+            4348458,
+            112167,
+            48208,
+            2650
+          ],
+          [
+            4847666,
+            108708,
+            49125,
+            2981
+          ],
+          [
+            4712625,
+            253833,
+            57125,
+            7342
+          ]
+        ],
+        "theme_census": {
+          "resource_programs": 897,
+          "resource_instruction_bytes": 53315,
+          "style_programs": 277,
+          "style_instruction_bytes": 36956,
+          "resources": {
+            "alias": 3634,
+            "literal_brush": 738,
+            "dynamic_brush": 714,
+            "static_brush": 338,
+            "double": 502,
+            "thickness": 568,
+            "corner_radius": 34,
+            "color": 470,
+            "text": 72
+          },
+          "native_style_tables": 0,
+          "native_control_theme_constructors": 3,
+          "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de"
+        },
+        "median_ns": [
+          4439709,
+          116250,
+          50459,
+          2732
+        ],
+        "concurrent_samples_ns": [
+          [
+            49631291,
+            4193042,
+            2487250,
+            2814
+          ],
+          [
+            8538833,
+            295667,
+            98875,
+            7212
+          ],
+          [
+            4273000,
+            122250,
+            55125,
+            2599
+          ],
+          [
+            18704792,
+            127167,
+            53917,
+            2672
+          ],
+          [
+            5557916,
+            117042,
+            124917,
+            7353
+          ],
+          [
+            6490750,
+            119083,
+            53250,
+            2591
+          ],
+          [
+            10832417,
+            232542,
+            90167,
+            14271
+          ],
+          [
+            4027042,
+            144709,
+            64250,
+            2673
+          ],
+          [
+            4031584,
+            112125,
+            47083,
+            2726
+          ],
+          [
+            4069542,
+            116958,
+            49917,
+            9863
+          ],
+          [
+            5620000,
+            113417,
+            52000,
+            2653
+          ]
+        ],
+        "concurrent_median_ns": [
+          5620000,
+          122250,
+          55125,
+          2726
+        ],
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 16334848,
+          "__DATA_CONST": 1425408,
+          "__DATA": 212992,
+          "__LINKEDIT": 196608
+        }
+      },
+      "rows": {
+        "bytes": 18370176,
+        "sha256": "c1cc9388fc8c2e8afaefed19686073e5ac55c044b0ec2183c29ec8c63870f275",
+        "samples_ns": [
+          [
+            43385834,
+            4325917,
+            2819875,
+            3137
+          ],
+          [
+            3905750,
+            109584,
+            46625,
+            2652
+          ],
+          [
+            3987375,
+            114542,
+            54417,
+            2688
+          ],
+          [
+            4138750,
+            124917,
+            48458,
+            2736
+          ],
+          [
+            4025125,
+            120333,
+            53042,
+            2749
+          ],
+          [
+            4256083,
+            135833,
+            58584,
+            2708
+          ],
+          [
+            4143416,
+            132667,
+            55416,
+            3316
+          ],
+          [
+            4260958,
+            126541,
+            53833,
+            2642
+          ],
+          [
+            3811042,
+            114625,
+            46750,
+            2684
+          ],
+          [
+            3828750,
+            113167,
+            48959,
+            2713
+          ],
+          [
+            4059542,
+            109916,
+            49334,
+            2673
+          ],
+          [
+            4002208,
+            113042,
+            46791,
+            2650
+          ],
+          [
+            3965916,
+            115292,
+            48458,
+            2761
+          ],
+          [
+            4403916,
+            112458,
+            50166,
+            2620
+          ],
+          [
+            4671875,
+            109500,
+            46000,
+            2939
+          ],
+          [
+            3852458,
+            107625,
+            46167,
+            2761
+          ],
+          [
+            4162542,
+            107667,
+            47125,
+            6263
+          ],
+          [
+            4305250,
+            106167,
+            46250,
+            2652
+          ],
+          [
+            5137500,
+            112834,
+            50750,
+            2742
+          ],
+          [
+            4217167,
+            104833,
+            46250,
+            2729
+          ],
+          [
+            4663542,
+            129375,
+            59875,
+            4456
+          ],
+          [
+            5910416,
+            202208,
+            105583,
+            4524
+          ],
+          [
+            4968292,
+            119125,
+            46542,
+            2701
+          ],
+          [
+            4235375,
+            110625,
+            48375,
+            2646
+          ],
+          [
+            4737500,
+            143958,
+            70042,
+            3121
+          ],
+          [
+            4095291,
+            107375,
+            46042,
+            2915
+          ],
+          [
+            4415625,
+            119959,
+            50875,
+            7335
+          ],
+          [
+            4040958,
+            107375,
+            48625,
+            2713
+          ],
+          [
+            3859250,
+            105292,
+            45792,
+            2693
+          ],
+          [
+            6419750,
+            202709,
+            82875,
+            6923
+          ],
+          [
+            7521250,
+            112625,
+            50125,
+            2654
+          ]
+        ],
+        "theme_census": {
+          "resource_programs": 897,
+          "resource_instruction_bytes": 53315,
+          "style_programs": 0,
+          "style_instruction_bytes": 0,
+          "resources": {
+            "alias": 3634,
+            "literal_brush": 738,
+            "dynamic_brush": 714,
+            "static_brush": 338,
+            "double": 502,
+            "thickness": 568,
+            "corner_radius": 34,
+            "color": 470,
+            "text": 72
+          },
+          "native_style_tables": 277,
+          "native_control_theme_constructors": 3,
+          "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+          "style_members": {
+            "TargetType": 277,
+            "Setter": 3423,
+            "Style": 1525,
+            "BasedOn": 126
+          },
+          "setter_values": {
+            "Computed": 177,
+            "Dynamic": 1922,
+            "Expression": 440,
+            "Template": 175,
+            "Absent": 2,
+            "Null": 15,
+            "Thickness": 98,
+            "Bool": 229,
+            "Double": 191,
+            "Static": 123,
+            "CornerRadius": 5,
+            "Int": 39,
+            "Text": 7
+          },
+          "selector_steps": {
+            "Nesting": 651,
+            "Class": 575,
+            "Template": 553,
+            "OfType": 607,
+            "Name": 576,
+            "PropertyEquals": 69,
+            "Not": 24,
+            "Child": 9,
+            "NthLastChild": 2,
+            "Descendant": 30,
+            "Or": 57
+          }
+        },
+        "median_ns": [
+          4217167,
+          113167,
+          48959,
+          2729
+        ],
+        "concurrent_samples_ns": [
+          [
+            12252709,
+            240625,
+            92083,
+            6965
+          ],
+          [
+            5323000,
+            114958,
+            49000,
+            2634
+          ],
+          [
+            12044292,
+            267250,
+            95542,
+            7108
+          ],
+          [
+            9916959,
+            140834,
+            73792,
+            2720
+          ],
+          [
+            4025625,
+            114000,
+            50083,
+            2653
+          ],
+          [
+            7252167,
+            110958,
+            53041,
+            2682
+          ],
+          [
+            5419291,
+            135584,
+            47833,
+            2589
+          ],
+          [
+            12108500,
+            282875,
+            112750,
+            7104
+          ],
+          [
+            4097167,
+            132791,
+            49333,
+            2689
+          ],
+          [
+            3921583,
+            108084,
+            47375,
+            2662
+          ],
+          [
+            9958916,
+            265625,
+            230166,
+            6027
+          ]
+        ],
+        "concurrent_median_ns": [
+          7252167,
+          135584,
+          53041,
+          2689
+        ],
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 16302080,
+          "__DATA_CONST": 1720320,
+          "__DATA": 163840,
+          "__LINKEDIT": 212992
+        }
+      }
+    },
+    "catalog": {
+      "rows-styles": {
+        "bytes": 64969664,
+        "sha256": "960388d6c5cf31c459b65dc0b75199545a430d5aba2ee7e3dab17a0bf08f9855",
+        "samples_ns": [
+          [
+            367336917
+          ],
+          [
+            173590333
+          ],
+          [
+            173211334
+          ],
+          [
+            178337042
+          ],
+          [
+            169534458
+          ],
+          [
+            259653500
+          ],
+          [
+            170879375
+          ],
+          [
+            205306208
+          ],
+          [
+            152400459
+          ],
+          [
+            176718542
+          ],
+          [
+            186917000
+          ],
+          [
+            212800958
+          ],
+          [
+            173273000
+          ],
+          [
+            190804375
+          ],
+          [
+            185261791
+          ],
+          [
+            196483625
+          ],
+          [
+            179835083
+          ],
+          [
+            189190750
+          ],
+          [
+            167631125
+          ],
+          [
+            192464791
+          ],
+          [
+            183971333
+          ]
+        ],
+        "theme_census": {
+          "resource_programs": 897,
+          "resource_instruction_bytes": 53315,
+          "style_programs": 277,
+          "style_instruction_bytes": 36956,
+          "resources": {
+            "alias": 3634,
+            "literal_brush": 738,
+            "dynamic_brush": 714,
+            "static_brush": 338,
+            "double": 502,
+            "thickness": 568,
+            "corner_radius": 34,
+            "color": 470,
+            "text": 72
+          },
+          "native_style_tables": 0,
+          "native_control_theme_constructors": 3,
+          "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de"
+        },
+        "median_ns": [
+          183971333
+        ],
+        "initial_samples_ns": [
+          [
+            368581084
+          ],
+          [
+            189012750
+          ],
+          [
+            325615500
+          ],
+          [
+            200538125
+          ],
+          [
+            149281750
+          ],
+          [
+            153371500
+          ],
+          [
+            160257875
+          ]
+        ],
+        "initial_median_ns": [
+          189012750
+        ],
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 59703296,
+          "__DATA_CONST": 4341760,
+          "__DATA": 344064,
+          "__LINKEDIT": 622592
+        }
+      },
+      "rows": {
+        "bytes": 65255888,
+        "sha256": "b6a0d8a5727cde82906d365403c536742b04efbe9a9d5f9bd8af8b6397083436",
+        "samples_ns": [
+          [
+            572564416
+          ],
+          [
+            183358666
+          ],
+          [
+            183360000
+          ],
+          [
+            182282125
+          ],
+          [
+            201374959
+          ],
+          [
+            173673292
+          ],
+          [
+            161768042
+          ],
+          [
+            170956000
+          ],
+          [
+            173405042
+          ],
+          [
+            182988167
+          ],
+          [
+            183914458
+          ],
+          [
+            193741250
+          ],
+          [
+            195025833
+          ],
+          [
+            169389958
+          ],
+          [
+            168720500
+          ],
+          [
+            214647500
+          ],
+          [
+            184509750
+          ],
+          [
+            293892625
+          ],
+          [
+            194005875
+          ],
+          [
+            195780875
+          ],
+          [
+            192606167
+          ]
+        ],
+        "theme_census": {
+          "resource_programs": 897,
+          "resource_instruction_bytes": 53315,
+          "style_programs": 0,
+          "style_instruction_bytes": 0,
+          "resources": {
+            "alias": 3634,
+            "literal_brush": 738,
+            "dynamic_brush": 714,
+            "static_brush": 338,
+            "double": 502,
+            "thickness": 568,
+            "corner_radius": 34,
+            "color": 470,
+            "text": 72
+          },
+          "native_style_tables": 277,
+          "native_control_theme_constructors": 3,
+          "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+          "style_members": {
+            "TargetType": 277,
+            "Setter": 3423,
+            "Style": 1525,
+            "BasedOn": 126
+          },
+          "setter_values": {
+            "Computed": 177,
+            "Dynamic": 1922,
+            "Expression": 440,
+            "Template": 175,
+            "Absent": 2,
+            "Null": 15,
+            "Thickness": 98,
+            "Bool": 229,
+            "Double": 191,
+            "Static": 123,
+            "CornerRadius": 5,
+            "Int": 39,
+            "Text": 7
+          },
+          "selector_steps": {
+            "Nesting": 651,
+            "Class": 575,
+            "Template": 553,
+            "OfType": 607,
+            "Name": 576,
+            "PropertyEquals": 69,
+            "Not": 24,
+            "Child": 9,
+            "NthLastChild": 2,
+            "Descendant": 30,
+            "Or": 57
+          }
+        },
+        "median_ns": [
+          183914458
+        ],
+        "initial_samples_ns": [
+          [
+            752765333
+          ],
+          [
+            179366500
+          ],
+          [
+            259058459
+          ],
+          [
+            153413125
+          ],
+          [
+            159689500
+          ],
+          [
+            150592417
+          ],
+          [
+            159299417
+          ]
+        ],
+        "initial_median_ns": [
+          159689500
+        ],
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 59654144,
+          "__DATA_CONST": 4718592,
+          "__DATA": 294912,
+          "__LINKEDIT": 638976
+        }
+      }
+    },
+    "matched_screenshots": {
+      "width": 1900,
+      "height": 1360,
+      "variants": [
+        "Light",
+        "Dark",
+        "HighContrast"
+      ],
+      "pages": [
+        "Buttons",
+        "ListBox",
+        "Calendar"
+      ],
+      "different_pixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

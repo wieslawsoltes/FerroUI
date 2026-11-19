@@ -1,0 +1,60 @@
+{
+  "base_revision": "3e662492eec6ce33c6169e0958ef73dbfe74c04f",
+  "platform": "x86_64-pc-windows-msvc",
+  "rustc": "1.93.0",
+  "backend": "bytecode",
+  "scope": "Extracted unit functions in debug cargo check output",
+  "themes": {
+    "winui": {
+      "extracted_runs": 347,
+      "scheduled_runs": 347,
+      "native_fallbacks": [],
+      "instructions": {
+        "alias_rows": 235,
+        "bool": 4,
+        "color_rows": 29,
+        "constant": 12,
+        "corner_radius_rows": 18,
+        "defer_text": 455,
+        "defer_type": 104,
+        "double_rows": 147,
+        "dynamic_brush_rows": 94,
+        "from_double": 6,
+        "int": 2,
+        "literal_brush_rows": 102,
+        "parse": 26,
+        "static_brush_rows": 33,
+        "text_rows": 22,
+        "thickness_rows": 207
+      },
+      "distinct_schedule_bytes_in_image": 5224,
+      "image_sha256": "6355b3ab02ecd448873a3de334663e0cf8d429839c491302ddf0b37eb33b9d83"
+    },
+    "fluent": {
+      "extracted_runs": 86,
+      "scheduled_runs": 86,
+      "native_fallbacks": [],
+      "instructions": {
+        "alias_rows": 95,
+        "bool": 1,
+        "color_rows": 2,
+        "constant": 2,
+        "corner_radius_rows": 5,
+        "defer_text": 125,
+        "defer_type": 83,
+        "double_rows": 66,
+        "dynamic_brush_rows": 42,
+        "from_double": 4,
+        "from_i64": 2,
+        "int": 2,
+        "literal_brush_rows": 40,
+        "parse": 10,
+        "static_brush_rows": 33,
+        "text_rows": 1,
+        "thickness_rows": 73
+      },
+      "distinct_schedule_bytes_in_image": 2164,
+      "image_sha256": "9e21ffa5f3a17692e1fc492f3c2d7b09540e4889c48238b778671d1ff63327b7"
+    }
+  }
+}

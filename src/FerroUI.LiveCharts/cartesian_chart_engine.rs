@@ -62,6 +62,10 @@ pub struct CartesianSeriesOptions {
     /// `DataLabelsPosition` of the series; `None` is the default of the family (`Middle` for a
     /// heat series, the only family that places its labels by it).
     pub data_labels_position: Option<DataLabelsPosition>,
+    /// `GeometrySvg`: the SVG path data drawn in each cell of a heat series, fitted to the cell
+    /// as the source's `VariableSVGPathGeometry`; `None` draws rectangles. Path data the parser
+    /// rejects is an error, where the source throws.
+    pub geometry_svg: Option<String>,
 }
 
 /// Calculated axes can also drive crosshairs and zoom/pan without reinterpreting pixels.
@@ -82,6 +86,44 @@ pub struct CartesianSeriesBounds {
 
 pub struct CartesianChartEngine;
 impl CartesianChartEngine {
+    /// The scene the first draw of a chart starts from, for the visuals the source seeds away
+    /// from their place: the bars of a financial or OHLC series collapsed at their open (the
+    /// `CoreFinancialSeries` visual starts with its high, close and low at the open and grows to
+    /// them, `OhlcSeriesAnimationTests`); everything else of `scene` is in place. `scene` is the
+    /// measured scene of `series` with the Y scales of its measurement.
+    pub fn first_draw_seed(scene: &Scene, series: &[Series], y_scales: &[AxisScale]) -> Scene {
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let Some(id) = primitive.id else {
+                continue;
+            };
+            let Some(s) = series.get(id.series) else {
+                continue;
+            };
+            if !matches!(s.kind, SeriesKind::Financial | SeriesKind::Ohlc) {
+                continue;
+            }
+            let (Some(c), Some(scale)) = (s.values.get(id.point), y_scales.get(s.y_axis)) else {
+                continue;
+            };
+            let open = scale.to_pixels(c.tertiary_value);
+            if !open.is_finite() {
+                continue;
+            }
+            match &mut primitive.geometry {
+                Geometry::Line { start, end } => {
+                    start.y = open;
+                    end.y = open;
+                }
+                Geometry::Rectangle { rect, .. } => {
+                    rect.y = open;
+                    rect.height = 0.0;
+                }
+                _ => {}
+            }
+        }
+        seed
+    }
     pub fn measure(
         size: Size,
         series: &[Series],
@@ -536,6 +578,9 @@ impl CartesianChartEngine {
                             .get(si)
                             .and_then(|o| o.data_labels_position)
                             .unwrap_or(DataLabelsPosition::Middle),
+                        geometry_svg: series_options
+                            .get(si)
+                            .and_then(|o| o.geometry_svg.as_deref()),
                     },
                     xs,
                     ys,
@@ -1608,6 +1653,7 @@ struct HeatDraw<'a> {
     series: &'a Series,
     points: &'a [Option<MeasuredPoint>],
     label_position: DataLabelsPosition,
+    geometry_svg: Option<&'a str>,
 }
 impl Series {
     /// The bounds of the weights of a heat series (`WeightBounds` of `CoreHeatSeries`): the
@@ -1673,8 +1719,18 @@ fn draw_heat(
         series: s,
         points,
         label_position,
+        geometry_svg,
     } = heat;
     let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
+    // `VariableSVGPathGeometry`: the path is read once and fitted to every cell.
+    let svg = match geometry_svg {
+        Some(data) => {
+            let commands = crate::svg_path::parse(data)?;
+            let bounds = crate::svg_path::bounds(&commands);
+            Some((commands, bounds))
+        }
+        None => None,
+    };
     let dx = minimum_delta(
         points
             .iter()
@@ -1715,7 +1771,12 @@ fn draw_heat(
             HeatFunctions::interpolate_color(c.tertiary_value, &weights, &s.heat_map, &stops);
         scene.primitives.push(
             Primitive::new(
-                Geometry::Rectangle { rect, radius: 0.0 },
+                match &svg {
+                    Some((commands, bounds)) => {
+                        Geometry::Path(crate::svg_path::fit(commands, *bounds, rect))
+                    }
+                    None => Geometry::Rectangle { rect, radius: 0.0 },
+                },
                 PaintStyle {
                     opacity: s.opacity,
                     ..PaintStyle::fill(color)

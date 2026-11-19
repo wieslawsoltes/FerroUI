@@ -5,6 +5,7 @@ use crate::{examples, navigation::NavigationHistory};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
@@ -18,7 +19,7 @@ use ferroui_markup_xaml_winui::{migrate_winui_xaml, WinUIXamlOptions};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// An owned gallery session. Keeping this value alive retains its event state;
 /// controls hold weak references back to that state, so closing releases the tree.
@@ -27,6 +28,8 @@ pub struct GalleryView {
 }
 
 struct GalleryState {
+    /// The state itself, for the links of the native examples to other pages.
+    this: Weak<GalleryState>,
     root: Ref<Control>,
     search: Ref<TextBox>,
     category: Ref<ComboBox>,
@@ -73,7 +76,8 @@ impl GalleryView {
         category.set_selected_index(0);
         let theme = root.get_control::<ComboBox>("Theme");
         theme.set_selected_index(0);
-        let state = Rc::new(GalleryState {
+        let state = Rc::new_cyclic(|this| GalleryState {
+            this: this.clone(),
             search: root.get_control("Search"),
             category,
             pages: root.get_control("Pages"),
@@ -240,6 +244,33 @@ impl GalleryState {
         changed
     }
 
+    /// The buttons of a native example that open another page of the gallery
+    /// (`examples::GALLERY_LINKS`). The navigation replaces the page that raised the click, so it
+    /// runs after the event.
+    fn wire_gallery_links(&self, page: &str, control: &Ref<Control>) {
+        for &(id, name, target) in examples::GALLERY_LINKS {
+            if id != page {
+                continue;
+            }
+            let Some(button) = control.find_control::<Control>(name).and_then(|button| button.cast::<Button>())
+            else {
+                continue;
+            };
+            let state = self.this.clone();
+            button.click(move |_, _| {
+                let state = state.clone();
+                Dispatcher::ui_thread().post_local(
+                    move || {
+                        if let Some(state) = state.upgrade() {
+                            state.navigate(target);
+                        }
+                    },
+                    DispatcherPriority::NORMAL,
+                );
+            });
+        }
+    }
+
     fn sync_selection(&self) {
         let current = self.history.borrow().current();
         let index = self
@@ -291,6 +322,7 @@ impl GalleryState {
             self.body.children().add(heading);
             match examples::create(adaptation) {
                 Ok(control) => {
+                    self.wire_gallery_links(entry.id, &control);
                     *self.native_example.borrow_mut() = Some(control.clone());
                     self.body.children().add(control);
                 }

@@ -45,24 +45,41 @@ use crate::{ServiceProviderExtensions, XamlLoadError};
 
 // The row tables of theme resources (#568, `theme_resources.rs`): the rows and the builders of
 // the shapes generated code writes as rows.
+pub use super::binding_program::{BindingPathImport, BindingPathProgram};
+pub use super::setter_choice::{choice_receiver, TypedSetterChoice};
+pub use super::construction::{compiled_path_geometry, construction_object, construction_result, ConstructionImports, ConstructionImport, ConstructionInput, ConstructionProgram, ConstructionRegister, ObjectDocumentProgram};
 pub use super::theme_resources::{
     add_color_resources, add_corner_radius_resources, add_double_resources, add_dynamic_brushes, add_literal_brushes,
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
-    LiteralBrushRow, ResourceAliasRow, StaticBrushRow, ValueRow,
+    LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.
 pub use super::theme_styles::{
-    assign_resource_value, bind_template_bindings, build_control_theme, build_selector, ControlThemeTable, PropertyFn,
-    ResourceChoice, SelectorStep, SetterForm, StyleMember, TemplateBindingRow, ThemeKey, ThemeSetter, ThemeTemplate, ThemeValue,
-    ThemeValueFn, ValueHandle,
+    assign_resource_value, bind_template_bindings, build_control_theme, build_selector, selector_operand, ControlThemeTable, PropertyFn,
+    ResourceChoice, SelectorImports, SelectorProperty, SelectorStep, SetterForm, StyleMember, TemplateBindingRow, ThemeKey,
+    ThemeSetter, ThemeTemplate, ThemeValue, ThemeValueFn, TypedSelectorProgram, TypedStyleImports, TypedStyleProgram, ValueHandle,
 };
 // The units of a compiled theme (#568, `theme_units.rs`): a unit, its runs and the function the
 // builds of the dictionaries apply them with.
+pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
     active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
+    register_wider_theme_parts, registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys,
+    wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
+
+/// Materialize an independently linkable constant from the build-time image.
+/// A live program can retain its own instructions without retaining the entire theme image.
+pub const fn program_bytes<const N: usize>(image: &[u8], offset: usize) -> [u8; N] {
+    let mut bytes = [0; N];
+    let mut i = 0;
+    while i < N {
+        bytes[i] = image[offset + i];
+        i += 1;
+    }
+    bytes
+}
 
 /// The exception a step of generated code failed with: the type name of the
 /// exception the managed original throws there (the name the run-time
@@ -472,6 +489,14 @@ pub fn bind_template_binding(
     Ok(())
 }
 
+/// Evaluate the source property before the target, as in explicit fresh TemplateBinding construction.
+#[inline]
+pub fn bind_template_binding_from(
+    target: &Ref<FerroObject>, source: &'static FerroProperty, property: &'static FerroProperty, line: i32, position: i32,
+) -> Result<(), XamlLoadError> {
+    bind_template_binding(target, property, source, line, position)
+}
+
 /// The build of deferred content that is `{StaticResource key}` alone (a resource of a
 /// dictionary that names another resource): the context of the build ([`deferred_context`]
 /// of `document`), the extension created (`StaticResourceExtension::__markup_new_0`) with its
@@ -627,16 +652,7 @@ pub fn clr_property_info(
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    ferroui_base::ferro_thread_local! {
-        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
-    }
-    let key = (markup as *const MarkupType as usize, name, is_static);
-    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
-        return info;
-    }
-    let info = new_clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
-    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
-    info
+    cached_clr_property_info(markup, None, name, is_static, property_type, cached_boxed_boolean)
 }
 
 /// The description of `Setter.Value` ([`clr_property_info`]) as a value:
@@ -671,18 +687,74 @@ pub fn declared_property_type(markup: &'static MarkupType, name: &str, is_static
     (declared.type_)()
 }
 
+/// The declared property `name` of `markup` at `index` of its list (the static properties when
+/// `is_static`), which the emitter resolved at compile time (#603); found by its name when the
+/// list at run time has another property there, so a declaration that changed since the
+/// compilation is still found.
+///
+/// # Panics
+/// Panics if `markup` declares no such property.
+fn declared_property(
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &str,
+    is_static: bool,
+) -> &'static MarkupProperty {
+    let list = match is_static {
+        true => markup.static_properties,
+        false => markup.properties,
+    };
+    let at_index = index.and_then(|index| list.get(index)).filter(|property| property.name == name);
+    at_index
+        .or_else(|| list.iter().find(|property| property.name == name))
+        .unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()))
+}
+
+/// [`clr_property_info`] of the declared property at `index` of the declaration of `markup`,
+/// which the emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The description is the one [`clr_property_info`] gives for `name`.
+pub fn declared_clr_property_info(
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    cached_clr_property_info(markup, Some(index), name, is_static, property_type, cached_boxed_boolean)
+}
+
+/// The description of a declared property, one per property and thread ([`clr_property_info`]).
+fn cached_clr_property_info(
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    ferroui_base::ferro_thread_local! {
+        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
+    }
+    let key = (markup as *const MarkupType as usize, name, is_static);
+    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
+        return info;
+    }
+    let declared = declared_property(markup, index, name, is_static);
+    let info = new_clr_property_info(markup, declared, name, is_static, property_type, cached_boxed_boolean);
+    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
+    info
+}
+
 fn new_clr_property_info(
     markup: &'static MarkupType,
+    declared: &'static MarkupProperty,
     name: &str,
     is_static: bool,
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    let declared = match is_static {
-        true => markup.static_properties.iter().find(|property| property.name == name),
-        false => markup.find_property(name),
-    };
-    let declared = declared.unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()));
     let accessors = Rc::new(DeclaredAccessors {
         owner: markup.full_name(),
         property: declared,
@@ -729,18 +801,49 @@ pub fn path_property(
     accepts_null: bool,
     typed: bool,
 ) -> CompiledBindingPathBuilder {
-    if typed {
-        let declared = match is_static {
-            true => None,
-            false => markup.find_property(name),
-        };
-        if let Some(typed) = declared.and_then(|property| property.typed_path_element) {
+    path_property_of(builder, markup, None, name, is_static, property_type, cached_boxed_boolean, accepts_null, typed)
+}
+
+/// [`path_property`] of the declared property at `index` of the declaration of `markup`, which the
+/// emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The element is the one [`path_property`] gives for `name`.
+#[allow(clippy::too_many_arguments)]
+pub fn declared_path_property(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    let cached = cached_boxed_boolean;
+    path_property_of(builder, markup, Some(index), name, is_static, property_type, cached, accepts_null, typed)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn path_property_of(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    if typed && !is_static {
+        if let Some(typed) = declared_property(markup, index, name, is_static).typed_path_element {
             if let Some(builder) = typed(builder, accepts_null) {
                 return builder;
             }
         }
     }
-    let info = clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
+    let info = cached_clr_property_info(markup, index, name, is_static, property_type, cached_boxed_boolean);
     let factory: PropertyAccessorFactory = Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor);
     match accepts_null {
         true => builder.property_with(info, factory, true),
@@ -1955,6 +2058,25 @@ pub fn add_event_handler(
 #[cfg(test)]
 mod tests {
     use super::uri_equals;
+
+    /// Not from upstream (#603): the description of a declared property at its position is the one
+    /// found by name (one per property and thread), and a position that names another property, or
+    /// none, falls back to the name.
+    #[test]
+    fn a_declared_property_at_its_position_is_the_one_found_by_name() {
+        use super::{clr_property_info, declared_clr_property_info};
+        use ferroui_base::data::core::ValueType;
+        use ferroui_base::metadata::MarkupTyped;
+        use ferroui_base::styling::Setter;
+        let markup = <Setter as MarkupTyped>::MARKUP;
+        let index = markup.properties.iter().position(|property| property.name == "Value").expect("Setter.Value");
+        let by_name = clr_property_info(markup, "Value", false, ValueType::object(), false);
+        let at_index = declared_clr_property_info(markup, index, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &at_index));
+        let elsewhere = declared_clr_property_info(markup, index + 1000, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &elsewhere));
+        assert_eq!(at_index.name(), "Value");
+    }
 
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
     #[test]

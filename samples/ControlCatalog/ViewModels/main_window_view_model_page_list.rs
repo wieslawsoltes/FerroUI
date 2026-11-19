@@ -88,6 +88,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
             s.add("/Pages/RefreshContainerPage.xaml", "RefreshContainer", Icons::REFRESH, "Pull-to-refresh for scrollable content");
+            // Not from upstream: SwipeControl of WinUI (docs/porting/winui-calculator-gaps.md, SW-1).
+            s.add("/Pages/SwipeControlPage.xaml", "SwipeControl", Icons::GESTURE, "Commands revealed by swiping an item");
             s.add("/Pages/TableViewPage.xaml", "TableView", Icons::GRID, "Tabular data with resizable, sortable columns");
             // Not in the original: the pages of the TreeDataGrid demo.
             s.add("/Pages/TreeDataGridPage.xaml", "TreeDataGrid", Icons::GRID, "Virtualized rows and columns of flat and hierarchical data");

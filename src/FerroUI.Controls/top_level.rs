@@ -66,6 +66,10 @@ pub struct TopLevel {
     global_styles_subscriptions: RefCell<Vec<Subscription>>,
     application_theme_host: RefCell<Option<Rc<dyn IThemeVariantHost>>>,
     application_theme_subscription: RefCell<Option<Subscription>>,
+    /// The subscriptions to the colour values of the platform and to the high contrast variant
+    /// of the theme (#560): a root resolves its variant again, the frame of the high contrast
+    /// variant follows the system colours.
+    theme_settings_subscriptions: RefCell<Vec<Subscription>>,
     back_gesture_subscription: RefCell<Option<Subscription>>,
     resources_changed_subscription: RefCell<Option<Subscription>>,
     platform_impl_bindings: RefCell<PlatformImplBindings>,
@@ -208,6 +212,7 @@ impl TopLevelImpl for TopLevel {
         if let Some(subscription) = this.application_theme_subscription.borrow_mut().take() {
             subscription.dispose();
         }
+        drop(this.theme_settings_subscriptions.take());
 
         if let Some(subscription) = this.back_gesture_subscription.borrow_mut().take() {
             subscription.dispose();
@@ -507,6 +512,7 @@ impl TopLevel {
             global_styles_subscriptions: RefCell::new(Vec::new()),
             application_theme_host: RefCell::new(None),
             application_theme_subscription: RefCell::new(None),
+            theme_settings_subscriptions: RefCell::new(Vec::new()),
             back_gesture_subscription: RefCell::new(None),
             resources_changed_subscription: RefCell::new(None),
             platform_impl_bindings: RefCell::new(HashMap::new()),
@@ -706,12 +712,13 @@ impl TopLevel {
         } else {
             ThemeVariant::update_actual_theme_variant(self);
         }
+        self.subscribe_theme_settings();
 
         self.create_platform_impl_binding(Self::actual_theme_variant_property(), {
             let weak = weak.clone();
             move |variant: Option<ThemeVariant>| {
                 if let Some(platform_impl) = weak.upgrade().and_then(|this| this.platform_impl()) {
-                    platform_impl.set_frame_theme_variant(variant.as_ref().and_then(to_platform_theme_variant));
+                    platform_impl.set_frame_theme_variant(frame_theme_variant(variant.as_ref()));
                 }
             }
         });
@@ -1429,6 +1436,35 @@ impl TopLevel {
         self.renderer().set_platform_specific_scene_info(scene_info);
     }
 
+    /// Follows the contrast setting of the platform (#560): a top level that is a theme variant
+    /// root resolves its variant again when the colour values of the platform or the high
+    /// contrast variant of the theme change; the frame of a top level in the high contrast
+    /// variant follows the window colour of the system colours (light for "High Contrast
+    /// White"), which can change while the variant stays.
+    fn subscribe_theme_settings(&self) {
+        let weak = self.to_ref().downgrade();
+        let on_change: Rc<dyn Fn()> = Rc::new(move || {
+            let Some(this) = weak.upgrade() else { return };
+            if this.application_theme_host.borrow().is_none() {
+                ThemeVariant::update_actual_theme_variant(&this);
+            }
+            let variant = this.get_value(Self::actual_theme_variant_property());
+            if variant.is_some() && variant == ThemeVariant::high_contrast_variant() {
+                if let Some(platform_impl) = this.platform_impl() {
+                    platform_impl.set_frame_theme_variant(frame_theme_variant(variant.as_ref()));
+                }
+            }
+        });
+        let mut subscriptions = Vec::with_capacity(2);
+        if let Some(platform_settings) = self.platform_settings() {
+            let on_change = on_change.clone();
+            let subscription = platform_settings.color_values_changed(Rc::new(move |_| on_change()));
+            subscriptions.push(Subscription::new(subscription));
+        }
+        subscriptions.push(Subscription::new(ThemeVariant::high_contrast_variant_changed(on_change)));
+        *self.theme_settings_subscriptions.borrow_mut() = subscriptions;
+    }
+
     fn global_actual_theme_variant_changed(&self, sender: &dyn IThemeVariantHost) {
         let _ = self.set_value_with_priority(
             Self::actual_theme_variant_property(),
@@ -1475,16 +1511,11 @@ impl Drop for TopLevel {
 /// The frame theme variant of a theme variant: light and dark map to
 /// themselves, a custom variant to what it inherits from, and the default
 /// variant to nothing (follow the system).
-fn to_platform_theme_variant(theme_variant: &ThemeVariant) -> Option<PlatformThemeVariant> {
-    if *theme_variant == ThemeVariant::light() {
-        Some(PlatformThemeVariant::Light)
-    } else if *theme_variant == ThemeVariant::dark() {
-        Some(PlatformThemeVariant::Dark)
-    } else if let Some(inherit_variant) = theme_variant.inherit_variant() {
-        to_platform_theme_variant(&inherit_variant)
-    } else {
-        None
-    }
+/// The variant of the frame of a top level for its actual theme variant: the light or dark
+/// variant it is or inherits, and for the high contrast variant the one of the system colours
+/// ([`ThemeVariant::frame_theme_variant`]).
+fn frame_theme_variant(theme_variant: Option<&ThemeVariant>) -> Option<PlatformThemeVariant> {
+    ThemeVariant::frame_theme_variant(theme_variant)
 }
 
 fn to_composition_transparency_level(level: WindowTransparencyLevel) -> CompositionTransparencyLevel {

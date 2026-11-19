@@ -1012,9 +1012,15 @@ Validated on macOS ARM64 (debug builds, a smoke run of each, and screenshots aga
   PlatformSanityChecks, ViewInterop, HelloWorld, the hot reload demo (which keeps every unit:
   `full-themes`), FerroDockReactiveUISample, SingleProjectSandbox, ChartsDemo and LiveChartsDemo
   (which has no smoke exit; its window was captured and closed): no diagnostic, no panic;
-- the ControlCatalog (desktop): it links `ferroui-diagnostics`, so it keeps every unit by design;
-  its tour selects all 127 pages with no diagnostic, and 12 of its 14 screenshots are identical to
+- the desktop ControlCatalog at the time linked `ferroui-diagnostics` and kept every unit.
+  Its tour selected all 127 pages with no diagnostic, and 12 of its 14 screenshots were identical to
   `"all"` (the home page differs in its animated banner, as between two runs of `main`).
+
+The desktop ControlCatalog links `ferroui-diagnostics` (the F12 inspector) only with its
+feature `diagnostics`, so its default build trims the WinUI theme. On native targets it keeps
+`ManagedFileChooser` as a theme root (`Build::theme_roots`), because the Dialogs page opens it
+through the managed storage provider; its template also supplies the overwrite prompt and
+references the ContentDialog resources.
 
 ### 11.9 An application without markup
 
@@ -1393,12 +1399,229 @@ function (`_deferred_<n>`, `_part_<n>`, `_unit_<n>`, `_untyped`).
 - `tests/FerroUI.Markup.Xaml.UnitTests/emitter/build_diagnostics.rs`: the error and the
   disambiguation reported by a build.
 
-## 15. Build inputs read as what they are (#850)
+## 17. Roots across targets, from dependencies, and only of the documents compiled (#847)
+
+The review found roots of theme trimming that were missed and roots that were over-collected.
+
+### 17.1 Every production target
+
+The build read the sources of a crate from one root file: `src/lib.rs`, else `lib.rs`, else
+`src/main.rs`. `ListBox::new()` in the binary of a package that also has a library therefore rooted
+nothing (#832 names the same limit for the samples).
+
+`theme_roots::binary_roots` (new) reads the binaries of the package as Cargo finds them:
+- the `path` of each `[[bin]]` table, or for a `[[bin]]` without a path, the file its name gives
+  (`src/bin/<name>.rs`, `src/bin/<name>/main.rs` or `src/main.rs`);
+- unless `[package]` states `autobins = false`, `src/main.rs`, `src/bin/*.rs` and
+  `src/bin/*/main.rs`.
+
+The build scans each binary for its names and string literals, as it scans the library, and adds
+them to the roots of the sources. Examples, tests and benchmarks are not production targets and are
+not read.
+
+`$OUT_DIR/xaml/theme_roots.txt` lists, for each target (by its root file), the types and keys its
+sources root. A kept unit can therefore be traced to the target that named it.
+
+The manifest is read as TOML (section 22.2): `[package] autobins` and the `name` and `path` of each
+`[[bin]]` table.
+
+### 17.2 What a dependency's code makes
+
+A dependency that is code only (`ListBox::new()` in a free function) exported nothing. The creates
+edges belong to classes of the model, and a free function has no owner. Exporting every name and
+literal of every dependency's code would root every control of `ferroui-view` (whose builders name
+each one) in every application that uses it, so this is not done automatically.
+
+Instead, a crate states what its code constructs with `Build::theme_roots(&[..])`. The build exports
+those names with the references of the crate's documents (`references.types` and `.keys` of its
+`.xamlmeta`), and every application that depends on the crate roots them.
+
+### 17.3 Only the documents a class compiles
+
+The build collected roots from every document given to a group, before it knew which documents
+belong to the class. A `NeverIncluded.xaml` with a `<ListBox />`, given to a class group but
+included by no document of it, is never compiled, yet it rooted 13 more units.
+
+For the group of a class, the roots now come from the documents of its group only: the document of
+the class and the documents it includes, directly or not (`class_document_group`). An ordinary
+group still roots every document it compiles.
+
+### 17.4 Tests
+
+- `theme_roots_tests.rs` (`the_binaries_of_a_package_are_its_production_targets`): explicit
+  binaries, a binary by its name, discovered binaries, `autobins = false`, and files that do not
+  exist.
+- `lib.rs` (`every_production_target_roots_the_themes`): a package whose binary names `ListBox` and a
+  key keeps their units while its library names neither. The binary is an input of the build,
+  `theme_roots.txt` names it with its types and keys, and a root the build script states is in the
+  exported references.
+
+## 19. Why each unit is kept (#852, first step)
+
+Issue #852 asks whether a graph of entries could split the high-fanout dictionaries of a theme
+into clusters that link independently: `Resources/Generic.xaml` of WinUI has 330 keys, and
+`Accents/FluentControlResources.xaml` of Fluent 626 in one unit. Its rule is to count first, and to
+stop if the count does not carry the idea. This step provides the count and the reasons. It changes
+no kept unit.
+
+`$OUT_DIR/xaml/theme_parts_why.txt`, written next to `theme_parts.txt`, has a block for each theme
+the application trims:
+
+- **A line of totals:** the units kept, and of the keys the kept units define, how many are live.
+  A key is live when it is a root or a kept unit references it. A unit with few live keys is the
+  candidate for entry-level selection that the issue describes.
+- **A line for each kept unit:** its name, its live and total keys, whether its reason is
+  `conservative` or `exact`, and the first reason the closure found. A reason is one of these:
+  - the ambient unit;
+  - named by the manifest or the build script;
+  - the theme of a live type, with what made the type live (a root of the documents or the sources,
+    a type a kept unit constructs, or a base class or created class of another);
+  - a live key, with where it came from (a root, or the unit that references it).
+
+  A reason is conservative when its root is a token of a document, a name of the sources or a
+  reference of a dependency: something that may only spell the key or the type. Stated roots,
+  constructions and references of kept units are exact.
+
+`theme_roots::explain_kept_units` (new) runs the closure of `kept_units` and records the first reason
+it meets for each unit. Its units are those of `kept_units` over the union of its sources, and a test
+checks this. `theme_roots::why_kept_listing` (new) writes the block.
+
+Not done in this step:
+
+- the count for hello world and a larger sample, and the bytes behind the counts. The listing gives
+  the keys; the bytes need a link map of a build of a sample with the Skia backend.
+- clusters inside one dictionary. Whether to build them waits for that count.
+
+## 20. A library that constructs a theme (#846)
+
+### 20.1 The selection reaches the library
+
+A library document with `<WinUITheme />` was compiled to
+`WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`, with the units the library
+needs. An application that uses the library and adds `<ListBox />` computed no table for the theme,
+because the emitter records a theme as used only in the crate that writes the construction. The
+theme the library constructed then had no `Controls/ListBox.xaml`.
+
+Now:
+
+- **The construction takes the wider table.** The construction is written as
+  `with_parts(None, rt::wider_theme_parts("<class>", crate::compiled_markup::THEME_PARTS_..))`.
+  `rt::wider_theme_parts` (new) returns the parts registered for the class when they have more
+  units than the table of the crate that writes the construction, and that table otherwise.
+- **Registration keeps the wider table.** The generated `register()` of a crate registers its
+  tables with `rt::register_wider_theme_parts` (new), which keeps the wider table whichever crate
+  registers first.
+- **The application computes the table.** For each theme that the compiled documents of a direct
+  dependency name (the `references.types` of its `.xamlmeta` hold the class name), the build of the
+  application writes and registers a table. The table is computed from all the roots of the
+  application, whether or not the application's own documents construct the theme. This needs no
+  new field in the metadata: the references of the library's documents are the record of what
+  they construct.
+- **Limits.** The table is written only when the theme's crate is a direct dependency too, since
+  the table names its unit statics. A library used alone, or in an application that does not depend
+  on the theme crate, keeps its own table. A crate without markup writes the file of its tables when
+  it has one, and `register()` must run for it to take effect.
+
+The rule "the wider table" assumes that the application's table holds the library's. That is the
+usual case, since the application's roots include what the library's documents name. A library
+whose code constructs controls that its documents do not name states them with `Build::theme_roots`,
+which #847 exports (section 17).
+
+### 20.2 The selection as state of the thread (not done)
+
+`set_active_theme_units` still writes a thread-local entry for each theme class, and the generated
+builds read it. A second construction of the same theme with other parts on the same thread, or a
+deferred producer that runs later, can read the selection of another instance. Carrying the
+selection in the creation context of the document, captured by its nested and deferred factories,
+changes the generated code of the theme builds. That is left for the work on the output of the
+themes (#853 and the related issues). `register_theme_parts` still replaces an earlier
+registration; the generated `register()` now uses the wider registration instead.
+
+### 20.3 Tests
+
+- `theme_units_tests.rs` (`the_wider_table_of_a_class_is_registered_and_applied`): registering in
+  either order keeps the wider table, and a construction applies the wider table.
+- `lib.rs` (`a_theme_a_library_constructs_gets_the_table_of_the_application`):
+  - an application that never names the theme, whose control is named in its sources, gets the
+    theme's table with that control's unit, registered with the wider registration;
+  - without the theme crate among its direct dependencies, it gets no table.
+
+## 21. Edges of the unit graph across themes, crates and types of one name (#848)
+
+The review found three places where the unit graph lost an edge.
+
+### 21.1 Themes used together
+
+`kept_units` closed over one theme at a time. Suppose a kept unit of theme A references a key that
+only theme B defines, or constructs a type whose control theme only B supplies. Then B kept only
+its ambient unit.
+
+`theme_roots::kept_units_across` (new) closes over every theme the application uses, in one loop:
+
+- the keys a kept unit of any theme references, and the types it constructs, become roots of every
+  theme;
+- the loop runs until no theme keeps another unit, so a cycle of references between two themes
+  ends;
+- the result for each theme does not depend on the order of the themes.
+
+The build calls it for the themes it writes tables for. An application with one theme keeps what it
+kept before.
+
+The reasons of `theme_parts_why.txt` (section 19) follow the same closure: for each theme, what
+the kept units of the other themes reference and construct is one more source of roots, named
+`other themes used together`, which is exact. With one theme that source is empty, and the
+listing is the one of section 19.
+
+A unit records the keys of `{StaticResource}`, `{DynamicResource}` and `ResourceKey` that its
+documents name, including keys no document of its own theme defines (21.4). Without this, a key that
+only another theme provides could not root that theme.
+
+### 21.2 Crates with a theme and ordinary documents
+
+Since #849 a crate exports the references of every document except those of a class constructed
+from selected units (section 14.1). A crate with a theme class and an ordinary `Other.xaml` with
+`<ListBox />` therefore exports `ListBox`. The path that imports checked-in metadata
+(`Build::checked_in_metadata`) copied the documents and the units and dropped the references. It now
+merges them into the references the crate exports.
+
+### 21.3 Types of one name
+
+`TypeGraph` keyed its edges by local name. Two assemblies with `Left.Twin : LeftBase` and
+`Right.Twin : RightBase` gave one chain or the other, depending on the order of the models, and
+their creates edges were merged.
+
+The graph now identifies each type by its full markup name. A base class is found by its Rust path,
+and by its local Rust name only when that name is unique. Roots and units still name types by local
+name, as documents write them. A local name stands for every type of that name, and is live with the
+edges of each. Where the name is not unique, every possible provider is kept rather than one picked
+by order. No ambiguity is reported yet: old metadata and unqualified roots cannot say which type they
+mean.
+
+### 21.4 References to keys of other themes
+
+The unit graph used to drop the argument of a resource extension unless the same theme defines the
+key. It now keeps every such argument as a reference of its unit. Identifier tokens of attribute
+values are still kept only when they spell a key of the theme, since they are only conservative
+guesses. This changes the `references` of the theme units in the `.xamlmeta` of the themes, so the
+checked-in `compiled_xaml.xamlmeta` of a theme whose documents name such a key has to be regenerated
+(its `compiled_xaml_tests` say so). The generated Rust does not change.
+
+### 21.5 Tests
+
+- `theme_roots_tests.rs`:
+  - `themes_used_together_are_closed_over_together`: a key from the other theme, a type theme from
+    the other theme, a cycle, and both orders of the themes;
+  - `types_of_one_local_name_keep_their_own_edges`: both orders of the models;
+  - the existing graph tests, unchanged.
+- `theme_unit_graph_tests.rs`: an extension key that no document of the group defines is a
+  reference of its unit.
+
+## 22. Build inputs read as what they are (#850)
 
 The review that found the problems of section 14 found three places where the build read an input
 as text. Each one has a test that failed on main.
 
-### 15.1 Includes
+### 22.1 Includes
 
 The group of a document is the document and the documents it includes, directly or not. Both the
 build (`rust_emitter::class_document_group`) and the run-time loader collect it with
@@ -1421,7 +1644,7 @@ A document that is not well formed has no includes. It fails when it is compiled
 the diagnostic of the parser, the same diagnostic it gets without includes. No new dependency is
 needed: the parser of `xamlx` already uses `roxmltree`.
 
-### 15.2 The manifest
+### 22.2 The manifest
 
 `[package.metadata.ferroui]` (`theme-trimming`, `theme-roots` and `compile-bindings`) was read by a
 parser of its own lines, which had four faults:
@@ -1441,8 +1664,12 @@ The options are read from the table at the path `package.metadata.ferroui`, what
 manifest writes it in: a header, dotted keys, an inline table, or dotted keys at the top level. A
 value of the wrong type is refused, and the error names the option. A manifest that is not TOML is
 an error of the build; Cargo has already parsed the manifest, so this does not happen in practice.
+The binaries of a package (section 17.1) are read from the same parsed manifest.
 
-### 15.3 Assets
+The `toml` dependency is kept by a decision of the owner: it is build-only (about 3 s more of a
+cold build, no cost in a binary or at run time).
+
+### 22.3 Assets
 
 `Build::embed_assets` embeds the files of its directories as raw bytes, except the documents the
 compiler consumed. For a class group, that list held only the documents the compiler emitted one by
@@ -1456,7 +1683,7 @@ consumed. The theme crates do not use `embed_assets` for their documents; they h
 own. Their assets, their `.xamlmeta` and the checked-in generated files are unchanged. There is no
 explicit option yet to ship the original text of a consumed document (see the issue).
 
-### 15.4 Tests
+### 22.4 Tests
 
 - `back_end/includes.rs`:
   - an entity in a source;

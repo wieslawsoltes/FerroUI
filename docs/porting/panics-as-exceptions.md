@@ -53,8 +53,8 @@ Per crate, after the conversions of section 5. The (T) column counts the sites o
 | `ferroui-markup`, `ferroui-markup-xaml`, `-loader`, `-winui` | 0 | 0 | 0 | 9 | 9 |
 | platform crates (section 8) | 25 | 13 | 4 | 36 | 78 |
 | libraries: Headless, Dock, Behaviors, Controls, Rx, ReactiveUI, Splat (section 9) | 37 | 21 | 5 | 214 | 277 |
-| tools: View, Remote, Inspect, MCP, DevTools, HotReload, HotPatch, Designer (section 10) | 14 | 1 | 9 | 6 | 30 |
-| **All** | **94** | **53** | **18** | **346** | **511** |
+| tools: View, Remote, Inspect, MCP, DevTools, HotReload, HotPatch, Designer (section 10) | 15 | 1 | 5 | 7 | 28 |
+| **All** | **95** | **53** | **14** | **347** | **509** |
 
 The (E) sites before this step were 23: the throw and the error scope of the markup runtime (2,
 with the 2 (R) of the scope, `xaml_error_scope.rs`), the failure of a composite page transition
@@ -102,12 +102,12 @@ Breaks with abort (an expected error travels as a panic), production paths:
 | `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` of finite paths that the third-party sweep (`linesweeper`) still gives up on aborts instead of drawing nothing (paths that are not finite are refused before the sweep, 5.5) |
 | `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.5) |
 
-Breaks with abort, development tools only (built with `dev`, `fast-release`, `release-unwind` or `dist-unwind`): hot reload
-(the `panic_any(ReloadError)` flows and `catch_reload`, 5 sites; the crate is
-`cfg(debug_assertions)` and never in `release` or `dist`), the previewer of `DesignerSupport`
-(the load and show of the edited document), and the Designer (the animation preview and the
-candidate stages, 3 sites). Their (B) sites isolate the code of the previewed application and
-also need a build that unwinds.
+Breaks with abort, development tools only (built with `dev`, `fast-release`, `release-unwind` or `dist-unwind`): the previewer
+of `DesignerSupport` (the load and show of the edited document) and the Designer (the animation
+preview and the candidate stages, 3 sites). Their (B) sites isolate the code of the previewed
+application and also need a build that unwinds, as the boundary of hot reload (`catch_reload`)
+does; the `ReloadError`s of hot reload no longer travel as panics (section 10, #567; the crate is
+`cfg(debug_assertions)` and never in `release` or `dist`).
 
 No change although listed as (E): the `Canceled` of the headless test session (tests always
 unwind), `ViewLocator::current` of ReactiveUI and the two `LoggingError` panics of Splat (nothing
@@ -452,14 +452,14 @@ conversion, or that the panic comes from a third-party crate.
 
 The Designer, `DesignerSupport` (the previewer), hot reload (`ferroui-hot-reload`, debug builds
 only), hot patch, DevTools, MCP and Inspect isolate the code of the previewed or inspected
-application with `catch_unwind`, and three of them still turn expected errors into values with
+application with `catch_unwind`, and two of them still turn expected errors into values with
 it (section 10). They are built with the `dev`, `fast-release` or `release-unwind` profile or
 `dist-unwind`. Not
 converted, as decided for this step:
 
-- hot reload: the `panic_any(ReloadError)` of the resource lookups of a candidate and
-  `catch_reload` (`lib.rs:583`); the way out is a side channel in the transaction, as the markup
-  scope does;
+- hot reload: `catch_reload` (`lib.rs:657`) as the boundary of adapters, application callbacks
+  and the throws of the XAML runtime; the `ReloadError`s of the resource lookups of a candidate
+  no longer unwind (section 10, #567);
 - the Designer: the preview of an animation (6.1) and the candidate stages
   (`preview_stages.rs:1661`, `:1746`);
 - the previewer: the load and show of the edited document (`remote_designer_entry_point.rs:370`).
@@ -1047,11 +1047,11 @@ Tests (T): 1 site in `tests/support.rs`.
 | `ferroui-inspect` | 1 | 0 | 0 | 0 | 1 |
 | `ferroui-mcp` | 2 | 0 | 0 | 0 | 2 |
 | `ferroui-devtools` | 1 | 0 | 0 | 0 | 1 |
-| `ferroui-hot-reload` | 0 | 0 | 5 | 5 | 10 |
+| `ferroui-hot-reload` | 1 | 0 | 1 | 6 | 8 |
 | `ferroui-hot-patch` | 1 | 1 | 0 | 1 | 3 |
 | `ferroui-designer-support` | 3 | 0 | 1 | 0 | 4 |
 | `ferroui-designer` | 4 | 0 | 3 | 0 | 7 |
-| **All** | **14** | **1** | **9** | **6** | **30** |
+| **All** | **15** | **1** | **5** | **7** | **28** |
 
 `src/FerroUI.Designer.*` (Animation, Collaboration, Collaboration.Host, Core, Language, Project,
 Tools), `src/FerroUI.Build.Tasks`, `src/FerroUI.Build.Scan`, `src/tools` and `src/FerroUI` have no
@@ -1106,37 +1106,36 @@ The crate is `#![cfg(debug_assertions)]`: it is not compiled into `release` or `
 
 | File:line | Function | Catches or raises | Class | With abort |
 |---|---|---|---|---|
-| `lib.rs:583` | `catch_reload` | catches a `ReloadError` payload and returns it; turns a text payload into `ReloadError::Failed` | E | breaks: a reload that must report `RestartRequired` or `Failed` (a resource lookup of the candidate, a throw of the XAML runtime while the candidate is populated) aborts the application instead of giving a `ReloadOutcome` |
-| `resource_preparation.rs:40` | `ResourcePreparation::register` (preview factory) | raises the `ReloadError` of `resolve` (cyclic dependency, failed preparation) with `panic_any` | E | breaks: as `lib.rs:583` |
-| `root_resources.rs:50` | `OwnedResources::preview_resource` | raises `ReloadError::RestartRequired` (the application replaced the dictionary) with `panic_any` | E | breaks: as `lib.rs:583` |
-| `root_styles.rs:146` | `OwnedStyles::preview_dictionary` | raises `ReloadError::RestartRequired` with `panic_any` | E | breaks: as `lib.rs:583` |
-| `root_styles.rs:151` | `OwnedStyles::preview_resource` | raises the `ReloadError` of `current()` (ambiguous or non-contiguous inline styles, closed container) with `panic_any` | E | breaks: as `lib.rs:583` |
+| `lib.rs:657` | `catch_reload` | catches a panic of an adapter, of an application callback or of the XAML runtime while the candidate is populated, and turns its payload into `ReloadError::Failed` | B | no change: a panicking callback or a throw of the XAML runtime aborts the application instead of giving a `ReloadOutcome` |
+| `lib.rs:645` | `raise_reload_error` | raises a `ReloadError` as a panic when no step of a reload is open | E | no change: the resource previews of a candidate exist only inside a step, so nothing reaches it in correct operation |
+| `resource_preparation.rs:40` | `ResourcePreparation::register` (preview factory) | raised the `ReloadError` of `resolve` with `panic_any` | E | converted: raised in the step (`raise_reload_error`), the lookup goes on in the original node; no panic |
+| `root_resources.rs:50` | `OwnedResources::preview_resource` | raised `ReloadError::RestartRequired` with `panic_any` | E | converted: raised in the step, the key is not found; no panic |
+| `root_styles.rs:146` | `OwnedStyles::preview_dictionary` | raised `ReloadError::RestartRequired` with `panic_any` | E | converted: as `root_resources.rs:50` |
+| `root_styles.rs:151` | `OwnedStyles::preview_resource` | raised the `ReloadError` of `current()` with `panic_any` | E | converted: as `root_resources.rs:50` |
 | `restart_handoff.rs:143` | test in `#[cfg(test)] mod tests` | catches a panicking participant | T | untouched |
 | `root_preview.rs:152` | test in `#[cfg(test)] mod tests` | catches a test panic | T | untouched |
 | `root_preview.rs:174` | test in `#[cfg(test)] mod tests` | catches a test panic | T | untouched |
-| `tests.rs` | tests | 2 sites | T | untouched |
+| `tests.rs` | tests | 3 sites | T | untouched |
 
-**`panic_any(ReloadError)` through the resource lookup of a candidate** (`resource_preparation.rs:40`,
-`root_resources.rs:50`, `root_styles.rs:146`, `root_styles.rs:151`, caught at `lib.rs:583`). A
-`ReloadError` (mostly `RestartRequired`, an expected outcome of a reload) travels as a panic
-because the lookups it arises in have no error channel: `Preview::try_get_resource`
-(`root_preview.rs`, `IResourceNode::try_get_resource -> Option<ResourceValue>`) calls
-`preview_resource`/`preview_dictionary`, and the factory registered in `ResourcePreviewScope` is
-`Rc<dyn Fn() -> Rc<dyn IResourceNode>>` (the development-only `resource_preview` module of
-`ferroui-base`, reached from `resource_preview::lookup`, about 13 lookup sites in `ferroui-base`
-and `ferroui-markup-xaml`). The functions under them already return `Result`
-(`ResourceDictionaryOwnership::preview_resource`, `OwnedStyles::current`,
-`ResourcePreparation::resolve`); no `try_` variant of the lookup exists, so converting is not
-trivial. Two ways: (a) a side channel: the preview records the first `ReloadError` in a cell of
-the transaction (on `ResourcePreviewScope` or a thread local of the session), the lookup returns
-`None`, and `catch_reload` (10 callers: 9 in `lib.rs`, 1 in `resource_preparation.rs`) checks the
-cell after the action; local to `ferroui-hot-reload` and the development-only module of
-`ferroui-base`; (b) a fallible lookup through `resource_preview::lookup`, the factory type and
-`IResourceNode`, which touches every lookup site and every node; disproportionate. `catch_reload`
-also turns the throws of the XAML runtime during population into `ReloadError::Failed` (E, raised
-in `ferroui-markup-xaml`), and isolates adapters and application callbacks (B; the contract of
-`apply_pending_with` names panics of the callback): after the conversion it stays as a (B)
-needing a build that unwinds. Development tool only, never a production path.
+**`ReloadError` through the resource lookup of a candidate** (`resource_preparation.rs:40`,
+`root_resources.rs:50`, `root_styles.rs:146`, `root_styles.rs:151`). A `ReloadError` (mostly
+`RestartRequired`, an expected outcome of a reload) arises in lookups that have no error channel:
+`Preview::try_get_resource` (`root_preview.rs`, `IResourceNode::try_get_resource ->
+Option<ResourceValue>`) calls `preview_resource`/`preview_dictionary`, and the factory registered
+in `ResourcePreviewScope` is `Rc<dyn Fn() -> Rc<dyn IResourceNode>>`. It travelled as a panic
+(`panic_any`) to `catch_reload`. Converted (#567) with a side channel, option (a) of the first
+survey, rather than a fallible lookup through every node: `catch_reload` opens a scope of the
+thread, `raise_reload_error` records the first error of the innermost scope and the lookup returns
+its fallback (the key is not found; the factory gives the original node), and `catch_reload`
+returns that error when the action ends, before the result of the action or of a panic. Nested
+steps (`ResourcePreparation::resolve` inside a lookup of an outer step) have their own scopes.
+Outside every step the error is still raised as a panic. Under unwinding the outcome of a reload
+is the same `ReloadOutcome`; what differs is that the code after the failed lookup runs with the
+fallback until the step ends, instead of unwinding at once. The candidate of a failed step is
+not committed. `catch_reload` stays as the boundary (B) of adapters, application callbacks and
+the throws of the XAML runtime during population, which still need a build that unwinds.
+Development tool only, never a production path. Test:
+`an_error_raised_in_a_reload_step_is_its_error_without_unwinding`.
 
 ### Hot patch (`src/FerroUI.HotPatch`)
 

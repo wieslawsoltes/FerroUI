@@ -411,3 +411,149 @@ fn a_wrong_value_names_its_option() {
     assert_eq!(other, Err("[package.metadata.ferroui] theme-roots must be \"all\" or an array of names".to_string()));
     assert!(ThemeTrimming::from_manifest("[package\nname = 1").is_err());
 }
+
+/// Not from upstream (#848): two types of one local name in two assemblies keep their own base
+/// classes and creates edges, whatever the order of the models; a root that names the local name
+/// is live with the edges of both.
+#[test]
+fn types_of_one_local_name_keep_their_own_edges() {
+    let model = |assembly: &str, namespace: &str, base: &str, created: &str| {
+        let mut model = AssemblyModel::new(assembly, &assembly.to_lowercase());
+        let crate_name = assembly.to_lowercase();
+        let mut twin = TypeModel::new("Twin", TypeKind::Class, RustType::resolved(&format!("::{crate_name}::Twin")), &crate_name);
+        twin.namespace = namespace.to_string();
+        twin.object_model = true;
+        twin.base = Some(RustType::resolved(&format!("::{crate_name}::{base}")));
+        twin.creates = vec![format!("{namespace}.{created}")];
+        let mut base_type = TypeModel::new(base, TypeKind::Class, RustType::resolved(&format!("::{crate_name}::{base}")), &crate_name);
+        base_type.namespace = namespace.to_string();
+        base_type.object_model = true;
+        model.types = vec![twin, base_type];
+        model
+    };
+    let left = model("Left", "Left", "LeftBase", "LeftPart");
+    let right = model("Right", "Right", "RightBase", "RightPart");
+    for graph in [TypeGraph::from_models([&left, &right]), TypeGraph::from_models([&right, &left])] {
+        assert_eq!(graph.live("Twin"), set(&["LeftBase", "LeftPart", "RightBase", "RightPart", "Twin"]));
+        assert_eq!(graph.live("LeftBase"), set(&["LeftBase"]));
+        assert!(graph.is_class("Twin") && graph.is_class("RightBase") && !graph.is_class("LeftPart"));
+    }
+}
+
+/// A theme of one unit besides the ambient one, for the tests of the closure across themes.
+fn small_theme(class: &str, units: Vec<ThemeUnitModel>) -> ThemeUnitsModel {
+    ThemeUnitsModel { class: class.to_string(), table_path: format!("::{}::THEME_UNITS", class.to_lowercase()), units }
+}
+
+/// Not from upstream (#848): themes used together are closed over together. A key that a kept unit
+/// of one theme references and only another theme defines keeps the unit that defines it, a type a
+/// kept unit of one theme constructs keeps the control theme another supplies, and references in a
+/// cycle between two themes end.
+#[test]
+fn themes_used_together_are_closed_over_together() {
+    let first = small_theme(
+        "Tests.First",
+        vec![
+            unit(0, "ambient", &[], &[], &[], &[]),
+            unit(1, "First/Button.xaml", &[], &["Button"], &["SecondBrush"], &["Popup"]),
+            unit(2, "First/Other.xaml", &["FirstBrush"], &[], &["SecondOther"], &[]),
+        ],
+    );
+    let second = small_theme(
+        "Tests.Second",
+        vec![
+            unit(0, "ambient", &[], &[], &[], &[]),
+            unit(1, "Second/Brushes.xaml", &["SecondBrush"], &[], &["FirstBrush"], &[]),
+            unit(2, "Second/Popup.xaml", &[], &["Popup"], &[], &[]),
+            unit(3, "Second/Unused.xaml", &["SecondOther"], &[], &[], &[]),
+        ],
+    );
+    let roots = Roots { types: set(&["Button"]), ..Roots::default() };
+    let graph = TypeGraph::default();
+    // Alone, each theme keeps what the roots name in it.
+    assert_eq!(kept_units(&first, &roots, &graph, false), [0, 1]);
+    assert_eq!(kept_units(&second, &roots, &graph, false), [0]);
+    // Together: the brush the button references and the popup it constructs, and, through the
+    // cycle `SecondBrush` -> `FirstBrush` -> `SecondOther`, the rest.
+    let kept = kept_units_across(&[&first, &second], &roots, &graph, false);
+    assert_eq!(kept, [vec![0, 1, 2], vec![0, 1, 2, 3]]);
+    // The order of the themes does not change what each keeps.
+    let reversed = kept_units_across(&[&second, &first], &roots, &graph, false);
+    assert_eq!(reversed, [vec![0, 1, 2, 3], vec![0, 1, 2]]);
+}
+
+/// Not from upstream (#847): the binaries of a package are read from its manifest and discovered as
+/// Cargo discovers them: explicit `[[bin]]` paths, a `[[bin]]` without a path by its name, and,
+/// unless `autobins = false`, `src/main.rs` and `src/bin`. Only files that exist count.
+#[test]
+fn the_binaries_of_a_package_are_its_production_targets() {
+    let root = std::env::temp_dir().join(format!("ferroui-binary-roots-{}", std::process::id()));
+    let files =
+        ["program.rs", "src/main.rs", "src/bin/tool.rs", "src/bin/other/main.rs", "src/bin/named.rs", "examples/a.rs"];
+    for file in files {
+        let path = root.join(file);
+        std::fs::create_dir_all(path.parent().expect("a directory")).expect("the directory");
+        std::fs::write(&path, "fn main() {}\n").expect("a file");
+    }
+    let manifest = "[package]\nname = \"app\"\nautobins = false # explicit only\n\n\
+                    [[bin]]\nname = \"app\"\npath = \"program.rs\"\n\n[[bin]]\nname = \"named\"\n\n\
+                    [[bin]]\nname = \"missing\"\npath = \"missing.rs\"\n\n[dependencies]\npath = \"x\"\n";
+    let relative = |paths: Vec<std::path::PathBuf>| -> Vec<String> {
+        let below = |path: &std::path::PathBuf| path.strip_prefix(&root).expect("below the root").display().to_string();
+        paths.iter().map(|path| below(path).replace('\\', "/")).collect()
+    };
+    assert_eq!(relative(binary_roots(&root, manifest)), ["program.rs", "src/bin/named.rs"]);
+    let discovered = "[package]\nname = \"app\"\n\n[[bin]]\nname = \"app\"\npath = \"program.rs\"\n";
+    assert_eq!(
+        relative(binary_roots(&root, discovered)),
+        ["program.rs", "src/main.rs", "src/bin/named.rs", "src/bin/other/main.rs", "src/bin/tool.rs"]
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// Not from upstream (#852): the explained closure keeps the units [`kept_units`] keeps, with the
+/// first reason for each (stated, constructed, referenced or conservative) and the live share of
+/// its keys; the listing has the totals.
+#[test]
+fn every_kept_unit_has_a_reason() {
+    let graph = TypeGraph::from_pairs(&[("MyButton", "Button")]);
+    let documents = Roots { types: set(&["MyButton"]), keys: set(&["CaptionStyle"]), ..Roots::default() };
+    let manifest = Roots { names: set(&["Controls/Popup.xaml"]), ..Roots::default() };
+    let button_keys = ["ButtonPadding", "ButtonUnused"];
+    let theme = ThemeUnitsModel {
+        class: "Tests.Explained".to_string(),
+        table_path: "::tests::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![
+            unit(0, "ambient", &["AmbientBrush"], &[], &[], &[]),
+            unit(1, "Controls/Button.xaml", &button_keys, &["Button"], &["AccentBrush"], &["TextBlock"]),
+            unit(2, "Resources/Accent.xaml", &["AccentBrush", "AccentUnused"], &[], &[], &[]),
+            unit(3, "Controls/TextBlock.xaml", &[], &["TextBlock"], &[], &[]),
+            unit(4, "Resources/Caption.xaml", &["CaptionStyle"], &[], &[], &[]),
+            unit(5, "Controls/Popup.xaml", &[], &["Popup"], &[], &[]),
+            unit(6, "Controls/Unused.xaml", &[], &["Unused"], &[], &[]),
+        ],
+    };
+    let sources: [(&str, &Roots); 2] = [("manifest", &manifest), ("documents", &documents)];
+    let explained = explain_kept_units(&theme, &sources, &graph, false);
+    let mut union = documents.clone();
+    union.extend(manifest.clone());
+    let indices: Vec<u32> = explained.iter().map(|unit| unit.index).collect();
+    assert_eq!(indices, kept_units(&theme, &union, &graph, false));
+    assert_eq!(indices, [0, 1, 2, 3, 4, 5]);
+    let reason = |index: u32| explained.iter().find(|unit| unit.index == index).expect("kept").clone();
+    assert_eq!(reason(0).reason, "the ambient unit, always kept");
+    assert!(reason(1).reason.contains("defines the theme of Button") && reason(1).reason.contains("makes Button live"));
+    assert!(reason(1).conservative, "a type of the documents is conservative");
+    assert_eq!(reason(2).reason, "defines AccentBrush: the key AccentBrush, referenced by Controls/Button.xaml");
+    assert!(!reason(2).conservative);
+    assert_eq!((reason(2).keys, reason(2).live_keys), (2, 1));
+    let constructed = "defines the theme of TextBlock: the type TextBlock, constructed by Controls/Button.xaml";
+    assert_eq!(reason(3).reason, constructed);
+    assert!(reason(4).conservative);
+    assert!(reason(4).reason.starts_with("defines CaptionStyle: the key CaptionStyle, a root of the documents"));
+    assert_eq!(reason(5).reason, "named by the manifest");
+    let listing = why_kept_listing("Tests.Explained", &explained, theme.units.len());
+    let totals = "Tests.Explained: 6 of 7 units; 2 of 6 keys of the kept units are live\n";
+    assert!(listing.starts_with(totals), "{listing}");
+    assert!(listing.contains("Resources/Accent.xaml\t1 of 2 keys live\texact\tdefines AccentBrush"), "{listing}");
+}

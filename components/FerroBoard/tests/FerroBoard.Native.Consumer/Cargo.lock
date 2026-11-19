@@ -365,7 +365,9 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "quote",
  "roxmltree",
+ "syn 2.0.119",
  "url",
  "xamlx",
 ]

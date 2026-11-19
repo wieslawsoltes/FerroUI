@@ -215,6 +215,20 @@ use, and nothing that is remembered is dropped for it.
 The deviation from upstream, which matches every child style against every element, is recorded
 in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
 
+### 2.5 Typed construction programs (opt-in)
+
+`Build::xaml_backend` (or `FERROUI_XAML_BACKEND` read by `Build::from_env`) selects how the
+operations the compiler resolved are emitted. `native`, the default, is the generated code of
+section 2.1. `theme-bytecode` encodes resource runs and recognised control styles as instruction
+streams; `bytecode` also encodes construction, resolved calls, staged setters, the extracted
+theme unit runs and compiled binding paths of pages and templates. The streams are constant
+arrays of the generated Rust (a Cargo build packs a module's streams in `OUT_DIR` and embeds them
+with `include_bytes!`); the typed imports they call are what the linker reaches, so units and
+trimming (section 3) are unchanged, and a shape the encoder does not recognise stays native. The
+checked-in references of section 2 are native output: with another backend their comparison
+tests fail by design. Design, coverage and measurements:
+[docs/porting/typed-xaml.md](porting/typed-xaml.md).
+
 ## 3. Units and theme trimming
 
 **Units.** The documents a theme merges (`MergeResourceInclude`) are each a unit, such as
@@ -247,7 +261,9 @@ needs. The build computes the table from the roots:
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
-`$OUT_DIR/xaml/theme_parts.txt`.
+`$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
+first reason, whether that reason is conservative or exact, and how many of its keys are live.
+See docs/porting/theme-trimming.md, section 19.
 
 **Which classes are constructed from units (#849).** Partitioning a class into units and
 constructing it from some of them are two separate things. Any class whose document merges
@@ -297,11 +313,17 @@ use compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
 launch_themed(|| WinUITheme::with_parts(None, THEME_PARTS).as_style(), view, |_| {});
 ```
 
+Since #847 the build reads every binary of the package as well as its library: the explicit
+`[[bin]]` targets and, unless `autobins = false`, the discovered ones (`src/main.rs`, `src/bin`).
+`$OUT_DIR/xaml/theme_roots.txt` says which target rooted which types and keys. A library whose code
+makes controls that no document names states them with `Build::theme_roots`, and the build exports
+them to the applications that depend on it. The documents of a class group that the class never
+includes root nothing.
+
 The roots are the ones of the list above without the documents: what the sources name and call
 (4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
-the modules it declares: an application with a library and a binary keeps its interface in the
-library, or names in `theme-roots` the controls only the binary makes. The table is named after
+the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
 every unit, so the code is the same either way. The three declarative versions of hello world
 (`samples/HelloWorld.Builders`, `.Macros`, `.Hooks`) are built this way, and keep the 16 units of
@@ -317,6 +339,18 @@ application trims takes the classes its paths name with it (#612, root D: hello 
 links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
 that no table naming classes is reachable from code outside the units.
 
+**A library that constructs a theme (#846).** A library document with `<WinUITheme />` constructs
+the theme with the wider of its own table and the table the application registers
+(`rt::wider_theme_parts`). The application writes and registers a table for every theme the
+documents of a direct dependency construct, so its controls keep their templates whichever crate
+constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
+library keeps its own table. See docs/porting/theme-trimming.md, section 20.
+
+**Themes used together, and types of one name (#848).** An application that uses several themes
+closes over all of them together: a key one theme references and another defines, or a type one
+constructs and another styles, keeps the providing unit. Types of one local name in two assemblies
+keep their own base classes and creates edges. See docs/porting/theme-trimming.md, section 21.
+
 **How the build reads its inputs (#850).**
 - The includes that make up the group of a document are found by the XML parser of the compiler,
   so entities are decoded and CDATA and comments are skipped. The build and the run-time loader use
@@ -326,7 +360,7 @@ that no table naming classes is reachable from code outside the units.
 - A document consumed by a class (merged into it as well) is not embedded again by
   `Build::embed_assets`.
 
-Details are in docs/porting/theme-trimming.md, section 15.
+Details are in docs/porting/theme-trimming.md, section 22.
 
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
@@ -379,6 +413,12 @@ name, the first time the control looks for its theme. Release builds do not chec
   rooted. If code must look a key up, write it as a string literal, or add it to `theme-roots`.
 - Define a geometry once as a keyed resource and refer to it, instead of repeating the same path
   data inline in several templates.
+- Colours the system reports (the accent, the system colours of high contrast) come from a
+  resource provider of the theme's Rust code (`Accents/SystemAccentColors`,
+  `Accents/SystemColors` of the WinUI theme), merged into the theme's dictionary, never from a
+  theme dictionary: theme dictionaries are searched before merged dictionaries, so a fixed value
+  there would hide the provider. Reference them with `{DynamicResource}`; the provider raises a
+  change only when its colours change.
 
 ### 4.3 Control themes
 
@@ -448,6 +488,10 @@ name, the first time the control looks for its theme. Release builds do not chec
   record the creates edge (4.4).
 - No `thread_local!` (use `ferro_thread_local!`), no panics for markup errors: return
   `XamlLoadError` (the move to `panic = "abort"` in `dist`).
+- A theme with a high contrast variant sets it with `ThemeVariant::set_high_contrast_variant`
+  while it is in use (the WinUI theme does so with `UseSystemHighContrast`); the theme variant
+  roots then resolve to it while the platform asks for high contrast. A theme without one sets
+  nothing, and the contrast setting selects nothing for it.
 
 ## 5. Compiled bindings in applications
 
@@ -473,6 +517,48 @@ Documents loaded at run time bind the way the built application does (#604):
   states `False` in its metadata as well, for the previewer to follow it.
 - A configuration made with `RuntimeXamlLoaderConfiguration::new()` keeps upstream's default
   (reflection bindings), for documents that belong to no application.
+
+### 5.1 Property lookups by name in compiled themes (#603)
+
+Two run-time helpers of compiled markup still find a declared (plain) property by its name:
+
+- `rt::clr_property_info`: the provide-value target of a nested markup extension, such as
+  `TemplateBinding.Converter` with a `{StaticResource}`, or `MultiBinding.Bindings` and `Converter`.
+- `rt::path_property`: a plain property in a compiled binding path, such as
+  `ProgressBar.TemplateSettings`, `CommandBar.VisiblePrimaryCommands` or the view models of the
+  managed file chooser.
+
+`python3 scripts/themes/by_name_lookups.py` counts the calls in the checked-in compiled themes;
+`--by-property` breaks them down by owner and property. On the branch of the change the counts were:
+
+| Theme | `rt::clr_property_info` | `rt::path_property` |
+|---|---:|---:|
+| WinUI | 70 | 59 |
+| Fluent | 65 | 53 |
+| Simple | 36 | 43 |
+| macOS | 67 | 43 |
+| All four | 238 | 198 |
+
+**Resolving the property at compile time.** The emitter can resolve the declared property at compile
+time wherever the type system knows the declaring type. It then writes
+`rt::declared_clr_property_info` and `rt::declared_path_property`, which take the position of the
+property in its declaration. At run time these helpers take the property at that position and do not
+search the declaration by name. If the declaration changed since the compilation and another
+property is at that position, they still find the property by name. Both forms give the same
+description, which is cached once per property and thread.
+
+**Off by default.** The option is off by default, because it changes the generated files. To turn it
+on:
+
+- in a build script, call `Build::compile_time_declared_properties(true)`;
+- in a host of the emitter, call `rust_emitter::set_compile_time_declared_properties(true)` around a
+  compilation.
+
+Turning it on for the themes means regenerating their checked-in `compiled_xaml.rs` (with the
+regeneration of each theme's `compiled_xaml_tests`) and the emitter corpus
+(`tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs`). The typed accessors that would also
+drop the untyped accessors of the declaration are a further step (the next row of the table in
+section 9).
 
 ## 6. Porting a theme from upstream
 
@@ -533,6 +619,7 @@ Documents loaded at run time bind the way the built application does (#604):
 | Samples, sample apps and component samples on compiled bindings; no explicit `default_compile_bindings(true)`; hot reload and the previewer follow the application's setting | #604 | In review |
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
+| `rt::clr_property_info` and `rt::path_property` counted (`scripts/themes/by_name_lookups.py`); declared properties resolved at compile time behind `Build::compile_time_declared_properties` (off by default) | #603 follow-up | In review |
 | `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
 | Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |

@@ -872,8 +872,10 @@ name = "custom-effects"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "sample-testing",
 ]
@@ -2336,7 +2338,9 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "quote",
  "roxmltree 0.20.0",
+ "syn 2.0.119",
  "url",
  "xamlx",
 ]
@@ -2672,6 +2676,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup-xaml-loader",
+ "ferroui-render3d",
 ]
 
 [[package]]
@@ -5385,8 +5390,10 @@ version = "0.5.1-preview.1"
 dependencies = [
  "cc",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-markup-xaml",
  "ferroui-media",
  "ferroui-media-apple",
  "ferroui-media-camera",
@@ -5419,8 +5426,10 @@ version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-browser",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-fonts-inter",
+ "ferroui-markup-xaml",
  "ferroui-media",
  "ferroui-media-browser",
  "ferroui-media-camera",
@@ -5441,8 +5450,10 @@ dependencies = [
  "cc",
  "ferroui-android",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-ios",
+ "ferroui-markup-xaml",
  "ferroui-media",
  "ferroui-media-android",
  "ferroui-media-apple",
@@ -5677,7 +5688,9 @@ name = "reactive-demo-components"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-system",
  "ferroui-themes-winui",
  "ferroui-view",
@@ -6126,7 +6139,10 @@ name = "seven-guis-cells-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6136,7 +6152,10 @@ name = "seven-guis-cells-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6146,7 +6165,10 @@ name = "seven-guis-cells-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6156,7 +6178,10 @@ name = "seven-guis-circle-drawer-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6166,7 +6191,10 @@ name = "seven-guis-circle-drawer-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6176,7 +6204,10 @@ name = "seven-guis-circle-drawer-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6186,7 +6217,10 @@ name = "seven-guis-counter-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6196,7 +6230,10 @@ name = "seven-guis-counter-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6206,7 +6243,10 @@ name = "seven-guis-counter-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6216,7 +6256,10 @@ name = "seven-guis-crud-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6226,7 +6269,10 @@ name = "seven-guis-crud-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6236,7 +6282,10 @@ name = "seven-guis-crud-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6246,7 +6295,10 @@ name = "seven-guis-flight-booker-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6256,7 +6308,10 @@ name = "seven-guis-flight-booker-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6266,7 +6321,10 @@ name = "seven-guis-flight-booker-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6277,6 +6335,7 @@ version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "ferroui-view",
 ]
@@ -6286,7 +6345,10 @@ name = "seven-guis-temperature-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6296,7 +6358,10 @@ name = "seven-guis-temperature-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6306,7 +6371,10 @@ name = "seven-guis-temperature-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6345,7 +6413,10 @@ name = "seven-guis-timer-builders"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6355,7 +6426,10 @@ name = "seven-guis-timer-hooks"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6365,7 +6439,10 @@ name = "seven-guis-timer-macros"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
  "ferroui-view",
  "seven-guis-model",
 ]
@@ -6541,7 +6618,9 @@ name = "static-view-locator-demo"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
  "ferroui-static-view-locator",
@@ -6800,7 +6879,9 @@ name = "todo-mvc"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-themes-winui",
  "ferroui-view",
 ]
@@ -7174,6 +7255,7 @@ name = "view-gallery"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
  "ferroui-controls-treedatagrid",
