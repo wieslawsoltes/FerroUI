@@ -45,7 +45,6 @@ mod events;
 mod frame;
 mod handles;
 mod ids;
-mod ring;
 mod signals;
 mod strings;
 mod thread;
@@ -55,8 +54,7 @@ mod values;
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_clear_error, ferro_last_error, ferro_last_error_code};
 pub use events::{
-    ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_subscribe_ring,
-    ferro_unsubscribe,
+    ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe,
 };
 pub use frame::{
     ferro_frame_begin, ferro_frame_bind, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
@@ -66,10 +64,6 @@ pub use frame::{
 };
 pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of, handle_of, object_of};
 pub use ids::{ferro_api_fingerprint, ferro_event_id, ferro_property_id, ferro_type_id};
-pub use ring::{
-    ferro_event_ring, ferro_event_ring_arg, ferro_event_ring_pop, ferro_event_ring_sender, FerroEventRing,
-    FERRO_EVENT_RING_LAYOUT,
-};
 pub use signals::{
     ferro_signal_bind, ferro_signal_free, ferro_signal_get_bool, ferro_signal_get_cstr, ferro_signal_get_f64,
     ferro_signal_get_i64, ferro_signal_new, ferro_signal_set_bool, ferro_signal_set_f64, ferro_signal_set_handle,

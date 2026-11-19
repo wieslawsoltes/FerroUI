@@ -14,9 +14,6 @@
 // version; a change that breaks a binding raises it.
 #define FERRO_ABI_VERSION 1
 
-// The version of the layout of [`FerroEventRing`].
-#define FERRO_EVENT_RING_LAYOUT 1
-
 // A free slot.
 #define FERRO_SIGNAL_FREE 0
 
@@ -62,25 +59,6 @@ typedef int64_t (*FerroEventDataFn)(void *user_data, FerroHandle sender, int64_t
 // Releases the user data of a subscription ([`ferro_subscribe_data`]) once the handler is
 // removed: by [`ferro_unsubscribe`], or when the object goes away.
 typedef void (*FerroReleaseFn)(void *user_data);
-
-// The event ring of the process: arrays the library allocates once, which stay at their
-// addresses until the process ends. Each record is four words: the tag, the sender (borrowed:
-// valid while the language does not release it, retain it to keep it), the argument, and the
-// number of the record.
-typedef struct {
-    // [`FERRO_EVENT_RING_LAYOUT`].
-    uint32_t layout;
-    // The number of records, a power of two.
-    uint32_t capacity;
-    // The number of records written (by the library).
-    uint64_t *head;
-    // The number of records taken (by the language).
-    uint64_t *tail;
-    // The number of events dropped because the ring was full.
-    uint64_t *dropped;
-    // `capacity` records of four `int64_t`: tag, sender, argument, number.
-    int64_t *records;
-} FerroEventRing;
 
 // The signal table of the process (docs/c-abi.md, section 14): arrays the library allocates
 // once, which stay at their addresses until the process ends. `capacity` is a multiple of 64;
@@ -233,13 +211,6 @@ int64_t ferro_subscribe(FerroHandle object, int64_t event, FerroEventFn function
 // its own between the library and its dispatcher: one indirect call per event. Returns a
 // positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only.
 int64_t ferro_subscribe_dispatch(FerroHandle object, int64_t event, int64_t tag);
-
-// [`ferro_subscribe`] to the event ring ([`ferro_event_ring`](crate::ferro_event_ring)): every
-// raise of the event appends a record with `tag` (not negative), the sender and the argument,
-// which the language drains when it wants, with no callback per event. Returns a positive
-// subscription ID for [`ferro_unsubscribe`], or a negative status
-// ([`FERRO_INVALID_STATE`](crate::FERRO_INVALID_STATE) before the ring exists). UI thread only.
-int64_t ferro_subscribe_ring(FerroHandle object, int64_t event, int64_t tag);
 
 // [`ferro_subscribe`] with a `void *` in place of the token: `function` is called with
 // `user_data`, and `release` (which may be `NULL`) is called with it once the handler is gone,
@@ -415,23 +386,6 @@ int64_t ferro_property_id(const char *name, int64_t length);
 // name, checked when it is first used with a class. Any thread.
 int64_t ferro_event_id(const char *name,
                        int64_t length);
-
-// Creates the event ring of the process with room for `capacity` records (rounded up to a
-// power of two, at most 2^20), or returns the one that exists. `NULL` on a failure. UI thread
-// only.
-const FerroEventRing *ferro_event_ring(int64_t capacity);
-
-// Takes the next record of the ring, for a language that cannot read memory: returns its tag
-// (and keeps its sender and argument for [`ferro_event_ring_sender`] and
-// [`ferro_event_ring_arg`]), or [`FERRO_NOT_FOUND`] when the ring is empty (nothing recorded).
-// The thread that drains the ring.
-int64_t ferro_event_ring_pop(void);
-
-// The sender of the record the last [`ferro_event_ring_pop`] of the thread took.
-FerroHandle ferro_event_ring_sender(void);
-
-// The argument of the record the last [`ferro_event_ring_pop`] of the thread took.
-int64_t ferro_event_ring_arg(void);
 
 // Creates the signal table of the process with room for `capacity` slots (rounded up to a
 // multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay

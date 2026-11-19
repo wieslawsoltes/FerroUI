@@ -303,16 +303,6 @@ SIGNAL_LAYOUT = {
         {"field": "kinds", "type": "u32[capacity]", "writer": "the library"},
     ],
     "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch",
-    "event_ring": {
-        "function": "ferro_event_ring", "subscribe": "ferro_subscribe_ring",
-        "fields": [
-            {"field": "layout", "type": "u32"}, {"field": "capacity", "type": "u32", "doc": "a power of two"},
-            {"field": "head", "type": "u64*", "writer": "the library, release order"},
-            {"field": "tail", "type": "u64*", "writer": "the language, release order"},
-            {"field": "dropped", "type": "u64*", "writer": "the library"},
-            {"field": "records", "type": "i64[capacity * 4]", "doc": "tag, sender, argument, number"},
-        ],
-    },
 }
 
 

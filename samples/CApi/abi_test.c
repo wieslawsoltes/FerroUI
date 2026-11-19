@@ -1,6 +1,6 @@
 /* Tests of the C ABI of FerroUI, from C (docs/c-abi.md, section 9): status codes, the UI thread
  * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, frames,
- * and signals and the event ring shared through memory (section 14). No
+ * and signals shared through memory (section 14). No
  * window is opened: the thread is made the UI thread with ferro_init and driven with
  * ferro_run_jobs, so the tests run without a display and without the desktop platform.
  *
@@ -267,7 +267,7 @@ static void test_frames(void) {
 }
 
 /* Signals shared through memory (docs/c-abi.md, section 14): a store and its dirty bit, applied to
- * a bound property; a watched property read with a load; a bind record of a frame; the ring. */
+ * a bound property; a watched property read with a load; a bind record of a frame. */
 static void test_signals(void) {
     const FerroSignalTable *table = ferro_signal_table(128);
     CHECK(table != NULL && table->layout == FERRO_SIGNAL_LAYOUT && table->capacity % 64 == 0);
@@ -318,25 +318,8 @@ static void test_signals(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(framed));
     CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
 
-    /* The event ring: a click is a record, drained with loads and a store of the tail. */
-    const FerroEventRing *ring = ferro_event_ring(16);
-    CHECK(ring != NULL && ring->capacity == 16);
-    FerroHandle button = create("Button");
-    int64_t click = ferro_event_id("Click", -1);
-    CHECK(ferro_subscribe_ring(button, click, 3) > 0);
-    _Atomic uint64_t *head = (_Atomic uint64_t *)ring->head;
-    _Atomic uint64_t *tail = (_Atomic uint64_t *)ring->tail;
-    uint64_t start = atomic_load_explicit(head, memory_order_acquire);
-    CHECK_STATUS(FERRO_OK, ferro_raise(button, click));
-    CHECK(atomic_load_explicit(head, memory_order_acquire) == start + 1);
-    const int64_t *record = &ring->records[(start % ring->capacity) * 4];
-    CHECK(record[0] == 3 && (FerroHandle)record[1] == button);
-    atomic_store_explicit(tail, start + 1, memory_order_release);
-    CHECK(ferro_event_ring_pop() == FERRO_NOT_FOUND);
-
     CHECK_STATUS(FERRO_OK, ferro_signal_free(typed));
     CHECK_STATUS(FERRO_OK, ferro_signal_free(size));
-    CHECK_STATUS(FERRO_OK, ferro_release(button));
     CHECK_STATUS(FERRO_OK, ferro_release(box));
     CHECK_STATUS(FERRO_OK, ferro_release(block));
     CHECK_STATUS(FERRO_OK, ferro_release(root));

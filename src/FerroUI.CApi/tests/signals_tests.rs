@@ -1,6 +1,6 @@
 //! Signals shared through memory and the event ring (docs/c-abi.md, section 14): slots written
 //! with a store and applied to bound properties, watched properties written into slots, the
-//! checks of a slot index, `bind` records of frames, and the ring.
+//! checks of a slot index and `bind` records of frames.
 
 use super::support::*;
 use crate::*;
@@ -191,40 +191,5 @@ fn a_bind_record_keeps_a_property_on_a_slot_between_frames() {
         assert_eq!(ferro_frame_clear(root), FERRO_OK);
         assert_eq!(ferro_release(root), FERRO_OK);
         assert_eq!(ferro_signal_free(slot), FERRO_OK);
-    });
-}
-
-#[test]
-fn events_go_into_the_ring_and_a_full_ring_drops() {
-    ui(|| {
-        let ring = ferro_event_ring(4);
-        assert!(!ring.is_null(), "{}", last_error());
-        // SAFETY: the ring lives for the process.
-        let ring = unsafe { &*ring };
-        assert_eq!(ring.capacity, 4);
-        let button = create("Button");
-        let click = event_id("Click");
-        let subscription = ferro_subscribe_ring(button, click, 7);
-        assert!(subscription > 0, "{}", last_error());
-        while ferro_event_ring_pop() >= 0 {}
-        let head = load(ring.head, 0);
-        assert_eq!(ferro_raise(button, click), FERRO_OK);
-        assert_eq!(load(ring.head, 0), head + 1);
-        let at = ((head % 4) * 4) as usize;
-        // SAFETY: a record inside the ring.
-        let record = unsafe { std::slice::from_raw_parts(ring.records.add(at), 4) };
-        assert_eq!((record[0], record[1] as FerroHandle, record[3]), (7, button, head as i64));
-        assert_eq!(ferro_event_ring_pop(), 7);
-        assert_eq!(ferro_event_ring_sender(), button);
-        assert_eq!(ferro_event_ring_pop(), i64::from(FERRO_NOT_FOUND));
-        let dropped = load(ring.dropped, 0);
-        for _ in 0..6 {
-            assert_eq!(ferro_raise(button, click), FERRO_OK);
-        }
-        assert_eq!(load(ring.dropped, 0), dropped + 2, "four fit, two are dropped");
-        while ferro_event_ring_pop() >= 0 {}
-        assert_eq!(ferro_unsubscribe(subscription), FERRO_OK);
-        assert_eq!(ferro_subscribe_ring(button, click, -1), i64::from(FERRO_INVALID_ARGUMENT));
-        assert_eq!(ferro_release(button), FERRO_OK);
     });
 }

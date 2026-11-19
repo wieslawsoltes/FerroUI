@@ -27,8 +27,6 @@ enum Callback {
     /// The one dispatcher of the thread ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)),
     /// with a tag.
     Dispatch(i64),
-    /// A record with a tag in the event ring (`ring.rs`).
-    Ring(i64),
 }
 
 /// The user data of a handler, released when the handler is dropped.
@@ -56,10 +54,6 @@ impl Callback {
                 Callback::Token { function, token } => function(*token, sender, arg),
                 Callback::Data(data) => (data.function)(data.user_data, sender, arg),
                 Callback::Dispatch(tag) => crate::frame::dispatch_tag(*tag, sender, arg),
-                Callback::Ring(tag) => {
-                    crate::ring::push(*tag, sender, arg);
-                    0
-                }
             }
         }
     }
@@ -177,24 +171,6 @@ pub extern "C" fn ferro_subscribe(object: FerroHandle, event: i64, function: Fer
 #[no_mangle]
 pub extern "C" fn ferro_subscribe_dispatch(object: FerroHandle, event: i64, tag: i64) -> i64 {
     status_or_value(|| subscribe(object, event, Callback::Dispatch(tag)))
-}
-
-/// [`ferro_subscribe`] to the event ring ([`ferro_event_ring`](crate::ferro_event_ring)): every
-/// raise of the event appends a record with `tag` (not negative), the sender and the argument,
-/// which the language drains when it wants, with no callback per event. Returns a positive
-/// subscription ID for [`ferro_unsubscribe`], or a negative status
-/// ([`FERRO_INVALID_STATE`](crate::FERRO_INVALID_STATE) before the ring exists). UI thread only.
-#[no_mangle]
-pub extern "C" fn ferro_subscribe_ring(object: FerroHandle, event: i64, tag: i64) -> i64 {
-    status_or_value(|| {
-        if !crate::ring::exists() {
-            return Err(Error::new(crate::FERRO_INVALID_STATE, "no event ring: call ferro_event_ring first"));
-        }
-        if tag < 0 {
-            return Err(Error::new(crate::FERRO_INVALID_ARGUMENT, "the tag of a ring record is negative"));
-        }
-        subscribe(object, event, Callback::Ring(tag))
-    })
 }
 
 /// [`ferro_subscribe`] with a `void *` in place of the token: `function` is called with

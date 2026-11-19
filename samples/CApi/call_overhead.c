@@ -2,10 +2,8 @@
  * operations of the Rust benchmark of the crate (cargo bench -p ferroui-capi
  * --no-default-features --bench call_overhead) that a C program makes: a property write and a
  * read, the call of the frame dispatcher, and frames of 100 text blocks (one changes; the same
- * as memo elements reused through ferro_frame_reuse), and signals and the event ring shared
- * through memory (section 14): a store and an apply against the setter, 100 stores and one apply
- * against 100 setters, a load of a watched value against the getter, a raise into the ring and
- * its drain against a raise to a C callback. No window: the thread is made the UI thread with
+ * as memo elements reused through ferro_frame_reuse), and signals shared through memory (section 14): a store and an apply against the setter, 100 stores and one apply
+ * against 100 setters, a load of a watched value against the getter. No window: the thread is made the UI thread with
  * ferro_init. The median of 9 samples, in nanoseconds per operation.
  *
  *   make -C samples/CApi bench CARGO_FLAGS="--release --no-default-features" PROFILE=release
@@ -107,12 +105,9 @@ static void memo_frame_100(int64_t i) {
 }
 
 static _Atomic uint64_t *values, *dirty;
-static _Atomic uint64_t *ring_head, *ring_tail;
 static int64_t size_slot;
 static FerroHandle blocks[100];
 static int64_t slots[100];
-static FerroHandle ringed, called;
-static int64_t click, clicks;
 
 static uint64_t bits_of(double value) {
     uint64_t bits;
@@ -145,26 +140,6 @@ static void signal_load(int64_t i) {
     double value;
     memcpy(&value, &bits, sizeof value);
     sink = value;
-}
-
-static int64_t on_click(int64_t token, FerroHandle sender, int64_t arg) {
-    (void)sender;
-    (void)arg;
-    clicks += token;
-    return 0;
-}
-
-static void raise_callback(int64_t i) {
-    (void)i;
-    ferro_raise(called, click);
-}
-
-static void raise_ring(int64_t i) {
-    (void)i;
-    ferro_raise(ringed, click);
-    uint64_t end = atomic_load_explicit(ring_head, memory_order_acquire);
-    clicks += (int64_t)(end - atomic_load_explicit(ring_tail, memory_order_relaxed));
-    atomic_store_explicit(ring_tail, end, memory_order_release);
 }
 
 int main(void) {
@@ -211,15 +186,6 @@ int main(void) {
     size_slot = watched;
     printf("%-44s %9.1f ns/op\n", "signal: a load of a watched value", measure(signal_load, 1000000));
 
-    const FerroEventRing *ring = ferro_event_ring(1024);
-    ring_head = (_Atomic uint64_t *)ring->head;
-    ring_tail = (_Atomic uint64_t *)ring->tail;
-    click = ferro_event_id("Click", -1);
-    called = ferro_create(ferro_type_id("Button", -1));
-    ringed = ferro_create(ferro_type_id("Button", -1));
-    ferro_subscribe(called, click, on_click, 1);
-    ferro_subscribe_ring(ringed, click, 1);
-    printf("%-44s %9.1f ns/op\n", "raise Click to a C callback", measure(raise_callback, 1000000));
-    printf("%-44s %9.1f ns/op\n", "raise Click into the ring, drained", measure(raise_ring, 1000000));
+
     return 0;
 }
