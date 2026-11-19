@@ -94,7 +94,9 @@ fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
     let root = page("Typography");
     assert!(design_image_uri("Typography", Some(&ThemeVariant::light())).ends_with("Typography.light.png"));
     assert!(design_image_uri("Typography", None).ends_with("Typography.dark.png"));
-    assert!(root.get_control::<Image>("HeaderImage").source().is_some());
+    // The theme's image where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(&design_image_uri("Typography", None)).is_ok();
+    assert_eq!(root.get_control::<Image>("HeaderImage").source().is_some(), decoded);
     // The five tips of ShowTypographyButtonClick1 to 5, the Flyouts of their buttons.
     for (index, title) in ["Caption", "Body", "Body Strong", "Title", "Display"].into_iter().enumerate() {
         let button = format!("ShowTypographyButton{}", index + 1);

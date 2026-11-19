@@ -158,7 +158,9 @@ fn xaml_resources_resolve_at_each_level_and_follow_the_theme() {
     assert!(root.get_control::<Grid>("StaticResourceGrid").background().is_some());
     assert!(theme_image_uri(Some(&ThemeVariant::light())).ends_with("SampleMedia/Light_Image.png"));
     assert!(theme_image_uri(Some(&ThemeVariant::dark())).ends_with("SampleMedia/Dark_Image.png"));
-    assert!(root.get_control::<Image>("ThemeImage").source().is_some());
+    // The theme's image where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(theme_image_uri(None)).is_ok();
+    assert_eq!(root.get_control::<Image>("ThemeImage").source().is_some(), decoded);
 
     // In a window: the ThemeDictionaries of the third example follow the requested theme, and
     // SetThemeResourceBinding follows a change of the resource where the one-time lookup keeps

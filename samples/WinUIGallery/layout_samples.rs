@@ -148,7 +148,7 @@ fn wire_stack_panel(root: &Ref<Control>) {
 }
 
 /// The source of the Viewbox page's image: `ms-appx:///Assets/SampleMedia/Slices.png`.
-const SLICES: &str = "ferres://WinUIGallery/Assets/SampleMedia/Slices.png";
+pub(crate) const SLICES: &str = "ferres://WinUIGallery/Assets/SampleMedia/Slices.png";
 
 /// The Tag of the selected option of `group`, the source's `selectedItem.Tag`.
 fn selected_tag(group: &RadioButtons) -> Option<String> {

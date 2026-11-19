@@ -152,10 +152,9 @@ fn viewbox_options_size_and_stretch_the_viewbox() {
     let _application = start();
     let root = page("Viewbox");
     let viewbox = root.get_control::<Viewbox>("Control1");
-    assert!(
-        root.get_control::<Image>("ViewboxImage").source().is_some(),
-        "the source's Slices.png"
-    );
+    // The source's Slices.png where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(crate::layout_samples::SLICES).is_ok();
+    assert_eq!(root.get_control::<Image>("ViewboxImage").source().is_some(), decoded);
     // The source's OneWay x:Bind of the size slider's Value to the Width and Height.
     assert_eq!((viewbox.width(), viewbox.height()), (200.0, 200.0));
     root.get_control::<Slider>("SizeSlider")

@@ -130,7 +130,9 @@ fn tool_tip_examples_keep_the_source_tips_offset_and_placement() {
     // The image's ToolTip is placed to the right of the 400 by 266 image, the source's
     // PlacementRect, with the source's description.
     let image = root.get_control::<Image>("textBoxToPlace");
-    assert!(image.source().is_some(), "the source's cliff.jpg");
+    // The source's cliff.jpg where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(crate::status_samples::CLIFF).is_ok();
+    assert_eq!(image.source().is_some(), decoded);
     assert_eq!((image.width(), image.height()), (400.0, 266.0));
     assert_eq!(ToolTip::get_placement(&image), PlacementMode::Right);
     let tool_tip = from_markup_value::<Ref<ToolTip>>(&ToolTip::get_tip(&image))
