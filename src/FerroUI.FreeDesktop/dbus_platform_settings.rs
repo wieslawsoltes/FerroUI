@@ -1,5 +1,6 @@
-//! The colour scheme and the accent colour of the desktop, from the
-//! settings portal (the port of `DBusPlatformSettings.cs`).
+//! The colour scheme, the accent colour and the contrast of the desktop, from the
+//! settings portal (the port of `DBusPlatformSettings.cs`; the contrast is a FerroUI
+//! addition, #560).
 
 use crate::dbus_helper::DBusHelper;
 use crate::signal_watch::watch_stream;
@@ -7,7 +8,7 @@ use ferroui_base::input::platform::PlatformHotkeyConfiguration;
 use ferroui_base::input::PointerType;
 use ferroui_base::media::Color;
 use ferroui_base::platform::{
-    DefaultPlatformSettings, IPlatformSettings, PlatformColorValues,
+    ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues,
     PlatformThemeVariant,
 };
 use ferroui_base::reactive::{IDisposable, Subscription};
@@ -62,6 +63,20 @@ pub(crate) fn to_color_scheme(value: &Value<'_>) -> Option<PlatformThemeVariant>
     Some(if is_dark { PlatformThemeVariant::Dark } else { PlatformThemeVariant::Light })
 }
 
+/// The contrast preference of the value of `contrast` of `org.freedesktop.appearance`;
+/// `None` when the value is not a number. A FerroUI addition (#560): the reference reads only
+/// the colour scheme and the accent colour.
+pub(crate) fn to_contrast(value: &Value<'_>) -> Option<ColorContrastPreference> {
+    /*
+    0: No preference (normal contrast)
+    1: Higher contrast
+    */
+    let Value::U32(value) = unwrap_variant(value) else {
+        return None;
+    };
+    Some(if *value == 1 { ColorContrastPreference::High } else { ColorContrastPreference::NoPreference })
+}
+
 /// The colour of the value of `accent-color` (`ToAccentColor`).
 pub(crate) fn to_accent_color(value: &Value<'_>) -> Option<Color> {
     /*
@@ -85,19 +100,24 @@ pub(crate) fn to_accent_color(value: &Value<'_>) -> Option<Color> {
     Some(Color::from_rgb((r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8))
 }
 
-/// The colour values of what the portal told (`BuildPlatformColorValues`).
+/// The colour values of what the portal told (`BuildPlatformColorValues`), with its contrast
+/// (no preference when it did not tell). The portal reports no system colours: the WinUI theme
+/// uses its high contrast schemes.
 pub(crate) fn build_platform_color_values(
     nullable_theme_variant: Option<PlatformThemeVariant>,
     nullable_accent_color: Option<Color>,
+    nullable_contrast: Option<ColorContrastPreference>,
 ) -> PlatformColorValues {
-    match (nullable_theme_variant, nullable_accent_color) {
+    let contrast = nullable_contrast.unwrap_or_default();
+    let values = match (nullable_theme_variant, nullable_accent_color) {
         (Some(theme_variant), Some(accent_color)) => {
             PlatformColorValues::new().with_theme_variant(theme_variant).with_accent_color1(accent_color)
         }
         (Some(theme_variant), None) => PlatformColorValues::new().with_theme_variant(theme_variant),
         (None, Some(accent_color)) => PlatformColorValues::new().with_accent_color1(accent_color),
         (None, None) => PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Light),
-    }
+    };
+    values.with_contrast_preference(contrast)
 }
 
 /// The platform settings of a FreeDesktop session: the defaults of the
@@ -112,6 +132,7 @@ pub struct DBusPlatformSettings {
     color_values: Cell<PlatformColorValues>,
     theme_variant: Cell<Option<PlatformThemeVariant>>,
     accent_color: Cell<Option<Color>>,
+    contrast: Cell<Option<ColorContrastPreference>>,
 }
 
 impl DBusPlatformSettings {
@@ -135,6 +156,7 @@ impl DBusPlatformSettings {
             color_values: Cell::new(color_values),
             theme_variant: Cell::new(None),
             accent_color: Cell::new(None),
+            contrast: Cell::new(None),
         });
 
         let Some(conn) = connection else {
@@ -178,9 +200,11 @@ impl DBusPlatformSettings {
 
                 let theme_variant = Self::try_get_theme_variant_async(&settings).await;
                 let accent_color = Self::try_get_accent_color_async(&settings).await;
+                let contrast = Self::try_get_contrast_async(&settings).await;
                 if let Some(this) = weak.upgrade() {
                     this.theme_variant.set(theme_variant);
                     this.accent_color.set(accent_color);
+                    this.contrast.set(contrast);
                     this.update_color_values();
                 }
             },
@@ -210,9 +234,15 @@ impl DBusPlatformSettings {
         to_accent_color(&value)
     }
 
+    async fn try_get_contrast_async(settings: &SettingsProxy<'static>) -> Option<ColorContrastPreference> {
+        let value = Self::read(settings, "contrast").await.ok()?;
+        to_contrast(&value)
+    }
+
     fn update_color_values(&self) {
         let old_color_values = self.color_values.get();
-        let color_values = build_platform_color_values(self.theme_variant.get(), self.accent_color.get());
+        let color_values =
+            build_platform_color_values(self.theme_variant.get(), self.accent_color.get(), self.contrast.get());
 
         if old_color_values != color_values {
             self.color_values.set(color_values);
@@ -234,6 +264,13 @@ impl DBusPlatformSettings {
             (APPEARANCE, "accent-color") => {
                 self.accent_color.set(to_accent_color(value));
                 self.update_color_values();
+            }
+            (APPEARANCE, "contrast") => {
+                // As the colour scheme: a value that is not a number is passed over.
+                if let Some(contrast) = to_contrast(value) {
+                    self.contrast.set(Some(contrast));
+                    self.update_color_values();
+                }
             }
             _ => {}
         }
@@ -324,16 +361,32 @@ mod tests {
     fn colour_values_keep_the_defaults_for_what_the_portal_does_not_tell() {
         let defaults = PlatformColorValues::new();
         let red = Color::from_rgb(255, 0, 0);
-        assert_eq!(build_platform_color_values(None, None), defaults);
+        assert_eq!(build_platform_color_values(None, None, None), defaults);
         assert_eq!(
-            build_platform_color_values(Some(PlatformThemeVariant::Dark), None),
+            build_platform_color_values(Some(PlatformThemeVariant::Dark), None, None),
             defaults.with_theme_variant(PlatformThemeVariant::Dark)
         );
-        assert_eq!(build_platform_color_values(None, Some(red)), defaults.with_accent_color1(red));
+        assert_eq!(build_platform_color_values(None, Some(red), None), defaults.with_accent_color1(red));
         assert_eq!(
-            build_platform_color_values(Some(PlatformThemeVariant::Dark), Some(red)),
+            build_platform_color_values(Some(PlatformThemeVariant::Dark), Some(red), None),
             defaults.with_theme_variant(PlatformThemeVariant::Dark).with_accent_color1(red)
         );
+        let high =
+            build_platform_color_values(Some(PlatformThemeVariant::Dark), None, Some(ColorContrastPreference::High));
+        assert!(high.is_high_contrast());
+        assert_eq!(high.theme_variant(), PlatformThemeVariant::Dark);
+        // The portal has no system colours.
+        assert_eq!(high.system_colors(), None);
+        assert_eq!(build_platform_color_values(None, None, Some(ColorContrastPreference::NoPreference)), defaults);
+    }
+
+    #[test]
+    fn the_contrast_is_high_only_when_the_portal_says_high() {
+        assert_eq!(to_contrast(&Value::U32(0)), Some(ColorContrastPreference::NoPreference));
+        assert_eq!(to_contrast(&Value::U32(1)), Some(ColorContrastPreference::High));
+        assert_eq!(to_contrast(&Value::U32(5)), Some(ColorContrastPreference::NoPreference));
+        assert_eq!(to_contrast(&Value::Value(Box::new(Value::U32(1)))), Some(ColorContrastPreference::High));
+        assert_eq!(to_contrast(&Value::from("high")), None);
     }
 
     /// A double of the settings portal.
@@ -429,7 +482,11 @@ mod tests {
         assert_eq!(*changes.borrow(), [dark_red]);
         assert_eq!(
             *f.log.lock().unwrap(),
-            ["ReadOne(org.freedesktop.appearance, color-scheme)", "ReadOne(org.freedesktop.appearance, accent-color)"]
+            [
+                "ReadOne(org.freedesktop.appearance, color-scheme)",
+                "ReadOne(org.freedesktop.appearance, accent-color)",
+                "ReadOne(org.freedesktop.appearance, contrast)",
+            ]
         );
 
         // The user switches to the light scheme.
@@ -441,9 +498,18 @@ mod tests {
         // The same scheme again, a setting of another namespace and another key: no change.
         f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "color-scheme", Value::U32(0)));
         f.connections.emit(PATH, INTERFACE, "SettingChanged", &("org.gnome.desktop.interface", "color-scheme", Value::U32(1)));
-        f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "contrast", Value::U32(1)));
+        f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "reduced-motion", Value::U32(1)));
         f.connections.settle();
         assert_eq!(changes.borrow().len(), 2);
+
+        // High contrast on (GNOME's high contrast switch), and off again.
+        f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "contrast", Value::U32(1)));
+        let light_red_high = light_red.with_contrast_preference(ColorContrastPreference::High);
+        pump_until(|| settings.get_color_values() == light_red_high);
+        f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "contrast", Value::U32(0)));
+        pump_until(|| settings.get_color_values() == light_red);
+        assert_eq!(*changes.borrow(), [dark_red, light_red, light_red_high, light_red]);
+        changes.borrow_mut().truncate(2);
 
         // A new accent colour; one out of range unsets it.
         f.connections.emit(PATH, INTERFACE, "SettingChanged", &(APPEARANCE, "accent-color", rgb(0.0, 0.0, 1.0)));
@@ -453,6 +519,19 @@ mod tests {
         let light = PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Light);
         pump_until(|| settings.get_color_values() == light);
         assert_eq!(*changes.borrow(), [dark_red, light_red, light_blue, light]);
+        let _ = &f.values;
+    }
+
+    #[test]
+    fn a_desktop_in_high_contrast_reports_it_from_the_first_read() {
+        let _scope = scope();
+        let f = fixture(2, vec![("color-scheme", Value::U32(0)), ("contrast", Value::U32(1))]);
+        let settings = DBusPlatformSettings::with_connection(Some(f.connections.client.clone()));
+        let high = PlatformColorValues::new()
+            .with_theme_variant(PlatformThemeVariant::Light)
+            .with_contrast_preference(ColorContrastPreference::High);
+        pump_until(|| settings.get_color_values() == high);
+        assert!(settings.get_color_values().is_high_contrast());
         let _ = &f.values;
     }
 
@@ -468,7 +547,11 @@ mod tests {
         assert_eq!(settings.get_color_values(), dark);
         assert_eq!(
             *f.log.lock().unwrap(),
-            ["Read(org.freedesktop.appearance, color-scheme)", "Read(org.freedesktop.appearance, accent-color)"]
+            [
+                "Read(org.freedesktop.appearance, color-scheme)",
+                "Read(org.freedesktop.appearance, accent-color)",
+                "Read(org.freedesktop.appearance, contrast)",
+            ]
         );
     }
 

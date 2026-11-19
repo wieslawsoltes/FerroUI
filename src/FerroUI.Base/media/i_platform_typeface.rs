@@ -29,6 +29,15 @@ pub trait IPlatformTypeface: IFontMemory {
         FontVariationSettings::empty()
     }
 
+    /// The typeface of the same font at another position in the variation space: the axes of
+    /// `settings` take their values, the other axes keep the values of this typeface. `None`,
+    /// the default, where the backend cannot make one (the font is then used as it is). The
+    /// optical size of a text is chosen with it (`GlyphTypeface::at_optical_size`).
+    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<std::rc::Rc<dyn IPlatformTypeface>> {
+        let _ = settings;
+        None
+    }
+
     /// Attempts to obtain a stream over the raw font data.
     fn try_get_stream(&self) -> Option<Box<dyn Read>>;
 

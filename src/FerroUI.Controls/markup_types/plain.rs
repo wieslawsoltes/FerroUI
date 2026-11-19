@@ -10,7 +10,10 @@ use crate::primitives::popup_positioning::{
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
 use crate::animation::{ColorKeyFrame, DoubleKeyFrame, ObjectKeyFrame, PointKeyFrame, Timeline};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup, VisualTransition};
+use crate::{
+    ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, SwipeItem, TableViewColumn, VisualState, VisualStateGroup,
+    VisualTransition,
+};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -487,6 +490,20 @@ ferro_markup_type!(class FerroListOf<Ref<VisualState>> as "FerroList`1" {
     methods: [fn Add(Ref<VisualState>) => |list: &FerroList<Ref<VisualState>>, item: Ref<VisualState>| list.add(item)],
 });
 
+// The items of a swipe control side (`SwipeItems`).
+ferro_markup_type!(class FerroListOf<Ref<SwipeItem>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<SwipeItem>>, Option<FerroList<Ref<SwipeItem>>>],
+    this: FerroList<Ref<SwipeItem>>,
+    generic: "FerroList`1" [Ref<SwipeItem>],
+    constructors: [() => FerroList::<Ref<SwipeItem>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<SwipeItem>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<SwipeItem>) => |list: &FerroList<Ref<SwipeItem>>, item: Ref<SwipeItem>| list.add(item)],
+});
+
 // The triggers of a visual state (`VisualState.StateTriggers`).
 ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -659,6 +676,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<SwipeItem>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualTransition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Timeline>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<DoubleKeyFrame>> as MarkupTyped>::MARKUP,
@@ -686,6 +704,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<SwipeItem>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualTransition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Timeline>>>();
     ValueTypes::register_nullable::<FerroList<Ref<DoubleKeyFrame>>>();

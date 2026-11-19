@@ -230,7 +230,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, MarkupReferencesModel};
+use crate::model::{AssemblyModel, MarkupReferencesModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -243,9 +243,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
-    parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, Roots, ThemeTrimming,
-    TypeGraph,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, parts_constructor,
+    parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
+    Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -381,6 +381,9 @@ pub struct Build {
     theme_roots: Roots,
     /// The themes the Rust code of the crate constructs from their parts ([`Build::theme`]).
     themes: Vec<String>,
+    /// Whether declared properties are resolved at compile time
+    /// ([`Build::compile_time_declared_properties`]).
+    compile_time_declared_properties: bool,
 }
 
 impl Build {
@@ -434,7 +437,18 @@ impl Build {
             full_themes: false,
             theme_roots: Roots::default(),
             themes: Vec::new(),
+            compile_time_declared_properties: false,
         }
+    }
+
+    /// Whether the compiled markup resolves the declared properties of nested markup extensions
+    /// and of compiled binding paths at compile time (#603): `rt::declared_clr_property_info` and
+    /// `rt::declared_path_property` with the position of the property in its declaration, in place
+    /// of `rt::clr_property_info` and `rt::path_property`, which search the declaration by name at
+    /// run time. Off without the call, so that the generated files stay what they are.
+    pub fn compile_time_declared_properties(mut self, value: bool) -> Self {
+        self.compile_time_declared_properties = value;
+        self
     }
 
     /// Selects typed bytecode for this package's compiled XAML. `from_env` reads
@@ -918,6 +932,9 @@ impl Build {
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
+        // The option of the emitter for the groups of this build (#603), restored after them.
+        use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
+        let declared_properties = set_compile_time_declared_properties(self.compile_time_declared_properties);
         for group in &self.groups {
             if self.assembly.is_none() && !on_models {
                 break;
@@ -1002,7 +1019,7 @@ impl Build {
                 });
                 let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
-                    Ok(file) => {
+                    Ok((file, consumed)) => {
                         // Upstream's `XamlLoaderUnreachable`, a warning the filter decides on.
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
@@ -1027,7 +1044,10 @@ impl Build {
                             exported_roots.extend(group_roots);
                         }
                         if group.exported {
-                            compiled_documents.extend(class_metadata.documents.iter().filter_map(|document| document_path(&document.uri)));
+                            // Every document the compiler consumed for the class, the ones merged
+                            // into it included, is left out of the raw assets (#850): its content
+                            // is in the compiled markup.
+                            compiled_documents.extend(consumed);
                             metadata.documents.extend(class_metadata.documents);
                             // The unit graph of the theme of the class (#568), for the builds of
                             // the applications that construct it.
@@ -1106,6 +1126,7 @@ impl Build {
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
         }
+        set_compile_time_declared_properties(declared_properties);
         for path in &self.checked_in_metadata {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
@@ -1113,6 +1134,10 @@ impl Build {
                 Ok(read) if read.name == assembly_name => {
                     metadata.documents.extend(read.documents);
                     metadata.theme_units.extend(read.theme_units);
+                    // What its documents name, for the applications that trim (#848): the
+                    // references travel with the documents they are of.
+                    exported_roots.types.extend(read.references.types);
+                    exported_roots.keys.extend(read.references.keys);
                 }
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
@@ -1240,19 +1265,45 @@ impl Build {
                 all: trimming.all || !trimming.enabled,
                 ..Roots::default()
             };
-            let sources: [(&str, &Roots); 5] = [
-                ("manifest", &from_manifest),
-                ("build script", &self.theme_roots),
-                ("documents", &document_roots),
-                ("sources", &from_sources),
-                ("dependencies", &from_dependencies),
-            ];
+            // The themes used together are closed over together (#848): what a kept unit of one
+            // references or constructs roots the units of the others.
+            let used_units: Vec<(String, &ThemeUnitsModel)> = used
+                .into_iter()
+                .filter_map(|class| {
+                    let units = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class)?;
+                    Some((class, units))
+                })
+                .collect();
+            let themes: Vec<&ThemeUnitsModel> = used_units.iter().map(|(_, units)| *units).collect();
+            let kept_of_themes = kept_units_across(&themes, &roots, &graph, self.full_themes);
+            // What the kept units of the other themes reference and construct: the roots the
+            // closure over the themes added to a theme, so that its reasons explain what it kept.
+            let from_other_themes: Vec<Roots> = (0..themes.len())
+                .map(|position| {
+                    let mut roots = Roots::default();
+                    for (other, (units, kept)) in themes.iter().zip(&kept_of_themes).enumerate() {
+                        if other == position {
+                            continue;
+                        }
+                        for unit in units.units.iter().filter(|unit| kept.contains(&unit.index)) {
+                            roots.keys.extend(unit.references.iter().cloned());
+                            roots.types.extend(unit.types.iter().cloned());
+                        }
+                    }
+                    roots
+                })
+                .collect();
             let mut why = String::new();
-            for class in used {
-                let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
-                    continue;
-                };
-                let kept = kept_units(units, &roots, &graph, self.full_themes);
+            let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
+            for (((class, units), kept), from_others) in together {
+                let sources: [(&str, &Roots); 6] = [
+                    ("manifest", &from_manifest),
+                    ("build script", &self.theme_roots),
+                    ("documents", &document_roots),
+                    ("sources", &from_sources),
+                    ("dependencies", &from_dependencies),
+                    ("other themes used together", from_others),
+                ];
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
@@ -1434,8 +1485,11 @@ fn class_group(
     constructor: Option<ClassConstructor>,
     module_path: &str,
     options: &TransformOptions,
-) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, ClassGroupError> {
+) -> Result<(ferroui_markup_xaml_loader::rust_emitter::ClassFile, Vec<String>), ClassGroupError> {
     let group = class_document_group(root_uri, documents, class_document).map_err(ClassGroupError::Transform)?;
+    // The documents the compiler consumed for the class (#850): the document of the class and every
+    // document it includes, merged ones too, by their rooted paths.
+    let consumed: Vec<String> = group.iter().filter_map(|(_, _, uri)| uri.as_deref().and_then(document_path)).collect();
     let class_name = class_of_document(&group[0].1)
         .map_err(ClassGroupError::Transform)?
         .ok_or_else(|| ClassGroupError::Transform("the document names no class (`x:Class`)".to_string()))?;
@@ -1444,12 +1498,12 @@ fn class_group(
             "the type models have no type `{class_name}`, which the document names with `x:Class`: the class is not declared in the sources of the crate, or its declaration is not read"
         ))
     })?;
-    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options).map_err(|reasons| {
-        match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
+    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options)
+        .map(|file| (file, consumed))
+        .map_err(|reasons| match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
             Some(_) => ClassGroupError::Transform(reasons),
             None => ClassGroupError::Emit(reasons),
-        }
-    })
+        })
 }
 
 /// Why the file of a class is not generated.

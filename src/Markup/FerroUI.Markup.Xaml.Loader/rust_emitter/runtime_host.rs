@@ -460,4 +460,32 @@ mod tests {
             assert_eq!(count, 1, "{}: {}", document.name, document.function_name);
         }
     }
+
+    /// Not from upstream (#603): with the option of compile-time declared properties on, a plain
+    /// property of a compiled binding path is written with the position of the property in its
+    /// declaration (`rt::declared_path_property`); off, the default, it is found by name at run
+    /// time (`rt::path_property`), so the checked-in files do not change.
+    #[test]
+    fn declared_properties_are_resolved_at_compile_time_with_the_option() {
+        let xaml = "<StackPanel xmlns='https://github.com/ferroui' \
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+                    <TextBlock x:DataType='ResourceDictionary' Text='{CompiledBinding Count}'/></StackPanel>";
+        let compile = |on: bool| {
+            let before = super::super::set_compile_time_declared_properties(on);
+            let configuration = RuntimeXamlLoaderConfiguration::new();
+            let compiled = compile_documents(&[("Paths.xaml", xaml)], None, &configuration, &[]);
+            super::super::set_compile_time_declared_properties(before);
+            compiled[0].source.clone().unwrap_or_else(|reason| panic!("not eligible: {reason}"))
+        };
+        let by_name = compile(false);
+        assert!(by_name.contains("rt::path_property(&builder, ") && by_name.contains("\"Count\""), "{by_name}");
+        assert!(!by_name.contains("rt::declared_path_property("), "{by_name}");
+        let resolved = compile(true);
+        let markup = <ferroui_base::controls::ResourceDictionary as ferroui_base::StaticType>::TYPE;
+        let index = ferroui_base::metadata::MarkupType::find_by_type_info(markup)
+            .and_then(|markup| markup.properties.iter().position(|property| property.name == "Count"))
+            .expect("Count is declared");
+        assert!(resolved.contains(&format!("::TYPE), {index}, \"Count\", false, ")), "{resolved}");
+        assert!(resolved.contains("rt::declared_path_property(&builder, "), "{resolved}");
+    }
 }

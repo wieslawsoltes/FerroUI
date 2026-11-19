@@ -8237,3 +8237,25 @@ the machine).
   fix of step 4): `text::SelectableTextBlockWidths.measure_at_the_other_width` -72.4 %; the rest of
   `text::` and `trees::Text` within its tolerance (the largest rise +1.5 %).
 
+
+### 9.104 Left out: a spatial index in the picture of a frame for its bands (#817)
+
+The picture of a frame was recorded with Skia's bounding-box hierarchy (`begin_recording` with a
+bounding-box factory), so that each band of a pipelined frame replays only the commands that touch
+it. The index was on from 2,000 commands of the picture before; `FERROUI_BAND_PICTURE_INDEX`
+(`off`, `always`, a count) chose it for a run without a new build.
+
+Measured with the harness of the framework comparison on the binary of the change, second start,
+two rounds a mode on a quiet machine (frames a second, and the CPU a frame in brackets):
+
+| Mode | patchwork, tier 17 | patchwork, tier 20 | gauntlet, tier 16 |
+|---|---|---|---|
+| off (the picture of main) | 52.6, 52.2 (57.5, 61.9 ms) | 37.4, 34.9 (94.2, 102.6 ms) | 41.7, 41.2 (68.7, 70.2 ms) |
+| always | 52.1, 52.4 (63.1, 64.3 ms) | 34.9, 31.4 (102.5, 114.9 ms) | 39.0, 39.5 (70.4, 74.0 ms) |
+| default (from 2,000 commands) | 51.6, 52.1 (64.4, 66.0 ms) | 29.3, 35.4 (121.1, 101.6 ms) | 33.8, 39.2 (84.6, 70.4 ms) |
+
+At tier 17 the rate is the same and the CPU a frame grows by 5 to 10 %; at tier 20 and in the
+gauntlet the rate falls. The hierarchy is built when the picture is recorded, on the render thread,
+and the bands of these scenes cross most of the commands of the picture, so it culls little of what
+a band replays. Left out (PR 872 closed); the bands keep replaying the whole picture under their
+clip, which Skia's canvas rejects per draw.
