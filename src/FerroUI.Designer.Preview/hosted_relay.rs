@@ -3,7 +3,8 @@ use crate::{
     hosted_animation_restore::{Presentation, Restore, SourceMap, SourceMaps, SourceScope},
     hosted_frame,
     projects::Projects,
-    protocol::{Image, Language, MAX_SOURCE_BYTES, Source},
+    protocol::{Image, MAX_SOURCE_BYTES, Source},
+    rsx_animation::AuthoredRsxFrame,
 };
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
@@ -52,7 +53,6 @@ struct Events {
     curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
     curve_programs: BTreeSet<i64>,
-    authored_xaml: bool,
     disconnected: bool,
 }
 
@@ -64,6 +64,7 @@ pub(crate) struct Relay {
     sent: Option<(i64, i64)>,
     next_animation: i64,
     animation_sources: SourceMaps,
+    authored_rsx: Option<AuthoredRsxFrame>,
     size: (f64, f64),
 }
 
@@ -138,6 +139,7 @@ impl Relay {
             sent: None,
             next_animation: 0,
             animation_sources: SourceMaps::default(),
+            authored_rsx: None,
             size: (0.0, 0.0),
         })
     }
@@ -185,16 +187,9 @@ impl Relay {
             if let Some(catalog) = message.downcast_ref::<DesignAnimationCatalogMessage>() {
                 if state.requested == Some(catalog.revision) {
                     state.animation_supported = true;
-                    let mut catalog = catalog.clone();
-                    if state.authored_xaml {
-                        state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
-                            .map(|program| program.id).collect();
-                    } else {
-                        catalog.programs.iter_mut().for_each(|program| program.authoring = None);
-                    }
                     state.curve_programs = catalog.programs.iter().filter(|program| program.curve_tracks.is_some())
                         .map(|program| program.id).collect();
-                    state.animation_catalog = Some(catalog);
+                    state.animation_catalog = Some(catalog.clone());
                 }
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationResultMessage>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
@@ -304,7 +299,6 @@ impl Relay {
             }
             *state = Events {
                 requested: Some(revision),
-                authored_xaml: design.document.language == Language::Xaml,
                 fixture: design.fixture.clone(),
                 ..Events::default()
             };
@@ -315,7 +309,7 @@ impl Relay {
             uri: design.document.uri.clone(),
             assembly: design.assembly.clone(),
             project_path: design.project_path.clone(),
-            invocation: document.rsx.as_ref().map(|projection| projection.invocation),
+            invocation: document.rsx.as_ref().map(|projection| projection.invocation.start),
         };
         let connection = self.connection()?;
         let source = UpdateXamlMessage {
@@ -327,7 +321,7 @@ impl Relay {
             &connection,
             Arc::new(UpdateDesignMessage { revision, source, fixture: design.fixture }),
         )?;
-        let (state, _) = self
+        let (mut state, _) = self
             .events
             .1
             .wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT, |state| {
@@ -345,6 +339,14 @@ impl Relay {
         if !matches!(state.outcome, Some(Ok(()))) || state.latest.is_none() {
             return Err("The application did not render this source revision".into());
         }
+        let authored_rsx = AuthoredRsxFrame::capture(&document);
+        if let Some(catalog) = &mut state.animation_catalog {
+            if let Some(projected) = &authored_rsx {
+                for program in &mut catalog.programs { projected.map_hosted_program(program); }
+            }
+            state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
+                .map(|program| program.id).collect();
+        }
         let source = state.animation_catalog.as_ref().and_then(|catalog| SourceMap::new(document.xaml, scope, catalog));
         drop(state);
         let mut presentation = self.animation_sources.restore(design.restore_animation.as_ref(), source.as_ref());
@@ -357,7 +359,11 @@ impl Relay {
             }
         }
         let mut frame = self.frame()?.ok_or("The application did not render this source revision")?;
+        if let (Some(authored), Some(catalog)) = (&authored_rsx, &mut frame.animations) {
+            authored.annotate_issues(catalog);
+        }
         self.animation_sources.deliver(source, revision, frame.sequence);
+        self.authored_rsx = authored_rsx;
         frame.animation_presentation = presentation;
         Ok(frame)
     }

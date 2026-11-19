@@ -2,7 +2,8 @@ use crate::document::DesignDocument;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::RsxAnimation;
+use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue};
+use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
 
@@ -10,6 +11,7 @@ pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,
     invocation: SourceSpan,
     clips: BTreeMap<NodeId, RsxAnimation>,
+    issues: Vec<RsxAnimationIssue>,
 }
 
 pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
@@ -18,11 +20,12 @@ pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
 
 impl AuthoredRsxFrame {
     pub(crate) fn capture(design: &DesignDocument<'_>) -> Option<Self> {
-        let invocation = design.rsx.as_ref()?.invocation;
+        let rsx = design.rsx.as_ref()?;
         Some(Self {
             source: design.source.into(),
-            invocation,
+            invocation: rsx.invocation,
             clips: design.rsx_animations.clone(),
+            issues: rsx.animation_issues.clone(),
         })
     }
 
@@ -51,6 +54,23 @@ impl AuthoredRsxFrame {
                 }
             }
         }
+        self.annotate_issues(models);
+    }
+
+    pub(crate) fn annotate_issues(&self, catalog: &mut Value) {
+        if self.issues.is_empty() {
+            return;
+        }
+        let index = LineIndex::new(&self.source);
+        catalog["sourceIssues"] = Value::Array(
+            self.issues
+                .iter()
+                .filter_map(|issue| {
+                    let range = index.range(issue.declaration).ok()?;
+                    Some(json!({ "range": range, "reason": issue.reason }))
+                })
+                .collect(),
+        );
     }
 
     pub(crate) fn patches(&self, args: &Value) -> Result<Vec<TextPatch>, String> {
@@ -69,5 +89,61 @@ impl AuthoredRsxFrame {
                 easing: args["easing"].as_str().ok_or("Supply a keyframe easing")?,
             },
         )
+    }
+
+    pub(crate) fn map_hosted_program(&self, program: &mut DesignAnimationProgram) {
+        let clip = u64::try_from(program.id)
+            .ok()
+            .and_then(|id| self.clips.get(&id));
+        program.source_utf16 = clip
+            .and_then(|clip| {
+                i32::try_from(self.source[..clip.declaration.start].encode_utf16().count()).ok()
+            })
+            .unwrap_or(-1);
+        if let Some(authoring) = &mut program.authoring {
+            authoring.tracks.retain_mut(|track| {
+                track.keys.retain(|key| {
+                    let kind = serde_json::from_value(Value::String(key.value_kind.clone())).ok();
+                    kind.zip(clip)
+                        .is_some_and(|(kind, clip)| clip.maps_key(&track.property, key.time, kind))
+                });
+                !track.keys.is_empty()
+            });
+            if authoring.tracks.is_empty() {
+                program.authoring = None;
+            }
+        }
+    }
+
+    pub(crate) fn hosted_patch(
+        &self,
+        draft: &crate::hosted_animation::KeyframeDraft,
+    ) -> Result<Option<DesignAnimationSourcePatch>, String> {
+        let clip = u64::try_from(draft.program)
+            .ok()
+            .and_then(|id| self.clips.get(&id))
+            .ok_or("Choose an animation with a mapped Rust declaration")?;
+        let patches = clip.patch_keyframe(
+            &draft.property,
+            KeyframeEdit::Upsert {
+                previous: draft.previous,
+                time: draft.time,
+                value: &draft.value,
+                easing: &draft.easing,
+            },
+        )?;
+        let mut edited = self.source.to_string();
+        for patch in patches.into_iter().rev() {
+            edited.replace_range(patch.span.range(), &patch.replacement);
+        }
+        TextPatch::between(&self.source, &edited)
+            .map(|patch| {
+                DesignAnimationSourcePatch::from_utf8(
+                    &self.source,
+                    patch.span.range(),
+                    patch.replacement,
+                )
+            })
+            .transpose()
     }
 }

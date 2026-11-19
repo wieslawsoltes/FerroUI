@@ -83,7 +83,7 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
                 "totalDuration": program.total_duration,
                 "defaultTargets": program.default_targets,
                 "compatibleTargets": program.compatible_targets,
-                "sourceOffset": program.source_utf16,
+                "sourceOffset": (program.source_utf16 >= 0).then_some(program.source_utf16),
                 "customAnimator": program.custom_animator,
                 "curveTracks": program.curve_tracks.map(tracks),
                 "authoring": program.authoring.map(|authoring| json!({

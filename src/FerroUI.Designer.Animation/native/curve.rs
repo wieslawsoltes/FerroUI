@@ -50,9 +50,9 @@ pub fn sample_scalar_track(
         .map_err(str::to_owned)
 }
 
-fn matches_property(property: &FerroProperty, name: &str) -> bool {
+pub(super) fn matches_property(property: &FerroProperty, name: &str) -> bool {
     if let Some((owner, name)) = name.rsplit_once('.') {
-        owner == property.owner_type().name() && name == property.name()
+        owner.rsplit(':').next() == Some(property.owner_type().name()) && name == property.name()
     } else {
         !property.is_attached() && name == property.name()
     }

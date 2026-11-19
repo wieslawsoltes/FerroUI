@@ -1,7 +1,8 @@
 use crate::animation_codecs::with_codecs;
+use ferroui_designer_animation::native::{native_keyframe_options, NativeProgramIndex};
 use ferroui_designer_animation::{
     animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
-    ImportOptions, KeyframeEdit, KeyframeLocation,
+    ImportOptions, KeyframeEdit, KeyframeLocation, ValueKind,
 };
 use ferroui_designer_core::{Document, NodeId, TextPatch};
 use ferroui_remote_protocol::designer::{
@@ -13,13 +14,13 @@ use std::collections::BTreeMap;
 
 pub(super) struct HostedKeyframes {
     document: Document,
-    programs: BTreeMap<i64, AnimationProgram>,
+    programs: BTreeMap<i64, (AnimationProgram, ImportOptions)>,
 }
-
 impl HostedKeyframes {
     pub(super) fn mount(
         document: Document,
         programs: Vec<AnimationProgram>,
+        native: &NativeProgramIndex,
         catalog: &mut [DesignAnimationProgram],
         can_edit: bool,
         curves: bool,
@@ -34,6 +35,8 @@ impl HostedKeyframes {
                 continue;
             };
             let mut program = program.clone();
+            let Some(animation) = native.animation(program.id) else { continue };
+            let options = native_keyframe_options(&document, &program, animation);
             program.targets = entry
                 .default_targets
                 .iter()
@@ -45,7 +48,7 @@ impl HostedKeyframes {
             // Keep ordinary preview usable if a project codec fails during catalog construction.
             let decoded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 with_codecs(|codecs| {
-                    codecs.decode(&mut program, &source, &ImportOptions::default())
+                    codecs.decode(&mut program, &source, &options)
                 });
                 tracks(&program)
             }));
@@ -56,12 +59,16 @@ impl HostedKeyframes {
                 }).cloned().collect();
                 entry.curve_tracks = (!tracks.is_empty()).then_some(tracks);
             }
-            if can_edit && (program.has_project_codec() || entry.curve_tracks.is_some()) {
+            let typed = program.timeline.as_ref().is_some_and(|timeline| timeline.tracks.iter().all(|track| {
+                options.property_kinds.get(&track.property).is_some_and(|kind| *kind != ValueKind::Discrete
+                    && track.keyframes.iter().all(|key| key.value.kind() == *kind))
+            }));
+            if can_edit && (program.has_project_codec() || typed) {
                 entry.authoring = Some(DesignAnimationAuthoring {
                     codec: program.codec.clone().unwrap_or_default(),
                     tracks,
                 });
-                programs.insert(entry.id, program);
+                programs.insert(entry.id, (program, options));
             }
         }
         Self { document, programs }
@@ -71,7 +78,7 @@ impl HostedKeyframes {
         &self,
         request: &DesignAnimationAuthoringRequest,
     ) -> Result<DesignAnimationAuthoringResult, String> {
-        let program = self
+        let (program, options) = self
             .programs
             .get(&request.program)
             .ok_or("Choose an editable animation in the current application preview")?;
@@ -97,7 +104,7 @@ impl HostedKeyframes {
         let (source, accepted) = with_codecs(|codecs| {
             let source = codecs.encode_for_document(&self.document, program, &draft)?;
             let mut accepted = program.clone();
-            codecs.decode(&mut accepted, &source, &ImportOptions::default());
+            codecs.decode(&mut accepted, &source, options);
             Ok::<_, AnimationError>((source, accepted))
         })
         .map_err(|error| error.to_string())?;
@@ -133,7 +140,7 @@ impl HostedKeyframes {
             .map_err(|error| error.to_string())?;
         let original = self.document.source();
         let patch = TextPatch::between(original, candidate.source())
-            .map(|patch| editor_patch(original, patch))
+            .map(|patch| DesignAnimationSourcePatch::from_utf8(original, patch.span.range(), patch.replacement))
             .transpose()?;
         Ok(DesignAnimationAuthoringResult {
             revision: request.revision,
@@ -170,30 +177,4 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         })
         .collect::<Vec<_>>();
     (!tracks.is_empty()).then_some(tracks)
-}
-
-fn utf16_offset(source: &str, offset: usize) -> Result<i32, String> {
-    i32::try_from(source[..offset].encode_utf16().count())
-        .map_err(|_| "The animation edit exceeds the editor's source range".into())
-}
-
-fn editor_patch(source: &str, mut patch: TextPatch) -> Result<DesignAnimationSourcePatch, String> {
-    let bytes = source.as_bytes();
-    let splits_line_ending =
-        |offset: usize| offset > 0 && bytes.get(offset - 1..offset + 1) == Some(b"\r\n");
-    // Editors represent CRLF as one line break and cannot address its interior.
-    if splits_line_ending(patch.span.start) {
-        patch.span.start -= 1;
-        patch.replacement.insert(0, '\r');
-    }
-    if splits_line_ending(patch.span.end) {
-        patch.span.end += 1;
-        patch.replacement.push('\n');
-    }
-    Ok(DesignAnimationSourcePatch {
-        start: utf16_offset(source, patch.span.start)?,
-        end: utf16_offset(source, patch.span.end)?,
-        expected: source[patch.span.start..patch.span.end].to_owned(),
-        replacement: patch.replacement,
-    })
 }

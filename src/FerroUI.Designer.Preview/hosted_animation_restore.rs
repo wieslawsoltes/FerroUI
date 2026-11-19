@@ -1,5 +1,5 @@
 use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms};
-use ferroui_designer_core::{Document, NodeId, SourceAnchor, SourceSpan};
+use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -39,7 +39,8 @@ pub(crate) struct SourceScope {
     pub(crate) uri: String,
     pub(crate) assembly: String,
     pub(crate) project_path: String,
-    pub(crate) invocation: Option<SourceSpan>,
+    // Edits to literals can change the length of this invocation during reload.
+    pub(crate) invocation: Option<usize>,
 }
 
 struct Clip {

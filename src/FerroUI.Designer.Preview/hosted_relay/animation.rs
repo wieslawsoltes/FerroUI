@@ -138,12 +138,13 @@ impl Relay {
         draft: hosted_animation::KeyframeDraft,
     ) -> Result<serde_json::Value, String> {
         let connection = self.animation_connection(draft.revision, draft.sequence)?;
+        let authored_patch = self.authored_rsx.as_ref().map(|source| source.hosted_patch(&draft)).transpose()?;
         let request = self.next_animation_request()?;
         {
             let mut state = self.events.0.lock().unwrap();
             if !state.authorable.contains(&draft.program) {
                 return Err(
-                    "Choose an editable XAML animation in the application preview".into(),
+                    "Choose an editable animation in the current application preview".into(),
                 );
             }
             state.animation_request = Some(request);
@@ -171,10 +172,13 @@ impl Relay {
             })
             .unwrap();
         state.animation_request = None;
-        let result = state
+        let mut result = state
             .keyframe_result
             .take()
             .ok_or("The application did not return an animation edit plan")?;
+        if let Some(patch) = authored_patch {
+            result.patch = patch;
+        }
         hosted_animation::keyframe(result)
     }
 

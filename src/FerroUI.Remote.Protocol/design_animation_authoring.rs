@@ -106,6 +106,46 @@ pub struct DesignAnimationSourcePatch {
     pub replacement: String,
 }
 
+impl DesignAnimationSourcePatch {
+    /// Convert a checked byte edit to the editor's UTF-16 coordinate space.
+    pub fn from_utf8(source: &str, span: std::ops::Range<usize>, mut replacement: String) -> Result<Self, String> {
+        let (mut start, mut end) = (span.start, span.end);
+        if source.get(start..end).is_none() {
+            return Err("The animation edit has an invalid source range".into());
+        }
+        let splits_line_ending = |offset: usize| {
+            offset > 0 && source.as_bytes().get(offset - 1..offset + 1) == Some(b"\r\n")
+        };
+        // Editors treat CRLF as one line break. Keep the complete line ending in the patch.
+        if splits_line_ending(start) {
+            start -= 1;
+            replacement.insert(0, '\r');
+        }
+        if splits_line_ending(end) {
+            end += 1;
+            replacement.push('\n');
+        }
+        let offset = |byte| i32::try_from(source[..byte].encode_utf16().count())
+            .map_err(|_| "The animation edit exceeds the editor's source range".to_owned());
+        Ok(Self { start: offset(start)?, end: offset(end)?, expected: source[start..end].into(), replacement })
+    }
+}
+
+#[cfg(test)]
+mod patch_tests {
+    use super::DesignAnimationSourcePatch;
+
+    #[test]
+    fn checked_patch_uses_utf16_and_keeps_crlf_boundaries() {
+        let source = "🧪\r\nview";
+        let patch = DesignAnimationSourcePatch::from_utf8(source, 5..5, "draft".into()).unwrap();
+        assert_eq!((patch.start, patch.end), (2, 4));
+        assert_eq!(patch.expected, "\r\n");
+        assert_eq!(patch.replacement, "\rdraft\n");
+        assert!(DesignAnimationSourcePatch::from_utf8(source, 1..2, String::new()).is_err());
+    }
+}
+
 bson_class!(DesignAnimationSourcePatch as "DesignAnimationSourcePatch" {
     "Start" => start: i32,
     "End" => end: i32,

@@ -1,11 +1,11 @@
+use super::keyframe::{keyframe, record, MappedKey};
 use super::{
-    AnimationStyle, FloatSource, KeySource, Property, RsxAnimation, RsxAnimationIssue, TargetType,
-    ValueShape, TRACK_TARGET,
+    AnimationStyle, FloatSource, RsxAnimation, RsxAnimationIssue, TargetType, TRACK_TARGET,
 };
 use crate::{tree::escape_xml, RsxCatalog};
-use ferroui_designer_animation::{native_key_time, Easing, FillMode, Repeat, Timeline};
+use ferroui_designer_animation::{Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
-use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, Pat, UnOp};
+use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, UnOp};
 
 pub(super) fn style(
     expr: &Expr,
@@ -55,7 +55,7 @@ fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
-                for (key, owner) in keyframe(method, duration, catalog)? {
+                for MappedKey { source: key, owner } in keyframe(method, duration, catalog)? {
                     if let Some(owner) = owner {
                         if target_type.as_ref().is_some_and(|target| *target != owner) {
                             return None;
@@ -88,31 +88,6 @@ fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     })
 }
 
-fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
-    if timeline
-        .track(TRACK_TARGET, &key.property)
-        .is_some_and(|track| track.keyframes.iter().any(|prior| prior.time == key.time))
-    {
-        return None;
-    }
-    timeline
-        .record(
-            TRACK_TARGET,
-            &key.property,
-            key.time,
-            key.value.value.clone(),
-        )
-        .ok()?;
-    if let Some(points) = key.spline {
-        let [x1, y1, x2, y2] = points.map(|point| point.value);
-        timeline
-            .track_mut(TRACK_TARGET, &key.property)?
-            .set_easing(key.time, Easing::CubicBezier { x1, y1, x2, y2 })
-            .ok()?;
-    }
-    Some(())
-}
-
 impl TargetType {
     fn annotate(&self, xaml: &mut String) {
         let namespace = self.namespace.as_ref().map_or_else(String::new, |uri| {
@@ -126,90 +101,6 @@ impl TargetType {
         xaml.insert_str("<Animation".len(), &format!(
             " xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"{namespace} x:SetterTargetType=\"{prefix}{}\"", self.name));
     }
-}
-
-fn keyframe(
-    method: &ExprMethodCall,
-    duration: f64,
-    catalog: &RsxCatalog,
-) -> Option<Vec<(KeySource, Option<TargetType>)>> {
-    if method.args.len() != 2 {
-        return None;
-    }
-    let cue = float(&method.args[0])?;
-    if !(0.0..=1.0).contains(&cue.value) {
-        return None;
-    }
-    let Expr::Closure(closure) = &method.args[1] else {
-        return None;
-    };
-    if closure.inputs.len() != 1 {
-        return None;
-    }
-    let Pat::Ident(frame) = closure.inputs.first()? else {
-        return None;
-    };
-    let Expr::MethodCall(outer) = closure.body.as_ref() else {
-        return None;
-    };
-    let (setter, spline) = if outer.method == "key_spline" {
-        let Expr::MethodCall(setter) = outer.receiver.as_ref() else {
-            return None;
-        };
-        if outer.turbofish.is_some() || outer.args.len() != 4 {
-            return None;
-        }
-        let points = [
-            float(&outer.args[0])?,
-            float(&outer.args[1])?,
-            float(&outer.args[2])?,
-            float(&outer.args[3])?,
-        ];
-        (setter, Some(points))
-    } else {
-        (outer, None)
-    };
-    if frame.subpat.is_some() || frame.by_ref.is_some() {
-        return None;
-    }
-    let time = native_key_time(cue.value * duration).ok()?;
-    let end = span(closure.body.as_ref()).end;
-    let mut keys = Vec::new();
-    let mut current = setter;
-    loop {
-        if current.method != "set" || current.turbofish.is_some() || current.args.len() != 2 {
-            return None;
-        }
-        let property = property(&current.args[0], catalog)?;
-        let value = property.shape.read(&current.args[1])?;
-        keys.push((
-            KeySource {
-                property: property.name,
-                time,
-                cue,
-                value,
-                spline,
-                shared: false,
-                end,
-            },
-            property.owner,
-        ));
-        match current.receiver.as_ref() {
-            Expr::Path(receiver)
-                if receiver.qself.is_none() && receiver.path.is_ident(&frame.ident) =>
-            {
-                break
-            }
-            Expr::MethodCall(previous) => current = previous,
-            _ => return None,
-        }
-    }
-    let shared = keys.len() > 1;
-    for (key, _) in &mut keys {
-        key.shared = shared;
-    }
-    keys.reverse();
-    Some(keys)
 }
 
 fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
@@ -251,36 +142,6 @@ fn fill_mode(expr: &Expr) -> Option<FillMode> {
         "ferroui_base::animation::FillMode::Both" => Some(FillMode::Both),
         _ => None,
     }
-}
-
-fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
-    let Expr::Call(call) = expr else { return None };
-    if !call.args.is_empty() {
-        return None;
-    }
-    let path = path(&call.func)?;
-    let (name, shape) = match path.as_str() {
-        "ferroui_base::Visual::opacity_property" => ("Opacity", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::width_property" => ("Width", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::height_property" => ("Height", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::min_width_property" => ("MinWidth", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::min_height_property" => {
-            ("MinHeight", ValueShape::NUMBER)
-        }
-        "ferroui_base::layout::Layoutable::max_width_property" => ("MaxWidth", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::max_height_property" => {
-            ("MaxHeight", ValueShape::NUMBER)
-        }
-        "ferroui_controls::Border::corner_radius_property" => {
-            ("CornerRadius", ValueShape::CORNER_RADIUS)
-        }
-        _ => return catalog.animation_property(&path).cloned(),
-    };
-    Some(Property {
-        name: name.into(),
-        shape,
-        owner: None,
-    })
 }
 
 pub(super) fn path(expr: &Expr) -> Option<String> {
@@ -369,7 +230,7 @@ pub(super) fn float(expr: &Expr) -> Option<FloatSource> {
     })
 }
 
-fn span(tokens: &impl Spanned) -> SourceSpan {
+pub(super) fn span(tokens: &impl Spanned) -> SourceSpan {
     let range = tokens.span().byte_range();
     SourceSpan::new(range.start, range.end)
 }

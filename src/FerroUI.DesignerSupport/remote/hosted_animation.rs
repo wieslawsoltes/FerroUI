@@ -206,9 +206,8 @@ impl HostedAnimations {
             .collect();
         let curves = CURVES.get();
         let authoring = AUTHORING.get();
-        let project_codecs = crate::animation_codecs::with_codecs(ferroui_designer_animation::AnimationCodecRegistry::has_project_codecs);
-        let keyframes = (curves || (authoring && project_codecs)).then(|| {
-            HostedKeyframes::mount(source.document, source.programs, &mut catalog.programs, authoring, curves)
+        let keyframes = (curves || authoring).then(|| {
+            HostedKeyframes::mount(source.document, source.programs, &index, &mut catalog.programs, authoring, curves)
         });
         Self {
             revision,
