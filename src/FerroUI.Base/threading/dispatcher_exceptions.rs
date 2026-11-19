@@ -1,3 +1,4 @@
+use std::cell::{Cell, RefCell};
 use std::error::Error;
 use std::rc::Rc;
 
@@ -87,6 +88,55 @@ impl Dispatcher {
     /// with `panic = "abort"` the process ends with a panic that carries its message.
     pub fn raise_unhandled_exception(&self, error: impl Into<Box<dyn Error + Send + Sync>>) {
         self.raise_unhandled_error(error.into())
+    }
+
+    /// Runs `work` and returns the message of the first exception of application code
+    /// that reaches the unhandled-exception events of this dispatcher while it runs and
+    /// that no other handler handles: an error raised with
+    /// [`raise_unhandled_exception`](Self::raise_unhandled_exception) (by a
+    /// [`CallbackResult`](super::CallbackResult) callback, a markup delegate, an
+    /// animation an animator rejects) or, in a build that unwinds, the panic of a job.
+    /// The exception is marked handled.
+    ///
+    /// This is how a development tool (the Designer, the previewer, hot reload) fails a
+    /// step with the error of the code it previews, without catching a panic (#567).
+    /// Only the innermost capture of the thread records an exception.
+    ///
+    /// # Panics
+    /// Panics when called from a thread other than the dispatcher thread.
+    pub fn capture_unhandled_exceptions<T>(&self, work: impl FnOnce() -> T) -> Result<T, String> {
+        crate::ferro_thread_local! {
+            static CAPTURE_DEPTH: Cell<usize> = const { Cell::new(0) };
+        }
+        struct Capture(Rc<dyn IDisposable>);
+        impl Drop for Capture {
+            fn drop(&mut self) {
+                CAPTURE_DEPTH.set(CAPTURE_DEPTH.get() - 1);
+                self.0.dispose();
+            }
+        }
+
+        self.verify_access();
+        let depth = CAPTURE_DEPTH.get() + 1;
+        CAPTURE_DEPTH.set(depth);
+        let first = Rc::new(RefCell::new(None::<String>));
+        let seen = first.clone();
+        let capture = Capture(self.unhandled_exception(move |args| {
+            if args.handled() || CAPTURE_DEPTH.get() != depth {
+                return;
+            }
+            let mut first = seen.borrow_mut();
+            if first.is_none() {
+                *first = Some(args.exception_message().unwrap_or("an error of application code").to_owned());
+            }
+            args.set_handled(true);
+        }));
+        let result = work();
+        drop(capture);
+        match first.take() {
+            Some(message) => Err(message),
+            None => Ok(result),
+        }
     }
 
     #[inline(never)]

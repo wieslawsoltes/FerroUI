@@ -493,3 +493,22 @@ fn an_error_raised_off_the_dispatcher_thread_is_posted_to_it() {
 
     assert_eq!(received.take().as_deref(), Some("raised on a worker"));
 }
+
+#[test]
+fn a_capture_returns_the_first_error_raised_while_it_runs_and_only_the_innermost_records_it() {
+    let t = DispatcherTests::new();
+    let outer = t.ui_thread.capture_unhandled_exceptions(|| {
+        let inner = t.ui_thread.capture_unhandled_exceptions(|| {
+            t.ui_thread.raise_unhandled_exception("first");
+            t.ui_thread.raise_unhandled_exception("second");
+            7
+        });
+        assert_eq!(inner, Err("first".to_owned()));
+        5
+    });
+    assert_eq!(outer, Ok(5));
+
+    // An exception another handler handled is not the error of the capture.
+    t.ui_thread.unhandled_exception(|args| args.set_handled(true));
+    assert_eq!(t.ui_thread.capture_unhandled_exceptions(|| t.ui_thread.raise_unhandled_exception("handled")), Ok(()));
+}
