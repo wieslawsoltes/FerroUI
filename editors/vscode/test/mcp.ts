@@ -197,6 +197,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyDesignTokens({ invoke, content });
         await verifyBrushMcp({ invoke, content });
         await verifyFocusOverlay({ invoke, content });
+        // Make the returning canvas present a fresh bitmap before it can acknowledge zoom.
+        content(await invoke('designer_view', { session, width: 710, height: 410 }));
+        const resized = content<{ width: number; height: number }>(await invoke('designer_preview_image', { session }));
+        assert.deepEqual([resized.width, resized.height], [710, 410]);
         const canvas = content<{ tab: string; scale: number; panTool: boolean }>(await invoke('designer_canvas', { session, tab: 'preview', scale: 2, pan_tool: true }));
         assert.deepEqual([canvas.tab, canvas.scale, canvas.panTool], ['preview', 2, true]);
         assert.equal(content<{ tab: string }>(await invoke('designer_canvas', { session, tab: 'counterpart', pan_tool: false })).tab, 'counterpart');

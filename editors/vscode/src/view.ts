@@ -52,7 +52,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
-                <img id="frame" alt="Rendered FerroUI view" draggable="false">
+                <canvas id="frame" role="img" aria-label="Rendered FerroUI view"></canvas>
                 <div id="hover-box" class="control-outline hover-outline" hidden></div>
                 <div id="selection-box" class="control-outline" hidden><div id="resize-handles" role="group" aria-label="Resize handles" hidden></div></div>
                 <div id="selection-group" aria-hidden="true"></div>

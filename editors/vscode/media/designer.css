@@ -75,8 +75,8 @@ body {
     min-block-size: 100%;
     padding: 24px;
 }
-.canvas[data-pan=ready], .canvas[data-pan=ready] img { cursor: grab; }
-.canvas[data-pan=dragging], .canvas[data-pan=dragging] img { cursor: grabbing; }
+.canvas[data-pan=ready], .canvas[data-pan=ready] #frame { cursor: grab; }
+.canvas[data-pan=dragging], .canvas[data-pan=dragging] #frame { cursor: grabbing; }
 .placeholder { display: grid; justify-items: center; gap: 8px; color: var(--muted); }
 .placeholder .codicon { font-size: 20px; }
 .artboard {
@@ -86,11 +86,11 @@ body {
     box-shadow: 0 0 0 1px var(--line), 0 8px 28px color-mix(in srgb, #000 26%, transparent);
 }
 .artboard[data-theme=dark] { background: #202020; }
-.artboard img { display: block; inline-size: 100%; block-size: 100%; cursor: crosshair; }
-.canvas[data-mode=interact]:not([data-pan=ready], [data-pan=dragging]) .artboard img { cursor: default; }
-.artboard.placing img { cursor: grabbing; }
-.artboard.invalid-placement img { cursor: no-drop !important; }
-.artboard.stale img { cursor: default; }
+#frame { display: block; inline-size: 100%; block-size: 100%; cursor: crosshair; }
+.canvas[data-mode=interact]:not([data-pan=ready], [data-pan=dragging]) #frame { cursor: default; }
+.artboard.placing #frame { cursor: grabbing; }
+.artboard.invalid-placement #frame { cursor: no-drop !important; }
+.artboard.stale #frame { cursor: default; }
 .control-outline {
     position: absolute;
     border: 1.5px solid var(--focus);

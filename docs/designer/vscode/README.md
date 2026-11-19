@@ -26,6 +26,8 @@ For a package built from this checkout, see the [extension build and packaging i
 
 The canvas toolbar and its **More designer actions** menu open the workbench views. You can also run their **FerroUI** commands from the Command Palette. Drag a view’s title or use **View: Move View** to place Toolbox, Outline, Properties, Events, Resources, and Assets where you use them. **FerroUI Timeline** opens in the VS Code Panel, below the editor groups in the default workbench layout. Drag the Panel divider to size it or use **Maximize Panel**. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)
 
+When a design changes, the last accepted frame stays visible until the replacement is ready. The canvas can decode a replacement while the VS Code window is covered, so zoom and pan use the refreshed artboard when you return to its tab.
+
 ## If the designer does not open
 
 | Symptom | What to check |

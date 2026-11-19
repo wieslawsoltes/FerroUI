@@ -257,8 +257,11 @@ function stageSnapshot(message: SnapshotMessage): void {
     }
 }
 
-function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): void {
-    if (staged !== message) return;
+function presentSnapshot(message: SnapshotMessage, bitmap?: ImageBitmap | null): void {
+    if (staged !== message) {
+        bitmap?.close();
+        return;
+    }
     staged = undefined;
     if (sourceKey !== message.sourceKey) editError = undefined;
     sourceKey = message.sourceKey;
@@ -268,15 +271,16 @@ function presentSnapshot(message: SnapshotMessage, frame?: HTMLImageElement): vo
     selection = message.selection ?? [];
     runtime = message.runtime;
     current = true;
-    if (frame) artboard.present(snapshot, message.viewport, frame);
-    drag.setFrame(frame ? message.frame : undefined);
+    const hasImage = bitmap !== undefined;
+    if (hasImage) artboard.present(snapshot, message.viewport, bitmap);
+    drag.setFrame(hasImage ? message.frame : undefined);
     size.show(message.viewport);
     counterpart.show(snapshot.counterpart, message.sourceKey);
     blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));
     blocks.hidden = snapshot.blocks.length <= 1;
     const active = snapshot.activeBlock?.start;
     blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
-    const error = snapshot.renderError ?? (snapshot.image && !frame ? 'The preview image could not be decoded.' : undefined);
+    const error = snapshot.renderError ?? (snapshot.image && !hasImage ? 'The preview image could not be decoded.' : undefined);
     if (error) showPreviewError(error);
     else showCurrentStatus();
     preview.setAttribute('aria-busy', 'false');
