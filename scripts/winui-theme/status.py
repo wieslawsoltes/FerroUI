@@ -55,8 +55,17 @@ CONTROLS = os.path.join(w.HERE, "controls.json")
 FLUENT_CONTROLS = os.path.join(REPOSITORY, "src/FerroUI.Themes.Fluent/Controls")
 
 # Keys the port defines in code, not in a document: the accent colour and its shades
-# (`Accents/system_accent_colors.rs`, which WinUI gets from the system as well).
+# (`Accents/system_accent_colors.rs`) and the system colours (`Accents/system_colors.rs`), which
+# WinUI gets from the system as well.
 PROVIDED_KEYS = {
+    "SystemColorWindowColor",
+    "SystemColorWindowTextColor",
+    "SystemColorButtonFaceColor",
+    "SystemColorButtonTextColor",
+    "SystemColorHighlightColor",
+    "SystemColorHighlightTextColor",
+    "SystemColorHotlightColor",
+    "SystemColorGrayTextColor",
     "SystemAccentColor",
     "SystemAccentColorDark1",
     "SystemAccentColorDark2",

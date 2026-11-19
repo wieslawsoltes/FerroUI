@@ -53,6 +53,22 @@
     {
       "path": "WinUIGallery/Samples/AppBarToggleButton/AppBarToggleButtonPage.xaml.cs",
       "sha256": "069e4500270d204e531908f7b8e37c5fd803a135bb7bc1e1cfcc7ea5ca003994"
+    },
+    {
+      "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml",
+      "sha256": "4008ad501812b8a1aaffb9e0da4a12e3514d948834ec37cf2726e27250b39d31"
+    },
+    {
+      "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml.cs",
+      "sha256": "c2fdead0696d5d519cfa3d158ff94ce9258fc9d2ca30c623f150f6e96170987c"
+    },
+    {
+      "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml",
+      "sha256": "d14deeb8e85163f31f212e7fa6a507193ada72b76f93316f5a30a6692fa30e40"
+    },
+    {
+      "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml.cs",
+      "sha256": "030a5c05e20674754b64088e6d42124e77f66c8e4d2801be13e7eef3efbe05e8"
     }
   ],
   "assembly": "WinUIGallery",
@@ -1358,6 +1374,30 @@
       ]
     },
     {
+      "source": "WinUIGallery/Assets/Design/Geometry.dark.png",
+      "path": "samples/WinUIGallery/Assets/Design/Geometry.dark.png",
+      "sha256": "b98df35c3c944819b36af8f0b4f738642ce6bc797aa0b940a96d23086c3f40a7",
+      "size_bytes": 52268,
+      "registered_paths": [
+        "Assets/Design/Geometry.dark.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Geometry.dark.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/Design/Geometry.light.png",
+      "path": "samples/WinUIGallery/Assets/Design/Geometry.light.png",
+      "sha256": "a018e118bc487ba8c0867118b518b6bfbb9e5e5c6f684442271d3825ab12cef5",
+      "size_bytes": 55222,
+      "registered_paths": [
+        "Assets/Design/Geometry.light.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/Design/Geometry.light.png"
+      ]
+    },
+    {
       "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
       "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
       "sha256": "e95f378499f06d2ec43b6633b8f81971961d15700f26566096d9b446863fc188",
@@ -1571,6 +1611,18 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/SampleMedia/cliff.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/folder.png",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/folder.png",
+      "sha256": "e79df2908d7027c58f49724b0c4a0a4727549b3621dcd30eaf43616b19449e3e",
+      "size_bytes": 17187,
+      "registered_paths": [
+        "Assets/SampleMedia/folder.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/folder.png"
       ]
     },
     {
