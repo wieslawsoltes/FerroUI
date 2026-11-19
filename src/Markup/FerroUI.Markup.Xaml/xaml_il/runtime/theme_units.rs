@@ -169,6 +169,31 @@ pub fn register_theme_parts_if_absent(class: &'static str, parts: ThemeParts) {
     }
 }
 
+/// [`register_theme_parts`] unless the parts registered for the class already have as many units
+/// (#846): what the generated `register()` of a crate calls. A library that constructs a theme
+/// registers the table of its own documents, and the application the table it computed with the
+/// references of every dependency; whichever crate registers first, the wider table stays.
+pub fn register_wider_theme_parts(class: &'static str, parts: ThemeParts) {
+    let mut registered = REGISTERED.write().unwrap_or_else(|error| error.into_inner());
+    match registered.iter_mut().find(|(known, _)| *known == class) {
+        Some(entry) if entry.1.len() >= parts.len() => {}
+        Some(entry) => entry.1 = parts,
+        None => registered.push((class, parts)),
+    }
+}
+
+/// The parts a compiled construction of the theme `class` applies (#846): the parts registered for
+/// the class when they have more units than `own`, the table of the crate that writes the
+/// construction, else `own`. A library compiled with `<WinUITheme />` thus constructs the theme with
+/// the table of the application that uses it (which roots what the application's documents and
+/// sources name), and with its own table when it is used alone.
+pub fn wider_theme_parts(class: &str, own: ThemeParts) -> ThemeParts {
+    match registered_theme_parts(class) {
+        Some(registered) if registered.len() > own.len() => registered,
+        _ => own,
+    }
+}
+
 /// The parts registered for the theme `class`, if any.
 pub fn registered_theme_parts(class: &str) -> Option<ThemeParts> {
     let registered = REGISTERED.read().unwrap_or_else(|error| error.into_inner());

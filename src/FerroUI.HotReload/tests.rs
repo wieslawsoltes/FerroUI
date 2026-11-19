@@ -3544,3 +3544,35 @@ fn a_document_reached_by_two_spellings_is_one_document() {
     let base = document_url("file:///C:/App/Views/Main.xaml").unwrap();
     assert_eq!(include_key(&base, "/Styles/Base.xaml").as_deref(), Some("file:///C:/Styles/Base.xaml"));
 }
+
+/// Not from upstream (#567): an error raised in a step of a reload (a resource lookup of a
+/// candidate, which has no error channel) is the error of the step, without unwinding: the step
+/// goes on with the fallback of the lookup, the first error raised is kept, and the scopes of
+/// nested steps are their own. Outside a step the error is raised as a panic, as before.
+#[test]
+fn an_error_raised_in_a_reload_step_is_its_error_without_unwinding() {
+    let went_on = Cell::new(false);
+    let result: Result<u32, ReloadError> = catch_reload(|| {
+        raise_reload_error(ReloadError::RestartRequired("first".into()));
+        raise_reload_error(ReloadError::Failed("second".into()));
+        // A nested step keeps its own error and leaves the outer one as it is.
+        let nested: Result<(), ReloadError> = catch_reload(|| {
+            raise_reload_error(ReloadError::Failed("nested".into()));
+            Ok(())
+        });
+        assert_eq!(nested, Err(ReloadError::Failed("nested".into())));
+        went_on.set(true);
+        Ok(1)
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::RestartRequired("first".into())));
+    // A step whose action fails without a raised error gives that error; one that raises
+    // nothing gives its value.
+    let own = ReloadError::Failed("own".into());
+    assert_eq!(catch_reload(|| Err::<(), _>(own.clone())), Err(own));
+    assert_eq!(catch_reload(|| Ok(2)), Ok(2));
+
+    let outside = std::panic::catch_unwind(|| raise_reload_error(ReloadError::Failed("outside".into())));
+    let payload = outside.expect_err("raised outside a step");
+    assert_eq!(payload.downcast_ref::<ReloadError>(), Some(&ReloadError::Failed("outside".into())));
+}

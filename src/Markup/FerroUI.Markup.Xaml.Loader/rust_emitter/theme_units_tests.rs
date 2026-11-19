@@ -28,7 +28,7 @@ fn local_types() -> HashMap<String, String> {
 }
 
 fn extract(lines: Vec<String>, units: &UnitEmission) -> (Vec<String>, Vec<String>) {
-    extract_runs("build_t_xaml", "t.xaml", lines, &local_types(), DICTIONARY, units)
+    extract_runs("build_t_xaml", "t.xaml", lines, &local_types(), DICTIONARY, units, None)
 }
 
 #[test]
@@ -37,6 +37,72 @@ fn markers_are_recognised() {
     assert_eq!(unit_marker(&format!("    {END_MARKER}")), Some(None));
     assert_eq!(unit_marker("    // t.xaml(1,2) Content (resource)"), None);
     assert_eq!(unit_marker("    //\u{1}unit x"), None);
+}
+
+#[test]
+fn a_complete_run_encodes_rows_then_deferred_keys_with_their_original_positions() {
+    use ferroui_markup::theme_run_opcodes as op;
+    let image = super::super::BytecodeImage::packed();
+    let button = begin(1);
+    let lines = body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        &button,
+        "ROWS_0.add_thickness_resources(&resource_dictionary_0)?;",
+        r#"rt::add_deferred_resource(&resource_dictionary_0, "Q\".add_\\x", ::ferroui_base::data::core::ValueType::object(), &context, factory, 12, 49)?;"#,
+        "let deferred = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, factory, 2, 3)?;",
+        "rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 6, 7)?;",
+        END_MARKER,
+    ]);
+    let (_, native) = extract(lines.clone(), &units());
+    assert!(native[0].contains("ROWS_0.add_thickness_resources("));
+    let rows = HashMap::from([("ROWS_0".to_owned(), super::super::theme_rows::RowKind::Thickness)]);
+    let config = Schedule { image: &image, document: "DOCUMENT", rows: &rows };
+    let (_, runs) = extract_runs("build_t", "t.xaml", lines, &local_types(), DICTIONARY, &units(), Some(config));
+    assert_eq!(runs.len(), 1);
+    assert_eq!(runs[0].matches("rt::apply_theme_run(").count(), 1);
+    assert!(runs[0].contains(r#"ThemeRunImport::Text("Q\".add_\\x")"#));
+    assert_eq!(runs[0].matches("ThemeRunImport::Factory(factory)").count(), 1);
+    assert_eq!(image.artifact("t.fxc").unwrap().0,
+        [op::VERSION, op::THICKNESS, 0, op::DEFER_TEXT, 1, 2, 24, 98, op::DEFER_TYPE, 3, 2, 4, 6, 12, 14]);
+}
+
+#[test]
+fn a_changed_call_keeps_the_entire_native_run_and_emits_no_partial_program() {
+    let image = super::super::BytecodeImage::packed();
+    let button = begin(1);
+    let lines = body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        &button,
+        "ROWS_0.add_double_resources(&resource_dictionary_0)?;",
+        "ROWS_1.add_double_resources(&resource_dictionary_0, &context)?;",
+        END_MARKER,
+    ]);
+    let native = extract(lines.clone(), &units());
+    let rows = HashMap::from([("ROWS_0".to_owned(), super::super::theme_rows::RowKind::Double)]);
+    let config = Schedule { image: &image, document: "DOCUMENT", rows: &rows };
+    for changed in ["UNRESOLVED.add_double_resources(&resource_dictionary_0)?;",
+                    "ROWS_0.add_color_resources(&resource_dictionary_0)?;",
+                    "ROWS_0.add_double_resources(&resource_dictionary_0, &context)?;"] {
+        assert!(bytecode::compile(&body(&[changed]), "resource_dictionary_0", &config).is_none());
+    }
+    let compiled = extract_runs("build_t_xaml", "t.xaml", lines, &local_types(), DICTIONARY, &units(), Some(config));
+    assert_eq!(compiled, native);
+    assert!(image.artifact("t.fxc").is_none());
+}
+
+#[test]
+fn grid_length_operands_keep_scientific_literals_and_reject_an_unresolved_value() {
+    use ferroui_markup::{compiled_operands as wire, theme_run_opcodes as op};
+    let image = super::super::BytecodeImage::packed();
+    let addition = |amount| format!("rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(dict.clone(), 4, 9)?, rt::string_object(\"Width\"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2({amount}, ::ferroui_controls::GridUnitType::Pixel))), 4, 9)?;");
+    let config = Schedule { image: &image, document: "DOC", rows: &HashMap::new() };
+    assert!(bytecode::compile(&[addition("amount")], "dict", &config).is_none());
+    assert!(bytecode::compile(&[addition("-1.25e-9_f64")], "dict", &config).is_some());
+    let (bytes, _) = image.artifact("t.fxc").unwrap();
+    assert_eq!(&bytes[..6], &[op::VERSION, op::FROM_DOUBLE, 0, 8, 18, 1]);
+    let mut operand = &bytes[6..];
+    assert_eq!(wire::read_number(&mut operand).unwrap(), -1.25e-9);
+    assert!(operand.is_empty());
 }
 
 #[test]
