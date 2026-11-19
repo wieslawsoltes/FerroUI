@@ -1,4 +1,5 @@
 use crate::protocol::{Bounds, Image, Render};
+use crate::rsx_animation::AuthoredRsxFrame;
 use crate::rsx_placement::PlacementPolicy;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
@@ -30,6 +31,7 @@ pub(crate) struct Stage {
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) placement_policy: Option<PlacementPolicy>,
+    pub(crate) authored_rsx: Option<AuthoredRsxFrame>,
     pub(crate) project_assets: Vec<ferroui_designer::DesignerAsset>,
     pub(crate) sources: SourceSnapshot,
     _window: PreviewWindow,
@@ -142,6 +144,7 @@ impl Renderer {
             width: input.width,
             height: input.height,
             placement_policy: None,
+            authored_rsx: None,
             project_assets: Vec::new(),
             sources,
             _window: window,

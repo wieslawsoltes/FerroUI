@@ -150,7 +150,9 @@ export class DesignerPanel implements vscode.Disposable {
     get timelineCatalogEpoch(): number { return this.animationCatalogEpoch; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
-    get supportsTimelineKeyframeDrafts(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineKeyframeDrafts); }
+    get supportsTimelineKeyframeDrafts(): boolean {
+        return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
+    }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
@@ -366,9 +368,12 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioTools() {
-        const { tools, xamlEdits, presentations } = await (await this.getClient()).studioTools();
-        return { tools, presentations: presentations ?? [], edits: this.language === 'xaml' ? xamlEdits : xamlEdits.filter(tool =>
-            mappedStudioEdits.has((tool as { name: string }).name)) };
+        const { tools, xamlEdits, rsxEdits, presentations } = await (await this.getClient()).studioTools();
+        const edits = this.language === 'xaml' ? xamlEdits : [
+            ...xamlEdits.filter(tool => mappedStudioEdits.has((tool as { name: string }).name)),
+            ...(this.supportsTimelineKeyframeDrafts ? rsxEdits ?? [] : []),
+        ];
+        return { tools, presentations: presentations ?? [], edits };
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -382,8 +387,10 @@ export class DesignerPanel implements vscode.Disposable {
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
         validate?: () => void): Promise<void> {
-        if (this.language === 'rust' && !mappedStudioEdits.has(name)) {
-            throw new Error('This Studio operation requires XAML or a mapped RSX layout operation.');
+        const rustKeyframe = name === 'designer_program' && (args as { action?: string }).action === 'upsert_keyframe'
+            && this.supportsTimelineKeyframeDrafts;
+        if (this.language === 'rust' && !rustKeyframe && !mappedStudioEdits.has(name)) {
+            throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
         const frame = this.frame;

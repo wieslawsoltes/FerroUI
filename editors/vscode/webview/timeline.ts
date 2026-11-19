@@ -272,7 +272,7 @@ function showTracks(): void {
                     selection.pick(location, event.shiftKey ? renderedKeys.map(item => item.key) : [], event.shiftKey, additive);
                     showKeySelection();
                     if (event.shiftKey || additive) return;
-                    if (model.writable && model.canEditKeyframes && model.documentVersion !== undefined) {
+                    if (model.canEditKeyframes && (model.writable || selected.sourceRange) && model.documentVersion !== undefined) {
                         keyframeEditor.open(model.frame, model.documentVersion, selected.id, track.target, track.property, key,
                             target ?? track.property, timeline.duration, true);
                     } else if (model.writable) vscode.postMessage({ type: 'keyframe', frame: model.frame, program: selected.id, track: index, time: key.time });

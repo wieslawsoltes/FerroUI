@@ -471,6 +471,39 @@ App Preview uses the same authored program IDs and source paths as Studio when a
 replaces its native tree. The relay resolves the selected clip and assigned controls, then samples
 the application at the retained elapsed time before it sends the replacement image to VS Code.
 
+### RSX style animations
+
+Attach an `AnimationBuilder` to an inline Rust style. The view mounts the same native
+`Animation`, `KeyFrame`, and `KeySpline` objects that FerroUI uses for XAML.
+
+```rust,ignore
+rsx! {
+    StackPanel {
+        styles: [
+            ferroui_view::style("Border#Card").animation(
+                ferroui_view::animation(ferroui_view::ms(800))
+                    .key_frame(0.0, |key| key.set(ferroui_base::Visual::opacity_property(), 0.2))
+                    .key_frame(1.0, |key| key.set(ferroui_base::Visual::opacity_property(), 1.0)
+                        .key_spline(0.25, 0.1, 0.75, 1.0))
+            ),
+        ],
+        Border { name: "Card", width: 180.0, height: 80.0, background: "#1660A0" }
+    }
+}
+```
+
+The VS Code designer maps fully qualified FerroUI builders in the active `rsx!` invocation.
+It supports a literal selector and millisecond duration, an optional delay and fill mode,
+and a literal cue and scalar setter per key. Opacity and the `Layoutable` width, height,
+and min/max size properties are mapped. Keep computed values and other style expressions
+in Rust. The preview reports which expressions it omitted.
+
+Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
+native track and the helper patches the original Rust tokens in a single undoable edit.
+Source reveal takes you to the animation declaration in the active invocation. Agents use
+`designer_keyframe_draft` and the `designer_program` action `upsert_keyframe` with the current
+designer revision.
+
 ## Visual states, transitions and behaviors
 
 The **States** panel authors groups, named states, target setters, default/directional transitions,

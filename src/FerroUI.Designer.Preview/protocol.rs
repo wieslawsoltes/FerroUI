@@ -161,6 +161,7 @@ pub(crate) struct Snapshot {
     pub(crate) notices: Vec<String>,
     pub(crate) dependencies: Vec<String>,
     pub(crate) project_assets: Vec<Asset>,
+    pub(crate) mapped_rust_animations: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
 }

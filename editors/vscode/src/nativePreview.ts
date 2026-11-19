@@ -165,7 +165,7 @@ export class NativePreview implements vscode.Disposable {
         return this.send('resources', { ...source, frame, target });
     }
 
-    studioTools(): Promise<{ tools: object[]; xamlEdits: object[]; presentations?: object[] }> { return this.send('studioTools'); }
+    studioTools(): Promise<{ tools: object[]; xamlEdits: object[]; rsxEdits?: object[]; presentations?: object[] }> { return this.send('studioTools'); }
 
     studioQuery(frame: number, name: string, args: object, selection?: number[]): Promise<unknown> {
         return this.send('studioQuery', { frame, name, arguments: args, selection });

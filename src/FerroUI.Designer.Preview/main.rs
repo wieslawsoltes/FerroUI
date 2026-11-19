@@ -18,6 +18,7 @@ mod property_fields;
 mod protocol;
 mod renderer;
 mod resources;
+mod rsx_animation;
 mod rsx_placement;
 mod scenario;
 mod scenario_images;

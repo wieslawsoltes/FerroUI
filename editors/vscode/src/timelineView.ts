@@ -5,7 +5,7 @@ import { errorMessage, type FrameTarget } from './protocol';
 import type { StateTransitionControl, StateTransitionRoute } from './stateTransitionProtocol';
 import { choose, StudioContext } from './studioContext';
 import { chooseKeyframeGroupEdit, keyframeOptions } from './studioKeyframes';
-import { chooseAnimationTargets, showAnimationActions } from './studioPrograms';
+import { chooseAnimationTargets, revealAnimationProgram, showAnimationActions } from './studioPrograms';
 import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, previewClock } from './timelinePrograms';
@@ -180,7 +180,7 @@ export class TimelineView implements vscode.Disposable {
                 if (message.type === 'programTargets' || message.type === 'revealProgram') {
                     if (!program) throw new Error('Choose a current animation program.');
                     if (message.type === 'programTargets') await chooseAnimationTargets(context, program);
-                    else await context.reveal(program.id);
+                    else await revealAnimationProgram(context, program);
                     return;
                 }
                 if (message.type === 'programActions') {

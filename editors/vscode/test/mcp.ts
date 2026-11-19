@@ -22,6 +22,7 @@ import { verifyDesignTokens } from './designTokenMcp';
 import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
 import { verifyResourcePromotion } from './studioResourceMcp';
+import { verifyRsxAnimation } from './rsxAnimationMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -223,6 +224,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyWorkspaceMcp({ invoke, content });
         await verifyProjectMcp({ invoke, content });
         await verifyScenarioMcp({ invoke, content });
+        await verifyRsxAnimation({ invoke, content });
         console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);

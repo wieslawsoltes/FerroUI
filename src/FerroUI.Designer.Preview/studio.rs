@@ -2,6 +2,7 @@ use crate::document::DesignDocument;
 use crate::edits::editor_edits;
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
+use crate::rsx_animation;
 use ferroui_designer::mcp::DesignerMcp;
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
@@ -38,7 +39,10 @@ pub(crate) fn catalog() -> Value {
         .into_iter()
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
-    json!({"tools":tools,"presentations":presentations,"xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
+    let rsx_edits = edits.iter().filter(|tool| tool["name"] == "designer_program").cloned()
+        .filter_map(|tool| action_definition(tool, rsx_animation::keyframe_edit)).collect::<Vec<_>>();
+    json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
+        "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
 }
 
 pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Presentation, String> {
@@ -97,19 +101,31 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
     }
-    provider.call(&query.name, &query.arguments, Permissions::default())
+    if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_keyframe_draft") {
+        rsx.patches(&query.arguments)?;
+    }
+    let mut result = provider.call(&query.name, &query.arguments, Permissions::default())?;
+    if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_programs") {
+        rsx.annotate_programs(&mut result);
+    }
+    Ok(result)
 }
 
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
     let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
+    let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, query.arguments["action"].as_str());
     if design.rsx.is_some()
+        && !rust_keyframe
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
         return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
     }
     let stage = renderer.stage(query.frame)?;
+    if let Some(rsx) = &stage.authored_rsx {
+        rsx.require_source(&design)?;
+    }
     if !source_action(&query.name, query.arguments["action"].as_str()) {
         return Err("Choose a source edit from the Studio authoring catalog".into());
     }
@@ -119,7 +135,8 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         .ok_or("arguments must be an object")?;
     {
         let session = stage.session.borrow();
-        if session.document_uri() != request.document.uri
+        if stage.project != request.document.project
+            || session.document_uri() != request.document.uri
             || session.document().source() != design.xaml.source()
         {
             return Err("The rendered design does not match the current source".into());
@@ -133,6 +150,22 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
+    }
+    if rust_keyframe {
+        let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
+        let patches = rsx.patches(&arguments)?;
+        // Studio checks the native target, timeline and easing. The result is applied
+        // to Rust by the editor without mutating the generated projection.
+        let mut draft = arguments;
+        let object = draft.as_object_mut().expect("validated action");
+        object.remove("action");
+        object.remove("expected_revision");
+        provider.call("designer_keyframe_draft", &draft, Permissions::default())?;
+        let result = editor_edits(&design, patches)?;
+        if !result.edits.is_empty() {
+            renderer.stage.take();
+        }
+        return Ok(result);
     }
     // Retire the frame before touching the native session. VS Code owns the undo
     // transaction and renders a new frame from its buffer even on rejection.

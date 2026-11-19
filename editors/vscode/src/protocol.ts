@@ -134,6 +134,7 @@ export interface Snapshot {
     notices: string[];
     dependencies?: string[];
     projectAssets?: Asset[];
+    mappedRustAnimations?: boolean;
     timelinePose?: TimelinePreviewPose;
 }
 export type NodeOperation =

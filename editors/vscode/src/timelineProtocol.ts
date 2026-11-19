@@ -1,4 +1,4 @@
-import type { FrameTarget } from './protocol';
+import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
 export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
@@ -22,6 +22,7 @@ export interface AuthoredTimeline {
 export interface TimelineProgram {
     id: number;
     source_key?: string | null;
+    sourceRange?: Range;
     name: string;
     owner: number;
     style?: number | null;

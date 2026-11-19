@@ -57,13 +57,14 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     }
     if let Some(stage) = &mut renderer.stage {
         stage.placement_policy = crate::rsx_placement::PlacementPolicy::of(&design);
+        stage.authored_rsx = crate::rsx_animation::AuthoredRsxFrame::capture(&design);
         stage.project_assets = assets;
     }
     let nodes = design
         .xaml
         .ast()
         .nodes_in_source_order()
-        .filter(|node| node.is_element())
+        .filter(|node| node.is_element() && (design.rsx.is_none() || design.rsx_node(node.id).is_some()))
         .map(|node| {
             let (span, name_span) = match design.rsx_node(node.id) {
                 Some((_, rsx)) => (rsx.span, rsx.name),
@@ -106,6 +107,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         notices,
         dependencies,
         project_assets,
+        mapped_rust_animations: !design.rsx_animations.is_empty(),
         timeline_pose,
     })
 }

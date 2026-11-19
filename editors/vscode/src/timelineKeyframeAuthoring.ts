@@ -9,7 +9,7 @@ export async function authorTimelineKeyframe(context: StudioContext, message: Ti
     const { panel } = context;
     const { draft } = message;
     try {
-        if (!context.writable || !panel.supportsTimelineKeyframeDrafts) throw new Error('Open a typed XAML keyframe in the current Timeline.');
+        if (!panel.supportsTimelineKeyframeDrafts) throw new Error('Open a mapped keyframe in the current Timeline.');
         if (!message.apply) return { ...result, preview: await context.read<KeyframeDraftPreview>('designer_keyframe_draft', draft) };
 
         const original = (await programs()).find(program => program.id === draft.program);

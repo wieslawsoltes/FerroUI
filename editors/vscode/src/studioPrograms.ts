@@ -29,6 +29,12 @@ export async function chooseAnimationTargets(context: StudioContext, program: Ti
         targets: targets.length ? targets.map(target => target.id) : null });
 }
 
+export async function revealAnimationProgram(context: StudioContext, program: TimelineProgram): Promise<void> {
+    if (!program.sourceRange) return context.reveal(program.id);
+    context.ensure();
+    await context.panel.revealSource({ session: context.panel.session, token: context.token }, program.sourceRange);
+}
+
 export async function showAnimationActions(context: StudioContext, program: TimelineProgram | undefined): Promise<void> {
     const actions: { label: string; run: () => Promise<void> }[] = [];
     const nodes = context.panel.nodes;
@@ -39,8 +45,8 @@ export async function showAnimationActions(context: StudioContext, program: Time
     }
     if (program) {
         const id = program.id;
-        if (nodes.some(node => node.id === id)) {
-            actions.push({ label: '$(go-to-file) Reveal animation in source', run: () => context.reveal(id) });
+        if (program.sourceRange || nodes.some(node => node.id === id)) {
+            actions.push({ label: '$(go-to-file) Reveal animation in source', run: () => revealAnimationProgram(context, program) });
         }
         actions.push({ label: '$(target) Choose preview targets…', run: () => chooseAnimationTargets(context, program) });
         if (targets.length) {
