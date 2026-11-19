@@ -226,7 +226,6 @@ document_tests! {
     resources_slider_themeresources => "/Resources/Slider_themeresources.xaml";
     resources_split_button_themeresources => "/Resources/SplitButton_themeresources.xaml";
     resources_split_view_themeresources => "/Resources/SplitView_themeresources.xaml";
-    resources_system_resources => "/Resources/SystemResources.xaml";
     resources_tab_view_themeresources => "/Resources/TabView_themeresources.xaml";
     resources_text_block_themeresources => "/Resources/TextBlock_themeresources.xaml";
     resources_text_block_themeresources_v2_5 => "/Resources/TextBlock_themeresources_v2.5.xaml";
