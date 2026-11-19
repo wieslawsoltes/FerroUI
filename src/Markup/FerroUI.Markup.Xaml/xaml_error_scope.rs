@@ -106,6 +106,21 @@ pub fn has_error() -> bool {
     SCOPES.with(|scopes| scopes.borrow().last().is_some_and(Option::is_some))
 }
 
+/// The number of scopes open on the thread. A runner that opens its scope with
+/// [`with_xaml_errors`] while `depth()` is `n` asks about that scope, while scopes opened inside
+/// it are open, with [`has_error_at(n)`](has_error_at).
+#[doc(hidden)]
+pub fn depth() -> usize {
+    SCOPES.with(|scopes| scopes.borrow().len())
+}
+
+/// Whether the scope opened while [`depth`] was `depth` is open and has an error already. False
+/// when no such scope is open.
+#[doc(hidden)]
+pub fn has_error_at(depth: usize) -> bool {
+    SCOPES.with(|scopes| scopes.borrow().get(depth).is_some_and(Option::is_some))
+}
+
 /// Throws `error`: panics with its message. The fatal fallback of a member without an error
 /// channel and without a value to go on with; members that a scoped load reaches report to the
 /// scope instead ([`report`], [`crate::throw_or`]). Public for the members of
@@ -170,6 +185,29 @@ mod tests {
         })
         .unwrap_err();
         assert_eq!(error.message(), "cause");
+    }
+
+    #[test]
+    fn a_runner_asks_about_its_own_scope_while_inner_scopes_are_open() {
+        let base = depth();
+        let _: Result<(), _> = with_xaml_errors(|| {
+            assert_eq!(base + 1, depth());
+            assert!(!has_error_at(base));
+            let inner: Result<(), _> = with_xaml_errors(|| {
+                report(XamlLoadError::with_message("inner")).unwrap();
+                assert!(has_error() && !has_error_at(base));
+                Ok(())
+            });
+            assert!(inner.is_err());
+            report(XamlLoadError::with_message("outer")).unwrap();
+            let _: Result<(), _> = with_xaml_errors(|| {
+                assert!(!has_error() && has_error_at(base));
+                Ok(())
+            });
+            Ok(())
+        });
+        assert_eq!(base, depth());
+        assert!(!has_error_at(base));
     }
 
     #[test]
