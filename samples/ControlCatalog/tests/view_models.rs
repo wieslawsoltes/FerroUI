@@ -200,7 +200,7 @@ fn the_3d_section_follows_the_custom_effects() {
 
 /// The OpenGL pages are hidden from the side bar for now, not removed: they are in no section, each
 /// is recorded as left out with the reason of a hidden page (the lease page with what it waits for,
-/// as before), and their classes are still those of their documents.
+/// as before), and the classes of the two pages that load are still those of their documents.
 #[test]
 fn the_open_gl_pages_are_hidden_from_the_side_bar() {
     let _app = start_catalog_application();
@@ -224,10 +224,13 @@ fn the_open_gl_pages_are_hidden_from_the_side_bar() {
             .unwrap_or_else(|| panic!("{document} is recorded as left out"));
         assert_eq!(page.header, header);
         assert_eq!(page.section, "Media & Graphics");
-        assert!(crate::markup::XamlClass::find(document).is_some(), "{document} keeps its class");
         match crate::excluded(document) {
+            // The lease page waits for its code-behind, as before.
             Some(excluded) => assert_eq!(page.reason, excluded.reason),
-            None => assert_eq!(page.reason, crate::view_models::HIDDEN),
+            None => {
+                assert_eq!(page.reason, crate::view_models::HIDDEN);
+                assert!(crate::markup::XamlClass::find(document).is_some(), "{document} keeps its class");
+            }
         }
     }
 }
