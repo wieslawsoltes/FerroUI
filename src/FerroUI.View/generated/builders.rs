@@ -1115,6 +1115,71 @@ pub fn pips_pager() -> El<ferroui_controls::PipsPager> {
     El::new()
 }
 
+pub use ferroui_controls::Pivot;
+
+impl ViewClass for ferroui_controls::Pivot {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::Pivot>::new()
+    }
+}
+
+/// Starts an element of [`Pivot`](ferroui_controls::Pivot).
+pub fn pivot() -> El<ferroui_controls::Pivot> {
+    El::new()
+}
+
+pub use ferroui_controls::PivotHeaderItem;
+
+impl ViewClass for ferroui_controls::PivotHeaderItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotHeaderItem>::new()
+    }
+}
+
+/// Starts an element of [`PivotHeaderItem`](ferroui_controls::PivotHeaderItem).
+pub fn pivot_header_item() -> El<ferroui_controls::PivotHeaderItem> {
+    El::new()
+}
+
+pub use ferroui_controls::PivotHeaderPanel;
+
+impl ViewClass for ferroui_controls::PivotHeaderPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotHeaderPanel>::new()
+    }
+}
+
+/// Starts an element of [`PivotHeaderPanel`](ferroui_controls::PivotHeaderPanel).
+pub fn pivot_header_panel() -> El<ferroui_controls::PivotHeaderPanel> {
+    El::new()
+}
+
+pub use ferroui_controls::PivotItem;
+
+impl ViewClass for ferroui_controls::PivotItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotItem>::new()
+    }
+}
+
+/// Starts an element of [`PivotItem`](ferroui_controls::PivotItem).
+pub fn pivot_item() -> El<ferroui_controls::PivotItem> {
+    El::new()
+}
+
+pub use ferroui_controls::PivotPanel;
+
+impl ViewClass for ferroui_controls::PivotPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PivotPanel>::new()
+    }
+}
+
+/// Starts an element of [`PivotPanel`](ferroui_controls::PivotPanel).
+pub fn pivot_panel() -> El<ferroui_controls::PivotPanel> {
+    El::new()
+}
+
 pub use ferroui_controls::shapes::Polygon;
 
 impl ViewClass for ferroui_controls::shapes::Polygon {
@@ -6404,6 +6469,88 @@ pub trait PipsPagerProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PipsPager>> PipsPagerProps for El<T> {}
 
+/// The properties and routed events of [`Pivot`](ferroui_controls::Pivot).
+pub trait PivotProps: ElementBuilder {
+    /// Sets [`Pivot::title_property`](ferroui_controls::Pivot::title_property).
+    fn title<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::title_property(), value)
+    }
+
+    /// Sets [`Pivot::title_template_property`](ferroui_controls::Pivot::title_template_property).
+    fn title_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::title_template_property(), value)
+    }
+
+    /// Sets [`Pivot::left_header_property`](ferroui_controls::Pivot::left_header_property).
+    fn left_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::left_header_property(), value)
+    }
+
+    /// Sets [`Pivot::left_header_template_property`](ferroui_controls::Pivot::left_header_template_property).
+    fn left_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::left_header_template_property(), value)
+    }
+
+    /// Sets [`Pivot::right_header_property`](ferroui_controls::Pivot::right_header_property).
+    fn right_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::right_header_property(), value)
+    }
+
+    /// Sets [`Pivot::right_header_template_property`](ferroui_controls::Pivot::right_header_template_property).
+    fn right_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::right_header_template_property(), value)
+    }
+
+    /// Sets [`Pivot::header_template_property`](ferroui_controls::Pivot::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::header_template_property(), value)
+    }
+
+    /// Sets [`Pivot::is_locked_property`](ferroui_controls::Pivot::is_locked_property).
+    fn is_locked<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::is_locked_property(), value)
+    }
+
+    /// Sets [`Pivot::is_header_items_carousel_enabled_property`](ferroui_controls::Pivot::is_header_items_carousel_enabled_property).
+    fn is_header_items_carousel_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::is_header_items_carousel_enabled_property(), value)
+    }
+
+    /// Sets [`Pivot::header_focus_visual_placement_property`](ferroui_controls::Pivot::header_focus_visual_placement_property).
+    fn header_focus_visual_placement<M>(self, value: impl IntoProp<ferroui_controls::PivotHeaderFocusVisualPlacement, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::header_focus_visual_placement_property(), value)
+    }
+
+    /// Sets [`Pivot::slide_in_animation_group_property`](ferroui_controls::Pivot::slide_in_animation_group_property).
+    fn slide_in_animation_group<M>(self, value: impl IntoProp<ferroui_controls::PivotSlideInAnimationGroup, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::slide_in_animation_group_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::Pivot>> PivotProps for El<T> {}
+
+/// The properties and routed events of [`PivotItem`](ferroui_controls::PivotItem).
+pub trait PivotItemProps: ElementBuilder {
+    /// Sets [`PivotItem::header_property`](ferroui_controls::PivotItem::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::PivotItem>::header_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PivotItem>> PivotItemProps for El<T> {}
+
+/// The properties and routed events of [`PivotPanel`](ferroui_controls::PivotPanel).
+pub trait PivotPanelProps: ElementBuilder {
+    /// Handles [`PivotPanel::horizontal_snap_points_changed_event`](ferroui_controls::PivotPanel::horizontal_snap_points_changed_event).
+    fn on_horizontal_snap_points_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::PivotPanel>::horizontal_snap_points_changed_event(), move |_, e| handler(e))
+    }
+
+    /// Handles [`PivotPanel::vertical_snap_points_changed_event`](ferroui_controls::PivotPanel::vertical_snap_points_changed_event).
+    fn on_vertical_snap_points_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::PivotPanel>::vertical_snap_points_changed_event(), move |_, e| handler(e))
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PivotPanel>> PivotPanelProps for El<T> {}
+
 /// The properties and routed events of [`PointAnimation`](ferroui_controls::animation::PointAnimation).
 pub trait PointAnimationProps: ElementBuilder {
     /// Sets [`PointAnimation::from_property`](ferroui_controls::animation::PointAnimation::from_property).
@@ -10540,6 +10687,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`NumericUpDown::text_alignment_property`](ferroui_controls::NumericUpDown::text_alignment_property).
     fn numeric_up_down_text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::text_alignment_property(), value)
+    }
+
+    /// Sets the attached [`Pivot::slide_in_animation_group_property`](ferroui_controls::Pivot::slide_in_animation_group_property).
+    fn pivot_slide_in_animation_group<M>(self, value: impl IntoProp<ferroui_controls::PivotSlideInAnimationGroup, M>) -> Self {
+        self.prop(<ferroui_controls::Pivot>::slide_in_animation_group_property(), value)
     }
 
     /// Sets the attached [`PlatformFeedback::feedback_type_property`](ferroui_controls::PlatformFeedback::feedback_type_property).

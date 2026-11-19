@@ -252,6 +252,12 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::image::Image,
     crate::info_badge::InfoBadge,
     crate::info_bar::InfoBar,
+    // --- pivot (WinUI, docs/porting/winui-calculator-gaps.md, PV-1) ---
+    crate::pivot::Pivot,
+    crate::pivot::PivotItem,
+    crate::pivot::PivotPanel,
+    crate::pivot::PivotHeaderItem,
+    crate::pivot::PivotHeaderPanel,
     crate::title_bar::TitleBar,
     crate::items_control::ItemsControl,
     crate::label::Label,
