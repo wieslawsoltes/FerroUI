@@ -3620,6 +3620,7 @@ fn an_error_the_xaml_runtime_reports_in_a_reload_step_is_its_error_without_unwin
 
 #[test]
 fn an_error_the_application_raises_on_the_dispatcher_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_base::threading::Dispatcher;
     let _scope = Dispatcher::unit_test_scope();
     let went_on = Cell::new(false);
     let result: Result<(), ReloadError> = catch_reload(|| {
