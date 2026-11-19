@@ -11,23 +11,25 @@ SOURCE_COMMIT = "14061eeac21c38ae99f302edf3d9136d4f652c4c"
 METADATA = "WinUIGallery/SampleSupport/Data/ControlInfoData.json"
 
 # Original media used by the reviewed Image, FlipView, ConnectedAnimation, Button,
-# AppBarButton, AppBarToggleButton and TreeView pages. Keep this list explicit: an embedded
+# AppBarButton, AppBarToggleButton, TreeView, XamlResources, ToolTip, Viewbox,
+# AccessibilityScreenReader and Clipboard pages. Keep this list explicit: an embedded
 # asset does not establish a port of the source feature (for example animated GIF playback or
 # SVG decoding).
 SAMPLE_MEDIA = [
     *(f"LandscapeImage{number}.jpg" for number in range(1, 14)),
     "MirrorPCConsent.svg", "animated.gif", "cliff.jpg", "grapes.jpg",
     "ninegrid.gif", "rainier.jpg", "sunset.jpg", "treetops.jpg", "valley.jpg",
-    "Slices.png", "Slices2.png", "folder.png",
+    "Slices.png", "Slices2.png", "folder.png", "Light_Image.png", "Dark_Image.png",
 ]
-# The theme images of the reviewed Geometry and Spacing pages (their images of the Default and Light
-# themes).
+# The theme images of the reviewed Geometry, Spacing and Typography pages (their images of the
+# Default and Light themes).
 DESIGN_MEDIA = ["Geometry.dark.png", "Geometry.light.png", "Cards.dark.png", "Cards.light.png",
-                "Dialog.dark.png", "Dialog.light.png"]
+                "Dialog.dark.png", "Dialog.light.png", "Typography.dark.png", "Typography.light.png"]
 MEDIA_PAGES = [
     f"WinUIGallery/Samples/{page}/{page}Page{suffix}"
     for page in ["Image", "FlipView", "ConnectedAnimation", "Button", "AppBarButton",
-                 "AppBarToggleButton", "TreeView", "Geometry", "Spacing", "IconElement"]
+                 "AppBarToggleButton", "TreeView", "Geometry", "Spacing", "IconElement", "Typography",
+                 "XamlResources", "ToolTip", "Viewbox", "AccessibilityScreenReader", "Clipboard"]
     for suffix in [".xaml", ".xaml.cs"]
 ]
 

@@ -1,4 +1,32 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Button Content="Show a simple ToolTip." ToolTip.Tip="Simple ToolTip"/><TextBlock Text="This text also has a tool tip" ToolTip.Tip="More information about this text"/>
+<!-- Ported from the three pinned ToolTip examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream; status_samples.rs sets the source's cliff.jpg on the
+     image. WinUI's ToolTipService.ToolTip is ToolTip.Tip, and the ToolTip's own VerticalOffset and
+     Placement are the attached ToolTip.VerticalOffset and ToolTip.Placement of the element. FerroUI's
+     ToolTip has no PlacementRect: the source's rectangle (0,0,400,266) is the bounds of the
+     400 by 266 image, the target of the placement, so Right places the tip beside the image without
+     covering it. AutomationProperties.FullDescription is HelpText, the description FerroUI's
+     automation has. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="A button with a simple ToolTip." FontSize="18" />
+    <Button x:Name="SimpleToolTipButton" Content="Show a simple ToolTip." ToolTip.Tip="Simple ToolTip" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="A TextBlock with an offset ToolTip." FontSize="18" />
+    <TextBlock x:Name="OffsetToolTipText" Text="TextBlock with an offset ToolTip."
+               ToolTip.Tip="Offset information." ToolTip.VerticalOffset="-80" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="An Image with a ToolTip using PlacementRect." FontSize="18" />
+    <Image x:Name="textBoxToPlace" Width="400" Height="266" HorizontalAlignment="Left"
+           ToolTip.Placement="Right">
+      <ToolTip.Tip>
+        <ToolTip Content="Non-occluding information."
+                 AutomationProperties.HelpText="Non-occluding tooltip" />
+      </ToolTip.Tip>
+    </Image>
+  </StackPanel>
 </StackPanel>
