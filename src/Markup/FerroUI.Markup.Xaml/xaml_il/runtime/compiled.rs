@@ -1309,6 +1309,27 @@ pub fn set_intermediate_root<T: PartialEq + Clone + 'static>(context: &Rc<XamlIl
     context.set_intermediate_root_object(to_value(object.clone()));
 }
 
+/// `rt::invoked(element.try_end_init(), line, position)?`: the end of the initialisation of a
+/// styled element, its failure the error of the member at `line`, `position` ([`invoked`]).
+#[inline(never)]
+pub fn end_init(element: &StyledElement, line: i32, position: i32) -> Result<(), XamlLoadError> {
+    invoked(element.try_end_init(), line, position)
+}
+
+/// `context.pop_parent(); rt::invoked(element.try_end_init(), line, position)?`: a styled
+/// element taken off the parent stack of the context, then the end of its initialisation
+/// ([`end_init`]).
+#[inline(never)]
+pub fn pop_parent_end_init(
+    context: &Rc<XamlIlContext>,
+    element: &StyledElement,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    context.pop_parent();
+    invoked(element.try_end_init(), line, position)
+}
+
 /// `context.FerroNameScope.Register(name, element)`: registers `element`
 /// under `name` in the name scope of the context. A missing scope, a
 /// completed scope and a duplicate name are load errors at the position of

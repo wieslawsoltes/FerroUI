@@ -2177,6 +2177,15 @@ impl<'a> Emitter<'a> {
             }
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
+        if supports_initialize && self.shares_element_statements(target) {
+            // The end of the initialisation of a styled element (after it leaves the parent
+            // stack): one function for every element, with the error path of the member.
+            self.line(match push_parent {
+                true => format!("rt::pop_parent_end_init(&context, &{}, {}, {})?;", target.expr, node.line(), node.position()),
+                false => format!("rt::end_init(&{}, {}, {})?;", target.expr, node.line(), node.position()),
+            });
+            return Ok(());
+        }
         if push_parent {
             self.line("context.pop_parent();".to_string());
         }
