@@ -12,7 +12,7 @@ pub mod geo_map_chart_engine;
 pub mod heat_functions;
 pub mod heat_legend;
 pub mod kernel;
-mod label_lines;
+pub mod label_lines;
 pub mod labelers;
 pub mod measure;
 pub mod motion;
@@ -23,6 +23,7 @@ pub mod sankey_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
+mod svg_path;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 

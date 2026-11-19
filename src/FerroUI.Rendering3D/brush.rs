@@ -1,5 +1,5 @@
 //! The brushes of material layers as the renderers sample them (`docs/porting/media3d.md`,
-//! sections 3.4 and 3.16, step D6): a [`MaterialBrush`] is what a draw of a layer needs to paint
+//! sections 3.4 and 3.18, step D6): a [`MaterialBrush`] is what a draw of a layer needs to paint
 //! its brush over the texture coordinates of a mesh, the same description for the CPU reference
 //! and the GPU executors.
 //!
@@ -183,6 +183,12 @@ enum TextureOrigin {
 /// bitmap for as long as the texture lives.
 #[derive(Clone)]
 pub struct BrushTextureIdentity(Option<Weak<SharedBitmapImpl>>);
+
+// The identity only asks whether the bitmap is alive (`Weak::strong_count`) and never reads it, so
+// a panic cannot leave it in a state another use would see: the rasterizer and the output cache
+// that keep identities stay unwind safe, as they were before brushes.
+impl std::panic::UnwindSafe for BrushTextureIdentity {}
+impl std::panic::RefUnwindSafe for BrushTextureIdentity {}
 
 impl BrushTextureIdentity {
     /// The identity of a texture that names no bitmap (always alive).

@@ -121,7 +121,7 @@ pub(crate) fn note_unsampled_brush() {
             None,
             "A material of a 3D scene paints with a brush the 3D renderer cannot sample (solid colours, linear and \
              radial gradients and readable images are sampled): the layer is drawn with its Color \
-             (docs/porting/media3d.md, section 3.16).",
+             (docs/porting/media3d.md, section 3.18).",
         );
     }
 }

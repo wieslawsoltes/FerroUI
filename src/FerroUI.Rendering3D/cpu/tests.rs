@@ -343,3 +343,16 @@ fn the_texels_of_a_brush_are_read_once_while_the_rasterizer_keeps_them() {
     assert_eq!(before + 3, brush_textures_read());
     assert_eq!([0, 0, 255, 255], third.pixel(25, 50));
 }
+
+/// The rasterizer, the output cache and the shared brushes of the materials keep the auto traits
+/// of the published release (`Send`, `Sync`, unwind safe) with the textures of brushes (the API
+/// gate checks them against the release; this test fails to compile first).
+#[test]
+fn the_rasterizer_the_output_cache_and_the_brushes_keep_their_auto_traits() {
+    use std::panic::{RefUnwindSafe, UnwindSafe};
+    fn auto_traits<T: Send + Sync + UnwindSafe + RefUnwindSafe>() {}
+    auto_traits::<CpuRasterizer>();
+    auto_traits::<crate::output_cache::Scene3DOutputCache<u8>>();
+    auto_traits::<ferroui_base::media::SharedBrush>();
+    auto_traits::<Scene3DSnapshot>();
+}
