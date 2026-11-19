@@ -46,6 +46,11 @@ typedef int64_t (*FerroPostFn)(int64_t token);
 // Work posted to the UI thread with [`ferro_post_data`]: called once with its user data.
 typedef void (*FerroPostDataFn)(void *user_data);
 
+// The function of a timer ([`ferro_timer_start`]): called on the UI thread with the token of the
+// timer and the time since its previous tick (or its start) in microseconds. It returns `0` to go
+// on ticking; any other value stops the timer.
+typedef int64_t (*FerroTimerFn)(int64_t token, int64_t elapsed);
+
 // The call succeeded.
 #define FERRO_OK 0
 
@@ -148,6 +153,34 @@ const char *ferro_last_error(void);
 // failed): the code of a function that returns a handle, which is `0` on a failure. Any thread.
 FerroStatus ferro_last_error_code(void);
 
+// The horizontal position of the pointer of the routed event being handled (a pointer event, or
+// a tap: `Tapped`, `DoubleTapped`), relative to the visual `relative_to`, or to the top level
+// the event happened in for `0`. NaN on a failure (recorded: [`FERRO_INVALID_STATE`] outside a
+// handler, [`FERRO_NOT_SUPPORTED`] for an event without a position). UI thread only.
+double ferro_event_x(FerroHandle relative_to);
+
+// The vertical position of the pointer of the routed event being handled; see
+// [`ferro_event_x`]. UI thread only.
+double ferro_event_y(FerroHandle relative_to);
+
+// The button a pointer event being handled is about: `1` left, `2` right, `3` middle, `4` and
+// `5` the first and second extra buttons (the values of `MouseButton`), for a press or a release;
+// `0` for a pointer event that is not about a button (a move). A negative status for an event
+// that is not a pointer event, or outside a handler. UI thread only.
+int64_t ferro_event_button(void);
+
+// The key of the key event being handled (`KeyDown`, `KeyUp`), as the name of the member of
+// `Key` (`Return`, which is also named `Enter`; `Escape`; `A`), NUL-terminated and owned by the
+// library until the next call of `ferro_event_key` on the thread. `NULL` on a failure (recorded:
+// an event that is not a key event, or outside a handler). UI thread only.
+const char *ferro_event_key(void);
+
+// Moves the keyboard focus to `object` (an input element: a text box, a button), as a click on it
+// does. [`FERRO_INVALID_STATE`] when it cannot take the focus now (it is not focusable, not
+// enabled, or not in a shown window yet: posting the call with [`ferro_post`](crate::ferro_post)
+// focuses it once it is). UI thread only.
+FerroStatus ferro_focus(FerroHandle object);
+
 // Attaches `function` to the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of
 // `object`: it is called with `token` on every raise of the event, on the UI thread (see
 // [`FerroEventFn`]). For a routed event the handler listens to the direct and the bubbling route
@@ -243,6 +276,19 @@ FerroStatus ferro_post_data(FerroPostDataFn function, void *user_data);
 // thread itself instead of [`ferro_app_run`](crate::ferro_app_run). UI thread only.
 FerroStatus ferro_run_jobs(void);
 
+// Starts a timer on the UI thread: `function(token, elapsed)` is called every `interval`
+// milliseconds (at least 1), on the UI thread, with the time since the previous tick (or since
+// the start, for the first) in microseconds as `elapsed`. It returns `0` to go on ticking; any
+// other result stops the timer. Returns a positive timer ID for [`ferro_timer_stop`], or a
+// negative status. Timers tick while the main loop of [`ferro_app_run`](crate::ferro_app_run)
+// runs, or in [`ferro_run_jobs`](crate::ferro_run_jobs) once they are due. UI thread only.
+int64_t ferro_timer_start(int64_t interval, FerroTimerFn function, int64_t token);
+
+// Stops the timer `timer` ([`ferro_timer_start`]): its function is not called again.
+// [`FERRO_NOT_FOUND`] for an ID that is not a running timer (one that stopped itself is gone
+// after its last tick). It may be called from the function of the timer itself. UI thread only.
+FerroStatus ferro_timer_stop(int64_t timer);
+
 // Adds the control `child` to the children of `parent`: at the end of the `Children` of a panel
 // or of the `Items` of an items control; as the one `Content` of a content control (a window)
 // or of a content presenter, or the `Child` of a decorator or a popup, which must not hold one
@@ -314,6 +360,21 @@ const char *ferro_get_cstr(FerroHandle object, int64_t property);
 // reference counted, which the caller releases ([`ferro_release`](crate::ferro_release)), or `0`
 // for null. UI thread only.
 FerroStatus ferro_get_handle(FerroHandle object, int64_t property, FerroHandle *result);
+
+// Reads a number from `property` of `object`, as [`ferro_get_f64`] does, and returns it; returns
+// `fallback` when the read fails (the failure is recorded: [`ferro_last_error`]). For a
+// language that cannot pass a pointer to a result. UI thread only.
+//
+// [`ferro_last_error`]: crate::ferro_last_error
+double ferro_get_f64_or(FerroHandle object, int64_t property, double fallback);
+
+// Reads an integer from `property` of `object`, as [`ferro_get_i64`] does, and returns it;
+// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+int64_t ferro_get_i64_or(FerroHandle object, int64_t property, int64_t fallback);
+
+// Reads a boolean from `property` of `object`, as [`ferro_get_bool`] does, and returns it;
+// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+bool ferro_get_bool_or(FerroHandle object, int64_t property, bool fallback);
 
 #ifdef __cplusplus
 }  // extern "C"

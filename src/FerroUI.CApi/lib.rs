@@ -27,6 +27,9 @@
 //!   [`ferro_app_run`], which calls it). A call from another thread returns
 //!   [`FERRO_WRONG_THREAD`]; [`ferro_post`] runs work on the UI thread from any thread. The ID
 //!   lookups work on any thread.
+//! - **Event data.** A handler receives scalars; what a routed event carries beyond them (the
+//!   position and button of a pointer event, the key of a key event) is read from inside the
+//!   handler ([`ferro_event_x`], [`ferro_event_button`], [`ferro_event_key`]).
 //! - **Callbacks** are a C function pointer and an `int64_t` token ([`FerroEventFn`]), which
 //!   every language can make (a language without closures dispatches on the token), or a
 //!   function with a `void *` and a release function for it ([`FerroEventDataFn`]).
@@ -35,24 +38,29 @@
 
 mod app;
 mod error;
+mod event_data;
 mod events;
 mod handles;
 mod ids;
 mod strings;
 mod thread;
+mod timer;
 mod tree;
 mod values;
 
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_last_error, ferro_last_error_code};
+pub use event_data::{ferro_event_button, ferro_event_key, ferro_event_x, ferro_event_y, ferro_focus};
 pub use events::{ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_unsubscribe};
 pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of, handle_of, object_of};
 pub use ids::{ferro_event_id, ferro_property_id, ferro_type_id};
 pub use thread::{ferro_init, ferro_is_ui_thread, ferro_post, ferro_post_data, ferro_run_jobs};
+pub use timer::{ferro_timer_start, ferro_timer_stop};
 pub use tree::{ferro_add_child, ferro_remove_child};
 pub use values::{
-    ferro_clear, ferro_get_bool, ferro_get_cstr, ferro_get_f64, ferro_get_handle, ferro_get_i64, ferro_get_str,
-    ferro_set_bool, ferro_set_f64, ferro_set_handle, ferro_set_i64, ferro_set_str,
+    ferro_clear, ferro_get_bool, ferro_get_bool_or, ferro_get_cstr, ferro_get_f64, ferro_get_f64_or, ferro_get_handle,
+    ferro_get_i64, ferro_get_i64_or, ferro_get_str, ferro_set_bool, ferro_set_f64, ferro_set_handle, ferro_set_i64,
+    ferro_set_str,
 };
 
 use std::ffi::c_void;
@@ -117,6 +125,11 @@ pub type FerroPostFn = Option<unsafe extern "C" fn(token: i64) -> i64>;
 
 /// Work posted to the UI thread with [`ferro_post_data`]: called once with its user data.
 pub type FerroPostDataFn = Option<unsafe extern "C" fn(user_data: *mut c_void)>;
+
+/// The function of a timer ([`ferro_timer_start`]): called on the UI thread with the token of the
+/// timer and the time since its previous tick (or its start) in microseconds. It returns `0` to go
+/// on ticking; any other value stops the timer.
+pub type FerroTimerFn = Option<unsafe extern "C" fn(token: i64, elapsed: i64) -> i64>;
 
 /// The handler of an event ([`ferro_subscribe`]): called on the UI thread with the token of the
 /// subscription, the handle of the object the handler is attached to (borrowed for the call:
