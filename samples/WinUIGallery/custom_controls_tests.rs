@@ -138,3 +138,57 @@ fn counter_controls_count_up_and_down_in_their_templates() {
         window.close();
     }
 }
+
+/// The validated password box alone in a window with the WinUI theme: the TextBox of its
+/// template gets the theme's template and the validation lines follow the password.
+#[cfg(feature = "theme")]
+#[test]
+fn validated_password_box_lays_out_its_template_in_a_window() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::styling::ControlTheme;
+    use ferroui_controls::Window;
+    let _application = crate::tests::start_winui();
+    let root = page();
+    let theme = root
+        .try_find_resource(&ResourceKey::from("ValidatedPasswordBoxTheme"), None)
+        .flatten()
+        .and_then(|value| value.downcast_ref::<Ref<ControlTheme>>().cloned())
+        .expect("the page's ValidatedPasswordBox theme");
+    let password = ValidatedPasswordBox::new();
+    password.set_header(Some("Password".to_string()));
+    password.set_theme(Some(theme));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(password.clone())));
+    window.show();
+    window.update_layout();
+    let input = password
+        .get_visual_descendants()
+        .find_map(|visual| visual.cast::<TextBox>())
+        .expect("the PasswordInput of the template");
+    input.set_text(Some("abc"));
+    assert_eq!(password.password(), "abc");
+    let lines = password
+        .get_visual_descendants()
+        .find_map(|visual| {
+            visual.cast::<StackPanel>().filter(|panel| panel.name().as_deref() == Some("ValidationLines"))
+        })
+        .expect("the ValidationLines of the template");
+    assert!(lines.is_visible());
+    assert_eq!(lines.children().count(), 3);
+    window.close();
+}
+
+/// The TemperatureConverterControl alone in a window with the WinUI theme.
+#[cfg(feature = "theme")]
+#[test]
+fn temperature_converter_lays_out_in_a_window() {
+    use ferroui_controls::Window;
+    let _application = crate::tests::start_winui();
+    let converter = crate::custom_controls::temperature_converter().unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(converter.clone())));
+    window.show();
+    window.update_layout();
+    assert!(converter.get_control::<TextBox>("InputTextBox").is_visible());
+    window.close();
+}
