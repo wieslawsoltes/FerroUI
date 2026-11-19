@@ -23,7 +23,12 @@ after a change of the emitter:
   `rt::register_name_value` against `rt::name_element(..)`;
 * `compiled_binding`: a `{CompiledBinding}` provided and bound to a property (the extension
   created with its path, the target property set, `ProvideValue`, the target property cleared,
-  `rt::bind`) against `rt::bind_compiled_binding(..)`.
+  `rt::bind`) against `rt::bind_compiled_binding(..)`;
+* `static_resource`: the value of a `{StaticResource}` for a registered property (the extension
+  created with the key, `rt::provide_value_invoked` with `rt::property_value(..)`, the provided
+  value held as a node value) against `rt::static_resource_value(..)`;
+* `dynamic_resource`: a `{DynamicResource}` bound to a registered property, one
+  `rt::bind_dynamic_resource(..)` each against a row of a run (`rt::DynamicResourceRow`).
 
 With them it counts the lines, the functions and the code statements of each file (a code
 statement is a line inside a function that is not a comment, a brace or part of a table). Only
@@ -71,6 +76,14 @@ PATTERNS = {
     "compiled_binding": (
         re.compile(r"CompiledBindingExtension::__markup_ProvideValue_0\("),
         re.compile(r"^\s*rt::bind_compiled_binding\("),
+    ),
+    "static_resource": (
+        re.compile(r"rt::provide_value_invoked\(&context, rt::property_value\(.*StaticResourceExtension::__markup_ProvideValue_0, "),
+        re.compile(r"rt::static_resource_value\(&context, "),
+    ),
+    "dynamic_resource": (
+        re.compile(r"^\s*rt::bind_dynamic_resource\(&context, "),
+        re.compile(r"^\s*rt::DynamicResourceRow \{"),
     ),
 }
 
