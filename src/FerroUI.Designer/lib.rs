@@ -78,6 +78,7 @@ mod rsx_session;
 mod runtime;
 mod runtime_outline;
 mod selection_layout;
+mod selection_wrap;
 mod session;
 #[cfg(feature = "collaboration-client")]
 pub mod sharing;
@@ -188,6 +189,7 @@ pub use authoring_placement::{PlacementOrigin, PlacementPlan, PlacementTarget};
 mod canvas_snapping;
 pub use canvas_snapping::{CanvasSnapAdjustment, CanvasSnapQuery};
 pub use selection_layout::{LayoutMatch, LayoutReset};
+pub use ferroui_designer_tools::WrapKind;
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::{EasingPreview, TimelineLane};

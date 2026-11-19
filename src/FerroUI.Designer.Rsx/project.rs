@@ -27,6 +27,7 @@ pub struct RsxNode {
     pub(crate) class: Class,
     pub(crate) open: usize,
     pub(crate) close: usize,
+    pub(crate) child_indices: Vec<usize>,
     pub(crate) complete_children: bool,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
@@ -266,6 +267,7 @@ impl State {
             class: class.clone(),
             open: node.braces.open().byte_range().end,
             close: node.braces.close().byte_range().start,
+            child_indices: Vec::new(),
             complete_children: true,
             state_slot: if class.xaml_property(None, "visual_states").is_none() {
                 ArraySlot::Missing
@@ -406,9 +408,11 @@ impl State {
                     if catalog.rust(&element.path).is_some()
                         && accepts_control(placement, &result) =>
                 {
+                    let child_index = self.nodes.len();
                     result
                         .children
-                        .push(self.element(source, child, depth + 1, catalog)?)
+                        .push(self.element(source, child, depth + 1, catalog)?);
+                    self.nodes[index].child_indices.push(child_index);
                 }
                 _ => {
                     self.nodes[index].complete_children = false;

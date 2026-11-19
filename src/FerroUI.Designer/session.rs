@@ -462,16 +462,37 @@ impl DesignerSession {
             let patches = rust.plan_edit(&self.document, &label, edits)?;
             return self.commit_rust_patches(&label, patches);
         }
+        self.commit_xaml_candidate(label, |document, label| {
+            let change = document.apply(label, edits.clone())?;
+            Ok((change, Some(edits)))
+        })
+    }
+
+    pub(crate) fn commit_xaml_patches(
+        &mut self, label: String, patches: Vec<ferroui_designer_core::TextPatch>,
+    ) -> Result<ChangeSet, DesignerError> {
+        self.ensure_writable()?;
+        self.commit_xaml_candidate(label, |document, label| {
+            let change = document.apply_text_patches(document.revision(), label, patches)?;
+            Ok((change, None))
+        })
+    }
+
+    fn commit_xaml_candidate(
+        &mut self, label: String,
+        plan: impl FnOnce(&mut Document, &str) -> Result<(ChangeSet, Option<Vec<Edit>>), DesignerError>,
+    ) -> Result<ChangeSet, DesignerError> {
         self.publish_source_draft()
             .map_err(DesignerError::InvalidEdit)?;
         let mut document = self.document.clone();
-        let change = document.apply(label.clone(), edits.clone())?;
+        let (change, authored_edits) = plan(&mut document, &label)?;
         if change.is_empty() {
             return Ok(change);
         }
         let mut collaboration = self.collaboration.clone();
         if let Some(state) = collaboration.as_mut() {
             let before = self.document.source().to_owned();
+            let edits = authored_edits.unwrap_or_else(|| vec![Edit::ReplaceSource { source: document.source().to_owned() }]);
             let operation = state
                 .replica
                 .submit_document_edits(&self.document, label, edits)

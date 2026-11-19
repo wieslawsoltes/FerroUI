@@ -47,6 +47,15 @@ fn apply_attribute_edits(
     edits: Vec<Edit>,
     next_id: &mut NodeId,
 ) -> Result<Snapshot, DesignerError> {
+    let patches = attribute_patches(&old.ast, edits)?;
+    if patches.is_empty() {
+        return Ok(old);
+    }
+    let (source, pins) = patched_source(&old.source, &old.ast, patches, &[])?;
+    parse_snapshot(source, &old, next_id, &pins)
+}
+
+pub(super) fn attribute_patches(ast: &Ast, edits: Vec<Edit>) -> Result<Vec<TextPatch>, DesignerError> {
     let mut values = BTreeMap::<NodeId, Vec<(String, Option<String>)>>::new();
     for edit in edits {
         let (id, name, value) = match edit {
@@ -55,9 +64,9 @@ fn apply_attribute_edits(
                 (node, name, Some(value))
             }
             Edit::RemoveAttribute { node, name } => (node, name, None),
-            _ => unreachable!("caller filters attribute operations"),
+            _ => return Err(DesignerError::InvalidEdit("Expected attribute edits".into())),
         };
-        element(&old.ast, id)?;
+        element(ast, id)?;
         let attributes = values.entry(id).or_default();
         if let Some(attribute) = attributes
             .iter_mut()
@@ -70,7 +79,7 @@ fn apply_attribute_edits(
     }
     let mut patches = Vec::new();
     for (id, values) in values {
-        let node = element(&old.ast, id)?;
+        let node = element(ast, id)?;
         let quote = node.attributes.first().map_or('"', |a| a.quote);
         let mut added = String::new();
         for (name, value) in values {
@@ -100,11 +109,7 @@ fn apply_attribute_edits(
             });
         }
     }
-    if patches.is_empty() {
-        return Ok(old);
-    }
-    let (source, pins) = patched_source(&old.source, &old.ast, patches, &[])?;
-    parse_snapshot(source, &old, next_id, &pins)
+    Ok(patches)
 }
 
 fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapshot, DesignerError> {

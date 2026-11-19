@@ -85,6 +85,11 @@ impl RustDocument {
             .unwrap_or_else(|| RsxCatalog::built_in())
     }
 
+    pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
+        let map = self.map().ok_or("Repair the Rust buffer before editing its layout")?;
+        self.catalog().project(&self.source, map.invocation.start)
+    }
+
     pub(crate) fn update(
         &mut self,
         document: &mut Document,

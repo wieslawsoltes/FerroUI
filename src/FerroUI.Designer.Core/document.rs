@@ -337,6 +337,15 @@ impl Document {
         Ok(change)
     }
 
+    /// Plan a batch of attribute edits in the current source coordinates. Structural
+    /// commands can combine these with disjoint patches and validate them together.
+    pub fn plan_attribute_patches(&self, edits: Vec<Edit>) -> Result<Vec<TextPatch>, DesignerError> {
+        if !self.is_valid() {
+            return Err(DesignerError::InvalidDocument);
+        }
+        editing::attribute_patches(self.ast(), edits)
+    }
+
     /// Source editors may temporarily contain invalid XML. The raw buffer and
     /// diagnostics enter history, while the AST/preview source remain the last
     /// valid snapshot. A subsequent valid source update reconciles node IDs.

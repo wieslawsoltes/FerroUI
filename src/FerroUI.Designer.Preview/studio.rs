@@ -109,6 +109,10 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
     }
+    if query.name == "designer_wrap_selection" {
+        let rsx = stage.authored_rsx.as_ref().map(crate::rsx_animation::AuthoredRsxFrame::projection).transpose()?;
+        return stage.sources.run(|| stage.studio.wrap_query(&query.arguments, rsx));
+    }
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_keyframe_draft") {
         rsx.validate_keyframe_draft(&query.arguments)?;
     }
@@ -126,7 +130,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
 }
 
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
-    let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
+    let mut design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
     let action = query.arguments["action"].as_str();
     let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, action);
@@ -134,12 +138,14 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
     let spacing = query.name == "designer_spacing_edit";
+    let wrapping = query.name == "designer_wrap_selection_edit";
     if design.rsx.is_some()
         && !rust_keyframe
         && !rust_program
         && !rust_state
         && !rust_placement
         && !spacing
+        && !wrapping
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
@@ -175,6 +181,14 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
+    }
+    if wrapping {
+        let (patches, wrapper) = stage.sources.run(|| stage.studio.wrap_source_plan(&arguments, design.rsx.take()))?;
+        let edited = TextPatch::apply_all(design.source, patches.clone()).map_err(|error| error.to_string())?;
+        let range = ferroui_designer_language::LineIndex::new(&edited).range(wrapper).map_err(|error| error.to_string())?;
+        let mut result = editor_edits(&design, patches)?;
+        result.retained_selection = vec![range];
+        return Ok(result);
     }
     if rust_state || rust_keyframe || rust_program || rust_placement {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust view before editing motion")?;
@@ -284,6 +298,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         | "designer_binding_edit"
         | "designer_grid_track_edit"
         | "designer_spacing_edit"
+        | "designer_wrap_selection_edit"
         | "designer_set_event"
         | "designer_focus_edit"
         | "designer_selection_layout_edit"

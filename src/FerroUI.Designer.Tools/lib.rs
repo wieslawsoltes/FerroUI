@@ -8,6 +8,7 @@ pub mod scenario;
 mod layout;
 mod layout_attributes;
 mod layout_helpers;
+mod layout_wrap;
 mod properties;
 mod selection;
 pub mod token_handoff;
@@ -37,6 +38,7 @@ pub use layout::{
     LayoutContext, LayoutRegistry, RelativeRelation, ResolvedLayout,
 };
 pub use layout_attributes::plan_layout_attributes;
+pub use layout_wrap::{SelectionWrap, WrapKind, plan_selection_wrap};
 pub use layout_helpers::{
     LayoutGuide, LayoutGuideGeometry, LayoutGuideRole, LayoutHandle, LayoutHandleAction,
     LayoutHelperRequest, LayoutHelperScene, LayoutPlacement,

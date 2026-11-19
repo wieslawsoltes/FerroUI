@@ -46,6 +46,8 @@ mod timeline_markers;
 mod selection_workflows;
 #[path = "mcp_spacing.rs"]
 mod spacing;
+#[path = "mcp_wrap.rs"]
+mod wrap;
 #[path = "mcp_workspace.rs"]
 mod workspace_tools;
 #[path = "mcp_placement.rs"]
@@ -293,6 +295,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
         tools.extend(spacing::tools());
+        tools.extend(wrap::tools());
         tools.extend(placement::tools());
         tools.push(design_tokens::tool());
         if self.workspace.is_some() {
@@ -321,6 +324,7 @@ impl UiToolProvider for DesignerMcp {
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
             || spacing::handles(name)
+            || wrap::handles(name)
             || preview_stages::handles(name)
             || placement::handles(name)
             || prototype::handles(name)
@@ -512,6 +516,7 @@ impl UiToolProvider for DesignerMcp {
         }
         if selection_workflows::handles(name)
             || spacing::handles(name)
+            || wrap::handles(name)
             || (name == "designer_layer" && args["action"] == "select_matching_type")
         {
             if let Some(workspace) = &self.workspace {
@@ -584,6 +589,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if spacing::handles(name) {
             return self.spacing.call(&mut session, name, args);
+        }
+        if wrap::handles(name) {
+            return wrap::call(&mut session, name, args);
         }
         match name {
             "designer_document" => {

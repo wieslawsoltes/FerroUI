@@ -34,6 +34,10 @@ pub(crate) struct AuthoredRsxFrame {
 }
 
 impl AuthoredRsxFrame {
+    pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
+        self.catalog.project(&self.source, self.invocation.start)
+    }
+
     pub(crate) fn capture(design: &DesignDocument<'_>) -> Option<Self> {
         let rsx = design.rsx.as_ref()?;
         Some(Self {

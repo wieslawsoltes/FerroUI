@@ -17,6 +17,7 @@ mod source_edits;
 mod spacing_edits;
 mod states;
 mod tree;
+mod wrap_edits;
 mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
@@ -26,6 +27,7 @@ pub use programs::{RsxAnimationEdit, RsxAnimationPlan};
 pub use project::{RsxNode, RsxProjection, project_rust};
 pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
+pub use wrap_edits::{RsxWrap, RsxWrapResult};
 pub use states::{RsxStateGroup, RsxStateSource};
 pub use xaml::{apply_rsx, xaml_to_rsx};
 

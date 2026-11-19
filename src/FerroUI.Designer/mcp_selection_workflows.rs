@@ -166,7 +166,7 @@ fn property_plan(
     ))
 }
 
-fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value) -> Value {
+pub(super) fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value) -> Value {
     report["revision"] = json!(session.document().revision());
     report["selection"] = json!(session.selection());
     report["scope_epoch"] = json!(session.definition_scope_epoch());
@@ -184,7 +184,7 @@ fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value
     report
 }
 
-fn require_model(args: &Value, report: &Value) -> Result<(), String> {
+pub(super) fn require_model(args: &Value, report: &Value) -> Result<(), String> {
     if args["expected_model"] == report["model"] {
         Ok(())
     } else {

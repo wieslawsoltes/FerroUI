@@ -240,6 +240,14 @@
                     <MenuItem Name="LayoutMatchHeight" Header="Height" />
                     <MenuItem Name="LayoutMatchSize" Header="Width and height" />
                   </MenuItem>
+                  <MenuItem Name="LayoutWrapMenu" Header="Wrap selection">
+                    <MenuItem Name="WrapVerticalStack" Header="Vertical StackPanel" />
+                    <MenuItem Name="WrapHorizontalStack" Header="Horizontal StackPanel" />
+                    <MenuItem Name="WrapFlowPanel" Header="WrapPanel" />
+                    <MenuItem Name="WrapGrid" Header="Grid" />
+                    <MenuItem Name="WrapCanvas" Header="Canvas (keep positions)" />
+                    <MenuItem Name="WrapBorder" Header="Border" />
+                  </MenuItem>
                   <MenuItem Name="LayoutResetMenu" Header="Reset size and alignment">
                     <MenuItem Name="LayoutResetMargin" Header="Margin" />
                     <MenuItem Name="LayoutResetAlignment" Header="Alignment" />

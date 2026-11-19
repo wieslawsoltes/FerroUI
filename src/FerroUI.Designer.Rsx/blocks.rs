@@ -41,25 +41,36 @@ fn scan(stream: TokenStream, found: &mut Vec<Block>, depth: usize) {
 }
 
 pub(crate) fn contains_trivia(source: &str, stream: TokenStream, span: SourceSpan) -> bool {
-    visit_comments(source, stream, span, &mut |_| true)
+    visit_comments(source, stream, span, &mut |_, _| true)
 }
 
 /// Preserve comments, including the newline that terminates a line comment.
 pub(crate) fn keep_comments(source: &str) -> Result<String, String> {
     let tokens: TokenStream = source.parse().map_err(|_| "Invalid Rust method tokens")?;
     let mut kept = String::new();
-    visit_comments(source, tokens, SourceSpan::new(0, source.len()), &mut |text| {
+    visit_comments(source, tokens, SourceSpan::new(0, source.len()), &mut |_, text| {
         kept.push_str(text);
         false
     });
     Ok(kept)
 }
 
+/// Start of each skipped comment gap. Callers can indent the leading trivia without
+/// changing tokens, string contents or the interior of a block comment.
+pub(crate) fn comment_starts(source: &str, stream: TokenStream) -> Vec<usize> {
+    let mut starts = Vec::new();
+    visit_comments(source, stream, SourceSpan::new(0, source.len()), &mut |offset, gap| {
+        starts.push(offset + gap.len() - gap.trim_start().len());
+        false
+    });
+    starts
+}
+
 fn visit_comments(
     source: &str,
     stream: TokenStream,
     span: SourceSpan,
-    visit: &mut impl FnMut(&str) -> bool,
+    visit: &mut impl FnMut(usize, &str) -> bool,
 ) -> bool {
     let mut end = span.start;
     for token in stream {
@@ -69,7 +80,7 @@ fn visit_comments(
         }
         if range.start >= end {
             let gap = &source[end..range.start];
-            if !gap.trim().is_empty() && visit(gap) {
+            if !gap.trim().is_empty() && visit(end, gap) {
                 return true;
             }
         }
@@ -84,5 +95,5 @@ fn visit_comments(
         }
         end = end.max(range.end);
     }
-    end < span.end && !source[end..span.end].trim().is_empty() && visit(&source[end..span.end])
+    end < span.end && !source[end..span.end].trim().is_empty() && visit(end, &source[end..span.end])
 }
