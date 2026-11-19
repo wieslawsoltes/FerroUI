@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
+import type { GuideEdit } from './canvasGuidesProtocol';
 import type { CargoSelection } from './cargoTarget';
 import type { TokenRequest } from './designTokenProtocol';
 import type { DesignerPanel } from './designerPanel';
@@ -71,6 +72,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     y?: number;
     label: string;
     edits: object[];
+    edit?: GuideEdit;
     source: string;
     action: string;
     tool: string;
@@ -263,6 +265,16 @@ export class AgentTools {
             case 'designer_canvas':
                 await this.workbench.revealDesign(panel, 'canvas');
                 return panel.controlCanvas(args, signal);
+            case 'designer_canvas_guides': {
+                await panel.waitForSnapshot(signal);
+                const state = panel.canvasGuides;
+                if (!state) throw new Error('Render a canvas before reading its guides.');
+                return { ...state, revision: state.frame.token };
+            }
+            case 'designer_canvas_guides_edit': {
+                const result = await panel.editCanvasGuides({ session: panel.session, token: args.expected_revision }, args.expected_epoch!, args.edit!, signal);
+                return { ...result, revision: result.frame.token };
+            }
             case 'designer_canvas_input':
                 await panel.interact(args.expected_revision, args.input!, signal);
                 return describe(panel);

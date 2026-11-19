@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import { recordedGeometry, recordedMove } from './animationGeometry';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
+import type { GuideCatalog, GuideEdit } from './canvasGuidesProtocol';
 import { CanvasRequests } from './canvasRequests';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { GuideViews, type GuideAnchor } from './guideViews';
 import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
@@ -13,7 +15,7 @@ import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, Runt
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState } from './protocol';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit']);
-export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews'>;
+export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews' | 'guideViews'>;
 
 interface Frame {
     token: number;
@@ -22,6 +24,8 @@ interface Frame {
     source: Source;
     snapshot: Snapshot;
     canvas: CanvasSnapshot;
+    guideCatalog?: GuideCatalog;
+    guideAnchor?: GuideAnchor;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -44,6 +48,7 @@ export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
     private readonly dependencies = new DesignerDependencies();
     private readonly layers: LayerViews;
+    private readonly guides: GuideViews;
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
@@ -92,6 +97,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.viewport = restored?.viewport ?? DEFAULT_VIEWPORT;
         this.designData = restored?.designData;
         this.layers = new LayerViews(document, language, restored?.layerViews);
+        this.guides = new GuideViews(document, restored?.guideViews);
         this.project = projects.forDocument(document.uri);
         let visible = panel.visible;
         this.subscriptions.push(
@@ -118,6 +124,7 @@ export class DesignerPanel implements vscode.Disposable {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
                 this.layers.sourceChanged(event.contentChanges);
+                this.guides.sourceChanged(event.contentChanges);
                 this.schedule();
             }),
             vscode.workspace.onDidCloseTextDocument(closed => {
@@ -353,6 +360,34 @@ export class DesignerPanel implements vscode.Disposable {
         return !this.editing && token !== undefined && target?.session === this.session && target.token === token;
     }
 
+    get canvasGuides() {
+        const frame = this.frame;
+        if (frame?.guideCatalog && frame.guideAnchor && this.currentToken !== undefined) {
+            return this.guides.state({ session: this.session, token: frame.token }, frame.guideAnchor, frame.guideCatalog);
+        }
+    }
+
+    async editCanvasGuides(target: FrameTarget, epoch: number, edit: GuideEdit, signal?: AbortSignal) {
+        const checked = () => {
+            const state = this.canvasGuides;
+            if (!state || !this.canUse(target) || state.epoch !== epoch) throw new Error('Read the current canvas guides before editing.');
+            return state;
+        };
+        const state = checked();
+        const anchor = this.frame!.guideAnchor!;
+        const client = await this.getClient();
+        signal?.throwIfAborted();
+        checked();
+        const update = await client.editCanvasGuides(state.settings, edit);
+        signal?.throwIfAborted();
+        checked();
+        this.guides.remember(anchor, update.settings);
+        const accepted = this.canvasGuides!;
+        this.rememberView();
+        this.post({ type: 'guides', state: accepted });
+        return { ...accepted, selected: update.selected };
+    }
+
     async place(target: FrameTarget, placement: Placement): Promise<void> {
         if (!this.canUse(target) || !this.frame?.snapshot.image) throw new Error('Wait for the current layout before placing controls.');
         await this.edit(this.frame, { type: 'place', frame: target.token, placement });
@@ -491,7 +526,8 @@ export class DesignerPanel implements vscode.Disposable {
             accepted?.(presentation);
             const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices, timelinePose: this.timelinePose };
             const canvasNodes = nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
-            this.frame = { ...frame, token: next, snapshot, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
+            const guideAnchor = this.guideAnchor(snapshot, presentation.definitionScope);
+            this.frame = { ...frame, token: next, snapshot, guideAnchor, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
             this.generation = next;
             this.runtime = undefined;
             if (syncSelection) {
@@ -615,6 +651,7 @@ export class DesignerPanel implements vscode.Disposable {
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             if (snapshot.image) this.timelinePose = snapshot.timelinePose;
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
+                guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
@@ -672,6 +709,15 @@ export class DesignerPanel implements vscode.Disposable {
         }
         if (message.type === 'canvasResult') {
             this.canvasRequests.receive(message);
+            return;
+        }
+        if (message.type === 'guideEdit') {
+            try {
+                const update = await this.editCanvasGuides(message.frame, message.epoch, message.edit);
+                this.post({ type: 'guideResult', frame: message.frame, request: message.request, selected: update.selected });
+            } catch (error) {
+                this.post({ type: 'guideResult', frame: message.frame, request: message.request, error: errorMessage(error) });
+            }
             return;
         }
         if (message.type === 'refresh') {
@@ -798,6 +844,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private syncCanvas(): void {
+        const guides = this.canvasGuides;
         this.rememberView();
         this.showRecording();
         const frame = this.frame;
@@ -805,12 +852,21 @@ export class DesignerPanel implements vscode.Disposable {
             const anchor = frame.snapshot.activeBlock?.start;
             const sourceKey = `${frame.version}:${anchor?.line ?? 0}:${anchor?.character ?? 0}`;
             this.post({ type: 'snapshot', frame: { session: this.session, token: frame.token }, sourceKey, snapshot: frame.canvas, viewport: frame.viewport,
-                selected: this.selected, selection: this.selection, runtime: this.runtime });
+                selected: this.selected, selection: this.selection, runtime: this.runtime, guides });
         } else if (this.problem) {
             this.post({ type: 'error', message: this.problem });
         } else {
             this.post({ type: 'pending' });
         }
+    }
+
+    private guideAnchor(snapshot: Snapshot, definition?: number | null): GuideAnchor | undefined {
+        if (!snapshot.image || snapshot.renderError) return;
+        if (snapshot.activeBlock) return { kind: 'rsx', start: snapshot.activeBlock.start };
+        if (this.language !== 'xaml') return;
+        if (definition == null) return { kind: 'document' };
+        const range = snapshot.nodes.find(node => node.id === definition)?.nameRange;
+        if (range) return { kind: 'definition', start: range.start };
     }
 
     private showRecording(): void {
@@ -823,7 +879,7 @@ export class DesignerPanel implements vscode.Disposable {
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         this.post({ type: 'viewState', state: { version: 1, uri: this.document.uri.toString(),
             caret: { line: caret.line, character: caret.character }, viewport: this.viewport, designData: this.designData,
-            layerViews: this.layers.saved } });
+            layerViews: this.layers.saved, guideViews: this.guides.saved } });
     }
 
     private async getClient(): Promise<NativePreview> {

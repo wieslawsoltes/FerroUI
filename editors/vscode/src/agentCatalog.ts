@@ -9,6 +9,14 @@ const workspacePath = { type: 'string', maxLength: 4096 };
 const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath,
     label: workspacePath, features: { type: 'array', items: workspacePath, maxItems: 128 } };
 const unit = { type: 'number', minimum: 0, maximum: 1 };
+const guidePosition = { type: 'number', minimum: -1_000_000, maximum: 1_000_000 };
+const guideAxis = choice('Horizontal', 'Vertical');
+const guideEdit = { type: 'object', additionalProperties: false, required: ['action'], properties: {
+    action: choice('visibility', 'add', 'move', 'duplicate', 'remove', 'clear', 'apply'), rulers: truth, guides: truth,
+    id: node, axis: guideAxis, position: guidePosition,
+    lines: { type: 'array', maxItems: 256, items: { type: 'object', additionalProperties: false, required: ['axis', 'position'],
+        properties: { id: node, axis: guideAxis, position: guidePosition } } },
+} };
 const wheel = { type: 'number', minimum: -64, maximum: 64 };
 const time = { type: 'number', minimum: 0 };
 const previewRange = { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'],
@@ -147,6 +155,9 @@ export const agentCatalog = {
         { ...session, tab: choice('preview', 'counterpart'), mode: choice('select', 'interact'), zoom: choice('fit', 'fit_selection', 'actual'),
             scale: { type: 'number', minimum: 0.125, maximum: 8 }, pan_x: { type: 'number' }, pan_y: { type: 'number' }, pan_tool: truth, focus_order: truth },
         ['session'], true, false),
+    designer_canvas_guides: tool('Read the active canvas scope, ruler visibility, and guides in logical coordinates.', session, ['session']),
+    designer_canvas_guides_edit: tool('Change local canvas guides or visibility. Use the reported revision and epoch. Apply edits a complete set atomically.',
+        { ...frame, expected_epoch: integer(0), edit: guideEdit }, ['session', 'expected_revision', 'expected_epoch', 'edit'], true, false),
     designer_canvas_input: tool('Interact with the native design preview at the current revision. Click or scroll at normalized x and y. Send text or a key gesture to the focused preview control.',
         { ...frame, input: { type: 'object', additionalProperties: false, required: ['kind'], properties: {
             kind: choice('click', 'scroll', 'text', 'key'), x: unit, y: unit, dx: wheel, dy: wheel,

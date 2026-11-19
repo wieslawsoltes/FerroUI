@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
+import type { GuideCatalog, GuideEdit, GuideSettings, GuideUpdate } from './canvasGuidesProtocol';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
 import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
@@ -33,6 +34,7 @@ export class NativePreview implements vscode.Disposable {
     private readonly projects = new WeakMap<BuiltProject, Promise<number>>();
     private nextProject = 0;
     assets: readonly Asset[] = [];
+    canvasGuides?: GuideCatalog;
     capabilities: {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
@@ -67,10 +69,11 @@ export class NativePreview implements vscode.Disposable {
         const command = await commandFor('preview', context);
         const client = new NativePreview(command, channel);
         try {
-            const hello = await client.send<{ version: number; assets: Asset[]; capabilities?: NativePreview['capabilities'] }>('initialize');
+            const hello = await client.send<{ version: number; assets: Asset[]; capabilities?: NativePreview['capabilities']; canvasGuides?: GuideCatalog }>('initialize');
             if (hello.version !== 4) throw new Error(`Preview protocol ${hello.version} is incompatible with this extension.`);
             client.assets = hello.assets;
             client.capabilities = hello.capabilities ?? {};
+            client.canvasGuides = hello.canvasGuides;
             return client;
         } catch (error) {
             client.dispose();
@@ -79,6 +82,11 @@ export class NativePreview implements vscode.Disposable {
     }
 
     get closed(): boolean { return this.stopped; }
+
+    editCanvasGuides(settings: GuideSettings, edit: GuideEdit): Promise<GuideUpdate> {
+        if (!this.canvasGuides) throw new Error('Update the FerroUI preview helper to edit canvas guides.');
+        return this.send('canvasGuideEdit', { settings, edit });
+    }
 
     async inProject(source: Source, project?: BuiltProject): Promise<Source> {
         if (!project || !this.capabilities.projectCatalog) return source;

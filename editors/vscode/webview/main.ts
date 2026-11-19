@@ -3,6 +3,7 @@ import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { ResizeHandles } from './resizeHandles';
 import { CanvasInput } from './canvasInput';
+import { CanvasGuides } from './canvasGuides';
 import { CanvasViewport } from './canvasViewport';
 import { Counterpart } from './counterpart';
 import { anchorPopover, element } from './dom';
@@ -62,6 +63,7 @@ const drag = new CanvasDrag(artboard, () => current && !applying && !input.panni
 const resize = new ResizeHandles(artboard, gesture => {
     if (current && !applying && !input.panning && interaction.mode === 'select') vscode.postMessage({ type: 'resize', token, ...gesture });
 });
+const guides = new CanvasGuides(viewport, () => input.panning, vscode.postMessage, error => showStatus('error', error));
 const size = new ViewportMenu(viewport => vscode.postMessage({ type: 'viewport', viewport }));
 const counterpart = new Counterpart(apply);
 const focusOverlay = new FocusOverlay(token => vscode.postMessage({ type: 'focusOrder', token }), node => select(node, true));
@@ -120,6 +122,7 @@ function showDesign(show: boolean): void {
     element('counterpart').hidden = show;
     previewTab.setAttribute('aria-pressed', String(show));
     sourceTab.setAttribute('aria-pressed', String(!show));
+    if (show) guides.schedule();
 }
 
 function controlCanvas(request: number, action: CanvasAction): void {
@@ -185,6 +188,7 @@ function updateSelection(): void {
     const enabled = current && !applying;
     const selecting = interaction.mode === 'select';
     const image = artboard.isCurrent ? snapshot?.image : undefined;
+    guides.setAvailable(Boolean(enabled && image), selecting);
     focusOverlay.update(Boolean(snapshot?.focusOrderAvailable), selecting, enabled && image
         ? { token, width: image.width, height: image.height, nodes: snapshot!.nodes } : undefined);
     viewport.element.dataset.mode = interaction.mode;
@@ -243,6 +247,7 @@ function stageSnapshot(message: SnapshotMessage): void {
         selected = message.selected;
         selection = message.selection ?? [];
         runtime = message.runtime;
+        if (artboard.isCurrent) guides.present(message.guides);
         updateSelection();
         return;
     }
@@ -272,7 +277,10 @@ function presentSnapshot(message: SnapshotMessage, bitmap?: ImageBitmap | null):
     runtime = message.runtime;
     current = true;
     const hasImage = bitmap !== undefined;
-    if (hasImage) artboard.present(snapshot, message.viewport, bitmap);
+    if (hasImage) {
+        artboard.present(snapshot, message.viewport, bitmap);
+        guides.present(message.guides);
+    }
     drag.setFrame(hasImage ? message.frame : undefined);
     size.show(message.viewport);
     counterpart.show(snapshot.counterpart, message.sourceKey);
@@ -320,6 +328,11 @@ function receive(message: ToDesigner): void {
             flushCanvasActions();
             return;
         case 'snapshot': stageSnapshot(message); return;
+        case 'guides':
+            if (staged?.frame.token === message.state.frame.token && staged.frame.session === message.state.frame.session) staged.guides = message.state;
+            else if (current && artboard.isCurrent && message.state.frame.token === token) guides.present(message.state);
+            return;
+        case 'guideResult': guides.result(message); return;
         case 'focusOrder':
             if (message.overlay) focusOverlay.show(message.token, message.overlay);
             else if (message.token === token && message.error) showStatus('notice', message.error);

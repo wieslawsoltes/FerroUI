@@ -1,4 +1,6 @@
 import type { LayerViewState, LayerViewsState } from './layerViews';
+import type { CanvasGuidesState, GuideEdit } from './canvasGuidesProtocol';
+import type { GuideViewsState } from './guideViews';
 import type { KeyframeLocation, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeTransitionPosition } from './stateTransitionProtocol';
 
@@ -36,6 +38,7 @@ export interface DesignerViewState {
     viewport: Viewport;
     designData?: DesignDataPresentation;
     layerViews?: LayerViewsState;
+    guideViews?: GuideViewsState;
 }
 export function isViewport(value: unknown): value is Viewport {
     if (!value || typeof value !== 'object') return false;
@@ -243,6 +246,7 @@ export interface CanvasPresentation {
     nodes: Array<{ id: number; bounds: Bounds | null; canInsert: boolean; canMove: boolean; selectable: boolean }>;
     notices: string[];
     selection: number[];
+    definitionScope?: number | null;
     layerView?: LayerViewState;
     timelinePosition?: { time: number; elapsed?: number; all?: boolean; completed?: boolean; playing: boolean; pose?: TimelinePreviewPose | null };
     timelineTargets?: TimelineTargetOverrides;
@@ -287,6 +291,7 @@ export type FromDesigner = DragMessage
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'focusOrder'; token: number }
+    | { type: 'guideEdit'; frame: FrameTarget; epoch: number; edit: GuideEdit; request: number }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }
     | { type: 'interaction'; token: number; action: CanvasInteraction }
@@ -298,7 +303,9 @@ export type ToDesigner = DragUpdate | PlacementResult
     | { type: 'recording'; time?: number }
     | { type: 'canvasAction'; request: number; action: CanvasAction }
     | { type: 'pending' }
-    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
+    | { type: 'snapshot'; frame: FrameTarget; sourceKey: string; snapshot: CanvasSnapshot; viewport: Viewport; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow; guides?: CanvasGuidesState }
+    | { type: 'guides'; state: CanvasGuidesState }
+    | { type: 'guideResult'; frame: FrameTarget; request: number; selected?: number | null; error?: string }
     | { type: 'error'; message: string }
     | { type: 'selection'; token: number; selected: number | undefined; selection?: number[]; runtime?: RuntimeRow }
     | { type: 'focusOrder'; token: number; overlay?: CanvasFocusOrder; error?: string }

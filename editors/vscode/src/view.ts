@@ -35,6 +35,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             ${tool('zoom-in', 'add', 'Zoom in (+)')}
         </div>
         ${tool('pan', 'move', 'Pan canvas (Space and drag)', 'aria-pressed="false"')}
+        ${tool('guides-button', 'symbol-ruler', 'Canvas Guides', 'popovertarget="guides-menu" aria-haspopup="dialog" disabled')}
         <output id="canvas-recording" class="canvas-recording" role="status" hidden>${icon('circle-filled')}<span></span></output>
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
@@ -48,7 +49,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 <div class="designer-content">
 <div id="status" class="status" role="status" hidden></div>
 <main id="preview" aria-label="Design" aria-busy="true">
-    <div id="canvas" class="canvas preview-surface" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter ArrowUp ArrowDown">
+    <div id="canvas" class="canvas preview-surface" tabindex="0" role="region" aria-label="Preview canvas" aria-keyshortcuts="0 1 + - Space Enter ArrowUp ArrowDown Shift+R Shift+G">
         <div id="stage" class="stage">
             <div id="placeholder" class="placeholder">${icon('preview')}<span id="empty-state">Rendering preview…</span></div>
             <div id="artboard" class="artboard" hidden>
@@ -60,6 +61,13 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
                 <div id="focus-order" class="focus-overlay" role="group" aria-label="Native keyboard navigation" hidden></div>
             </div>
         </div>
+    </div>
+    <div id="guide-overlay" class="guide-overlay" hidden>
+        <canvas id="ruler-top" class="canvas-ruler" role="img" aria-label="Horizontal ruler"></canvas>
+        <canvas id="ruler-left" class="canvas-ruler" role="img" aria-label="Vertical ruler"></canvas>
+        <span id="ruler-origin" class="ruler-origin" title="Logical pixels" aria-hidden="true">px</span>
+        <div id="guide-lines" class="guide-lines" role="group" aria-label="Canvas guides"></div>
+        <div id="guide-ghost" class="guide-line guide-ghost" aria-hidden="true" hidden><span></span></div>
     </div>
     <button id="selection-label" class="selection-label" title="Reveal selection in source" hidden>${icon('go-to-file')}<span id="selected-control" aria-live="polite"></span></button>
     <output id="drop-hint" class="drop-hint" aria-live="polite" hidden></output>
@@ -103,6 +111,32 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         <button type="button" data-scale="4">400%</button>
     </div>
 </div>
+<div id="guides-menu" class="popover guides-menu" popover role="dialog" aria-labelledby="guides-title">
+    <form id="guides-form">
+        <div class="guide-menu-heading">
+            <strong id="guides-title">Canvas Guides</strong>
+            <span id="guides-scope"></span>
+        </div>
+        <div class="guide-visibility">
+            <label><input id="guides-rulers-visible" type="checkbox" autofocus> Rulers</label>
+            <label><input id="guides-visible" type="checkbox"> Guides</label>
+        </div>
+        <div class="guide-position-heading">
+            <span id="guide-positions-label">Positions (px)</span>
+            <div class="guide-menu-tools" role="group" aria-label="Guide actions">
+                ${tool('add-horizontal-guide', 'split-vertical', 'Add horizontal guide')}
+                ${tool('add-vertical-guide', 'split-horizontal', 'Add vertical guide')}
+                ${tool('clear-guides', 'clear-all', 'Clear guides')}
+            </div>
+        </div>
+        <div id="guide-positions" role="group" aria-labelledby="guide-positions-label"></div>
+        <p id="guides-error" role="status" hidden></p>
+        <div class="guide-menu-actions">
+            <button type="button" id="guides-cancel" class="secondary">Cancel</button>
+            <button type="submit" id="guides-apply" class="primary">Apply</button>
+        </div>
+    </form>
+</div>
 <div id="actions-menu" class="popover zoom-menu" popover>
     <button type="button" class="compact-action" id="menu-toolbox">Show Toolbox</button>
     <button type="button" class="compact-action" id="menu-outline">Show Outline</button>
@@ -116,7 +150,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" id="menu-library">Show Library</button>
     <button type="button" id="menu-focus-order" aria-pressed="false" disabled>Focus Order Overlay</button>
     <button type="button" class="compact-action" id="menu-refresh">Refresh preview</button>
-</div>`);
+</div>`, ['canvas-guides']);
 }
 
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {

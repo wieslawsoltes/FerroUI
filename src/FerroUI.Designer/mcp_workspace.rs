@@ -7,8 +7,11 @@ use ferroui_designer_project::{BuildTask, TaskKind};
 use serde_json::{json, Value};
 use std::rc::Rc;
 
+#[path = "mcp_canvas_guides.rs"]
+mod canvas_guides;
+
 pub(super) fn handles(name: &str) -> bool {
-    matches!(
+    canvas_guides::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -81,7 +84,7 @@ pub(super) fn tools() -> Vec<Value> {
         })
         .collect();
     tasks.push(s::action("cancel", json!({}), &[], true));
-    vec![
+    let mut tools = vec![
         s::tool("designer_reveal_rsx_animation_issue", "Reveal a computed or unsupported clip expression from the current Rust Timeline sourceIssues list.",
             s::object(json!({"index":s::revision(),"expected_revision":s::revision()}), &["index","expected_revision"]), false),
         s::tool("designer_reveal_rsx_state", "Reveal a mapped Rust state group or its exact route. Pass owner and group from designer_states. Include to and optionally from for a route.",
@@ -98,13 +101,18 @@ pub(super) fn tools() -> Vec<Value> {
         s::actions("designer_project_task","Save checked editor buffers and explicitly start a Cargo check/build/run task, or cancel the owned task. Starting a process additionally requires allow_input because builds execute the project's build scripts with host privileges. Poll designer_project for status/output; no shell text is accepted.",tasks,true),
         s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 byte offsets; returned ranges are LSP UTF-16. format returns text edits with the current version; rename returns a versioned WorkspaceEdit for designer_language_apply.",queries,false),
         s::tool("designer_language_apply","Apply a prepared multi-document language WorkspaceEdit atomically through retained editor tabs and the project version guards. The active document also requires expected_revision; no files are saved automatically.",s::object(json!({"expected_revision":s::revision(),"edit":s::workspace_edit()}),&["expected_revision","edit"]),true),
-    ]
+    ];
+    tools.extend(canvas_guides::tools());
+    tools
 }
 pub(super) fn call(
     workspace: &Rc<DesignerWorkspace>,
     name: &str,
     args: &Value,
 ) -> Result<Value, String> {
+    if canvas_guides::handles(name) {
+        return canvas_guides::call(workspace, name, args);
+    }
     match name {
         "designer_reveal_rsx_animation_issue" => {
             workspace.reveal_rust_animation_issue(integer(args, "expected_revision")?, index(args, "index")?)?;

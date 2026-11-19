@@ -51,6 +51,7 @@ pub(crate) struct Presentation {
     nodes: Vec<PresentedNode>,
     notices: Vec<String>,
     selection: Vec<NodeId>,
+    definition_scope: Option<NodeId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     layer_view: Option<LayerViewState>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -173,6 +174,7 @@ impl Renderer {
             nodes,
             notices: frame.notices,
             selection: session.selection().to_vec(),
+            definition_scope: session.definition_scope().map(|scope| scope.node),
             layer_view: include_layers.then(|| session.persist_layer_view()),
             timeline_position: None,
             timeline_targets: None,

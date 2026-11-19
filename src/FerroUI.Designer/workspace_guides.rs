@@ -26,6 +26,13 @@ pub struct CanvasGuideEditSnapshot {
     epoch: u64,
 }
 
+#[cfg(feature = "mcp")]
+impl CanvasGuideEditSnapshot {
+    pub(crate) fn epoch(&self) -> u64 {
+        self.epoch
+    }
+}
+
 /// Retained tab presentation. This can only restore into the matching document allocation.
 #[derive(Clone)]
 pub struct CanvasGuideViewSnapshot {
@@ -138,6 +145,20 @@ impl DesignerWorkspace {
     ) -> Result<(), String> {
         self.validate_canvas_guide_snapshot(snapshot)?;
         self.set_canvas_guides(value)
+    }
+
+    pub fn apply_canvas_guide_edit(
+        &self,
+        snapshot: &CanvasGuideEditSnapshot,
+        edit: CanvasGuideEdit,
+    ) -> Result<(), String> {
+        self.validate_canvas_guide_snapshot(snapshot)?;
+        let update = edit.plan(&self.canvas_guides())?;
+        self.set_canvas_guides(update.settings)?;
+        if update.selected.is_some() {
+            self.select_canvas_guide(update.selected);
+        }
+        Ok(())
     }
 
     fn validate_canvas_guide_snapshot(
