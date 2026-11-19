@@ -1,19 +1,52 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel>
-    <StackPanel.Resources>
-      <ControlTheme x:Key="AccentButton" TargetType="Button">
-        <Setter Property="Background" Value="#0078D4"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Template">
-          <ControlTemplate>
-            <Border Background="{TemplateBinding Background}" Padding="18,10" CornerRadius="6">
-              <ContentPresenter Content="{TemplateBinding Content}"/>
-            </Border>
-          </ControlTemplate>
-        </Setter>
-      </ControlTheme>
-    </StackPanel.Resources>
-    <Button Content="An explicitly themed Button" Theme="{StaticResource AccentButton}"/>
+<!-- Ported from the two pinned XamlStyles examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. FerroUI's styles are selectors: the source's keyed
+     CustomButtonStyle, based on the default button style (ButtonRevealStyle), is the style of the
+     class CustomButtonStyle, which a button applies with Classes (the button keeps its theme, and
+     a local Background still overrides the style's); the implicit style of the TextBlocks is the
+     style of the selector TextBlock in the panel's Styles, applied to every TextBlock in it.
+     ThemeResource is DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Margin="0,12,0,0" Spacing="12">
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="The definition of styles is similiar to other resources: app-level, page-level, control-level." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="• " /><Run FontWeight="SemiBold" Text="Styles" /><Run Text=" are reusable collections of property settings for a specific control type." /></Paragraph>
+      <Paragraph><Run Text="• A " /><Run FontWeight="SemiBold" Text="keyed style" /><Run Text=" is used for explicit application, while an " /><Run FontWeight="SemiBold" Text="implicit style" /><Run Text=" is used for automatic application to all controls of a type." /></Paragraph>
+      <Paragraph><Run Text="• Styles improve maintainability, consistency, and reduce repetition in XAML code." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Creating and applying a style" FontSize="18" />
+    <StackPanel x:Name="KeyedStyleExample" Spacing="8">
+      <StackPanel.Styles>
+        <Style Selector="Button.CustomButtonStyle">
+          <Setter Property="Background" Value="{DynamicResource AccentAcrylicBackgroundFillColorDefaultBrush}" />
+          <Setter Property="MinWidth" Value="200" />
+        </Style>
+      </StackPanel.Styles>
+      <Button x:Name="DefaultStyleButton" Content="Default style" />
+      <Button x:Name="CustomStyleButton" Classes="CustomButtonStyle" Content="Custom style" />
+      <Button x:Name="OverriddenStyleButton" Classes="CustomButtonStyle"
+              Background="{DynamicResource SystemFillColorCriticalBackgroundBrush}"
+              Content="Custom style with overridden background" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Style without a key (implicit style)" FontSize="18" />
+    <StackPanel x:Name="ImplicitStyleExample">
+      <StackPanel.Styles>
+        <Style Selector="TextBlock">
+          <Setter Property="FontSize" Value="16" />
+          <Setter Property="FontFamily" Value="Consolas" />
+          <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+      </StackPanel.Styles>
+      <TextBlock x:Name="ImplicitText1" Text="This style is applied automatically!" />
+      <TextBlock x:Name="ImplicitText2" Text="No need to set a key." />
+    </StackPanel>
   </StackPanel>
 </StackPanel>
