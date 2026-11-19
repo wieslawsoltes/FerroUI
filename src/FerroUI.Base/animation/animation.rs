@@ -18,6 +18,21 @@ use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
+/// The rejection of a setter without a property.
+const NO_SETTER_PROPERTY: &str = "No Setter property assigned.";
+
+/// The rejection of a preview of the transform animator on a CSS `TransformOperations` value.
+const CSS_TRANSFORM_TARGET: &str = "The native component animator cannot target an existing CSS \
+    TransformOperations value; use a native TransformGroup or a registered transform animator.";
+
+/// The rejection of a property no animator is registered for.
+fn no_animator_message(property: &'static FerroProperty) -> String {
+    format!(
+        "No animator registered for the property {property}. Add an animator to the \
+         Animation.Animators collection that matches this property to animate it."
+    )
+}
+
 struct PreviewTransform {
     target: WeakRef<Visual>,
     transform: Rc<dyn crate::media::ITransform>,
@@ -224,7 +239,7 @@ impl Animation {
         for keyframe in self.children.snapshot().iter() {
             for setter in keyframe.setters().snapshot().iter() {
                 let Some(property) = setter.property() else {
-                    panic!("No Setter property assigned.");
+                    panic!("{NO_SETTER_PROPERTY}");
                 };
                 if only_property.is_some_and(|only| only != property) {
                     continue;
@@ -238,9 +253,7 @@ impl Animation {
                     .or_else(|| Animation::get_animator_type(property));
 
                 let Some((type_, factory)) = handler else {
-                    panic!(
-                        "No animator registered for the property {property}. Add an animator to the Animation.Animators collection that matches this property to animate it."
-                    );
+                    panic!("{}", no_animator_message(property));
                 };
 
                 if !handler_list
@@ -474,7 +487,7 @@ impl Animation {
                                 setter.property().and_then(Animation::get_animator_type)
                             });
                             if handler.is_some_and(|(kind, _)| kind == TypeId::of::<crate::animation::animators::TransformAnimator>()) {
-                                panic!("The native component animator cannot target an existing CSS TransformOperations value; use a native TransformGroup or a registered transform animator.");
+                                panic!("{CSS_TRANSFORM_TARGET}");
                             }
                         }
                     }
@@ -504,6 +517,73 @@ impl Animation {
             applied.dispose();
             drop(preview);
         })
+    }
+
+    /// [`apply_for_preview`](Self::apply_for_preview), with the programs the framework rejects
+    /// as `Err` instead of a panic (#567): a setter without a property, a property no animator
+    /// is registered for, a CSS `TransformOperations` target of the transform animator, a
+    /// transform animation of a target that is not a `Visual`, and a negative speed ratio,
+    /// delay, duration or delay between iterations (or an iteration count above `i64::MAX`).
+    /// The error has the message `apply_for_preview` panics with; nothing is applied then.
+    ///
+    /// What an animator checks itself (an animator given explicitly for a property of another
+    /// value type, the checks of an application's animator) still panics.
+    pub fn try_apply_for_preview(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
+        self.validate_for_preview(control)?;
+        Ok(self.apply_for_preview(control, clock, on_complete))
+    }
+
+    /// The first rejection of [`try_apply_for_preview`](Self::try_apply_for_preview), in the
+    /// order `apply_for_preview` meets them: the CSS target, the key frames
+    /// (`interpret_keyframes`), then each animator as it is applied (the target of the
+    /// transform animator, the timing of the instance it creates).
+    fn validate_for_preview(&self, control: &Animatable) -> Result<(), AnimationError> {
+        let transform_animator = TypeId::of::<crate::animation::animators::TransformAnimator>();
+        let visual = control.downcast_ref::<Visual>();
+        let css_target = visual.is_some_and(|visual| {
+            visual
+                .render_transform()
+                .is_some_and(|value| value.as_any().is::<crate::media::transformation::TransformOperations>())
+        });
+        let keyframes = self.children.snapshot();
+        if css_target {
+            for keyframe in keyframes.iter() {
+                for setter in keyframe.setters().snapshot().iter() {
+                    let handler = Animation::get_animator(setter)
+                        .or_else(|| setter.property().and_then(Animation::get_animator_type));
+                    if handler.is_some_and(|(kind, _)| kind == transform_animator) {
+                        return Err(AnimationError(CSS_TRANSFORM_TARGET.to_string()));
+                    }
+                }
+            }
+        }
+        let mut animators: Vec<(TypeId, &'static FerroProperty)> = Vec::new();
+        for keyframe in keyframes.iter() {
+            for setter in keyframe.setters().snapshot().iter() {
+                let Some(property) = setter.property() else {
+                    return Err(AnimationError(NO_SETTER_PROPERTY.to_string()));
+                };
+                let Some((kind, _)) = Animation::get_animator(setter).or_else(|| Animation::get_animator_type(property))
+                else {
+                    return Err(AnimationError(no_animator_message(property)));
+                };
+                if !animators.contains(&(kind, property)) {
+                    animators.push((kind, property));
+                }
+            }
+        }
+        for (kind, _) in animators {
+            if kind == transform_animator && visual.is_none() {
+                return Err(AnimationError(crate::animation::animators::not_a_visual_message(control)));
+            }
+            crate::animation::animation_instance::validate_timing(self)?;
+        }
+        Ok(())
     }
 
     pub(crate) fn retain_preview_subscription(&self, subscription: &Rc<dyn IDisposable>) {

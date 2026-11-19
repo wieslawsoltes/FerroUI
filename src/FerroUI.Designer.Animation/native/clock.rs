@@ -115,19 +115,18 @@ impl NativeRun {
         let clock = Rc::new(NativeClock::default());
         let complete = Rc::new(Cell::new(false));
         let completed = complete.clone();
+        // Framework validation returns errors. Application animators and property
+        // observers can still unwind, so keep them inside the preview boundary.
         let subscription = catch_unwind(AssertUnwindSafe(|| {
-            animation.apply_for_preview(
+            animation.try_apply_for_preview(
                 target,
                 Some(clock.clone()),
                 Some(Rc::new(move || completed.set(true))),
             )
         }))
-        .map_err(|payload| {
-            format!(
-                "Native animation rejected the program: {}",
-                panic_message(payload)
-            )
-        })?;
+        .map_err(panic_message)
+        .and_then(|applied| applied.map_err(|error| error.to_string()))
+        .map_err(|message| format!("Native animation rejected the program: {message}"))?;
         Ok(Self {
             clock,
             subscription,

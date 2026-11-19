@@ -225,3 +225,198 @@ fn a_large_image_is_drawn_in_tiles_without_seams() {
     let image = render(&scene, PixelSize::new(300, 200), 1.0, CpuRenderOptions::default());
     assert!(image.rgba.chunks_exact(4).all(|pixel| pixel == [0, 255, 0, 255]));
 }
+
+// Step D6: the brushes of the layers.
+
+/// Red to blue from the left of the box of the texture coordinates to its right.
+fn horizontal_gradient(stops: usize) -> ferroui_base::media::immutable::ImmutableLinearGradientBrush {
+    use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
+    let stops: Vec<ImmutableGradientStop> = (0..stops)
+        .map(|index| {
+            let f = index as f64 / (stops - 1) as f64;
+            let level = (255.0 * f).round() as u8;
+            ImmutableGradientStop::new(f, Color::from_argb(255, 255 - level, 0, level))
+        })
+        .collect();
+    ImmutableLinearGradientBrush::new(
+        &stops,
+        1.0,
+        None,
+        None,
+        ferroui_base::media::GradientSpreadMethod::Pad,
+        Some(ferroui_base::RelativePoint::TOP_LEFT),
+        Some(ferroui_base::RelativePoint::new(1.0, 0.0, ferroui_base::RelativeUnit::Relative)),
+        None,
+    )
+}
+
+/// The red to blue of a pixel column of the quad over the whole image (its texture coordinate
+/// `u` is the centre of the column): within a level.
+#[track_caller]
+fn assert_gradient_column(image: &Scene3DImage, x: u32, y: u32, alpha: u8) {
+    let u = (f64::from(x) + 0.5) / 100.0;
+    let pixel = image.pixel(x, y);
+    let expected = [((1.0 - u) * 255.0).round() as u8, 0, (u * 255.0).round() as u8];
+    for i in 0..3 {
+        assert!(pixel[i].abs_diff(expected[i]) <= 1, "column {x}: {pixel:?}, expected {expected:?}");
+    }
+    assert_eq!(alpha, pixel[3], "column {x}");
+}
+
+#[test]
+fn a_diffuse_layer_paints_its_gradient_over_the_texture_coordinates() {
+    use crate::test_scenes::brush_layer;
+    use ferroui_base::rendering::scene3d::Scene3DMaterialKind;
+    for stops in [2, 12] {
+        let brush = horizontal_gradient(stops);
+        let layers = vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush)];
+        let quad = model(quad(1, -1.0, -1.0, 1.0, 1.0, 0.0), layers, vec![]);
+        let before = crate::layers_with_unsampled_brushes();
+        let image = draw(&snapshot(orthographic(), vec![quad], vec![white_ambient()]), CpuRenderOptions::default());
+        for x in [0, 25, 50, 77, 99] {
+            assert_gradient_column(&image, x, 50, 255);
+        }
+        assert_eq!(before, crate::layers_with_unsampled_brushes(), "{stops} stops are sampled");
+    }
+}
+
+#[test]
+fn the_specular_and_emissive_layers_of_a_group_add_their_brushes() {
+    use crate::test_scenes::{brush_layer, image_brush, PixelBitmap};
+    use ferroui_base::media::{Stretch, TileMode};
+    use ferroui_base::rendering::scene3d::{Scene3DLight, Scene3DMaterialKind};
+    use ferroui_base::RelativeRect;
+    let black = Color::from_argb(255, 0, 0, 0);
+    // Left: a black diffuse layer and the gradient as the brush of a specular layer, lit head on
+    // (the highlight is the light's colour everywhere: N, L and H along +z).
+    let gradient = horizontal_gradient(2);
+    let specular = model(
+        quad(1, -1.0, -1.0, 1.0, 0.0, 0.0),
+        vec![diffuse(black), brush_layer(Scene3DMaterialKind::Specular, &gradient)],
+        vec![],
+    );
+    // Right half of the top: a black diffuse layer and an image (green) as the brush of an
+    // emissive layer.
+    let green = PixelBitmap::rgba(2, 2, [0, 255, 0, 255].repeat(4));
+    let image = image_brush(&green, Stretch::Fill, TileMode::None, RelativeRect::FILL, RelativeRect::FILL);
+    let emissive_model = model(
+        quad(2, -1.0, 0.0, 1.0, 1.0, 0.0),
+        vec![diffuse(black), brush_layer(Scene3DMaterialKind::Emissive, &image)],
+        vec![],
+    );
+    let direction = ferroui_base::numerics::Vector3::new(0.0, 0.0, -1.0);
+    let light = Scene3DLight::Directional { color: WHITE, direction };
+    let scene = snapshot(orthographic(), vec![specular, emissive_model], vec![light]);
+    let image = draw(&scene, CpuRenderOptions::default());
+    // The bottom half: the gradient of the specular layer added to black.
+    for x in [10, 40, 90] {
+        assert_gradient_column(&image, x, 75, 255);
+    }
+    // The top half: the image of the emissive layer added to black.
+    assert_eq!([0, 255, 0, 255], image.pixel(50, 25));
+}
+
+#[test]
+fn the_texels_of_a_brush_are_read_once_while_the_rasterizer_keeps_them() {
+    use crate::test_scenes::{brush_layer, image_brush, PixelBitmap};
+    use ferroui_base::media::{Stretch, TileMode};
+    use ferroui_base::rendering::scene3d::Scene3DMaterialKind;
+    use ferroui_base::RelativeRect;
+    let bitmap = PixelBitmap::rgba(1, 1, vec![255, 0, 0, 255]);
+    let brush = image_brush(&bitmap, Stretch::Fill, TileMode::None, RelativeRect::FILL, RelativeRect::FILL);
+    let gradient = horizontal_gradient(12);
+    let models = vec![
+        model(quad(1, -1.0, -1.0, 0.0, 1.0, 0.0), vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush)], vec![]),
+        model(quad(2, 0.0, -1.0, 1.0, 1.0, 0.0), vec![brush_layer(Scene3DMaterialKind::Diffuse, &gradient)], vec![]),
+    ];
+    let scene = snapshot(orthographic(), models, vec![white_ambient()]);
+    let mut rasterizer = CpuRasterizer::new();
+    let before = brush_textures_read();
+    let first = rasterizer.render(&scene, SIZE, 1.0, CpuRenderOptions::default());
+    assert_eq!(before + 2, brush_textures_read(), "the image and the lookup texture");
+    assert_eq!([255, 0, 0, 255], first.pixel(25, 50));
+    rasterizer.render(&scene, SIZE, 1.0, CpuRenderOptions::default());
+    assert_eq!(before + 2, brush_textures_read(), "kept");
+    // New pixels of the bitmap: a new version, read again.
+    bitmap.set_pixels(vec![0, 0, 255, 255]);
+    let third = rasterizer.render(&scene, SIZE, 1.0, CpuRenderOptions::default());
+    assert_eq!(before + 3, brush_textures_read());
+    assert_eq!([0, 0, 255, 255], third.pixel(25, 50));
+}
+
+#[test]
+fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as_an_image() {
+    use ferroui_base::media::{Brushes, DrawingBrush, GeometryDrawing, IBrush, RectangleGeometry, SharedBrush, Stretch};
+    use ferroui_base::rendering::scene3d::{Scene3DBrushContent, Scene3DMaterialKind, Scene3DMaterialLayer};
+    use ferroui_base::rendering::testing::MockPlatformRenderInterface;
+    use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
+    let (_scope, _) = MockPlatformRenderInterface::install();
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some(Brushes::red()));
+    let rect = ferroui_base::Rect::new(0.0, 0.0, 20.0, 10.0);
+    drawing.set_geometry(RectangleGeometry::with_rect(rect).upcast::<ferroui_base::media::Geometry>());
+    let brush = DrawingBrush::new();
+    brush.set_drawing(&drawing);
+    brush.set_stretch(Stretch::Fill);
+    let handle: Rc<dyn IBrush> = brush.into();
+    let layer = |generation: u64| {
+        let content = Scene3DBrushContent::record(handle.as_scene_brush().unwrap(), 1, generation).unwrap();
+        Scene3DMaterialLayer {
+            brush: SharedBrush::from_scene_content(&*handle, content),
+            ..crate::test_scenes::layer(Scene3DMaterialKind::Diffuse, WHITE)
+        }
+    };
+    let scene = |generation: u64| {
+        snapshot(orthographic(), vec![model(quad(1, -1.0, -1.0, 1.0, 1.0, 0.0), vec![layer(generation)], vec![])], vec![
+            white_ambient(),
+        ])
+    };
+
+    // The renderer stands for the 2D renderer of a backend: it paints the left half of the
+    // content green and its right half blue, and records the sizes it was asked for.
+    let sizes = Arc::new(Mutex::new(Vec::new()));
+    let asked = sizes.clone();
+    let mut rasterizer = CpuRasterizer::new();
+    rasterizer.set_content_renderer(Some(Box::new(move |content: &Scene3DBrushContent, (width, height)| {
+        asked.lock().unwrap().push((content.generation(), width, height));
+        let mut rgba = Vec::new();
+        for _ in 0..height {
+            for x in 0..width {
+                rgba.extend_from_slice(if x < width / 2 { &[0, 255, 0, 255] } else { &[0, 0, 255, 255] });
+            }
+        }
+        Some(crate::brush::BrushTexels { width, height, rgba, premultiplied: true })
+    })));
+
+    let first = rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
+    // The content of 20 by 10 units at 2 pixels a unit.
+    assert_eq!(vec![(1, 40, 20)], *sizes.lock().unwrap());
+    assert_eq!([0, 255, 0, 255], first.pixel(20, 50));
+    assert_eq!([0, 0, 255, 255], first.pixel(80, 50));
+    // The same generation in a new snapshot: not rendered again.
+    rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
+    assert_eq!(1, sizes.lock().unwrap().len());
+    // A new generation is rendered again.
+    rasterizer.render(&scene(2), SIZE, 2.0, CpuRenderOptions::default());
+    assert_eq!(vec![(1, 40, 20), (2, 40, 20)], *sizes.lock().unwrap());
+
+    // Without a renderer the layer is drawn with its colour, and counted.
+    let before = crate::layers_with_unsampled_brushes();
+    let plain = CpuRasterizer::new().render(&scene(3), SIZE, 1.0, CpuRenderOptions::default());
+    assert_eq!([255, 255, 255, 255], plain.pixel(50, 50));
+    assert!(crate::layers_with_unsampled_brushes() > before);
+}
+
+/// The rasterizer, the output cache and the shared brushes of the materials keep the auto traits
+/// of the published release (`Send`, `Sync`, unwind safe) with the textures of brushes (the API
+/// gate checks them against the release; this test fails to compile first).
+#[test]
+fn the_rasterizer_the_output_cache_and_the_brushes_keep_their_auto_traits() {
+    use std::panic::{RefUnwindSafe, UnwindSafe};
+    fn auto_traits<T: Send + Sync + UnwindSafe + RefUnwindSafe>() {}
+    auto_traits::<CpuRasterizer>();
+    auto_traits::<crate::output_cache::Scene3DOutputCache<u8>>();
+    auto_traits::<ferroui_base::media::SharedBrush>();
+    auto_traits::<Scene3DSnapshot>();
+}

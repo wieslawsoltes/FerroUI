@@ -141,4 +141,44 @@
        Fluent theme of FerroUI (PasswordBoxRevealButtonData of
        src/FerroUI.Themes.Fluent/Controls/TextBox.xaml). -->
   <StreamGeometry x:Key="GlyphGeometryF78D">m10.051 7.0032c2.215 0 4.0105 1.7901 4.0105 3.9984s-1.7956 3.9984-4.0105 3.9984c-2.215 0-4.0105-1.7901-4.0105-3.9984s1.7956-3.9984 4.0105-3.9984zm0 1.4994c-1.3844 0-2.5066 1.1188-2.5066 2.499s1.1222 2.499 2.5066 2.499 2.5066-1.1188 2.5066-2.499-1.1222-2.499-2.5066-2.499zm0-5.0026c4.6257 0 8.6188 3.1487 9.7267 7.5613 0.10085 0.40165-0.14399 0.80877-0.54686 0.90931-0.40288 0.10054-0.81122-0.14355-0.91208-0.54521-0.94136-3.7492-4.3361-6.4261-8.2678-6.4261-3.9334 0-7.3292 2.6792-8.2689 6.4306-0.10063 0.40171-0.50884 0.64603-0.91177 0.54571s-0.648-0.5073-0.54737-0.90901c1.106-4.4152 5.1003-7.5667 9.728-7.5667z</StreamGeometry>
+  <!-- The glyphs of MediaTransportControls (MediaTransportControls_themeresources.xaml): FontIcon
+       glyphs of the template and the SymbolIcon symbols it names (Volume, Mute, Stop, RepeatAll,
+       RepeatOne, FullScreen, BackToWindow), drawn for the port in a box of 20 by 20. -->
+  <!-- F5B0 PlaySolid: PlayPauseSymbol and PlayPauseSymbolLeft in PlayState. -->
+  <StreamGeometry x:Key="GlyphGeometryF5B0">M6 3 L17 10 L6 17 Z</StreamGeometry>
+  <!-- F8AE PauseSolid: PlayPauseSymbol and PlayPauseSymbolLeft in PauseState. -->
+  <StreamGeometry x:Key="GlyphGeometryF8AE">M5 3 H8 V17 H5 Z M12 3 H15 V17 H12 Z</StreamGeometry>
+  <!-- E15B Stop: StopButton (Icon="Stop"). -->
+  <StreamGeometry x:Key="GlyphGeometryE15B">M5 5 H15 V15 H5 Z</StreamGeometry>
+  <!-- E15D Volume: VolumeMuteSymbol and AudioMuteSymbol in VolumeState. -->
+  <StreamGeometry x:Key="GlyphGeometryE15D">M2 7 H6 L11 3 V17 L6 13 H2 Z M13 6 V8 C15 9 15 11 13 12 V14 C18 12 18 8 13 6 Z M15 2 V4 C21 7 21 13 15 16 V18 C24 14 24 6 15 2 Z</StreamGeometry>
+  <!-- E198 Mute: VolumeMuteSymbol and AudioMuteSymbol in MuteState. -->
+  <StreamGeometry x:Key="GlyphGeometryE198">M2 7 H6 L11 3 V17 L6 13 H2 Z M14 6 L16 8 L18 6 L19.5 7.5 L17.5 9.5 L19.5 11.5 L18 13 L16 11 L14 13 L12.5 11.5 L14.5 9.5 L12.5 7.5 Z</StreamGeometry>
+  <!-- ED3C SkipBack10 and ED3D SkipForward30: SkipBackwardButton and SkipForwardButton. -->
+  <StreamGeometry x:Key="GlyphGeometryED3C">M10 2 V0 L6 3 L10 6 V4 A6 6 0 1 1 4 10 H2 A8 8 0 1 0 10 2 Z</StreamGeometry>
+  <StreamGeometry x:Key="GlyphGeometryED3D">M10 2 V0 L14 3 L10 6 V4 A6 6 0 1 0 16 10 H18 A8 8 0 1 1 10 2 Z</StreamGeometry>
+  <!-- E627 Rewind and E628 FastForward: RewindButton and FastForwardButton. -->
+  <StreamGeometry x:Key="GlyphGeometryE627">M10 4 L2 10 L10 16 Z M18 4 L10 10 L18 16 Z</StreamGeometry>
+  <StreamGeometry x:Key="GlyphGeometryE628">M2 4 L10 10 L2 16 Z M10 4 L18 10 L10 16 Z</StreamGeometry>
+  <!-- F8AC PreviousSolid and F8AD NextSolid: PreviousTrackButton and NextTrackButton. -->
+  <StreamGeometry x:Key="GlyphGeometryF8AC">M3 4 H5 V16 H3 Z M17 4 L6 10 L17 16 Z</StreamGeometry>
+  <StreamGeometry x:Key="GlyphGeometryF8AD">M15 4 H17 V16 H15 Z M3 4 L14 10 L3 16 Z</StreamGeometry>
+  <!-- EC57 Speed: PlaybackRateButton. -->
+  <StreamGeometry x:Key="GlyphGeometryEC57">M2 14 A8 8 0 0 1 18 14 H16 A6 6 0 0 0 4 14 Z M9 14 L13 7 L14.5 8 L11 15 Z</StreamGeometry>
+  <!-- E1CD RepeatAll and E1CC RepeatOne: RepeatSymbol in RepeatNoneState, RepeatAllState and
+       RepeatOneState. -->
+  <StreamGeometry x:Key="GlyphGeometryE1CD">M4 9 V8 A3 3 0 0 1 7 5 H14 V3 L17 6 L14 9 V7 H7 A1 1 0 0 0 6 8 V9 Z M16 11 V12 A3 3 0 0 1 13 15 H6 V17 L3 14 L6 11 V13 H13 A1 1 0 0 0 14 12 V11 Z</StreamGeometry>
+  <StreamGeometry x:Key="GlyphGeometryE1CC">M4 9 V8 A3 3 0 0 1 7 5 H14 V3 L17 6 L14 9 V7 H7 A1 1 0 0 0 6 8 V9 Z M16 11 V12 A3 3 0 0 1 13 15 H6 V17 L3 14 L6 11 V13 H13 A1 1 0 0 0 14 12 V11 Z M9.25 8.5 H10.75 V12 H9.25 Z</StreamGeometry>
+  <!-- E799 AspectRatio: ZoomButton. -->
+  <StreamGeometry x:Key="GlyphGeometryE799">M2 4 H18 V16 H2 Z M4 6 V14 H16 V6 Z M6 8 H9 V9.5 H7.5 V11 H6 Z M14 12 H11 V10.5 H12.5 V9 H14 Z</StreamGeometry>
+  <!-- EC15 Cast: CastButton. -->
+  <StreamGeometry x:Key="GlyphGeometryEC15">M2 4 H18 V16 H12 V14 H16 V6 H4 V8 H2 Z M2 10 A6 6 0 0 1 8 16 H6 A4 4 0 0 0 2 12 Z M2 14 A2 2 0 0 1 4 16 H2 Z</StreamGeometry>
+  <!-- ED1E Subtitles: CCSelectionButton. -->
+  <StreamGeometry x:Key="GlyphGeometryED1E">M2 4 H18 V16 H2 Z M4 6 V14 H16 V6 Z M5 8 H9 V9.5 H6.5 V10.5 H9 V12 H5 Z M11 8 H15 V9.5 H12.5 V10.5 H15 V12 H11 Z</StreamGeometry>
+  <!-- ED1F: AudioTracksSelectionButton. -->
+  <StreamGeometry x:Key="GlyphGeometryED1F">M8 3 H17 V13.5 A2.5 2.5 0 1 1 15 11.05 V6 H10 V15.5 A2.5 2.5 0 1 1 8 13.05 Z</StreamGeometry>
+  <!-- E1D9 FullScreen and E1D8 BackToWindow: FullWindowSymbol in NonFullWindowState and
+       FullWindowState. -->
+  <StreamGeometry x:Key="GlyphGeometryE1D9">M2 8 V2 H8 V4 H4 V8 Z M12 2 H18 V8 H16 V4 H12 Z M18 12 V18 H12 V16 H16 V12 Z M8 18 H2 V12 H4 V16 H8 Z</StreamGeometry>
+  <StreamGeometry x:Key="GlyphGeometryE1D8">M6 2 H8 V8 H2 V6 H6 Z M12 2 H14 V6 H18 V8 H12 Z M12 12 H18 V14 H14 V18 H12 Z M2 12 H8 V18 H6 V14 H2 Z</StreamGeometry>
 </ResourceDictionary>

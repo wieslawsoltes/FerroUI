@@ -525,6 +525,43 @@ lines of WinUI), incremental loading, semantic zoom, grouping and sticky headers
 animation helpers (FerroUI's `ConnectedAnimationService` serves them from application code), the
 scrolling placeholders.
 
+**Status (LV-1, done).** `ListViewBase`, `ListView`, `ListViewBaseItem`, `ListViewItem`,
+`ListViewItemTemplateSettings`, `ItemsStackPanel`, `ItemClickEventArgs`,
+`ContainerContentChangingEventArgs`, `ChoosingItemContainerEventArgs`, `ItemIndexRange` and the
+enums `ListViewSelectionMode`, `ScrollIntoViewAlignment`, `ListViewReorderMode`,
+`IncrementalLoadingTrigger`, `ItemsUpdatingScrollMode`, `GroupHeaderPlacement` in
+`ferroui-controls` (`list_view/`), with the peers `ListViewBaseAutomationPeer`,
+`ListViewAutomationPeer` (List, Selection), `ListViewBaseItemAutomationPeer` and
+`ListViewItemAutomationPeer` (ListItem, SelectionItem, Invoke while item clicks are enabled).
+`SelectionMode` of `ListViewBase` is its own property (found first by name on a list view) that
+sets the flags of the base as the table above says; `None` clears the selection and keeps input
+from selecting. Item clicks follow WinUI's `OnItemClick` (a tap, Enter, the Invoke pattern) with
+the data item as `ClickedItem`. `ContainerContentChanging` is raised in phase 0 when a container
+is prepared and when it is cleared (`InRecycleQueue`); `ChoosingItemContainer` lets a handler give
+the container. `ScrollIntoView` with `Leading` puts the item at the start of the viewport.
+`ItemsStackPanel` is FerroUI's virtualizing stack panel with WinUI's visible and cache indexes;
+the grouping members are accepted. `ListViewBase` and `ListViewBaseItem` have no markup
+constructor (WinUI's are protected). The WinUI theme has `Controls/ListView.xaml` (the ListView
+style of `generic.xaml`, with the header and the footer as content presenters around the items
+presenter, and the implicit theme of `ListViewItem` based on `DefaultListViewItemStyle`); the
+ListView waiver is removed and G-23 and LBI-8 are updated. `ListView` and `ListViewItem` join the
+WinUI-only list. The catalog has a "ListView" page in "Collections & Data". Tests:
+`list_view/list_view_tests.rs`.
+
+**Status (LV-2, done).** `GridView`, `GridViewItem`, `GridViewItemTemplateSettings`,
+`ItemsWrapGrid` and the peers `GridViewAutomationPeer` (List) and `GridViewItemAutomationPeer`
+(ListItem, SelectionItem, Invoke) in `ferroui-controls` (`list_view/`). `ItemsWrapGrid` derives
+from `WrapPanel` (decision D5): cells of one size (`ItemWidth` by `ItemHeight`, or the size of the
+first item, as in WinUI), in rows or columns that wrap at the edge or after
+`MaximumRowsOrColumns` items; it does not virtualize (recorded). The WinUI theme has
+`Controls/GridView.xaml` (the GridView style of `generic.xaml`, and `DefaultGridViewItemStyle`
+with the chrome of `ListViewItemPresenter` drawn with elements: the background of the state, the
+accent selection border of `GridViewItemSelectedBorderThickness`, the disabled opacity; the check
+mark and the multi-select check box are left out, as for the list items) and the converted
+`Resources/GridViewItem_themeresources.xaml`; the GridView waivers are removed. `GridView` and
+`GridViewItem` join the WinUI-only list; the catalog has a "GridView" page in "Collections &
+Data". Tests: the grid tests of `list_view/list_view_tests.rs`.
+
 ### 6.3 Templates and resources (WinUI theme)
 
 - `Controls/ListView.xaml` and `Controls/GridView.xaml` from GX 9284 and 9348:
@@ -731,7 +768,7 @@ Additive members of `ferroui-base`:
 | Windows (`src/Windows/FerroUI.Win32/win32_platform_settings.rs`) | `SPI_GETHIGHCONTRAST` with `HCF_HIGHCONTRASTON` (as WinUI), the `IAccessibilitySettings` reading kept as the fallback | `GetSysColor` of `COLOR_WINDOW`, `COLOR_WINDOWTEXT`, `COLOR_BTNFACE`, `COLOR_BTNTEXT`, `COLOR_HIGHLIGHT`, `COLOR_HIGHLIGHTTEXT`, `COLOR_HOTLIGHT`, `COLOR_GRAYTEXT`, while high contrast is on | `WM_SETTINGCHANGE` with `SPI_SETHIGHCONTRAST`, and `WM_SYSCOLORCHANGE` | Windows VM: the four contrast themes, switching while running |
 | macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11), while the preference is `High` | the observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` (already re-reading the colour values) beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings). As built (HC-3): an optional interface `IFrnContrastSettings` found with `QueryInterface`, as `IFrnAccessibilitySettings` and `IFrnPowerSettings`, instead of methods at the end of `IFrnPlatformSettings`, so an older native library keeps working |
 | Linux (`src/FerroUI.FreeDesktop/dbus_platform_settings.rs`) | the portal key `contrast` of `org.freedesktop.appearance` (1 is high) | none (the portal has none): the fixed palettes of 7.3 | `SettingChanged` for `contrast` | the fake portal of the crate's tests; the Linux VM with GNOME's high contrast switch |
-| Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | | already | |
+| Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | HC-5 (done, #560): the browser takes `forced-colors: active` as high contrast and reads `Canvas`, `CanvasText`, `ButtonFace`, `ButtonText`, `Highlight`, `HighlightText`, `LinkText`, `GrayText`; iOS and Android report none | already; the browser also on the `forced-colors` change | browser (Windows high contrast in Chrome or Edge) |
 
 ### 7.5 Not in this plan
 
@@ -762,8 +799,8 @@ to see. Efforts are working days of one agent, including review rounds.
 | HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
 | HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | done (#560); to validate in the Windows VM |
 | HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); the owner validates it by toggling the setting |
-| HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
-| Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours; `ListViewItemPresenter` as an element (D6) | | | | |
+| HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | done (#560); to confirm in the Linux VM |
+| Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours (done, #560); `ListViewItemPresenter` as an element (D6) | | | | |
 
 Order of work: VSM-1 to VSM-5 first. LV-1, SW-1 and PV-1 wait for W4 (#333). They change the
 WinUI theme, so each is rebased on `main` and regenerates `compiled_xaml.rs` and the theme

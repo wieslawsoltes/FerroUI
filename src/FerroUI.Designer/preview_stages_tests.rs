@@ -1794,3 +1794,22 @@ fn document_hit_testing_selects_template_owner_and_definition_stage_selects_the_
     assert_eq!(board.resolve_selection(&part_token).unwrap().node, part);
     window.close();
 }
+
+/// Not from upstream (#567): an error the XAML runtime reports while a stage is laid out is the
+/// error of the stage, with the message its throw panicked with, without unwinding; the work goes
+/// on with what the failing member built, and its own error or value passes through otherwise.
+#[test]
+fn an_error_of_the_xaml_runtime_in_a_stage_layout_is_its_error_without_unwinding() {
+    use ferroui_markup_xaml::{xaml_error_scope, XamlLoadError};
+    let went_on = Cell::new(false);
+    let result: Result<(), String> = with_runtime_errors("layout", || {
+        xaml_error_scope::report(XamlLoadError::with_message("Unable to resolve the resource")).unwrap();
+        went_on.set(true);
+        Err("A consequence".into())
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err("Native preview layout failed: Unable to resolve the resource".into()));
+    assert_eq!(with_runtime_errors("construction", || Err::<(), _>("own".into())), Err("own".into()));
+    assert_eq!(with_runtime_errors("construction", || Ok(3)), Ok(3));
+    assert!(!xaml_error_scope::has_error());
+}

@@ -5,11 +5,12 @@
 //! linear gradient and two texts), drawn by the native renderer as the rest of the chart.
 
 use crate::geo_map_chart_engine::HeatLandSeries;
+use crate::label_lines::LabelLines;
 use crate::labelers::{Labeler, Labelers};
 use crate::measure::Bounds;
 use crate::paint::BrushSpace;
 use crate::scene::{Geometry, PaintStyle, Primitive, TextAnchor};
-use crate::series::{Series, SeriesKind};
+use crate::series::{Series, SeriesKind, DATA_LABELS_MAX_WIDTH};
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
 use ferroui_base::media::{Color, GradientSpreadMethod, IBrush};
 use ferroui_base::{Point, Rect, RelativePoint, RelativeUnit, Size, Thickness};
@@ -85,7 +86,7 @@ impl Default for HeatLegend {
 struct Layout {
     size: Size,
     bar: Rect,
-    labels: [(Rect, String, Color); 2],
+    labels: [(Rect, LabelLines, Color); 2],
 }
 
 impl HeatLegend {
@@ -140,21 +141,27 @@ impl HeatLegend {
                 ..PaintStyle::default()
             },
         )];
-        for (rect, text, color) in layout.labels {
+        // A label of several lines takes a text of the scene for each, from the left of its block.
+        for (rect, lines, color) in layout.labels {
             let rect = offset(rect);
-            primitives.push(Primitive::new(
-                Geometry::Text {
-                    origin: Point::new(
-                        rect.x + HEAT_LEGEND_LABELS_PADDING.0,
-                        rect.y + HEAT_LEGEND_LABELS_PADDING.1,
-                    ),
-                    text,
-                    size: self.text_size,
-                    rotation: 0.0,
-                    anchor: TextAnchor::Start,
-                },
-                PaintStyle::fill(color),
-            ));
+            for (i, text) in lines.lines.into_iter().enumerate() {
+                if text.is_empty() {
+                    continue;
+                }
+                primitives.push(Primitive::new(
+                    Geometry::Text {
+                        origin: Point::new(
+                            rect.x + HEAT_LEGEND_LABELS_PADDING.0,
+                            rect.y + HEAT_LEGEND_LABELS_PADDING.1 + i as f64 * lines.line_height,
+                        ),
+                        text,
+                        size: self.text_size,
+                        rotation: 0.0,
+                        anchor: TextAnchor::Start,
+                    },
+                    PaintStyle::fill(color),
+                ));
+            }
         }
         primitives
     }
@@ -176,14 +183,21 @@ impl HeatLegend {
         plot: Size,
         mut measure_text: impl FnMut(&str, f64) -> Size,
     ) -> Layout {
+        // A label breaks into lines at `MaxTooltipsAndLegendsLabelsWidth` (170) less its padding,
+        // as the `MaxWidth` of the source's `LabelGeometry`.
         let mut label = |value: f64, color: Color| {
             let text = self.formatter.label(value);
-            let measured = measure_text(&text, self.text_size);
-            let size = Size::new(
-                measured.width + HEAT_LEGEND_LABELS_PADDING.0 * 2.0,
-                measured.height + HEAT_LEGEND_LABELS_PADDING.1 * 2.0,
+            let lines = LabelLines::wrap(
+                &mut measure_text,
+                &text,
+                self.text_size,
+                DATA_LABELS_MAX_WIDTH - HEAT_LEGEND_LABELS_PADDING.0 * 2.0,
             );
-            (size, text, contrasting_color(color))
+            let size = Size::new(
+                lines.size.width + HEAT_LEGEND_LABELS_PADDING.0 * 2.0,
+                lines.size.height + HEAT_LEGEND_LABELS_PADDING.1 * 2.0,
+            );
+            (size, lines, contrasting_color(color))
         };
         let first = source.heat_map[0];
         let last = source.heat_map[source.heat_map.len() - 1];
@@ -444,6 +458,39 @@ mod tests {
     }
 
     /// `GetContrastingColor`: the integer luma of the source against 128.
+    /// The labels of the legend break into lines at `MaxTooltipsAndLegendsLabelsWidth` (170) less
+    /// their padding (the `MaxWidth` of their `LabelGeometry`): a text of the scene for each
+    /// line, one line height apart from the left of the label, and a bar as thick as the block.
+    #[test]
+    fn labels_break_at_the_max_width_of_the_tooltips_and_legends() {
+        let legend = HeatLegend {
+            formatter: Labeler::new(|value| format!("{value} people in the area of the map")),
+            ..HeatLegend::default()
+        };
+        let source = HeatLegendSource::of_series(&[heat(&[10.0, 20.0])]).unwrap();
+        let plot = Size::new(300.0, 400.0);
+        let block = Size::new(16.0 * 16.0 * 0.6, 3.0 * 16.0 * 1.2);
+        let size = legend.measure(Some(&source), true, plot, metrics);
+        assert!((size.width - (block.width + 16.0 + 20.0)).abs() < 1e-9);
+        let primitives = legend.draw(Some(&source), true, Point::new(0.0, 0.0), plot, metrics);
+        let texts: Vec<_> = primitives[1..]
+            .iter()
+            .map(|p| match &p.geometry {
+                Geometry::Text { origin, text, .. } => (*origin, text.clone()),
+                _ => panic!("a label"),
+            })
+            .collect();
+        assert_eq!(texts.len(), 6);
+        let lines: Vec<_> = texts[..3].iter().map(|(_, text)| text.as_str()).collect();
+        assert_eq!(lines, ["10 people in ", "the area of the ", "map"]);
+        for (i, (origin, _)) in texts[..3].iter().enumerate() {
+            assert!((origin.x - 18.0).abs() < 1e-9);
+            assert!((origin.y - (14.0 + i as f64 * 16.0 * 1.2)).abs() < 1e-9);
+        }
+        // The upper label ends at the end of the bar by the height of its three lines.
+        assert!((texts[3].0.y - (10.0 + 380.0 - (block.height + 8.0) + 4.0)).abs() < 1e-9);
+    }
+
     #[test]
     fn contrasting_colors_follow_the_luma() {
         assert_eq!(

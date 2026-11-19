@@ -93,6 +93,28 @@ class CompareTests(unittest.TestCase):
         self.assertEqual(compare.build_only_additions(units, units, {"toml"}), [])
         self.assertEqual(compare.package_name(toml), "toml")
 
+    def test_a_crate_the_application_also_links_is_not_build_only(self):
+        # `ferroui-build` and the application both depend on the loader; `toml` only `ferroui-build`
+        # does. A new dependency of the loader is linked into the application: it is not exempt.
+        def dependency(name, kind=None):
+            return {"pkg": name, "dep_kinds": [{"kind": kind, "target": None}]}
+        packages = ["app", "ferroui-build", "loader", "loader-dep", "toml", "toml-dep", "tests-only"]
+        metadata = {"packages": [{"id": name, "name": name} for name in packages],
+                    "resolve": {"nodes": [
+                        {"id": "app", "deps": [dependency("loader"), dependency("ferroui-build", "build"),
+                                               dependency("tests-only", "dev")]},
+                        {"id": "ferroui-build", "deps": [dependency("loader"), dependency("toml")]},
+                        {"id": "loader", "deps": [dependency("loader-dep")]},
+                        {"id": "loader-dep", "deps": []},
+                        {"id": "toml", "deps": [dependency("toml-dep")]},
+                        {"id": "toml-dep", "deps": []},
+                        {"id": "tests-only", "deps": []}]}}
+        self.assertEqual(compare.build_only_names(metadata, ["app"]), {"toml", "toml-dep"})
+        # An edge that is a normal and a build dependency at once is followed as a normal one.
+        both = {"pkg": "toml", "dep_kinds": [{"kind": "build", "target": None}, {"kind": None, "target": None}]}
+        metadata["resolve"]["nodes"][0]["deps"].append(both)
+        self.assertEqual(compare.build_only_names(metadata, ["app"]), set())
+
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])
