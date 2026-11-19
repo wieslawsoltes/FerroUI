@@ -85,7 +85,13 @@ export async function run(): Promise<void> {
         const spacingEdit = await native.studioEdit(spacingSource, 18, 'designer_spacing_edit', {
             model: handles.model, handle: gap.id, adjustment: { value: 18.5 },
         }, selection);
-        assert.deepEqual(spacingEdit.edits.map(edit => edit.newText), ['18.5']);
+        assert.equal(spacingEdit.edits.length, 1);
+        const { range: gapRange, newText } = spacingEdit.edits[0];
+        assert.equal(gapRange.start.line, 0);
+        assert.equal(gapRange.end.line, 0);
+        const changedGap = spacingSource.source.slice(0, gapRange.start.character) + newText
+            + spacingSource.source.slice(gapRange.end.character);
+        assert.equal(changedGap, spacingSource.source.replace('Spacing="12"', 'Spacing="18.5"'));
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);
