@@ -265,6 +265,16 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::layout_transform_control::LayoutTransformControl,
     crate::list_box::ListBox,
     crate::list_box_item::ListBoxItem,
+    // --- list view (WinUI, docs/porting/winui-calculator-gaps.md, LV-1) ---
+    crate::list_view::ListViewBase,
+    crate::list_view::ListView,
+    crate::list_view::ListViewBaseItem,
+    crate::list_view::ListViewItem,
+    crate::list_view::ItemsStackPanel,
+    // --- grid view (WinUI, docs/porting/winui-calculator-gaps.md, LV-2) ---
+    crate::list_view::GridView,
+    crate::list_view::GridViewItem,
+    crate::list_view::ItemsWrapGrid,
     crate::platform::MacOSProperties,
     crate::masked_text_box::MaskedTextBox,
     crate::menu::Menu,
