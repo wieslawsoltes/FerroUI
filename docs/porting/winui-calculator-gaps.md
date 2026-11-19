@@ -16,9 +16,9 @@ port's notes). The other items of that tracker (materials, composition, Navigati
 application work) are covered elsewhere: Reveal and the materials by #325, `ThemeShadow` by #326,
 NavigationView by the W-series of `winui-controls.md`.
 
-Nothing here is implemented yet. Each item lands as a series of small pull requests from `main`
-(section 8), each with its tests, its rows in the deviation registers and a line in
-`CHANGELOG.md` under "Unreleased".
+Each item lands as a series of small pull requests from `main` (section 8), each with its tests,
+its rows in the deviation registers and a line in `CHANGELOG.md` under "Unreleased". The status
+of each step is in the table of section 8; high contrast (XAML-03) is tracked by #560.
 
 ## 1. Sources and revisions
 
@@ -183,9 +183,9 @@ virtualizing stack, and the List, ListItem and Invoke patterns.
 | WinUI behaviour | FerroUI `main` | PRs | Status |
 |---|---|---|---|
 | Detection: `SystemParametersInfo(SPI_GETHIGHCONTRAST)` and `HCF_HIGHCONTRASTON`; the scheme classified as Black, White or Custom from `GetSysColor(COLOR_WINDOW)` and `COLOR_WINDOWTEXT` | `PlatformColorValues::contrast_preference` (`NoPreference`, `High`) reported by Windows (`IAccessibilitySettings.HighContrast`, `win32_platform_settings.rs`), the browser (`prefers-contrast: more`), iOS (`accessibilityContrast`) and Android (`high_text_contrast_enabled`). macOS compares `effectiveAppearance.name` with the high contrast appearance names (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`), which "Increase contrast" does not select, so it probably never reports `High`; `accessibilityDisplayShouldIncreaseContrast` is not read. Linux reads `color-scheme` and `accent-color` of `org.freedesktop.appearance`, not `contrast` | #325 reads the contrast preference for the Reveal fallback (`reveal_brush.rs`) and adds `IsHighContrast` to `SystemBackdropConfiguration` | partial |
-| Selection: with high contrast on, the theme dictionary `HighContrastBlack`/`HighContrastWhite`/`HighContrastCustom`, falling back to `HighContrast` (the only key WinUI's themes define), whatever `RequestedTheme` says (a subtree's `RequestedTheme` only picks the White or Black key); `ActualThemeChanged` is suppressed while high contrast stays on | `ThemeVariant::update_actual_theme_variant` (`src/FerroUI.Base/styling/theme_variant.rs`) uses the requested variant, else Light or Dark of the platform; `contrast_preference` is read nowhere in Base, Controls or the themes. The WinUI theme's `HighContrast` dictionaries (61, keyed `{x:Static winui:WinUITheme.HighContrast}`, a variant inheriting Dark) apply only when an application requests the variant (theme G-5) | | missing |
-| System colours: 15 `SystemColor*Color` resources and brushes built from `GetSysColor` (`FrameworkTheming::RebuildColorAndBrushResources`), in a dictionary of the framework; the WinUI theme names 8 of them (Window, WindowText, ButtonFace, ButtonText, Highlight, HighlightText, Hotlight, GrayText) about 1,150 times | `Resources/SystemResources.xaml` of the WinUI theme: fixed values, Windows defaults in `Default`/`Light`, High Contrast Black in `HighContrast` (G-6); no backend reports system colours, only the accent (`Accents/system_accent_colors.rs` follows `color_values_changed` for the accent) | | missing |
-| Live update: `UISettings.ColorValuesChanged` (and the island's `ThemeChanged`) re-reads theme, contrast and accent, rebuilds the system colours and re-resolves every `ThemeResource` | `IPlatformSettings::color_values_changed`; Windows re-reads on `WM_SETTINGCHANGE` (`ImmersiveColorSet`, `WindowsThemeElement`); macOS by KVO on `NSApp.effectiveAppearance`; Linux on the portal's `SettingChanged` for its two keys; `{DynamicResource}` re-resolves on resource changes | | partial |
+| Selection: with high contrast on, the theme dictionary `HighContrastBlack`/`HighContrastWhite`/`HighContrastCustom`, falling back to `HighContrast` (the only key WinUI's themes define), whatever `RequestedTheme` says (a subtree's `RequestedTheme` only picks the White or Black key); `ActualThemeChanged` is suppressed while high contrast stays on | HC-1: `ThemeVariant::set_high_contrast_variant`, set by the WinUI theme while `UseSystemHighContrast` (default `true`); with the platform's `contrast_preference() == High` the application and the root top levels resolve to `WinUITheme.HighContrast`, also when they request Light or Dark (D10); a variant requested below a root is kept | | has (roots; theme G-5) |
+| System colours: 15 `SystemColor*Color` resources and brushes built from `GetSysColor` (`FrameworkTheming::RebuildColorAndBrushResources`), in a dictionary of the framework; the WinUI theme names 8 of them (Window, WindowText, ButtonFace, ButtonText, Highlight, HighlightText, Hotlight, GrayText) about 1,150 times | HC-1: `PlatformColorValues::system_colors()` (`SystemColors`, the 8 colours) and the provider `Accents/SystemColors` of the WinUI theme: in the high contrast variant the colours the platform reports, else High Contrast Black or White by the platform's variant; the standard colours of Windows in Light and Dark (G-6). The platforms report them from HC-2 (Windows) and HC-3 (macOS) | | partial (the 8 the theme names) |
+| Live update: `UISettings.ColorValuesChanged` (and the island's `ThemeChanged`) re-reads theme, contrast and accent, rebuilds the system colours and re-resolves every `ThemeResource` | `IPlatformSettings::color_values_changed`; Windows re-reads on `WM_SETTINGCHANGE` (`ImmersiveColorSet`, `WindowsThemeElement`); macOS by KVO on `NSApp.effectiveAppearance`; Linux on the portal's `SettingChanged` for its two keys; `{DynamicResource}` re-resolves on resource changes. HC-1: the application and the root top levels resolve again on `color_values_changed` and on a change of the high contrast variant; `Accents/SystemColors` raises a resource change when the colours change; `DefaultPlatformSettings::set_color_values` simulates a change for tests | | has (the platform messages: HC-2 to HC-4) |
 | `FrameworkElement.HighContrastChanged`; `Application/FrameworkElement.HighContrastAdjustment` (the text backplate of `TextBlock`, `RichTextBlock`, `TextBox`) | none | | missing (not in this plan, section 7.5) |
 
 ## 5. Design: visual states
@@ -668,9 +668,11 @@ Additive members of `ferroui-base`:
 - `Accents/SystemColors` (beside `SystemAccentColors`): a resource provider of the eight
   `SystemColor*Color` keys of the `HighContrast` dictionary, from `PlatformColorValues::system_colors()`,
   following `color_values_changed`. Without system colours: the High Contrast Black values (today's
-  fixed ones) when the platform variant is dark, High Contrast White when it is light. The
-  `HighContrast` entries of `Resources/SystemResources.xaml` move to the provider; `Default` and
-  `Light` keep their fixed values (as WinUI's own dictionaries).
+  fixed ones) when the platform variant is dark, High Contrast White when it is light. As built,
+  the provider answers the light and dark variants too, with the standard colours of Windows
+  (the former values of `Default` and `Light`), and `Resources/SystemResources.xaml` is gone:
+  theme dictionaries are searched before merged dictionaries, so a `Default` entry would hide the
+  provider from the high contrast variant (which falls back to `Default`).
 - The `{DynamicResource}` references of the theme re-resolve when the provider changes, so the
   colours update live; G-5 and G-6 are corrected, and the window frame follows the luminance of
   `SystemColorWindowColor`.
@@ -710,7 +712,7 @@ to see. Efforts are working days of one agent, including review rounds.
 | PV-1 | `Pivot`, `PivotItem`, `PivotPanel` with the scroll viewer and the state machine (7.1), selection, keyboard, `IsLocked`, the item events; peers | W4 | D8 | | 7 |
 | PV-2 | The headers: `PivotHeaderManager`, `PivotHeaderPanel`, `PivotHeaderItem`, static headers, the parallax, the previous and next buttons, the fly-in, fly-out and slide-in animations | PV-1 | D8 | | 5 |
 | PV-3 | The WinUI theme documents of Pivot, PivotItem and PivotHeaderItem; WinUI-only list; catalog page | PV-2 | D8 | yes: the header carousel and flick against WinUI, the Tab peers | 3 |
-| HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | 2 |
+| HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
 | HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | 2 |
 | HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | 2 |
 | HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
