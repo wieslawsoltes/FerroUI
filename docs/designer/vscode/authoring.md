@@ -37,6 +37,8 @@ Use the size button to change logical width, height, preset, or theme. With the 
 
 In **Design**, use **Select** mode and select one control or consecutive siblings in the canvas or Source Outline. Choose **Wrap Selection** from **More designer actions**, from **Arrange selection** in Outline, or from the Command Palette. Choose a container and the designer selects the new wrapper.
 
+![Wrap Selection picker over two cards selected in the XAML source outline and design canvas](../images/vscode-wrap-selection-choices.jpg)
+
 | Container | What to expect |
 | --- | --- |
 | **Vertical StackPanel** or **Horizontal StackPanel** | Arrange the selected controls in source order along the chosen axis. |
@@ -46,6 +48,10 @@ In **Design**, use **Select** mode and select one control or consecutive sibling
 | **Border** | Put one selected control inside a container that supports padding, a background, and a border. |
 
 The selection must share one authored child slot. In a Grid, select controls with matching cells and spans. In a DockPanel, select controls on the same side. The planner protects bindings and object-valued layout attributes that would need to change. An RSX run can sit beside a dynamic child or contain computed values of its own. Wrap a run interrupted by an unmapped child in the Rust editor.
+
+![New XAML Canvas selected around both cards, with the rebased child offsets visible in source](../images/vscode-wrap-selection-canvas.jpg)
+
+![Horizontal Rust StackPanel selected in the preview, with its child buttons and the adjacent computed control visible in source](../images/vscode-wrap-selection-rsx.jpg)
 
 Wrap Selection is one source edit. Undo restores the original layout and source order. [Studio authoring](../native-controls.md#wrap-selected-controls) · [MCP workflow](reference.md#wrap-controls-with-mcp)
 
