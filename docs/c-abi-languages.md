@@ -64,6 +64,11 @@ Rules every caller follows:
   (`bindings/model/ferroui-api.json`). Hand-written code looks each name up once
   (`ferro_type_id`, `ferro_property_id`, `ferro_event_id`) and keeps the integer; never look a
   name up per call.
+- **Register the classes you use** before `ferro_app_run`: call the entry of each class
+  (`ferro_type_window()`, `ferro_type_button()`; generated bindings call them in
+  `registerTypes()`). An entry returns the type ID. A library built without the tables of types
+  knows only the classes registered this way, and a program that links it statically keeps only
+  those and the theme they need (docs/c-abi.md, section 16).
 - **The UI thread.** UI calls run on the thread that called `ferro_init` or `ferro_app_run`
   (the main thread on macOS). From any other thread, post the work (`ferro_post`,
   `ferro_post_data`) or store numeric signal slots.
@@ -194,6 +199,7 @@ against the same control in Rust is in docs/c-abi.md, section 15.4.
 
 - Generated binding, or constant IDs looked up once.
 - Version and fingerprint checked at start.
+- The entries of the classes you use called before `ferro_app_run`.
 - Views as frames, memo elements for subtrees that rarely change.
 - Values that change bound to signal slots; values the user changes watched and read with
   loads.

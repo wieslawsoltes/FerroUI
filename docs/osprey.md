@@ -34,6 +34,12 @@ property of those classes and their bases (`Width` of `Layoutable` for a `Button
 events; the enumerations those properties use; and the ID constants of all of it. Names are
 the names of the full bindings, so adding a class to the manifest changes no code.
 
+The selection also declares the entries of the classes it names (`ferro_type_button()`) and
+`registerTypes()`, which calls them; `run` calls it before the main loop, and a program that
+starts with `ferro_init` calls it itself. A library built by use knows only the classes
+registered this way and keeps only those when it is linked statically (docs/c-abi.md,
+section 16). The full bindings register nothing: the full library knows every class.
+
 | File | Namespace | What |
 | --- | --- | --- |
 | `<application>/ferroui/abi.osp` | `ferroui` | generated: the extern declarations, the ID constants (`buttonTypeId()`, `textPropertyId()`, `clickEventId()`), the fingerprint, the enumerations |
