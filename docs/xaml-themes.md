@@ -62,7 +62,7 @@ units of the build's own output.
 | Plain resources: brushes with a literal colour or a resource colour, `x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`, `{StaticResource}` aliases | Static row tables, one shared builder per shape (`rt::add_literal_brushes`, `rt::add_double_resources`, ...) | Added at load. A value row (`x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`) is added as its value; a brush or alias row is built on its first lookup (section 2.2) |
 | Other resources | One deferred build function per resource (`rt::add_deferred_resource`) | On first lookup |
 | Control themes | One static table per theme, interpreted by `rt::build_control_theme`; selector chains are static slices, shared when identical | Once per theme, on first use of the control type |
-| Control templates | Native code | Every time a control applies its template |
+| Control templates | Native code; what every element repeats (the parent stack, the end of the initialisation, the name, a `{CompiledBinding}` bound to a property) is a call of a shared helper of `rt` (`docs/porting/xaml.md`, 9.3.7) | Every time a control applies its template |
 | Template bindings in a template | Runs of (target, source) pairs, applied by `rt::bind_template_bindings` | With the template |
 | Units | `THEME_UNIT_<n>` statics and the table `THEME_UNITS` | See section 3 |
 
