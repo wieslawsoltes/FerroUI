@@ -1,6 +1,6 @@
 use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
-use ferroui_designer_animation::CurvePoint;
+use ferroui_designer_animation::{CurveChannel, CurvePoint};
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
     DesignAnimationResultMessage,
@@ -191,6 +191,11 @@ impl Relay {
         &mut self,
         query: hosted_animation::CurveRequest,
     ) -> Result<Vec<CurvePoint>, String> {
+        let channel = if query.channel == CurveChannel::Value {
+            None
+        } else {
+            serde_json::to_value(query.channel).map_err(|error| error.to_string())?.as_str().map(str::to_owned)
+        };
         let connection = self.animation_connection(query.revision, query.sequence)?;
         let request = self.next_animation_request()?;
         {
@@ -207,6 +212,7 @@ impl Relay {
             program: query.program,
             target: query.target,
             property: query.property,
+            channel,
             start: query.window.start,
             end: query.window.end,
         }))?;

@@ -241,6 +241,10 @@ key to edit time and value in one undo step, or select it and edit in the inspec
 the trace to retime its key. Change its incoming easing in the inspector to shape the velocity.
 The fit icon frames a selection in either display. `designer_animation_curve` accepts
 `metric: "velocity"` for the same native samples.
+
+Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
+corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
+geometry value. The MCP program catalog lists the same `curve_channels` for a track.
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name

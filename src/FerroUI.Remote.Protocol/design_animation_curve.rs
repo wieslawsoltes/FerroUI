@@ -10,6 +10,7 @@ pub struct DesignAnimationCurveRequest {
     pub program: i64,
     pub target: i64,
     pub property: String,
+    pub channel: Option<String>,
     pub start: f64,
     pub end: f64,
 }
@@ -24,6 +25,7 @@ bson_class!(DesignAnimationCurveRequest as "DesignAnimationCurveRequest" {
     "Program" => program: i64,
     "Target" => target: i64,
     "Property" => property: String,
+    "Channel" => channel: Option<String>,
     "Start" => start: f64,
     "End" => end: f64,
 });

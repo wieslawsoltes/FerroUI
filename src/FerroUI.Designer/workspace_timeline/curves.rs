@@ -1,3 +1,6 @@
+#[path = "channel_picker.rs"]
+mod channel_picker;
+
 use super::*;
 use ferroui_controls::{MenuFlyout, MenuItem, MenuItemToggleType};
 use ferroui_designer_animation::{AnimationValue, CurvePoint, KeyframeEdit};
@@ -71,9 +74,10 @@ impl DesignerWorkspace {
         track: &Track,
         context: &TimelineContext,
         metric: CurveMetric,
-    ) -> bool {
+        channel: CurveChannel,
+    ) {
         let Some(program) = context.program else {
-            return false;
+            return;
         };
         let keys: Vec<_> = track
             .keyframes
@@ -89,10 +93,6 @@ impl DesignerWorkspace {
                 }
             })
             .collect();
-        if keys.is_empty() {
-            return false;
-        }
-
         let target = track.target;
         let query = Rc::downgrade(self);
         let query_context = context.clone();
@@ -102,12 +102,19 @@ impl DesignerWorkspace {
         let property = track.property.clone();
         lane.configure_curve(
             metric,
+            channel,
             keys,
             move |window| {
                 let workspace = query.upgrade().ok_or("The Timeline closed")?;
                 query_context.check(&workspace)?;
                 let session = workspace.session.borrow();
-                let points = session.animation_curve(program, target, &query_property, window)?;
+                let points = session.animation_curve_channel(
+                    program,
+                    target,
+                    &query_property,
+                    channel,
+                    window,
+                )?;
                 metric.measure(points).map_err(|error| error.to_string())
             },
             move |from, time, value| {
@@ -127,7 +134,6 @@ impl DesignerWorkspace {
                 }
             },
         );
-        true
     }
 
     fn apply_curve_drag(

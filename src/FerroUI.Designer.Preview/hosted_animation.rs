@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{CurveMetric, CurveWindow};
+use ferroui_designer_animation::{CurveChannel, CurveMetric, CurveWindow};
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationSourcePatch, DesignAnimationTrack,
 };
@@ -57,12 +57,15 @@ pub(crate) struct CurveRequest {
     pub(crate) window: CurveWindow,
     #[serde(default)]
     pub(crate) metric: CurveMetric,
+    #[serde(default)]
+    pub(crate) channel: CurveChannel,
 }
 
 fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {
     tracks.into_iter().map(|track| json!({
         "target": track.target,
         "property": track.property,
+        "curve_channels": track.keys.first().map(|key| CurveChannel::for_authored_kind(&key.value_kind)).unwrap_or_default(),
         "keyframes": track.keys.into_iter().map(|key| json!({
             "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
         })).collect::<Vec<_>>(),

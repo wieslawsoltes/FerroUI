@@ -4,7 +4,7 @@ use ferroui_base::styling::Style;
 use ferroui_base::{StyledElement, TypeInfo};
 use ferroui_designer_animation::{
     AnimationCodec, AnimationCodecRegistry, AnimationProgram, AnimationPrograms, AnimationValue,
-    CompiledTimeline, Easing, ImportOptions, Player, Sample, Timeline, TimelineTimingEdit, ValueKind,
+    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, Sample, Timeline, TimelineTimingEdit, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
@@ -684,20 +684,31 @@ impl DesignerSession {
         id: NodeId,
         target: NodeId,
         property: &str,
-        window: ferroui_designer_animation::CurveWindow,
-    ) -> Result<Vec<ferroui_designer_animation::CurvePoint>, String> {
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>, String> {
+        self.animation_curve_channel(id, target, property, CurveChannel::Value, window)
+    }
+
+    pub fn animation_curve_channel(
+        &self,
+        id: NodeId,
+        target: NodeId,
+        property: &str,
+        channel: CurveChannel,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>, String> {
         if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
             return Err("Open the current animation preview to sample its tracks".into());
         }
         let program = self.animation.programs.iter().find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
         if self.requires_native_animation(program) {
-            return self.animation.native.scalar_curve(program, &self.preview, target, property, window);
+            return self.animation.native.curve(program, &self.preview, target, property, channel, window);
         }
         let compiled = self.animation.compiled_targets.get(&(id, target))
             .or_else(|| self.animation.compiled_programs.get(&id))
             .ok_or("Choose a compiled animation program")?;
-        compiled.scalar_curve(target, property, window).map_err(|error| error.to_string())
+        compiled.curve(target, property, channel, window).map_err(|error| error.to_string())
     }
     pub fn set_duration(&mut self, duration: f64) -> Result<(), String> {
         self.editable_program()?;

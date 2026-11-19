@@ -204,7 +204,8 @@ fn entities() -> Vec<Message> {
             error: Some("Portable draft result".into()),
         }),
         Arc::new(DesignAnimationCurveRequest {
-            revision: 40, request: 33, program: 6, target: 12, property: "Opacity".into(),
+            revision: 40, request: 33, program: 6, target: 12, property: "CornerRadius".into(),
+            channel: Some("top_left".into()),
             start: 0.2, end: 1.8,
         }),
         Arc::new(DesignAnimationCurveResult {

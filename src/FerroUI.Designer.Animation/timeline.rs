@@ -1,4 +1,4 @@
-use crate::{require, AnimationError, AnimationValue, CurvePoint, CurveWindow, Easing, Result};
+use crate::{require, AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow, Easing, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -610,19 +610,29 @@ impl CompiledTimeline {
         property: &str,
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>> {
+        self.curve(target, property, CurveChannel::Value, window)
+    }
+
+    pub fn curve(
+        &self,
+        target: u64,
+        property: &str,
+        channel: CurveChannel,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>> {
         let track = self.0.track(target, property)
             .filter(|track| {
                 !track.muted && track.keyframes.first()
-                    .is_some_and(|key| matches!(key.value, AnimationValue::Number(_)))
+                    .is_some_and(|key| CurveChannel::for_kind(key.value.kind()).contains(&channel))
             })
-            .ok_or_else(|| AnimationError("Choose an active scalar animation track".into()))?;
+            .ok_or_else(|| AnimationError("Choose an active track and one of its curve channels".into()))?;
         let times = window.sample_times(self.0.duration, track.keyframes.iter().map(|key| key.time))?;
         times.into_iter()
             .map(|time| {
-                let Some(AnimationValue::Number(value)) =
-                    track.sample_validated(time, self.0.duration, self.0.fill)?
+                let Some(value) = track.sample_validated(time, self.0.duration, self.0.fill)?
+                    .and_then(|sample| channel.project(&sample))
                 else {
-                    return Err(AnimationError("The track has no scalar sample".into()));
+                    return Err(AnimationError("The track has no finite sample for the selected channel".into()));
                 };
                 Ok(CurvePoint { time, value })
             })

@@ -12,7 +12,7 @@ use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, Flyout, PathIcon, ToolTip};
 use ferroui_designer_animation::{
-    keyframe_easing_presets, CurveMetric, Keyframe, KeyframeGroupEdit as KeyframeEdit,
+    keyframe_easing_presets, CurveChannel, CurveMetric, Keyframe, KeyframeGroupEdit as KeyframeEdit,
     KeyframeLocation as SelectedKey, Track,
 };
 
@@ -28,6 +28,7 @@ pub(super) struct TimelineUi {
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
     curves: Option<CurveMetric>,
+    curve_channels: std::collections::BTreeMap<(NodeId, String), CurveChannel>,
     keyframe_paste: Option<Ref<Flyout>>,
 }
 #[derive(Clone)]
@@ -371,11 +372,15 @@ impl DesignerWorkspace {
                     .filter(|key| key.target == target && key.property == track.property)
                     .map(|key| key.time),
             );
-            let curve = curves.filter(|&metric| self.attach_timeline_curve(&lane, track, &context, metric));
-            if curve.is_some() {
+            let curve = curves.and_then(|metric| self.timeline_curve_channel(track).map(|channel| (metric, channel)));
+            if let Some((metric, channel)) = curve {
+                self.attach_timeline_curve(&lane, track, &context, metric, channel);
                 title.set_height(lane.height());
             }
-            plot.children().add(title.upcast::<Control>());
+            plot.children().add(match curve {
+                Some((metric, channel)) if channel != CurveChannel::Value => self.timeline_curve_title(title, &lane, track, &context, metric, channel),
+                _ => title.upcast::<Control>(),
+            });
             AutomationProperties::set_name(
                 &lane,
                 Some(&format!(
@@ -383,8 +388,8 @@ impl DesignerWorkspace {
                     target_name,
                     track.property,
                     match curve {
-                        Some(CurveMetric::Value) => "value curve",
-                        Some(CurveMetric::Velocity) => "velocity curve",
+                        Some((CurveMetric::Value, _)) => "value curve",
+                        Some((CurveMetric::Velocity, _)) => "velocity curve",
                         None => "keyframes",
                     }
                 )),

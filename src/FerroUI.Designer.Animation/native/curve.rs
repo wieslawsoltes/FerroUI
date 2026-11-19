@@ -1,4 +1,5 @@
-use crate::{CurvePoint, CurveWindow};
+use super::curve_value;
+use crate::{CurveChannel, CurvePoint, CurveWindow};
 use ferroui_base::animation::{Animatable, Animation};
 use ferroui_base::{BoxedValue, FerroProperty};
 
@@ -8,6 +9,16 @@ pub fn sample_scalar_track(
     animation: &Animation,
     target: &Animatable,
     name: &str,
+    window: CurveWindow,
+) -> Result<Vec<CurvePoint>, String> {
+    sample_curve_track(animation, target, name, CurveChannel::Value, window)
+}
+
+pub fn sample_curve_track(
+    animation: &Animation,
+    target: &Animatable,
+    name: &str,
+    channel: CurveChannel,
     window: CurveWindow,
 ) -> Result<Vec<CurvePoint>, String> {
     let duration = animation.duration().total_seconds();
@@ -23,13 +34,9 @@ pub fn sample_scalar_track(
         .into_iter()
         .zip(values)
         .map(|(time, value)| {
-            let value = value
-                .as_ref()
-                .downcast_ref::<f64>()
-                .copied()
-                .or_else(|| value.as_ref().downcast_ref::<f32>().copied().map(f64::from))
-                .filter(|value| value.is_finite())
-                .ok_or("The native animation does not produce a finite scalar")?;
+            let value = curve_value::value(&value)
+                .and_then(|value| channel.project(&value))
+                .ok_or("The native animation does not produce a finite sample for the selected channel")?;
             Ok(CurvePoint { time, value })
         })
         .collect::<Result<_, &str>>()

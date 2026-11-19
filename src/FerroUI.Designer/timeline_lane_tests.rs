@@ -117,6 +117,7 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
     let observed = commits.clone();
     lane.configure_curve(
         ferroui_designer_animation::CurveMetric::Value,
+        ferroui_designer_animation::CurveChannel::Value,
         vec![
             CurvePoint {
                 time: 0.0,
@@ -173,13 +174,14 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
 
 #[test]
 fn velocity_curve_markers_retime_keys_without_editing_their_values() {
-    use ferroui_designer_animation::{CurveMetric, CurvePoint};
+    use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint};
 
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let lane = TimelineLane::new();
     lane.configure(2.0, vec![0.0, 1.0, 2.0]);
     lane.configure_curve(
         CurveMetric::Velocity,
+        CurveChannel::Value,
         vec![CurvePoint { time: 1.0, value: 40.0 }],
         |window| Ok(vec![CurvePoint { time: window.start, value: 20.0 }]),
         |_, _, _| panic!("Velocity must not write a derived value into the keyframe"),

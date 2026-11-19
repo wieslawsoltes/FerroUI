@@ -1,5 +1,5 @@
 use super::*;
-use ferroui_designer_animation::{CurveMetric, CurvePoint, CurveWindow};
+use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow};
 
 pub(super) const HEIGHT: f64 = 88.0;
 const VALUE_INSET: f64 = 12.0;
@@ -9,6 +9,7 @@ type Edit = Rc<dyn Fn(f64, f64, f64)>;
 
 pub(super) struct Plot {
     metric: CurveMetric,
+    channel: CurveChannel,
     keys: Vec<CurvePoint>,
     samples: Vec<CurvePoint>,
     scale: Option<Scale>,
@@ -17,11 +18,15 @@ pub(super) struct Plot {
 }
 
 impl Plot {
+    fn edits_values(&self) -> bool {
+        self.metric == CurveMetric::Value && self.channel == CurveChannel::Value
+    }
+
     fn height(&self, height: f64) -> f64 {
-        if self.metric == CurveMetric::Velocity {
-            height - KEY_ROW
-        } else {
+        if self.edits_values() {
             height
+        } else {
+            height - KEY_ROW
         }
     }
 }
@@ -99,17 +104,21 @@ impl TimelineLane {
     pub(crate) fn configure_curve(
         &self,
         metric: CurveMetric,
+        channel: CurveChannel,
         keys: Vec<CurvePoint>,
         sample: impl Fn(CurveWindow) -> Result<Vec<CurvePoint>, String> + 'static,
         edit: impl Fn(f64, f64, f64) + 'static,
     ) {
-        self.set_height(if metric == CurveMetric::Velocity {
-            HEIGHT + KEY_ROW
-        } else {
-            HEIGHT
-        });
+        self.set_height(
+            if metric == CurveMetric::Velocity || channel != CurveChannel::Value {
+                HEIGHT + KEY_ROW
+            } else {
+                HEIGHT
+            },
+        );
         *self.curve.borrow_mut() = Some(Plot {
             metric,
+            channel,
             keys,
             samples: Vec::new(),
             scale: None,
@@ -126,6 +135,7 @@ impl TimelineLane {
         let result = (plot.sample)(CurveWindow { start, end });
         let help = match &result {
             Ok(_) if plot.metric == CurveMetric::Velocity => "Velocity in property units per authored second. Drag the bottom markers to retime keys. Edit incoming easing to shape the rate of change.".into(),
+            Ok(_) if !plot.edits_values() => "Read the selected property component. Drag a marker to retime its key or select it to edit the full value and easing.".into(),
             Ok(_) => "Drag a key to edit time and value together. Select a key to edit its time, value, and easing in the inspector. Alt+Left or Right selects adjacent keys. Ctrl+wheel zooms and Shift+wheel pans.".into(),
             Err(error) => error.clone(),
         };
@@ -137,9 +147,7 @@ impl TimelineLane {
                 .chain(
                     plot.keys
                         .iter()
-                        .filter(|key| {
-                            plot.metric == CurveMetric::Value && (start..=end).contains(&key.time)
-                        })
+                        .filter(|key| plot.edits_values() && (start..=end).contains(&key.time))
                         .map(|key| key.value),
                 )
                 .chain(
@@ -172,7 +180,7 @@ impl TimelineLane {
     }
 
     pub(super) fn key_y(&self, time: f64) -> Option<f64> {
-        if self.curve.borrow().as_ref()?.metric == CurveMetric::Velocity {
+        if !self.curve.borrow().as_ref()?.edits_values() {
             return Some(self.bounds().height - KEY_ROW * 0.5);
         }
         self.curve_y(self.curve_value(time)?)
@@ -219,7 +227,7 @@ impl TimelineLane {
         let curve = self.curve.borrow();
         let plot = curve
             .as_ref()
-            .filter(|plot| plot.metric == CurveMetric::Value && !plot.samples.is_empty())?;
+            .filter(|plot| plot.edits_values() && !plot.samples.is_empty())?;
         Some(ValueDrag {
             origin,
             current: origin,

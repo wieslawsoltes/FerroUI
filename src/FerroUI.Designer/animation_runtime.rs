@@ -3,10 +3,10 @@ use crate::{runtime::RuntimePreview, PreviewStatus};
 use ferroui_base::animation::Animatable;
 use ferroui_base::StyledElement;
 use ferroui_designer_animation::native::{
-    animation_timing, sample_keyframe_value, sample_scalar_track, validate_animation_target, NativePlayback, NativeProgramIndex,
+    animation_timing, sample_curve_track, sample_keyframe_value, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
-use ferroui_designer_animation::{AnimationProgram, CurvePoint, CurveWindow, Timeline};
+use ferroui_designer_animation::{AnimationProgram, CurveChannel, CurvePoint, CurveWindow, Timeline};
 use ferroui_designer_core::{Document, NodeId};
 use std::collections::BTreeSet;
 
@@ -51,19 +51,20 @@ impl NativeAnimations {
         animation_timing(self.index.animation(id)?)
     }
 
-    pub(crate) fn scalar_curve(
+    pub(crate) fn curve(
         &self,
         program: &AnimationProgram,
         preview: &RuntimePreview,
         target: NodeId,
         property: &str,
+        channel: CurveChannel,
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>, String> {
         let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
         program.timeline.as_ref().and_then(|timeline| timeline.track(target, property))
             .ok_or("Choose an authored animation track")?;
         let object = self.track_target(program, preview, target)?;
-        sample_scalar_track(animation, &object, property, window)
+        sample_curve_track(animation, &object, property, channel, window)
     }
 
     pub(crate) fn sample_keyframe(

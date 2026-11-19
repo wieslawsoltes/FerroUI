@@ -4,7 +4,7 @@ use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_animation::{
-    AnimationValue, BehaviorModel, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
+    AnimationValue, BehaviorModel, CurveChannel, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
     TimelineTimingEdit, VisualStateGroup,
 };
 use ferroui_designer_tools::PropertyKind;
@@ -56,9 +56,10 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_select_rsx_view", "Select an RSX invocation by its authored UTF-8 starting offset.",
             s::object(json!({"start":s::revision(),"expected_revision":s::revision()}), &["start","expected_revision"]), true),
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
-        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored scalar track over the visible time range using the current native animation evaluator.",
+        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track over the visible time range. Read curve_channels from designer_programs for the available property components.",
             s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
                 "metric":{"type":"string","enum":["value","velocity"]},
+                "channel":s::string(),
                 "window":s::object(json!({"start":s::time(),"end":s::time()}), &["start","end"])}),
                 &["program","target","property","window"]), false),
         s::tool("designer_keyframe_draft", "Validate an animation keyframe's time, typed value and easing against the current program and source codec. Returns the sampled easing preview.",
@@ -159,8 +160,9 @@ pub(super) fn call(
         }
         "designer_animation_curve" => {
             let metric: CurveMetric = args.get("metric").map(|_| decode(args, "metric")).transpose()?.unwrap_or_default();
-            let points = session.animation_curve(node_id(args, "program")?, node_id(args, "target")?,
-                &text(args, "property")?, decode(args, "window")?)?;
+            let channel: CurveChannel = args.get("channel").map(|_| decode(args, "channel")).transpose()?.unwrap_or_default();
+            let points = session.animation_curve_channel(node_id(args, "program")?, node_id(args, "target")?,
+                &text(args, "property")?, channel, decode(args, "window")?)?;
             let points = metric.measure(points).map_err(|error| error.to_string())?;
             return Ok(json!({"document":state(session), "points":points}));
         }
@@ -498,10 +500,14 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
                     .range(span).map_err(|error| error.to_string())?);
             }
         }
-        if args["include_keyframe_text"] == true {
-            for (track, authored) in program.timeline.iter().flat_map(|timeline| &timeline.tracks).enumerate() {
+        for (track, authored) in program.timeline.iter().flat_map(|timeline| &timeline.tracks).enumerate() {
+            let track_model = &mut model["timeline"]["tracks"][track];
+            if let Some(first) = authored.keyframes.first() {
+                track_model["curve_channels"] = json!(CurveChannel::for_kind(first.value.kind()));
+            }
+            if args["include_keyframe_text"] == true {
                 for (key, authored) in authored.keyframes.iter().enumerate() {
-                    let model = &mut model["timeline"]["tracks"][track]["keyframes"][key];
+                    let model = &mut track_model["keyframes"][key];
                     model["value_text"] = json!(authored.value.to_xaml());
                     model["value_kind"] = json!(authored.value.kind());
                     model["easing_text"] = json!(authored.easing.to_xaml());

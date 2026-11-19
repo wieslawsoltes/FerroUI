@@ -66,6 +66,45 @@ mod tests {
     use crate::{AnimationValue::Number, Easing, Timeline};
 
     #[test]
+    fn geometry_components_follow_the_authored_value_order() {
+        use crate::{AnimationValue::CornerRadius, CurveChannel, ValueKind};
+        let mut timeline = Timeline::new(2.0).unwrap();
+        for (time, top_left, bottom_left) in [(0.0, 4.0, 20.0), (2.0, 20.0, 4.0)] {
+            timeline
+                .record(
+                    12,
+                    "CornerRadius",
+                    time,
+                    CornerRadius {
+                        top_left,
+                        top_right: 8.0,
+                        bottom_right: 12.0,
+                        bottom_left,
+                    },
+                )
+                .unwrap();
+        }
+        let compiled = timeline.compile().unwrap();
+        let window = CurveWindow {
+            start: 0.0,
+            end: 2.0,
+        };
+        let top = compiled
+            .curve(12, "CornerRadius", CurveChannel::TopLeft, window)
+            .unwrap();
+        let bottom = compiled
+            .curve(12, "CornerRadius", CurveChannel::BottomLeft, window)
+            .unwrap();
+        assert_eq!((top[0].value, top.last().unwrap().value), (4.0, 20.0));
+        assert_eq!((bottom[0].value, bottom.last().unwrap().value), (20.0, 4.0));
+        assert!(compiled.scalar_curve(12, "CornerRadius", window).is_err());
+        assert_eq!(
+            CurveChannel::for_authored_kind("CornerRadius"),
+            CurveChannel::for_kind(ValueKind::CornerRadius)
+        );
+    }
+
+    #[test]
     fn graph_samples_implicit_endpoints_and_easing_like_the_playhead() {
         let mut timeline = Timeline::new(3.0).unwrap();
         for (time, value) in [(0.3, 0.25), (0.301, 0.85), (2.0, 0.4)] {

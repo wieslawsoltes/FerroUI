@@ -2,7 +2,7 @@ use crate::animation_codecs::with_codecs;
 use ferroui_designer_animation::native::{native_keyframe_options, NativeProgramIndex};
 use ferroui_designer_animation::{
     animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
-    ImportOptions, KeyframeEdit, KeyframeLocation, ValueKind,
+    CurveChannel, ImportOptions, KeyframeEdit, KeyframeLocation, ValueKind,
 };
 use ferroui_designer_core::{Document, NodeId, TextPatch};
 use ferroui_remote_protocol::designer::{
@@ -55,7 +55,7 @@ impl HostedKeyframes {
             let Ok(Some(tracks)) = decoded else { continue };
             if curves {
                 let tracks: Vec<_> = tracks.iter().filter(|track| {
-                    track.keys.first().is_some_and(|key| key.value_kind == "Number")
+                    track.keys.first().is_some_and(|key| !CurveChannel::for_authored_kind(&key.value_kind).is_empty())
                 }).cloned().collect();
                 entry.curve_tracks = (!tracks.is_empty()).then_some(tracks);
             }
