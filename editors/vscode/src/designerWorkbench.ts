@@ -22,7 +22,7 @@ import { chooseLayout } from './studioLayout';
 import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
 import { StudioView } from './studioView';
-import type { TimelineControl, TimelineMarkerEdit } from './timelineProtocol';
+import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
 import { languageOf } from './textDocument';
@@ -227,7 +227,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         return this.timeline.control(panel, frame, control, signal);
     }
 
-    timelineMarkers(panel: DesignerPanel, frame: FrameTarget, program: number, signal: AbortSignal, edit?: TimelineMarkerEdit) {
+    timelineMarkers(panel: DesignerPanel, frame: FrameTarget, program: number | undefined, signal: AbortSignal, edit?: TimelineMarkerAction) {
         return this.timeline.previewMarkers(panel, frame, program, signal, edit);
     }
 

@@ -43,14 +43,24 @@ export async function verifyHostedClips(preview: NativePreview, update: (revisio
     const first = await preview.renderHosted(update(160, source));
     present(first);
     const [corner, width] = animations.state.programs;
-    assert.ok(corner?.customAnimator && width?.clip && first.animations?.clipScope);
+    assert.ok(corner?.customAnimator && width?.clip && first.animations?.clipScope && first.animations.markerScope);
     assert.deepEqual(corner.clip, { start: .5, end: 1.5, editable: true });
     assert.deepEqual(width.clip, { start: 0, end: 2, editable: true });
     const programs = [width.id, corner.id];
-    await control({ action: 'scrub_all', elapsed: 1 });
+    await assert.rejects(control({ action: 'marker', program: corner.id, marker: { action: 'set', name: 'Inspect', time: 3 } }), /within the preview clock/);
+    await control({ action: 'marker', program: corner.id, marker: { action: 'set', name: 'Inspect', time: .9 } });
+    await control({ action: 'marker', marker: { action: 'set', name: 'Inspect', time: 1 } });
+    await control({ action: 'marker', marker: { action: 'set', name: 'Draft', time: 1.5 } });
+    await control({ action: 'marker', marker: { action: 'remove', name: 'Draft' } });
+    assert.equal(animations.state.frame?.sequence, first.sequence, 'Setting a marker keeps the accepted frame');
+    assert.deepEqual(animations.state.markers?.programs[corner.id], [{ name: 'Inspect', time: .9 }]);
+    assert.deepEqual(animations.state.markers?.shared, [{ name: 'Inspect', time: 1 }]);
+    await control({ action: 'marker', marker: { action: 'seek', name: 'Inspect' } });
     const paused = displayed!;
     const frame = animations.state.frame!;
     assert.deepEqual(animations.state.position?.clips, [corner.id, width.id]);
+    await assert.rejects(animations.control(first, { action: 'marker', marker: { action: 'remove', name: 'Inspect' } }, AbortSignal.timeout(5000)),
+        /current app-hosted preview frame/);
     await assert.rejects(preview.sampleHostedAnimation({ ...frame, clips: [{ program: corner.id }, { program: corner.id }],
         elapsed: 1, restart: true }), /distinct current native clips/i);
     await assert.rejects(preview.planHostedClipPlacement({ revision: first.revision, sequence: first.sequence }, { programs }), /frame changed/i);
@@ -64,6 +74,8 @@ export async function verifyHostedClips(preview: NativePreview, update: (revisio
     assert.equal(rebuilt.animationPresentation?.position?.clips?.length, 2);
     assert.deepEqual(rebuilt.animations?.programs.map(program => program.clip?.start), [1.5, .25]);
     present(rebuilt);
+    assert.deepEqual(animations.state.markers?.programs[rebuilt.animations!.programs[0].id], [{ name: 'Inspect', time: .9 }]);
+    assert.deepEqual(animations.state.markers?.shared, [{ name: 'Inspect', time: 1 }]);
     await control({ action: 'play_all' });
     await until(() => (animations.state.position?.elapsed ?? 0) > 1);
     await control({ action: 'pause' });
@@ -113,5 +125,5 @@ export async function verifyHostedClips(preview: NativePreview, update: (revisio
     const expected = await preview.renderHosted(update(167, animationFixture(0).replace('Width="180"', 'Width="190"')));
     assert.equal(out.image.png, expected.image.png, 'Out is a rendered app-native pose');
     assert.deepEqual(errors, []);
-    console.log('App Preview combined clips, applied native delays, looped and held preview ranges, and matched the first replacement pose');
+    console.log('App Preview used scoped markers, combined clips, applied native delays, looped and held preview ranges, and matched the first replacement pose');
 }

@@ -4,6 +4,7 @@ import { element, labelButton } from './dom';
 import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
+import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
 import { TimelineWorkArea } from './timelineWorkArea';
 
@@ -31,6 +32,8 @@ export class HostedAnimationView {
     private readonly clips: TimelineClips<HostedAnimationFrame>;
     private readonly workArea: TimelineWorkArea;
     private readonly clipRange: TimelineWorkArea;
+    private readonly programMarkers: TimelineMarkerView;
+    private readonly clipMarkers: TimelineMarkerView;
     private rangeProgram?: string;
     private rangeScope?: string;
     readonly keyframes: HostedKeyframeEditor;
@@ -69,8 +72,16 @@ export class HostedAnimationView {
                 rememberComparison(false);
                 this.control({ action: 'select', program });
             },
-            layout: () => this.clipRange.layout(),
+            layout: () => { this.clipRange.layout(); this.clipMarkers.layout(); },
         });
+        this.programMarkers = new TimelineMarkerView('hosted', this.seek,
+            () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber,
+            marker => this.control({ action: 'marker', program: Number(this.programs.value), marker }));
+        this.clipMarkers = new TimelineMarkerView('clip', element('clip-seek'), () => this.clips.viewport,
+            () => this.clips.elapsed, (marker, time) => {
+                if (time !== undefined) this.clips.reveal(time);
+                this.control({ action: 'marker', marker });
+            });
         this.programs.onchange = () => {
             this.queued = undefined;
             this.keyframes.close();
@@ -205,6 +216,8 @@ export class HostedAnimationView {
         const groupEnd = playable.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
         const clipScope = this.state.clipScope;
         const clipPosition = position?.clips ? position : undefined;
+        const clipMarkers = this.state.markers?.shared ?? [];
+        const markerEnd = clipMarkers.at(-1)?.time ?? 0;
         this.clipRange.follow(this.state.canPreviewRanges ? groupEnd : 0, this.rangeScope !== clipScope, clipRulerExtent(clipRows));
         this.rangeScope = clipScope;
         this.clipRange.adopt(clipPosition?.previewRange, clipPosition?.playing === true);
@@ -212,9 +225,10 @@ export class HostedAnimationView {
         this.clips.follow({
             frame: this.state.frame, scope: clipScope, position: comparisonPosition, programs: clipRows,
             reference: playable[0]?.id, rangeEnabled: Boolean(this.clipRange.range),
-            rangeEnd: this.clipRange.range?.end,
+            minimumDuration: Math.max(this.clipRange.range?.end ?? 0, markerEnd),
         }, !this.canUse(), false, clipElapsed);
         this.clipRange.show(!usable, playing ? clipPosition?.previewRange : undefined);
+        this.clipMarkers.show(clipMarkers, !usable || !playable.length, Boolean(this.state.markers));
         this.programs.disabled = !usable;
         this.programs.title = program?.customAnimator ? `${program.name} · Registered animator` : program?.name ?? '';
         this.targets.hidden = Boolean(program?.stateRoute);
@@ -237,7 +251,8 @@ export class HostedAnimationView {
         // Keep the slider focused while the next sample is decoded. Retain only the latest seek.
         this.seek.disabled = !this.state.frame || !available || playing;
         const elapsed = this.queued ?? this.submitted ?? current?.elapsed ?? 0;
-        const horizon = Math.max(program?.duration ?? 0, program?.clip?.start ?? 0, elapsed);
+        const programMarkers = program ? this.state.markers?.programs[program.id] ?? [] : [];
+        const horizon = Math.max(program?.duration ?? 0, program?.clip?.start ?? 0, elapsed, programMarkers.at(-1)?.time ?? 0);
         const rangeProgram = program && (program.sourceKey ?? String(program.id));
         this.workArea.follow(this.state.canPreviewRanges && available ? program?.totalDuration ?? Infinity : 0,
             this.rangeProgram !== rangeProgram, horizon);
@@ -250,6 +265,7 @@ export class HostedAnimationView {
         labelButton(this.play, playing ? current?.previewRange ? 'Pause preview range' : 'Pause application animation' : playLabel,
             playing ? 'debug-pause' : 'play');
         this.seek.value = String(elapsed);
+        this.programMarkers.show(programMarkers, !usable || !available, Boolean(this.state.markers));
         this.seek.setAttribute('aria-valuetext', `${this.number.format(elapsed)} seconds elapsed`);
         const limit = program?.totalDuration;
         this.time.value = limit == null || elapsed > limit ? `${this.number.format(elapsed)} s elapsed`

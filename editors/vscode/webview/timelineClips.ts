@@ -19,7 +19,7 @@ interface ClipState<Frame> {
     scope?: string;
     programs: readonly TimelineClipRow[];
     reference?: number;
-    rangeEnd?: number;
+    minimumDuration?: number;
     rangeEnabled?: boolean;
     position?: { program: number; playing: boolean; completed?: boolean; all?: boolean; previewRange?: object };
 }
@@ -109,6 +109,12 @@ export class TimelineClips<Frame extends ClipFrame> {
     get viewport(): TimelineViewport { return this.view; }
     get elapsed(): number { return this.seconds; }
 
+    reveal(time: number): void {
+        if (visibleTime(this.view, time)) return;
+        this.view = panTimeline(this.view, time - this.view.span / 2);
+        this.layout();
+    }
+
     private get frame(): Frame | undefined { return !this.locked && this.visible ? this.state?.frame : undefined; }
 
     private get selected(): TimelineClipRow[] {
@@ -136,7 +142,7 @@ export class TimelineClips<Frame extends ClipFrame> {
         this.pane.hidden = this.tools.hidden = !this.visible;
         if (!this.visible) { this.placement.follow(undefined, []); return; }
         const signature = JSON.stringify([this.scope, clips]);
-        const duration = Math.max(clipRulerExtent(clips), state.rangeEnd ?? 0);
+        const duration = Math.max(clipRulerExtent(clips), state.minimumDuration ?? 0);
         const extentChanged = this.view.duration !== duration;
         if (extentChanged) this.view = fitTimeline(duration);
         if (signature !== this.signature) {

@@ -75,12 +75,11 @@ const viewport = new TimelineViewportView(slider, () => visibleKeys, () => {
     showCurves();
 });
 const workArea = new TimelineWorkArea('timeline', viewport.grid, () => viewport.range, () => slider.valueAsNumber, showPosition);
-const markerView = new TimelineMarkerView(() => viewport.range, time => {
-    viewport.reveal(time);
-    queueSeek(time);
-}, edit => {
+const markerView = new TimelineMarkerView('timeline', slider, () => viewport.range, () => slider.valueAsNumber, (edit, time) => {
     const frame = gestureFrame();
-    if (frame && program !== undefined) vscode.postMessage({ type: 'markerEdit', frame, program, edit });
+    if (!frame || program === undefined) return;
+    if (time !== undefined) viewport.reveal(time);
+    vscode.postMessage({ type: 'markerEdit', frame, program, edit });
 });
 const trackFilter = new TimelineTrackFilter(updateTrackVisibility);
 const navigation = new TimelineNavigation(viewport.grid, slider, () => frameRate, time => {
@@ -123,7 +122,14 @@ const clips = new TimelineClips<FrameTarget>(Boolean(typeof saved === 'object' &
         showTracks();
         programs.focus({ preventScroll: true });
     },
+    layout: () => sharedMarkers.layout(),
 });
+const sharedMarkerButton = element<HTMLButtonElement>('clip-marker-options');
+const sharedMarkers = new TimelineMarkerView('clip', element('clip-seek'), () => clips.viewport, () => clips.elapsed, (edit, time) => {
+    if (!model.frame || pending || clipEdit || model.position?.playing) return;
+    if (time !== undefined) clips.reveal(time);
+    vscode.postMessage({ type: 'markerEdit', frame: model.frame, edit });
+}, false);
 
 const gestureFrame = () => pending || keyEdit || keyframeEditor.applying || positionFor(current())?.playing ? undefined : model.frame;
 const nativePreview = new TimelineNativePreview(queueSeek, () => programAction('programTargets'), () => programAction('revealProgram'));
@@ -490,8 +496,12 @@ function showPosition(): void {
         id: program.id, name: program.name, clip: program.clip, sourceKey: program.source_key,
         duration: program.preview?.duration ?? program.timeline?.duration ?? 1, keys: Boolean(program.timeline),
     }] : []);
-    clips.follow({ frame: model.frame, scope: model.clipScope, programs: clipRows, reference, position: model.position },
+    const markerEnd = Math.max(0, ...(model.sharedMarkers ?? []).map(marker => marker.time));
+    clips.follow({ frame: model.frame, scope: model.clipScope, programs: clipRows, reference, position: model.position, minimumDuration: markerEnd },
         pending, editing || Boolean(clipEdit), queued ?? submitted ?? combined ?? 0);
+    sharedMarkerButton.hidden = model.sharedMarkers === undefined;
+    sharedMarkerButton.disabled = !model.frame || pending || Boolean(clipEdit || model.position?.playing);
+    sharedMarkers.show(model.sharedMarkers ?? [], sharedMarkerButton.disabled);
     container.hidden = !timeline || clips.visible;
     if (clips.visible) {
         nativePreview.show(undefined, {}, 0, false, false);

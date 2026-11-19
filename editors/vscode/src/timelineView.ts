@@ -12,7 +12,7 @@ import { TimelineMarkers } from './timelineMarkers';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, canPreviewRange, previewClock } from './timelinePrograms';
 import { TimelineTransitions } from './timelineTransitions';
-import type { AnimationSourceIssue, CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineMarkerEdit, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
+import type { AnimationSourceIssue, CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineMarkerAction, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
 import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
@@ -32,7 +32,7 @@ export class TimelineView implements vscode.Disposable {
     readonly view: DockView<TimelineState, FromTimeline, ToTimeline>;
     private readonly playback: TimelinePlayback;
     private readonly transitions: TimelineTransitions;
-    private readonly markers = new TimelineMarkers();
+    private readonly markers = new WeakMap<DesignerPanel, TimelineMarkers>();
     private panel?: DesignerPanel;
     private file = '';
     private catalog?: Catalog;
@@ -64,21 +64,32 @@ export class TimelineView implements vscode.Disposable {
         return panel?.animationRecordingTime;
     }
 
-    async previewMarkers(panel: DesignerPanel, frame: FrameTarget, id: number, signal: AbortSignal, edit?: TimelineMarkerEdit) {
+    async previewMarkers(panel: DesignerPanel, frame: FrameTarget, id: number | undefined, signal: AbortSignal, edit?: TimelineMarkerAction) {
         signal.throwIfAborted();
         if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
-        const program = (await this.programs(panel).pending).find(entry => entry.id === id);
+        const programs = await this.programs(panel).pending;
         signal.throwIfAborted();
-        if (!panel.canUse(frame) || !program || !canPreviewRange(program)) throw new Error('Choose a typed clip from the current frame.');
+        if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
+        const clock = markerClock(panel, programs, id);
+        if (!clock) throw new Error('Choose a playable Timeline clock from the current frame.');
+        const marks = this.markers.get(panel) ?? new TimelineMarkers();
+        let position;
         if (edit) {
-            if (this.playback.position?.session === panel.session && this.playback.position.busy) {
-                throw new Error('Pause playback before changing markers.');
+            const current = this.playback.position;
+            if (current?.session === panel.session && (current.busy || current.playing)) {
+                throw new Error('Pause playback before using preview markers.');
             }
-            this.markers.edit(panel, program, edit);
-            this.shown = undefined;
-            this.refresh();
+            if (edit.action === 'seek') {
+                const time = marks.time(clock.key, clock.end, edit.name);
+                position = await this.control(panel, frame, { action: id === undefined ? 'scrub_all' : 'seek', program: clock.reference, time }, signal);
+            } else {
+                marks.edit(clock.key, clock.end, edit);
+                this.markers.set(panel, marks);
+                this.shown = undefined;
+                this.refresh();
+            }
         }
-        return { revision: frame.token, markers: this.markers.list(panel, program) };
+        return { revision: panel.currentToken ?? frame.token, markers: marks.list(clock.key, clock.end), position };
     }
 
     async control(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {
@@ -184,10 +195,15 @@ export class TimelineView implements vscode.Disposable {
         const message = !panel ? 'Open a FerroUI designer.' : panel.status ?? catalog?.error
             ?? (catalog?.programs ? undefined : 'Loading animation programs…');
         const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
-        const markers = panel && catalog?.programs
-            ? Object.fromEntries(programs.map(program => [program.id, this.markers.list(panel, program)])) : undefined;
+        const marks = panel && this.markers.get(panel);
+        const markers = panel && marks && catalog?.programs ? Object.fromEntries(programs.map(program => {
+            const clock = markerClock(panel, programs, program.id);
+            return [program.id, clock ? marks.list(clock.key, clock.end) : []];
+        })) : undefined;
+        const sharedClock = panel && catalog?.programs && markerClock(panel, programs, undefined);
+        const sharedMarkers = sharedClock ? marks?.list(sharedClock.key, sharedClock.end) ?? [] : undefined;
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
-            programs, message, names, selectedTargets, markers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
+            programs, message, names, selectedTargets, markers, sharedMarkers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
             canTransferKeys: panel?.supportsTimelineKeyframeTransfer,
             canAuthorRustKeys: panel?.supportsRustKeyframeStructure,
@@ -383,4 +399,20 @@ export class TimelineView implements vscode.Disposable {
         this.transitions.follow();
         this.view.dispose();
     }
+}
+
+function markerClock(panel: DesignerPanel, programs: readonly TimelineProgram[], id: number | undefined) {
+    const block = panel.snapshot?.activeBlock?.start;
+    const scope = [block?.line, block?.character];
+    if (id !== undefined) {
+        const program = programs.find(entry => entry.id === id);
+        if (!program?.timeline || !canPreviewRange(program)) return;
+        const key = program.source_key ?? [program.id, program.owner, program.selector];
+        return { key: JSON.stringify([...scope, 'clip', key]), end: program.timeline.duration, reference: id };
+    }
+    if (!panel.supportsTimelineClipPlacement) return;
+    const clips = programs.filter(program => program.clip && canPreviewProgram(program));
+    if (!clips.length) return;
+    return { key: JSON.stringify([...scope, 'shared']), reference: clips[0].id,
+        end: clips.reduce((end, program) => Math.max(end, program.clip?.end ?? Infinity), 0) };
 }

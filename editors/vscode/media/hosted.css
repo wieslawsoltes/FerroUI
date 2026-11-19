@@ -8,7 +8,8 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 #hosted-animations:has(#timeline-compare[aria-pressed="true"]) .hosted-single-animation { display: none; }
 #hosted-animations .clip-grid { margin: 4px 8px; max-block-size: clamp(80px, 29vh, 220px); }
 .hosted-animation-clock { display: flex; align-items: center; gap: 6px; padding: 2px 8px; }
-.hosted-playhead { flex: 1; min-inline-size: 0; position: relative; padding-block-end: 4px; }
+.hosted-playhead { flex: 1; min-inline-size: 0; }
+.hosted-playhead-clock { position: relative; padding-block-end: 4px; }
 .hosted-playhead .timeline-range-track, .clip-ruler .timeline-range-track { inset-inline: 0; }
 .clip-ruler:has(.timeline-range-track) { padding-block-end: 18px; }
 .clip-ruler:has(.timeline-range-track) .clip-marks { inset-block-end: 2px; }

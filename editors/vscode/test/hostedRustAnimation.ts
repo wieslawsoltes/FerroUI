@@ -58,7 +58,7 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         await verifyIsolatedRustAnimation(preview, await documentFor(source));
         const first = await render(40, source);
         const [clip] = first.animations?.programs ?? [];
-        assert.ok(clip?.customAnimator && clip.authoring);
+        assert.ok(clip?.customAnimator && clip.authoring && clip.markerKey);
         assert.equal(first.animations?.programs.length, 1, 'An opaque neighbor does not suppress the mapped clip');
         assertSourceIssue(first.animations?.sourceIssues);
         assert.equal(clip.sourceOffset, source.indexOf('ferroui_view::animation('));
@@ -87,6 +87,7 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         const next = await render(41, edited, { frame: paused.frame, position: retained });
         const rebuilt = next.animations?.programs[0];
         assert.ok(rebuilt);
+        assert.equal(rebuilt.markerKey, clip.markerKey, 'Mapped Rust clips keep their marker identity through key edits');
         assert.ok(rebuilt.authoring?.tracks[0].keyframes.some(key => key.time === 1.6));
         assert.deepEqual(next.animationPresentation?.position, { ...retained, program: rebuilt.id });
         const resumed = await render(42, edited.replace('preserve 🧭', 'preserve the Rust comment 🧭'), {

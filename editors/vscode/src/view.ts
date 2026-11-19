@@ -285,13 +285,16 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
         </div>
         ${clipToolbarHtml('Open selected animation', previewRangeButton('clip'))}
     </div>
-    ${clipBoardHtml(previewRangeBand('clip'))}
-    ${previewRangeHtml('hosted')}
-    ${previewRangeHtml('clip')}
+    ${clipBoardHtml(previewRangeBand('clip'), markerStrip('clip'))}
+    ${previewRangeHtml('hosted', markerControls('hosted'))}
+    ${previewRangeHtml('clip', markerControls('clip'))}
     <div id="hosted-animation-clock" class="hosted-animation-clock hosted-single-animation">
         <div class="hosted-playhead">
-            <input id="hosted-animation-seek" type="range" min="0" step="0.001" aria-label="Application animation playhead" aria-keyshortcuts="I O">
-            ${previewRangeBand('hosted')}
+            <div class="hosted-playhead-clock">
+                <input id="hosted-animation-seek" type="range" min="0" step="any" aria-label="Application animation playhead" aria-keyshortcuts="I O">
+                ${previewRangeBand('hosted')}
+            </div>
+            ${markerStrip('hosted')}
         </div>
         <output id="hosted-animation-time" for="hosted-animation-seek"></output>
     </div>
@@ -443,15 +446,14 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
             ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
-        ${clipToolbarHtml()}
+        ${clipToolbarHtml('Open selected animation', tool('clip-marker-options', 'bookmark', 'Preview markers',
+            'popovertarget="clip-preview-markers" aria-controls="clip-preview-markers" aria-expanded="false" hidden'))}
     </div>
-    ${clipBoardHtml()}
-    ${previewRangeHtml('timeline', `
-        <form id="timeline-marker-form" aria-label="Preview markers">
-            <input id="timeline-marker-name" type="text" aria-label="Marker name" placeholder="Marker name" maxlength="48" required>
-            <button type="submit" id="timeline-marker-add" class="tool" aria-label="Add or update marker at playhead" title="Add or update marker at playhead">${icon('add')}</button>
-        </form>
-        <ul id="timeline-marker-list" aria-label="Named markers" hidden></ul>`)}
+    ${clipBoardHtml('', markerStrip('clip'))}
+    ${previewRangeHtml('timeline', markerControls('timeline'))}
+    <div id="clip-preview-markers" class="popover timeline-popover preview-range-popover" popover role="group" aria-label="Preview markers">
+        ${markerControls('clip')}
+    </div>
     <div id="timeline-track-filter" class="popover timeline-popover" popover role="group" aria-label="Filter tracks">
         <input id="timeline-track-search" type="search" aria-label="Filter tracks by property or target" placeholder="Filter tracks" autofocus>
         <label class="timeline-check"><input id="timeline-selected-targets" type="checkbox"> Selected controls only</label>
@@ -496,7 +498,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
                     <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
                     ${previewRangeBand('timeline')}
                 </div>
-                <div id="timeline-marker-strip" role="group" aria-label="Markers on the ruler" hidden></div>
+                ${markerStrip('timeline')}
             </div>
             <ol id="timeline-tracks" aria-label="Animation targets and properties"></ol>
             <p id="timeline-filter-status" role="status" hidden>No matching tracks.</p>
@@ -533,7 +535,7 @@ function clipToolbarHtml(openLabel = 'Open selected clip keyframes', range = '')
 </div>`;
 }
 
-function clipBoardHtml(rangeBand = ''): string {
+function clipBoardHtml(rangeBand = '', markers = ''): string {
     return `
 <section id="timeline-clips" class="clip-grid" aria-label="Animation clips on a shared ruler" hidden>
     <div class="clip-axis">
@@ -542,6 +544,7 @@ function clipBoardHtml(rangeBand = ''): string {
             <div id="clip-marks" class="clip-marks" aria-hidden="true"></div>
             ${rangeBand}
         </div>
+        ${markers}
     </div>
     <ol id="clip-rows" aria-label="Animation clips"></ol>
     <div id="clip-pan-row" class="clip-pan" hidden>
@@ -581,6 +584,18 @@ function previewRangeHtml(prefix: string, extra = ''): string {
 
 function previewRangeBand(prefix: string): string {
     return `<div class="timeline-range-track" aria-hidden="true"><span id="${prefix}-range-band" class="timeline-range-band" hidden></span></div>`;
+}
+
+function markerControls(prefix: string): string {
+    return `<form id="${prefix}-marker-form" class="timeline-marker-form" aria-label="Preview markers">
+        <input id="${prefix}-marker-name" class="timeline-marker-name" type="text" aria-label="Marker name" placeholder="Marker name" maxlength="48" required>
+        <button type="submit" id="${prefix}-marker-add" class="tool" aria-label="Add or update marker at playhead" title="Add or update marker at playhead">${icon('add')}</button>
+    </form>
+    <ul id="${prefix}-marker-list" class="timeline-marker-list" aria-label="Named markers" hidden></ul>`;
+}
+
+function markerStrip(prefix: string): string {
+    return `<div id="${prefix}-marker-strip" class="timeline-marker-strip" role="group" aria-label="Markers on the ruler" hidden></div>`;
 }
 
 function timelineOption(id: string, glyph: string, label: string, attributes = ''): string {

@@ -142,10 +142,25 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     assert.deepEqual(await markers(), [{ name: 'In', time: .25 }, { name: 'Settled', time: .8 }]);
     content(await editMarker({ action: 'remove', name: 'In' }));
     assert.deepEqual(await markers(), [{ name: 'Settled', time: .8 }]);
-    await control('seek', { time: .8 });
+    const markerPose = content<{ position: TimelinePosition }>(await editMarker({ action: 'seek', name: 'Settled' }));
+    assert.equal(markerPose.position.time, .8);
     assert.equal((await editMarker({ action: 'remove', name: 'Settled' })).isError, true, 'A retired frame cannot edit markers');
     assert.equal(await opacity('Lead'), .4);
     assert.equal(document.getText(), scene);
+
+    frame = await wait();
+    const sharedFrame = { session, expected_revision: frame.revision, all: true };
+    const shared = (action: string, time?: number, revision = frame.revision) => invoke('designer_timeline_marker_edit', {
+        ...sharedFrame, expected_revision: revision, arguments: { action, name: 'Settled', ...(time !== undefined && { time }) },
+    });
+    content(await shared('set', 1.25));
+    const sharedPose = content<{ position: TimelinePosition }>(await shared('seek'));
+    assert.equal(sharedPose.position.all, true);
+    assert.equal(sharedPose.position.elapsed, 1.25);
+    frame = await wait();
+    content(await shared('remove'));
+    const independent = content<{ markers: TimelineMarker[] }>(await invoke('designer_timeline_markers', { ...markerFrame, expected_revision: frame.revision }));
+    assert.deepEqual(independent.markers, [{ name: 'Settled', time: .8 }]);
 
     const clips = await programs();
     assert.deepEqual(clips.map(clip => clip.clip), [{ start: 0, end: 6, editable: true }, { start: 0, end: 1, editable: true }]);

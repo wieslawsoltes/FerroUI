@@ -13,6 +13,8 @@ const wheel = { type: 'number', minimum: -64, maximum: 64 };
 const time = { type: 'number', minimum: 0 };
 const previewRange = { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'],
     properties: { start: time, end: time, loop: truth } };
+const markerAction = { type: 'object', additionalProperties: false, required: ['action', 'name'],
+    properties: { action: choice('set', 'remove', 'seek'), name: { type: 'string', minLength: 1, maxLength: 48 }, time } };
 const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false,
         required: ['program', 'target', 'property', 'time', 'value', 'easing'],
@@ -61,12 +63,12 @@ export const agentCatalog = {
     designer_hosted_fixture: tool('Select a registered fixture in the application preview and wait for its accepted frame. Omit fixture to return to the current source.', {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
-    designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, source issues, frame and elapsed time.', session, ['session']),
+    designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, frame, elapsed time, and named markers.', session, ['session']),
     designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
-    designer_hosted_animation: tool('Control native clips or a Rust state route on the app’s elapsed clock. Play range takes start, end and loop. Omit program to rehearse all playable clips together. Use the current app generation, revision and frame sequence.', {
+    designer_hosted_animation: tool('Control native clips or a Rust state route on the app’s elapsed clock. Play range takes start, end and loop. Marker actions set, remove, or seek by name. Omit program for the shared elapsed ruler. Use the current app generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
-            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'play_range', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
-                index: integer(0), elapsed: time, range: previewRange, targets: { type: 'array', items: node, maxItems: 2000 } } },
+            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'play_range', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue', 'marker'), program: node,
+                index: integer(0), elapsed: time, range: previewRange, marker: markerAction, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
     designer_hosted_curve: tool('Sample values or signed velocity from a running project’s animation track. Read the track’s curve_channels for its available components.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: {
@@ -147,12 +149,10 @@ export const agentCatalog = {
             properties: { action: choice('seek', 'scrub_all', 'play', 'play_range', 'play_all', 'pause', 'stop', 'record'), program: node, enabled: truth, time,
                 range: previewRange } } },
         ['session', 'expected_revision', 'arguments'], true, false),
-    designer_timeline_markers: tool('List the named preview markers for a typed Timeline clip in the current VS Code designer revision.',
-        { ...frame, program: node }, ['session', 'expected_revision', 'program']),
-    designer_timeline_marker_edit: tool('Set or remove a session-local Timeline marker by name. Set takes an authored time in seconds. Markers are used for preview navigation.',
-        { ...frame, program: node, arguments: { type: 'object', additionalProperties: false, required: ['action', 'name'],
-            properties: { action: choice('set', 'remove'), name: { type: 'string', maxLength: 48 }, time } } },
-        ['session', 'expected_revision', 'program', 'arguments'], true, false),
+    designer_timeline_markers: tool('List the named preview markers for a typed Timeline clip or the shared ruler. Use the current designer revision and supply program or set all to true.',
+        { ...frame, program: node, all: truth }, ['session', 'expected_revision']),
+    designer_timeline_marker_edit: tool('Set, remove, or seek to a session-local Timeline marker by name. Supply program for authored seconds or set all to true for elapsed seconds.',
+        { ...frame, program: node, all: truth, arguments: markerAction }, ['session', 'expected_revision', 'arguments'], true, false),
     designer_transition_control: tool('Open, seek, play, pause, or stop the native state transition shown in the Timeline. Reveal opens its mapped Rust declaration. Use designer_states for authored groups and endpoints. Open takes owner, group, to, optional from, and optional elapsed time. Omit from to start at base values. The returned revision identifies the accepted frame.',
         { ...frame, arguments: { type: 'object', additionalProperties: false, required: ['action'],
             properties: { action: choice('open', 'seek', 'play', 'pause', 'stop', 'reveal'), owner: node, group: text,

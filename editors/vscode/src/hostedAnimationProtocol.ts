@@ -1,4 +1,4 @@
-import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
+import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineMarker, TimelineMarkerAction, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 
@@ -17,6 +17,7 @@ export interface HostedAnimationProgram {
     compatibleTargets: number[];
     sourceOffset: number | null;
     sourceKey?: string;
+    markerKey?: string;
     customAnimator: boolean;
     authoring?: { codec: string; tracks: TimelineTrack[] } | null;
     curveTracks?: TimelineTrack[] | null;
@@ -35,6 +36,7 @@ export interface HostedAnimationCatalog {
     targets: HostedAnimationTarget[];
     sourceIssues?: AnimationSourceIssue[];
     clipScope?: string;
+    markerScope?: string;
 }
 
 export interface HostedAnimationFrame {
@@ -57,6 +59,7 @@ export type HostedAnimationControl =
     | { action: 'scrub_all'; elapsed: number }
     | { action: 'play_all'; elapsed?: number }
     | { action: 'play_range'; program?: number; range: TimelinePreviewRange }
+    | { action: 'marker'; program?: number; marker: TimelineMarkerAction }
     | { action: 'pause' }
     | { action: 'stop' }
     | { action: 'targets'; program: number; targets?: number[] };
@@ -90,6 +93,7 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
     busy: boolean;
     canShowVelocity?: boolean;
     canPreviewRanges?: boolean;
+    markers?: { programs: Record<number, TimelineMarker[]>; shared: TimelineMarker[] };
 }
 
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };

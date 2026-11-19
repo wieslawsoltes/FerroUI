@@ -75,6 +75,7 @@ export interface TimelinePreviewRange {
 
 export interface TimelineMarker { name: string; time: number }
 export type TimelineMarkerEdit = { action: 'set'; name: string; time: number } | { action: 'remove'; name: string };
+export type TimelineMarkerAction = TimelineMarkerEdit | { action: 'seek'; name: string };
 
 export interface TimelinePreviewPose {
     program: number;
@@ -93,6 +94,7 @@ export interface TimelineState {
     names: Record<number, string>;
     selectedTargets?: readonly number[];
     markers?: Record<number, TimelineMarker[]>;
+    sharedMarkers?: TimelineMarker[];
     writable: boolean;
     canRecord?: boolean;
     canRecordGeometry?: boolean;
@@ -129,7 +131,7 @@ export type FromTimeline =
     | { type: 'revealProgram'; frame: FrameTarget; program: number }
     | { type: 'sourceIssues'; frame: FrameTarget }
     | { type: 'clipPlacement'; frame: FrameTarget; programs: number[]; start?: number; gap?: number }
-    | { type: 'markerEdit'; frame: FrameTarget; program: number; edit: TimelineMarkerEdit }
+    | { type: 'markerEdit'; frame: FrameTarget; program?: number; edit: TimelineMarkerAction }
     | { type: 'recordKeyframe'; frame: FrameTarget; program: number; time: number; track?: number; candidates?: number[] }
     | TimelineCurveRequest
     | TimelineKeyframeRequest

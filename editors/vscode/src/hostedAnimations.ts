@@ -3,6 +3,7 @@ import type {
     HostedAnimationProgram, HostedAnimationRequest, HostedAnimationRestore, HostedAnimationState,
 } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame } from './hostedProtocol';
+import { hostedClockEnd, HostedMarkers } from './hostedMarkers';
 import { drivePreviewClock } from './previewClock';
 import { stepPreviewRange, validPreviewRange } from './timelinePreviewRange';
 
@@ -28,6 +29,8 @@ export class HostedAnimations {
     private overrides: Record<number, number[]> = {};
     private pending?: object;
     private restoration?: HostedAnimationRestore;
+    private readonly markers = new HostedMarkers();
+    private markerState?: HostedAnimationState['markers'];
 
     constructor(private readonly render: (request: HostedAnimationRequest, signal: AbortSignal) => Promise<HostedAnimationSample>,
         private readonly present: (frame: HostedFrame) => void,
@@ -36,7 +39,7 @@ export class HostedAnimations {
 
     get state(): HostedAnimationState {
         return { ...this.catalog, frame: this.frame, selection: this.selection, position: this.playback?.position,
-            overrides: this.overrides, busy: Boolean(this.pending), canPreviewRanges: this.supportsRanges() };
+            overrides: this.overrides, busy: Boolean(this.pending), canPreviewRanges: this.supportsRanges(), markers: this.markerState };
     }
 
     get driving(): boolean { return Boolean(this.pending || this.playback?.position.playing); }
@@ -51,6 +54,8 @@ export class HostedAnimations {
             this.selection = state?.selection ?? state?.position?.program;
             this.overrides = state?.overrides ?? {};
             restored = state?.position;
+            this.markers.replaceFrame();
+            this.refreshMarkers();
         }
         this.previousSequence = this.frame?.sequence;
         this.frame = { revision: frame.revision, sequence: frame.sequence };
@@ -78,6 +83,7 @@ export class HostedAnimations {
     private reset(): void {
         this.retireFrame();
         this.playback = this.selection = this.restoration = undefined;
+        this.markerState = undefined;
         this.overrides = {};
     }
 
@@ -113,6 +119,15 @@ export class HostedAnimations {
         } else if (action.action === 'play_range') {
             const programs = action.program === undefined ? this.playableClips() : [this.program(frame, action.program)];
             await this.start(frame.revision, programs, action, signal);
+        } else if (action.action === 'marker') {
+            if (!action.marker) throw new Error('Supply a marker action and name.');
+            const program = action.program === undefined ? undefined : this.program(frame, action.program);
+            const programs = program ? [program].filter(item => this.hasTargets(item)) : this.playableClips();
+            const elapsed = this.markers.edit(this.catalog.markerScope, programs, program, action.marker);
+            if (elapsed !== undefined) {
+                await this.start(frame.revision, programs, program ? { action: 'seek', program: program.id, elapsed }
+                    : { action: 'scrub_all', elapsed }, signal);
+            } else this.refreshMarkers();
         } else if (action.action === 'play_all' || action.action === 'scrub_all') {
             await this.start(frame.revision, this.playableClips(), action, signal);
         } else {
@@ -130,6 +145,7 @@ export class HostedAnimations {
                     this.overrides = { ...this.overrides };
                     if (targets.length) this.overrides[program.id] = targets;
                     else delete this.overrides[program.id];
+                    this.refreshMarkers();
                 };
                 const position = this.playback?.position;
                 if (position?.program === program.id || position?.clips?.includes(program.id)) {
@@ -147,17 +163,25 @@ export class HostedAnimations {
     }
 
     private playableClips(): HostedAnimationProgram[] {
-        return this.catalog.programs.filter(program =>
-            program.clip && (this.overrides[program.id] ?? program.defaultTargets).length);
+        return this.catalog.programs.filter(program => program.clip && this.hasTargets(program));
+    }
+
+    private hasTargets(program: HostedAnimationProgram): boolean {
+        return Boolean((this.overrides[program.id] ?? program.defaultTargets).length);
+    }
+
+    private refreshMarkers(): void {
+        const programs = this.catalog.programs.filter(program => this.hasTargets(program));
+        this.markerState = this.markers.state(this.catalog, programs, programs.filter(program => program.clip));
     }
 
     private async start(revision: number, programs: HostedAnimationProgram[], action: PlaybackAction, signal: AbortSignal): Promise<void> {
         const first = programs[0];
-        if (!first || !(this.overrides[first.id] ?? first.defaultTargets).length) {
+        if (!first || !this.hasTargets(first)) {
             throw new Error('Choose controls to preview this animation.');
         }
         const clips = 'program' in action && action.program !== undefined ? undefined : programs.map(program => program.id);
-        const end = programs.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
+        const end = hostedClockEnd(programs);
         const range = action.action === 'play_range' ? action.range : undefined;
         if (action.action === 'play_range' && !validPreviewRange(range, end)) {
             throw new Error('Choose an In and Out time within the preview clock, with In before Out.');

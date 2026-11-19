@@ -17,7 +17,7 @@ import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange } from './stagesProtocol';
-import type { AnimationSourceIssue, TimelineControl, TimelineMarkerEdit } from './timelineProtocol';
+import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
@@ -33,6 +33,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_sequence: number;
     runtime?: RuntimeTarget;
     accept_baselines?: boolean;
+    all?: boolean;
     path: string;
     line?: number;
     character?: number;
@@ -341,8 +342,9 @@ export class AgentTools {
                     args.arguments as TimelineControl, signal);
             case 'designer_timeline_markers':
             case 'designer_timeline_marker_edit':
+                if ((args.all === true) === (args.program !== undefined)) throw new Error('Choose a clip or the shared elapsed ruler.');
                 return this.workbench.timelineMarkers(panel, { session: panel.session, token: args.expected_revision }, args.program,
-                    signal, tool === 'designer_timeline_marker_edit' ? args.arguments as TimelineMarkerEdit : undefined);
+                    signal, tool === 'designer_timeline_marker_edit' ? args.arguments as TimelineMarkerAction : undefined);
             case 'designer_transition_control':
                 await this.workbench.revealDesign(panel, 'timeline');
                 return await this.workbench.controlStateTransition(panel, { session: panel.session, token: args.expected_revision },
