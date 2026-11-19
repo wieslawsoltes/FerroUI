@@ -1,0 +1,177 @@
+--- a/src/FerroUI.Base/data/core/typed_binding_expression.rs
++++ b/src/FerroUI.Base/data/core/typed_binding_expression.rs
+@@ -356,6 +356,7 @@
+     }
+ }
+ 
++
+ /// Target events and the lifetime of the target subscription do not depend on
+ /// the model or its property's Rust type. Dispatch back to the concrete
+ /// expression only when an operation needs the typed source or payload.
+@@ -494,59 +495,6 @@
+     }
+ }
+ 
+-/// Resolving an owner and replacing its notification subscription depend on
+-/// the model type alone. Return the strong handle to the typed caller so it
+-/// survives the initial read or write, including a reentrant notification.
+-struct SourceSlot<TSource> {
+-    weak: RefCell<Option<Weak<TSource>>>,
+-    token: Cell<Option<u64>>,
+-}
+-
+-impl<TSource: 'static> SourceSlot<TSource> {
+-    fn get(&self) -> Option<Rc<TSource>> {
+-        self.weak.borrow().as_ref().and_then(Weak::upgrade)
+-    }
+-
+-    fn unsubscribe(&self, notifier: Option<fn(&TSource) -> &dyn INotifyPropertyChanged>) {
+-        if let Some(token) = self.token.take() {
+-            if let Some(old) = self.get() {
+-                if let Some(inpc) = notifier.map(|f| f(&old)) {
+-                    inpc.property_changed().remove(token);
+-                }
+-            }
+-        }
+-    }
+-
+-    fn replace(
+-        &self,
+-        controller: &BindingController,
+-        name: &str,
+-        notifier: Option<fn(&TSource) -> &dyn INotifyPropertyChanged>,
+-        data_context: Option<&BoxedValue>,
+-    ) -> Option<Rc<TSource>> {
+-        let source = data_context.and_then(owner_of::<TSource>);
+-        if let (Some(d), None) = (data_context, &source) {
+-            controller.target.log(name, &format!(
+-                "Could not convert DataContext of type '{}' to '{}'.",
+-                d.type_name(),
+-                std::any::type_name::<TSource>()
+-            ));
+-        }
+-
+-        self.unsubscribe(notifier);
+-        self.weak.replace(source.as_ref().map(Rc::downgrade));
+-        controller.should_update_one_time_binding_target.set(true);
+-
+-        if let Some(source) = &source {
+-            if let Some(inpc) = notifier.map(|f| f(source)) {
+-                let token = controller.subscribe_source(inpc);
+-                self.token.set(Some(token));
+-            }
+-        }
+-
+-        source
+-    }
+-}
+ 
+ /// Storage and property-store conversions are specialized only on the value
+ /// type. The model stays in the expression and is never boxed for a change.
+@@ -617,7 +565,8 @@
+ pub struct TypedBindingExpression<TSource: PartialEq + 'static, TValue: PropertyValue> {
+     property_info: Rc<TypedClrPropertyInfo<TSource, TValue>>,
+     controller: BindingController,
+-    source: SourceSlot<TSource>,
++    source: RefCell<Option<Weak<TSource>>>,
++    source_token: Cell<Option<u64>>,
+     source_value: TypedValueSlot<TValue>,
+ }
+ 
+@@ -644,7 +593,8 @@
+                 target_subscription: RefCell::new(None),
+                 should_update_one_time_binding_target: Cell::new(mode == BindingMode::OneTime),
+             },
+-            source: SourceSlot { weak: RefCell::new(None), token: Cell::new(None) },
++            source: RefCell::new(None),
++            source_token: Cell::new(None),
+             source_value: TypedValueSlot(RefCell::new(None)),
+         })
+     }
+@@ -654,10 +604,41 @@
+         self.property_info.name()
+     }
+ 
++    fn try_get_source(&self) -> Option<Rc<TSource>> {
++        self.source.borrow().as_ref().and_then(Weak::upgrade)
++    }
++
++    fn unsubscribe_source(&self) {
++        if let Some(token) = self.source_token.take() {
++            if let Some(old) = self.try_get_source() {
++                if let Some(inpc) = self.property_info.notifier(&old) {
++                    inpc.property_changed().remove(token);
++                }
++            }
++        }
++    }
++
+     fn update_source(&self, data_context: Option<BoxedValue>) {
+-        let source = self.source.replace(
+-            &self.controller, self.property_info.name(), self.property_info.inpc, data_context.as_ref(),
+-        );
++        let source = data_context.as_ref().and_then(owner_of::<TSource>);
++        if let (Some(d), None) = (&data_context, &source) {
++            self.controller.target.log(self.description(), &format!(
++                "Could not convert DataContext of type '{}' to '{}'.",
++                d.type_name(),
++                std::any::type_name::<TSource>()
++            ));
++        }
++
++        self.unsubscribe_source();
++        self.source.replace(source.as_ref().map(Rc::downgrade));
++        self.controller.should_update_one_time_binding_target.set(true);
++
++        if let Some(source) = &source {
++            if let Some(inpc) = self.property_info.notifier(source) {
++                let token = self.controller.subscribe_source(inpc);
++                self.source_token.set(Some(token));
++            }
++        }
++
+         if self.controller.mode == BindingMode::OneWayToSource {
+             if let Some(value) = TypedValueSlot::<TValue>::try_get_target_value(&self.controller.target) {
+                 self.write_value_to_source(value);
+@@ -673,7 +654,7 @@
+             return;
+         }
+         if self.controller.target.property.get().is_some() && self.controller.target.owner().is_some() {
+-            if let Some(source) = self.source.get() {
++            if let Some(source) = self.try_get_source() {
+                 self.property_info.set_on(&source, value);
+             }
+         }
+@@ -686,6 +667,8 @@
+         let value = source.map(|owner| self.property_info.try_get_from(owner));
+         self.source_value.update(&self.controller, self.property_info.name(), value);
+     }
++
++
+ }
+ 
+ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingHost for TypedBindingExpression<TSource, TValue> {
+@@ -698,12 +681,12 @@
+     }
+ 
+     fn disconnect_source(&self) {
+-        self.source.unsubscribe(self.property_info.inpc);
++        self.unsubscribe_source();
+     }
+ 
+     fn source_changed(&self, name: &str) {
+         if name.is_empty() || name == self.property_info.name() {
+-            let source = self.source.get();
++            let source = self.try_get_source();
+             if source.is_some() {
+                 self.write_source_value_to_target(source.as_ref());
+             }
+@@ -835,7 +818,7 @@
+ 
+ impl<TSource: PartialEq + 'static, TValue: PropertyValue> Drop for TypedBindingExpression<TSource, TValue> {
+     fn drop(&mut self) {
+-        self.source.unsubscribe(self.property_info.inpc);
++        self.unsubscribe_source();
+         if let Some(s) = self.controller.target_subscription.get_mut().take() {
+             s.dispose();
+         }

@@ -23,6 +23,7 @@ pub mod sankey_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
+mod svg_path;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 

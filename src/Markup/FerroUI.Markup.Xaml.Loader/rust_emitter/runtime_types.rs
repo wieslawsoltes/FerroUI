@@ -173,6 +173,13 @@ impl EmitMarkup for RuntimeMarkup {
         };
         super::emit_types::markup_value_rust_type(value.name(), owner, &path)
     }
+    fn is_optional_value(&self, key: TypeKey<'_>) -> bool {
+        let (Some(id), Some(value)) = (id_of(key), self.0.value) else { return false };
+        self.0.handles.iter().map(|handle| handle()).any(|handle| {
+            handle.id() == id
+                && handle.name().strip_prefix("core::option::Option<").and_then(|s| s.strip_suffix('>')) == Some(value().name())
+        })
+    }
     fn is_flags(&self) -> bool {
         self.0.is_flags
     }
