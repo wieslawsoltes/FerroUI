@@ -364,6 +364,22 @@ documents of a direct dependency construct, so its controls keep their templates
 constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
 library keeps its own table. See docs/porting/theme-trimming.md, section 20.
 
+**Themes used together, and types of one name (#848).** An application that uses several themes
+closes over all of them together: a key one theme references and another defines, or a type one
+constructs and another styles, keeps the providing unit. Types of one local name in two assemblies
+keep their own base classes and creates edges. See docs/porting/theme-trimming.md, section 21.
+
+**How the build reads its inputs (#850).**
+- The includes that make up the group of a document are found by the XML parser of the compiler,
+  so entities are decoded and CDATA and comments are skipped. The build and the run-time loader use
+  the same rules.
+- The `[package.metadata.ferroui]` table is read as TOML, so dotted keys, inline tables and string
+  escapes all work.
+- A document consumed by a class (merged into it as well) is not embedded again by
+  `Build::embed_assets`.
+
+Details are in docs/porting/theme-trimming.md, section 22.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.
@@ -606,7 +622,8 @@ section 9).
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
-| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
+| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
+| Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |

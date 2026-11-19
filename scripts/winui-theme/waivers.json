@@ -37,16 +37,6 @@
       "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported."
     },
     {
-      "document": "controls/dev/CommonStyles/Pivot_themeresources.xaml",
-      "key": "*",
-      "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView."
-    },
-    {
-      "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:Pivot.*",
-      "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView."
-    },
-    {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
       "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
@@ -80,16 +70,6 @@
       "document": "controls/dev/TwoPaneView/TwoPaneView.xaml",
       "key": "*",
       "reason": "TwoPaneView: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/SwipeControl/SwipeControl.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/SwipeControl/SwipeControl_themeresources.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
     },
     {
       "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",

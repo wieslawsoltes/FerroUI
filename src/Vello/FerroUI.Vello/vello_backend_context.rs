@@ -101,12 +101,15 @@ impl IPlatformRenderInterfaceContext for VelloContext {
         .collect()
     }
 
-    /// Advances the release of the frames of producers the device reads, without waiting:
-    /// whether some are still read.
+    /// Advances the release of the frames of producers the device reads, and the work of the
+    /// platform's context their frames wait for (on a device over that context), without
+    /// waiting: whether some is still pending.
     fn poll_pending_gpu_work(&self) -> bool {
         #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(gpu) = &self.gpu {
-            return gpu.device().poll_frame_reads();
+            let reads = gpu.device().poll_frame_reads();
+            let platform = gpu.poll_pending_platform_gpu_work();
+            return reads || platform;
         }
         false
     }

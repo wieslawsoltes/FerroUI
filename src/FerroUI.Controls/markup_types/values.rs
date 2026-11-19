@@ -127,6 +127,14 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
     // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
     <crate::ZoomMode as MarkupTyped>::MARKUP,
+    // WinUI's Pivot (docs/porting/winui-calculator-gaps.md, PV-1).
+    <crate::PivotHeaderFocusVisualPlacement as MarkupTyped>::MARKUP,
+    <crate::PivotSlideInAnimationGroup as MarkupTyped>::MARKUP,
+    <crate::PivotItemEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's SwipeControl (docs/porting/winui-calculator-gaps.md, SW-1).
+    <crate::SwipeMode as MarkupTyped>::MARKUP,
+    <crate::SwipeBehaviorOnInvoked as MarkupTyped>::MARKUP,
+    <crate::SwipeItemInvokedEventArgs as MarkupTyped>::MARKUP,
     // WinUI's EasingMode of the storyboard easing functions (docs/porting/winui-calculator-gaps.md).
     <crate::animation::EasingMode as MarkupTyped>::MARKUP,
 ];
@@ -154,6 +162,10 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<Symbol>();
     ValueTypes::register_used::<InfoBarSeverity>();
     ValueTypes::register_used::<crate::ZoomMode>();
+    ValueTypes::register_used::<crate::PivotHeaderFocusVisualPlacement>();
+    ValueTypes::register_used::<crate::PivotSlideInAnimationGroup>();
+    ValueTypes::register_used::<crate::SwipeMode>();
+    ValueTypes::register_used::<crate::SwipeBehaviorOnInvoked>();
     ValueTypes::register_used::<crate::animation::EasingMode>();
     ValueTypes::register_used::<InfoBarCloseReason>();
     ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
@@ -207,6 +219,30 @@ impl ferroui_base::data::core::ValueTypeRegistration for Symbol {
 impl ferroui_base::data::core::ValueTypeRegistration for InfoBarSeverity {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<InfoBarSeverity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::PivotHeaderFocusVisualPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::PivotHeaderFocusVisualPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::PivotSlideInAnimationGroup {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::PivotSlideInAnimationGroup>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::SwipeMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::SwipeMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::SwipeBehaviorOnInvoked {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::SwipeBehaviorOnInvoked>();
     }
 }
 

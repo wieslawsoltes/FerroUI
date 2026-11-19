@@ -25,7 +25,8 @@ import sys
 import tempfile
 import time
 
-from compare import generated_outputs, identity, normalized, units
+from compare import (BUILD_ONLY_ROOT, build_only_additions, build_only_packages, generated_outputs, identity,
+                     normalized, unit_key, units, without_units)
 
 
 FIXTURE_PACKAGE = "sample-freshness-fixture"
@@ -179,6 +180,7 @@ def changed_outputs(first: dict, second: dict) -> list[str]:
 def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env: dict,
                    jobs: int | None, report: dict, save, accept_output_changes: bool = False) -> None:
     reference_outputs: dict[str, dict] = {}
+    build_only = build_only_packages(sources["candidate"])
     for label, source in sources.items():
         directory = temporary / f"fixture-{label}"
         make_fixture(directory, source, env)
@@ -235,6 +237,12 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 raise RuntimeError(f"candidate fixture {phase}: unchanged build was unnecessarily rebuilt")
             equivalence = {"generated": record["generated"], "runtime": record["consumer_stdout"],
                            "units": definitions(record)}
+            if label == "candidate" and phase in reference_outputs:
+                # Build-only units of the build crate's new dependencies are not a change of the graph.
+                additions = build_only_additions(reference_outputs[phase]["units"], equivalence["units"], build_only)
+                if additions:
+                    report.setdefault("fixture_build_only_units", {})[phase] = sorted(unit_key(u) for u in additions)
+                    equivalence["units"] = without_units(equivalence["units"], additions)
             if label == "baseline":
                 reference_outputs[phase] = equivalence
             elif equivalence != reference_outputs[phase]:
@@ -329,19 +337,28 @@ def main() -> int:
                 # The graph of every build is the baseline's; the generated files of a revision are its
                 # own first build's, and the baseline's unless an output change is acknowledged.
                 references = {}
+                build_only = build_only_packages(sources["candidate"])
                 for label, source in sources.items():
                     target = temporary / f"target-{label}"
                     record = build(source, source, target, output / "graph", label, "populate", package,
                                    env, args.jobs, library=not args.catalog, no_default_features=not args.catalog)
                     references[label] = (definitions(record), record["generated"])
                     baseline_reference = references["baseline"]
-                    if references[label][0] != baseline_reference[0]:
+                    # Units only the candidate builds because the build crate gained a dependency run
+                    # in build scripts only: they are reported, and left out of the comparison.
+                    compared = references[label][0]
+                    if label == "candidate":
+                        additions = build_only_additions(baseline_reference[0], compared, build_only)
+                        if additions:
+                            report["graph_build_only_units"] = sorted(unit_key(unit) for unit in additions)
+                            compared = without_units(compared, additions)
+                    if compared != baseline_reference[0]:
                         # An acknowledged change (label build-output-changes) may build some units with
                         # other features; the units and their profiles are still the baseline's.
-                        if not (args.accept_output_changes and without_features(references[label][0])
+                        if not (args.accept_output_changes and without_features(compared)
                                 == without_features(baseline_reference[0])):
                             raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
-                        report["graph_feature_changes"] = changed_features(baseline_reference[0], references[label][0])
+                        report["graph_feature_changes"] = changed_features(baseline_reference[0], compared)
                     if references[label][1] != baseline_reference[1]:
                         if not args.accept_output_changes:
                             raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
@@ -412,6 +429,12 @@ def main() -> int:
                      "The units and profiles of the graph are the baseline's and every repeat builds the graph of its "
                      "revision; these units are built with other features than the baseline's:\n\n"
                      + "".join(f"- `{name}`\n" for name in feature_changes[:50]))
+        build_only_units = report.get("graph_build_only_units", [])
+        if build_only_units:
+            text += (f"\n### Build-only units of `{BUILD_ONLY_ROOT}`\n\n"
+                     f"The candidate also builds {len(build_only_units)} units of dependencies of `{BUILD_ONLY_ROOT}`, "
+                     "which run in build scripts only; they are left out of the comparison:\n\n"
+                     + "".join(f"- `{name}`\n" for name in build_only_units[:50]))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")
