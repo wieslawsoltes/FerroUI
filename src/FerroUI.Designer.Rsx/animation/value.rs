@@ -16,6 +16,8 @@ impl ValueShape {
     pub(crate) const NUMBER: Self = Self(ValueKind::Number);
     pub(crate) const CORNER_RADIUS: Self = Self(ValueKind::CornerRadius);
 
+    pub(super) fn kind(self) -> ValueKind { self.0 }
+
     pub(crate) fn from_type(path: &str) -> Option<Self> {
         if path == "f64" {
             return Some(Self::NUMBER);
@@ -87,12 +89,7 @@ impl ValueSource {
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
         let kind = self.value.kind();
         let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;
-        let values = value
-            .to_xaml()
-            .split(',')
-            .map(str::parse::<f64>)
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|_| "The key value has no numeric Rust representation")?;
+        let values = numeric_parts(&value)?;
         let components = match (self.parts.len(), values.as_slice()) {
             (1, [a, b, c, d]) if a == b && a == c && a == d => vec![*a],
             (2, [a, b, c, d]) if kind == ValueKind::CornerRadius && a == b && c == d => {
@@ -111,4 +108,26 @@ impl ValueSource {
         }
         Ok(())
     }
+}
+
+pub(super) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
+    if let AnimationValue::Number(number) = value {
+        return Ok(format!("{number:?}"));
+    }
+    let name = match value.kind() {
+        ValueKind::CornerRadius => "CornerRadius",
+        ValueKind::Thickness => "Thickness",
+        ValueKind::Point => "Point",
+        ValueKind::Vector => "Vector",
+        ValueKind::Size => "Size",
+        ValueKind::Rect => "Rect",
+        _ => return Err("The key value has no typed Rust builder representation".into()),
+    };
+    let args = numeric_parts(value)?.iter().map(|part| format!("{part:?}")).collect::<Vec<_>>().join(", ");
+    Ok(format!("::ferroui_base::{name}::new({args})"))
+}
+
+fn numeric_parts(value: &AnimationValue) -> Result<Vec<f64>, String> {
+    value.to_xaml().split(',').map(str::parse::<f64>).collect::<Result<_, _>>()
+        .map_err(|_| "The key value has no numeric Rust representation".into())
 }

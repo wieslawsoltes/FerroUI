@@ -1,7 +1,7 @@
-use super::syntax::{float, path, span};
+use super::syntax::{float, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
-use ferroui_designer_animation::{native_key_time, Easing, Timeline};
+use ferroui_designer_animation::{native_key_time, Timeline};
 use syn::{Expr, ExprMethodCall, Pat};
 
 pub(super) struct MappedKey {
@@ -61,17 +61,20 @@ pub(super) fn keyframe(
         if current.method != "set" || current.turbofish.is_some() || current.args.len() != 2 {
             return None;
         }
-        let property = property(&current.args[0], catalog)?;
+        let (getter, property) = read_property(&current.args[0], catalog)?;
         let value = property.shape.read(&current.args[1])?;
         keys.push(MappedKey {
             source: KeySource {
                 property: property.name,
+                getter,
                 time,
                 cue,
                 value,
                 spline,
                 shared: false,
                 end,
+                frame: method_suffix(method),
+                setter: method_suffix(current),
             },
             owner: property.owner,
         });
@@ -108,42 +111,41 @@ pub(super) fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
             key.value.value.clone(),
         )
         .ok()?;
-    if let Some(points) = key.spline {
-        let [x1, y1, x2, y2] = points.map(|point| point.value);
+    if key.spline.is_some() {
         timeline
             .track_mut(TRACK_TARGET, &key.property)?
-            .set_easing(key.time, Easing::CubicBezier { x1, y1, x2, y2 })
+            .set_easing(key.time, key.easing())
             .ok()?;
     }
     Some(())
 }
 
 pub(crate) fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
+    read_property(expr, catalog).map(|(_, property)| property)
+}
+
+fn read_property(expr: &Expr, catalog: &RsxCatalog) -> Option<(String, Property)> {
     let Expr::Call(call) = expr else { return None };
     if !call.args.is_empty() {
         return None;
     }
-    let path = path(&call.func)?;
-    let (name, shape) = match path.as_str() {
-        "ferroui_base::Visual::opacity_property" => ("Opacity", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::width_property" => ("Width", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::height_property" => ("Height", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::min_width_property" => ("MinWidth", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::min_height_property" => {
-            ("MinHeight", ValueShape::NUMBER)
-        }
-        "ferroui_base::layout::Layoutable::max_width_property" => ("MaxWidth", ValueShape::NUMBER),
-        "ferroui_base::layout::Layoutable::max_height_property" => {
-            ("MaxHeight", ValueShape::NUMBER)
-        }
-        "ferroui_controls::Border::corner_radius_property" => {
-            ("CornerRadius", ValueShape::CORNER_RADIUS)
-        }
-        _ => return catalog.animation_property(&path).cloned(),
-    };
-    Some(Property {
-        name: name.into(),
-        shape,
+    let getter = path(&call.func)?;
+    let property = BUILTINS.iter().find(|(path, _, _)| *path == getter).map(|(_, name, shape)| Property {
+        name: (*name).into(),
+        shape: *shape,
         owner: None,
-    })
+    }).or_else(|| catalog.animation_property(&getter).cloned())?;
+    let absolute = matches!(call.func.as_ref(), Expr::Path(expr) if expr.path.leading_colon.is_some());
+    Some((if absolute { format!("::{getter}") } else { getter }, property))
 }
+
+pub(super) const BUILTINS: &[(&str, &str, ValueShape)] = &[
+    ("ferroui_base::Visual::opacity_property", "Opacity", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::width_property", "Width", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::height_property", "Height", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::min_width_property", "MinWidth", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::min_height_property", "MinHeight", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::max_width_property", "MaxWidth", ValueShape::NUMBER),
+    ("ferroui_base::layout::Layoutable::max_height_property", "MaxHeight", ValueShape::NUMBER),
+    ("ferroui_controls::Border::corner_radius_property", "CornerRadius", ValueShape::CORNER_RADIUS),
+];

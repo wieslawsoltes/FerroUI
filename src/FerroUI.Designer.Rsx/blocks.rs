@@ -41,25 +41,48 @@ fn scan(stream: TokenStream, found: &mut Vec<Block>, depth: usize) {
 }
 
 pub(crate) fn contains_trivia(source: &str, stream: TokenStream, span: SourceSpan) -> bool {
+    visit_comments(source, stream, span, &mut |_| true)
+}
+
+/// Preserve comments, including the newline that terminates a line comment.
+pub(crate) fn keep_comments(source: &str) -> Result<String, String> {
+    let tokens: TokenStream = source.parse().map_err(|_| "Invalid Rust method tokens")?;
+    let mut kept = String::new();
+    visit_comments(source, tokens, SourceSpan::new(0, source.len()), &mut |text| {
+        kept.push_str(text);
+        false
+    });
+    Ok(kept)
+}
+
+fn visit_comments(
+    source: &str,
+    stream: TokenStream,
+    span: SourceSpan,
+    visit: &mut impl FnMut(&str) -> bool,
+) -> bool {
     let mut end = span.start;
     for token in stream {
         let range = token.span().byte_range();
         if range.end <= span.start || range.start >= span.end {
             continue;
         }
-        if range.start >= end && !source[end..range.start].trim().is_empty() {
-            return true;
+        if range.start >= end {
+            let gap = &source[end..range.start];
+            if !gap.trim().is_empty() && visit(gap) {
+                return true;
+            }
         }
         if let TokenTree::Group(group) = token {
             let inner = SourceSpan::new(
                 group.span_open().byte_range().end,
                 group.span_close().byte_range().start,
             );
-            if contains_trivia(source, group.stream(), inner) {
+            if visit_comments(source, group.stream(), inner, visit) {
                 return true;
             }
         }
         end = end.max(range.end);
     }
-    end < span.end && !source[end..span.end].trim().is_empty()
+    end < span.end && !source[end..span.end].trim().is_empty() && visit(&source[end..span.end])
 }

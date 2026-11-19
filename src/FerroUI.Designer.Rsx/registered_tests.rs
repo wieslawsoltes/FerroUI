@@ -101,6 +101,20 @@ fn registered_typed_keys_keep_comments_other_invocations_and_opaque_clips() {
         previous: Some(0.0), time: 0.0, value: "10,20,30,40", easing: "LinearEasing",
     }).is_err());
     assert!(RsxCatalog::built_in().project(&source, caret).unwrap().preview_markup().animations.is_empty());
+    let changes = animation.author_keyframe(&source, &catalog, "ReadingRadius", KeyframeEdit::Upsert {
+        previous: None, time: 1.5, value: "24,30,20,18", easing: "LinearEasing",
+    }).unwrap();
+    assert_eq!(changes.len(), 1);
+    assert!(changes[0].span.is_empty());
+    assert_eq!(changes[0].replacement, concat!(
+        "\r\n                    .key_frame(0.75, |key| key.set(crate::motion::reading_radius(), ",
+        "::ferroui_base::CornerRadius::new(24.0, 30.0, 20.0, 18.0)))"
+    ));
+    let inserted = ferroui_designer_core::TextPatch::apply_all(&source, changes).unwrap();
+    let inserted = catalog.project(&inserted, caret).unwrap();
+    let markup = inserted.preview_markup();
+    assert!(markup.animations[0].1.maps_key("ReadingRadius", 1.5, ValueKind::CornerRadius));
+    assert_eq!(inserted.omitted_count, 1);
 }
 
 impl Drop for Fixture {

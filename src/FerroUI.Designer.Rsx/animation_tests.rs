@@ -1,7 +1,8 @@
-use crate::project_rust;
-use ferroui_designer_animation::{AnimationPrograms, ImportOptions, KeyframeEdit, Timeline};
-use ferroui_designer_core::Document;
-use ferroui_designer_core::TextPatch;
+use crate::{RsxCatalog, project_rust};
+use ferroui_designer_animation::{
+    AnimationPrograms, ImportOptions, KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline,
+};
+use ferroui_designer_core::{Document, TextPatch};
 
 const VIEW: &str = r#"fn different() { rsx! { TextBlock { text: "Separate 🪴" } } }
 
@@ -162,4 +163,87 @@ fn a_shared_rust_key_can_edit_one_value_and_keeps_its_common_cue_and_easing() {
     assert_eq!(changes[0].replacement, "72.0");
     assert!(clip.patch_keyframe("Width", edit(1.0, "0.25,-0.5,0.6,1.2")).is_err());
     assert!(clip.patch_keyframe("Width", edit(0.5, "LinearEasing")).is_err());
+}
+
+fn authored_timeline(source: &str) -> Timeline {
+    let projection = project_rust(source, source.rfind("rsx!").unwrap()).unwrap();
+    let document = Document::new(projection.xaml()).unwrap();
+    let programs = AnimationPrograms::scan(&document);
+    Timeline::import_xaml(&programs[0].source, 1, &ImportOptions::default()).unwrap().timeline
+}
+
+#[test]
+fn insert_and_duplicate_only_add_methods_and_reject_native_tick_collisions() {
+    let source = VIEW.replace('\n', "\r\n");
+    let catalog = RsxCatalog::built_in();
+    let projection = catalog.project(&source, source.rfind("rsx!").unwrap()).unwrap();
+    let clip = projection.preview_markup().animations[0].1;
+    let timeline = authored_timeline(&source);
+    let location = KeyframeLocation { target: 1, property: "Opacity".into(), time: 0.5 };
+    let duplicate = |offset| {
+        clip.author_keyframes(&source, catalog, &timeline, std::slice::from_ref(&location),
+            KeyframeGroupEdit::Duplicate(offset))
+    };
+    assert!(duplicate(1.49999996).unwrap_err().contains("occupies"));
+    let (patches, destinations) = duplicate(1.0).unwrap();
+    assert_eq!(destinations[0].time, 1.5);
+    let updated = TextPatch::apply_all(&source, patches).unwrap();
+    assert_eq!(updated, source.replace(
+        "\r\n                        .fill_mode",
+        "\r\n                        .key_frame(0.75, |key| key.set(ferroui_base::Visual::opacity_property(), 0.6).key_spline(0.25, -0.5, 0.6, 1.2))\r\n                        .fill_mode",
+    ));
+    let new = authored_timeline(&updated);
+    let mut duplicate = timeline.tracks[0].keyframes[1].clone();
+    duplicate.time = 1.5;
+    assert_eq!(new.tracks[0].keyframes[2], duplicate);
+
+    let patches = clip.author_keyframe(&source, catalog, "Opacity", KeyframeEdit::Upsert {
+        previous: None, time: 0.75, value: "0.72", easing: "LinearEasing",
+    }).unwrap();
+    let updated = TextPatch::apply_all(&source, patches).unwrap();
+    assert_eq!(updated, source.replace(
+        "\r\n                        .fill_mode",
+        "\r\n                        .key_frame(0.375, |key| key.set(ferroui_base::Visual::opacity_property(), 0.72))\r\n                        .fill_mode",
+    ));
+    assert_eq!(authored_timeline(&updated).tracks[0].keyframes[2].time, 0.75);
+}
+
+#[test]
+fn deleting_keys_keeps_comment_trivia_and_leaves_an_editable_empty_clip() {
+    let source = VIEW.replace("0.6f64)\n", concat!(
+        "0.6f64)\n",
+        "                            .set(ferroui_base::layout::Layoutable::width_property(),\n",
+        "                                /* width */ 64.0 // keep this note\n",
+        "                            )\n",
+    )).replace('\n', "\r\n");
+    let catalog = RsxCatalog::built_in();
+    let projection = catalog.project(&source, source.rfind("rsx!").unwrap()).unwrap();
+    let clip = projection.preview_markup().animations[0].1;
+    let changes = clip.author_keyframe(&source, catalog, "Width", KeyframeEdit::Remove(0.5)).unwrap();
+    let updated = TextPatch::apply_all(&source, changes).unwrap();
+    for text in ["/* width */", "// keep this note\r\n", "/* tangent */", "compute_label()", "Separate 🪴"] {
+        assert!(updated.contains(text), "{updated}");
+    }
+    let timeline = authored_timeline(&updated);
+    assert_eq!(timeline.tracks.len(), 1);
+    assert_eq!(timeline.tracks[0].keyframes, authored_timeline(VIEW).tracks[0].keyframes);
+    let projection = catalog.project(&updated, updated.rfind("rsx!").unwrap()).unwrap();
+    let clip = projection.preview_markup().animations[0].1;
+    let keys = timeline.tracks[0].keyframes.iter().map(|key| KeyframeLocation {
+        target: 1, property: "Opacity".into(), time: key.time,
+    }).collect::<Vec<_>>();
+    let (changes, keys) = clip.author_keyframes(&updated, catalog, &timeline, &keys, KeyframeGroupEdit::Remove).unwrap();
+    assert!(keys.is_empty());
+    let empty = TextPatch::apply_all(&updated, changes).unwrap();
+    assert!(authored_timeline(&empty).tracks.is_empty());
+    assert!(empty.contains(".fill_mode(ferroui_base::animation::FillMode::Both)"));
+    assert!(empty.contains("// keep this note\r\n"));
+    let projection = catalog.project(&empty, empty.rfind("rsx!").unwrap()).unwrap();
+    let clip = projection.preview_markup().animations[0].1;
+    let changes = clip.author_keyframe(&empty, catalog, "Opacity", KeyframeEdit::Upsert {
+        previous: None, time: 1.25, value: "0.6", easing: "LinearEasing",
+    }).unwrap();
+    let restored = TextPatch::apply_all(&empty, changes).unwrap();
+    assert!(restored.contains("::ferroui_base::Visual::opacity_property()"));
+    assert_eq!(authored_timeline(&restored).tracks[0].keyframes[0].time, 1.25);
 }

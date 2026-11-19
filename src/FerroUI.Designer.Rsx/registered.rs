@@ -17,7 +17,7 @@ pub(crate) use control::Class;
 
 const KEY: &str = "FerroUI.Designer.Rsx.v1:";
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct RsxCatalog {
     registered: Vec<Arc<RegisteredClass>>,
     animation_properties: BTreeMap<String, crate::animation::Property>,
@@ -93,6 +93,17 @@ impl RsxCatalog {
 
     pub(crate) fn animation_property(&self, path: &str) -> Option<&crate::animation::Property> {
         self.animation_properties.get(path)
+    }
+
+    pub(crate) fn animation_getter(
+        &self,
+        name: &str,
+        owner: Option<&crate::animation::TargetType>,
+    ) -> Option<(&str, crate::animation::ValueShape)> {
+        let (path, property) = unique(self.animation_properties.iter().filter(|(_, property)| {
+            property.name == name && owner.is_none_or(|owner| property.owner.as_ref() == Some(owner))
+        }))?;
+        Some((path, property.shape))
     }
 
     pub(crate) fn rust(&self, path: &syn::Path) -> Option<Class> {

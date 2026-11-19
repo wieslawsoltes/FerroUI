@@ -45,13 +45,14 @@ pub(super) fn style(
         .then_some((AnimationStyle { selector, clips }, omitted))
 }
 
-fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
+pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument(factory, "animation")?)?;
     let mut timeline = Timeline::new(duration).ok()?;
     timeline.fill = FillMode::None;
     let mut keys = Vec::new();
     let mut target_type = None;
+    let first_method = methods.first().map(|method| span(&method.dot_token).start);
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
@@ -73,17 +74,17 @@ fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
             _ => return None,
         }
     }
-    if keys.is_empty() {
-        return None;
-    }
     let mut xaml = timeline.to_xaml_authored_keys(TRACK_TARGET).ok()?;
-    if let Some(target) = target_type {
+    if let Some(target) = &target_type {
         target.annotate(&mut xaml);
     }
     Some(RsxAnimation {
         declaration: span(expr),
         xaml,
         duration,
+        factory_end: span(factory).end,
+        first_method,
+        target_type,
         keys,
     })
 }
@@ -233,4 +234,8 @@ pub(super) fn float(expr: &Expr) -> Option<FloatSource> {
 pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
     let range = tokens.span().byte_range();
     SourceSpan::new(range.start, range.end)
+}
+
+pub(super) fn method_suffix(method: &ExprMethodCall) -> SourceSpan {
+    SourceSpan::new(span(&method.dot_token).start, span(method).end)
 }

@@ -2,6 +2,7 @@
 
 mod keyframe;
 mod retime;
+mod structural;
 pub(crate) mod syntax;
 mod value;
 
@@ -20,7 +21,7 @@ pub(crate) struct Property {
     pub(crate) owner: Option<TargetType>,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct TargetType {
     pub(crate) name: String,
     pub(crate) namespace: Option<String>,
@@ -50,18 +51,33 @@ pub struct RsxAnimation {
     pub declaration: SourceSpan,
     pub(crate) xaml: String,
     duration: f64,
+    factory_end: usize,
+    first_method: Option<usize>,
+    target_type: Option<TargetType>,
     keys: Vec<KeySource>,
 }
 
 #[derive(Clone, Debug)]
 struct KeySource {
     property: String,
+    getter: String,
     time: f64,
     cue: FloatSource,
     value: ValueSource,
     spline: Option<[FloatSource; 4]>,
     shared: bool,
     end: usize,
+    frame: SourceSpan,
+    setter: SourceSpan,
+}
+
+impl KeySource {
+    fn easing(&self) -> Easing {
+        self.spline.map_or(Easing::Linear, |points| {
+            let [x1, y1, x2, y2] = points.map(|point| point.value);
+            Easing::CubicBezier { x1, y1, x2, y2 }
+        })
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
