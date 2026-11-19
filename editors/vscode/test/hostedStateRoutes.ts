@@ -1,9 +1,11 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import { runEditorHistory } from '../src/editorHistory';
 import { applyHostedSourcePatches } from '../src/hostedSourceEdit';
 import type { HostedFrame, HostedSource } from '../src/hostedProtocol';
 import type { NativePreview } from '../src/nativePreview';
 import { asRange } from '../src/textDocument';
+import { until } from './wait';
 
 const companionClip = `styles: [ferroui_view::style("Border#ReviewCard")
                 .animation(ferroui_view::animation(ferroui_view::ms(600))
@@ -80,7 +82,11 @@ async function verifyUndo(source: string, range: import('../src/protocol').Range
         await applyHostedSourcePatches(document, document.version, patches);
         const edited = document.getText();
         assert.equal(edited, source.replace('640u64', '800u64').replace('"CubicEaseIn"', '"LinearEasing"'));
-        await vscode.commands.executeCommand('undo');
+        const editedVersion = document.version;
+        await runEditorHistory(document, 'undo', () => {
+            assert.equal(document.version, editedVersion);
+        }, AbortSignal.timeout(5_000));
+        await until(() => document.version > editedVersion);
         assert.equal(document.getText(), source, 'One Undo restores exact CRLF, comments and surrounding Rust');
         return edited;
     } finally {
