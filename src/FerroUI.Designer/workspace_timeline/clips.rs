@@ -130,6 +130,7 @@ impl DesignerWorkspace {
         AutomationProperties::set_name(&ruler, Some("Shared animation clip ruler"));
         self.bind_clip_lane(&ruler, &context);
         self.connect_preview_range(&ruler, &context);
+        self.connect_preview_markers(&ruler, &context, true);
         let header = StackPanel::new();
         header.set_orientation(Orientation::Horizontal);
         header.set_spacing(4.0);

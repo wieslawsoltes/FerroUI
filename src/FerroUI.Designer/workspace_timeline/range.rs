@@ -129,11 +129,12 @@ impl DesignerWorkspace {
         apply.set_vertical_alignment(VerticalAlignment::Center);
         let weak = Rc::downgrade(self);
         let feedback = error.downgrade();
+        let range_context = context.clone();
         apply.click(move |_, _| {
             let Some(workspace) = weak.upgrade() else {
                 return;
             };
-            let result = context.check(&workspace).and_then(|()| {
+            let result = range_context.check(&workspace).and_then(|()| {
                 if workspace.comparing_animation_clips() != all {
                     return Err("The timeline clock changed while editing its range".into());
                 }
@@ -178,6 +179,7 @@ impl DesignerWorkspace {
         fields.children().add(cancel.upcast::<Control>());
         body.children().add(fields.upcast::<Control>());
         body.children().add(error.upcast::<Control>());
+        self.append_preview_markers(&body, context, all);
         let weak = Rc::downgrade(self);
         body.add_handler(InputElement::key_down_event(), move |_, event| {
             if event.key == Key::Escape {

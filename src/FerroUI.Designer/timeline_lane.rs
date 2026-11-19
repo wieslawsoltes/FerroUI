@@ -4,6 +4,7 @@
 mod clip;
 mod curve;
 mod easing_preview;
+mod markers;
 pub use easing_preview::EasingPreview;
 
 use ferroui_base::input::{
@@ -24,6 +25,7 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, ControlImpl, ToolTip};
+use ferroui_designer_animation::PreviewMarker;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -67,6 +69,8 @@ pub struct TimelineLane {
     view_end: Cell<f64>,
     playhead: Cell<f64>,
     preview_range: Cell<Option<ferroui_designer_animation::PreviewRange>>,
+    preview_markers: RefCell<Vec<PreviewMarker>>,
+    marker_action: RefCell<Option<markers::MarkerAction>>,
     ruler: Cell<bool>,
     highlighted: Cell<bool>,
     drag: RefCell<Option<Drag>>,
@@ -104,6 +108,8 @@ impl TimelineLane {
             view_end: Cell::new(1.0),
             playhead: Cell::new(0.0),
             preview_range: Cell::new(None),
+            preview_markers: RefCell::new(Vec::new()),
+            marker_action: RefCell::new(None),
             ruler: Cell::new(false),
             highlighted: Cell::new(false),
             drag: RefCell::new(None),
@@ -138,7 +144,7 @@ impl TimelineLane {
         this.ruler.set(true);
         this.set_height(34.0);
         AutomationProperties::set_name(&this, Some("Animation timeline ruler"));
-        ToolTip::set_tip(&this, Some(Rc::new("Drag to scrub. Ctrl+wheel zooms around the pointer; Shift+wheel pans. Home and End seek to timeline boundaries.".to_owned())));
+        ToolTip::set_tip(&this, Some(Rc::new("Click a marker to seek or drag to scrub. Ctrl+wheel zooms, Shift+wheel pans, and Home and End seek to the ruler boundaries.".to_owned())));
         this
     }
     pub fn is_ruler(&self) -> bool {
@@ -490,6 +496,10 @@ impl InputElementImpl for TimelineLane {
         let time = this.time(x, event.key_modifiers());
         event.set_handled(true);
         if this.ruler.get() {
+            if let Some(name) = this.marker_at(position) {
+                if let Some(action) = this.marker_action.borrow().clone() { action(&name); }
+                return;
+            }
             this.capture_drag(Drag::Scrub, event.pointer());
             this.activate_time(time);
         } else if let Some(from) = this.key_at_position(position) {
@@ -850,6 +860,7 @@ impl VisualImpl for TimelineLane {
                 context.draw_text(&text, Point::new(origin, 2.0));
             }
         }
+        if this.ruler.get() { this.draw_preview_markers(context, bounds); }
         if let Some(band) = this.clip.get() {
             this.draw_clip(context, bounds, band);
         } else if !this.ruler.get() {

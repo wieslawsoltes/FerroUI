@@ -791,6 +791,7 @@ impl DesignerWorkspace {
             self.refresh_components();
             self.refresh_animation_programs();
         }
+        self.refresh_preview_markers();
         self.surface.invalidate_layout_helpers();
         self.surface.invalidate_visual();
     }

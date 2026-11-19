@@ -21,6 +21,35 @@ fn write() -> Permissions {
         allow_input: false,
     }
 }
+
+#[test]
+fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let session = Rc::new(RefCell::new(DesignerSession::new(original, ContentControl::new()).unwrap()));
+    let provider = DesignerMcp::new(&session);
+    let marker = "designer_timeline_marker_edit";
+    let program = session.borrow().animation_programs()[0].id;
+    let set = json!({"expected_revision":0,"action":"set","program":program,"name":"Review","time":0.6});
+    assert!(provider.call(marker, &set, Permissions::default()).is_err());
+    assert_eq!(provider.call(marker, &set, write()).unwrap()["markers"][0]["time"], 0.6);
+    let shared = json!({"expected_revision":0,"all":true,"action":"set","name":"Review","time":1.25});
+    assert_eq!(provider.call(marker, &shared, write()).unwrap()["markers"][0]["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), original);
+    assert!(!session.borrow().can_undo());
+    let changed = original.replace("Client onboarding", "Customer onboarding");
+    session.borrow_mut().update_source(&changed);
+    assert!(provider.call(marker, &set, write()).unwrap_err().contains("revision changed"));
+    let revision = session.borrow().document().revision();
+    let program = session.borrow().animation_programs()[0].id;
+    let list = provider.call("designer_timeline_markers", &json!({"expected_revision":revision,"program":program}), Permissions::default()).unwrap();
+    assert_eq!(list["markers"][0]["time"], 0.6);
+    let seek = json!({"expected_revision":revision,"all":true,"action":"seek","name":"Review"});
+    assert_eq!(provider.call(marker, &seek, write()).unwrap()["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), changed);
+    session.borrow_mut().open_document(original.into(), "memory://unrelated.xaml".into()).unwrap();
+    assert!(session.borrow().preview_markers(None, true).unwrap().is_empty());
+}
 fn call_edit(
     session: &Rc<RefCell<DesignerSession>>,
     provider: &DesignerMcp,

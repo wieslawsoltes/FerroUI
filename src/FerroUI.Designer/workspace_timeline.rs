@@ -7,6 +7,8 @@ mod clips;
 mod curves;
 #[path = "workspace_timeline/easing.rs"]
 mod easing;
+#[path = "workspace_timeline/markers.rs"]
+mod markers;
 #[path = "workspace_timeline/range.rs"]
 mod range;
 
@@ -40,6 +42,7 @@ pub(super) struct TimelineUi {
     clip_focus: Option<NodeId>,
     clip_duration: f64,
     ranges: range::WorkAreas,
+    marker_editor: Option<markers::MarkerEditor>,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -107,6 +110,7 @@ impl DesignerWorkspace {
         self.root
             .get_control::<ContentControl>("TimelineInspectorHost")
             .set_content(None);
+        self.timeline_ui.borrow_mut().marker_editor = None;
         self.timeline_lanes.borrow_mut().clear();
         if self.comparing_animation_clips() {
             self.rebuild_clip_tracks(focus_was_ruler);
@@ -300,6 +304,7 @@ impl DesignerWorkspace {
         self.connect_timeline_zoom(&ruler);
         self.connect_timeline_clipboard(&ruler, &context, None);
         self.connect_preview_range(&ruler, &context);
+        self.connect_preview_markers(&ruler, &context, false);
         self.timeline_lanes.borrow_mut().push(ruler.downgrade());
         Grid::set_column(&ruler, 1);
         ruler_row.children().add(ruler.clone().upcast::<Control>());

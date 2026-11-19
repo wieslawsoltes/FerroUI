@@ -104,6 +104,38 @@ fn studio_rehearses_the_range_from_its_inline_timeline_editor() {
 }
 
 #[test]
+fn studio_adds_and_seeks_marks_from_the_inline_editor() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let root = workspace.control();
+    let session = workspace.session();
+    click(&root.get_control::<Button>("TimelineClips"));
+    session.borrow_mut().scrub_animation_clips(None, 1.25).unwrap();
+    workspace.refresh(false);
+    click(&root.get_control::<Button>("TimelineRange"));
+    let content = keyframe_editor(&workspace).children().to_vec();
+    let form = content[2].cast::<StackPanel>().unwrap();
+    keyframe_input(&form, "TimelineMarkerName").set_text(Some("Review ready"));
+    let add = form.children().to_vec()[1].cast::<Button>().unwrap();
+    click(&add);
+    assert_eq!(session.borrow().preview_markers(None, true).unwrap()[0].time, 1.25);
+    assert!(session.borrow().preview_markers(None, false).unwrap().is_empty());
+    let list = content[3].cast::<ScrollViewer>().unwrap();
+    let list = Control::from_boxed(&list.content().unwrap()).unwrap().cast::<StackPanel>().unwrap();
+    let actions = list.children().to_vec()[0].cast::<StackPanel>().unwrap().children().to_vec();
+    session.borrow_mut().scrub_animation_clips(None, 0.25).unwrap();
+    workspace.refresh(false);
+    click(&actions[0].cast::<Button>().unwrap());
+    assert_eq!(session.borrow().time(), 1.25);
+    click(&actions[2].cast::<Button>().unwrap());
+    assert!(session.borrow().preview_markers(None, true).unwrap().is_empty());
+    assert!(list.children().to_vec().is_empty());
+    assert_eq!(session.borrow().authored_source(), source);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
 fn clip_comparison_places_both_offsets_in_one_studio_transaction() {
     use ferroui_base::input::Key;
     let _app = UnitTestApplication::start(TestServices::styled_window());

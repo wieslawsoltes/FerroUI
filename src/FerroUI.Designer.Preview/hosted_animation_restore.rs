@@ -7,6 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[path = "hosted_clip_placement.rs"]
 mod clip_placement;
+#[path = "hosted_marker_scopes.rs"]
+mod marker_scopes;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]

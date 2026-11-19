@@ -367,6 +367,7 @@ impl Relay {
         }
         if let (Some(source), Some(catalog)) = (&source, &mut frame.animations) {
             source.annotate_clips(catalog);
+            source.annotate_marker_scopes(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;

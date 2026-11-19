@@ -40,6 +40,8 @@ mod preview_stages;
 mod prototype;
 #[path = "mcp_schema.rs"]
 mod schema;
+#[path = "mcp_timeline_markers.rs"]
+mod timeline_markers;
 #[path = "mcp_selection_workflows.rs"]
 mod selection_workflows;
 #[path = "mcp_workspace.rs"]
@@ -276,6 +278,7 @@ impl UiToolProvider for DesignerMcp {
             ),
         ];
         tools.extend(authoring::tools());
+        tools.extend(timeline_markers::tools());
         tools.extend(binding::tools());
         tools.push(brush::tool());
         tools.extend(grid::tools());
@@ -301,6 +304,7 @@ impl UiToolProvider for DesignerMcp {
             .find(|tool| tool["name"] == name)
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
+            || timeline_markers::handles(name)
             || binding::handles(name)
             || name == brush::NAME
             || grid::handles(name)
@@ -544,6 +548,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if authoring::handles(name) {
             return authoring::call(&mut session, name, args, permissions);
+        }
+        if timeline_markers::handles(name) {
+            return timeline_markers::call(&mut session, name, args);
         }
         if binding::handles(name) {
             return binding::call(&mut session, name, args);
