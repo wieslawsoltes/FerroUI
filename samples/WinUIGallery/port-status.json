@@ -422,14 +422,14 @@
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
-          "name": "clipboard_sample_uses_host_service_for_copy_paste_formats_and_clear"
+          "name": "clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear"
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "clipboard_sample_reports_missing_service_and_platform_failure"
         }
       ],
-      "notes": "Text copy/paste, available formats and clear use the host clipboard service asynchronously. Bitmap/file operations, history/roaming, content-change notifications and original accessibility announcements remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "All six source examples with the handlers of ClipboardPage.xaml.cs in Rust (platform_samples.rs), over the window's clipboard service (TopLevel.Clipboard, asynchronous): CopyText_Click with the editor's text of the constructor and its confirmation, hidden again after two seconds (the page's VisualStateManager states are the confirmation's visibility); PasteText_Click; CopyImage_Click and PasteImage_Click with the source's rainier.jpg; CopyFiles_Click with the files of the window's storage provider and PasteFiles_Click; CopyWithOptions_Click; ShowFormats_Click and ClearClipboard_Click; and ContentChangedToggle_Toggled. The announcements of UIHelper.AnnounceActionForAccessibility are polite live regions; the ToggleSwitches' Headers are their Content and IsOn is IsChecked. FerroUI's clipboard has no history or roaming (Clipboard.IsHistoryEnabled, IsRoamingEnabled and ClipboardContentOptions are Windows clipboard features: the text is copied without them and the example says so), its data transfer has no RequestedOperation (the pasted files' operation is not shown), and it raises no ContentChanged (the monitor switch says so): the page is partial.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/Clipboard/CopyTextClipboard.txt",

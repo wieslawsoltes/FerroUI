@@ -101,6 +101,38 @@
     {
       "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml.cs",
       "sha256": "d62d272b4f97dc0c8fed72df0bb6800d928129333385acbbe5e5f04f634e6d9c"
+    },
+    {
+      "path": "WinUIGallery/Samples/ToolTip/ToolTipPage.xaml",
+      "sha256": "768f5d4c62e31bc0ff13a2573e70b0da2b3d0ebce4abb2d8efc1a729d106d423"
+    },
+    {
+      "path": "WinUIGallery/Samples/ToolTip/ToolTipPage.xaml.cs",
+      "sha256": "585ccb35cb6152a9d818917c3b6f14ee595e93ae281cfb644b0e8dff789c92ed"
+    },
+    {
+      "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml",
+      "sha256": "1c7243a55a793c197105417cbe7e03319ebc6c9efa5bb35062ca8733482b2276"
+    },
+    {
+      "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml.cs",
+      "sha256": "45734b88046429ad2d6a9f60704049b91c9ec9a9ea9cb9ec853e7d9d496d814f"
+    },
+    {
+      "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml",
+      "sha256": "275e7dbaf8e1a0a6da2ac2c8c413745b91c88b8b484fe9ec3aedef973cf7068d"
+    },
+    {
+      "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml.cs",
+      "sha256": "e1e08e5a1751cfec1e9c10f2cb7139d60a172ccc0a000575d78b6350968cc1a0"
+    },
+    {
+      "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml",
+      "sha256": "b76f75244262bbe1982d28939742edc070ee02eec550448dacd1206b71d0b8fc"
+    },
+    {
+      "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml.cs",
+      "sha256": "1d4f9991032566f7aedce78db18c793ec6cc83796bbe99d9611175039d5425ce"
     }
   ],
   "assembly": "WinUIGallery",

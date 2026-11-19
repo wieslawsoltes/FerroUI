@@ -618,10 +618,11 @@ fn dropping_native_example_releases_handler_targets() {
 }
 
 #[test]
-fn clipboard_sample_uses_host_service_for_copy_paste_formats_and_clear() {
+fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() {
+    use crate::platform_samples::{COPIED_TEXT, RAINIER};
     use ferroui_base::input::platform::IClipboard;
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
-    use ferroui_controls::{Control, Window};
+    use ferroui_controls::{Control, Image, ToggleSwitch, Window};
     let _application = start();
     let root = examples::create(examples::find("Clipboard").unwrap()).unwrap();
     let clipboard = TestClipboardImpl::new();
@@ -634,36 +635,65 @@ fn clipboard_sample_uses_host_service_for_copy_paste_formats_and_clear() {
         root.get_control::<Button>(name)
             .raise_event(&RoutedEventArgs::with_event(&Button::click_event()))
     };
+    let text = |name| root.get_control::<TextBlock>(name).text();
+    // CopyText_Click copies the editor's text and shows the confirmation.
     click("CopyText");
-    assert_eq!(clipboard.text().as_deref(), Some("Copy this text"));
-    assert_eq!(clipboard.set_data_count(), 1);
+    assert_eq!(
+        clipboard.text().map(|text| text.trim_end().to_string()).as_deref(),
+        Some(COPIED_TEXT)
+    );
+    assert!(root.get_control::<TextBlock>("ConfirmationTextBlock").is_visible());
+    // PasteText_Click.
     clipboard.set_text(Some("External text 🦀"));
     click("PasteText");
-    assert_eq!(
-        root.get_control::<TextBox>("PastedText").text().as_deref(),
-        Some("External text 🦀")
-    );
+    assert_eq!(text("PasteClipboard2").as_deref(), Some("External text 🦀"));
+    // CopyImage_Click and PasteImage_Click, where the test platform decodes the source's image.
+    let decoded = crate::assets::load_bitmap(RAINIER).is_ok();
+    click("CopyImage");
+    if decoded {
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Image copied to clipboard."));
+        click("PasteImage");
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Image pasted from clipboard."));
+        assert!(root.get_control::<Image>("PastedImage").is_visible());
+    } else {
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Error copying image to clipboard."));
+    }
+    // CopyWithOptions_Click copies the text without the Windows history and roaming options.
+    click("CopyWithOptions");
+    assert_eq!(clipboard.text().as_deref(), Some("Text with clipboard options"));
+    assert!(text("HistoryRoamingStatusText").unwrap().starts_with("Text copied to clipboard."));
+    // ShowFormats_Click and ClearClipboard_Click.
     click("ShowClipboardFormats");
-    assert!(root
-        .get_control::<TextBlock>("ClipboardOutput")
-        .text()
+    assert!(text("OtherOperationsStatusText")
         .unwrap()
-        .starts_with("Available formats: "));
+        .starts_with("Available formats on the clipboard:"));
+    let cleared = clipboard.clear_count();
     click("ClearClipboard");
-    assert_eq!(clipboard.clear_count(), 1);
+    assert_eq!(clipboard.clear_count(), cleared + 1);
+    assert_eq!(text("OtherOperationsStatusText").as_deref(), Some("Clipboard has been cleared."));
     assert!(clipboard.text().is_none());
-    click("PasteText");
+    // An empty clipboard has no bitmap and no files.
+    click("PasteImage");
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
-            .text()
-            .as_deref(),
-        Some("The clipboard has no text.")
+        text("ImageStatusText").as_deref(),
+        Some("Bitmap format is not available in the clipboard.")
     );
+    assert!(!root.get_control::<Image>("PastedImage").is_visible());
+    click("PasteFiles");
+    assert_eq!(
+        text("FilesStatusText").as_deref(),
+        Some("StorageItems format is not available in the clipboard.")
+    );
+    // The ContentChanged monitor: FerroUI's clipboard raises no ContentChanged.
+    root.get_control::<ToggleSwitch>("ContentChangedToggle")
+        .set_is_checked(Some(true));
+    assert!(text("OtherOperationsStatusText").unwrap().contains("ContentChanged"));
     window.close();
 }
 
 #[test]
 fn clipboard_sample_reports_missing_service_and_platform_failure() {
+    use crate::platform_samples::NO_CLIPBOARD;
     use ferroui_base::input::platform::{ClipboardErrorKind, IClipboard};
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
     use ferroui_controls::{Control, Window};
@@ -672,10 +702,10 @@ fn clipboard_sample_reports_missing_service_and_platform_failure() {
     let copy = root.get_control::<Button>("CopyText");
     copy.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
+        root.get_control::<TextBlock>("ConfirmationTextBlock")
             .text()
             .as_deref(),
-        Some("This window has no clipboard service.")
+        Some(NO_CLIPBOARD)
     );
     let clipboard = TestClipboardImpl::throwing(ClipboardErrorKind::AccessDenied);
     let platform = MockWindowingPlatform::create_window_mock();
@@ -685,7 +715,7 @@ fn clipboard_sample_reports_missing_service_and_platform_failure() {
     window.show();
     copy.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
+        root.get_control::<TextBlock>("ConfirmationTextBlock")
             .text()
             .as_deref(),
         Some("Clipboard operation failed: Access to the clipboard was denied.")
