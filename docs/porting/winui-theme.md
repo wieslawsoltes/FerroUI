@@ -637,7 +637,8 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `InfoBar` | `InfoBar` | B6 | NotificationCard is drawn with the template of InfoBar |
 | `ListBox` | `ListBox` | B3 |  |
 | `ListBoxItem` | `ListBoxItem` | B3 |  |
-| `ListViewItem` | `ListBoxItem` | B3 | the keyed ListViewItem styles; the implicit one has no FerroUI control (no ListView) |
+| `ListView` | `ListView` | B3 |  |
+| `ListViewItem` | `ListViewItem` | B3 | the implicit style; the keyed ListViewItem styles are keyed themes of ListBoxItem, which ListViewItem derives from |
 | `LoopingSelector` | no FerroUI control | B4 | the looping lists of the date and time picker presenters; FerroUI's DateTimePickerPanel is a panel, not templated, so the selectors are part of the DatePickerPresenter and TimePickerPresenter themes |
 | `LoopingSelectorItem` | `ListBoxItem` | B4 | the items of the date and time picker presenters |
 | `MediaPlayerElement` | `MediaPlayerElement` | B6 | a panel of ferroui-media-video-controls that arranges its presenter and its transport controls in code; the WinUI template is waived |
@@ -698,7 +699,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

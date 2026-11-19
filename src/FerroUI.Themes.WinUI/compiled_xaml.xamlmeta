@@ -1483,8 +1483,17 @@
           "types": ["Border", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ListBox", "ResourceDictionary", "ScrollViewer", "Setter", "VirtualizingStackPanel"]
         },
         {
-          "name": "Controls/ComboBoxItem.xaml",
+          "name": "Controls/ListView.xaml",
           "index": 161,
+          "documents": ["Controls/ListView.xaml"],
+          "keys": ["DefaultListViewStyle"],
+          "type_keys": ["ListView", "ListViewItem"],
+          "references": ["DefaultListViewItemStyle", "DefaultListViewStyle"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewItem", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
+        },
+        {
+          "name": "Controls/ComboBoxItem.xaml",
+          "index": 162,
           "documents": ["Controls/ComboBoxItem.xaml"],
           "keys": ["ComboBoxItemPill", "DefaultComboBoxItemStyle"],
           "type_keys": ["ComboBoxItem"],
@@ -1493,7 +1502,7 @@
         },
         {
           "name": "Controls/ComboBox.xaml",
-          "index": 162,
+          "index": 163,
           "documents": ["Controls/ComboBox.xaml"],
           "keys": ["ComboBoxTextBoxStyle", "DefaultComboBoxStyle"],
           "type_keys": ["ComboBox"],
@@ -1502,7 +1511,7 @@
         },
         {
           "name": "Controls/TreeViewItem.xaml",
-          "index": 163,
+          "index": 164,
           "documents": ["Controls/TreeViewItem.xaml"],
           "keys": ["MUX_TreeViewItemStyle", "TreeViewItemExpandCollapseChevron", "TreeViewItemIndentationConverter"],
           "type_keys": ["TreeViewItem"],
@@ -1511,7 +1520,7 @@
         },
         {
           "name": "Controls/TreeView.xaml",
-          "index": 164,
+          "index": 165,
           "documents": ["Controls/TreeView.xaml"],
           "keys": ["DefaultTreeViewStyle"],
           "type_keys": ["TreeView"],
@@ -1520,7 +1529,7 @@
         },
         {
           "name": "Controls/AutoCompleteBox.xaml",
-          "index": 165,
+          "index": 166,
           "documents": ["Controls/AutoCompleteBox.xaml"],
           "keys": ["AutoSuggestBoxDeleteButtonStyle", "AutoSuggestBoxTextBoxStyle", "DefaultAutoSuggestBoxStyle"],
           "type_keys": ["AutoCompleteBox"],
@@ -1529,7 +1538,7 @@
         },
         {
           "name": "Controls/AutoSuggestBox.xaml",
-          "index": 166,
+          "index": 167,
           "documents": ["Controls/AutoSuggestBox.xaml"],
           "keys": ["AutoSuggestBoxQueryButtonStyle", "AutoSuggestBoxQuerySymbolIconTemplate"],
           "type_keys": ["AutoSuggestBox"],
@@ -1538,7 +1547,7 @@
         },
         {
           "name": "Controls/RadioButtons.xaml",
-          "index": 167,
+          "index": 168,
           "documents": ["Controls/RadioButtons.xaml"],
           "keys": ["DefaultRadioButtonsStyle"],
           "type_keys": ["RadioButtons"],
@@ -1547,7 +1556,7 @@
         },
         {
           "name": "Controls/RichEditBox.xaml",
-          "index": 168,
+          "index": 169,
           "documents": ["Controls/RichEditBox.xaml"],
           "keys": ["DefaultRichEditBoxStyle", "StringRichEditBoldText", "StringRichEditItalicText", "StringRichEditUnderlineText", "WinUIRichEditBoxContextFlyout"],
           "type_keys": ["RichEditBox"],

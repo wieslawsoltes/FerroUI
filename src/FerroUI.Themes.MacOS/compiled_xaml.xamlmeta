@@ -1546,8 +1546,17 @@
           "types": ["Border", "Button", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "ResourceDictionary", "Setter", "Style", "TextBlock", "TitleBar", "Viewbox"]
         },
         {
-          "name": "Controls/Pivot.xaml",
+          "name": "Controls/ListView.xaml",
           "index": 168,
+          "documents": ["Controls/ListView.xaml"],
+          "keys": ["DefaultListViewStyle"],
+          "type_keys": ["ListView", "ListViewItem"],
+          "references": ["DefaultListViewItemStyle", "DefaultListViewStyle"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewItem", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
+        },
+        {
+          "name": "Controls/Pivot.xaml",
+          "index": 169,
           "documents": ["Controls/Pivot.xaml"],
           "keys": ["DefaultPivotHeaderItemStyle", "DefaultPivotItemStyle", "DefaultPivotStyle", "NextTemplate", "PivotNextButtonStyle", "PivotPreviousButtonStyle", "PivotTitleContentControlStyle", "PreviousTemplate", "TitleContentControlStyle"],
           "type_keys": ["Pivot", "PivotHeaderItem", "PivotItem"],
@@ -1556,7 +1565,7 @@
         },
         {
           "name": "Controls/SwipeControl.xaml",
-          "index": 169,
+          "index": 170,
           "documents": ["Controls/SwipeControl.xaml"],
           "keys": ["DefaultSwipeControlStyle", "SwipeItemStyle"],
           "type_keys": ["SwipeControl"],
