@@ -1,6 +1,7 @@
-//! The RadialGradientBrush, IconElement and Spacing pages of the pinned WinUI Gallery in Rust: the
-//! code behind of `RadialGradientBrushPage.xaml.cs` and `IconElementPage.xaml.cs`, and the theme
-//! images of the Spacing page (which has no code-behind upstream).
+//! The RadialGradientBrush, IconElement, Spacing and Typography pages of the pinned WinUI Gallery in
+//! Rust: the code behind of `RadialGradientBrushPage.xaml.cs`, `IconElementPage.xaml.cs` and
+//! `TypographyPage.xaml.cs` with the copy buttons of the gallery's `TypographyControl`, and the
+//! theme images of the Spacing and Typography pages.
 //!
 //! FerroUI's RadialGradientBrush has no `MappingMode`: each point and radius has a unit, Relative
 //! for RelativeToBoundingBox and Absolute for Absolute. FerroUI has no BitmapIcon: the bitmap icon
@@ -21,6 +22,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "RadialGradientBrush" => wire_radial_gradient_brush(root),
         "IconElement" => wire_icon_element(root),
         "Spacing" => wire_spacing(root),
+        "Typography" => wire_typography(root),
         _ => {}
     }
 }
@@ -203,4 +205,57 @@ fn wire_spacing(root: &Ref<Control>) {
         }
     })
     .detach();
+}
+
+// --- Typography --------------------------------------------------------------------------------
+
+/// The rows of the type ramp, the source's TypographyControls: the example, the resource name of
+/// its style (a ControlTheme of the WinUI theme), the size and line height, and the variable font.
+pub(crate) const TYPE_RAMP: [(&str, &str, &str, &str); 9] = [
+    ("Caption", "CaptionTextBlockStyle", "12/16 epx", "Small, Regular"),
+    ("Body", "BodyTextBlockStyle", "14/20 epx", "Text, Regular"),
+    ("Body Strong", "BodyStrongTextBlockStyle", "14/20 epx", "Text, SemiBold"),
+    ("Body Large", "BodyLargeTextBlockStyle", "18/24 epx", "Text, Regular"),
+    ("Body Large Strong", "BodyLargeStrongTextBlockStyle", "18/24 epx", "Text, SemiBold"),
+    ("Subtitle", "SubtitleTextBlockStyle", "20/28 epx", "Display, SemiBold"),
+    ("Title", "TitleTextBlockStyle", "28/36 epx", "Display, SemiBold"),
+    ("Title Large", "TitleLargeTextBlockStyle", "40/52 epx", "Display, SemiBold"),
+    ("Display", "DisplayTextBlockStyle", "68/92 epx", "Display, SemiBold"),
+];
+
+/// The copy buttons of the type ramp: `CopyToClipboardButton_Click` of each TypographyControl puts
+/// its ResourceName on the clipboard.
+const TYPE_RAMP_COPY_BUTTONS: [(&str, &str); 9] = [
+    ("CopyCaptionTextBlockStyle", "CaptionTextBlockStyle"),
+    ("CopyBodyTextBlockStyle", "BodyTextBlockStyle"),
+    ("CopyBodyStrongTextBlockStyle", "BodyStrongTextBlockStyle"),
+    ("CopyBodyLargeTextBlockStyle", "BodyLargeTextBlockStyle"),
+    ("CopyBodyLargeStrongTextBlockStyle", "BodyLargeStrongTextBlockStyle"),
+    ("CopySubtitleTextBlockStyle", "SubtitleTextBlockStyle"),
+    ("CopyTitleTextBlockStyle", "TitleTextBlockStyle"),
+    ("CopyTitleLargeTextBlockStyle", "TitleLargeTextBlockStyle"),
+    ("CopyDisplayTextBlockStyle", "DisplayTextBlockStyle"),
+];
+
+/// `HeaderImage` of the theme dictionaries (the gallery's SampleThemeListener).
+fn update_typography_image(root: &Ref<Control>) {
+    let theme = root.actual_theme_variant();
+    root.get_control::<Image>("HeaderImage").set_source(
+        load_bitmap(&design_image_uri("Typography", theme.as_ref())).map(|bitmap| bitmap as Rc<dyn IImage>),
+    );
+}
+
+/// The code behind of `TypographyPage.xaml.cs`: the header image of the theme, and the copy
+/// buttons of the rows. The ShowTypographyButtonClick handlers toggle the tips, which are the
+/// Flyouts of their buttons (FerroUI has no TeachingTip): the button's click opens and closes it.
+fn wire_typography(root: &Ref<Control>) {
+    update_typography_image(root);
+    let weak_root = root.downgrade();
+    root.actual_theme_variant_changed(move || {
+        if let Some(root) = weak_root.upgrade() {
+            update_typography_image(&root);
+        }
+    })
+    .detach();
+    crate::shape_samples::wire_copy_buttons(root, &TYPE_RAMP_COPY_BUTTONS);
 }

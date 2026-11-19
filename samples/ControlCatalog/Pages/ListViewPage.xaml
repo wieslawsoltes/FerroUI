@@ -1,0 +1,52 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="ListView"
+             x:Class="ControlCatalog.Pages.ListViewPage">
+  <!-- Not from upstream: WinUI's ListView (docs/porting/winui-calculator-gaps.md, LV-1). Its
+       template and the implicit theme of its items (DefaultListViewItemStyle) are in the WinUI
+       theme. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A ListView shows a vertical, virtualizing list of items, selected as its SelectionMode says; with IsItemClickEnabled a click on an item raises ItemClick.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A history list: no selection, item clicks</TextBlock>
+    <ListView Width="320" Height="200" HorizontalAlignment="Left" Margin="2"
+              SelectionMode="None" IsItemClickEnabled="True">
+      <ListView.Header>
+        <TextBlock Text="History" FontWeight="SemiBold" Margin="12,0,0,4" />
+      </ListView.Header>
+      <ListViewItem Content="12 + 30 = 42" />
+      <ListViewItem Content="7 × 6 = 42" />
+      <ListViewItem Content="84 ÷ 2 = 42" />
+      <ListViewItem Content="√1764 = 42" />
+      <ListViewItem Content="50 − 8 = 42" />
+      <ListView.Footer>
+        <TextBlock Text="Five calculations" Opacity="0.6" Margin="12,4,0,0" />
+      </ListView.Footer>
+    </ListView>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">The selection modes: Single, Multiple (a tap toggles), Extended (Ctrl and Shift)</TextBlock>
+    <StackPanel Orientation="Horizontal" Spacing="12" Margin="2">
+      <ListView Width="200" Height="200" SelectionMode="Single">
+        <ListViewItem Content="Memory 1" />
+        <ListViewItem Content="Memory 2" />
+        <ListViewItem Content="Memory 3" />
+        <ListViewItem Content="Memory 4" />
+        <ListViewItem Content="Memory 5" />
+      </ListView>
+      <ListView Width="200" Height="200" SelectionMode="Multiple">
+        <ListViewItem Content="Memory 1" />
+        <ListViewItem Content="Memory 2" />
+        <ListViewItem Content="Memory 3" />
+        <ListViewItem Content="Memory 4" />
+        <ListViewItem Content="Memory 5" />
+      </ListView>
+      <ListView Width="200" Height="200" SelectionMode="Extended">
+        <ListViewItem Content="Memory 1" />
+        <ListViewItem Content="Memory 2" />
+        <ListViewItem Content="Memory 3" />
+        <ListViewItem Content="Memory 4" />
+        <ListViewItem Content="Memory 5" />
+      </ListView>
+    </StackPanel>
+  </StackPanel>
+</ContentPage>
