@@ -29,7 +29,7 @@ use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::{AstTransformationContext, IXamlAstTransformer};
 use xamlx::type_system::IXamlType;
 
-use super::ferro_xaml_il_setter_transformer::XamlStyleTransformException;
+use super::FerroTransformErrors;
 use crate::compiler_extensions::transformers::{FerroXamlIlTargetTypeMetadataNode, ScopeTypes};
 
 pub struct FerroXamlIlVisualStateSetterTransformer;
@@ -71,14 +71,14 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
                 .is_some_and(|type_| type_.is("FerroUI.Controls", "VisualState"))
         });
         if !in_visual_state {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 "Setter.Target is only valid in the setters of a visual state.",
                 &*text,
                 None,
             ));
         }
         if find_property_value(&on, "Property")?.is_some() {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 "A setter of a visual state names its property in Setter.Target, not in Setter.Property.",
                 &*text,
                 None,
@@ -87,14 +87,14 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
 
         let target_text = text.text();
         let Some((element_name, path)) = split_target(&target_text) else {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 format!("Setter.Target '{target_text}' is not of the form Element.Property or Element.(Owner.Property)."),
                 &*text,
                 None,
             ));
         };
         let Some(element_type) = find_named_element_type(&parents, &element_name)? else {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 format!("Setter.Target '{target_text}': no element named '{element_name}' in the name scope of the setter."),
                 &*text,
                 None,

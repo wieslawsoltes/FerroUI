@@ -16,7 +16,7 @@ pub mod scenarios;
 mod shots;
 pub mod state;
 
-pub use shots::{capture_if_asked, run};
+pub use shots::{capture_if_asked, run, run_with_parts};
 
 /// Temperature converter: degrees Celsius to Fahrenheit.
 pub fn celsius_to_fahrenheit(celsius: f64) -> f64 {
