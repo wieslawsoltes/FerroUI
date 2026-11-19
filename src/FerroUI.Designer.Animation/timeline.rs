@@ -1,4 +1,4 @@
-use crate::{require, AnimationError, AnimationValue, Easing, Result};
+use crate::{require, AnimationError, AnimationValue, CurvePoint, CurveWindow, Easing, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -600,6 +600,33 @@ impl CompiledTimeline {
     pub fn scrub(&self, time: f64) -> Result<Vec<Sample>> {
         require(time.is_finite(), "Scrub time must be finite")?;
         self.0.sample_tracks(time.clamp(0.0, self.0.duration))
+    }
+
+    /// Plot one scalar track using the same underlying values, fill, and
+    /// interpolation as an authored playhead seek.
+    pub fn scalar_curve(
+        &self,
+        target: u64,
+        property: &str,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>> {
+        let track = self.0.track(target, property)
+            .filter(|track| {
+                !track.muted && track.keyframes.first()
+                    .is_some_and(|key| matches!(key.value, AnimationValue::Number(_)))
+            })
+            .ok_or_else(|| AnimationError("Choose an active scalar animation track".into()))?;
+        let times = window.sample_times(self.0.duration, track.keyframes.iter().map(|key| key.time))?;
+        times.into_iter()
+            .map(|time| {
+                let Some(AnimationValue::Number(value)) =
+                    track.sample_validated(time, self.0.duration, self.0.fill)?
+                else {
+                    return Err(AnimationError("The track has no scalar sample".into()));
+                };
+                Ok(CurvePoint { time, value })
+            })
+            .collect()
     }
     /// Display position in the authored iteration before global easing is applied.
     pub fn playback_position(&self, elapsed: f64) -> Result<f64> {

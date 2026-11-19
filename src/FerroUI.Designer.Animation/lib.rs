@@ -1,6 +1,7 @@
 //! Renderer-independent animation authoring. Times are seconds; colors are unpremultiplied sRGB.
 //! Samples can be applied to a live preview without modifying authored XAML, and recording adds
 //! keyframes rather than baking transient preview values into document attributes.
+mod curve;
 mod easing;
 mod interactions;
 mod keyframe_draft;
@@ -16,6 +17,7 @@ mod xaml;
 #[cfg(feature = "native-preview")]
 pub mod native;
 
+pub use curve::{CurvePoint, CurveWindow};
 pub use easing::Easing;
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
