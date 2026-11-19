@@ -647,3 +647,112 @@ fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
     chart.bounce_back();
     assert_eq!(chart.map_animation.borrow().len(), 1);
 }
+
+/// `BaseNeedleVisual` animates the rotation of its needle: a needle whose value changes turns to
+/// it over the animations speed of the chart, the long way round when the range asks for it
+/// (from 10 to 90 of a gauge of 270 degrees), with the cubic out easing of the transitions; the
+/// first value is drawn at once, and the needle stops at its value.
+#[test]
+fn a_needle_turns_to_its_new_value() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_chart_kind(ChartKind::Pie);
+    chart.set_animations_speed(1000.0);
+    chart.set_initial_rotation(-225.0);
+    chart.set_max_angle(270.0);
+    chart.set_min_value(0.0);
+    chart.set_max_value(Some(100.0));
+    let needle = crate::NeedleVisual::new();
+    needle.set_numeric_value(10.0);
+    chart.visual_elements().add(needle.clone().upcast());
+    let _window = attach(&chart);
+    let tip = |scene: &Scene| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Polygon(points) => Some(points[0]),
+                _ => None,
+            })
+            .expect("the needle")
+    };
+    let size = chart.bounds().size();
+    let at_ten = tip(&chart.scene(size).unwrap());
+    assert!(
+        chart.needle_timer.borrow().is_none(),
+        "the first value is drawn at once"
+    );
+    needle.set_numeric_value(90.0);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(tip(&scene), at_ten, "the needle starts where it was");
+    assert!(chart.needle_timer.borrow().is_some());
+    let motion = chart.needles.borrow()[0];
+    assert_eq!(
+        (motion.from, motion.to, motion.duration_ms),
+        (10.0, 90.0, 1000.0)
+    );
+    let half = motion.at(motion.started_ms + 500.0);
+    assert!((half - (10.0 + 80.0 * EasingFunctions::cubic_out(0.5))).abs() < 1e-9);
+    // The animation is over: the needle is drawn at its value and the frames stop.
+    chart.needles.borrow_mut()[0].started_ms -= 10_000.0;
+    chart.invalidate_chart();
+    let at_ninety = tip(&chart.scene(size).unwrap());
+    assert_ne!(at_ninety, at_ten);
+    assert!(chart.needle_timer.borrow().is_none());
+}
+
+/// HeatSeriesAnimationTests.HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient: the four
+/// cells of the source, with axes from -0.5 to 1.5, keep their rectangles
+/// while their colours come in from transparent at the first draw, and end at distinct colours
+/// of the gradient.
+#[test]
+fn heat_cells_take_their_colours_at_the_first_draw() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_animations_speed(1000.0);
+    let series = crate::HeatSeries::new();
+    series.set_coordinates([
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 0.0, 1.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 0.0, 5.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 1.0, 3.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 1.0, 9.0),
+    ]);
+    chart.series().add(series.upcast());
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_min_limit(Some(-0.5));
+        axes.get(0).set_max_limit(Some(1.5));
+    }
+    let start = Dispatcher::ui_thread().now() as f64;
+    let _window = attach(&chart);
+    let target = chart.scene(chart.bounds().size()).unwrap();
+    let cells = |scene: &Scene| -> Vec<(Rect, Color)> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Rectangle { rect, .. }, Some(id))
+                    if id.series == 0 =>
+                {
+                    Some((*rect, p.style.fill.unwrap()))
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let end = cells(&target);
+    assert_eq!(end.len(), 4);
+    let middle = cells(&chart.presentation_scene(start + 500.0, target.clone()));
+    assert_eq!(middle.len(), 4);
+    for ((rect, color), (end_rect, end_color)) in middle.iter().zip(&end) {
+        assert_eq!(rect, end_rect, "the cells do not move");
+        assert!(
+            color.a > 0 && color.a < end_color.a,
+            "the colour comes in: {color:?}"
+        );
+    }
+    assert_ne!(
+        end[0].1, end[3].1,
+        "the lowest and highest weights take distinct colours"
+    );
+}

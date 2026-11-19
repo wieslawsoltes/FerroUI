@@ -1,11 +1,32 @@
-<!-- Adapted from AppbarbuttonsSeparatedAppbarseparators.txt in the pinned Gallery; see ../NOTICE.md. -->
-<CommandBar xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <CommandBar.PrimaryCommands>
-    <CommandBarButton Label="Attach Camera"/>
-    <CommandBarSeparator/>
-    <CommandBarButton Label="Like"/>
-    <CommandBarButton Label="Dislike"/>
-    <CommandBarSeparator/>
-    <CommandBarButton Label="Orientation"/>
-  </CommandBar.PrimaryCommands>
-</CommandBar>
+<!-- Ported from the pinned AppBarSeparator example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. WinUI's AppBarButton and AppBarSeparator are FerroUI's
+     CommandBarButton and CommandBarSeparator, and the icons are SymbolIcons. The scroll viewer's
+     HorizontalScrollMode Auto with a hidden bar is HorizontalScrollBarVisibility Hidden, and
+     VerticalScrollMode Disabled is VerticalScrollBarVisibility Disabled. The glyphs need the
+     symbol font of the platform (Segoe Fluent Icons on Windows). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="AppBarSeparatorExample1" Spacing="8">
+    <TextBlock Text="AppBarButtons separated by AppBarSeparators." FontSize="18" />
+    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+      <CommandBar x:Name="Control1">
+        <CommandBar.PrimaryCommands>
+          <CommandBarButton x:Name="AttachCameraButton" Label="Attach Camera">
+            <CommandBarButton.Icon><SymbolIcon Symbol="AttachCamera" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarSeparator />
+          <CommandBarButton x:Name="LikeButton" Label="Like">
+            <CommandBarButton.Icon><SymbolIcon Symbol="Like" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarButton x:Name="DislikeButton" Label="Dislike">
+            <CommandBarButton.Icon><SymbolIcon Symbol="Dislike" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarSeparator />
+          <CommandBarButton x:Name="OrientationButton" Label="Orientation">
+            <CommandBarButton.Icon><SymbolIcon Symbol="Orientation" /></CommandBarButton.Icon>
+          </CommandBarButton>
+        </CommandBar.PrimaryCommands>
+      </CommandBar>
+    </ScrollViewer>
+  </StackPanel>
+</StackPanel>

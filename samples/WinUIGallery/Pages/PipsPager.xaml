@@ -1,4 +1,53 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Horizontal pager"/><PipsPager NumberOfPages="10" SelectedPageIndex="2" MaxVisiblePips="5" IsNextButtonVisible="True" IsPreviousButtonVisible="True"/><TextBlock Text="Vertical pager"/><PipsPager NumberOfPages="5" Orientation="Vertical" HorizontalAlignment="Left"/>
+<!-- Ported from the two pinned PipsPager examples of WinUI Gallery (14061eea) and the code behind
+     of PipsPagerPage.xaml.cs (status_samples.rs); see ../NOTICE.md. FerroUI has no FlipView: the
+     gallery is a Carousel, as on the FlipView page, filled in Rust with the source's Pictures;
+     the pager's NumberOfPages is Pictures.Count and its SelectedPageIndex keeps the source's
+     TwoWay x:Bind of the gallery's SelectedIndex. FerroUI's PipsPager has IsPreviousButtonVisible
+     and IsNextButtonVisible instead of the button visibilities (no VisibleOnPointerOver) and no
+     WrapMode, so those options are left out. The ComboBoxes' Headers are composed above them;
+     the announcement of TestPipsPager2_SelectedIndexChanged is a polite live region. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="PipsPagerExample1" Spacing="8">
+    <TextBlock Text="PipsPager integrated with a FlipView" FontSize="18" />
+    <StackPanel>
+      <Carousel x:Name="Gallery" Height="270" MaxWidth="400" AutomationProperties.Name="Pictures" />
+      <PipsPager x:Name="FlipViewPipsPager"
+                 Margin="0,12,0,0"
+                 HorizontalAlignment="Center"
+                 SelectedPageIndex="{x:Bind Gallery.SelectedIndex, Mode=TwoWay}" />
+      <TextBlock x:Name="GalleryLoadError" IsVisible="False" TextWrapping="Wrap" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="PipsPagerExample2" Spacing="8">
+    <TextBlock Text="PipsPager with options to change its orientation, button visibility, and wrap mode."
+               FontSize="18" TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel>
+        <PipsPager x:Name="TestPipsPager2" NumberOfPages="10" />
+        <TextBlock x:Name="PipsPagerAnnouncement" FontSize="12" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="Orientation" />
+        <ComboBox x:Name="OrientationComboBox" HorizontalAlignment="Stretch" SelectedIndex="0"
+                  AutomationProperties.Name="Orientation">
+          <x:String>Horizontal</x:String>
+          <x:String>Vertical</x:String>
+        </ComboBox>
+        <TextBlock Text="Previous Button Visibility" />
+        <ComboBox x:Name="PrevButtonComboBox" HorizontalAlignment="Stretch" SelectedIndex="0"
+                  AutomationProperties.Name="Previous Button Visibility">
+          <x:String>Visible</x:String>
+          <x:String>Collapsed</x:String>
+        </ComboBox>
+        <TextBlock Text="Next Button Visibility" />
+        <ComboBox x:Name="NextButtonComboBox" HorizontalAlignment="Stretch" SelectedIndex="0"
+                  AutomationProperties.Name="Next Button Visibility">
+          <x:String>Visible</x:String>
+          <x:String>Collapsed</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

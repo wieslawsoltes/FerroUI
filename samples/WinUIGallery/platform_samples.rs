@@ -1,4 +1,5 @@
-//! Adaptations of the pinned Popup, Clipboard and PullToRefresh code behind.
+//! The code behind of the pinned Popup page (the handlers of `PopupPage.xaml.cs`) and
+//! adaptations of the Clipboard and PullToRefresh code behind.
 //! The controls keep their existing platform services and event/deferral APIs.
 
 use ferroui_base::input::platform::ClipboardExtensions;
@@ -6,7 +7,7 @@ use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{BoxedValue, ObjectType, Ref};
 use ferroui_controls::primitives::Popup;
 use ferroui_controls::pull_to_refresh::{RefreshCompletionDeferral, RefreshContainer};
-use ferroui_controls::{Button, Control, ListBox, TextBlock, TextBox, TopLevel};
+use ferroui_controls::{Button, Control, ListBox, TextBlock, TextBox, ToggleSwitch, TopLevel};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -21,30 +22,35 @@ fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {
         .and_then(|control| control.cast())
 }
 
+/// `ShowPopupOffsetClicked`, `ClosePopupClicked` and `PopupClosed` of `PopupPage.xaml.cs`: the
+/// buttons open and close the popup, and the light-dismiss option is disabled while it is open.
 fn wire_popup(root: &Ref<Control>) {
     let Some(popup) = find::<Popup>(root, "StandardPopup") else {
         return;
     };
+    let toggle = root.get_control::<ToggleSwitch>("IsLightDismissEnabledToggleSwitch");
     for (name, open) in [("ShowPopup", true), ("ClosePopup", false)] {
         let button = root.get_control::<Button>(name);
         let weak_popup = popup.downgrade();
+        let weak_toggle = toggle.downgrade();
         button.click(move |_, _| {
-            if let Some(popup) = weak_popup.upgrade() {
-                if popup.is_open() != open {
-                    popup.set_is_open(open);
-                }
+            let (Some(popup), Some(toggle)) = (weak_popup.upgrade(), weak_toggle.upgrade()) else {
+                return;
+            };
+            if popup.is_open() != open {
+                popup.set_is_open(open);
             }
+            toggle.set_is_enabled(!open);
         });
     }
-    let weak_popup = popup.downgrade();
-    let weak_output = root.get_control::<TextBlock>("PopupOutput").downgrade();
-    popup.property_changed(move |change| {
-        if change.property() == Popup::is_open_property().as_property() {
-            if let (Some(popup), Some(output)) = (weak_popup.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(if popup.is_open() { "Open" } else { "Closed" }));
+    let weak_toggle = toggle.downgrade();
+    popup
+        .closed(move || {
+            if let Some(toggle) = weak_toggle.upgrade() {
+                toggle.set_is_enabled(true);
             }
-        }
-    });
+        })
+        .detach();
 }
 
 #[derive(Clone, Copy)]
