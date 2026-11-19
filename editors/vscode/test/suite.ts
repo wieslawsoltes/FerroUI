@@ -74,7 +74,6 @@ export async function run(): Promise<void> {
     const panel = designer.designs().find(panel => panel.document === xaml);
     assert.ok(panel);
     await verifyDrag(panel);
-    await verifyMcp(xaml);
 
     const undoXaml = async (expected: string) => {
         const version = xaml.version;
@@ -109,6 +108,8 @@ export async function run(): Promise<void> {
         assert.ok(xaml.getText().includes('Text="Text"'));
         assert.ok(selection && xaml.lineAt(selection.start.line).text.includes('<TextBlock'));
         await undoXaml(xamlInput.source);
+        // The MCP audit opens other editors and views. Complete the source-only undo checks first.
+        await verifyMcp(xaml);
         const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
         assert.ok(frame.counterpart.editable && draft);
         const { edits: rsxEdits } = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });
