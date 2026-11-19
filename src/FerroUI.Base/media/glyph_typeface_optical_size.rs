@@ -74,23 +74,29 @@ pub(crate) fn glyph_typeface_for_text(
     family: &FontFamily,
     em_size: f64,
 ) -> Rc<GlyphTypeface> {
-    if names_optical_size(family) {
+    // The axis first: it is read once per typeface, and most fonts have none, so the name of the
+    // family is looked at only for a font that has the axis.
+    if glyph_typeface.optical_size_axis().is_none() || names_optical_size(family) {
         return glyph_typeface;
     }
     glyph_typeface.at_optical_size(em_size)
 }
 
 impl GlyphTypeface {
+    /// The range of the optical size axis of the font (`opsz` of its `fvar` table), read once.
+    fn optical_size_axis(&self) -> Option<(f64, f64)> {
+        *self.optical_size_axis.get_or_init(|| {
+            let fvar = self.platform_typeface().try_get_table(FVAR)?;
+            optical_size_axis(fvar.span())
+        })
+    }
+
     /// The typeface at the optical size of a text of `em_size` (in points: device-independent
     /// pixels), rounded to a whole point and clamped to the optical size axis of the font. The
     /// typeface itself for a font without the axis, for a typeface at that optical size already,
     /// and where the backend makes no instance. The instances are kept by this typeface.
     pub fn at_optical_size(self: &Rc<Self>, em_size: f64) -> Rc<GlyphTypeface> {
-        let axis = *self.optical_size_axis.get_or_init(|| {
-            let fvar = self.platform_typeface().try_get_table(FVAR)?;
-            optical_size_axis(fvar.span())
-        });
-        let Some((min, max)) = axis else { return self.clone() };
+        let Some((min, max)) = self.optical_size_axis() else { return self.clone() };
         if !em_size.is_finite() || em_size <= 0.0 {
             return self.clone();
         }
