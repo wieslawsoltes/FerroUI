@@ -124,6 +124,9 @@ impl DesignerSession {
         selector: &str,
         duration: f64,
     ) -> Result<NodeId, String> {
+        if self.uses_rust_source() {
+            return self.create_rust_animation(name, owner, selector, duration);
+        }
         let timeline = Timeline::new(duration).map_err(|error| error.to_string())?;
         let before = self
             .animation
@@ -146,6 +149,9 @@ impl DesignerSession {
         Ok(id)
     }
     pub fn remove_animation_program(&mut self, id: NodeId) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Remove Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Remove).map(|_| ());
+        }
         let edits =
             AnimationPrograms::remove(&self.document, id).map_err(|error| error.to_string())?;
         self.apply("Remove animation program", edits)
@@ -153,6 +159,9 @@ impl DesignerSession {
         Ok(())
     }
     pub fn rename_animation_program(&mut self, id: NodeId, name: &str) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Rename Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Rename(name)).map(|_| ());
+        }
         let edits = AnimationPrograms::rename(&self.document, id, name)
             .map_err(|error| error.to_string())?;
         self.apply("Rename animation program", edits)
@@ -164,6 +173,10 @@ impl DesignerSession {
         id: NodeId,
         name: &str,
     ) -> Result<NodeId, String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Duplicate Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Duplicate(name))?
+                .ok_or_else(|| "The duplicated animation has no selection identity".into());
+        }
         let before = self
             .animation
             .programs

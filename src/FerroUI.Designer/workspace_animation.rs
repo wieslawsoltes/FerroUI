@@ -338,19 +338,22 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let rust = session.uses_rust_source();
         for name in [
-            "NewAnimation", "DuplicateAnimation", "DeleteAnimation", "Record",
-            "CommitAnimation", "TimelineDetails", "BehaviorsMode",
+            "Record", "CommitAnimation", "BehaviorsMode", "SetAnimationSelector",
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
         self.root.get_control::<Button>("StatesMode").set_is_visible(!rust || !session.state_groups().is_empty());
-        if rust {
-            self.root.get_control::<ferroui_controls::Border>("AnimationDetails").set_is_visible(false);
-        }
+        self.root.get_control::<TextBox>("AnimationSelector").set_is_read_only(rust);
         self.duration.set_is_read_only(rust);
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
         let active = session.animation_programs().iter()
             .find(|program| Some(program.id) == session.active_animation_program());
+        let owner = session.selection().first().copied().unwrap_or(session.document().ast().root());
+        self.root.get_control::<Button>("NewAnimation")
+            .set_is_enabled(!rust || session.can_create_animation_program(owner));
+        for name in ["DuplicateAnimation", "DeleteAnimation", "TimelineDetails"] {
+            self.root.get_control::<Button>(name).set_is_enabled(!rust || active.is_some());
+        }
         self.root.get_control::<Button>("Keyframe")
             .set_is_visible(!rust || active.is_some_and(|program| program.timeline.is_some()));
         let previous = self.guard.replace(true);

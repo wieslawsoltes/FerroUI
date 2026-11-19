@@ -97,6 +97,12 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
             })
         })
         .collect::<Result<_, String>>()?;
+    let rust_animation_owners = design.rsx.as_ref().filter(|_| image.is_some()).map_or_else(Vec::new, |rsx| {
+        design.xaml.ast().elements().filter_map(|node| {
+            let (ordinal, _) = design.rsx_node(node.id)?;
+            rsx.can_create_animation(ordinal).then_some(node.id)
+        }).collect()
+    });
     Ok(Snapshot {
         nodes,
         blocks,
@@ -108,6 +114,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         dependencies,
         project_assets,
         mapped_rust_animations: !design.rsx_animations.is_empty(),
+        rust_animation_owners,
         timeline_pose,
     })
 }

@@ -135,6 +135,8 @@ pub(crate) struct EditResult {
     pub(crate) selection: Option<Range>,
     #[serde(rename = "timelinePose", skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
+    #[serde(rename = "timelineProgramKey", skip_serializing_if = "Option::is_none")]
+    pub(crate) timeline_program_key: Option<String>,
     #[serde(rename = "retainedSelection", skip_serializing_if = "Vec::is_empty")]
     pub(crate) retained_selection: Vec<Range>,
 }
@@ -162,6 +164,8 @@ pub(crate) struct Snapshot {
     pub(crate) dependencies: Vec<String>,
     pub(crate) project_assets: Vec<Asset>,
     pub(crate) mapped_rust_animations: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) rust_animation_owners: Vec<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
 }

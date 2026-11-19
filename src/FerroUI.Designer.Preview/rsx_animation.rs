@@ -9,6 +9,8 @@ use std::collections::BTreeMap;
 
 mod keyframes;
 pub(crate) use keyframes::keyframe_edit;
+mod programs;
+pub(crate) use programs::{program_edit, program_patches};
 
 pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,

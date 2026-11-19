@@ -43,6 +43,61 @@ fn review() {
     } }
 }"###;
 
+#[test]
+fn studio_timeline_authors_whole_rust_clips_and_keeps_source_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Fixture::new();
+    let source = "fn view() { rsx! { Border { name: \"Card\", width: 180.0 } } }\r\n";
+    let uri = files.file("clip.rs", source);
+    let workspace = DesignerWorkspace::with_uri(XAML, files.file("Main.xaml", XAML)).unwrap();
+    workspace.set_solution(Solution::discover(&files.0).unwrap()).unwrap();
+    workspace.activate_document(&uri).unwrap();
+    let root = workspace.control();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let card = session.borrow().document().ast().root();
+    session.borrow_mut().select([card]);
+    workspace.refresh(true);
+
+    click(&root.get_control::<Button>("NewAnimation"));
+    let (created_source, identifier) = {
+        let session = session.borrow();
+        assert_eq!(session.animation_programs().len(), 1);
+        let clip = &session.animation_programs()[0];
+        assert_eq!(clip.name, "Animation 1");
+        assert_eq!(clip.targets, [card]);
+        assert_eq!(session.active_animation_program(), Some(clip.id));
+        (session.authored_source().to_owned(), clip.source_key.clone().unwrap())
+    };
+    click(&root.get_control::<Button>("TimelineDetails"));
+    root.get_control::<TextBox>("AnimationName").set_text(Some("Card reveal"));
+    click(&root.get_control::<Button>("RenameAnimation"));
+    let renamed_source = session.borrow().authored_source().to_owned();
+    assert_eq!(session.borrow().animation_programs()[0].name, "Card reveal");
+    assert_eq!(session.borrow().animation_programs()[0].source_key.as_deref(), Some(identifier.as_str()));
+
+    click(&root.get_control::<Button>("DuplicateAnimation"));
+    let duplicated_source = {
+        let session = session.borrow();
+        let copy = &session.animation_programs()[1];
+        assert_eq!(copy.name, "Card reveal copy");
+        assert_ne!(copy.source_key.as_deref(), Some(identifier.as_str()));
+        assert_eq!(session.active_animation_program(), Some(copy.id));
+        session.authored_source().to_owned()
+    };
+    click(&root.get_control::<Button>("DeleteAnimation"));
+    assert_eq!(session.borrow().animation_programs().len(), 1);
+    assert_eq!(session.borrow().authored_source(), renamed_source);
+    for expected in [&duplicated_source, &renamed_source, &created_source, source] {
+        session.borrow_mut().undo().unwrap();
+        assert_eq!(session.borrow().authored_source(), expected);
+    }
+    assert!(!session.borrow().can_undo());
+}
+
 struct Fixture(PathBuf);
 
 impl Fixture {

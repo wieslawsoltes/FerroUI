@@ -3,7 +3,7 @@ use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocati
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
 };
-use ferroui_designer_rsx::RsxAnimation;
+use ferroui_designer_rsx::{RsxAnimation, RsxAnimationEdit, RsxAnimationPlan};
 
 impl RustDocument {
     pub(crate) fn source_span(&self, document: &Document, node: NodeId) -> Option<SourceSpan> {
@@ -51,6 +51,25 @@ impl RustDocument {
     ) -> Result<(Vec<TextPatch>, Vec<KeyframeLocation>), String> {
         self.animation(document, program)?
             .author_keyframes(&self.source, self.catalog(), timeline, keys, edit)
+    }
+
+    pub(crate) fn create_animation(
+        &self, document: &Document, owner: NodeId, name: &str, selector: &str, duration: f64,
+    ) -> Result<RsxAnimationPlan, String> {
+        let node = document.ast().node(owner).ok_or("Choose an authored Rust control")?;
+        let map = self.map().ok_or("Open the current Rust view")?;
+        let (ordinal, _) = map.control(node.span.start).ok_or("Choose a mapped Rust control")?;
+        self.catalog().project(&self.source, map.invocation.start)?
+            .create_animation(ordinal, name, selector, duration)
+    }
+
+    pub(crate) fn edit_animation(
+        &self, document: &Document, program: NodeId, edit: RsxAnimationEdit<'_>,
+    ) -> Result<RsxAnimationPlan, String> {
+        let declaration = self.animation(document, program)?.declaration;
+        let map = self.map().ok_or("Open the current Rust view")?;
+        self.catalog().project(&self.source, map.invocation.start)?
+            .edit_animation(declaration, edit)
     }
 
     pub(crate) fn plan_edit(

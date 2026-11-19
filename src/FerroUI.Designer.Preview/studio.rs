@@ -40,7 +40,8 @@ pub(crate) fn catalog() -> Value {
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
     let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state"))).cloned()
-        .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)))
+        .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::program_edit(name, action)
+            || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)))
         .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
         "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
@@ -125,9 +126,11 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
     let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, query.arguments["action"].as_str());
+    let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, query.arguments["action"].as_str());
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, query.arguments["action"].as_str());
     if design.rsx.is_some()
         && !rust_keyframe
+        && !rust_program
         && !rust_state
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
@@ -171,17 +174,24 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         }
         return Ok(result);
     }
-    if rust_keyframe {
+    if rust_keyframe || rust_program {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
-        let (patches, pose, retained_selection) = {
+        let (patches, pose, program_key, retained_selection) = {
             let session = stage.session.borrow();
-            let (patches, pose) = stage.sources.run(|| rsx.keyframe_patches(&session, &arguments))?;
+            let (patches, pose, program_key) = if rust_program {
+                let plan = stage.sources.run(|| rsx_animation::program_patches(&design, &arguments))?;
+                (plan.patches, None, plan.selected_key)
+            } else {
+                let (patches, pose) = stage.sources.run(|| rsx.keyframe_patches(&session, &arguments))?;
+                (patches, pose, None)
+            };
             let ranges = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
-            (patches, pose, ranges)
+            (patches, pose, program_key, ranges)
         };
         let mut result = editor_edits(&design, patches)?;
         if !result.edits.is_empty() {
             result.timeline_pose = pose;
+            result.timeline_program_key = program_key;
             result.retained_selection = retained_selection;
             renderer.stage.take();
         }

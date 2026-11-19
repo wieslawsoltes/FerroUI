@@ -115,6 +115,7 @@ fn respond(
                 "timelineKeyframeDrafts": true,
                 "timelineKeyframeScale": true,
                 "rsxKeyframeStructure": true,
+                "rsxAnimationPrograms": true,
                 "timelineCurves": true,
                 "timelineCombinedPlayback": true,
                 "timelineProgramTargets": true,
