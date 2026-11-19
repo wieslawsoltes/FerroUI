@@ -164,6 +164,18 @@ def c_type(text):
     return C_TYPES.get(text, text)
 
 
+# The crates whose classes have an entry in the library (`ferro_type_<class>()`, `api_types.rs`,
+# docs/c-abi.md, section 16): the ones it depends on for its classes.
+ENTRY_CRATES = ("ferroui_base", "ferroui_controls")
+
+
+def entry_of(rust_path, class_words):
+    """The entry of a class (`ferro_type_button`), or None for a class of no crate of the library."""
+    if not rust_path or rust_path.split("::")[0] not in ENTRY_CRATES:
+        return None
+    return "ferro_type_" + "_".join(class_words)
+
+
 def read_header():
     """The functions, callback types and status codes of `include/ferroui.h`."""
     header = meta.read(HEADER)
@@ -418,6 +430,7 @@ def build():
             "words": words(name),
             "base": model.bases.get(name) if model.bases.get(name) in type_ids else None,
             "rust_path": meta.class_path(model, name),
+            "entry": entry_of(meta.class_path(model, name), words(name)),
             "creatable": name in model.creatable,
             "control": is_control,
             "children": children_of(model, name),
@@ -451,6 +464,10 @@ def build():
         })
 
     functions, callbacks, statuses = read_header()
+    # The class entries are the classes' (`entry`), not functions of the ABI a binding declares
+    # by hand: a binding declares the entries of the classes it selects.
+    entries = {cls["entry"] for cls in out_classes if cls["entry"]}
+    functions = [function for function in functions if function["name"] not in entries]
     abi_version = int(re.search(r"#define FERRO_ABI_VERSION (\d+)", meta.read(HEADER)).group(1))
 
     document = {
