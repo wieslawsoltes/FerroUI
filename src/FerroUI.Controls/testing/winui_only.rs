@@ -32,7 +32,7 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (NavigationViewItemSeparator::TYPE, "WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes"),
     (RichEditBox::TYPE, "WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4)"),
     (TitleBar::TYPE, "WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes"),
-    (SwipeControl::TYPE, "WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme"),
+    (SwipeControl::TYPE, "WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes"),
 ];
 
 /// Whether only the WinUI theme and the themes derived from it style `control`.
