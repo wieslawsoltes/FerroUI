@@ -1,0 +1,256 @@
+// 7GUIs task 3, Flight Booker, in Osprey through the C ABI of FerroUI (ferroui-capi): a one-way
+// or a return flight, two dates (dd.mm.yyyy), a date that does not parse is marked, the return
+// date is used for a return flight only, and the booking needs valid dates in order. The same
+// task as samples/SevenGuis/Builders/FlightBooker. The state is the controls themselves: every
+// handler reads the kind (ferro_get_i64_or of SelectedIndex) and the dates (ferro_get_cstr) back
+// from FerroUI, so the Osprey side keeps only the handles.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program runs the steps of the scenario of the Rust tests and
+// prints what the controls show.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_get_i64_or(object: int, property: int, fallback: int) -> int
+extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
+extern fn ferro_set_i64(object: int, property: int, value: int) -> int32
+extern fn ferro_clear(object: int, property: int) -> int32
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn getInt(object: int, name: string, fallback: int) -> int =
+    ferro_get_i64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getFlag(object: int, name: string) -> bool =
+    ferro_get_bool_or(object: object, property: prop(name: name), fallback: toInt8(0)) == toInt8(1)
+
+fn setInt(object: int, name: string, value: int) -> Unit =
+    check(what: name, status: ferro_set_i64(object: object, property: prop(name: name), value: value))
+
+fn clear(object: int, name: string) -> Unit = check(what: name, status: ferro_clear(object: object, property: prop(name: name)))
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- dates (seven_guis_model) -----------------------------------------------------------------
+
+type Date = { valid: bool, year: int, month: int, day: int }
+
+let noDate = Date { valid: false, year: 0, month: 0, day: 0 }
+
+fn daysInMonth(year: int, month: int) -> int =
+    month == 2 ? ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0 ? 29 : 28)
+        : (month == 4 || month == 6 || month == 9 || month == 11 ? 30 : 31)
+
+fn number(text: string) -> int = match parseInt(text) {
+    Success { value } => value
+    Error { message } => 0 - 1
+}
+
+fn part(parts: List<string>, index: int) -> int = match listGet(parts, index) {
+    Success { value } => number(text: value)
+    Error { message } => 0 - 1
+}
+
+// Parses dd.mm.yyyy; an invalid date when the text is not one.
+fn parseDate(text: string) -> Date = match split(trim(text), ".") {
+    Success { value } => {
+        let day = part(parts: value, index: 0)
+        let month = part(parts: value, index: 1)
+        let year = part(parts: value, index: 2)
+        let fits = length(value) == 3 && year >= 0 && month >= 1 && month <= 12 && day >= 1
+        fits && day <= daysInMonth(year: year, month: month) ? Date { valid: true, year: year, month: month, day: day } : noDate
+    }
+    Error { message } => noDate
+}
+
+fn dateKey(date: Date) -> int = date.year * 10000 + date.month * 100 + date.day
+
+fn pad(value: int, width: int) -> string = padStart(toString(value), width, "0") ?: toString(value)
+
+fn formatDate(date: Date) -> string = "${pad(value: date.day, width: 2)}.${pad(value: date.month, width: 2)}.${pad(value: date.year, width: 4)}"
+
+// ---- state: the handles ----------------------------------------------------------------------
+
+type Ui = { kind: int, start: int, back: int, book: int, message: int }
+
+effect State { ui: fn(Ui) -> Unit }
+
+mut ui = Ui { kind: 0, start: 0, back: 0, book: 0, message: 0 }
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// ---- the task --------------------------------------------------------------------------------
+
+fn isReturn() -> bool = getInt(object: ui.kind, name: "SelectedIndex", fallback: 0) == 1
+
+fn startDate() -> Date = parseDate(text: getText(object: ui.start, name: "Text"))
+
+fn backDate() -> Date = parseDate(text: getText(object: ui.back, name: "Text"))
+
+fn canBook(back: bool, start: Date, end: Date) -> bool =
+    back ? start.valid && end.valid && dateKey(date: end) >= dateKey(date: start) : start.valid
+
+// Marks a date that does not parse.
+fn mark(box: int, date: Date) -> Unit =
+    if date.valid { clear(object: box, name: "Background") } else { setText(object: box, name: "Background", text: "#FFC8C8") }
+
+// What the controls show follows the kind and the dates.
+fn update() -> Unit = {
+    let back = isReturn()
+    let start = startDate()
+    let end = backDate()
+    mark(box: ui.start, date: start)
+    mark(box: ui.back, date: end)
+    setFlag(object: ui.back, name: "IsEnabled", value: back)
+    setFlag(object: ui.book, name: "IsEnabled", value: canBook(back: back, start: start, end: end))
+}
+
+fn onChanged(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    update()
+    0
+}
+
+fn onBook(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let start = startDate()
+    let end = backDate()
+    let text = isReturn() && end.valid
+        ? "You have booked a return flight on ${formatDate(date: start)}, returning on ${formatDate(date: end)}."
+        : "You have booked a one-way flight on ${formatDate(date: start)}."
+    if start.valid { setText(object: ui.message, name: "Text", text: text) } else { nothing() }
+    0
+}
+
+fn item(text: string) -> int = {
+    let entry = make(name: "ComboBoxItem")
+    setText(object: entry, name: "Content", text: text)
+    entry
+}
+
+fn dateBox(name: string) -> int = {
+    let box = make(name: "TextBox")
+    setText(object: box, name: "Name", text: name)
+    setText(object: box, name: "Text", text: "27.03.2014")
+    box
+}
+
+fn onStart(token: int) -> int = {
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Flight Booker")
+    setNumber(object: window, name: "Width", value: 300.0)
+    setNumber(object: window, name: "Height", value: 270.0)
+    let panel = make(name: "StackPanel")
+    setNumber(object: panel, name: "Spacing", value: 8.0)
+    setText(object: panel, name: "Margin", text: "16")
+    setNumber(object: panel, name: "Width", value: 240.0)
+    let kind = make(name: "ComboBox")
+    setText(object: kind, name: "Name", text: "Kind")
+    add(parent: kind, child: item(text: "one-way flight"))
+    add(parent: kind, child: item(text: "return flight"))
+    setInt(object: kind, name: "SelectedIndex", value: 0)
+    let start = dateBox(name: "Start")
+    let back = dateBox(name: "Return")
+    let book = make(name: "Button")
+    setText(object: book, name: "Name", text: "Book")
+    setText(object: book, name: "Content", text: "Book")
+    let message = make(name: "TextBlock")
+    setText(object: message, name: "Name", text: "Message")
+    setUi(value: Ui { kind: kind, start: start, back: back, book: book, message: message })
+    let _k = ferro_subscribe(object: kind, event: ferro_event_id(name: "SelectionChanged", length: 0 - 1), function: onChanged, token: 0)
+    let changed = ferro_event_id(name: "TextChanging", length: 0 - 1)
+    let _s = ferro_subscribe(object: start, event: changed, function: onChanged, token: 0)
+    let _r = ferro_subscribe(object: back, event: changed, function: onChanged, token: 0)
+    let _b = ferro_subscribe(object: book, event: ferro_event_id(name: "Click", length: 0 - 1), function: onBook, token: 0)
+    add(parent: panel, child: kind)
+    add(parent: panel, child: start)
+    add(parent: panel, child: back)
+    add(parent: panel, child: book)
+    add(parent: panel, child: message)
+    add(parent: window, child: panel)
+    let _u = onChanged(token: 0, sender: 0, arg: 0)
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn expect(what: string, ok: bool) -> Unit = print("script: ${what}: ${ok ? "ok" : "FAILED"}")
+
+fn script() -> Unit = {
+    expect(what: "Book is enabled", ok: getFlag(object: ui.book, name: "IsEnabled"))
+    expect(what: "a one-way flight has no return date", ok: !getFlag(object: ui.back, name: "IsEnabled"))
+    setInt(object: ui.kind, name: "SelectedIndex", value: 1)
+    expect(what: "a return flight has a return date", ok: getFlag(object: ui.back, name: "IsEnabled"))
+    setText(object: ui.back, name: "Text", text: "26.03.2014")
+    expect(what: "the return date is before the start date", ok: !getFlag(object: ui.book, name: "IsEnabled"))
+    setText(object: ui.start, name: "Text", text: "31.02.2014")
+    expect(what: "31.02.2014 is no date: Book stays disabled", ok: !getFlag(object: ui.book, name: "IsEnabled"))
+    setText(object: ui.start, name: "Text", text: "20.03.2014")
+    expect(what: "Book is enabled with dates in order", ok: getFlag(object: ui.book, name: "IsEnabled"))
+    let click = ferro_event_id(name: "Click", length: 0 - 1)
+    check(what: "raise", status: ferro_raise(object: ui.book, event: click))
+    let message = getText(object: ui.message, name: "Text")
+    print("script: Message shows '${message}'")
+    expect(what: "the message", ok: message == "You have booked a return flight on 20.03.2014, returning on 26.03.2014.")
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}
