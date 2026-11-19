@@ -192,7 +192,7 @@ fn xaml_resources_resolve_at_each_level_and_follow_the_theme() {
     let green = Color::from_rgb(0, 128, 0);
     Application::current().unwrap().resources().set(
         ResourceKey::from(background),
-        Some(Rc::new(ImmutableSolidColorBrush::new(green)) as BoxedValue),
+        Some(Rc::new(Rc::new(ImmutableSolidColorBrush::new(green)) as Rc<dyn IBrush>) as BoxedValue),
     );
     assert_eq!(color(bound.background()), Some(green), "the resource binding follows the resource");
     assert_eq!(color(one_time.background()), before, "the one-time lookup keeps its value");
