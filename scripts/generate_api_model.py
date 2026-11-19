@@ -265,6 +265,17 @@ FRAME_LAYOUT = {
          "fields": [{"field": "length", "type": "i64"},
                     {"field": "bytes", "type": "u8[length]", "doc": "UTF-8, padded with zeros to 8 bytes"}],
          "doc": "Gives the open element a text key in place of its integer key."},
+        {"op": 10, "name": "memo", "writer": "ferro_frame_memo",
+         "fields": [{"field": "version", "type": "i64"}, {"field": "tag_base", "type": "i64"}],
+         "doc": "Makes the open element a memo element: while its key and `version` stay, a commit"
+                " does not look into its subtree, and the next frame can reuse it whole. The tags of its"
+                " events are `tag_base` plus offsets the version fixes."},
+        {"op": 11, "name": "reuse", "writer": "ferro_frame_reuse",
+         "fields": [{"field": "key", "type": "i64"}, {"field": "version", "type": "i64"},
+                    {"field": "tag_base", "type": "i64"}],
+         "doc": "Stands for the memo element with the integer key `key` and the version `version` of the"
+                " last frame under the root, with its tags moved to start at `tag_base`, in place of an"
+                " element. `ferro_frame_reuse` writes it when the root has that element."},
     ],
 }
 

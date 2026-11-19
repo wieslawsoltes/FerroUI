@@ -107,7 +107,15 @@ fn report_abi(name: &str, abi: f64) {
 
 /// Writes a frame of a stack panel of `count` text blocks with the scalar writer; the first has
 /// the text of iteration `i` when `changes`, every other its label.
-fn write_texts(text_type: i64, panel_type: i64, text: i64, labels: &[String], values: &[&str; 2], i: u32, changes: bool) {
+fn write_texts(
+    text_type: i64,
+    panel_type: i64,
+    text: i64,
+    labels: &[String],
+    values: &[&str; 2],
+    i: u32,
+    changes: bool,
+) {
     ferro_frame_begin();
     ferro_frame_open(panel_type, 0);
     for (n, label) in labels.iter().enumerate() {
@@ -254,9 +262,12 @@ fn main() {
     }
     assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
     if selected("frame dispatcher") {
-        report_abi("call the frame dispatcher (ferro_frame_dispatch)", measure(|i| {
-            black_box(ferro_frame_dispatch(i64::from(i & 1), button, 0));
-        }));
+        report_abi(
+            "call the frame dispatcher (ferro_frame_dispatch)",
+            measure(|i| {
+                black_box(ferro_frame_dispatch(i64::from(i & 1), button, 0));
+            }),
+        );
     }
 
     // Frames: the scalar writer and a commit under a root, against the write it comes down to.

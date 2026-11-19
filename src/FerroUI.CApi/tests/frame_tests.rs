@@ -344,3 +344,153 @@ fn getters_with_a_fallback_and_utf16_text() {
         assert_eq!(ferro_release(text_block), FERRO_OK);
     });
 }
+
+#[test]
+fn values_after_a_child_belong_to_the_open_element() {
+    ui(|| {
+        let root = create("Border");
+        let frame = |spacing: f64| {
+            assert_eq!(ferro_frame_begin(), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("StackPanel"), 1), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("TextBlock"), 2), FERRO_OK);
+            text("Text", "child");
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            // A value of the panel after its child, and one more after a second child.
+            assert_eq!(ferro_frame_f64(property_id("Spacing"), spacing), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("TextBlock"), 3), FERRO_OK);
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            assert_eq!(ferro_frame_f64(property_id("Width"), 100.0 + spacing), FERRO_OK);
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+        };
+        frame(4.0);
+        let panel = find(root, 1);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(4.0));
+        assert_eq!(get_f64(panel, "Width"), Ok(104.0));
+        frame(4.0);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(4.0));
+        frame(6.0);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(6.0));
+        assert_eq!(get_f64(panel, "Width"), Ok(106.0));
+        assert_eq!(get_str(find(root, 2), "Text").as_deref(), Ok("child"));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+/// A frame of a stack panel with a memo element (key 5) of a button whose Click carries the
+/// tag `tag_base`, unless `reuse` and the root has it.
+fn memo_frame(root: FerroHandle, version: i64, tag_base: i64, label: &str, reuse: bool) -> i64 {
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
+    assert_eq!(ferro_frame_open(type_id("StackPanel"), 1), FERRO_OK);
+    let reused = if reuse { ferro_frame_reuse(root, 5, version, tag_base) } else { i64::from(FERRO_NOT_FOUND) };
+    if reused < 0 {
+        assert_eq!(ferro_frame_open(type_id("Button"), 5), FERRO_OK);
+        assert_eq!(ferro_frame_memo(version, tag_base), FERRO_OK);
+        text("Content", label);
+        assert_eq!(ferro_frame_on(event_id("Click"), tag_base, 0), FERRO_OK);
+        assert_eq!(ferro_frame_close(), FERRO_OK);
+    }
+    assert_eq!(ferro_frame_close(), FERRO_OK);
+    assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+    reused
+}
+
+#[test]
+fn a_memo_element_is_not_looked_into_while_its_version_stays() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let root = create("Border");
+        memo_frame(root, 1, 3, "first", false);
+        let button = find(root, 5);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("first"));
+        // The same version with another label: the subtree is the one of the version.
+        memo_frame(root, 1, 3, "second", false);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("first"));
+        // A new tag base moves the tags of the element.
+        memo_frame(root, 1, 8, "second", false);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(8, button, 0, String::new())]);
+        // A new version is written.
+        memo_frame(root, 2, 8, "second", false);
+        assert_eq!(find(root, 5), button);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("second"));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_reuse_record_stands_for_the_memo_element_of_the_last_frame() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let root = create("Border");
+        assert_eq!(ferro_frame_reuse(root, 5, 1, 3), i64::from(FERRO_NOT_FOUND), "nothing is committed yet");
+        assert_eq!(memo_frame(root, 1, 3, "kept", true), i64::from(FERRO_NOT_FOUND));
+        let button = find(root, 5);
+        // One tag: the Click of the button.
+        assert_eq!(memo_frame(root, 1, 3, "unused", true), 1);
+        assert_eq!(find(root, 5), button);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("kept"));
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(3, button, 0, String::new())]);
+        // Reused with its tags moved.
+        assert_eq!(memo_frame(root, 1, 20, "unused", true), 1);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(20, button, 0, String::new())]);
+        // Another version is not there to reuse: written in full.
+        assert_eq!(memo_frame(root, 2, 20, "new", true), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("new"));
+        assert_eq!(ferro_frame_reuse(root, 5, 1, 0), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(ferro_frame_begin(), FERRO_OK);
+        // A frame without it: its bytes go with it.
+        assert_eq!(ferro_frame_commit(root), FERRO_OK);
+        assert_eq!(ferro_frame_reuse(root, 5, 2, 0), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_reused_element_can_move_to_another_parent() {
+    ui(|| {
+        let root = create("StackPanel");
+        let frame = |parent: i64, reuse: bool| {
+            assert_eq!(ferro_frame_begin(), FERRO_OK);
+            for key in [1, 2] {
+                assert_eq!(ferro_frame_open(type_id("StackPanel"), key), FERRO_OK);
+                if key == parent {
+                    if !reuse || ferro_frame_reuse(root, 5, 7, 0) < 0 {
+                        assert_eq!(ferro_frame_open(type_id("TextBlock"), 5), FERRO_OK);
+                        assert_eq!(ferro_frame_memo(7, 0), FERRO_OK);
+                        text("Text", "moving");
+                        assert_eq!(ferro_frame_close(), FERRO_OK);
+                    }
+                }
+                assert_eq!(ferro_frame_close(), FERRO_OK);
+            }
+            assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+        };
+        frame(1, false);
+        let first = find(root, 1);
+        assert_eq!(get_str(find(root, 5), "Text").as_deref(), Ok("moving"));
+        frame(2, true);
+        assert_eq!(get_str(find(root, 5), "Text").as_deref(), Ok("moving"));
+        let second = find(root, 2);
+        let child = find(root, 5);
+        assert_ne!(child, 0);
+        assert_ne!(first, second);
+        // Reused again where it is now.
+        frame(2, true);
+        assert_eq!(find(root, 5), child);
+        // The element is a child of the second panel, not of the first.
+        assert_eq!(ferro_remove_child(first, child), FERRO_NOT_FOUND);
+        assert_eq!(ferro_remove_child(second, child), FERRO_OK, "{}", last_error());
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}

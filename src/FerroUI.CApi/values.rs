@@ -618,6 +618,23 @@ pub(crate) fn peek_text(object: FerroHandle, property: i64) -> Option<String> {
     text_of(&object, property).ok()
 }
 
+/// Whether the text of `property` of `object` is `text` (null is the empty text): compared in
+/// place for a text property, with no copy of the text; nothing is recorded (the frames compare
+/// what an object shows with what a frame sets).
+pub(crate) fn shows_text(object: FerroHandle, property: i64, text: &str) -> bool {
+    let Ok((object, property)) = target(object, property) else {
+        return false;
+    };
+    if let Property::Registered(registered) = property {
+        if registered.property_type() == TypeId::of::<Option<String>>() {
+            if let Some(styled) = registered.as_styled::<Option<String>>() {
+                return object.with_value(styled, |shown| shown.as_deref().unwrap_or_default() == text);
+            }
+        }
+    }
+    text_of(&object, property).is_ok_and(|shown| shown == text)
+}
+
 /// The value of `property` of `object` as a number (a boolean as `0` or `1`), `None` when it is
 /// none; nothing is recorded.
 pub(crate) fn peek_number(object: FerroHandle, property: i64) -> Option<f64> {
