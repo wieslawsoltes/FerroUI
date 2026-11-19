@@ -57,9 +57,9 @@ fn increment() -> int = {
 // The scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs): two clicks count to 2.
 fn script() -> Unit = {
     let _ = ui.counter |> raiseClick |> raiseClick
-    let value = getText(ui.field)
+    let shown = getText(ui.field)
     match failure() {
-        Success { value: ok } => print("script: after two clicks the count shows '${value}': ${value == "2" ? "ok" : "FAILED"}")
+        Success { value } => print("script: after two clicks the count shows '${shown}': ${shown == "2" ? "ok" : "FAILED"}")
         Error { message } => print("script: FAILED: ${message}")
     }
 }

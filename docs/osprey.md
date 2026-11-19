@@ -278,7 +278,8 @@ script: Fahrenheit 5 gives Celsius: '-15': ok
 (`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`) from Osprey: a
 property write and a read with layer 1, an event raised to the one dispatcher, and three
 frames of layer 2 (one text block whose text changes; 100 text blocks of which one changes,
-built by Osprey every time; the same 100 as memo elements). It uses the clock of macOS.
+built by Osprey every time; the same 100 as memo elements), and building that view alone. It
+uses the clock of macOS.
 
 The first run (2026-11-19, one Apple silicon Mac, the median of 9 samples; Osprey with
 `--memory=arc` and the selection of the sample against the library in the `release` profile,
@@ -292,7 +293,31 @@ the Rust benchmark in the `bench` profile), before the work of docs/c-abi.md, se
 | frame: one text block, its text changes | 1.10 us | 0.61 us | 89.0 ns |
 | frame: 100 text blocks, one changes | 74.2 us | 27.7 us | 89.0 ns |
 
-@@AFTER@@
+After it (the same machine, the median of three runs, the library in the `release` profile
+without the desktop platform; the Rust columns from docs/c-abi.md, section 13):
+
+| Operation | Osprey | Rust through the ABI | Rust |
+| --- | ---: | ---: | ---: |
+| write `FontSize` | 39.1 ns | 34.8 ns | 28.5 ns |
+| read `FontSize` (a plain value) | 10.6 ns | 7.3 ns | 3.4 ns |
+| raise `Click` (Osprey: to the one dispatcher) | 58.4 ns | 53.4 ns | 44.3 ns |
+| frame: one text block, its text changes | 0.72 us | 0.20 us | 73.6 ns |
+| frame: 100 text blocks, one changes | 51.6 us | 3.18 us | 73.6 ns |
+| frame: 100 memo text blocks, one changes | 48.3 us | 1.81 us | 73.6 ns |
+| building the view of the 100 text blocks alone | 31.4 us | | |
+
+- **A getter** is one call and returns the value (no `ferro_clear_error`, no second call for
+  the code, no `Result` allocated per read): 53.7 ns to 10.6 ns, the read of the ABI plus the
+  call from Osprey.
+- **An event** goes from the library to `dispatch` with no trampoline of the bindings
+  (`ferro_subscribe_dispatch`): 94.4 ns to 58.4 ns.
+- **A frame** costs the library 3.2 us for 100 elements now, so what is left is Osprey's:
+  building the view (31.4 us: the list, the attributes and the strings of 100 elements every
+  time) and writing it (about 20 us: 302 calls of the writer, with a C string made from each
+  Osprey string). Memo elements save the writing of the 99 unchanged elements but not their
+  building and not the walk of their attributes that finds the key and the version (48.3 us);
+  they pay off for subtrees larger than one text block, and fully once Osprey can skip
+  building a subtree (section 7).
 
 ## 7. Limits of the MVP
 

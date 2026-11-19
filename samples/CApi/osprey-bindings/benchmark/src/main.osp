@@ -2,9 +2,10 @@
 // 6), the same operations as the Rust benchmark of the ABI (cargo bench -p ferroui-capi
 // --no-default-features --bench call_overhead): a property write and a read with layer 1, an
 // event dispatched to the one dispatcher, and frames of layer 2 (one text block whose text
-// changes; 100 text blocks of which one changes; the same 100 as memo elements). No window: the
-// thread is made the UI thread with ferro_init. Each case runs `iterations` times per sample; the median of 9 samples is
-// printed in nanoseconds per operation. The clock is the one of macOS.
+// changes; 100 text blocks of which one changes; the same 100 as memo elements; building the
+// view of the 100 alone). No window: the thread is made the UI thread with ferro_init. Each
+// case runs `iterations` times per sample; the median of 9 samples is printed in nanoseconds
+// per operation. The clock is the one of macOS.
 
 import ferroui::*
 import ferroviews::*
@@ -62,7 +63,8 @@ fn runCase(case: int, i: int, object: int, root: int) -> int = match case {
     2 => toInt(ferro_raise(object: object, event: clickEventId()))
     3 => commitUnder(root, oneText(i))
     4 => commitUnder(root, manyTexts(i))
-    _ => commitUnder(root, manyMemoTexts(i))
+    5 => commitUnder(root, manyMemoTexts(i))
+    _ => manyTexts(i).elementType
 }
 
 // The nanoseconds of one operation over one sample.
@@ -110,4 +112,5 @@ fn main() = {
     print("frame: 100 text blocks, one changes       ${median(4, 1000, text, root)} ns")
     let _ = ferro_frame_clear(root: root)
     print("frame: 100 memo text blocks, one changes  ${median(5, 1000, text, root)} ns")
+    print("the view of 100 text blocks alone         ${median(6, 1000, text, root)} ns")
 }

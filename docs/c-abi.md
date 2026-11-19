@@ -420,8 +420,8 @@ Each line of the benchmark was broken down with a sampling profiler before it wa
    moved to another parent, and a new tag base only moves the tags of its events (positional
    tags of an Elm-like binding shift when an earlier element gains an event). From C, a reused
    text block costs about 17 ns, about half of writing and comparing it; the gain grows with
-   the size of the subtree, and for a binding whose view is expensive to write (Osprey) it is
-   the whole subtree.
+   the size of the subtree. In Osprey, building the view is most of a frame now (section 6 of
+   docs/osprey.md), which a memo element does not skip yet.
 3. **The writer appends words** (`Vec<u64>`), one store per field, in place of byte copies of
    variable length: 2.79 us to 1.26 us for the 302 writer calls of 100 elements (with step 5).
 4. **No allocation on the paths of every call.** The error of the thread is a buffer that is
