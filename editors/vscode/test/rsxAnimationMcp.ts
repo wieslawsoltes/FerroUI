@@ -35,7 +35,8 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     assert.match(document.getText(asRange(target.nameRange)), /^Border$/);
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
-    assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum, ['upsert_keyframe']);
+    assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,
+        ['upsert_keyframe', 'move_keyframes']);
 
     const draft = { program: program.id, target: program.timeline.tracks[0].target, property: 'Opacity',
         previous: .5, time: 1.4, value: '0.82', easing: '0.25,0.3,0.75,1.4' };
@@ -70,11 +71,24 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
         `Undo left the Rust buffer at version ${editVersion}. Focused window: ${vscode.window.state.focused}. Active editor: ${vscode.window.activeTextEditor?.document.fileName}.`));
     assert.equal(document.getText(), original);
     frame = await outline();
+    const [restored] = await programs();
+    const track = restored.timeline!.tracks[0];
+    const keyframes = track.keyframes.slice(1).map(key => ({ target: track.target, property: track.property, time: key.time }));
+    const move = { action: 'move_keyframes', program: restored.id, keyframes, offset: -0.25 };
+    content(await edit(frame.revision, move));
+    assert.equal(document.getText(), original.replace('.key_frame(0.25,', '.key_frame(0.125,')
+        .replace('.key_frame(1.0,', '.key_frame(0.875,'));
+    assert.ok((await edit(frame.revision, move)).isError);
+    const movedVersion = document.version;
+    content(await invoke('designer_history', { session, expected_version: movedVersion, action: 'undo' }));
+    await until(() => document.version !== movedVersion);
+    assert.equal(document.getText(), original);
+    frame = await outline();
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
     await outline();
     assert.deepEqual(await programs(), []);
     const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(fixtureTabs);
-    console.log('RSX animation used native playback and keyframe validation, preserved CRLF and Unicode, rejected a stale edit, and restored exact Rust with Undo');
+    console.log('RSX animation validated native keyframes, moved a Rust selection in one edit, rejected a stale revision, and restored CRLF and Unicode with Undo');
 }
