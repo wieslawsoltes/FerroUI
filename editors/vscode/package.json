@@ -138,6 +138,47 @@
         "icon": "$(settings-gear)"
       },
       {
+        "command": "ferroui.showColumns",
+        "title": "Edit Columns",
+        "category": "FerroUI",
+        "icon": "$(table)"
+      },
+      {
+        "command": "ferroui.columns.add",
+        "title": "Add Column",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.columns.reveal",
+        "title": "Reveal in Source",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.columns.earlier",
+        "title": "Move Column Earlier",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "ferroui.columns.later",
+        "title": "Move Column Later",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "ferroui.columns.duplicate",
+        "title": "Duplicate Column",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "ferroui.columns.remove",
+        "title": "Remove Column",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "ferroui.columns.reset",
+        "title": "Reset Property",
+        "icon": "$(discard)"
+      },
+      {
         "command": "ferroui.showToolbox",
         "title": "Show Toolbox",
         "category": "FerroUI",
@@ -290,6 +331,38 @@
         {
           "command": "ferroui.project.runTarget",
           "when": "false"
+        },
+        {
+          "command": "ferroui.showColumns",
+          "when": "ferroui.hasColumnEditor"
+        },
+        {
+          "command": "ferroui.columns.add",
+          "when": "focusedView == ferroui.columns && ferroui.canAddColumn"
+        },
+        {
+          "command": "ferroui.columns.reveal",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.earlier",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.later",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.duplicate",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.remove",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.reset",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -306,6 +379,16 @@
         }
       ],
       "view/title": [
+        {
+          "command": "ferroui.showColumns",
+          "when": "view == ferroui.properties && ferroui.hasColumnEditor",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.columns.add",
+          "when": "view == ferroui.columns && ferroui.canAddColumn",
+          "group": "navigation"
+        },
         {
           "command": "ferroui.revealDesignerSource",
           "when": "view == ferroui.outline",
@@ -353,6 +436,36 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.columns.reveal",
+          "when": "view == ferroui.columns && viewItem =~ /\\bsource\\b/",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.columns.earlier",
+          "when": "view == ferroui.columns && viewItem =~ /\\bearlier\\b/",
+          "group": "1_order@1"
+        },
+        {
+          "command": "ferroui.columns.later",
+          "when": "view == ferroui.columns && viewItem =~ /\\blater\\b/",
+          "group": "1_order@2"
+        },
+        {
+          "command": "ferroui.columns.duplicate",
+          "when": "view == ferroui.columns && viewItem =~ /\\bduplicate\\b/",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "ferroui.columns.remove",
+          "when": "view == ferroui.columns && viewItem =~ /\\bremove\\b/",
+          "group": "2_edit@2"
+        },
+        {
+          "command": "ferroui.columns.reset",
+          "when": "view == ferroui.columns && viewItem =~ /\\breset\\b/",
+          "group": "2_edit"
+        },
         {
           "command": "ferroui.project.runTarget",
           "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
@@ -542,6 +655,14 @@
           "name": "Properties",
           "icon": "dist/icons/settings-gear.svg",
           "contextualTitle": "FerroUI Properties"
+        },
+        {
+          "id": "ferroui.columns",
+          "name": "Columns",
+          "icon": "dist/icons/table.svg",
+          "contextualTitle": "FerroUI Columns",
+          "when": "ferroui.hasColumnEditor",
+          "visibility": "collapsed"
         },
         {
           "type": "webview",

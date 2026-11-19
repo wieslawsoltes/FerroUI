@@ -57,6 +57,14 @@ Studio's MCP server exposes `designer_wrap_selection` and `designer_wrap_selecti
 
 On a Studio MCP connection these names are direct tools. Pass Studio’s document revision as `expected_revision` on `designer_spacing_edit`. [Designer Studio MCP](../README.md#mcp-integration)
 
+### Edit table columns with MCP
+
+1. Call `designer_wait` and locate a `TableView` or `TreeDataGrid` with `designer_outline`. Select the table and use `designer_view` with `view: "columns"` to show its editor.
+2. Call `designer_studio_query` with `tool: "designer_columns"` and `arguments: { node }`. Read the table ID, current `model`, ordered columns, available kinds, field metadata, and source ranges. A `reason` explains when the collection is read-only.
+3. Call `designer_studio_edit` with `tool: "designer_columns_edit"`. Pass the accepted editor frame as `expected_revision`. Use `arguments: { action: "move", table, column, index: 0, expected_model: model }` to move a column to the first position. For `insert`, supply an index and an available `kind`. For `set`, supply a column ID, `field`, and `value`. The catalog also includes `duplicate`, `remove`, and `clear`.
+
+Indices start at zero. The move index is the column’s place in the resulting list. Read a fresh model after a source or preview change. On Studio’s server call `designer_columns` and `designer_columns_edit` directly, using Studio’s document revision for `expected_revision`. [Authoring guide](authoring.md#edit-table-columns)
+
 ### Read Preview Checks with MCP
 
 Call `designer_studio_query` with `tool: "designer_preview_checks"` and empty `arguments` for the active design. On a stage, call `designer_stage_checks` with its current ID and epoch. `layoutOverflow` and `clippedLayout` include `overflow.boundary` and `left`, `top`, `right`, and `bottom` distances in logical pixels. `ineffectiveLayoutValue` identifies the authored `property` and explains the effective layout. `range` points to the original XAML or mapped Rust in UTF-16 coordinates.
@@ -71,7 +79,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Rename RSX Control** |
-| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Show Events**, **Show Resources**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
+| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Show Events**, **Show Resources**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |

@@ -22,6 +22,7 @@ import { verifyDesignData } from './designDataMcp';
 import { verifyLayerViews } from './layerViewsMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
 import { verifyGridMcp } from './studioGridMcp';
+import { verifyColumnsMcp } from './studioColumnsMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
 import { verifyDesignTokens } from './designTokenMcp';
@@ -161,6 +162,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const rsxKeyframeClipboard = await verifyRsxAnimation({ invoke, content });
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
+        await verifyColumnsMcp({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });
         designData.expected_revision = content<{ revision: number }>(await invoke('designer_wait', { session })).revision;
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /managed FerroUI application/);

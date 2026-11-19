@@ -159,3 +159,51 @@ fn keeps_runtime_owned_and_foreign_collections_read_only() {
         assert_eq!(document.source(), source);
     }
 }
+
+#[test]
+fn generated_columns_keep_the_bindings_the_native_source_requires() {
+    let source = r#"<TreeDataGrid xmlns="https://github.com/ferroui" x:CompileBindings="True" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" />"#;
+    let mut document = Document::new(source).unwrap();
+    let table = document.ast().root();
+    for (index, kind) in [ColumnKind::Text, ColumnKind::CheckBox, ColumnKind::Expander]
+        .into_iter()
+        .enumerate()
+    {
+        apply(
+            &mut document,
+            table,
+            ColumnChange::Insert {
+                index,
+                kind,
+                header: None,
+            },
+        );
+    }
+    let model = table_columns(&document, table).unwrap();
+    let expander = &model.columns[2];
+    let checks = [
+        (&model.columns[0], "Binding", "{ReflectionBinding}"),
+        (
+            &model.columns[1],
+            "Binding",
+            "{ReflectionBinding IsChecked}",
+        ),
+        (expander, "ChildrenBinding", "{ReflectionBinding Children}"),
+        (&expander.children[0], "Binding", "{ReflectionBinding}"),
+    ];
+    for (column, name, expression) in checks {
+        let field = column
+            .fields
+            .iter()
+            .find(|field| field.name == name)
+            .unwrap();
+        assert_eq!(field.value.as_deref(), Some(expression));
+        assert!(field.editable);
+        assert!(!field.can_clear);
+        let clear = ColumnChange::Clear {
+            column: column.node,
+            field: name.into(),
+        };
+        assert!(plan_column_change(&document, table, &clear).is_err());
+    }
+}

@@ -105,7 +105,7 @@ fn input(row: &Grid, column: NodeId, field: &ColumnField, scope: &ColumnScope) {
     };
     Grid::set_column(&button, 2);
     row.children().add(button.upcast::<Control>());
-    if field.source.is_some() {
+    if field.can_clear {
         let scope = scope.clone();
         let button = icon_button(RESET, &format!("Reset {property}"), move || {
             scope.apply(

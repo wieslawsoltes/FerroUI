@@ -128,6 +128,20 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
 
+## Edit table columns
+
+1. Open the designer for [ColumnsWorkbench.xaml](../../../editors/vscode/test/fixtures/ColumnsWorkbench.xaml). Select **Portfolio** or **Status** in the canvas or **Outline**.
+2. Choose the table icon in the **Properties** title bar or run **FerroUI: Edit Columns**. The **Columns** view shows the selected table’s authored columns in display order.
+3. Expand a column to edit its header, width, binding, or control-specific options. Use `Auto`, a number in logical pixels, or a star length such as `2*` for a width. Use XAML markup such as `{Binding Region}` for a binding. Boolean and enum fields offer a list of valid values. **Reset Property** removes an optional authored value. Edit required bindings directly. **Reveal in Source** opens a column declaration, binding, or template.
+4. Use **Add Column** to append a column. `TableView` offers its standard column. `TreeDataGrid` adds text, checkbox, template, row header, and hierarchy columns. A template starts with a cell template you can open in source. A hierarchy column starts with a `Children` binding and an inner text column. Edit the binding to point to your row model’s child collection.
+5. Drag a top-level column onto its destination in **Columns**. To reorder with the keyboard, focus the row, press Shift+F10, and choose **Move Column Earlier** or **Move Column Later**. The same menu offers **Duplicate Column** and **Remove Column** when applicable.
+
+Each action updates the unsaved XAML and native preview through one Undo step. Moving a column preserves its bindings, object values, and templates. Edit protected expressions, table sources supplied by the application, and collections constructed in Rust at their source. [Designer Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+
+![Columns shows the reordered Portfolio beside its XAML and native preview](../images/vscode-table-columns.jpg)
+
+[Keyboard ordering](../images/vscode-column-ordering.jpg) · [Add a column](../images/vscode-add-column.jpg) · [Edit an exact width](../images/vscode-column-width.jpg) · [Inspect a hierarchy column](../images/vscode-hierarchy-column.jpg)
+
 ## Reuse snippets and design tokens
 
 Save a reusable, single-root XAML fragment under `.ferroui/toolbox` in the workspace or Cargo package. Select the package view to see its snippets and registered **Project controls** and **Dependency controls**. A package snippet takes precedence over a workspace snippet with the same filename. RSX offers entries with a supported source mapping.

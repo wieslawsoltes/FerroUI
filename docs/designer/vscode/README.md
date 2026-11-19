@@ -19,7 +19,7 @@ For a package built from this checkout, see the [extension build and packaging i
 
 | Task | Where to work |
 | --- | --- |
-| Find a project view, edit source and layout, add controls, or work with bindings and resources | [Author views and components](authoring.md) |
+| Find a project view, edit source and layout, configure table columns, or work with bindings and resources | [Author views and components](authoring.md) |
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
 | Preview with the app’s types and data, inspect a running window, hot reload, or run UI tests | [Run and test a view](runtime.md) |
 | Set up MCP, find a command, or configure the workspace | [Use agents and configure the extension](reference.md) |

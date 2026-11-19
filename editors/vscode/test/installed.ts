@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { access, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { TableColumns } from '../src/columnEditor';
 import { NativePreview } from '../src/nativePreview';
 import type { PreviewFinding } from '../src/protocol';
 import type { SpacingCatalog } from '../src/spacingProtocol';
@@ -21,6 +22,7 @@ export async function run(): Promise<void> {
     assert.ok(viewsContainers.panel.some(({ id }: { id: string }) => id === 'ferrouiTimeline'));
     assert.ok(views.ferrouiTimeline.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
     assert.ok(!views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
+    assert.ok(views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.columns'));
     const readme = await readFile(path.join(extension.extensionPath, 'readme.md'), 'utf8');
     const userGuide = readme.match(/\[VS Code user guides\]\(([^)]+)\)/)?.[1];
     assert.ok(userGuide, 'The installed README links to the user guides');
@@ -34,6 +36,7 @@ export async function run(): Promise<void> {
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
         ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
+        access(path.join(extension.extensionPath, 'dist', 'icons', 'table.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
         access(path.join(extension.extensionPath, 'media', 'timeline-clips.css')),
         access(path.join(extension.extensionPath, 'media', 'canvas-spacing.css')),
@@ -55,6 +58,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.canvasInteraction);
         assert.ok(native.capabilities.spacingHelpers, 'The installed preview negotiates measured spacing');
         assert.ok(native.capabilities.selectionWrapping, 'The installed preview negotiates selection wrapping');
+        assert.ok(native.capabilities.columnAuthoring, 'The installed preview negotiates table column editing');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
@@ -113,6 +117,16 @@ export async function run(): Promise<void> {
         const anchor = findings.find(finding => finding.property === 'Canvas.Right');
         assert.ok(anchor?.range);
         assert.equal(layoutDocument.getText(asRange(anchor.range)), 'Canvas.Right="32"');
+        const tableDocument = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'ColumnsWorkbench.xaml'));
+        const tables = await native.render(sourceOf(tableDocument, 'xaml', new vscode.Position(0, 0)), { width: 800, height: 520, dark: false }, 20);
+        assert.ok(tables.image, tables.renderError ?? undefined);
+        for (const [name, expected] of [['Portfolio', ['Account', 'Owner', 'Region']], ['Status', ['Account', 'Tier', 'Active']]] as const) {
+            const node = tables.nodes.find(node => node.name === name);
+            assert.ok(node?.bounds);
+            const model = await native.studioQuery(20, 'designer_columns', { node: node.id }) as TableColumns;
+            assert.equal(model.reason, null);
+            assert.deepEqual(model.columns.map(column => column.label), expected);
+        }
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);

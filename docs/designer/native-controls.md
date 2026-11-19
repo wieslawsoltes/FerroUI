@@ -88,6 +88,14 @@ The native TreeDataGrid `RowDragStarted` arguments expose `data_transfer()` and
 `key_modifiers()` so other hosts can attach typed payloads while retaining normal row drag
 behavior. Designer source hierarchy moves continue to use their own guarded move transaction.
 
+## Edit table columns
+
+Select one XAML `TableView` or `TreeDataGrid` in the canvas or Layers. Use the **Edit columns** icon beside the property search. Choose a column from the list. The arrow icons change its position, and the adjacent icons duplicate, remove, or reveal it in source. To add a column, choose an available type and select the plus icon.
+
+Edit a column’s width, header, binding, or supported type-specific settings. Press Enter in a text field or use the check icon to confirm a value. Reset restores the framework default by removing the authored field. A template, object value, or protected expression links to its XAML. You can also edit the supported inner fields of a hierarchy column.
+
+Each action updates the native design and writes one source transaction. Undo restores the previous collection or value. Use the authored source for collections supplied by runtime code. [VS Code Columns view](vscode/authoring.md#edit-table-columns) · [MCP arguments](vscode/reference.md#edit-table-columns-with-mcp)
+
 ## Contextual panel layout
 
 The property dock's Layout section shows the selected panel, or the common parent panel of

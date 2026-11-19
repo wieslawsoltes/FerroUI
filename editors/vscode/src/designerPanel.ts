@@ -29,6 +29,7 @@ interface Frame {
     canvas: CanvasSnapshot;
     guideCatalog?: GuideCatalog;
     guideAnchor?: GuideAnchor;
+    columnAuthoring: boolean;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -174,6 +175,7 @@ export class DesignerPanel implements vscode.Disposable {
     get timelineCatalogEpoch(): number { return this.animationCatalogEpoch; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
+    get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -719,6 +721,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (snapshot.image) this.timelinePose = snapshot.timelinePose;
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot),
+                columnAuthoring: Boolean(client.capabilities.columnAuthoring),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
@@ -813,7 +816,8 @@ export class DesignerPanel implements vscode.Disposable {
         if (message.type === 'dock') {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
                 events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
-                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData', library: 'ferroui.showLibrary' } as const;
+                studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData', library: 'ferroui.showLibrary',
+                columns: 'ferroui.showColumns' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }

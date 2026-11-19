@@ -26,6 +26,7 @@ pub struct ColumnField {
     pub choices: &'static [&'static str],
     pub source: Option<SourceSpan>,
     pub editable: bool,
+    pub can_clear: bool,
 }
 
 use ColumnFieldKind::*;
@@ -104,9 +105,9 @@ fn definitions(kind: ColumnKind) -> impl Iterator<Item = Field> {
 pub(super) fn describe(
     document: &Document,
     node: &Node,
-    kind: ColumnKind,
+    column: ColumnKind,
 ) -> Result<Vec<ColumnField>> {
-    definitions(kind)
+    definitions(column)
         .map(|(name, kind, choices)| {
             let attribute = component_property_attribute(document, node.id, name)?;
             let object = component_property_elements(document, node.id, name)?
@@ -134,6 +135,11 @@ pub(super) fn describe(
             let source = attribute
                 .map(|attr| attr.span)
                 .or_else(|| object.map(|node| node.name_span));
+            let required = matches!(
+                (column, name),
+                (ColumnKind::Expander, "ChildrenBinding")
+                    | (ColumnKind::Text | ColumnKind::CheckBox, "Binding")
+            );
             Ok(ColumnField {
                 name,
                 kind,
@@ -141,6 +147,7 @@ pub(super) fn describe(
                 choices,
                 source,
                 editable,
+                can_clear: editable && source.is_some() && !required,
             })
         })
         .collect()
@@ -171,7 +178,10 @@ pub(super) fn plan(
     let name = authored.map_or_else(|| property.to_owned(), |attr| attr.name.clone());
     match value {
         None if authored.is_none() => Ok(Vec::new()),
-        None => Ok(vec![Edit::RemoveAttribute { node: id, name }]),
+        None => {
+            require(field.can_clear, "This column requires a binding")?;
+            Ok(vec![Edit::RemoveAttribute { node: id, name }])
+        }
         Some(value) => {
             let value = normalize(document, id, field, value)?;
             if authored.is_some_and(|attr| attr.value == value) {

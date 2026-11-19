@@ -259,12 +259,16 @@ impl<'a> Collection<'a> {
                 let template = self.qualify("DataTemplate")?;
                 let text = self.qualify("TextBlock")?;
                 Ok(format!(
-                    "{start}><{property}><{template}><{text} Text=\"{{Binding}}\" /></{template}></{property}></{tag}>"
+                    "{start}><{property}><{template}><{text} Text=\"{{ReflectionBinding}}\" /></{template}></{property}></{tag}>"
                 ))
             }
             ColumnKind::Expander => Ok(format!(
-                "{start}><{} /></{tag}>",
+                "{start} ChildrenBinding=\"{{ReflectionBinding Children}}\"><{} Binding=\"{{ReflectionBinding}}\" /></{tag}>",
                 self.qualify(ColumnKind::Text.element())?
+            )),
+            ColumnKind::Text => Ok(format!("{start} Binding=\"{{ReflectionBinding}}\" />")),
+            ColumnKind::CheckBox => Ok(format!(
+                "{start} Binding=\"{{ReflectionBinding IsChecked}}\" />"
             )),
             _ => Ok(format!("{start} />")),
         }
