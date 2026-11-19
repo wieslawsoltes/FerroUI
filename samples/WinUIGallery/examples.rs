@@ -108,10 +108,10 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("ToggleSplitButton", "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol and the automation name, checks the button, closes the flyout and focuses the RichEditBox. FerroUI's RichEditBox has no paragraph list type (ParagraphFormat.ListType, MarkerType), so neither the bullet buttons nor MyListButton_IsCheckedChanged set the list of the text, and the page stays partial."),
     page!("ToolTip", "ToolTipService.ToolTip is explicitly mapped to the shared ToolTip.Tip attached property."),
     page!(ported "HyperlinkButton", "Both source examples use native HyperlinkButton: NavigateUri opens the Microsoft home page through the top level's launcher, with the Disable option as the source's OneWay x:Bind of IsChecked negated by BoolConverters.Not; GoToHyperlinkButton_Click navigates the gallery to the ToggleButton page, as the source's App.MainWindow.Navigate does."),
-    page!("CalendarDatePicker", "Native CalendarDatePicker; header is composed and placeholder uses the shared property."),
-    page!("CalendarView", "CalendarView is adapted to the shared Calendar; WinUI-specific day item customization is pending."),
-    page!("DatePicker", "Native DatePicker composes a label for WinUI Header."),
-    page!("TimePicker", "Native TimePicker demonstrates 12/24-hour clocks and minute increments."),
+    page!(ported "CalendarDatePicker", "The source example uses native CalendarDatePicker with its header (composed above it, whose automation name it is) and the placeholder Pick a date. The page has no code-behind upstream."),
+    page!("CalendarView", "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). FerroUI's Calendar has no IsGroupLabelVisible, IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its names follow the current culture instead of a Language of the calendar, so those options and their x:Bind are left out and the page is partial."),
+    page!(ported "DatePicker", "Both source examples use native DatePicker: the picker with its header (composed above it), and the picker with the formatted day and hidden year with OnNavigatedTo of DatePickerPage.xaml.cs in Rust (the date two months from now, within the years from now to five years from now; WinUI's Date is the SelectedDate). FerroUI's DayFormat is a .NET date format: WinUI's {day.integer} ({dayofweek.abbreviated}) is d (ddd)."),
+    page!(ported "TimePicker", "All three source examples use native TimePicker: the picker with the clock of the current culture, the picker with its header (composed) and MinuteIncrement 15, and the 12-hour and 24-hour ClockIdentifiers. The page has no code-behind upstream; the x:Bind of the static path sys:DateTime.Now.TimeOfDay (a member of a .NET type, which the x:Bind core does not compile) is the time of day set once in Rust, as that OneTime binding."),
     page!("Shape", "Shared Ellipse, Rectangle and Polygon render through the framework geometry backend."),
     page!("Line", "Shared Line and Polyline use native geometry and stroke properties."),
     page!("Typography", "The WinUI type ramp is expressed with shared TextBlock font sizes and weights."),
@@ -179,6 +179,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::status_samples::wire(sample.page_id, &root);
     crate::command_samples::wire(sample.page_id, &root);
     crate::menu_samples::wire(sample.page_id, &root);
+    crate::date_samples::wire(sample.page_id, &root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)

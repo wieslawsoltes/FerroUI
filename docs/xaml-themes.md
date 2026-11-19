@@ -339,6 +339,13 @@ application trims takes the classes its paths name with it (#612, root D: hello 
 links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
 that no table naming classes is reachable from code outside the units.
 
+**A library that constructs a theme (#846).** A library document with `<WinUITheme />` constructs
+the theme with the wider of its own table and the table the application registers
+(`rt::wider_theme_parts`). The application writes and registers a table for every theme the
+documents of a direct dependency construct, so its controls keep their templates whichever crate
+constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
+library keeps its own table. See docs/porting/theme-trimming.md, section 20.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.

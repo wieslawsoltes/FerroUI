@@ -288,8 +288,15 @@ impl ModelSet {
     /// only), each assembly once, in the order of `paths`, with every file that was read.
     /// A file of format 1 is a model without types.
     pub fn read(paths: &[PathBuf]) -> Result<(Vec<AssemblyModel>, Vec<PathBuf>), String> {
+        Self::read_with_direct(paths).map(|(models, files, _)| (models, files))
+    }
+
+    /// [`read`](Self::read), with the names of the crates (`crate_name`) of the files of `paths`
+    /// themselves (#846): the direct dependencies, which the Rust code of the crate can name.
+    pub fn read_with_direct(paths: &[PathBuf]) -> Result<(Vec<AssemblyModel>, Vec<PathBuf>, Vec<String>), String> {
         let mut models: Vec<AssemblyModel> = Vec::new();
         let mut files = Vec::new();
+        let mut direct = Vec::new();
         let mut pending: Vec<PathBuf> = paths.iter().rev().cloned().collect();
         while let Some(path) = pending.pop() {
             if files.contains(&path) {
@@ -298,6 +305,9 @@ impl ModelSet {
             let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
             let model = AssemblyModel::parse(&text).map_err(|error| format!("{}: {error}", path.display()))?;
             let directory = path.parent().map(Path::to_path_buf).unwrap_or_default();
+            if paths.contains(&path) && !direct.contains(&model.crate_name) {
+                direct.push(model.crate_name.clone());
+            }
             files.push(path);
             if models.iter().any(|known| known.name == model.name) {
                 continue;
@@ -307,7 +317,7 @@ impl ModelSet {
             }
             models.push(model);
         }
-        Ok((models, files))
+        Ok((models, files, direct))
     }
 }
 
