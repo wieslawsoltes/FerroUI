@@ -242,7 +242,24 @@ benchmark of the crate (`cargo bench -p ferroui-capi --no-default-features --ben
 call_overhead`): a property write (`ferro_set_f64` of `FontSize` and `ferro_set_str` of
 `Text` against the typed setters) and an event dispatch (`ferro_raise` of `Click` to a handler
 subscribed with `ferro_subscribe` against a Rust handler of the same event). The workflow
-`capi.yml` runs it and prints the numbers; they are recorded here once measured.
+`capi.yml` runs it and prints the numbers. The first run (2026-11-19, a GitHub `ubuntu-latest`
+runner, the `bench` profile, 100 000 operations per sample, the median of 9 samples):
+
+| Operation | Rust | ABI | Overhead |
+| --- | ---: | ---: | ---: |
+| write `FontSize` (`ferro_set_f64`) | 37.8 ns | 49.5 ns | 11.7 ns |
+| write `Text`, NUL-terminated (`ferro_set_str`, length `-1`) | 54.2 ns | 74.6 ns | 20.4 ns |
+| write `Text` with a length (`ferro_set_str`) | 54.2 ns | 71.8 ns | 17.6 ns |
+| read `FontSize` (`ferro_get_f64`) | 3.3 ns | 21.8 ns | 18.5 ns |
+| dispatch `Click` to one handler (C function and token) | 43.4 ns | 52.3 ns | 8.9 ns |
+| raise `Click` (`ferro_raise`, the whole call) | 43.4 ns | 66.6 ns | 23.3 ns |
+
+The overhead of a write is the check of the thread, the lookup of the handle, the cached
+resolution of the property ID for the class, the validation of the value and the boundary
+that catches a panic; the string forms add the length (`strlen`) and the check of UTF-8. A
+dispatch adds the check of the remembered sender handle and one indirect call. A read in Rust
+is an inlined field access, so its overhead is the whole call. A shared runner is not a quiet
+machine: the numbers say how large the overhead is, not its exact value.
 
 ## 9. Tests
 
