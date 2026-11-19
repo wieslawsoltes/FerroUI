@@ -98,6 +98,7 @@ pub(crate) fn decorate(
     color: Color,
     legend: LegendPosition,
     heat_legend: Option<(&HeatLegend, Option<&HeatLegendSource>)>,
+    legend_background: Option<Color>,
 ) {
     let titled = !title.is_empty() && title_size.is_finite() && title_size > 0.0;
     if titled {
@@ -132,6 +133,17 @@ pub(crate) fn decorate(
             ),
         };
         let primitives = heat_legend.draw(source, vertical, origin, plot, text_size);
+        // `LegendBackgroundPaint` fills the legend under its bar and labels (the fill of the
+        // container geometry of the source's legend); the default theme has none.
+        if let Some(background) = legend_background.filter(|_| source.is_some()) {
+            scene.primitives.push(Primitive::new(
+                Geometry::Rectangle {
+                    rect: Rect::new(origin.x, origin.y, measured.width, measured.height),
+                    radius: 0.0,
+                },
+                PaintStyle::fill(background),
+            ));
+        }
         scene.primitives.extend(primitives);
         return;
     }

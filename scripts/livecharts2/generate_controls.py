@@ -412,6 +412,10 @@ chart_props = [
  # The legend of the chart (IChartView.Legend): None is the native legend of the series, a
  # HeatLegend the gradient of SKHeatLegend (#624).
  ('legend','Legend','Option<Ref<ChartLegend>>','None'),
+ # The LegendTextSize (None or a negative size is the theme's 16) and LegendBackgroundPaint (none
+ # by default, as the theme) of IChartView, which the heat legend reads (#624).
+ ('legend_text_size','LegendTextSize','Option<f64>','None'),
+ ('legend_background_paint','LegendBackgroundPaint','Option<Color>','None'),
  # The TooltipFormatter of a map (IGeoMapView, code only): the line of each series value in the
  # tooltip of a land (#624).
  ('tooltip_formatter','TooltipFormatter','Option<GeoTooltipFormatter>','None'),

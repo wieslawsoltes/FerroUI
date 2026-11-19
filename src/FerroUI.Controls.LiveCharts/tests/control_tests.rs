@@ -1133,6 +1133,76 @@ fn has_text(scene: &ferroui_livecharts::Scene, wanted: &str) -> bool {
     })
 }
 
+/// `LegendTextSize` and `LegendBackgroundPaint` of a chart (`IChartView`), from markup: the heat
+/// legend writes its labels at the text size and fills its whole room with the background under
+/// its bar; without them the labels take the theme's 16 and nothing is under the bar.
+#[test]
+fn heat_legend_takes_the_legend_text_size_and_background_of_the_chart() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts" LegendPosition="Right"
+              LegendTextSize="24" LegendBackgroundPaint="#FFEEEEEE">
+          <lc:CartesianChart.Legend>
+            <lc:HeatLegend />
+          </lc:CartesianChart.Legend>
+          <lc:HeatSeries>
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="10" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="40" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    assert_eq!(chart.legend_text_size(), Some(24.0));
+    let size = Size::new(400.0, 400.0);
+    let text_sizes = |scene: &ferroui_livecharts::Scene| -> Vec<f64> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Text { text, size, .. }
+                    if text == "10" || text == "40" =>
+                {
+                    Some(*size)
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let background = Some(ferroui_base::media::Color::from_rgb(0xEE, 0xEE, 0xEE));
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [24.0, 24.0]);
+    let bar = heat_legend_bar(&scene);
+    let fill = scene
+        .primitives
+        .iter()
+        .position(|p| p.id.is_none() && p.style.fill == background)
+        .expect("the background of the legend");
+    let ferroui_livecharts::Geometry::Rectangle { rect, .. } = scene.primitives[fill].geometry else {
+        panic!("a rectangle")
+    };
+    // The room of the legend, the bar padded by 10 on every side, at the right of the control.
+    assert!((rect.x + rect.width - 400.0).abs() < 1e-6);
+    assert!((rect.x + 10.0 - bar.x).abs() < 1e-6 && (rect.y + 10.0 - bar.y).abs() < 1e-6);
+    let bar_index = scene
+        .primitives
+        .iter()
+        .position(|p| p.style.fill_brush.is_some() && p.id.is_none())
+        .unwrap();
+    assert!(fill < bar_index, "the background is under the bar");
+    chart.set_legend_text_size(None);
+    chart.set_legend_background_paint(None);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [16.0, 16.0]);
+    assert!(!scene
+        .primitives
+        .iter()
+        .any(|p| p.id.is_none() && p.style.fill == background));
+}
+
 /// SKChartingVisualsTests.SKHeatLegend_IsDrawnWhenAttachedToCartesianChartWithHeatSeries and
 /// SKHeatLegend_HorizontalPositionExercisesBottomBranch, from markup: a `HeatLegend` at the right
 /// of a 400 by 400 chart draws the gradient of its heat series beside the plot with its lowest

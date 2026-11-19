@@ -727,7 +727,11 @@ impl Chart {
         let heat_legend = self
             .legend()
             .and_then(|legend| ChartLegend::heat_legend(&legend))
-            .map(|legend| {
+            .map(|mut legend| {
+                // `LegendTextSize` of the chart; none or a negative size is the theme's.
+                if let Some(size) = self.legend_text_size().filter(|size| *size >= 0.0) {
+                    legend.text_size = size;
+                }
                 let source = match self.chart_kind() {
                     ChartKind::Cartesian => HeatLegendSource::of_series(&series),
                     ChartKind::GeoMap => heat_lands
@@ -991,6 +995,7 @@ impl Chart {
             self.text_color(),
             self.legend_position(),
             heat_legend.as_ref().map(|(legend, source)| (legend, source.as_ref())),
+            self.legend_background_paint(),
         );
         {
             for (series_index, model) in models.iter().enumerate() {

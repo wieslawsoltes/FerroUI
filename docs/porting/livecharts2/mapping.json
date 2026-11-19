@@ -1233,12 +1233,13 @@
       "status": "ported"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/DrawingTextExtensions.cs": {
-      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of every series (label_lines::wrap_data_labels for the Cartesian, pie and polar scenes): words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
+      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of every series (label_lines::wrap_data_labels for the Cartesian, pie and polar scenes) and the labels of the heat legend: words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
       "remaining": [
-        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the axes and of the legends do not break; a Cartesian, pie or polar label is placed by the size of one line before it breaks (above its point it keeps its last line in place, centred it keeps its middle)."
+        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the axes and of the legend of the series do not break; a Cartesian, pie or polar label is placed by the size of one line before it breaks (above its point it keeps its last line in place, centred it keeps its middle)."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/label_lines.rs"
+        "src/FerroUI.LiveCharts/label_lines.rs",
+        "src/FerroUI.LiveCharts/heat_legend.rs"
       ],
       "status": "partial"
     },
@@ -1419,9 +1420,9 @@
       "status": "partial"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKHeatLegend.cs": {
-      "reason": "HeatLegend measures and draws GetLayout: the gradient bar as thick as the larger label (or BadgeWidth) and as long as the draw margin less BadgePadding, the two bounds by Formatter (SixRepresentativeDigits) at its ends in the contrasting black or white, the legend padded by BadgePadding and placed by GetLegendPosition; the chart reserves its size from the draw margin. The class HeatLegend of the controls (Legend of a chart) has BadgePadding, BadgeWidth and Formatter.",
+      "reason": "HeatLegend measures and draws GetLayout: the gradient bar as thick as the larger label (or BadgeWidth) and as long as the draw margin less BadgePadding, the two bounds by Formatter (SixRepresentativeDigits) at its ends in the contrasting black or white, the legend padded by BadgePadding and placed by GetLegendPosition; the chart reserves its size from the draw margin. The two labels break into lines at MaxTooltipsAndLegendsLabelsWidth (170) less their padding, a text of the scene for each line. The class HeatLegend of the controls (Legend of a chart) has BadgePadding, BadgeWidth and Formatter; the LegendTextSize of the chart (none or a negative size is the theme's 16) sets the text size, and its LegendBackgroundPaint fills the room of the legend under the bar (Initialize).",
       "remaining": [
-        "The labels do not wrap at MaxTooltipsAndLegendsLabelsWidth, the text size is the theme LegendTextSize of 16 (a chart has no LegendTextSize), there is no LegendBackgroundPaint (the default theme has none), and the legend is not animated (Easing, AnimationsSpeed)."
+        "The legend is not animated (Easing, AnimationsSpeed of the legend geometry); it is drawn where GetLegendPosition puts it in every frame."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/heat_legend.rs",
