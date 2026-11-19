@@ -40,6 +40,8 @@
 mod app;
 // The stable IDs of the API model, generated (scripts/generate_api_model.py).
 mod api_ids;
+// The entries of the classes of the model, generated (tests/types_tests.rs).
+mod api_types;
 mod error;
 mod events;
 mod foreign;
@@ -50,6 +52,7 @@ mod signals;
 mod strings;
 mod thread;
 mod tree;
+mod types;
 mod values;
 
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
@@ -76,6 +79,7 @@ pub use signals::{
 };
 pub use thread::{ferro_init, ferro_is_ui_thread, ferro_post, ferro_post_data, ferro_run_jobs};
 pub use tree::{ferro_add_child, ferro_remove_child};
+pub use api_types::*;
 pub use values::{
     ferro_clear, ferro_get_bool, ferro_get_bool_or, ferro_get_cstr, ferro_get_cstr_or, ferro_get_f64, ferro_get_f64_or,
     ferro_get_handle, ferro_get_i64, ferro_get_i64_or, ferro_get_str, ferro_set_bool, ferro_set_f64, ferro_set_handle,

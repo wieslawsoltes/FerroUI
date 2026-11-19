@@ -1776,9 +1776,12 @@ version = "0.5.1-preview.1"
 dependencies = [
  "cbindgen",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-markup-xaml",
  "ferroui-themes-fluent",
+ "serde_json",
 ]
 
 [[package]]

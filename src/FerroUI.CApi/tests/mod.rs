@@ -10,4 +10,5 @@ mod header_tests;
 mod signals_tests;
 mod support;
 mod tree_tests;
+mod types_tests;
 mod values_tests;

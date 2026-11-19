@@ -665,6 +665,9 @@ pub unsafe extern "C" fn ferro_class_register(name: *const c_char, length: i64, 
                 .with_class_init(init)
                 .with_constructor(Some(CONSTRUCTORS[index])),
         ));
+        // Without the tables of types the type carries no constructor (the by-use mode,
+        // docs/c-abi.md, section 16): it is registered beside it.
+        TypeInfo::register_constructor_of(type_info, CONSTRUCTORS[index]);
         let vtable = match base {
             FERRO_BASE_PANEL => table_of::<ForeignPanel>(type_info),
             FERRO_BASE_DECORATOR => table_of::<ForeignDecorator>(type_info),
