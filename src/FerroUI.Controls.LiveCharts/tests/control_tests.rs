@@ -1249,3 +1249,62 @@ fn sankey_and_treemap_data_labels_max_width_load_from_markup() {
     assert!(chart.revision() > revision);
     assert_eq!(texts(&chart), 0, "one line is wider than the tile");
 }
+
+/// `GaugeGenerator.BuildSolidGauge` and `BuildAngularGaugeSections` with `GaugeItem`, and the
+/// theme's gauge rules: a ring of each value among empty values (solid) or one value relative to
+/// the minimum (angular), the fill series of a zero for each item styled by the background item,
+/// and the rules of the theme for what a series does not set (centred data labels, no stroke,
+/// the corner radius of 8) while what it sets stays.
+#[test]
+fn gauge_generator_builds_solid_and_angular_gauges_with_the_theme_rules() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let solid = GaugeGenerator::build_solid_gauge(&[
+        GaugeItem::new(30.0).with_builder(|s| s.set_name("Vanessa".into())),
+        GaugeItem::new(50.0),
+        GaugeItem::new(GaugeItem::BACKGROUND).with_builder(|s| s.set_inner_radius(20.0)),
+    ]);
+    assert_eq!(solid.len(), 3);
+    assert_eq!(solid[0].name(), "Vanessa");
+    let rings: Vec<_> = solid[1]
+        .values()
+        .to_vec()
+        .iter()
+        .map(|p| (p.is_empty(), p.y()))
+        .collect();
+    assert_eq!(rings, vec![(true, 0.0), (false, 50.0)]);
+    assert!(solid[2].is_fill_series() && solid[2].is_gauge());
+    assert_eq!(solid[2].values().count(), 2);
+    assert_eq!(solid[2].inner_radius(), 20.0);
+    // `AsSeries` clears the hover push-out of every gauge series; the fill series of a solid
+    // gauge keeps the default of the source (only the angular one clears it).
+    assert!(solid[..2].iter().all(|s| s.hover_push_out() == 0.0));
+    assert_eq!(solid[2].hover_push_out(), 20.0);
+    let angular = GaugeGenerator::build_angular_gauge_sections(&[
+        GaugeItem::new(60.0),
+        GaugeItem::new(30.0),
+        GaugeItem::new(10.0),
+    ]);
+    assert_eq!(angular.len(), 4, "a fill series is added");
+    assert!(angular[..3]
+        .iter()
+        .all(|s| s.is_relative_to_min_value() && !s.data_labels() && s.values().count() == 1));
+    // The theme's rules through the chart: the solid gauge has its data labels, centred, without
+    // a stroke; the corner radius set on a series stays.
+    solid[1].set_corner_radius(2.0);
+    let chart = PieChart::new();
+    chart.set_animations_speed(0.0);
+    chart.set_max_value(Some(100.0));
+    for series in &solid {
+        chart.series().add(series.clone().upcast());
+    }
+    let scene = chart.scene(Size::new(400.0, 400.0)).unwrap();
+    assert!(scene.primitives.iter().any(|p| matches!(
+        &p.geometry,
+        ferroui_livecharts::Geometry::Text { text, .. } if text == "30"
+    )));
+    assert!(scene
+        .primitives
+        .iter()
+        .filter(|p| p.id.is_some_and(|id| id.series < 2))
+        .all(|p| p.style.stroke.is_none()));
+}
