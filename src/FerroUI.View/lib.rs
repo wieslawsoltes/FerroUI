@@ -114,7 +114,7 @@ pub use template::template;
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
-pub use extras::GridDefinitions;
+pub use extras::{GridDefinitions, GridDefinitionsText};
 pub use async_data::{sleep, suspense, use_future, AsyncState};
 pub use error_boundary::{error_boundary, ErrorInfo};
 pub use router::{route, router, try_use_router, use_router, RouteDef, RouteMatch, Router};
@@ -147,7 +147,8 @@ pub mod prelude {
         animation, batch, component, dynamic, effect, for_each, memo, ms, on_cleanup, provide_context, rerender, rsx, show,
         show_else, style, transition, transitions, use_animation, use_resource, use_resource_as, use_theme_variant,
         signal, template, untrack, use_context, use_data_context, use_effect, use_effect_with, use_hook, use_memo,
-        use_signal, Bind, ComponentHost, El, Element, ElementBuilder, GridDefinitions, IntoChild, IntoChildren, IntoElement, Key, Memo, NodeRef, Owner, Signal, TwoWay,
+        use_signal, Bind, ComponentHost, El, Element, ElementBuilder, GridDefinitions, GridDefinitionsText, IntoChild, IntoChildren, IntoElement, Key, Memo,
+        NodeRef, Owner, Signal, TwoWay,
     };
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,

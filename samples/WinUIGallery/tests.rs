@@ -981,8 +981,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        134,
-        "108 control images, 24 sample media files and two explicit source-path case aliases"
+        141,
+        "108 control images, 25 sample media files, six design images and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1020,7 +1020,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 24);
+    assert_eq!(media.len(), 25);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();

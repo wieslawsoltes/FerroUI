@@ -230,7 +230,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, MarkupReferencesModel};
+use crate::model::{AssemblyModel, MarkupReferencesModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -243,9 +243,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
-    parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, Roots, ThemeTrimming,
-    TypeGraph,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, parts_constructor,
+    parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
+    Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -381,6 +381,9 @@ pub struct Build {
     theme_roots: Roots,
     /// The themes the Rust code of the crate constructs from their parts ([`Build::theme`]).
     themes: Vec<String>,
+    /// Whether declared properties are resolved at compile time
+    /// ([`Build::compile_time_declared_properties`]).
+    compile_time_declared_properties: bool,
 }
 
 impl Build {
@@ -434,7 +437,18 @@ impl Build {
             full_themes: false,
             theme_roots: Roots::default(),
             themes: Vec::new(),
+            compile_time_declared_properties: false,
         }
+    }
+
+    /// Whether the compiled markup resolves the declared properties of nested markup extensions
+    /// and of compiled binding paths at compile time (#603): `rt::declared_clr_property_info` and
+    /// `rt::declared_path_property` with the position of the property in its declaration, in place
+    /// of `rt::clr_property_info` and `rt::path_property`, which search the declaration by name at
+    /// run time. Off without the call, so that the generated files stay what they are.
+    pub fn compile_time_declared_properties(mut self, value: bool) -> Self {
+        self.compile_time_declared_properties = value;
+        self
     }
 
     /// Selects typed bytecode for this package's compiled XAML. `from_env` reads
@@ -716,7 +730,7 @@ impl Build {
         // 1. The compiled markup and the type models of the dependencies.
         let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
         let started = Instant::now();
-        let (models, dependency_files) = match ModelSet::read(&self.dependencies) {
+        let (models, dependency_files, direct_crates) = match ModelSet::read_with_direct(&self.dependencies) {
             Ok(read) => read,
             Err(error) => {
                 errors.push(format!("the .xamlmeta of a dependency cannot be read: {error}"));
@@ -751,6 +765,13 @@ impl Build {
         // classes that can be constructed from selected units (#849; any other class, whatever its
         // markup is partitioned into, is constructed with `new()`). The models the base classes of
         // the roots are read from, and the roots of the documents.
+        // The classes another crate can construct from selected units (#849), for the themes the
+        // documents of the dependencies construct (#846).
+        let constructible: Vec<String> = unit_classes
+            .iter()
+            .filter(|class| parts_constructor(&models, class).is_some())
+            .map(|class| class.to_string())
+            .collect();
         let theme_parts: Option<Rc<ThemePartsTables>> = (trimming.enabled || !self.themes.is_empty()).then(|| {
             let tables = static_names
                 .iter()
@@ -911,6 +932,9 @@ impl Build {
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
+        // The option of the emitter for the groups of this build (#603), restored after them.
+        use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
+        let declared_properties = set_compile_time_declared_properties(self.compile_time_declared_properties);
         for group in &self.groups {
             if self.assembly.is_none() && !on_models {
                 break;
@@ -1108,6 +1132,7 @@ impl Build {
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
         }
+        set_compile_time_declared_properties(declared_properties);
         for path in &self.checked_in_metadata {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
@@ -1115,6 +1140,10 @@ impl Build {
                 Ok(read) if read.name == assembly_name => {
                     metadata.documents.extend(read.documents);
                     metadata.theme_units.extend(read.theme_units);
+                    // What its documents name, for the applications that trim (#848): the
+                    // references travel with the documents they are of.
+                    exported_roots.types.extend(read.references.types);
+                    exported_roots.keys.extend(read.references.keys);
                 }
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
@@ -1187,6 +1216,26 @@ impl Build {
                     )),
                 }
             }
+            // The themes the compiled documents of a direct dependency construct (#846): a library
+            // with `<WinUITheme />` constructs the theme with the wider of its own table and the one
+            // the application registers (`rt::wider_theme_parts`), so the application writes and
+            // registers a table for it, with every root of the application, though its own
+            // documents do not construct the theme. Only for a theme of a direct dependency, which
+            // the table can name; a library used alone keeps its own table.
+            for units in dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()) {
+                let class = units.class.as_str();
+                let local = class.rsplit('.').next().unwrap_or(class);
+                let theme_crate = units.table_path.trim_start_matches("::").split("::").next().unwrap_or_default();
+                let required = dependencies
+                    .iter()
+                    .filter(|metadata| direct_crates.contains(&metadata.crate_name))
+                    .any(|metadata| metadata.references.types.iter().any(|name| name == class || name == local));
+                let nameable = direct_crates.iter().any(|name| name == theme_crate);
+                let constructed = constructible.iter().any(|known| known == class);
+                if required && nameable && constructed && !used.iter().any(|known| known == class) {
+                    used.push(class.to_string());
+                }
+            }
             // The compiled documents of the dependencies run in the application too: what they
             // name roots the units it keeps (a control library's template naming a key of the
             // theme of the application).
@@ -1222,19 +1271,45 @@ impl Build {
                 all: trimming.all || !trimming.enabled,
                 ..Roots::default()
             };
-            let sources: [(&str, &Roots); 5] = [
-                ("manifest", &from_manifest),
-                ("build script", &self.theme_roots),
-                ("documents", &document_roots),
-                ("sources", &from_sources),
-                ("dependencies", &from_dependencies),
-            ];
+            // The themes used together are closed over together (#848): what a kept unit of one
+            // references or constructs roots the units of the others.
+            let used_units: Vec<(String, &ThemeUnitsModel)> = used
+                .into_iter()
+                .filter_map(|class| {
+                    let units = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class)?;
+                    Some((class, units))
+                })
+                .collect();
+            let themes: Vec<&ThemeUnitsModel> = used_units.iter().map(|(_, units)| *units).collect();
+            let kept_of_themes = kept_units_across(&themes, &roots, &graph, self.full_themes);
+            // What the kept units of the other themes reference and construct: the roots the
+            // closure over the themes added to a theme, so that its reasons explain what it kept.
+            let from_other_themes: Vec<Roots> = (0..themes.len())
+                .map(|position| {
+                    let mut roots = Roots::default();
+                    for (other, (units, kept)) in themes.iter().zip(&kept_of_themes).enumerate() {
+                        if other == position {
+                            continue;
+                        }
+                        for unit in units.units.iter().filter(|unit| kept.contains(&unit.index)) {
+                            roots.keys.extend(unit.references.iter().cloned());
+                            roots.types.extend(unit.types.iter().cloned());
+                        }
+                    }
+                    roots
+                })
+                .collect();
             let mut why = String::new();
-            for class in used {
-                let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
-                    continue;
-                };
-                let kept = kept_units(units, &roots, &graph, self.full_themes);
+            let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
+            for (((class, units), kept), from_others) in together {
+                let sources: [(&str, &Roots); 6] = [
+                    ("manifest", &from_manifest),
+                    ("build script", &self.theme_roots),
+                    ("documents", &document_roots),
+                    ("sources", &from_sources),
+                    ("dependencies", &from_dependencies),
+                    ("other themes used together", from_others),
+                ];
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
@@ -1303,7 +1378,8 @@ impl Build {
         // A crate that only exports its model includes nothing; one whose code constructs a theme
         // from its parts (`Build::theme`) includes the table.
         let includes = self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty();
-        if includes || !self.themes.is_empty() {
+        // A table for a theme a dependency constructs (#846) is written for a crate without markup too.
+        if includes || !self.themes.is_empty() || !parts_tables.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets, &parts_tables);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
         }
@@ -1611,7 +1687,7 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
     text.push_str("        ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY_NAME, try_load);\n");
     for table in parts {
         text.push_str(&format!(
-            "        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_theme_parts({}, {});\n",
+            "        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts({}, {});\n",
             rust_string_literal(&table.class),
             table.static_name
         ));
@@ -1703,7 +1779,7 @@ mod tests {
         );
         assert!(text.contains("(#568): 2 of 9,"), "{text}");
         assert!(
-            text.contains("        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);\n    }\n"),
+            text.contains("        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);\n    }\n"),
             "{text}"
         );
         assert!(!crate_file("App", &[], &[], &[], &[]).contains("THEME_PARTS"));
@@ -1859,6 +1935,83 @@ mod tests {
         let expected = "the theme `OtherTheme` (Build::theme) is not a theme of a direct dependency of the crate";
         assert!(unknown.errors[0].starts_with(expected), "{:?}", unknown.errors);
         let _ = fs::remove_dir_all(&out);
+    }
+
+    /// Not from upstream (#846): a theme the compiled documents of a direct dependency construct gets
+    /// a table in the application and is registered with the wider of the tables; a theme the
+    /// application cannot name (its crate is not a direct dependency) gets none.
+    #[test]
+    fn a_theme_a_library_constructs_gets_the_table_of_the_application() {
+        use ferroui_build_scan::model::{FunctionModel, FunctionsModel, RustType, TypeKind, TypeModel};
+        use ferroui_build_scan::xaml_metadata::{MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
+        let root = env::temp_dir().join(format!("ferroui-build-required-{}", std::process::id()));
+        let unit = |index: u32, name: &str, type_keys: &[&str]| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: Vec::new(),
+            type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
+            references: Vec::new(),
+            types: Vec::new(),
+        };
+        // The theme: a class with units and `with_parts`.
+        let mut theme = AssemblyModel::new("Theme", "theme");
+        let mut class = TypeModel::new("Theme", TypeKind::Class, RustType::resolved("::theme::Theme"), "theme");
+        class.namespace = "Tests".to_string();
+        class.public_path = Some("::theme::Theme".to_string());
+        theme.types.push(class);
+        theme.functions.push(FunctionsModel {
+            owner: "::theme::Theme".to_string(),
+            public_path: "::theme::Theme".to_string(),
+            functions: vec![FunctionModel { name: "with_parts".into(), parameters: 2, ..FunctionModel::default() }],
+        });
+        theme.theme_units.push(ThemeUnitsModel {
+            class: "Tests.Theme".to_string(),
+            table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![
+                unit(0, "ambient", &[]),
+                unit(1, "Controls/ListBox.xaml", &["ListBox"]),
+                unit(2, "Controls/Unused.xaml", &["Unused"]),
+            ],
+        });
+        fs::create_dir_all(root.join("theme")).expect("a directory");
+        let theme_file = root.join("theme").join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        // The library: its documents construct the theme.
+        let library = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: vec![theme_file.display().to_string()],
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel { types: vec!["Theme".to_string()], keys: Vec::new() },
+        };
+        fs::create_dir_all(root.join("library")).expect("a directory");
+        let library_file = root.join("library").join("library.xamlmeta");
+        fs::write(&library_file, library.to_json()).expect("the .xamlmeta of the library");
+        // The application names a control and never the theme.
+        let app = root.join("app");
+        fs::create_dir_all(&app).expect("a directory");
+        fs::write(app.join("Cargo.toml"), "[package]\nname = \"app\"\n").expect("a manifest");
+        fs::write(app.join("lib.rs"), "pub fn show() {\n    let _ = ListBox::new();\n}\n").expect("the library");
+
+        let build = |name: &str, dependencies: Vec<PathBuf>| {
+            let out = root.join(name);
+            let outcome = Build::new(app.clone(), out.clone(), "app", dependencies).type_system(TypeSystem::Model);
+            let outcome = outcome.execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let module = fs::read_to_string(out.join("xaml").join("mod.rs")).unwrap_or_default();
+            let listing = fs::read_to_string(out.join("xaml").join("theme_parts.txt")).expect("the listing");
+            (module, listing)
+        };
+        let (module, listing) = build("direct", vec![library_file.clone(), theme_file.clone()]);
+        assert!(listing.starts_with("Tests.Theme: 2 of 3 units\nambient\nControls/ListBox.xaml\n"), "{listing}");
+        let registered = "register_wider_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);";
+        assert!(module.contains(registered), "{module}");
+        // Without the theme among the direct dependencies, the application cannot name its units.
+        let (module, listing) = build("transitive", vec![library_file.clone()]);
+        assert!(listing.is_empty() && !module.contains("THEME_PARTS"), "{listing}\n{module}");
+        let _ = fs::remove_dir_all(&root);
     }
 
     /// Not from upstream (#847): the binaries of a package root the themes as its library does,

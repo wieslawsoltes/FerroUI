@@ -62,7 +62,7 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreFinancialSeries.cs": {
-      "reason": "OHLC coordinates render candlesticks (and the I-bars of an OHLC series), wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
+      "reason": "OHLC coordinates render candlesticks (and the I-bars of an OHLC series), wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text; at the first draw a bar grows from its open (its high, close and low start at the open, as the source seeds its visuals), and on a change it moves with the scene transition.",
       "remaining": [
         "Separate UpFill/DownFill/UpStroke/DownStroke properties, generic financial visuals and all source data label placement behavior remain pending."
       ],
@@ -1216,10 +1216,11 @@
       "status": "ported"
     },
     "src/LiveChartsCore/VisualElements/BaseNeedleVisual.cs": {
-      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels.",
+      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels; a needle whose value changes turns to it over the animations speed of the chart (the source animates the rotation of its geometry), the long way when the range asks for it.",
       "remaining": [],
       "rust": [
-        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "ported"
     },
@@ -1234,9 +1235,9 @@
       "status": "ported"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/DrawingTextExtensions.cs": {
-      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of the Sankey and treemap series: words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
+      "reason": "label_lines.rs ports Tokenize and BlobArray.Measure for the data labels of every series (label_lines::wrap_data_labels for the Cartesian, pie and polar scenes): words end after a white space, a line feed is a word, a carriage return is dropped, a word that passes the largest width starts a line (a first word wider than it leaves an empty line, as the source); lines start at the left of their block (LinesAlignment.Start). Each line is a text of the scene.",
       "remaining": [
-        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the other series and of the axes do not break."
+        "Shaping, right-to-left text, the typeface fallback and the drawing of the glyphs are the native text stack; the labels of the axes and of the legends do not break; a Cartesian, pie or polar label is placed by the size of one line before it breaks (above its point it keeps its last line in place, centred it keeps its middle)."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/label_lines.rs"
@@ -1338,6 +1339,38 @@
         "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
       ],
       "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/BaseGaugeItem.cs": {
+      "reason": "GaugeItem carries BaseGaugeItem: the value, the builder, GaugeItem::BACKGROUND (double.MaxValue) and is_fill_series_builder.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeGenerator.cs": {
+      "reason": "GaugeGenerator::build_solid_gauge and build_angular_gauge_sections: a gauge series for each item (a ring of its value among empty values, or one value relative to the minimum without a hover push-out or data labels), the fill series of a zero for each item styled by the background items, added when no item styles it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeItem.cs": {
+      "reason": "GaugeItem: the value and the builder of an item, which runs after the generator has set the series up.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeOptions.cs": {
+      "reason": "The solid and angular builds of GaugeGenerator are its two functions; the options are not a public type.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/gauges.rs"
+      ],
+      "status": "native-replacement"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/HeatLandSeries.cs": {
       "reason": "The native HeatLandSeries, a generated ChartSeries of the kind HeatLand with its lands and the default heat map of the source constructors.",
@@ -3245,6 +3278,16 @@
       ],
       "status": "partial"
     },
+    "tests/CoreTests/SeriesTests/OhlcSeriesAnimationTests.cs::CoreTests.SeriesTests.OhlcSeriesAnimationTests::void OhlcSeries_FirstDraw_BarsAppearWithOHLC()#L43": {
+      "reason": "The source's three I-bars with a Y axis from 0 to 40: the first draw starts with the high, the close and the low of each bar at its open and ends with the low below the high (CartesianChartEngine::first_draw_seed, the start of the scene transition of the first draw).",
+      "remaining": [
+        "The frame-by-frame baseline of the source (OhlcSeries_FirstDraw.json, with the Lineal easing of the chart) is not compared: the native transition eases with cubic out and the chart has no EasingFunction."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_first_draw_bars_grow_from_their_open"
+      ],
+      "status": "partial"
+    },
     "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldPlaceDataLabel()#L132": {
       "reason": "The source fixture: thirteen one-value pie series in a 500 by 500 chart with a draw margin of 50, the hidden case and the five label positions for the normal, inner, outer and inner-and-outer radii, with the source assertions on each label location. Labels are measured with fixed native text metrics; angles are compared on the circle so that 360 and 0 degrees agree in f64.",
       "remaining": [],
@@ -3481,7 +3524,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGauge()#L50": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
@@ -3494,7 +3537,7 @@
     "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGaugeAtMinValue()#L60": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "The scenario builds its sections by hand, as GaugeGenerator::build_angular_gauge_sections does.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],

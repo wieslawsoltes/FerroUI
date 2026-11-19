@@ -121,6 +121,9 @@ impl LayoutableImpl for TemplatedControl {
             }
 
             *this.applied_template.borrow_mut() = template;
+            // The state mapper of the control, when the template root has visual state groups
+            // (docs/porting/winui-calculator-gaps.md, section 5.10).
+            crate::visual_state::state_mappers::on_template_applied(this);
         }
     }
 }

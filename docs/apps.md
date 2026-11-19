@@ -123,6 +123,42 @@ cargo --config FerroUI/.cargo/compiler-cache.toml build --locked   # sccache as 
 cargo --config FerroUI/.cargo/build-tools.toml build --locked      # optimised source scanner
 ```
 
+### The Graphite Metal ownership fix
+
+On macOS FerroUI draws with Skia's Graphite on Metal, and the Skia that `skia-bindings` 0.153.3
+publishes leaks the shader functions and descriptors of every Metal pipeline it makes (#622;
+`docs/media/MACOS-VERIFICATION.md`, "Graphite dependency ownership"). The FerroUI repository fixes
+it with a patched copy of the binding (`external/rust-skia-bindings`, `FERROUI-PATCH.md`), which
+builds Skia from source with the fix on macOS, chosen by a `[patch.crates-io]` of its root
+manifest. Cargo applies a patch only in the workspace that declares it:
+
+- **An application with FerroUI as a submodule** gets it from `sync-workspace.py`, which copies the
+  `[patch.*]` sections of FerroUI's manifest into the settings block, with the path made relative
+  to the application (`FerroUI/external/rust-skia-bindings`). Nothing else is needed.
+- **An application built from the published crates** has to declare the patch itself, until a
+  released `skia-bindings` carries the fix. The binding of the FerroUI release the application
+  uses is the one to take: copy `external/rust-skia-bindings` of that release into the application
+  (for example as `third_party/skia-bindings`) and name it in the root manifest:
+
+  ```toml
+  [patch.crates-io]
+  skia-bindings = { path = "third_party/skia-bindings" }
+  ```
+
+  The build of the binding on macOS then needs what a source build of Skia needs (the command-line
+  tools of Xcode, Python and Ninja, and the network the first time, for Skia's sources).
+
+**How a build tells.** The patched binding passes `graphite_metal_ownership=fixed` to the crates
+that depend on it, and `ferroui-skia` is built knowing it. Without it, the build of
+`ferroui-skia` warns (cargo shows the warnings of path dependencies only), the platform logs a
+warning when it makes its first Graphite context (area `Visual`), and
+`ferroui_skia::graphite_metal_ownership_fixed()` answers `Some(false)` (`None` where the build has
+no Graphite on Metal), which a test of the application can assert.
+
+**iOS.** The patched binding applies the fix to builds for macOS (`darwin`) only; a build for iOS
+takes Skia's published archive, with or without the patch, and its pipelines leak as well
+(`graphite_metal_ownership_fixed()` says `Some(false)` there).
+
 ## 4. Conventions
 
 The rules of the port hold in the application as well, and its CI checks them:

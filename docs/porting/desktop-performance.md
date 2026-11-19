@@ -8212,3 +8212,50 @@ benchmarks; the change of the instructions):
 
 The times of that run are not given: other builds ran on the machine. New:
 `FerroObject::try_set_value_typed`, `FerroProperty::as_direct`.
+
+### 9.103 Three measured steps of 0.5.1: grid text in place, run-once descriptions, selectable text runs
+
+Each was gated against its own benchmark commit or its base on main (`scripts/perf/gate.py`, two
+rounds; the change of the instructions; the times of those runs are not given, other builds ran on
+the machine).
+
+- **Grid definitions given as text take new sizes in place** (#803 part (b)). The rows and columns
+  a declarative element gives a grid as text are values of the grid (`GridDefinitionsText`): a new
+  text with the same count and kinds of definitions writes the sizes into the definitions the grid
+  has, where an effect gave the grid new definitions. `declarative::ViewBenchmark`: a thousand bars
+  that follow one signal take 7.50 million instructions as text (`grid_definitions_followed`)
+  against 14.28 million with new definitions (`grid_definitions_replaced`), -47.5 %; the other
+  lines of the class within 0.7 %. `Grid::set_column_definitions` is unchanged: a program that
+  calls it in an effect of its own (as the declarative program of the framework comparison does)
+  replaces the definitions as before.
+- **An element that no reconciler reaches again keeps no description of its values** (#811, the
+  rest of part (b) and part (c)). Text blocks with the same typeface, size and foreground share
+  their default run properties. No line of the gate is worse; `trees::Text.create_and_measure`
+  -5.56 %, `change_and_lay_out` -1.83 %. What the descriptions kept is memory, which this gate does
+  not count; it is to be counted with the heap of the wall.
+- **A selectable text block keeps the shaped runs of its text between layouts** (#649, the first
+  fix of step 4): `text::SelectableTextBlockWidths.measure_at_the_other_width` -72.4 %; the rest of
+  `text::` and `trees::Text` within its tolerance (the largest rise +1.5 %).
+
+
+### 9.104 Left out: a spatial index in the picture of a frame for its bands (#817)
+
+The picture of a frame was recorded with Skia's bounding-box hierarchy (`begin_recording` with a
+bounding-box factory), so that each band of a pipelined frame replays only the commands that touch
+it. The index was on from 2,000 commands of the picture before; `FERROUI_BAND_PICTURE_INDEX`
+(`off`, `always`, a count) chose it for a run without a new build.
+
+Measured with the harness of the framework comparison on the binary of the change, second start,
+two rounds a mode on a quiet machine (frames a second, and the CPU a frame in brackets):
+
+| Mode | patchwork, tier 17 | patchwork, tier 20 | gauntlet, tier 16 |
+|---|---|---|---|
+| off (the picture of main) | 52.6, 52.2 (57.5, 61.9 ms) | 37.4, 34.9 (94.2, 102.6 ms) | 41.7, 41.2 (68.7, 70.2 ms) |
+| always | 52.1, 52.4 (63.1, 64.3 ms) | 34.9, 31.4 (102.5, 114.9 ms) | 39.0, 39.5 (70.4, 74.0 ms) |
+| default (from 2,000 commands) | 51.6, 52.1 (64.4, 66.0 ms) | 29.3, 35.4 (121.1, 101.6 ms) | 33.8, 39.2 (84.6, 70.4 ms) |
+
+At tier 17 the rate is the same and the CPU a frame grows by 5 to 10 %; at tier 20 and in the
+gauntlet the rate falls. The hierarchy is built when the picture is recorded, on the render thread,
+and the bands of these scenes cross most of the commands of the picture, so it culls little of what
+a band replays. Left out (PR 872 closed); the bands keep replaying the whole picture under their
+clip, which Skia's canvas rejects per draw.

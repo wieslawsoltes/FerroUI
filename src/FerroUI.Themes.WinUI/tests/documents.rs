@@ -197,6 +197,8 @@ document_tests! {
     resources_hyperlink_button_themeresources => "/Resources/HyperlinkButton_themeresources.xaml";
     resources_hyperlink_themeresources => "/Resources/Hyperlink_themeresources.xaml";
     resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
+    resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
+    resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
@@ -225,7 +227,6 @@ document_tests! {
     resources_slider_themeresources => "/Resources/Slider_themeresources.xaml";
     resources_split_button_themeresources => "/Resources/SplitButton_themeresources.xaml";
     resources_split_view_themeresources => "/Resources/SplitView_themeresources.xaml";
-    resources_system_resources => "/Resources/SystemResources.xaml";
     resources_tab_view_themeresources => "/Resources/TabView_themeresources.xaml";
     resources_text_block_themeresources => "/Resources/TextBlock_themeresources.xaml";
     resources_text_block_themeresources_v2_5 => "/Resources/TextBlock_themeresources_v2.5.xaml";
@@ -242,6 +243,8 @@ document_tests! {
     controls_info_bar => "/Controls/InfoBar.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_pivot => "/Controls/Pivot.xaml";
+    controls_swipe_control => "/Controls/SwipeControl.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";

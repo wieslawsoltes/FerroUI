@@ -331,6 +331,7 @@ mod glyph_metrics;
 mod glyph_run;
 mod glyph_run_metrics;
 mod glyph_typeface;
+mod glyph_typeface_optical_size;
 #[cfg(test)]
 mod glyph_typeface_tests;
 mod i_font_memory;

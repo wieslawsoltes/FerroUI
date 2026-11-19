@@ -6,6 +6,42 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **High contrast** (#560, `ferroui-base`, `ferroui-controls`, `ferroui-themes-winui`, `ferroui-native`): `SystemColors` and `PlatformColorValues::system_colors`; a theme's high contrast variant (`ThemeVariant::set_high_contrast_variant`), which the application and the top levels select while the platform asks for high contrast; the WinUI theme follows the system's high contrast (`UseSystemHighContrast`, on by default) with the system colours of `Accents/SystemColors`; `DefaultPlatformSettings::set_color_values` simulates the setting. On macOS, "Increase contrast" is reported as high contrast, with the system colours under the effective appearance.
+
+- **3D hit testing** (#608, step D10, `ferroui-media3d`): `VisualTreeHelper::hit_test`, `hit_test_point` and `hit_test_ray` report `RayMeshGeometry3DHitTestResult`s (model, mesh, point, distance, vertex indices and weights) nearest first, with WPF's filter and result callbacks and its front and back material rules. Each mesh has a bounding-volume hierarchy, built once per version; the ray of a viewport point uses the camera and planes the renderer draws with.
+
+- **Interactive 3D** (#608, step D11, `ferroui-media3d`): `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` receive pointer entered, exited, moved, pressed, released and capture lost events, with pointer capture. `Viewport3D` routes them through the 3D hit test, and they bubble through the elements that hold them. 2D input hits a `Viewport3D` only where one of its models is.
+
+- **`DataLabelsMaxWidth` of every series of the LiveCharts2 port** (#624, `ferroui-livecharts`, `ferroui-controls-livecharts`): every series has `DataLabelsMaxWidth` (170 by default, as in LiveCharts2), and the data labels of the Cartesian, pie and polar charts break into lines at it, as those of the Sankey and treemap series do. New: `label_lines::wrap_data_labels`, the `DataLabelsMaxWidth` property of `ChartSeries`.
+
+- `MediaPlayerElement.TransportControls` replaces the transport controls of the element, from code or markup, as in WinUI (#561).
+
+- WinUI Gallery: the SplitView, ScrollViewer, Shape and Line pages are ported, and the Geometry page has its example with the source's theme images (#418).
+
+- **Compiled markup can resolve declared properties at compile time** (#603, `ferroui-markup-xaml`, `ferroui-markup-xaml-loader`, `ferroui-build`, docs/xaml-themes.md section 5.1): with `Build::compile_time_declared_properties(true)`, nested markup extensions and plain properties of compiled paths use `rt::declared_clr_property_info` and `rt::declared_path_property` with the position of the property in its declaration, instead of a search by name at run time. Off by default. `scripts/themes/by_name_lookups.py` counts the lookups by name in the compiled themes.
+
+- Skia: `ferroui_skia::graphite_metal_ownership_fixed()`, and a warning at build and at run time when the Skia of a build lacks the Graphite Metal ownership fix; `docs/apps.md` says how an application built from the published crates takes the fix (#622).
+
+- **The SVG cells and the colour animation of the heat series of the LiveCharts2 port** (#624, `ferroui-livecharts`, `ferroui-controls-livecharts`, [docs/porting/livecharts2.md](docs/porting/livecharts2.md)): - `GeometrySvg` of a `HeatSeries` draws its SVG path data in every cell, fitted to the cell as in LiveCharts2. - At the first draw, the cells take their colours from transparent over the animation. - New in the API: `CartesianSeriesOptions::geometry_svg` and the `GeometrySvg` property of `HeatSeries`.
+
+- **`GaugeGenerator`, the theme's gauge rules and the needle animation of the LiveCharts2 port** (#624, `ferroui-controls-livecharts`, [docs/porting/livecharts2.md](docs/porting/livecharts2.md)): - `GaugeGenerator::build_solid_gauge` and `build_angular_gauge_sections` with `GaugeItem` build the series of a gauge as in LiveCharts2. - Every gauge series takes the theme's gauge rules for what it does not set: no stroke, centred data labels, a corner radius of 8, a translucent fill series. - A needle turns to a new value over the animations speed of the chart. - New in the API: `GaugeGenerator` and `GaugeItem`.
+
+- WinUI Gallery: the Flyout, MenuFlyout, MenuBar and Popup pages have every source example with their code behind; Flyout, MenuBar and Popup are ported (#418).
+
+- WinUI Gallery: the DatePicker, TimePicker, CalendarDatePicker and CalendarView pages have every source example; the first three are ported (#418).
+
+- The reusable application workflow `app.yml` has an input `size-report` that attributes the WebAssembly module of the browser site (code by crate and generic family, largest functions) into the run summary and an artifact (#441).
+
+- Compiled XAML: an opt-in typed representation (`Build::xaml_backend`, `FERROUI_XAML_BACKEND=theme-bytecode|bytecode`) that encodes the operations the compiler resolved as constant instruction streams with typed imports; `native` stays the default.
+
+- ControlCatalog (desktop): the F12 inspector is the feature `diagnostics`; the default catalog trims the WinUI theme.
+
+- `ferroui_controls::animation`: WinUI's storyboards (`Storyboard`, the from/to/by and key frame animations of doubles, colours, points and objects, the eleven easing functions with `EasingMode`) on the global clock at animation priority, and `VisualState.Storyboard` (#443, VSM-3).
+
+- Visual states: `VisualTransition` and `VisualStateGroup.Transitions`, with WinUI's choice of the transition and its generated animations (#443, VSM-4).
+
+- Visual states: upstream-ported buttons, toggle buttons, check boxes, radio buttons, list box items and text boxes drive the visual states of a template that declares them (WinUI's `ChangeVisualState`) (#443, VSM-5).
+
 - **`theme_parts_why.txt`: why each unit of a trimmed theme is kept** (#852, `ferroui-build`, docs/porting/theme-trimming.md section 19). The build writes, next to `theme_parts.txt`, for each trimmed theme, how many keys of the kept units are live. For each kept unit it gives the first reason the closure found, with its origin, marked conservative or exact. New: `theme_roots::{KeptUnit, explain_kept_units, why_kept_listing}`.
 
 - Diagnostics: `FERROUI_UNCHANGED_DRAWINGS` (with `perf-counters`) reports how many of the drawings a frame replays have not changed for a number of frames, and their share of the operations and of the replay time (#821).
@@ -31,6 +67,20 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - **The tooltip formatter of the map and `DataLabelsMaxWidth` of the Sankey and treemap series of the LiveCharts2 port** (#624, `ferroui-livecharts`, `ferroui-controls-livecharts`, [docs/porting/livecharts2.md](docs/porting/livecharts2.md)): the `TooltipFormatter` of a map (code only, a `GeoTooltipFormatter`) writes the line of each series value in the tooltip of a land; a custom tooltip is the application's own from `hover_changed`, with the native tooltip hidden, as for every chart kind. The data labels of the Sankey and treemap series break into lines at their `DataLabelsMaxWidth` (170 by default, as LiveCharts2), so a long label that was drawn on one line now takes several. New in the API: `GeoTooltipFormatter`, `GeoMapChartEngine::measure_with_tooltip_formatter`, `tooltip_label_with`, `SankeySeriesOptions`, `TreemapSeriesOptions`, the `measure_with_series_options` of the Sankey and treemap engines and `DATA_LABELS_MAX_WIDTH` in the engine; `Chart::tooltip_formatter` and the `DataLabelsMaxWidth` of `SankeySeries` and `TreemapSeries` in the controls.
 
 ### Changed
+
+- `ferroui-markup-xaml-loader`: `FerroTransformErrors` (`XamlError::bindings_transform`, `data_context`, `property_path`, `selectors_transform`, `style_transform`, `transform_kind`) and `FerroTransformErrorKind` replace the factories `XamlBindingsTransformException`, `XamlDataContextException`, `XamlPropertyPathException`, `XamlSelectorsTransformException` and `XamlStyleTransformException`, which are deprecated (#423). For example, `XamlStyleTransformException::new(m, l, i)` becomes `XamlError::style_transform(m, l, i)`, and `XamlStyleTransformException::is(&e)` becomes `e.transform_kind() == Some(FerroTransformErrorKind::Style)`.
+
+- The samples that construct a theme in code (SevenGuis, TodoMvc, ReactiveDemoComponents, ViewGallery, StaticViewLocatorDemo, ChartsDemo, LiveChartsDemo, CustomEffects, PortableMedia and its hosts) trim it to the units they use (`Build::theme`, `with_parts`).
+
+- The WinUI theme: `Resources/SystemResources.xaml` is gone; the `SystemColor*Color` resources come from the `Accents/SystemColors` provider (#560). An application that requests `WinUITheme.HighContrast` on a light platform without system colours gets High Contrast White (before: Black).
+
+- An element of the declarative layer that no reconciler reaches again (a tree mounted once, what a component that runs once builds) keeps no description of its plain values once they are set; text blocks of the same font and foreground brush share their default run properties (#811).
+
+- The rows and columns a declarative element gives a grid as text are values of the grid (`GridDefinitionsText`): a new text in a later run or one that follows state gives the grid its sizes, in place where the count and kinds are the same (#803).
+
+- A `SelectableTextBlock` keeps the shaped runs of its text between layouts at other widths, as a `TextBlock` does (#649).
+
+- The gzip budget of the published browser catalog module is 16 MB again (#441): the module is 13.87 MB. `browser.yml` has an optional size report (`size-report`), and `scripts/browser/wasm-size-report.py` attributes code and data by crate from the link map and reads the names the current toolchain demangles.
 
 - `scripts/android/apk.sh --profile dist` builds an Android package with the shipped profile. The docs say which profile sections an application copies into its own manifest. Cargo does not take profiles from a dependency's workspace (#581).
 
@@ -75,6 +125,8 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - **The workspace at 0.5.1-preview.1**: 0.5.0 is published, and `main` carries the previews of 0.5.1 (owner decision, 2026-11-14). Unlike the previews of a minor version, they keep the public API of 0.5: the API gate compares every pull request with `v0.5.0` (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1), and a change that breaks it waits for 0.6.0.
 
 ### Fixed
+
+- **A library that constructs a theme gets the table of the application that uses it** (#846, `ferroui-build`, `ferroui-markup-xaml`, `ferroui-markup-xaml-loader`, docs/porting/theme-trimming.md section 20). A library document with `<WinUITheme />` was compiled with the units the library needs. An application that used the library and added a control wrote no table, so the control had no template. Compiled constructions now apply the wider of their own table and the table registered for the class (`rt::wider_theme_parts`), and `register()` keeps the wider table (`rt::register_wider_theme_parts`). An application writes and registers a table for every theme that the documents of a direct dependency construct, when the theme's crate is a direct dependency too. New: `rt::wider_theme_parts`, `rt::register_wider_theme_parts`, `ModelSet::read_with_direct`.
 
 - Hot reload: a reload that cannot go on because of a resource lookup of its candidate (a replaced dictionary, inline styles that moved, a candidate that cannot be prepared) reports its `ReloadError` without unwinding (#567).
 

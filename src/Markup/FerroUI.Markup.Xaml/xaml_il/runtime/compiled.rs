@@ -65,7 +65,8 @@ pub use super::theme_styles::{
 pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
     active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
+    register_wider_theme_parts, registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys,
+    wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
 
 /// Materialize an independently linkable constant from the build-time image.
@@ -651,16 +652,7 @@ pub fn clr_property_info(
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    ferroui_base::ferro_thread_local! {
-        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
-    }
-    let key = (markup as *const MarkupType as usize, name, is_static);
-    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
-        return info;
-    }
-    let info = new_clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
-    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
-    info
+    cached_clr_property_info(markup, None, name, is_static, property_type, cached_boxed_boolean)
 }
 
 /// The description of `Setter.Value` ([`clr_property_info`]) as a value:
@@ -695,18 +687,74 @@ pub fn declared_property_type(markup: &'static MarkupType, name: &str, is_static
     (declared.type_)()
 }
 
+/// The declared property `name` of `markup` at `index` of its list (the static properties when
+/// `is_static`), which the emitter resolved at compile time (#603); found by its name when the
+/// list at run time has another property there, so a declaration that changed since the
+/// compilation is still found.
+///
+/// # Panics
+/// Panics if `markup` declares no such property.
+fn declared_property(
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &str,
+    is_static: bool,
+) -> &'static MarkupProperty {
+    let list = match is_static {
+        true => markup.static_properties,
+        false => markup.properties,
+    };
+    let at_index = index.and_then(|index| list.get(index)).filter(|property| property.name == name);
+    at_index
+        .or_else(|| list.iter().find(|property| property.name == name))
+        .unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()))
+}
+
+/// [`clr_property_info`] of the declared property at `index` of the declaration of `markup`,
+/// which the emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The description is the one [`clr_property_info`] gives for `name`.
+pub fn declared_clr_property_info(
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    cached_clr_property_info(markup, Some(index), name, is_static, property_type, cached_boxed_boolean)
+}
+
+/// The description of a declared property, one per property and thread ([`clr_property_info`]).
+fn cached_clr_property_info(
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    ferroui_base::ferro_thread_local! {
+        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
+    }
+    let key = (markup as *const MarkupType as usize, name, is_static);
+    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
+        return info;
+    }
+    let declared = declared_property(markup, index, name, is_static);
+    let info = new_clr_property_info(markup, declared, name, is_static, property_type, cached_boxed_boolean);
+    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
+    info
+}
+
 fn new_clr_property_info(
     markup: &'static MarkupType,
+    declared: &'static MarkupProperty,
     name: &str,
     is_static: bool,
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    let declared = match is_static {
-        true => markup.static_properties.iter().find(|property| property.name == name),
-        false => markup.find_property(name),
-    };
-    let declared = declared.unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()));
     let accessors = Rc::new(DeclaredAccessors {
         owner: markup.full_name(),
         property: declared,
@@ -753,18 +801,49 @@ pub fn path_property(
     accepts_null: bool,
     typed: bool,
 ) -> CompiledBindingPathBuilder {
-    if typed {
-        let declared = match is_static {
-            true => None,
-            false => markup.find_property(name),
-        };
-        if let Some(typed) = declared.and_then(|property| property.typed_path_element) {
+    path_property_of(builder, markup, None, name, is_static, property_type, cached_boxed_boolean, accepts_null, typed)
+}
+
+/// [`path_property`] of the declared property at `index` of the declaration of `markup`, which the
+/// emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The element is the one [`path_property`] gives for `name`.
+#[allow(clippy::too_many_arguments)]
+pub fn declared_path_property(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    let cached = cached_boxed_boolean;
+    path_property_of(builder, markup, Some(index), name, is_static, property_type, cached, accepts_null, typed)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn path_property_of(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    if typed && !is_static {
+        if let Some(typed) = declared_property(markup, index, name, is_static).typed_path_element {
             if let Some(builder) = typed(builder, accepts_null) {
                 return builder;
             }
         }
     }
-    let info = clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
+    let info = cached_clr_property_info(markup, index, name, is_static, property_type, cached_boxed_boolean);
     let factory: PropertyAccessorFactory = Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor);
     match accepts_null {
         true => builder.property_with(info, factory, true),
@@ -1979,6 +2058,25 @@ pub fn add_event_handler(
 #[cfg(test)]
 mod tests {
     use super::uri_equals;
+
+    /// Not from upstream (#603): the description of a declared property at its position is the one
+    /// found by name (one per property and thread), and a position that names another property, or
+    /// none, falls back to the name.
+    #[test]
+    fn a_declared_property_at_its_position_is_the_one_found_by_name() {
+        use super::{clr_property_info, declared_clr_property_info};
+        use ferroui_base::data::core::ValueType;
+        use ferroui_base::metadata::MarkupTyped;
+        use ferroui_base::styling::Setter;
+        let markup = <Setter as MarkupTyped>::MARKUP;
+        let index = markup.properties.iter().position(|property| property.name == "Value").expect("Setter.Value");
+        let by_name = clr_property_info(markup, "Value", false, ValueType::object(), false);
+        let at_index = declared_clr_property_info(markup, index, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &at_index));
+        let elsewhere = declared_clr_property_info(markup, index + 1000, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &elsewhere));
+        assert_eq!(at_index.name(), "Value");
+    }
 
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
     #[test]

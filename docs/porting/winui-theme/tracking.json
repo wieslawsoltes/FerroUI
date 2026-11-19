@@ -37234,8 +37234,8 @@
    "key": "DefaultPivotHeaderItemStyle",
    "kind": "Style",
    "target_type": "PivotHeaderItem",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37244,8 +37244,8 @@
    "key": "DefaultPivotItemStyle",
    "kind": "Style",
    "target_type": "PivotItem",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37254,8 +37254,8 @@
    "key": "DefaultPivotStyle",
    "kind": "Style",
    "target_type": "Pivot",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37264,8 +37264,8 @@
    "key": "PivotHeaderItemSelectedPipeCornerRadius",
    "kind": "CornerRadius",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37274,8 +37274,8 @@
    "key": "PivotTitleContentControlStyle",
    "kind": "Style",
    "target_type": "ContentControl",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37284,8 +37284,8 @@
    "key": "{PivotHeaderItem}",
    "kind": "Style",
    "target_type": "PivotHeaderItem",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37294,8 +37294,8 @@
    "key": "{PivotItem}",
    "kind": "Style",
    "target_type": "PivotItem",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37304,8 +37304,8 @@
    "key": "{Pivot}",
    "kind": "Style",
    "target_type": "Pivot",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37314,8 +37314,8 @@
    "key": "PivotBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37324,8 +37324,8 @@
    "key": "PivotForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37334,8 +37334,8 @@
    "key": "PivotHeaderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37344,8 +37344,8 @@
    "key": "PivotHeaderBackgroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37354,8 +37354,8 @@
    "key": "PivotHeaderBackgroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37364,8 +37364,8 @@
    "key": "PivotHeaderForegroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37374,8 +37374,8 @@
    "key": "PivotHeaderForegroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37384,8 +37384,8 @@
    "key": "PivotHeaderItemBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37394,8 +37394,8 @@
    "key": "PivotHeaderItemBackgroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37404,8 +37404,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37414,8 +37414,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37424,8 +37424,8 @@
    "key": "PivotHeaderItemBackgroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37434,8 +37434,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37444,8 +37444,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37454,8 +37454,8 @@
    "key": "PivotHeaderItemCharacterSpacing",
    "kind": "x:Int32",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37464,8 +37464,8 @@
    "key": "PivotHeaderItemFocusPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37474,8 +37474,8 @@
    "key": "PivotHeaderItemFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37484,8 +37484,8 @@
    "key": "PivotHeaderItemFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37494,8 +37494,8 @@
    "key": "PivotHeaderItemForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37504,8 +37504,8 @@
    "key": "PivotHeaderItemForegroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37514,8 +37514,8 @@
    "key": "PivotHeaderItemForegroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37524,8 +37524,8 @@
    "key": "PivotHeaderItemForegroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37534,8 +37534,8 @@
    "key": "PivotHeaderItemForegroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37544,8 +37544,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37554,8 +37554,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37564,8 +37564,8 @@
    "key": "PivotHeaderItemLockedTranslation",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37574,8 +37574,8 @@
    "key": "PivotHeaderItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37584,8 +37584,8 @@
    "key": "PivotHeaderItemSelectedPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37594,8 +37594,8 @@
    "key": "PivotHeaderItemThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37604,8 +37604,8 @@
    "key": "PivotItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37614,8 +37614,8 @@
    "key": "PivotItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37624,8 +37624,8 @@
    "key": "PivotLandscapeThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37634,8 +37634,8 @@
    "key": "PivotNavButtonBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37644,8 +37644,8 @@
    "key": "PivotNavButtonBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37654,8 +37654,8 @@
    "key": "PivotNavButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37664,8 +37664,8 @@
    "key": "PivotNavButtonForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37674,8 +37674,8 @@
    "key": "PivotNavButtonMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37684,8 +37684,8 @@
    "key": "PivotNavButtonPointerOverBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37694,8 +37694,8 @@
    "key": "PivotNavButtonPointerOverBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37704,8 +37704,8 @@
    "key": "PivotNavButtonPointerOverForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37714,8 +37714,8 @@
    "key": "PivotNavButtonPressedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37724,8 +37724,8 @@
    "key": "PivotNavButtonPressedBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37734,8 +37734,8 @@
    "key": "PivotNavButtonPressedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37744,8 +37744,8 @@
    "key": "PivotNextButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37754,8 +37754,8 @@
    "key": "PivotNextButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37764,8 +37764,8 @@
    "key": "PivotNextButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37774,8 +37774,8 @@
    "key": "PivotNextButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37784,8 +37784,8 @@
    "key": "PivotNextButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37794,8 +37794,8 @@
    "key": "PivotNextButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37804,8 +37804,8 @@
    "key": "PivotNextButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37814,8 +37814,8 @@
    "key": "PivotNextButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37824,8 +37824,8 @@
    "key": "PivotNextButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37834,8 +37834,8 @@
    "key": "PivotPortraitThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37844,8 +37844,8 @@
    "key": "PivotPreviousButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37854,8 +37854,8 @@
    "key": "PivotPreviousButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37864,8 +37864,8 @@
    "key": "PivotPreviousButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37874,8 +37874,8 @@
    "key": "PivotPreviousButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37884,8 +37884,8 @@
    "key": "PivotPreviousButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37894,8 +37894,8 @@
    "key": "PivotPreviousButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37904,8 +37904,8 @@
    "key": "PivotPreviousButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37914,8 +37914,8 @@
    "key": "PivotPreviousButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37924,8 +37924,8 @@
    "key": "PivotPreviousButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37934,8 +37934,8 @@
    "key": "PivotTitleFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37944,8 +37944,8 @@
    "key": "PivotTitleFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37954,8 +37954,8 @@
    "key": "PivotTitleThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37964,8 +37964,8 @@
    "key": "PivotBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37974,8 +37974,8 @@
    "key": "PivotForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37984,8 +37984,8 @@
    "key": "PivotHeaderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -37994,8 +37994,8 @@
    "key": "PivotHeaderBackgroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38004,8 +38004,8 @@
    "key": "PivotHeaderBackgroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38014,8 +38014,8 @@
    "key": "PivotHeaderForegroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38024,8 +38024,8 @@
    "key": "PivotHeaderForegroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38034,8 +38034,8 @@
    "key": "PivotHeaderItemBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38044,8 +38044,8 @@
    "key": "PivotHeaderItemBackgroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38054,8 +38054,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38064,8 +38064,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38074,8 +38074,8 @@
    "key": "PivotHeaderItemBackgroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38084,8 +38084,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38094,8 +38094,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38104,8 +38104,8 @@
    "key": "PivotHeaderItemCharacterSpacing",
    "kind": "x:Int32",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38114,8 +38114,8 @@
    "key": "PivotHeaderItemFocusPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38124,8 +38124,8 @@
    "key": "PivotHeaderItemFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38134,8 +38134,8 @@
    "key": "PivotHeaderItemFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38144,8 +38144,8 @@
    "key": "PivotHeaderItemForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38154,8 +38154,8 @@
    "key": "PivotHeaderItemForegroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38164,8 +38164,8 @@
    "key": "PivotHeaderItemForegroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38174,8 +38174,8 @@
    "key": "PivotHeaderItemForegroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38184,8 +38184,8 @@
    "key": "PivotHeaderItemForegroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38194,8 +38194,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38204,8 +38204,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38214,8 +38214,8 @@
    "key": "PivotHeaderItemLockedTranslation",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38224,8 +38224,8 @@
    "key": "PivotHeaderItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38234,8 +38234,8 @@
    "key": "PivotHeaderItemSelectedPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38244,8 +38244,8 @@
    "key": "PivotHeaderItemThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38254,8 +38254,8 @@
    "key": "PivotItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38264,8 +38264,8 @@
    "key": "PivotItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38274,8 +38274,8 @@
    "key": "PivotLandscapeThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38284,8 +38284,8 @@
    "key": "PivotNavButtonBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38294,8 +38294,8 @@
    "key": "PivotNavButtonBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38304,8 +38304,8 @@
    "key": "PivotNavButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38314,8 +38314,8 @@
    "key": "PivotNavButtonForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38324,8 +38324,8 @@
    "key": "PivotNavButtonMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38334,8 +38334,8 @@
    "key": "PivotNavButtonPointerOverBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38344,8 +38344,8 @@
    "key": "PivotNavButtonPointerOverBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38354,8 +38354,8 @@
    "key": "PivotNavButtonPointerOverForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38364,8 +38364,8 @@
    "key": "PivotNavButtonPressedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38374,8 +38374,8 @@
    "key": "PivotNavButtonPressedBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38384,8 +38384,8 @@
    "key": "PivotNavButtonPressedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38394,8 +38394,8 @@
    "key": "PivotNextButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38404,8 +38404,8 @@
    "key": "PivotNextButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38414,8 +38414,8 @@
    "key": "PivotNextButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38424,8 +38424,8 @@
    "key": "PivotNextButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38434,8 +38434,8 @@
    "key": "PivotNextButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38444,8 +38444,8 @@
    "key": "PivotNextButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38454,8 +38454,8 @@
    "key": "PivotNextButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38464,8 +38464,8 @@
    "key": "PivotNextButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38474,8 +38474,8 @@
    "key": "PivotNextButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38484,8 +38484,8 @@
    "key": "PivotPortraitThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38494,8 +38494,8 @@
    "key": "PivotPreviousButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38504,8 +38504,8 @@
    "key": "PivotPreviousButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38514,8 +38514,8 @@
    "key": "PivotPreviousButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38524,8 +38524,8 @@
    "key": "PivotPreviousButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38534,8 +38534,8 @@
    "key": "PivotPreviousButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38544,8 +38544,8 @@
    "key": "PivotPreviousButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38554,8 +38554,8 @@
    "key": "PivotPreviousButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38564,8 +38564,8 @@
    "key": "PivotPreviousButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38574,8 +38574,8 @@
    "key": "PivotPreviousButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38584,8 +38584,8 @@
    "key": "PivotTitleFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38594,8 +38594,8 @@
    "key": "PivotTitleFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38604,8 +38604,8 @@
    "key": "PivotTitleThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38614,8 +38614,8 @@
    "key": "PivotBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38624,8 +38624,8 @@
    "key": "PivotForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38634,8 +38634,8 @@
    "key": "PivotHeaderBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38644,8 +38644,8 @@
    "key": "PivotHeaderBackgroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38654,8 +38654,8 @@
    "key": "PivotHeaderBackgroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38664,8 +38664,8 @@
    "key": "PivotHeaderForegroundSelectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38674,8 +38674,8 @@
    "key": "PivotHeaderForegroundUnselectedBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38684,8 +38684,8 @@
    "key": "PivotHeaderItemBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38694,8 +38694,8 @@
    "key": "PivotHeaderItemBackgroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38704,8 +38704,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38714,8 +38714,8 @@
    "key": "PivotHeaderItemBackgroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38724,8 +38724,8 @@
    "key": "PivotHeaderItemBackgroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38734,8 +38734,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38744,8 +38744,8 @@
    "key": "PivotHeaderItemBackgroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38754,8 +38754,8 @@
    "key": "PivotHeaderItemCharacterSpacing",
    "kind": "x:Int32",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38764,8 +38764,8 @@
    "key": "PivotHeaderItemFocusPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38774,8 +38774,8 @@
    "key": "PivotHeaderItemFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38784,8 +38784,8 @@
    "key": "PivotHeaderItemFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38794,8 +38794,8 @@
    "key": "PivotHeaderItemForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38804,8 +38804,8 @@
    "key": "PivotHeaderItemForegroundSelected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38814,8 +38814,8 @@
    "key": "PivotHeaderItemForegroundSelectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38824,8 +38824,8 @@
    "key": "PivotHeaderItemForegroundSelectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38834,8 +38834,8 @@
    "key": "PivotHeaderItemForegroundUnselected",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38844,8 +38844,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38854,8 +38854,8 @@
    "key": "PivotHeaderItemForegroundUnselectedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38864,8 +38864,8 @@
    "key": "PivotHeaderItemLockedTranslation",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38874,8 +38874,8 @@
    "key": "PivotHeaderItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38884,8 +38884,8 @@
    "key": "PivotHeaderItemSelectedPipeFill",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38894,8 +38894,8 @@
    "key": "PivotHeaderItemThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38904,8 +38904,8 @@
    "key": "PivotItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38914,8 +38914,8 @@
    "key": "PivotItemMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38924,8 +38924,8 @@
    "key": "PivotLandscapeThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38934,8 +38934,8 @@
    "key": "PivotNavButtonBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38944,8 +38944,8 @@
    "key": "PivotNavButtonBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38954,8 +38954,8 @@
    "key": "PivotNavButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38964,8 +38964,8 @@
    "key": "PivotNavButtonForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38974,8 +38974,8 @@
    "key": "PivotNavButtonMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38984,8 +38984,8 @@
    "key": "PivotNavButtonPointerOverBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -38994,8 +38994,8 @@
    "key": "PivotNavButtonPointerOverBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39004,8 +39004,8 @@
    "key": "PivotNavButtonPointerOverForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39014,8 +39014,8 @@
    "key": "PivotNavButtonPressedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39024,8 +39024,8 @@
    "key": "PivotNavButtonPressedBorderThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39034,8 +39034,8 @@
    "key": "PivotNavButtonPressedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39044,8 +39044,8 @@
    "key": "PivotNextButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39054,8 +39054,8 @@
    "key": "PivotNextButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39064,8 +39064,8 @@
    "key": "PivotNextButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39074,8 +39074,8 @@
    "key": "PivotNextButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39084,8 +39084,8 @@
    "key": "PivotNextButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39094,8 +39094,8 @@
    "key": "PivotNextButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39104,8 +39104,8 @@
    "key": "PivotNextButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39114,8 +39114,8 @@
    "key": "PivotNextButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39124,8 +39124,8 @@
    "key": "PivotNextButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39134,8 +39134,8 @@
    "key": "PivotPortraitThemePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39144,8 +39144,8 @@
    "key": "PivotPreviousButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39154,8 +39154,8 @@
    "key": "PivotPreviousButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39164,8 +39164,8 @@
    "key": "PivotPreviousButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39174,8 +39174,8 @@
    "key": "PivotPreviousButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39184,8 +39184,8 @@
    "key": "PivotPreviousButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39194,8 +39194,8 @@
    "key": "PivotPreviousButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39204,8 +39204,8 @@
    "key": "PivotPreviousButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39214,8 +39214,8 @@
    "key": "PivotPreviousButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39224,8 +39224,8 @@
    "key": "PivotPreviousButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39234,8 +39234,8 @@
    "key": "PivotTitleFontFamily",
    "kind": "FontFamily",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39244,8 +39244,8 @@
    "key": "PivotTitleFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -39254,8 +39254,8 @@
    "key": "PivotTitleThemeFontWeight",
    "kind": "FontWeight",
    "target_type": "",
-   "status": "waived",
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -71984,8 +71984,8 @@
    "key": "DefaultSwipeControlStyle",
    "kind": "Style",
    "target_type": "SwipeControl",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -71994,8 +71994,8 @@
    "key": "{SwipeControl}",
    "kind": "Style",
    "target_type": "SwipeControl",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72004,8 +72004,8 @@
    "key": "SwipeItemStyle",
    "kind": "Style",
    "target_type": "AppBarButton",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72014,8 +72014,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72024,8 +72024,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72034,8 +72034,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72044,8 +72044,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72054,8 +72054,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72064,8 +72064,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72074,8 +72074,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72084,8 +72084,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72094,8 +72094,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72104,8 +72104,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72114,8 +72114,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72124,8 +72124,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72134,8 +72134,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72144,8 +72144,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72154,8 +72154,8 @@
    "key": "SwipeItemBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72164,8 +72164,8 @@
    "key": "SwipeItemBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72174,8 +72174,8 @@
    "key": "SwipeItemForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72184,8 +72184,8 @@
    "key": "SwipeItemPostThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72194,8 +72194,8 @@
    "key": "SwipeItemPostThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72204,8 +72204,8 @@
    "key": "SwipeItemPreThresholdExecuteBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -72214,8 +72214,8 @@
    "key": "SwipeItemPreThresholdExecuteForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "SwipeControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90112,6 +90112,7 @@
   "Controls/PathIcon.xaml",
   "Controls/PersonPicture.xaml",
   "Controls/PipsPager.xaml",
+  "Controls/Pivot.xaml",
   "Controls/PopupRoot.xaml",
   "Controls/ProgressBar.xaml",
   "Controls/ProgressRing.xaml",
@@ -90130,6 +90131,7 @@
   "Controls/Slider.xaml",
   "Controls/SplitButton.xaml",
   "Controls/SplitView.xaml",
+  "Controls/SwipeControl.xaml",
   "Controls/SymbolIcon.xaml",
   "Controls/TabControl.xaml",
   "Controls/TabItem.xaml",
@@ -90199,6 +90201,7 @@
   "Resources/PasswordBox_themeresources.xaml",
   "Resources/PersonPicture_themeresources.xaml",
   "Resources/PipsPager_themeresources.xaml",
+  "Resources/Pivot_themeresources.xaml",
   "Resources/ProgressBar_themeresources.xaml",
   "Resources/ProgressRing_themeresources.xaml",
   "Resources/RadioButton_themeresources.xaml",
@@ -90216,7 +90219,7 @@
   "Resources/Slider_themeresources.xaml",
   "Resources/SplitButton_themeresources.xaml",
   "Resources/SplitView_themeresources.xaml",
-  "Resources/SystemResources.xaml",
+  "Resources/SwipeControl_themeresources.xaml",
   "Resources/TabView_themeresources.xaml",
   "Resources/TableView_themeresources.xaml",
   "Resources/TabularSurfaces_themeresources.xaml",
@@ -90756,6 +90759,20 @@
    "date": "2026-10-24"
   },
   {
+   "document": "Pivot.xaml",
+   "themes": [
+    "{Pivot}",
+    "{PivotItem}",
+    "{PivotHeaderItem}",
+    "PivotTitleContentControlStyle"
+   ],
+   "batch": "B5",
+   "winui": "Pivot: {Pivot} (DefaultPivotStyle), {PivotItem} (DefaultPivotItemStyle) and {PivotHeaderItem} (DefaultPivotHeaderItemStyle) of Pivot_themeresources.xaml. A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, PV-1 to PV-3); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-18"
+  },
+  {
    "document": "InfoBar.xaml",
    "themes": [
     "{InfoBar}"
@@ -90776,6 +90793,18 @@
    "status": "ported",
    "deviations": 4,
    "date": "2026-10-24"
+  },
+  {
+   "document": "SwipeControl.xaml",
+   "themes": [
+    "{SwipeControl}",
+    "SwipeItemStyle"
+   ],
+   "batch": "B6",
+   "winui": "SwipeControl: {SwipeControl} (SwipeControl.xaml, DefaultSwipeControlStyle) and SwipeItemStyle (SwipeControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, SW-1); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-18"
   },
   {
    "document": "NumericUpDown.xaml",
@@ -91402,20 +91431,6 @@
    "items": 49
   },
   {
-   "document": "controls/dev/CommonStyles/Pivot_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
-   "items": 203
-  },
-  {
-   "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-   "key": "re:Pivot.*",
-   "variant": null,
-   "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView.",
-   "items": 0
-  },
-  {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
    "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
    "variant": null,
@@ -91463,20 +91478,6 @@
    "variant": null,
    "reason": "TwoPaneView: no FerroUI control.",
    "items": 2
-  },
-  {
-   "document": "controls/dev/SwipeControl/SwipeControl.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "SwipeControl: no FerroUI control.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/SwipeControl/SwipeControl_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "SwipeControl: no FerroUI control.",
-   "items": 22
   },
   {
    "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",
@@ -91868,10 +91869,26 @@
    "ferroui": "InfoBadge",
    "batch": "B1"
   },
+  "SwipeControl": {
+   "ferroui": "SwipeControl",
+   "batch": "B6"
+  },
   "InfoBar": {
    "ferroui": "InfoBar",
    "batch": "B6",
    "note": "NotificationCard is drawn with the template of InfoBar"
+  },
+  "Pivot": {
+   "ferroui": "Pivot",
+   "batch": "B5"
+  },
+  "PivotItem": {
+   "ferroui": "PivotItem",
+   "batch": "B5"
+  },
+  "PivotHeaderItem": {
+   "ferroui": "PivotHeaderItem",
+   "batch": "B5"
   },
   "ListBox": {
    "ferroui": "ListBox",

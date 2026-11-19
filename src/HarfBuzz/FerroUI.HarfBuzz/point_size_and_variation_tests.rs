@@ -24,6 +24,7 @@ const INTER_VARIABLE_FONT: &[u8] = include_bytes!("../../FerroUI.Base/test_asset
 
 const TRAK: OpenTypeTag = OpenTypeTag::from_chars('t', 'r', 'a', 'k');
 const WGHT: OpenTypeTag = OpenTypeTag::from_chars('w', 'g', 'h', 't');
+const OPSZ: OpenTypeTag = OpenTypeTag::from_chars('o', 'p', 's', 'z');
 
 /// A `trak` table of one track (the normal one, value 0) at two sizes: a tracking of 100 units
 /// of the font at 12 points and of -100 units at 24 points, interpolated between them.
@@ -89,6 +90,12 @@ impl IPlatformTypeface for TestTypeface {
 
     fn variation_settings(&self) -> FontVariationSettings {
         self.variation_settings.clone()
+    }
+
+    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
+        let kept = self.variation_settings.variations().iter().filter(|v| settings.try_get_value(v.tag).is_none());
+        let variation_settings = FontVariationSettings::new(kept.chain(settings.variations()).copied());
+        Some(Rc::new(TestTypeface { inner: self.inner.clone(), trak: self.trak, variation_settings }))
     }
 
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
@@ -216,4 +223,29 @@ fn a_variable_font_is_shaped_at_the_position_of_the_typeface() {
 
     // The heavy instance of Inter is wider (its `HVAR` table).
     assert!(bold_width > regular_width, "the heavy text is {bold_width} wide, the regular one {regular_width}");
+}
+
+/// A text is shaped at its optical size (#859): the variable Inter (`opsz` 14 to 32) at the
+/// instance of the size of the text, one instance a whole point kept by the typeface, clamped to
+/// the axis; a font without the axis keeps its typeface.
+#[test]
+fn a_text_is_shaped_at_the_optical_size_of_its_size() {
+    let (shaper, _app) = start();
+    let variable = typeface(INTER_VARIABLE_FONT, None, FontVariationSettings::empty());
+    let small = variable.at_optical_size(9.0);
+    let large = variable.at_optical_size(48.0);
+    let opsz = |typeface: &Rc<GlyphTypeface>| typeface.platform_typeface().variation_settings().try_get_value(OPSZ);
+    assert_eq!((opsz(&small), opsz(&large)), (Some(14.0), Some(32.0)));
+    assert!(Rc::ptr_eq(&large, &variable.at_optical_size(32.4)), "one instance for a whole point");
+    assert_eq!(opsz(&variable.at_optical_size(20.6)), Some(21.0));
+    // An instance is at its optical size and is not asked for others.
+    assert!(Rc::ptr_eq(&large.at_optical_size(14.0), &large));
+
+    // The two designs give the same text other advances at the same size.
+    let text = "Hamburgefonstiv";
+    let width = |typeface: &Rc<GlyphTypeface>| advances(&shaper, typeface, text, 32.0).iter().sum::<f64>();
+    assert_ne!(width(&small), width(&large));
+
+    let fixed = typeface(INTER_FONT, None, FontVariationSettings::empty());
+    assert!(Rc::ptr_eq(&fixed.at_optical_size(48.0), &fixed));
 }

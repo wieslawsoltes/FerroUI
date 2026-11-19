@@ -1,8 +1,8 @@
 //! `{x:Bind}` in the gallery on the compiled x:Bind core (#525, step X7, docs/porting/x-bind.md).
 //!
 //! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `Canvas`,
-//! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `PipsPager`, `Popup`, `ProgressRing`,
-//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `Slider`, `Spacing`, `SplitView`,
+//! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `Line`, `PipsPager`, `Popup`, `ProgressRing`,
+//! `RatingControl`, `RepeatButton`, `RichTextBlock`, `ScrollViewer`, `Shape`, `Slider`, `SplitView`,
 //! `StackPanel`, `TextBlock`, `TitleBar`, `ToggleButton`, `ToggleSwitch` and the window of
 //! `TitleBarWindow.xaml`): the run-time loader compiles the paths of the named elements,
 //! `examples::create` initializes the bindings once the page is wired, and the attach of a page
@@ -12,9 +12,7 @@
 use crate::{examples, tests::start, CATALOG};
 use ferroui_base::Ref;
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{
-    CheckBox, Control, InfoBar, Slider, SplitView, StackPanel, TextBlock, TextBox, Window,
-};
+use ferroui_controls::{CheckBox, Control, InfoBar, SplitView, TextBlock, TextBox, Window};
 use ferroui_markup_xaml::markup_extensions::XBindings;
 
 /// The native pages that keep the x:Bind of their source.
@@ -26,14 +24,16 @@ const X_BIND_PAGES: &[&str] = &[
     "Grid",
     "HyperlinkButton",
     "InfoBar",
+    "Line",
     "PipsPager",
     "Popup",
     "ProgressRing",
     "RatingControl",
     "RepeatButton",
     "RichTextBlock",
+    "ScrollViewer",
+    "Shape",
     "Slider",
-    "Spacing",
     "SplitView",
     "StackPanel",
     "TextBlock",
@@ -44,15 +44,6 @@ const X_BIND_PAGES: &[&str] = &[
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap_or_else(|error| panic!("{id}: {error}"))
-}
-
-fn child<T: ferroui_base::ObjectType>(root: &Ref<Control>, index: usize) -> Ref<T> {
-    root.cast::<StackPanel>()
-        .expect("the root of the page is a stack panel")
-        .children()
-        .get(index)
-        .cast::<T>()
-        .expect("the child of the page")
 }
 
 #[test]
@@ -70,40 +61,38 @@ fn native_pages_compile_the_x_bind_of_their_source_and_initialize_it() {
     }
 }
 
-/// The Binding page: OneWay x:Bind of a slider and a text box (the source's
-/// `SourceTextBoxOneWay.Text, Mode=OneWay`).
+/// The Binding page: the source's OneWay and TwoWay x:Bind between its text boxes, and the x:Bind of
+/// a text box's text through a converter.
 #[test]
-fn binding_page_one_way_x_bind_follows_the_slider_and_the_text_box() {
+fn binding_page_x_bind_mirrors_the_text_boxes_and_converts_the_input() {
     let _application = start();
     let root = page("Binding");
-    let sized = child::<TextBlock>(&root, 1);
-    let mirror = child::<TextBlock>(&root, 3);
-    assert_eq!(sized.font_size(), 20.0);
-    assert_eq!(mirror.text().as_deref(), Some("FerroUI"));
-    root.get_control::<Slider>("SizeSlider").set_range_value(30.0);
-    assert_eq!(sized.font_size(), 30.0);
-    root.get_control::<TextBox>("NameInput").set_text(Some("x:Bind"));
-    assert_eq!(mirror.text().as_deref(), Some("x:Bind"));
+    let text = |name: &str| root.get_control::<TextBox>(name).text().unwrap_or_default();
+    root.get_control::<TextBox>("SourceTextBoxOneWay").set_text(Some("one way"));
+    assert_eq!(text("TargetTextBoxOneWay"), "one way");
+    root.get_control::<TextBox>("TargetTextBoxOneWay").set_text(Some("edited"));
+    assert_eq!(text("SourceTextBoxOneWay"), "one way", "OneWay does not write back");
+    root.get_control::<TextBox>("SourceTextBoxTwoWay").set_text(Some("two"));
+    assert_eq!(text("TargetTextBoxTwoWay"), "two");
+    root.get_control::<TextBox>("TargetTextBoxTwoWay").set_text(Some("way"));
+    assert_eq!(text("SourceTextBoxTwoWay"), "way", "TwoWay writes back");
+    let not_empty = root.get_control::<TextBlock>("NotEmptyText");
+    assert!(!not_empty.is_visible());
+    root.get_control::<TextBox>("InputTextBox").set_text(Some("x"));
+    assert!(not_empty.is_visible());
 }
 
-/// Spacing and SplitView: a OneWay x:Bind of a named element whose name is also a property of
-/// the root (`Spacing`: at the root of a document the named element wins, as WinUI's field), and
-/// a nullable `IsChecked` read into a `bool` target.
+/// SplitView: the TwoWay x:Bind of a nullable `IsChecked` with a `bool` target, read in both
+/// directions.
 #[test]
-fn spacing_and_split_view_pages_follow_their_options() {
+fn split_view_page_pane_follows_its_toggle_button() {
     let _application = start();
-    let root = page("Spacing");
-    let row = child::<StackPanel>(&root, 1);
-    assert_eq!(row.spacing(), 8.0);
-    root.get_control::<Slider>("Spacing").set_range_value(20.0);
-    assert_eq!(row.spacing(), 20.0);
-
     let root = page("SplitView");
-    let split = child::<SplitView>(&root, 1);
+    let split = root.get_control::<SplitView>("splitView");
     assert!(split.is_pane_open());
-    root.get_control::<ToggleButton>("OpenPane").set_is_checked(Some(false));
+    root.get_control::<ToggleButton>("togglePaneButton").set_is_checked(Some(false));
     assert!(!split.is_pane_open());
-    root.get_control::<ToggleButton>("OpenPane").set_is_checked(Some(true));
+    root.get_control::<ToggleButton>("togglePaneButton").set_is_checked(Some(true));
     assert!(split.is_pane_open());
 }
 
