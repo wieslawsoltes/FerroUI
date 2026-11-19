@@ -59,7 +59,7 @@ use xamlx::XamlNamespaces;
 use super::x_bind_path::{self, XBindArgument, XBindFunctionOwner, XBindPath};
 use super::{
     BindingExpressionNode, FerroXamlIlBindingPathTransformer, FerroXamlIlWellKnownTypesExtensions, ParsedBindingPathNode,
-    XamlBindingsTransformException, XamlDirectCallAddHandler,
+    FerroTransformErrors, XamlDirectCallAddHandler,
 };
 use crate::compiler_extensions::{
     TypeCastPathElementNode, XBindBindBack, XBindEventHandlerPathElementNode, XBindFunctionArgument,
@@ -104,7 +104,7 @@ pub fn map_type_reference(tref: &XamlAstXmlTypeReference) {
 }
 
 fn error(message: impl Into<String>, line_info: &dyn IXamlLineInfo) -> XamlError {
-    XamlBindingsTransformException::new(message, line_info, None)
+    XamlError::bindings_transform(message, line_info, None)
 }
 
 /// The name of a property reference, resolved or not.
