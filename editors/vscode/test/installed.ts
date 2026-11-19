@@ -8,6 +8,7 @@ import { sourceOf } from '../src/textDocument';
 import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import { isInside } from '../src/workspacePaths';
 import { verifyHostedPreview } from './hostedPreview';
+import { reviewStateSource } from './rsxStatesMcp';
 import { until } from './wait';
 
 export async function run(): Promise<void> {
@@ -44,6 +45,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
+        assert.ok(native.capabilities.rsxStateAuthoring, 'The installed preview maps typed Rust state declarations');
         assert.ok(native.capabilities.hostedAnimationRestoration, 'The installed preview restores the accepted app-hosted timeline');
         const source = sourceOf(document, 'xaml', new vscode.Position(0, 0));
         const snapshot = await native.render(source, { width: 800, height: 520, dark: false }, 1);
@@ -64,6 +66,20 @@ export async function run(): Promise<void> {
         const curve = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
             target: track.target, property: track.property, window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
         assert.equal(curve.points.find(point => point.time === .5)?.value, .65);
+        const stateSource = { uri: vscode.Uri.joinPath(workspace.uri, 'review_states.rs').toString(),
+            language: 'rust' as const, source: reviewStateSource, caret: { line: 3, character: 2 } };
+        const states = await native.render(stateSource, { width: 640, height: 420, dark: false }, 3);
+        assert.ok(states.image, states.renderError ?? undefined);
+        const { groups: [group] } = await native.studioQuery(3, 'designer_states', {}) as {
+            groups: { name: string; transitions: Array<{ from: string | null; to: string; duration: number }> }[];
+        };
+        assert.equal(group.name, 'Review');
+        const forward = group.transitions.find(route => route.from === 'Idle' && route.to === 'Ready');
+        assert.ok(forward);
+        assert.equal(forward.duration, .64);
+        forward.duration = .8;
+        const planned = await native.studioEdit(stateSource, 3, 'designer_state', { action: 'upsert', model: group }, []);
+        assert.deepEqual(planned.edits.map(edit => edit.newText), ['800u64']);
         const { animationQuery } = await native.listenHosted(randomBytes(32).toString('hex'));
         const capabilities = new URLSearchParams(animationQuery);
         assert.equal(capabilities.get('ferroui-design-animation'), '1', 'The installed relay negotiates native application animations');
