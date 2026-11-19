@@ -244,6 +244,26 @@ impl Storyboard {
         })
     }
 
+    /// The animations of the storyboard with their targets (the names looked up in `names`).
+    pub(crate) fn resolved_animations(&self, names: Option<&Names>) -> Vec<ResolvedAnimation> {
+        let mut resolved = Vec::new();
+        for child in self.children.snapshot().iter() {
+            resolve(child, &[], &Inherited::default(), names, &mut resolved);
+        }
+        resolved
+    }
+
+    /// The length of the active period of the storyboard: `None` for ever.
+    pub(crate) fn active_duration(&self) -> Option<Duration> {
+        let (timing, natural) = timing_of(self);
+        timing.active_duration(natural)
+    }
+
+    /// Whether the storyboard has begun and was not stopped (it may be filling).
+    pub(crate) fn is_running(&self) -> bool {
+        self.run.borrow().is_some()
+    }
+
     fn current_run(&self) -> Option<Rc<Run>> {
         self.run.borrow().clone()
     }
@@ -361,20 +381,29 @@ impl Inherited {
     }
 }
 
-/// Collects the animations under `timeline`, with their targets resolved.
-fn collect(
+/// An animation of a storyboard with its target resolved.
+pub(crate) struct ResolvedAnimation {
+    pub(crate) animation: Ref<Timeline>,
+    // The storyboards between the root and the animation, outermost first.
+    chain: Vec<Ref<Timeline>>,
+    pub(crate) object: Ref<FerroObject>,
+    pub(crate) property: &'static FerroProperty,
+}
+
+/// Resolves the targets of the animations under `timeline`.
+fn resolve(
     timeline: &Ref<Timeline>,
     chain: &[Ref<Timeline>],
     inherited: &Inherited,
     names: Option<&Names>,
-    leaves: &mut Vec<Leaf>,
+    resolved: &mut Vec<ResolvedAnimation>,
 ) {
     let inherited = inherited.of(timeline);
     if let Some(storyboard) = timeline.downcast_ref::<Storyboard>() {
         let mut chain = chain.to_vec();
         chain.push(timeline.clone());
         for child in storyboard.children.snapshot().iter() {
-            collect(child, &chain, &inherited, names, leaves);
+            resolve(child, &chain, &inherited, names, resolved);
         }
         return;
     }
@@ -384,10 +413,7 @@ fn collect(
         }
         let found = names.and_then(|names| names.find(&inherited.name));
         if found.is_none() {
-            warn(&format!(
-                "Storyboard: no element named '{}' for an animation.",
-                inherited.name
-            ));
+            warn(&format!("Storyboard: no element named '{}' for an animation.", inherited.name));
         }
         found
     });
@@ -397,33 +423,53 @@ fn collect(
         }
         return;
     };
-    let (object, property) = match property_path::resolve(&target, &inherited.property) {
-        Ok(resolved) => resolved,
-        Err(error) => {
-            warn(&format!("Storyboard: {error}."));
-            return;
-        }
+    // A property given in code (the generated animations of a visual transition) wins over the
+    // path.
+    let (object, property) = match timeline.explicit_property() {
+        Some(property) => (target, property),
+        None => match property_path::resolve(&target, &inherited.property) {
+            Ok(resolved) => resolved,
+            Err(error) => {
+                warn(&format!("Storyboard: {error}."));
+                return;
+            }
+        },
     };
     if property.is_read_only() {
         warn(&format!("Storyboard: the property '{property}' is read-only."));
         return;
     }
-    let Some(curve) = Curve::of(timeline, &object, property) else {
-        return;
-    };
-    let natural = natural_of(timeline).unwrap_or(Duration::ZERO);
-    leaves.push(Leaf {
-        animation: timeline.clone(),
-        chain: chain.to_vec(),
-        natural,
-        target: object.downgrade(),
-        property,
-        curve,
-        source: Rc::new(AnimatedSource::default()),
-        handle: RefCell::new(None),
-        direct_old: RefCell::new(None),
-        completed: Cell::new(false),
-    });
+    resolved.push(ResolvedAnimation { animation: timeline.clone(), chain: chain.to_vec(), object, property });
+}
+
+/// Collects the animations under `timeline`, with their targets resolved.
+fn collect(
+    timeline: &Ref<Timeline>,
+    chain: &[Ref<Timeline>],
+    inherited: &Inherited,
+    names: Option<&Names>,
+    leaves: &mut Vec<Leaf>,
+) {
+    let mut resolved = Vec::new();
+    resolve(timeline, chain, inherited, names, &mut resolved);
+    for ResolvedAnimation { animation, chain, object, property } in resolved {
+        let Some(curve) = Curve::of(&animation, &object, property) else {
+            continue;
+        };
+        let natural = natural_of(&animation).unwrap_or(Duration::ZERO);
+        leaves.push(Leaf {
+            animation,
+            chain,
+            natural,
+            target: object.downgrade(),
+            property,
+            curve,
+            source: Rc::new(AnimatedSource::default()),
+            handle: RefCell::new(None),
+            direct_old: RefCell::new(None),
+            completed: Cell::new(false),
+        });
+    }
 }
 
 /// A value of a double, colour or point animation.
@@ -506,8 +552,20 @@ fn base_values(
 ) -> Option<(Animated, Animated)> {
     let current = object.get_value_untyped(property);
     let current = wrap(&current)?;
+    // The value without animations: the base value, else the default of the property for the
+    // type of the object (an inherited value is not told apart from the default here).
     let base = object.get_base_value_untyped(property);
-    Some((current, wrap(&base).unwrap_or(current)))
+    let default = || -> Option<BoxedValue> {
+        if let Some(styled) = property.as_styled::<f64>() {
+            return Some(Rc::new(styled.get_default_value_for(object)));
+        }
+        if let Some(styled) = property.as_styled::<Color>() {
+            return Some(Rc::new(styled.get_default_value_for(object)));
+        }
+        property.as_styled::<Point>().map(|styled| Rc::new(styled.get_default_value_for(object)) as BoxedValue)
+    };
+    let base = wrap(&base).or_else(|| default().and_then(|value| wrap(&value)));
+    Some((current, base.unwrap_or(current)))
 }
 
 fn sorted<T>(mut frames: Vec<(SignedDuration, KeyFrameEase, T)>) -> (Vec<(SignedDuration, KeyFrameEase)>, Vec<T>) {

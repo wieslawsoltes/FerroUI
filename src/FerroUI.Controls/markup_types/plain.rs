@@ -10,7 +10,7 @@ use crate::primitives::popup_positioning::{
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
 use crate::animation::{ColorKeyFrame, DoubleKeyFrame, ObjectKeyFrame, PointKeyFrame, Timeline};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup};
+use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup, VisualTransition};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -501,6 +501,20 @@ ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
     methods: [fn Add(Ref<StateTriggerBase>) => |list: &FerroList<Ref<StateTriggerBase>>, item: Ref<StateTriggerBase>| list.add(item)],
 });
 
+// The transitions of a visual state group (`VisualStateGroup.Transitions`).
+ferro_markup_type!(class FerroListOf<Ref<VisualTransition>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualTransition>>, Option<FerroList<Ref<VisualTransition>>>],
+    this: FerroList<Ref<VisualTransition>>,
+    generic: "FerroList`1" [Ref<VisualTransition>],
+    constructors: [() => FerroList::<Ref<VisualTransition>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualTransition>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualTransition>) => |list: &FerroList<Ref<VisualTransition>>, item: Ref<VisualTransition>| list.add(item)],
+});
+
 // The timelines of a storyboard (`Storyboard.Children`).
 ferro_markup_type!(class FerroListOf<Ref<Timeline>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -645,6 +659,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualTransition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Timeline>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<DoubleKeyFrame>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<ColorKeyFrame>> as MarkupTyped>::MARKUP,
@@ -671,6 +686,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualTransition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Timeline>>>();
     ValueTypes::register_nullable::<FerroList<Ref<DoubleKeyFrame>>>();
     ValueTypes::register_nullable::<FerroList<Ref<ColorKeyFrame>>>();
