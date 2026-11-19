@@ -402,7 +402,6 @@ impl DesignerSession {
         self.generation += 1;
     }
 
-    #[cfg(feature = "mcp")]
     pub(crate) fn start_combined_playback(&mut self, reference: Option<NodeId>, elapsed: Option<f64>) -> Result<(), String> {
         if !self.animation.programs.iter().any(|program| self.animation_preview_available(program)) {
             return Err("Choose live preview targets for an animation before playing all programs".into());

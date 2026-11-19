@@ -66,7 +66,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::object(keyframe_draft(), draft_required), false),
         s::tool("designer_keyframe_clipboard", "Copy selected typed keys and relative times for paste into compatible tracks. Returns portable clipboard data.",
             s::object(json!({"program":s::id(),"keyframes":keys(),"expected_revision":s::revision()}), &["program","keyframes"]), false),
-        s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
+        s::actions("designer_program","Author animation programs and keyframes, arrange clips on a shared clock, set preview targets, or control playback. IDs refer to the current document. Every action checks expected_revision.",vec![
             s::action("create",json!({"name":s::string(),"owner":s::id(),"selector":s::string(),"duration":s::time()}), &["name","owner","selector","duration"],true),
             s::action("select",json!({"program":s::id()}), &["program"],true),
             s::action("rename",json!({"program":s::id(),"name":s::string()}), &["program","name"],true),
@@ -76,6 +76,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("source",json!({"program":s::id(),"source":s::string()}), &["program","source"],true),
             s::action("update",json!({"program":s::id(),"timeline":s::timeline()}), &["program","timeline"],true),
             s::action("update_timing",json!({"program":s::id(),"timing":s::timing_edit()}), &["program","timing"],true),
+            s::action("place_clips",json!({"programs":ids(),"start":s::time(),"gap":s::number()}), &["programs"],true),
             s::action("upsert_keyframe",keyframe_draft(),draft_required,true),
             s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
@@ -88,6 +89,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
             s::action("preview",json!({"programs":ids(),"time":s::time()}), &["programs","time"],true),
             s::action("scrub",json!({"program":s::id(),"time":s::time()}), &["program","time"],true),
+            s::action("scrub_all",json!({"program":s::id(),"time":s::time()}), &["time"],true),
             s::action("play_program",json!({"program":s::id(),"time":s::time(),"from_playhead":{"type":"boolean"}}), &["program"],true),
             s::action("advance_program",json!({"program":s::id(),"seconds":s::time()}), &["program","seconds"],true),
             s::action("pause_program",json!({"program":s::id()}), &["program"],true),
@@ -213,6 +215,9 @@ pub(super) fn call(
                         .map_err(|error| format!("Invalid timing: {error}"))?;
                     session.edit_animation_timing(node_id(args, "program")?, timing)?;
                 }
+                "place_clips" => session.place_animation_clips(
+                    &decode::<Vec<u64>>(args, "programs")?, args["start"].as_f64(), args["gap"].as_f64().unwrap_or(0.0),
+                )?,
                 "upsert_keyframe" => session.edit_program_keyframe(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
                     keyframe_draft(args)?,
@@ -275,6 +280,10 @@ pub(super) fn call(
                     let time = number(args, "time")?;
                     session.scrub_animation_program(id, time)?;
                     return Ok(json!({"timelinePosition":{"time":time,"playing":false,"pose":session.timeline_preview_pose()}}));
+                }
+                "scrub_all" => {
+                    session.scrub_animation_clips(args["program"].as_u64(), number(args, "time")?)?;
+                    return Ok(playback_position(session));
                 }
                 "play_program" => {
                     session.start_animation_playback(
@@ -521,6 +530,10 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
         }
         if let Some(preview) = session.program_preview(program) {
             model["preview"] = json!(preview);
+        }
+        if let Some((clock, editable)) = session.animation_clip_clock(program) {
+            let span = clock.clip_span();
+            model["clip"] = json!({"start":span.start,"end":span.end,"editable":editable});
         }
         Ok(model)
     }).collect()

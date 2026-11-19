@@ -87,6 +87,16 @@ impl RustDocument {
             .edit_animation(declaration, edit)
     }
 
+    pub(crate) fn place_animation_clips(
+        &self, document: &Document, placements: &[(NodeId, f64)],
+    ) -> Result<Vec<TextPatch>, String> {
+        let map = self.map().ok_or("Open the current Rust view")?;
+        let placements = placements.iter().map(|&(program, delay)| {
+            Ok((self.animation(document, program)?.declaration, delay))
+        }).collect::<Result<Vec<_>, String>>()?;
+        self.catalog().project(&self.source, map.invocation.start)?.place_animation_clips(&placements)
+    }
+
     pub(crate) fn edit_state_group(
         &self, document: &Document, owner: NodeId, name: &str, model: Option<&VisualStateGroup>,
     ) -> Result<Vec<TextPatch>, String> {

@@ -1,6 +1,8 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
 #[path = "workspace_timeline/clipboard.rs"]
 mod clipboard;
+#[path = "workspace_timeline/clips.rs"]
+mod clips;
 #[path = "workspace_timeline/curves.rs"]
 mod curves;
 #[path = "workspace_timeline/easing.rs"]
@@ -30,6 +32,11 @@ pub(super) struct TimelineUi {
     curves: Option<CurveMetric>,
     curve_channels: std::collections::BTreeMap<(NodeId, String), CurveChannel>,
     keyframe_paste: Option<Ref<Flyout>>,
+    compare_clips: bool,
+    clip_scope: Option<(String, Option<usize>)>,
+    clip_selection: Vec<NodeId>,
+    clip_focus: Option<NodeId>,
+    clip_duration: f64,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -98,6 +105,10 @@ impl DesignerWorkspace {
             .get_control::<ContentControl>("TimelineInspectorHost")
             .set_content(None);
         self.timeline_lanes.borrow_mut().clear();
+        if self.comparing_animation_clips() {
+            self.rebuild_clip_tracks(focus_was_ruler);
+            return;
+        }
         let session = self.session.borrow();
         let tracks = session.timeline().tracks.clone();
         let warnings = session.animation_warnings().to_vec();
@@ -581,7 +592,7 @@ impl DesignerWorkspace {
                 if !seconds.is_finite() {
                     return;
                 }
-                let duration = this.session.borrow().timeline().duration;
+                let duration = this.timeline_view_duration();
                 let (start, end) = this
                     .timeline_ui
                     .borrow()
@@ -598,7 +609,7 @@ impl DesignerWorkspace {
         if !factor.is_finite() || factor <= 0.0 || !pivot.is_finite() {
             return;
         }
-        let duration = self.session.borrow().timeline().duration;
+        let duration = self.timeline_view_duration();
         let (start, end) = self
             .timeline_ui
             .borrow()
@@ -611,7 +622,7 @@ impl DesignerWorkspace {
         self.set_timeline_view(Some((start, start + span)));
     }
     fn set_timeline_view(&self, view: Option<(f64, f64)>) {
-        let duration = self.session.borrow().timeline().duration;
+        let duration = self.timeline_view_duration();
         let view = view.filter(|(start, end)| *start >= 0.0 && *end > *start && *end <= duration);
         self.timeline_ui.borrow_mut().view = view;
         let (start, end) = view.unwrap_or((0.0, duration));

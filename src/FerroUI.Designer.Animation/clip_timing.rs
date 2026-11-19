@@ -56,11 +56,14 @@ pub fn clip_delays(clips: &[&Timeline], start: Option<f64>, gap: f64) -> Result<
             let time = end.ok_or_else(|| {
                 AnimationError("An infinite clip must be last in the sequence".into())
             })? + gap;
+            // Adding and subtracting the same authored span can straddle the
+            // boundary by a few bits. Preserve equal starts at that boundary.
+            let rounding = f64::EPSILON * actual_start.abs().max(gap.abs()) * 4.0;
             require(
-                time >= actual_start,
+                time >= actual_start - rounding,
                 "The overlap cannot exceed the preceding clip's length",
             )?;
-            next = Some(time);
+            next = Some(time.max(actual_start));
         }
     }
     Ok(delays)
@@ -127,6 +130,11 @@ mod tests {
             [2.0, 2.188]
         );
         assert!(clip_delays(&[&first, &second], None, -1.3).is_err());
+        let coincident = Timeline::new(0.8).unwrap();
+        assert_eq!(
+            clip_delays(&[&coincident, &coincident], Some(0.1), -0.8).unwrap(),
+            [0.1, 0.1]
+        );
         assert!(clip_delays(&[&first], Some(-1.0), 0.0).is_err());
         assert!(clip_delays(&[&first], Some(f64::MAX), 0.0).is_err());
         second.repeat = Repeat::Infinite;

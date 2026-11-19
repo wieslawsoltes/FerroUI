@@ -387,7 +387,7 @@ impl DesignerWorkspace {
         self.scrubber.value_changed(move |_, _| {
             if let Some(this) = weak.upgrade() {
                 if !this.guard.get() {
-                    let result = this.session.borrow_mut().seek(this.scrubber.value());
+                    let result = this.seek_workspace_timeline(this.scrubber.value());
                     this.report(result);
                     this.surface.invalidate_visual();
                 }
@@ -408,9 +408,9 @@ impl DesignerWorkspace {
                         .map_err(|_| "Enter a valid number of seconds".to_string())
                         .and_then(|value| {
                             if is_duration {
-                                this.session.borrow_mut().set_duration(value)
+                                if this.comparing_animation_clips() { Ok(()) } else { this.session.borrow_mut().set_duration(value) }
                             } else {
-                                this.session.borrow_mut().seek(value)
+                                this.seek_workspace_timeline(value)
                             }
                         });
                     this.report(result);
@@ -618,6 +618,13 @@ impl DesignerWorkspace {
                 let mut session = self.session.borrow_mut();
                 if session.is_playing() {
                     session.pause();
+                } else if self.comparing_animation_clips() {
+                    let restart = session.animation.playback_completed.then_some(0.0);
+                    let result = session.start_combined_playback(None, restart);
+                    drop(session);
+                    self.refresh(false);
+                    self.report(result);
+                    return;
                 } else {
                     session.play();
                 }
@@ -684,15 +691,16 @@ impl DesignerWorkspace {
             lane.set_playhead(session.time());
         }
         self.guard.set(true);
-        self.scrubber.set_maximum(session.timeline().duration);
+        let duration = self.timeline_view_duration();
+        self.scrubber.set_maximum(duration);
         self.scrubber
-            .set_range_value(session.time().min(session.timeline().duration));
+            .set_range_value(session.time().min(duration));
         if !self.time.is_focused() {
             self.time.set_text(Some(&format!("{:.2}", session.time())));
         }
         if !self.duration.is_focused() {
             self.duration
-                .set_text(Some(&format!("{}", session.timeline().duration)));
+                .set_text(Some(&format!("{duration}")));
         }
         self.guard.set(false);
         self.root

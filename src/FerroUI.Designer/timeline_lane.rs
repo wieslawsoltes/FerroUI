@@ -1,6 +1,7 @@
 //! Native timeline track and ruler. Both share one time axis, so labels, keyframes
 //! and scrubbing remain aligned while zooming. A drag edits a ghost marker and
 //! commits once on release; capture loss or Escape leaves authored keys intact.
+mod clip;
 mod curve;
 mod easing_preview;
 pub use easing_preview::EasingPreview;
@@ -85,6 +86,7 @@ pub struct TimelineLane {
     zoom: RefCell<Option<MoveAction>>,
     pan: RefCell<Option<TimeAction>>,
     curve: RefCell<Option<curve::Plot>>,
+    clip: Cell<Option<clip::Band>>,
 }
 ferro_class!(TimelineLane:Control);
 ferro_class_info!(TimelineLane {
@@ -120,6 +122,7 @@ impl TimelineLane {
             zoom: RefCell::new(None),
             pan: RefCell::new(None),
             curve: RefCell::new(None),
+            clip: Cell::new(None),
         });
         this.set_height(36.0);
         this.set_min_width(120.0);
@@ -830,7 +833,9 @@ impl VisualImpl for TimelineLane {
                 context.draw_text(&text, Point::new(origin, 2.0));
             }
         }
-        if !this.ruler.get() {
+        if let Some(band) = this.clip.get() {
+            this.draw_clip(context, bounds, band);
+        } else if !this.ruler.get() {
             let center = bounds.height * 0.5;
             let keys = this.keys.borrow();
             let start = keys.partition_point(|key| *key < this.view_start.get());

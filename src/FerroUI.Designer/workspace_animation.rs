@@ -220,6 +220,10 @@ impl DesignerWorkspace {
                 }
             });
         }
+        let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("TimelineClips").click(move |_, _| {
+            if let Some(this) = weak.upgrade() { this.toggle_clip_comparison(); }
+        });
     }
     fn authoring_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
         let owner = self
@@ -337,14 +341,19 @@ impl DesignerWorkspace {
     pub(super) fn refresh_animation_programs(&self) {
         let session = self.session.borrow();
         let rust = session.uses_rust_source();
+        let clips = self.comparing_animation_clips();
         for name in [
-            "Record", "CommitAnimation", "BehaviorsMode", "SetAnimationSelector",
+            "Record", "CommitAnimation",
         ] {
+            self.root.get_control::<Button>(name).set_is_visible(!rust && !clips);
+        }
+        for name in ["BehaviorsMode", "SetAnimationSelector"] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
+        self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
 
         self.root.get_control::<TextBox>("AnimationSelector").set_is_read_only(rust);
-        self.duration.set_is_read_only(rust);
+        self.duration.set_is_read_only(rust || clips);
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
         let active = session.animation_programs().iter()
             .find(|program| Some(program.id) == session.active_animation_program());
@@ -358,7 +367,7 @@ impl DesignerWorkspace {
             self.root.get_control::<Button>(name).set_is_enabled(!rust || active.is_some());
         }
         self.root.get_control::<Button>("Keyframe")
-            .set_is_visible(!rust || active.is_some_and(|program| program.timeline.is_some()));
+            .set_is_visible(!clips && (!rust || active.is_some_and(|program| program.timeline.is_some())));
         let previous = self.guard.replace(true);
         picker.set_placeholder_text(Some("No animation".into()));
         picker.items().clear();

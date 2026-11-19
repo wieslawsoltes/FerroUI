@@ -70,6 +70,52 @@ fn timeline_key(lane: &crate::TimelineLane, key: ferroui_base::input::Key) {
     assert!(event.handled());
 }
 
+#[test]
+fn clip_comparison_places_both_offsets_in_one_studio_transaction() {
+    use ferroui_base::input::Key;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    click(&workspace.control().get_control::<Button>("TimelineClips"));
+    let tracks = workspace.control().get_control::<StackPanel>("Tracks");
+    for index in 0..2 {
+        let row = tracks.children().to_vec()[index].cast::<Grid>().unwrap();
+        let label = row.children().to_vec()[0].cast::<Button>().unwrap();
+        click(&label);
+    }
+    let inspector = keyframe_editor(&workspace);
+    keyframe_input(&inspector, "ClipStart").set_text(Some("0.5"));
+    keyframe_input(&inspector, "ClipGap").set_text(Some("0.25"));
+    let apply = inspector.children().to_vec().into_iter()
+        .find(|control| control.name().as_deref() == Some("ApplyClipPlacement"))
+        .unwrap().cast::<Button>().unwrap();
+    click(&apply);
+    let session = workspace.session();
+    assert!(session.borrow().document().source().contains("Delay=\"0:0:0.5000000\""));
+    assert!(session.borrow().document().source().contains("Delay=\"0:0:1.5500000\""));
+    timeline_key(&timeline_ruler(&workspace), Key::End);
+    assert!(session.borrow().animation.play_all);
+    assert!((session.borrow().time() - 2.65).abs() < 1e-8);
+    assert!(!session.borrow().is_playing());
+    {
+        // Apply the edited markup with the actual runtime animators as well as the designer sampler.
+        let mut session = session.borrow_mut();
+        let session = &mut *session;
+        let programs = session.animation_programs().to_vec();
+        let targets = programs.iter().map(|clip| session.preview.visual(clip.primary_target()).unwrap()).collect::<Vec<_>>();
+        session.preview.clear_animation();
+        session.animation.native.seek(&programs, &session.preview, 1.0).unwrap();
+        assert!(targets[0].opacity() > 0.2);
+        assert!((targets[1].opacity() - 0.2).abs() < 1e-8);
+        session.animation.native.advance_to(&programs, &session.preview, 2.1).unwrap();
+        assert_eq!(targets[0].opacity(), 1.0);
+        assert!(targets[1].opacity() > 0.2);
+        session.animation.native.stop();
+    }
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().document().source(), source);
+}
+
 fn authoring_row(workspace: &DesignerWorkspace, name: &str) -> Ref<Grid> {
     workspace
         .control()

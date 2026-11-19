@@ -187,6 +187,9 @@ impl TimelineLane {
     }
 
     pub(super) fn key_at_position(&self, position: Point) -> Option<f64> {
+        if let Some(band) = self.clip.get() {
+            return self.clip_key_at(position, band);
+        }
         if self.curve.borrow().is_none() {
             return self.key_at(position.x);
         }
