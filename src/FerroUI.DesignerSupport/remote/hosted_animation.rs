@@ -57,7 +57,7 @@ pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
         return None;
     }
     let document = Document::new(update.source.xaml.as_deref()?).ok()?;
-    let programs = AnimationPrograms::scan(&document);
+    let programs = AnimationPrograms::scan_hosted(&document);
     (!programs.is_empty()).then(|| AnimationSource {
         identity: format!("ferroui-design/{}", update.revision),
         document,

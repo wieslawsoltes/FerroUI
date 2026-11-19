@@ -1,5 +1,5 @@
 use crate::project_rust;
-use ferroui_designer_animation::{Easing, VisualStateGroup};
+use ferroui_designer_animation::{AnimationPrograms, Easing, VisualStateGroup};
 use ferroui_designer_core::{Document, TextPatch};
 
 #[test]
@@ -27,7 +27,10 @@ fn visual_states_project_native_routes_and_retain_original_rust_sources() {
     assert!(!projection.can_replace_structure());
     assert_eq!(projection.animation_issues.len(), 1);
     let (xaml, map) = projection.mapped_markup();
+    assert_eq!(xaml, project_rust(&source, offset).unwrap().xaml());
     let document = Document::new(xaml).unwrap();
+    assert!(!AnimationPrograms::scan(&document).is_empty());
+    assert!(AnimationPrograms::scan_hosted(&document).is_empty());
     let [state] = VisualStateGroup::read(&document).try_into().unwrap();
     let map = map
         .state_group(

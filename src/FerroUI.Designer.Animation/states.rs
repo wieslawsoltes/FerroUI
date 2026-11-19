@@ -15,6 +15,23 @@ const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";
 const TRANSITION_MARKER: &str = "ferroui-designer-transition:";
 pub(crate) const STATE_PROGRAM_MARKER: &str = "ferroui-designer-state-program:";
+
+pub(crate) fn is_projected_state_animation(document: &Document, id: NodeId) -> bool {
+    if state_program_role(document, id).is_none() {
+        return false;
+    }
+    let ast = document.ast();
+    let mut parent = ast.node(id).and_then(|node| node.parent);
+    while let Some(node) = parent.and_then(|id| ast.node(id)) {
+        if node.children.iter().filter_map(|id| ast.node(*id)).any(|child| {
+            child.kind == NodeKind::Comment && child.text.as_deref().is_some_and(|text| text.trim().starts_with(PROJECTED_GROUP_MARKER))
+        }) {
+            return true;
+        }
+        parent = node.parent;
+    }
+    false
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StateSetter {
     pub target: String,
@@ -250,6 +267,7 @@ impl VisualStateGroup {
         self.validate()?;
         require(!owner_selector.is_empty(), "State styles require an owner selector")?;
         let metadata = serde_json::to_string(self).map_err(core_error)?;
+        let projected = marker == PROJECTED_GROUP_MARKER;
         let mut result = format!(
             "<Style Selector=\"{}\"><!--{marker}{}-->",
             escape(owner_selector),
@@ -267,7 +285,7 @@ impl VisualStateGroup {
                         transition.easing.clone(),
                     )
                 });
-            result.push_str(&self.state_styles(state, None, duration, easing, &target_selector)?);
+            result.push_str(&self.state_styles(state, None, duration, easing, &target_selector, projected)?);
         }
         for transition in self
             .transitions
@@ -285,6 +303,7 @@ impl VisualStateGroup {
                 transition.duration.max(0.000_000_1),
                 transition.easing.clone(),
                 &target_selector,
+                projected,
             )?);
         }
         for transition in self
@@ -305,6 +324,7 @@ impl VisualStateGroup {
         duration: f64,
         easing: Easing,
         target_selector: &impl Fn(&str) -> String,
+        projected: bool,
     ) -> Result<String> {
         let mut targets = BTreeMap::<&str, Vec<&StateSetter>>::new();
         for setter in &state.setters {
@@ -394,6 +414,7 @@ impl VisualStateGroup {
                         state.name,
                         if target.is_empty() { "owner" } else { target }
                     ),
+                    projected,
                 )?);
                 result.push_str("</Style.Animations>");
             }
@@ -416,6 +437,7 @@ impl VisualStateGroup {
                         state.name,
                         if target.is_empty() { "owner" } else { target }
                     ),
+                    projected,
                 )?;
                 // Merge into an existing property collection when literals and bindings coexist.
                 if let Some(end) = result
@@ -1288,7 +1310,7 @@ fn merge_state_collection(
             old_timing.1 != new_timing.1,
         )?;
         let merged = if state_program_role(&output, id).is_none() {
-            state_program(&merged, role, "State animation")?
+            state_program(&merged, role, "State animation", false)?
         } else {
             merged
         };
@@ -1578,16 +1600,23 @@ fn replace_endpoint(document: &Document, setter: NodeId, value: &str, edits: &mu
     });
 }
 
-fn state_program(source: &str, role: &str, name: &str) -> Result<String> {
-    let mut document =
-        Document::new(crate::programs::named_source(source, name)?).map_err(core_error)?;
+fn state_program(source: &str, role: &str, name: &str, projected: bool) -> Result<String> {
+    let mut marker = format!("<!--{STATE_PROGRAM_MARKER}{role}-->");
+    let mut document = if projected {
+        // Source identity comes from the Rust declaration. Reprojection of the
+        // accepted buffer must produce identical markup for the edit guard.
+        marker.push_str(&crate::programs::name_marker(name));
+        Document::new(source)
+    } else {
+        Document::new(crate::programs::named_source(source, name)?)
+    }.map_err(core_error)?;
     document
         .apply(
             "Identify state-owned program",
             vec![Edit::InsertChild {
                 parent: document.ast().root(),
                 index: 0,
-                source: format!("<!--{STATE_PROGRAM_MARKER}{role}-->"),
+                source: marker,
             }],
         )
         .map_err(core_error)?;

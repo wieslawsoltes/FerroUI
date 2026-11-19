@@ -248,6 +248,15 @@ fn xaml_annotation(attribute: &ferroui_designer_core::Attribute) -> bool {
 
 pub struct AnimationPrograms;
 impl AnimationPrograms {
+    /// App-hosted clips are individually seekable. Generated Rust state routes
+    /// use the live application clock through their state handlers.
+    pub fn scan_hosted(document: &Document) -> Vec<AnimationProgram> {
+        Self::scan(document)
+            .into_iter()
+            .filter(|program| !crate::states::is_projected_state_animation(document, program.id))
+            .collect()
+    }
+
     /// Enumerate every Animation, including resource, nested-style and custom payload programs.
     /// Hosts resolve selectors against their live tree and then invoke the codec registry.
     pub fn scan(document: &Document) -> Vec<AnimationProgram> {
@@ -369,7 +378,7 @@ impl AnimationPrograms {
     pub fn rename(document: &Document, id: NodeId, name: &str) -> Result<Vec<Edit>> {
         validate_name(name)?;
         let node = animation_node(document, id)?;
-        let comment = format!("<!--{NAME_MARKER}{}-->", encode_text(name));
+        let comment = name_marker(name);
         let edit = if let Some(marker) = node
             .children
             .iter()
@@ -773,6 +782,10 @@ pub(crate) fn named_source(source: &str, name: &str) -> Result<String> {
         .apply("Name animation", edits)
         .map_err(core_error)?;
     Ok(document.source().into())
+}
+
+pub(crate) fn name_marker(name: &str) -> String {
+    format!("<!--{NAME_MARKER}{}-->", encode_text(name))
 }
 /// Extract a standalone XML subtree with its inherited namespace declarations intact.
 pub fn fragment(document: &Document, id: NodeId) -> Result<String> {
