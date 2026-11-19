@@ -28,14 +28,18 @@ static FerroHandle create(int64_t type_id) {
     return object;
 }
 
+/* The classes of the program, registered by their entries before the application starts
+ * (docs/c-abi.md, section 16). */
+static int64_t window_type, panel_type;
+
 static int64_t on_start(int64_t token) {
     (void)token;
     check((FerroStatus)gauge_register(), "gauge_register");
-    FerroHandle window = create(ferro_type_id("Window", -1));
+    FerroHandle window = create(window_type);
     check(ferro_set_str(window, ferro_property_id("Title", -1), "Gauges", -1), "Title");
     check(ferro_set_f64(window, ferro_property_id("Width", -1), 320), "Width");
     check(ferro_set_f64(window, ferro_property_id("Height", -1), 200), "Height");
-    FerroHandle panel = create(ferro_type_id("StackPanel", -1));
+    FerroHandle panel = create(panel_type);
     check(ferro_set_f64(panel, ferro_property_id("Spacing", -1), 12), "Spacing");
     check(ferro_set_str(panel, ferro_property_id("Margin", -1), "24", -1), "Margin");
     FerroHandle gauges[3];
@@ -52,6 +56,7 @@ static int64_t on_start(int64_t token) {
         double level = ferro_get_f64_or(gauges[1], gauge_level, -1);
         int ok = width == 160 && level == 0.5;
         printf("script: a gauge measures %.0f wide, the second shows %.2f: %s\n", width, level, ok ? "ok" : "FAILED");
+        if (!ok) exit(1);
     }
     for (int n = 0; n < 3; n++) ferro_release(gauges[n]);
     ferro_release(panel);
@@ -60,6 +65,8 @@ static int64_t on_start(int64_t token) {
 }
 
 int main(void) {
+    window_type = ferro_type_window();
+    panel_type = ferro_type_stack_panel();
     FerroStatus status = ferro_app_run(NULL, on_start, 0);
     if (status != FERRO_OK) {
         fprintf(stderr, "ferro_app_run failed (%d): %s\n", status, ferro_last_error());
