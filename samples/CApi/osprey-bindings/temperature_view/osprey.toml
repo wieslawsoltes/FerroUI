@@ -1,0 +1,9 @@
+# The temperature converter with layer 2 (frames) of the generated Osprey bindings (docs/osprey.md).
+[project]
+name = "temperature_view"
+source_roots = ["src", "../../../../bindings/osprey"]
+default_namespace = "app"
+entry = "src/main.osp"
+
+[modules]
+allow_wildcard_imports = true

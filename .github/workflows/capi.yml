@@ -9,6 +9,7 @@ on:
     paths:
       - 'src/FerroUI.CApi/**'
       - 'samples/CApi/**'
+      - 'bindings/**'
       - 'docs/c-abi.md'
       - 'Cargo.toml'
       - 'Cargo.lock'
