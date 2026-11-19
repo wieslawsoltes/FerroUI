@@ -1803,7 +1803,7 @@
       "examples": []
     },
     "ProgressRing": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ProgressRing.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1825,9 +1825,13 @@
         {
           "path": "samples/WinUIGallery/feedback_samples_tests.rs",
           "name": "feedback_pages_and_callbacks_release_their_native_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Both original examples use the native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending.",
+      "notes": "Both source examples use the native ProgressRing with the handlers of ProgressRingPage.xaml.cs in Rust (feedback_samples.rs): the indeterminate ring whose IsActive keeps the source's OneWay x:Bind of the switch (IsOn is IsChecked), the determinate ring set by the NumberBox with ProgressValue_ValueChanged (an empty box goes back to 0), and Background_SelectionChanged of both background options (Transparent or LightGray, the ComboBoxes start with the source's placeholder and their Headers are composed). FerroUI's ProgressRing draws its arcs with the native animation of its template where WinUI's plays an animated visual: a difference of rendering, not of the examples.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/ProgressRing/IndeterminateProgressRing.txt",
