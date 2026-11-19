@@ -6,10 +6,10 @@ export async function runEditorHistory(
     requireCurrent: () => void,
     signal: AbortSignal,
 ): Promise<void> {
-    const editor = await vscode.window.showTextDocument(document, { preserveFocus: false });
+    await vscode.window.showTextDocument(document, { preserveFocus: false });
     await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
     signal.throwIfAborted();
     requireCurrent();
-    if (vscode.window.activeTextEditor !== editor) throw new Error('The authored editor lost focus.');
+    if (vscode.window.activeTextEditor?.document !== document) throw new Error('The authored editor lost focus.');
     await vscode.commands.executeCommand(action);
 }
