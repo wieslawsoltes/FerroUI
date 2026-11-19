@@ -1,19 +1,25 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
+import type { Range } from './protocol';
 
 interface Setter { property: string; value: string; target: string }
 interface State { name: string; setters: Setter[] }
-interface Transition { from: string | null; to: string; duration: number; easing: unknown }
+type Easing = { kind: 'Linear' } | { kind: 'Named'; value: string }
+    | { kind: 'CubicBezier'; value: { x1: number; y1: number; x2: number; y2: number } }
+    | { kind: 'Spring'; value: { mass: number; stiffness: number; damping: number; initial_velocity: number } };
+interface Transition { from: string | null; to: string; duration: number; easing: Easing }
 interface StateGroup { owner: number; name: string; states: State[]; transitions: Transition[] }
+interface StateSource { owner: number; group: string; range: Range; transitions: Array<Pick<Transition, 'from' | 'to'> & { range: Range }> }
 
 type OpenTransition = (context: StudioContext, route: StateTransitionRoute) => Promise<void>;
 
 export async function stateItems(context: StudioContext, openTransition: OpenTransition): Promise<StudioItem[]> {
-    const { groups } = await context.read<{ groups: StateGroup[] }>('designer_states');
+    const { groups, sources } = await context.read<{ groups: StateGroup[]; sources?: StateSource[] }>('designer_states');
     const update = (model: StateGroup) => context.edit('designer_state', { action: 'upsert', model });
     const rows: StudioItem[] = groups.map(group => ({
         id: groupId(group), label: group.name, description: `${group.states.length} states`,
-        children: async () => groupItems(context, group, update, openTransition),
+        children: async () => groupItems(context, group, update, openTransition,
+            sources?.find(source => source.owner === group.owner && source.group === group.name)),
     }));
     rows.unshift(action('states:clear', 'Clear state preview', () => context.present('designer_state', { action: 'clear_preview' }), 'clear-all'));
     const owner = context.node;
@@ -29,15 +35,17 @@ export async function stateItems(context: StudioContext, openTransition: OpenTra
 
 function groupId(group: StateGroup): string { return `states:${group.owner}:${group.name}`; }
 
-function groupItems(context: StudioContext, group: StateGroup, update: (group: StateGroup) => Promise<void>, openTransition: OpenTransition): StudioItem[] {
+function groupItems(context: StudioContext, group: StateGroup, update: (group: StateGroup) => Promise<void>,
+    openTransition: OpenTransition, source?: StateSource): StudioItem[] {
     const id = groupId(group);
+    const mapped = context.panel.supportsRustStates && source;
     const rows = group.states.map(state => action(`${id}:state:${state.name}`, state.name, async () => {
         const preview = () => context.present('designer_state', { action: 'preview', owner: group.owner, group: group.name, state: state.name });
-        if (!context.writable) return preview();
+        if (!context.writable && (!mapped || !state.setters.length)) return preview();
         const selected = await choose(state.name, [
             { label: 'Preview state', run: preview },
-            { label: 'Add or edit a state setter…', run: async () => {
-                const setters = await authorSetter(state);
+            { label: mapped ? 'Edit a state value…' : 'Add or edit a state setter…', run: async () => {
+                const setters = await (mapped ? editMappedSetter(state) : authorSetter(state));
                 if (setters) await update({ ...group, states: group.states.map(item => item === state ? { ...item, setters } : item) });
             } },
         ]);
@@ -48,6 +56,23 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
             const route = await chooseTransition(group);
             if (route) await openTransition(context, route);
         }, 'play'));
+    }
+    if (mapped) {
+        rows.push(action(`${id}:source`, 'Reveal Rust declaration', () => context.revealRange(mapped.range), 'code'));
+        if (group.transitions.length) rows.push(action(`${id}:transition`, 'Edit transition…', async () => {
+            const route = await pickTransition(group);
+            if (!route) return;
+            const duration = await editTime('Transition duration in seconds', 600, route.duration);
+            if (duration === undefined) return;
+            const value = await editText('Transition easing', easingText(route.easing));
+            if (value !== undefined) await update({ ...group, transitions: group.transitions.map(item =>
+                item === route ? { ...item, duration, easing: parseMappedEasing(value) } : item) });
+        }, 'settings-gear'));
+        if (mapped.transitions.length) rows.push(action(`${id}:route-source`, 'Reveal transition source…', async () => {
+            const route = await pickTransition(group);
+            const range = route && mapped.transitions.find(item => item.from === route.from && item.to === route.to)?.range;
+            if (range) await context.revealRange(range);
+        }, 'go-to-file'));
     }
     if (!context.writable) return rows;
     rows.unshift(action(`${id}:add`, 'Add state…', async () => {
@@ -67,18 +92,53 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
 }
 
 async function chooseTransition(group: StateGroup): Promise<StateTransitionRoute | undefined> {
-    const transition = await choose('Preview a state transition', group.transitions.map(transition => ({
-        label: `${transition.from ?? 'Any state'} → ${transition.to}`,
-        description: `${transition.duration} s`,
-        transition,
-    })));
-    if (!transition) return;
-    const { from, to } = transition.transition;
+    const route = await pickTransition(group);
+    if (!route) return;
+    const { from, to } = route;
     if (from !== null) return { owner: group.owner, group: group.name, from, to };
     const directional = new Set(group.transitions.filter(transition => transition.to === to).map(transition => transition.from));
     const initial = await choose('Choose the starting state', [{ label: 'Base values', name: null },
         ...group.states.filter(state => state.name !== to && !directional.has(state.name)).map(state => ({ label: state.name, name: state.name }))]);
     if (initial) return { owner: group.owner, group: group.name, from: initial.name, to };
+}
+
+async function pickTransition(group: StateGroup): Promise<Transition | undefined> {
+    const choice = await choose('State transitions', group.transitions.map(transition => ({
+        label: `${transition.from ?? 'Any state'} → ${transition.to}`,
+        description: `${transition.duration} s`,
+        transition,
+    })));
+    return choice?.transition;
+}
+
+async function editMappedSetter(state: State): Promise<Setter[] | undefined> {
+    const selection = await choose(state.name, state.setters.map(setter => ({
+        label: `${setter.target || 'Owner'}.${setter.property}`, description: setter.value, setter,
+    })));
+    if (!selection) return;
+    const value = await editText(selection.label, selection.setter.value);
+    if (value !== undefined) return state.setters.map(setter => setter === selection.setter ? { ...setter, value } : setter);
+}
+
+function easingText(easing: Easing): string {
+    if (easing.kind === 'Named') return easing.value;
+    if (easing.kind === 'CubicBezier') {
+        const { x1, y1, x2, y2 } = easing.value;
+        return `${x1}, ${y1}, ${x2}, ${y2}`;
+    }
+    return 'LinearEasing';
+}
+
+function parseMappedEasing(text: string): Easing {
+    const name = text.trim();
+    if (!name || name === 'LinearEasing') return { kind: 'Linear' };
+    if (!name.includes(',')) return { kind: 'Named', value: name };
+    const fields = name.split(',').map(field => field.trim());
+    if (fields.length !== 4 || fields.some(field => !field || !Number.isFinite(Number(field)))) {
+        throw new Error('Enter a native easing name or four Bézier coordinates.');
+    }
+    const [x1, y1, x2, y2] = fields.map(Number);
+    return { kind: 'CubicBezier', value: { x1, y1, x2, y2 } };
 }
 
 async function authorSetter(state: State): Promise<Setter[] | undefined> {

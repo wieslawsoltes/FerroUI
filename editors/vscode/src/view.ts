@@ -387,6 +387,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('transition-close', 'arrow-left', 'Stop transition and return to animations')}
             <strong id="transition-route"></strong>
             ${tool('transition-play', 'play', 'Play state transition')}
+            ${tool('transition-source', 'code', 'Reveal transition in Rust source', 'hidden')}
             <output id="transition-time" for="transition-seek" aria-live="off"></output>
         </div>
         <input id="transition-seek" type="range" min="0" value="0" step="any" aria-label="State transition playhead">

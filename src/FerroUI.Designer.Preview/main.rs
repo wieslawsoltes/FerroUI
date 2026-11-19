@@ -117,6 +117,7 @@ fn respond(
                 "timelineCombinedPlayback": true,
                 "timelineProgramTargets": true,
                 "stateTransitionPreview": true,
+                "rsxStateAuthoring": true,
             },
         })),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())

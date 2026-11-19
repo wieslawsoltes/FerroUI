@@ -39,8 +39,9 @@ pub(crate) fn catalog() -> Value {
         .into_iter()
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
-    let rsx_edits = edits.iter().filter(|tool| tool["name"] == "designer_program").cloned()
-        .filter_map(|tool| action_definition(tool, rsx_animation::keyframe_edit)).collect::<Vec<_>>();
+    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state"))).cloned()
+        .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)))
+        .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
         "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
 }
@@ -58,11 +59,17 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let provider = DesignerMcp::new(&stage.session);
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
+    let route_source = if query.name == "designer_state" && arguments["action"] == "preview_transition" {
+        stage.authored_rsx.as_ref().and_then(|source| source.state_route_range(&arguments))
+    } else { None };
     let result = stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
     let mut presentation = renderer.present(request.next_frame, query.name == "designer_layer")?;
     presentation.timeline_position = result.get("timelinePosition").cloned();
     presentation.timeline_targets = result.get("timelineTargets").cloned();
     presentation.transition_position = result.get("transitionPosition").cloned();
+    if let (Some(position), Some(range)) = (&mut presentation.transition_position, route_source) {
+        position["sourceRange"] = json!(range);
+    }
     Ok(presentation)
 }
 
@@ -108,6 +115,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_programs") {
         rsx.annotate_programs(&mut result);
     }
+    if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_states") {
+        rsx.annotate_states(&mut result, query.arguments["owner"].as_u64());
+    }
     Ok(result)
 }
 
@@ -115,8 +125,10 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
     let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, query.arguments["action"].as_str());
+    let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, query.arguments["action"].as_str());
     if design.rsx.is_some()
         && !rust_keyframe
+        && !rust_state
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
@@ -150,6 +162,14 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection {
         select(stage, selection)?;
+    }
+    if rust_state {
+        let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust state group before editing")?;
+        let result = editor_edits(&design, rsx.state_patches(&arguments)?)?;
+        if !result.edits.is_empty() {
+            renderer.stage.take();
+        }
+        return Ok(result);
     }
     if rust_keyframe {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;

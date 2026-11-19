@@ -25,6 +25,7 @@ try {
         'workbench.startupEditor': 'none',
         'telemetry.telemetryLevel': 'off',
         'files.autoSave': 'off',
+        'files.enableTrash': false,
     }));
     await runTests({
         extensionDevelopmentPath: extension,

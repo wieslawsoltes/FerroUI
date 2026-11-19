@@ -7,6 +7,7 @@ export class TimelineStateTransition {
     private readonly route = element('transition-route');
     private readonly close = element<HTMLButtonElement>('transition-close');
     private readonly play = element<HTMLButtonElement>('transition-play');
+    private readonly source = element<HTMLButtonElement>('transition-source');
     private readonly slider = element<HTMLInputElement>('transition-seek');
     private readonly time = element<HTMLOutputElement>('transition-time');
     private readonly seconds = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
@@ -19,6 +20,7 @@ export class TimelineStateTransition {
     constructor(private readonly send: (frame: FrameTarget, control: StateTransitionControl) => void) {
         this.play.onclick = () => this.request({ action: this.position?.playing ? 'pause' : 'play' });
         this.close.onclick = () => this.request({ action: 'stop' });
+        this.source.onclick = () => { if (this.frame && this.position?.sourceRange) this.send(this.frame, { action: 'reveal' }); };
         this.slider.oninput = () => {
             this.queued = this.slider.valueAsNumber;
             this.flush();
@@ -79,6 +81,8 @@ export class TimelineStateTransition {
         this.slider.disabled = !this.frame || position.playing || position.duration <= 0;
         this.play.disabled = !this.frame || position.duration <= 0 || (this.pending && !position.playing);
         this.close.disabled = !this.frame || (this.pending && !position.playing);
+        this.source.hidden = !position.sourceRange;
+        this.source.disabled = !this.frame || this.pending;
         labelButton(this.play, position.playing ? 'Pause state transition' : 'Play state transition', position.playing ? 'debug-pause' : 'play');
     }
 }

@@ -1,8 +1,8 @@
 use crate::document::DesignDocument;
-use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation};
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, VisualStateGroup};
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue};
+use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxStateGroup};
 use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
@@ -11,11 +11,16 @@ pub(crate) struct AuthoredRsxFrame {
     source: Box<str>,
     invocation: SourceSpan,
     clips: BTreeMap<NodeId, RsxAnimation>,
+    states: BTreeMap<(NodeId, String), RsxStateGroup>,
     issues: Vec<RsxAnimationIssue>,
 }
 
 pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
     tool == "designer_program" && matches!(action, Some("upsert_keyframe" | "move_keyframes"))
+}
+
+pub(crate) fn state_edit(tool: &str, action: Option<&str>) -> bool {
+    tool == "designer_state" && action == Some("upsert")
 }
 
 impl AuthoredRsxFrame {
@@ -25,6 +30,7 @@ impl AuthoredRsxFrame {
             source: design.source.into(),
             invocation: rsx.invocation,
             clips: design.rsx_animations.clone(),
+            states: design.rsx_states.clone(),
             issues: rsx.animation_issues.clone(),
         })
     }
@@ -55,6 +61,29 @@ impl AuthoredRsxFrame {
             }
         }
         self.annotate_issues(models);
+    }
+
+    pub(crate) fn annotate_states(&self, models: &mut Value, owner: Option<NodeId>) {
+        let index = LineIndex::new(&self.source);
+        models["sources"] = json!(self.states.iter().filter_map(|((id, _), group)| {
+            if owner.is_some_and(|owner| owner != *id) { return None; }
+            group.source_ranges(*id, &index)
+        }).collect::<Vec<_>>());
+    }
+
+    pub(crate) fn state_route_range(&self, args: &Value) -> Option<ferroui_designer_language::Range> {
+        let group = self.states.get(&(args["owner"].as_u64()?, args["group"].as_str()?.to_owned()))?;
+        let to = args["to"].as_str()?;
+        let span = group.transition_span(args["from"].as_str(), to).or_else(|| group.transition_span(None, to))?;
+        LineIndex::new(&self.source).range(span).ok()
+    }
+
+    pub(crate) fn state_patches(&self, args: &Value) -> Result<Vec<TextPatch>, String> {
+        let model: VisualStateGroup = serde_json::from_value(args["model"].clone())
+            .map_err(|error| error.to_string())?;
+        self.states.get(&(model.owner, model.name.clone()))
+            .ok_or("Choose an existing mapped Rust state group")?
+            .patch_model(&model)
     }
 
     pub(crate) fn annotate_issues(&self, catalog: &mut Value) {

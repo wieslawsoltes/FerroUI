@@ -39,6 +39,7 @@ export class NativePreview implements vscode.Disposable {
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineCurves?: boolean; timelineCombinedPlayback?: boolean; timelineProgramTargets?: boolean;
         stateTransitionPreview?: boolean;
+        rsxStateAuthoring?: boolean;
     } = {};
 
     private constructor(command: string, channel: vscode.OutputChannel) {

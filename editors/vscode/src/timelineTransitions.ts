@@ -49,6 +49,11 @@ export class TimelineTransitions {
         if (frame.token !== token && !(interrupt && preview.loop && frame.token === token - 1)) {
             throw new Error('Read the current transition frame.');
         }
+        if (control.action === 'reveal') {
+            if (!preview.position.sourceRange || !panel.canUse(frame)) throw new Error('The current transition has no mapped Rust source range.');
+            await panel.revealSource(frame, preview.position.sourceRange);
+            return preview.position;
+        }
         if (preview.interrupting || (preview.position.busy && (!interrupt || !preview.loop))) {
             throw new Error('Wait for the current transition frame.');
         }

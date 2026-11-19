@@ -2,7 +2,7 @@ use crate::protocol::{Counterpart, Language, Source, MAX_SOURCE_BYTES};
 use crate::projects::Project;
 use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use ferroui_designer_language::{LineIndex, Range, Schema};
-use ferroui_designer_rsx::{RsxAnimation, RsxCatalog, RsxNode, RsxProjection};
+use ferroui_designer_rsx::{RsxAnimation, RsxCatalog, RsxNode, RsxProjection, RsxStateGroup};
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
@@ -13,6 +13,7 @@ pub(crate) struct DesignDocument<'a> {
     pub(crate) index: LineIndex,
     pub(crate) project: Option<&'a Project>,
     pub(crate) rsx_animations: BTreeMap<NodeId, RsxAnimation>,
+    pub(crate) rsx_states: BTreeMap<(NodeId, String), RsxStateGroup>,
     rsx_nodes: BTreeMap<NodeId, usize>,
 }
 
@@ -39,6 +40,7 @@ impl<'a> DesignDocument<'a> {
         }.map_err(|e| e.to_string())?;
         let mut rsx_nodes = BTreeMap::new();
         let mut rsx_animations = BTreeMap::new();
+        let mut rsx_states = BTreeMap::new();
         for (i, node) in xaml
             .ast()
             .nodes_in_source_order()
@@ -56,6 +58,10 @@ impl<'a> DesignDocument<'a> {
                 if let Ok(index) = markup.animations.binary_search_by_key(&offset, |(start, _)| *start) {
                     rsx_animations.insert(node.id, markup.animations[index].1.clone());
                 }
+                let first = markup.state_groups.partition_point(|(start, _)| *start < offset);
+                for (_, group) in markup.state_groups[first..].iter().take_while(|(start, _)| *start == offset) {
+                    rsx_states.insert((node.id, group.name().to_owned()), (*group).clone());
+                }
             }
         }
         Ok(Self {
@@ -66,6 +72,7 @@ impl<'a> DesignDocument<'a> {
             project,
             rsx_nodes,
             rsx_animations,
+            rsx_states,
         })
     }
 
@@ -106,11 +113,12 @@ impl<'a> DesignDocument<'a> {
     pub(crate) fn counterpart(&self) -> Counterpart {
         if let Some(rsx) = &self.rsx {
             let animated = rsx.has_projected_animations();
+            let states = rsx.has_projected_states();
             let complete = rsx.omitted_count == 0;
             return Counterpart {
                 source: Some(self.xaml.source().to_owned()),
-                editable: complete && !animated,
-                reason: if animated { Some("Edit mapped animation keys in Timeline".into()) } else { (!complete).then(|| {
+                editable: complete && !animated && !states,
+                reason: if states { Some("Edit mapped Rust state declarations in States".into()) } else if animated { Some("Edit mapped animation keys in Timeline".into()) } else { (!complete).then(|| {
                     "Edit mapped literals in the inspector or change the Rust source".into()
                 }) },
             };

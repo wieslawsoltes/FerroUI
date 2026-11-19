@@ -1,3 +1,5 @@
+import type { Range } from './protocol';
+
 export interface StateTransitionRoute {
     owner: number;
     group: string;
@@ -8,6 +10,7 @@ export interface StateTransitionRoute {
 export interface NativeTransitionPosition {
     time: number;
     duration: number;
+    sourceRange?: Range;
 }
 
 export interface StateTransitionPosition extends NativeTransitionPosition {
@@ -20,4 +23,4 @@ export interface StateTransitionPosition extends NativeTransitionPosition {
 export type StateTransitionControl =
     | ({ action: 'open'; time?: number; from?: string | null } & Omit<StateTransitionRoute, 'from'>)
     | { action: 'seek'; time: number }
-    | { action: 'play' | 'pause' | 'stop' };
+    | { action: 'play' | 'pause' | 'stop' | 'reveal' };

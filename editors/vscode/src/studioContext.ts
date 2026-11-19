@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
+import type { Range } from './protocol';
 
 export class StudioContext {
     readonly selection: number[];
@@ -40,6 +41,11 @@ export class StudioContext {
         this.ensure();
         const entry = this.panel.nodes.find(item => item.id === node);
         if (entry) await this.panel.revealSource({ session: this.panel.session, token: this.token }, entry.nameRange);
+    }
+
+    async revealRange(range: Range): Promise<void> {
+        this.ensure();
+        await this.panel.revealSource({ session: this.panel.session, token: this.token }, range);
     }
 }
 

@@ -7,6 +7,7 @@ import { verifyHostedAnimation, verifyHostedScalarCurve } from './hostedAnimatio
 import { verifyHostedCodec } from './hostedCodec';
 import { verifyHostedContinuity } from './hostedContinuity';
 import { verifyHostedRustAnimation } from './hostedRustAnimation';
+import { reviewStateSource } from './rsxStatesMcp';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
     const app = process.env.FERROUI_TEST_HOSTED_APP;
@@ -68,6 +69,14 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedContinuity(preview, update);
         await verifyHostedScalarCurve(preview, update);
         await verifyHostedRustAnimation(preview);
+        const review = await preview.renderHosted({
+            ...hostedRsx(150, 'Interactive review'), projectPath: '/app_preview/review_states.rs',
+            document: { uri: new URL('review_states.rs', uri).toString(), language: 'rust',
+                source: reviewStateSource, caret: { line: 3, character: 2 } },
+        });
+        assert.equal(review.fixture, 'Interactive review');
+        assert.notEqual(review.image.png, one.image.png);
+        assert.deepEqual(review.animations?.programs ?? [], []);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {
