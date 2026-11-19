@@ -1733,15 +1733,20 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/WrapPanel.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/layout_samples.rs"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/layout_samples_tests.rs",
+          "name": "wrap_panel_options_set_the_orientation_spacing_and_padding"
         }
       ],
-      "notes": "The source wrapping layout uses shared WrapPanel; ItemsStretch and Padding require explicit owner adaptation. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native WrapPanel with the handlers of WrapPanelPage.xaml.cs in Rust (layout_samples.rs): the ten items of the first panel with OrientationGroup_SelectionChanged (the Tag of the selected option is the Orientation, and the host is 360 high for Vertical and 200 otherwise) and the ValueChanged handlers of the item spacing, line spacing and padding sliders, and the five fixed items and the accent-colored final item of the second panel. ThemeResource is DynamicResource and ControlCornerRadius is its value, 4; the sliders' Headers are composed, SnapsTo Ticks with StepFrequency 2 is IsSnapToTickEnabled with TickFrequency 2, and the ToggleSwitch's IsOn is IsChecked. FerroUI's WrapPanel has no Padding: the uniform padding of PaddingSlider_ValueChanged is the Padding of the host Border, the same layout. FerroUI's WrapPanel has no ItemsStretch, so the final item does not stretch to fill its line and StretchLastItemToggle_Toggled is not ported: the page is partial.",
       "examples": []
     },
     "XamlResources": {

@@ -183,3 +183,39 @@ fn viewbox_options_size_and_stretch_the_viewbox() {
     direction.set_selected_index(2);
     assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
 }
+
+#[test]
+fn wrap_panel_options_set_the_orientation_spacing_and_padding() {
+    use ferroui_base::layout::Orientation;
+    use ferroui_controls::{RadioButtons, WrapPanel};
+    let _application = start();
+    let root = page("WrapPanel");
+    let panel = root.get_control::<WrapPanel>("Control1");
+    let host = root.get_control::<Border>("LayoutHost");
+    assert_eq!(panel.children().count(), 10);
+    assert_eq!((panel.item_spacing(), panel.line_spacing()), (8.0, 8.0));
+    assert_eq!(host.padding(), Thickness::new(12.0, 12.0, 12.0, 12.0));
+    // OrientationGroup_SelectionChanged: the Tag is the Orientation, and the host is 360 high
+    // for Vertical and 200 otherwise.
+    let group = root.get_control::<RadioButtons>("OrientationGroup");
+    group.set_selected_index(1);
+    assert_eq!(panel.orientation(), Orientation::Vertical);
+    assert_eq!(host.height(), 360.0);
+    group.set_selected_index(0);
+    assert_eq!(panel.orientation(), Orientation::Horizontal);
+    assert_eq!(host.height(), 200.0);
+    // The ValueChanged handlers of the three sliders.
+    root.get_control::<Slider>("ItemSpacingSlider")
+        .set_range_value(16.0);
+    assert_eq!(panel.item_spacing(), 16.0);
+    root.get_control::<Slider>("LineSpacingSlider")
+        .set_range_value(4.0);
+    assert_eq!(panel.line_spacing(), 4.0);
+    root.get_control::<Slider>("PaddingSlider")
+        .set_range_value(24.0);
+    assert_eq!(host.padding(), Thickness::new(24.0, 24.0, 24.0, 24.0));
+    // The second example: five fixed items and the final item (no ItemsStretch in FerroUI).
+    let second = root.get_control::<WrapPanel>("Control2");
+    assert_eq!(second.children().count(), 6);
+    assert_eq!(second.item_spacing(), 8.0);
+}

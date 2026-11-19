@@ -485,6 +485,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Templates | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | ToolTip | 3 of 3 | ported | `status_samples.rs` (no code-behind upstream) | `status_samples_tests.rs` |
 | Viewbox | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs`, `x_bind_tests.rs` |
+| WrapPanel | 1 ported, 1 partial: no ItemsStretch (and no Padding: the host Border's) | partial | `layout_samples.rs` | `layout_samples_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
