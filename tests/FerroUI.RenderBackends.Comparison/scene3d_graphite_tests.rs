@@ -214,11 +214,12 @@ fn a_static_viewport_issues_no_3d_pass_on_graphite() {
 }
 
 /// Every scene drawn on Graphite at 96 and 192 DPI, twice: the first round compiles the library
-/// once and makes the pipelines (at most one per key: two blends, one sample count, the four
-/// variants of the brush shader, and the resolve), the second makes none.
+/// once and makes the pipelines (at most one per key: two blends, two sample counts, the four
+/// variants of the brush shader, and the resolve; culling and the depth test are state of the
+/// encoder), the second makes none.
 #[test]
 fn pipelines_are_created_once_per_graphite_context() {
-    const KEYS: u64 = 2 * 4 + 1;
+    const KEYS: u64 = 2 * 2 * 4 + 1;
     let Some(graphite) = Graphite::try_new() else { return };
     let draw_all = || {
         for scale in [1, 2] {
