@@ -21,7 +21,7 @@ style = "type"
 usize_is_size_t = true
 
 [export]
-item_types = ["constants", "typedefs", "functions"]
+item_types = ["constants", "typedefs", "structs", "functions"]
 
 [fn]
 args = "auto"

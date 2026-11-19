@@ -96,6 +96,13 @@ pub(crate) fn status_or_value(body: impl FnOnce() -> Result<i64>) -> i64 {
     })
 }
 
+/// The message of the last failure of the calling thread.
+pub(crate) fn last_message() -> String {
+    LAST_MESSAGE
+        .try_with(|last| String::from_utf8_lossy(last.borrow().strip_suffix(&[0]).unwrap_or_default()).into_owned())
+        .unwrap_or_default()
+}
+
 /// The message of the last call that failed on the calling thread, as UTF-8 with a NUL at the end;
 /// an empty string when none has failed. Successful calls leave it as it is (as `errno`). The text
 /// stays valid until the next failure on the thread. Any thread.

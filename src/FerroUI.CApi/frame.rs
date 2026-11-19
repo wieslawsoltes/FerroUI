@@ -82,6 +82,8 @@ pub(crate) const OP_MEMO: u32 = 10;
 /// The memo element of the last frame with this key and version, in place of an element: `key`,
 /// `version`, `tag base`.
 pub(crate) const OP_REUSE: u32 = 11;
+/// A property of the open element bound to a signal slot: `property`, `slot`.
+pub(crate) const OP_BIND: u32 = 12;
 
 // ---- the writer -----------------------------------------------------------------------------
 
@@ -296,6 +298,15 @@ pub extern "C" fn ferro_frame_bool(property: i64, value: bool) -> FerroStatus {
 #[no_mangle]
 pub extern "C" fn ferro_frame_on(event: i64, tag: i64, value_property: i64) -> FerroStatus {
     write_words(OP_ON, [event, tag, value_property])
+}
+
+/// Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14):
+/// the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding
+/// while the frames keep the record, so a write of the slot updates the property with no new
+/// frame. Any thread.
+#[no_mangle]
+pub extern "C" fn ferro_frame_bind(property: i64, slot: i64) -> FerroStatus {
+    write_words(OP_BIND, [property, slot])
 }
 
 /// Makes the open element a memo element: its subtree is what `version` says it is (a revision
@@ -552,6 +563,11 @@ impl Index {
                     let open = self.open(offset)?;
                     self.attribute(bytes, open, offset, size);
                 }
+                OP_BIND => {
+                    need(2)?;
+                    let open = self.open(offset)?;
+                    self.attribute(bytes, open, offset, size);
+                }
                 OP_ON => {
                     need(3)?;
                     let open = self.open(offset)?;
@@ -739,6 +755,8 @@ enum Attr<'a> {
     Prop(i64, ValueRef<'a>),
     /// Event, tag, value property.
     On(i64, i64, i64),
+    /// Property, signal slot.
+    Bind(i64, i64),
 }
 
 /// The attribute records of `bytes` (records checked when the frame was indexed), with their
@@ -767,6 +785,7 @@ fn records(bytes: &[u8]) -> impl Iterator<Item = (usize, Attr<'_>)> {
                 OP_INTEGER => Attr::Prop(word(0), ValueRef::Integer(word(1))),
                 OP_BOOL => Attr::Prop(word(0), ValueRef::Bool(word(1) != 0)),
                 OP_ON => Attr::On(word(0), word(1), word(2)),
+                OP_BIND => Attr::Bind(word(0), word(1)),
                 _ => continue,
             };
             return Some((at, attr));
@@ -791,6 +810,7 @@ fn is_last(bytes: &[u8], at: usize, attr: Attr<'_>) -> bool {
     records(&bytes[at..]).skip(1).all(|(_, other)| match (attr, other) {
         (Attr::Prop(a, _), Attr::Prop(b, _)) => a != b,
         (Attr::On(a, _, _), Attr::On(b, _, _)) => a != b,
+        (Attr::Bind(a, _), Attr::Bind(b, _)) => a != b,
         _ => true,
     })
 }
@@ -868,6 +888,7 @@ pub(crate) fn decode(bytes: &[u8]) -> Result<Vec<Element>> {
             match attr {
                 Attr::Prop(id, value) => props.push((id, value.owned())),
                 Attr::On(event, tag, property) => events.push((event, tag, property)),
+                Attr::Bind(..) => {}
             }
         }
         let children = siblings(frame, entry.first_child).map(|child| element(frame, child)).collect();
@@ -941,6 +962,8 @@ struct Node {
     children: Vec<Node>,
     /// The version and the tag base of a memo element.
     memo: Option<(i64, i64)>,
+    /// The signal bindings of `bind` records: property, slot, binding ID.
+    signals: Vec<(i64, i64, i64)>,
 }
 
 /// The bytes of a memo element with an integer key, as the frame that last wrote it in full had
@@ -1079,6 +1102,8 @@ fn commit(root: FerroHandle, bytes: &[u8]) -> Result<()> {
     if committing() {
         return Err(Error::new(FERRO_INVALID_STATE, "a frame is being committed: commit after it, not inside it"));
     }
+    // The start of a commit is a point where the signals written since the last one are applied.
+    crate::signals::apply_pending();
     if root != 0 {
         handles::get(root)?;
     }
@@ -1405,6 +1430,12 @@ fn create(commit: &mut Commit<'_>, frame: &Frame<'_>, index: u32) -> Option<Node
     for binding in &bindings {
         binding.target.set_frame_value(attrs);
     }
+    let mut signals = Vec::new();
+    for attr in effective(attrs) {
+        if let Attr::Bind(property, slot) = attr {
+            signals.extend(bind_signal(handle, property, slot, &mut commit.failures));
+        }
+    }
     let node = Node {
         type_id: entry.type_id,
         key: frame.owned_key(entry),
@@ -1413,6 +1444,7 @@ fn create(commit: &mut Commit<'_>, frame: &Frame<'_>, index: u32) -> Option<Node
         bindings,
         children,
         memo: entry.memo,
+        signals,
     };
     store(commit, &node, frame, entry, false);
     Some(node)
@@ -1466,8 +1498,40 @@ fn update(commit: &mut Commit<'_>, node: &mut Node, attrs: &[u8]) {
     for binding in &node.bindings {
         binding.target.set_frame_value(attrs);
     }
+    // Signal bindings: the same property and slot stays bound; the others come and go.
+    let bound_to = |property: i64| {
+        effective(attrs).find_map(|attr| match attr {
+            Attr::Bind(id, slot) if id == property => Some(slot),
+            _ => None,
+        })
+    };
+    node.signals.retain(|&(property, slot, id)| {
+        let keep = bound_to(property) == Some(slot);
+        if !keep {
+            let _ = crate::signals::unbind(id);
+        }
+        keep
+    });
+    for attr in effective(attrs) {
+        if let Attr::Bind(property, slot) = attr {
+            if !node.signals.iter().any(|&(bound, _, _)| bound == property) {
+                node.signals.extend(bind_signal(handle, property, slot, &mut commit.failures));
+            }
+        }
+    }
     node.attrs.clear();
     node.attrs.extend_from_slice(attrs);
+}
+
+/// Binds a property of an element to a signal slot: (property, slot, binding ID).
+fn bind_signal(handle: FerroHandle, property: i64, slot: i64, failures: &mut Failures) -> Option<(i64, i64, i64)> {
+    match crate::signals::bind(slot, handle, property, false) {
+        Ok(id) => Some((property, slot, id)),
+        Err(error) => {
+            failures.check(error.record());
+            None
+        }
+    }
 }
 
 fn bind(handle: FerroHandle, event: i64, tag: i64, value_property: i64, failures: &mut Failures) -> Option<Binding> {
@@ -1514,19 +1578,24 @@ impl Dispatching {
 impl Drop for Dispatching {
     #[inline]
     fn drop(&mut self) {
-        let removed = STATE
+        let (outermost, removed) = STATE
             .with(|state| {
                 state.dispatching -= 1;
-                if state.dispatching == 0 && !state.removed.is_empty() {
-                    std::mem::take(&mut state.removed)
+                let outermost = state.dispatching == 0;
+                if outermost && !state.removed.is_empty() {
+                    (true, std::mem::take(&mut state.removed))
                 } else {
-                    Vec::new()
+                    (outermost, Vec::new())
                 }
             })
             .unwrap_or_default();
         // Freed with no access of the state running: freeing runs code of the framework.
         for node in removed {
             free(node);
+        }
+        // The end of a dispatch is a point where the signals the dispatcher wrote are applied.
+        if outermost {
+            crate::signals::apply_pending();
         }
     }
 }
@@ -1592,6 +1661,9 @@ fn free(node: Node) {
     };
     for binding in node.bindings {
         let _ = ferro_unsubscribe(binding.subscription);
+    }
+    for (_, _, id) in node.signals {
+        let _ = crate::signals::unbind(id);
     }
     for child in node.children {
         free(child);

@@ -45,6 +45,8 @@ mod events;
 mod frame;
 mod handles;
 mod ids;
+mod ring;
+mod signals;
 mod strings;
 mod thread;
 mod tree;
@@ -52,9 +54,23 @@ mod values;
 
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_clear_error, ferro_last_error, ferro_last_error_code};
-pub use events::{ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe};
+pub use events::{
+    ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_subscribe_ring, ferro_unsubscribe,
+};
+pub use ring::{
+    ferro_event_ring, ferro_event_ring_arg, ferro_event_ring_pop, ferro_event_ring_sender, FerroEventRing,
+    FERRO_EVENT_RING_LAYOUT,
+};
+pub use signals::{
+    ferro_signal_bind, ferro_signal_free, ferro_signal_get_bool, ferro_signal_get_cstr, ferro_signal_get_f64,
+    ferro_signal_get_i64, ferro_signal_new, ferro_signal_set_bool, ferro_signal_set_f64, ferro_signal_set_handle,
+    ferro_signal_set_i64, ferro_signal_set_str, ferro_signal_table, ferro_signal_take_changed, ferro_signal_unbind,
+    ferro_signal_version, ferro_signal_watch, ferro_signals_apply, FerroSignalTable, FERRO_SIGNAL_BOOL,
+    FERRO_SIGNAL_F64, FERRO_SIGNAL_FREE, FERRO_SIGNAL_HANDLE, FERRO_SIGNAL_I64, FERRO_SIGNAL_LAYOUT,
+    FERRO_SIGNAL_TEXT,
+};
 pub use frame::{
-    ferro_frame_begin, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
+    ferro_frame_begin, ferro_frame_bind, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
     ferro_frame_commit_bytes, ferro_frame_dispatch, ferro_frame_dispatcher, ferro_frame_event_f64,
     ferro_frame_event_text, ferro_frame_f64, ferro_frame_find, ferro_frame_i64, ferro_frame_key_str, ferro_frame_memo,
     ferro_frame_on, ferro_frame_open, ferro_frame_reuse, ferro_frame_str, ferro_frame_str16,
