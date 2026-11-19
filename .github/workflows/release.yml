@@ -109,9 +109,10 @@ jobs:
       # different (docs/porting/vello-backend.md, section 13 and C9); a scene that fails three
       # times in a row fails the release.
       - name: Test (the Vello backend and the render backends compared)
+        # Match the dedicated CI job's serial draws on the shared adapter.
         run: |
           for attempt in 1 2 3; do
-            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
+            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests -- --test-threads=1; then
               exit 0
             fi
             echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"
