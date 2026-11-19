@@ -1,9 +1,10 @@
-import { downloadAndUnzipVSCode, runTests } from '@vscode/test-electron';
+import { runTests } from '@vscode/test-electron';
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installVsix } from './vscodeCli.mjs';
+import { testVSCodeExecutable } from './vscodeDownload.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
 const [vsixPath] = process.argv.slice(2);
@@ -13,7 +14,7 @@ const manifest = JSON.parse(await readFile(join(extension, 'package.json'), 'utf
 const minimum = manifest.engines.vscode.replace(/^\^/, '');
 
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
-    const executable = supplied ?? await downloadAndUnzipVSCode(version);
+    const executable = await testVSCodeExecutable(supplied, { version });
     const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-installed-'));
     const workspace = join(sandbox, 'workspace');
     const profile = join(sandbox, 'profile');

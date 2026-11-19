@@ -3,6 +3,7 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { testVSCodeExecutable } from './vscodeDownload.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
 const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-vscode-'));
@@ -30,8 +31,10 @@ try {
     await runTests({
         extensionDevelopmentPath: extension,
         extensionTestsPath: join(extension, 'dist/test.js'),
-        vscodeExecutablePath: process.env.FERROUI_TEST_VSCODE,
-        version: process.env.FERROUI_TEST_VSCODE_VERSION,
+        vscodeExecutablePath: await testVSCodeExecutable(process.env.FERROUI_TEST_VSCODE, {
+            version: process.env.FERROUI_TEST_VSCODE_VERSION,
+            extensionDevelopmentPath: extension,
+        }),
         launchArgs: [workspace, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });
