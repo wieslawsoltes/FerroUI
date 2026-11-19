@@ -61,6 +61,9 @@ impl DesignerWorkspace {
     pub(super) fn refresh_rust_source_tools(self: &Rc<Self>) -> bool {
         let session = self.session.borrow();
         let rust = session.uses_rust_source();
+        self.root
+            .get_control::<Button>("Share")
+            .set_is_visible(cfg!(feature = "collaboration-client") && !rust);
         let picker = self.root.get_control::<ComboBox>("RustInvocations");
         let issues = self.root.get_control::<Button>("AnimationSourceIssues");
         issues.set_is_visible(session.rust_map().is_some_and(|map| !map.issues.is_empty()));
@@ -132,6 +135,7 @@ impl DesignerWorkspace {
         let anchor = self.root.get_control::<Button>("AnimationSourceIssues");
         let flyout = Flyout::new();
         flyout.set_placement(PlacementMode::Top);
+        flyout.popup().set_should_use_overlay_layer(true);
         flyout.flyout_presenter_classes().add("designer-chrome");
         let weak = Rc::downgrade(self);
         let weak_flyout = flyout.downgrade();

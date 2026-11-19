@@ -55,6 +55,11 @@ impl DesignerSession {
         }
     }
 
+    pub(crate) fn rust_property_span(&self, node: NodeId, property: &str) -> Option<SourceSpan> {
+        let offset = self.document.ast().node(node)?.span.start;
+        self.rust_map()?.property(offset, property)
+    }
+
     pub(crate) fn open_rust_document(
         &mut self,
         source: String,

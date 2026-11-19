@@ -1,6 +1,6 @@
-use crate::animation::{AnimationStyle, RsxAnimation, RsxAnimationIssue};
-use crate::tree::{escape_xml, Element};
 use crate::RsxProjection;
+use crate::animation::{AnimationStyle, RsxAnimation, RsxAnimationIssue};
+use crate::tree::{Element, escape_xml};
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_language::FRAMEWORK_NAMESPACE;
 use std::collections::BTreeMap;
@@ -24,18 +24,35 @@ pub struct RsxSourceMap {
     pub blocks: Vec<SourceSpan>,
     pub issues: Vec<RsxAnimationIssue>,
     pub omitted_count: usize,
-    controls: Vec<(usize, SourceSpan)>,
+    controls: Vec<ControlSource>,
     animations: Vec<(usize, RsxAnimation)>,
+}
+
+struct ControlSource {
+    offset: usize,
+    name: SourceSpan,
+    properties: BTreeMap<String, SourceSpan>,
 }
 
 impl RsxSourceMap {
     pub fn control(&self, offset: usize) -> Option<(usize, SourceSpan)> {
-        let index = self.controls.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
-        Some((index, self.controls[index].1))
+        let index = self
+            .controls
+            .binary_search_by_key(&offset, |control| control.offset)
+            .ok()?;
+        Some((index, self.controls[index].name))
+    }
+
+    pub fn property(&self, offset: usize, name: &str) -> Option<SourceSpan> {
+        let (index, _) = self.control(offset)?;
+        self.controls[index].properties.get(name).copied()
     }
 
     pub fn animation(&self, offset: usize) -> Option<&RsxAnimation> {
-        let index = self.animations.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
+        let index = self
+            .animations
+            .binary_search_by_key(&offset, |(start, _)| *start)
+            .ok()?;
         Some(&self.animations[index].1)
     }
 }
@@ -48,8 +65,26 @@ impl RsxProjection<'_> {
             blocks: self.blocks.clone(),
             issues: self.animation_issues.clone(),
             omitted_count: self.omitted_count,
-            controls: markup.controls.into_iter().zip(self.nodes.iter().map(|node| node.name)).collect(),
-            animations: markup.animations.into_iter().map(|(offset, clip)| (offset, clip.clone())).collect(),
+            controls: markup
+                .controls
+                .into_iter()
+                .zip(&self.nodes)
+                .map(|(offset, node)| ControlSource {
+                    offset,
+                    name: node.name,
+                    properties: node
+                        .properties
+                        .iter()
+                        .chain(&node.expressions)
+                        .map(|(name, span)| (name.clone(), *span))
+                        .collect(),
+                })
+                .collect(),
+            animations: markup
+                .animations
+                .into_iter()
+                .map(|(offset, clip)| (offset, clip.clone()))
+                .collect(),
         };
         (markup.source, map)
     }
@@ -112,8 +147,10 @@ impl<'a> RsxPreviewMarkup<'a> {
         let _ = write!(self.source, "\n{pad}<{owner}.Styles>");
         for style in styles {
             let selector = escape_xml(&style.selector, Some('"'));
-            let _ = write!(self.source,
-                "\n{pad}{INDENT}<Style Selector=\"{selector}\">\n{pad}{INDENT}{INDENT}<Style.Animations>");
+            let _ = write!(
+                self.source,
+                "\n{pad}{INDENT}<Style Selector=\"{selector}\">\n{pad}{INDENT}{INDENT}<Style.Animations>"
+            );
             for clip in &style.clips {
                 let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}{INDENT}");
                 self.animations.push((self.source.len(), clip));

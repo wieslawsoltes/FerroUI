@@ -290,7 +290,7 @@ impl DesignerWorkspace {
             ("CommitAnimation", "Save animation to XAML"),
             ("TimelineToggle", "Show or hide timeline"),
             ("TimelineDetails", "Animation name and target"),
-            ("AnimationSource", "Reveal animation XAML"),
+            ("AnimationSource", "Reveal animation source"),
             ("AnimationSettings", "Animation settings"),
         ] {
             ferroui_controls::automation::AutomationProperties::set_name(

@@ -123,6 +123,24 @@ fn studio_rust_keyframe_editor_preserves_authored_history_and_the_native_preview
         (program.id, program.primary_target())
     };
     let root = workspace.control();
+    session.borrow_mut().select([target]);
+    workspace.reveal_property_source("Width").unwrap();
+    let width = session
+        .borrow()
+        .rust_property_span(target, "Width")
+        .unwrap();
+    assert_eq!(&source[width.range()], "180.0");
+    session
+        .borrow_mut()
+        .set_property(&[target], "Width", "220")
+        .unwrap();
+    assert_eq!(
+        session.borrow().authored_source(),
+        source.replace("width: 180.0", "width: 220.0")
+    );
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
+    workspace.refresh(true);
     click(&root.get_control::<Button>("AnimationSource"));
     let editor = root.get_control::<TextBox>("Source");
     let selection = editor.selection_start().min(editor.selection_end()) as usize
@@ -158,10 +176,15 @@ fn studio_rust_keyframe_editor_preserves_authored_history_and_the_native_preview
         .cast::<Border>()
         .unwrap();
     let radius = native.corner_radius().top_left;
-    assert!((radius - 30.0).abs() < 1e-9, "The retained 1 s pose has radius {radius}");
+    assert!(
+        (radius - 30.0).abs() < 1e-9,
+        "The retained 1 s pose has radius {radius}"
+    );
     {
         let mut session = session.borrow_mut();
-        session.start_animation_playback(program, Some(0.75), false).unwrap();
+        session
+            .start_animation_playback(program, Some(0.75), false)
+            .unwrap();
         session.advance(0.25).unwrap();
         assert!(session.is_playing());
         let revised = edited.replace("Keep both views", "Keep both Rust views");

@@ -471,7 +471,7 @@ fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool)
         return match entry.name.as_str() {
             "Project" => (COMPONENT, 0xffb6a2f6, false),
             "Folder" => (FOLDER, 0xff9caecb, false),
-            "XAML" => (FILE, 0xff79a8ff, false),
+            "XAML" | "RSX" => (FILE, 0xff79a8ff, false),
             "Rust" => (FILE, 0xffd5ad8f, false),
             "Asset" => (IMAGE, 0xffa4c5b7, false),
             _ => (FILE, 0xffa9adba, false),
@@ -838,7 +838,7 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         cell.children().add(reset.upcast::<Control>());
     } else if let Some(reveal) = &row.reveal {
         cell.children()
-            .add(property_source_link("View XAML…", reveal));
+            .add(property_source_link("View source…", reveal));
     } else {
         let value = TextBox::new();
         value.set_text(Some(&row.display_value));
@@ -1487,7 +1487,7 @@ impl DesignerWorkspace {
                             label: node.name.clone(),
                             name: node.xaml_name().or(resource).unwrap_or_default().to_owned(),
                             detail: resource.map_or_else(
-                                || "XAML".into(),
+                                || if session.uses_rust_source() { "RSX" } else { "XAML" }.into(),
                                 |key| format!("XAML · Resource key: {key}"),
                             ),
                             source: Some(node.id),
@@ -1517,7 +1517,7 @@ impl DesignerWorkspace {
                             detail: format!(
                                 "{} · {membership}",
                                 if row.source_id.is_some() {
-                                    "XAML"
+                                    if session.uses_rust_source() { "RSX" } else { "XAML" }
                                 } else {
                                     "Runtime"
                                 }
@@ -2067,7 +2067,7 @@ impl DesignerWorkspace {
                             this.rebuild_properties();
                             return;
                         }
-                        let span = session.document().ast().node(node).map(|node| node.span);
+                        let span = session.authored_span(node);
                         drop(session);
                         if let Some(span) = span {
                             this.session.borrow_mut().select([node]);
