@@ -320,7 +320,7 @@ def setter_call(kind, object_expr, prop_id, value_expr):
 def generate_objects(model, names):
     lines = [HEADER, "//", "// Layer 1 of the Osprey bindings (docs/osprey.md): the fluent object model. A constructor per",
              "// class that can be created, a setter per property that takes the handle and returns it (setters",
-             "// chain with the pipe), a getter per property that returns a Result, and a helper per event",
+             "// chain with the pipe), a getter per property that returns a plain value, and a helper per event",
              "// that dispatches a tag to the one dispatcher of the application (core.osp).",
              "// A failed write is recorded by the library: `failure()` (core.osp) reads and clears it.",
              "", "namespace ferroobjects;", "", "import ferroui::*", ""]
@@ -384,7 +384,8 @@ def generate_objects(model, names):
             name = "get" + base[:1].upper() + base[1:]
             if name not in used:
                 used.add(name)
-                lines += comment(f"Reads {prop['name']} ({owners}).")
+                lines += comment(f"Reads {prop['name']} ({owners}); the fallback of its kind when the read fails"
+                                 " (`failure()` tells).")
                 if kind == "string":
                     read = f"\"${{ferro_get_cstr_or(object: object, property: {prop['id']}, fallback: \"\")}}\""
                     type_ = "string"
@@ -397,11 +398,9 @@ def generate_objects(model, names):
                 else:
                     read = f"ferro_get_f64_or(object: object, property: {prop['id']}, fallback: 0.0)"
                     type_ = "float"
-                lines.append(f"fn {name}(object: int) -> Result<{type_}, string> = {{")
-                lines.append("    ferro_clear_error()")
-                lines.append(f"    let value = {read}")
-                lines.append("    readResult(value: value)")
-                lines.append("}")
+                # A plain value, with no Result to allocate: a failed read returns the fallback and
+                # records the failure, which `failure()` reports as for the setters.
+                lines.append(f"fn {name}(object: int) -> {type_} = {read}")
                 counts["getters"] += 1
     lines.append("")
     lines.append("// ---- events --------------------------------------------------------------------------------")
@@ -415,7 +414,7 @@ def generate_objects(model, names):
         doc = next((d["doc"] for d in event["declarations"] if d["doc"]), "")
         lines += comment(f"Dispatches `tag` to the dispatcher of the application on every {event['name']} ({owners}). {doc}")
         lines.append(f"fn {name}(object: int, tag: int) -> int = {{")
-        lines.append(f"    let _ = ferro_subscribe(object: object, event: {event['id']}, function: dispatchEvent, token: tag)")
+        lines.append(f"    let _ = ferro_subscribe_dispatch(object: object, event: {event['id']}, tag: tag)")
         lines.append("    object")
         lines.append("}")
         lines += comment(f"Raises {event['name']} on the object, as the control does (for tests and scripts).")

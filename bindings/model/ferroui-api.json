@@ -101,6 +101,25 @@
     "doc": "Attaches `function` to the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of `object`: it is called with `token` on every raise of the event, on the UI thread (see [`FerroEventFn`]). For a routed event the handler listens to the direct and the bubbling route of events that are not handled yet, and a result other than `0` marks the event as handled. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only."
    },
    {
+    "name": "ferro_subscribe_dispatch",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "event",
+      "type": "i64"
+     },
+     {
+      "name": "tag",
+      "type": "i64"
+     }
+    ],
+    "doc": "[`ferro_subscribe`] to the one dispatcher of the thread ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it with `tag`, the sender and the argument, as an event bound in a frame does (the event text and number are empty). For a binding with one dispatcher, which then needs no trampoline of its own between the library and its dispatcher: one indirect call per event. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only."
+   },
+   {
     "name": "ferro_subscribe_data",
     "returns": "i64",
     "params": [

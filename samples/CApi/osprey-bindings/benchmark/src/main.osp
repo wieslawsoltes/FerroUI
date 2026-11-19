@@ -2,8 +2,8 @@
 // 6), the same operations as the Rust benchmark of the ABI (cargo bench -p ferroui-capi
 // --no-default-features --bench call_overhead): a property write and a read with layer 1, an
 // event dispatched to the one dispatcher, and frames of layer 2 (one text block whose text
-// changes; 100 text blocks of which one changes). No window: the thread is made the UI thread
-// with ferro_init. Each case runs `iterations` times per sample; the median of 9 samples is
+// changes; 100 text blocks of which one changes; the same 100 as memo elements). No window: the
+// thread is made the UI thread with ferro_init. Each case runs `iterations` times per sample; the median of 9 samples is
 // printed in nanoseconds per operation. The clock is the one of macOS.
 
 import ferroui::*
@@ -40,22 +40,29 @@ fn item(n: int, i: int) -> Element<Message> = match n {
 fn manyTexts(i: int) -> Element<Message> =
     border([], [stackPanel([], range(0, 100) |> map(fn(n: int) => item(n, i)) |> toList)])
 
+// The item `n` as a memo element: its version is the text it shows (two for the first).
+fn memoItem(n: int, i: int) -> Element<Message> = match n {
+    0 => textBlock([key(1), memo(i % 2 + 1), text(textOf(i))])
+    _ => textBlock([key(n + 1), memo(1), text("Item ${n}")])
+}
+
+fn manyMemoTexts(i: int) -> Element<Message> =
+    border([], [stackPanel([], range(0, 100) |> map(fn(n: int) => memoItem(n, i)) |> toList)])
+
 // The frame of a border element, committed under `root` (not a window: no application runs).
 fn commitUnder(root: int, element: Element<Message>) -> int = {
     let _ = ferro_frame_begin()
-    let _ = writeChildren(children: element.elementChildren, tag: 1)
+    let _ = writeChildren(root: root, children: element.elementChildren, tag: 1)
     toInt(ferro_frame_commit(root: root))
 }
 
 fn runCase(case: int, i: int, object: int, root: int) -> int = match case {
     0 => setFontSize(object, sizeOf(i))
-    1 => match getFontSize(object) {
-        Success { value } => 0
-        Error { message } => 1
-    }
+    1 => getFontSize(object) > 0.0 ? 0 : 1
     2 => toInt(ferro_raise(object: object, event: clickEventId()))
     3 => commitUnder(root, oneText(i))
-    _ => commitUnder(root, manyTexts(i))
+    4 => commitUnder(root, manyTexts(i))
+    _ => commitUnder(root, manyMemoTexts(i))
 }
 
 // The nanoseconds of one operation over one sample.
@@ -97,8 +104,10 @@ fn main() = {
     let root = ferro_create(typeId: borderTypeId())
     print("benchmark: the median of 9 samples, nanoseconds per operation")
     print("write FontSize (layer 1 setter)           ${median(0, 100000, text, root)} ns")
-    print("read FontSize (layer 1 getter, a Result)  ${median(1, 100000, text, root)} ns")
+    print("read FontSize (layer 1 getter)            ${median(1, 100000, text, root)} ns")
     print("raise Click to the one dispatcher         ${median(2, 100000, button, root)} ns")
     print("frame: one text block, its text changes   ${median(3, 100000, text, root)} ns")
     print("frame: 100 text blocks, one changes       ${median(4, 1000, text, root)} ns")
+    let _ = ferro_frame_clear(root: root)
+    print("frame: 100 memo text blocks, one changes  ${median(5, 1000, text, root)} ns")
 }

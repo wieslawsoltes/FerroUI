@@ -1713,6 +1713,14 @@ extern fn ferro_clear_error()
 // handled. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status.
 // UI thread only.
 extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+// [`ferro_subscribe`] to the one dispatcher of the thread
+// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls
+// it with `tag`, the sender and the argument, as an event bound in a frame does (the event
+// text and number are empty). For a binding with one dispatcher, which then needs no
+// trampoline of its own between the library and its dispatcher: one indirect call per event.
+// Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI
+// thread only.
+extern fn ferro_subscribe_dispatch(object: int, event: int, tag: int) -> int
 // Removes the handler of the subscription `subscription` ([`ferro_subscribe`]); its user data
 // is released ([`ferro_subscribe_data`]). [`FERRO_NOT_FOUND`] for an ID that is not a live
 // subscription. UI thread only.
