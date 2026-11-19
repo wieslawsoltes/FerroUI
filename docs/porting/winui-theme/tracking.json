@@ -90664,7 +90664,7 @@
    "winui": "ListView: {ListView} (generic.xaml) and {ListViewItem} (ListViewItem_themeresources.xaml, based on DefaultListViewItemStyle of ListBoxItem.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 0,
-   "date": "not committed"
+   "date": "2026-11-18"
   },
   {
    "document": "ListBoxItem.xaml",
