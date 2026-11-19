@@ -42,6 +42,17 @@ source editing or extension codecs; their preview uses the native framework anim
 running in the designer. The portable timeline does not invent interpolation semantics for
 runtime-specific values.
 
+## Transfer keyframes
+
+`Timeline::copy_keyframes` returns a versioned `KeyframeClipboard` with typed values,
+relative seconds, and incoming easing. Its text representation can travel between hosts.
+Pass it to `Timeline::with_pasted_keyframes` with a distinct existing destination for each
+copied track and the authored playhead time. The planner checks value types, duration,
+and collisions at native 100 ns precision. With `reverse` set, the reflected first key
+lands at the playhead. `Timeline::with_mirrored_keyframes` reflects a selection around an
+authored pivot and leaves unselected keys in place. Both methods return the replacement
+timeline and accepted positions for the host’s source transaction.
+
 ## Native XAML
 
 `to_xaml(target)` writes FerroUI `Animation`, `KeyFrame` and `Setter` markup, including timing,

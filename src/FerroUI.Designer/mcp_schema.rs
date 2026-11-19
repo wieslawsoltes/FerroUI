@@ -102,13 +102,22 @@ pub(super) fn easing() -> Value {
         object(json!({"kind":{"const":"Spring"},"value":object(json!({"mass":{"type":"number","exclusiveMinimum":0},"stiffness":{"type":"number","exclusiveMinimum":0},"damping":time(),"initial_velocity":number()}), &["mass","stiffness","damping","initial_velocity"])}), &["kind","value"])
     ]})
 }
-pub(super) fn timeline() -> Value {
-    let keyframe = object(
+fn keyframe() -> Value {
+    object(
         json!({"time":time(),"value":animation_value(),"easing":easing()}),
         &["time", "value", "easing"],
-    );
+    )
+}
+pub(super) fn keyframe_paste() -> Value {
+    let track = object(json!({"property":string(),"keyframes":array(keyframe(),4096)}), &["property","keyframes"]);
+    let clipboard = object(json!({"format":{"const":"ferroui.keyframes.v1"},"tracks":array(track,4096)}), &["format","tracks"]);
+    let destination = object(json!({"target":id(),"property":string()}), &["target","property"]);
+    object(json!({"clipboard":clipboard,"destinations":array(destination,4096),"time":time(),"reverse":{"type":"boolean"}}),
+        &["clipboard","destinations","time"])
+}
+pub(super) fn timeline() -> Value {
     let track = object(
-        json!({"target":id(),"property":string(),"keyframes":array(keyframe,100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
+        json!({"target":id(),"property":string(),"keyframes":array(keyframe(),100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
         &["target", "property", "keyframes", "muted"],
     );
     let mut properties = timing_properties();

@@ -67,6 +67,7 @@ struct KeySource {
     cue: FloatSource,
     value: ValueSource,
     spline: Option<[FloatSource; 4]>,
+    spline_method: Option<SourceSpan>,
     shared: bool,
     end: usize,
     frame: SourceSpan,

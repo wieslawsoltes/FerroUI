@@ -6,6 +6,7 @@
 mod affine_manipulation;
 mod animation_geometry;
 mod animation_keyframe_authoring;
+mod animation_keyframe_transfer;
 mod animation_rsx_programs;
 mod animation_preview_pose;
 mod animation_playback_pose;

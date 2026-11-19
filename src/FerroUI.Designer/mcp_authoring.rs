@@ -4,7 +4,7 @@ use super::{decode, node_id, number, state, text, Permissions};
 use crate::DesignerSession;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_animation::{
-    AnimationValue, BehaviorModel, Easing, KeyframeGroupEdit, KeyframeLocation, Repeat, Timeline,
+    AnimationValue, BehaviorModel, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
     TimelineTimingEdit, VisualStateGroup,
 };
 use ferroui_designer_tools::PropertyKind;
@@ -19,6 +19,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_select_rsx_view"
             | "designer_program"
             | "designer_keyframe_draft"
+            | "designer_keyframe_clipboard"
             | "designer_animation_curve"
             | "designer_states"
             | "designer_state"
@@ -61,6 +62,8 @@ pub(super) fn tools() -> Vec<Value> {
                 &["program","target","property","window"]), false),
         s::tool("designer_keyframe_draft", "Validate an animation keyframe's time, typed value and easing against the current program and source codec. Returns the sampled easing preview.",
             s::object(keyframe_draft(), draft_required), false),
+        s::tool("designer_keyframe_clipboard", "Copy selected typed keys and relative times for paste into compatible tracks. Returns portable clipboard data.",
+            s::object(json!({"program":s::id(),"keyframes":keys(),"expected_revision":s::revision()}), &["program","keyframes"]), false),
         s::actions("designer_program","Author animation programs and keyframes, edit timing with proportional retiming, set selectors or preview targets, sample several programs together, or play all programs. IDs refer to the current document; every action checks expected_revision.",vec![
             s::action("create",json!({"name":s::string(),"owner":s::id(),"selector":s::string(),"duration":s::time()}), &["name","owner","selector","duration"],true),
             s::action("select",json!({"program":s::id()}), &["program"],true),
@@ -76,6 +79,8 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("move_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
             s::action("scale_keyframes",json!({"program":s::id(),"keyframes":keys(),"pivot":s::time(),"factor":s::number()}), &["program","keyframes","pivot","factor"],true),
+            s::action("mirror_keyframes",json!({"program":s::id(),"keyframes":keys(),"pivot":s::time()}), &["program","keyframes","pivot"],true),
+            s::action("paste_keyframes",json!({"program":s::id(),"paste":s::keyframe_paste()}), &["program","paste"],true),
             s::action("duplicate_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
             s::action("remove_keyframes",json!({"program":s::id(),"keyframes":keys()}), &["program","keyframes"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
@@ -146,6 +151,11 @@ pub(super) fn call(
         "designer_keyframe_draft" => return session.preview_program_keyframe(
             node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?, keyframe_draft(args)?,
         ),
+        "designer_keyframe_clipboard" => {
+            let keys: Vec<KeyframeLocation> = decode(args, "keyframes")?;
+            let clipboard = session.copy_program_keyframes(node_id(args, "program")?, &keys)?;
+            return Ok(json!(clipboard));
+        }
         "designer_animation_curve" => {
             let points = session.animation_curve(node_id(args, "program")?, node_id(args, "target")?,
                 &text(args, "property")?, decode(args, "window")?)?;
@@ -223,6 +233,16 @@ pub(super) fn call(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
                     KeyframeEdit::Remove(number(args, "time")?),
                 )?,
+                "mirror_keyframes" => {
+                    let keys: Vec<KeyframeLocation> = decode(args, "keyframes")?;
+                    keyframes = Some(session.mirror_program_keyframes(
+                        node_id(args, "program")?, &keys, number(args, "pivot")?,
+                    )?);
+                }
+                "paste_keyframes" => {
+                    let paste: KeyframePaste = decode(args, "paste")?;
+                    keyframes = Some(session.paste_program_keyframes(node_id(args, "program")?, &paste)?);
+                }
                 action @ ("move_keyframes" | "scale_keyframes" | "duplicate_keyframes" | "remove_keyframes") => {
                     let edit = match action {
                         "move_keyframes" => KeyframeGroupEdit::Move(number(args, "offset")?),

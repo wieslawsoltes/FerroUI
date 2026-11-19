@@ -209,6 +209,36 @@ fn insert_and_duplicate_only_add_methods_and_reject_native_tick_collisions() {
 }
 
 #[test]
+fn mirror_retains_comment_trivia_and_rejects_conflicting_shared_cue_easings() {
+    let source = VIEW.replace(
+        "0.2))",
+        "0.2).set(ferroui_base::layout::Layoutable::width_property(), 120.0))",
+    ).replace('\n', "\r\n");
+    let catalog = RsxCatalog::built_in();
+    let projection = catalog.project(&source, source.rfind("rsx!").unwrap()).unwrap();
+    let clip = projection.preview_markup().animations[0].1;
+    let timeline = authored_timeline(&source);
+    let key = |property: &str, time| KeyframeLocation { target: 1, property: property.into(), time };
+    let opacity = [key("Opacity", 0.0), key("Opacity", 0.5)];
+    assert!(clip.mirror_keyframes(&source, catalog, &timeline, &opacity, 0.5).unwrap_err().contains("shares"));
+    let shared = [opacity[0].clone(), opacity[1].clone(), key("Width", 0.0)];
+    assert!(clip.mirror_keyframes(&source, catalog, &timeline, &shared, 0.5).unwrap_err().contains("different incoming easings"));
+
+    let keys = [key("Opacity", 0.5), key("Opacity", 2.0)];
+    let (patches, accepted) = clip.mirror_keyframes(&source, catalog, &timeline, &keys, 1.25).unwrap();
+    assert_eq!(accepted, [key("Opacity", 2.0), key("Opacity", 0.5)]);
+    let rewritten = TextPatch::apply_all(&source, patches).unwrap();
+    for text in ["/* tangent */", "0.6f64", "Separate 🪴", "compute_label()"] {
+        assert!(rewritten.contains(text), "{rewritten}");
+    }
+    assert!(!rewritten.replace("\r\n", "").contains('\n'));
+    let updated = authored_timeline(&rewritten);
+    let opacity = updated.track(1, "Opacity").unwrap();
+    assert_eq!(opacity.keyframes[1].easing, timeline.track(1, "Opacity").unwrap().keyframes[1].easing);
+    assert_eq!(opacity.keyframes[2].value, ferroui_designer_animation::AnimationValue::Number(0.6));
+}
+
+#[test]
 fn deleting_keys_keeps_comment_trivia_and_leaves_an_editable_empty_clip() {
     let source = VIEW.replace("0.6f64)\n", concat!(
         "0.6f64)\n",

@@ -1,4 +1,5 @@
 //! Checked method-chain edits for one authored RSX animation.
+mod transfer;
 use super::{KeySource, RsxAnimation, keyframe::BUILTINS, syntax, value::rust_literal};
 use crate::{RsxCatalog, blocks::keep_comments, source_edits::line_prefix};
 use ferroui_designer_animation::{

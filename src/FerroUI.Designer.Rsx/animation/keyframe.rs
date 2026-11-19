@@ -71,6 +71,7 @@ pub(super) fn keyframe(
                 cue,
                 value,
                 spline,
+                spline_method: spline.map(|_| method_suffix(outer)),
                 shared: false,
                 end,
                 frame: method_suffix(method),

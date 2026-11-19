@@ -43,7 +43,7 @@ impl DesignerSession {
             .timeline
             .as_ref()
             .ok_or("The program has an opaque payload")?;
-        let mut changed = if let Some(rust) = &self.rust {
+        let changed = if let Some(rust) = &self.rust {
             let (patches, changed) = rust.keyframes(&self.document, id, authored, keys, edit)?;
             if !patches.is_empty() {
                 self.commit_rust_patches("Edit Rust keyframes", patches)
@@ -60,17 +60,7 @@ impl DesignerSession {
             }
             changed
         };
-        if let Some(accepted) = self
-            .animation_programs()
-            .iter()
-            .find(|program| program.id == id)
-            .and_then(|program| program.timeline.as_ref())
-        {
-            for key in &mut changed {
-                key.reconcile_time(accepted);
-            }
-        }
-        Ok(changed)
+        Ok(self.accepted_keyframe_locations(id, changed))
     }
 
     pub(crate) fn edit_program_keyframe(

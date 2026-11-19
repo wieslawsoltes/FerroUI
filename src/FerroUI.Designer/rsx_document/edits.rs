@@ -1,5 +1,5 @@
 use super::{RustDocument, invalid};
-use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline, VisualStateGroup};
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Timeline, VisualStateGroup};
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
 };
@@ -51,6 +51,21 @@ impl RustDocument {
     ) -> Result<(Vec<TextPatch>, Vec<KeyframeLocation>), String> {
         self.animation(document, program)?
             .author_keyframes(&self.source, self.catalog(), timeline, keys, edit)
+    }
+
+    pub(crate) fn mirror_keys(
+        &self, document: &Document, program: NodeId, timeline: &Timeline,
+        keys: &[KeyframeLocation], pivot: f64,
+    ) -> Result<(Vec<TextPatch>, Vec<KeyframeLocation>), String> {
+        self.animation(document, program)?
+            .mirror_keyframes(&self.source, self.catalog(), timeline, keys, pivot)
+    }
+
+    pub(crate) fn paste_keys(
+        &self, document: &Document, program: NodeId, timeline: &Timeline, paste: &KeyframePaste,
+    ) -> Result<(Vec<TextPatch>, Vec<KeyframeLocation>), String> {
+        self.animation(document, program)?
+            .paste_keyframes(&self.source, self.catalog(), timeline, paste)
     }
 
     pub(crate) fn create_animation(

@@ -6,6 +6,8 @@ mod easing;
 mod interactions;
 mod keyframe_draft;
 mod keyframe_edits;
+mod keyframe_clipboard;
+mod keyframe_mirror;
 mod program_edit;
 mod program_locator;
 mod programs;
@@ -22,6 +24,7 @@ pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
+pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};
 pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use programs::{
@@ -60,6 +63,9 @@ pub(crate) fn require(condition: bool, message: impl Into<String>) -> Result<()>
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod keyframe_transfer_tests;
 
 #[cfg(test)]
 mod program_tests;
