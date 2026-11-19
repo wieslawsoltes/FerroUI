@@ -303,3 +303,23 @@ fn the_linked_probe_counts() {
     );
     owner.dispose();
 }
+
+/// A linked application's recorded smoke script (`OSPREY_NATIVE_SMOKE` names its `smoke.jsonl`),
+/// replayed through the real boundary: Osprey's flock and painting examples ship one.
+#[cfg(osprey_app)]
+#[test]
+fn the_linked_application_replays_its_smoke_script() {
+    let Some(path) = std::env::var_os("OSPREY_NATIVE_SMOKE") else {
+        eprintln!("OSPREY_NATIVE_SMOKE names no smoke.jsonl; skipped");
+        return;
+    };
+    let script = std::fs::read_to_string(&path).expect("the smoke script");
+    let context = crate::launch_context(&[]);
+    let steps = crate::smoke::replay(
+        Box::new(crate::boundary::Linked::new().expect("linked")),
+        &context,
+        &script,
+    )
+    .expect("the smoke script passes");
+    assert!(steps > 0);
+}
