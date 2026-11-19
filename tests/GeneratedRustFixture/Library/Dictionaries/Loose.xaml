@@ -1,0 +1,5 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- No document of the crate includes this dictionary: it stays an embedded asset. -->
+  <SolidColorBrush x:Key="LooseBrush">#ff304050</SolidColorBrush>
+</ResourceDictionary>
