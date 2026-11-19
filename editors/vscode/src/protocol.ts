@@ -254,7 +254,7 @@ export interface CanvasPresentation {
     transitionPosition?: NativeTransitionPosition;
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
-    focusOrderAvailable?: boolean; spacingAvailable?: boolean };
+    focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean };
 export interface CanvasFocusOrder {
     badges: { node: number; group: number; rank: number; label: string; bounds: Bounds; groupEntry: boolean }[];
     links: [number, number][];
@@ -295,6 +295,7 @@ export type FromDesigner = DragMessage | SpacingRequest
     | { type: 'viewport'; viewport: Viewport }
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'focusOrder'; token: number }
+    | { type: 'wrapSelection'; token: number }
     | { type: 'guideEdit'; frame: FrameTarget; epoch: number; edit: GuideEdit; request: number }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }

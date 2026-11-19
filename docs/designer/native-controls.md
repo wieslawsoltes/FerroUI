@@ -117,6 +117,12 @@ Bound cell coordinates/spans, object-valued positions, and definition collection
 entirely by a style or factory are rejected rather than flattened. Structural Grid edits remain
 ordinary source edits even when animation recording is enabled.
 
+### Wrap selected controls
+
+Select one control or consecutive siblings. Open **Arrange** on the canvas shelf, choose **Wrap selection**, then choose a stack, WrapPanel, Grid, Canvas, or Border. The wrapper occupies the original child slot and becomes the selection. **Canvas (keep positions)** uses the measured slots of existing Canvas children. **Border** wraps one child.
+
+Use Undo to restore the original source in one step. Studio applies the same plan to XAML and mapped Rust views, including Rust comments and computed values within the selected controls. [Layout choices in VS Code](vscode/authoring.md#wrap-selected-controls) · [MCP workflow](vscode/reference.md#wrap-controls-with-mcp)
+
 ## Hierarchy and artboard
 
 Layer rows use a single virtualized template column with semantic icons and name/key/type

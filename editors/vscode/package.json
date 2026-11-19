@@ -201,6 +201,12 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.studio.wrapSelection",
+        "title": "Wrap Selection",
+        "category": "FerroUI",
+        "icon": "$(group-by-ref-type)"
+      },
+      {
         "command": "ferroui.studio.gridTracks",
         "title": "Edit Grid Tracks",
         "category": "FerroUI"

@@ -16,7 +16,8 @@ import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState, ResizeGesture } from './protocol';
 
-const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit', 'designer_spacing_edit']);
+const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit',
+    'designer_spacing_edit', 'designer_wrap_selection_edit']);
 export type DesignerCanvasState = Pick<DesignerViewState, 'viewport' | 'designData' | 'layerViews' | 'guideViews'>;
 
 interface Frame {
@@ -172,6 +173,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
     get timelineCatalogEpoch(): number { return this.animationCatalogEpoch; }
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
+    get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -495,7 +497,7 @@ export class DesignerPanel implements vscode.Disposable {
         try {
             return await this.commitEdit(frame, client => client.studioEdit(frame.source, token, name, args, targets), signal, validate);
         } finally {
-            if (name !== 'designer_spacing_edit' && this.currentToken === token) this.schedule(0);
+            if (name !== 'designer_spacing_edit' && name !== 'designer_wrap_selection_edit' && this.currentToken === token) this.schedule(0);
         }
     }
 
@@ -732,7 +734,8 @@ export class DesignerPanel implements vscode.Disposable {
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
                 canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image),
-                    spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image) } };
+                    spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image),
+                    wrapAvailable: Boolean(client.capabilities.selectionWrapping && snapshot.image) } };
             this.runtime = undefined;
             const retained = this.retainedSelection?.version === version && snapshot.image
                 ? this.retainedSelection.ranges.flatMap(range => {
@@ -828,7 +831,9 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         try {
-            if (message.type === 'focusOrder') {
+            if (message.type === 'wrapSelection') {
+                await vscode.commands.executeCommand('ferroui.studio.wrapSelection', this.session, frame.token);
+            } else if (message.type === 'focusOrder') {
                 if (!frame.canvas.focusOrderAvailable) return;
                 const client = await this.getClient();
                 if (this.currentToken !== frame.token) return;

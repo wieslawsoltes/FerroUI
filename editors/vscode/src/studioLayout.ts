@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
+import { chooseWrapper } from './studioWrap';
 
 const commands = [
     ['align_left', 'Align left edges', 2], ['align_horizontal_center', 'Align horizontal centers', 2],
@@ -16,8 +17,10 @@ export async function chooseLayout(panel: DesignerPanel, stillActive: () => bool
     const token = panel.currentToken;
     const selection = [...panel.selectedIds];
     if (token === undefined || panel.status || !selection.length) throw new Error('Select authored controls in the current preview.');
-    const choice = await vscode.window.showQuickPick(commands.filter(([, , count]) => selection.length >= count)
-        .map(([operation, label]) => ({ label, operation })), {
+    const options: { label: string; operation: string }[] = commands.filter(([, , count]) => selection.length >= count)
+        .map(([operation, label]) => ({ label, operation }));
+    if (panel.supportsSelectionWrapping) options.push({ label: 'Wrap Selection…', operation: 'wrap' });
+    const choice = await vscode.window.showQuickPick(options, {
         title: 'FerroUI Layout',
         placeHolder: selection.length > 1 ? `${selection.length} selected controls` : 'Reset a local layout value',
     });
@@ -25,6 +28,7 @@ export async function chooseLayout(panel: DesignerPanel, stillActive: () => bool
     const current = () => stillActive() && panel.currentToken === token && selection.length === panel.selectedIds.length
         && selection.every((id, index) => id === panel.selectedIds[index]);
     if (!current()) throw new Error('The preview or selection changed. Choose the layout command again.');
+    if (choice.operation === 'wrap') return chooseWrapper(panel, current);
     const signal = AbortSignal.timeout(15_000);
     const args = { operation: choice.operation };
     const plan = await panel.studioQuery('designer_selection_layout', args, selection, signal) as {

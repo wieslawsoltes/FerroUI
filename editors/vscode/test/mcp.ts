@@ -6,6 +6,7 @@ import { verifyCanvasInteraction, verifyCanvasScroll } from './canvasInteraction
 import { verifyCanvasGuides } from './canvasGuidesMcp';
 import { verifyCanvasSnapping } from './canvasSnappingMcp';
 import { verifySpacing } from './spacingMcp';
+import { verifyWrapping } from './wrapMcp';
 import { verifyProjectMcp } from './projectMcp';
 import { verifyScenarioMcp } from './scenarioMcp';
 import { verifyWorkspaceMcp } from './workspaceMcp';
@@ -225,6 +226,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyCanvasGuides({ invoke, content });
         await verifyCanvasSnapping({ invoke, content });
         await verifySpacing({ invoke, content });
+        await verifyWrapping({ invoke, content });
         await verifyBindingMcp({ invoke, content });
         await verifyGridMcp({ invoke, content });
         await verifyResourcePromotion({ invoke, content });

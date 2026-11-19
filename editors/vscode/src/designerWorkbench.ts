@@ -19,6 +19,7 @@ import { editBinding } from './studioBinding';
 import { StudioContext } from './studioContext';
 import type { StateTransitionControl } from './stateTransitionProtocol';
 import { chooseLayout } from './studioLayout';
+import { chooseWrapper } from './studioWrap';
 import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
 import { StudioView } from './studioView';
@@ -142,6 +143,13 @@ export class DesignerWorkbench implements vscode.Disposable {
                 } catch (error) {
                     void vscode.window.showErrorMessage(errorMessage(error));
                 }
+            }),
+            vscode.commands.registerCommand('ferroui.studio.wrapSelection', async (session?: number, token?: number) => {
+                try {
+                    const panel = session !== undefined && token !== undefined ? this.panelFor({ session, token }) : this.active;
+                    if (!panel) throw new Error('Open a FerroUI designer to wrap controls.');
+                    await chooseWrapper(panel, () => this.active === panel);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
             }),
             vscode.commands.registerCommand('ferroui.revealDesignerSource', () => {
                 const panel = this.active;

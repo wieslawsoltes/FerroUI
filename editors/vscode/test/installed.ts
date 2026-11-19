@@ -53,6 +53,7 @@ export async function run(): Promise<void> {
     try {
         assert.ok(native.capabilities.canvasInteraction);
         assert.ok(native.capabilities.spacingHelpers, 'The installed preview negotiates measured spacing');
+        assert.ok(native.capabilities.selectionWrapping, 'The installed preview negotiates selection wrapping');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
@@ -92,6 +93,17 @@ export async function run(): Promise<void> {
         const changedGap = spacingSource.source.slice(0, gapRange.start.character) + newText
             + spacingSource.source.slice(gapRange.end.character);
         assert.equal(changedGap, spacingSource.source.replace('Spacing="12"', 'Spacing="18.5"'));
+        const childSelection = spacing.nodes.filter(node => node.label === 'TextBlock').map(node => node.id);
+        const wrap = { container: 'horizontal_stack' };
+        const wrapPlan = await native.studioQuery(18, 'designer_wrap_selection', wrap, childSelection) as { model: string };
+        const wrapEdit = await native.studioEdit(spacingSource, 18, 'designer_wrap_selection_edit', {
+            ...wrap, expected_model: wrapPlan.model,
+        }, childSelection);
+        const wrappedSpacing = [...wrapEdit.edits].sort((a, b) => b.range.start.character - a.range.start.character)
+            .reduce((source, { range, newText }) => source.slice(0, range.start.character) + newText
+                + source.slice(range.end.character), spacingSource.source);
+        assert.match(wrappedSpacing, /<StackPanel Orientation="Horizontal"><TextBlock Text="First"\/><TextBlock Text="Second"\/><\/StackPanel>/);
+        assert.equal(wrapEdit.retainedSelection?.length, 1);
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);

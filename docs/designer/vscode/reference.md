@@ -39,6 +39,15 @@ For example, ask an agent to open the current design, inspect its animation prog
 
 Read the new buffer revision, frame token, stage epoch, or connection generation after the corresponding change. Text locations are UTF-16. A stale source edit is rejected. Re-read the current state before retrying the edit. The advertised tool schemas specify which identity each tool needs.
 
+### Wrap controls with MCP
+
+1. Wait for the accepted designer frame with `designer_wait`. Use `designer_select` for one authored control or a consecutive source sibling run.
+2. Call `designer_studio_query` with `tool: "designer_wrap_selection"` and empty `arguments`. Each choice has a `container`, a description, and a reason if the choice is unavailable.
+3. Read the exact plan with the same query and `arguments: { container: "canvas" }`. The report includes the ordered child IDs, wrapper properties, source patches in UTF-8 byte offsets, and the accepted `model`.
+4. Call `designer_studio_edit` with `tool: "designer_wrap_selection_edit"`, the same `container`, the model as `expected_model`, and the accepted frame as `expected_revision`. If you supply a selection explicitly, use the same ordered list for the plan and the edit. VS Code selects the wrapper after applying a single source edit.
+
+Studio's MCP server exposes `designer_wrap_selection` and `designer_wrap_selection_edit` directly. Use Studio's document revision for the edit. [Designer Studio MCP](../README.md#mcp-integration)
+
 ### Adjust measured spacing with MCP
 
 1. Wait for the accepted design using `designer_wait` and choose authored nodes using `designer_select`. To display the handles in the canvas, call `designer_canvas` with `spacing_helpers: true` in Select mode.
@@ -54,7 +63,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 
 | Task | Commands |
 | --- | --- |
-| Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Edit Grid Tracks** |
+| Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Rename RSX Control** |
 | Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Show Events**, **Show Resources**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
