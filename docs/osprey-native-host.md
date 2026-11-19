@@ -16,8 +16,8 @@ The crate is not published yet (`publish = false`).
 | Application | Source | Result |
 |---|---|---|
 | The probe | `src/toolchain/hosts/gpui/probe` of Osprey | Runs: the count, Add, the note field and Load. The smoke run (start, tap Add, "Count 1") passes through the real boundary, in the binary (`--smoke`) and as a Rust test through the FerroUI tree |
-| flock | `src/osprey/examples/gpui/flock` | See section 8 |
-| painting | `src/osprey/examples/gpui/painting` | See section 8 |
+| flock | `src/osprey/examples/gpui/flock` | Runs: the HUD badges, Pause, the field of 1000 birds, the hawk and the dog animated on the frame clock (a resident application: the birds are streamed through `native_shape`), the Flock size picker. Its recorded `smoke.jsonl` (11 steps: frames, Pause and Resume, a key, a pointer, the picker) passes through the real boundary, in the binary and as a Rust test |
+| painting | `src/osprey/examples/gpui/painting` | Runs: the header with Dashed and Clear, and the canvas in window pixels with the squares, translucent discs, the logo path, the lightning bolt, the star and the bar with two-stop gradients, the pie of arcs and the zig-zag strip. Its `smoke.jsonl` (Dashed switches to Solid) passes |
 
 ## 2. Building and running
 
@@ -191,6 +191,8 @@ lifecycle phase `active` when it opens.
   Osprey's own probe through the real boundary (start, find Add by its node, send the tap, read
   "Count 1" in the root region) and then through the FerroUI tree. CI runs it where Osprey is
   installed; elsewhere it is not compiled.
+- With an application linked and `OSPREY_NATIVE_SMOKE` naming its `smoke.jsonl`,
+  `the_linked_application_replays_its_smoke_script` replays it through the real boundary.
 - `ferroui-osprey-native --smoke`: the probe's check in the binary; `--smoke <smoke.jsonl>`
   replays an application's recorded script (the format of Osprey's examples: a `send` of an
   event, a control found by region and label, or null for the start envelope, and an `expect` of
@@ -208,6 +210,11 @@ lifecycle phase `active` when it opens.
 - Scenes: sprites are drawn as their tinted quads (no atlas images); the accessibility labels of
   scene text are not exposed.
 - Capabilities: only `animate`, the store and `cancel` are answered (section 6).
+- Checked on macOS by the smoke runs, the tests and screenshots of the three windows; pointer
+  and keyboard input in the windows (drawing in painting, steering the dog in flock, typing in
+  the probe's note) was not driven by hand. No timings were taken.
+- Only macOS was run. The Linux and Windows link lines of `build.rs` follow Osprey's library
+  targets but were not tried.
 
 ## 9. Where this host differs from the GPUI host
 
