@@ -40,6 +40,17 @@ impl DesignerSession {
             .collect()
     }
     pub fn upsert_state_group(&mut self, group: VisualStateGroup) -> Result<(), String> {
+        if self.uses_rust_source() {
+            let patches = self.rust_state_group(group.owner, &group.name)
+                .ok_or("Choose an existing mapped Rust state group")?
+                .patch_model(&group)?;
+            let change = self.commit_rust_patches("Edit Rust visual state group", patches)
+                .map_err(|error| error.to_string())?;
+            if !change.is_empty() {
+                self.changed(true);
+            }
+            return Ok(());
+        }
         let edits = group
             .plan(&self.document)
             .map_err(|error| error.to_string())?;
@@ -48,6 +59,9 @@ impl DesignerSession {
         Ok(())
     }
     pub fn remove_state_group(&mut self, owner: NodeId, name: &str) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return Err("Remove the Rust state group in the source editor".into());
+        }
         let edits = VisualStateGroup::remove(&self.document, owner, name)
             .map_err(|error| error.to_string())?;
         self.apply("Remove visual state group", edits)
@@ -324,6 +338,9 @@ impl DesignerSession {
         from: Option<&str>,
         to: &str,
     ) -> Result<Vec<BehaviorAction>, String> {
+        if self.uses_rust_source() {
+            return Err("Use set_visual_state in the Rust handler for this state group".into());
+        }
         let group = self
             .state_groups()
             .into_iter()

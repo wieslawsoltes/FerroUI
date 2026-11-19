@@ -60,6 +60,12 @@ impl DesignerSession {
         self.rust_map()?.property(offset, property)
     }
 
+    pub(crate) fn rust_state_group(&self, owner: NodeId, name: &str) -> Option<&ferroui_designer_rsx::RsxStateGroup> {
+        if !self.authored_is_valid() { return None; }
+        let offset = self.document.ast().node(owner)?.span.start;
+        self.rust_map()?.state_group(offset, name)
+    }
+
     pub(crate) fn open_rust_document(
         &mut self,
         source: String,

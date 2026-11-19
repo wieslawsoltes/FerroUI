@@ -1,4 +1,7 @@
 //! Native program, visual-state and behavior authoring panels.
+#[path = "workspace_animation/rust_states.rs"]
+mod rust_states;
+
 use super::*;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_controls::automation::AutomationProperties;
@@ -13,6 +16,7 @@ pub(super) struct AuthoringUi {
     mode: u8,
     group: String,
     state: String,
+    rust_route: Option<(Option<String>, String)>,
 }
 struct AuthoringField {
     row: Ref<Grid>,
@@ -335,10 +339,11 @@ impl DesignerWorkspace {
         let rust = session.uses_rust_source();
         for name in [
             "NewAnimation", "DuplicateAnimation", "DeleteAnimation", "Record", "Keyframe",
-            "CommitAnimation", "TimelineDetails", "StatesMode", "BehaviorsMode",
+            "CommitAnimation", "TimelineDetails", "BehaviorsMode",
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
+        self.root.get_control::<Button>("StatesMode").set_is_visible(!rust || !session.state_groups().is_empty());
         if rust {
             self.root.get_control::<ferroui_controls::Border>("AnimationDetails").set_is_visible(false);
         }
@@ -408,7 +413,7 @@ impl DesignerWorkspace {
         panel.children().clear();
         panel.set_spacing(8.0);
         let mut authoring = self.authoring.borrow_mut();
-        if self.session.borrow().uses_rust_source() && matches!(authoring.mode, 1 | 2) {
+        if self.session.borrow().uses_rust_source() && authoring.mode == 2 {
             authoring.mode = 0;
         }
         let mode = authoring.mode;
@@ -571,6 +576,10 @@ impl DesignerWorkspace {
         });
     }
     fn build_state_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {
+        if self.session.borrow().uses_rust_source() {
+            self.build_rust_states(panel, owner);
+            return;
+        }
         section(panel, "State groups");
         description(
             panel,

@@ -17,6 +17,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_language"
             | "designer_language_apply"
             | "designer_reveal_rsx_animation_issue"
+            | "designer_reveal_rsx_state"
     )
 }
 pub(super) fn tools() -> Vec<Value> {
@@ -83,6 +84,8 @@ pub(super) fn tools() -> Vec<Value> {
     vec![
         s::tool("designer_reveal_rsx_animation_issue", "Reveal a computed or unsupported clip expression from the current Rust Timeline sourceIssues list.",
             s::object(json!({"index":s::revision(),"expected_revision":s::revision()}), &["index","expected_revision"]), false),
+        s::tool("designer_reveal_rsx_state", "Reveal a mapped Rust state group or its exact route. Pass owner and group from designer_states. Include to and optionally from for a route.",
+            s::object(json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string(),"expected_revision":s::revision()}), &["owner","group","expected_revision"]), false),
         s::tool("designer_project","Read the discovered solution, selected project, open document URIs, discovery status and current build task. include_output returns the bounded captured compiler output.",s::object(json!({"include_output":{"type":"boolean"}}),&[]),false),
         s::actions("designer_project_edit","Open a solution asynchronously, select a project, activate/close an editor document, or save all authored buffers. Poll designer_project for discovery completion. close requires an explicit discard choice; saves preserve external-change checks.",vec![
             s::action("open_solution",json!({"path":s::string()}),&["path"],true),
@@ -105,6 +108,10 @@ pub(super) fn call(
     match name {
         "designer_reveal_rsx_animation_issue" => {
             workspace.reveal_rust_animation_issue(integer(args, "expected_revision")?, index(args, "index")?)?;
+            Ok(state(&workspace.session().borrow()))
+        }
+        "designer_reveal_rsx_state" => {
+            workspace.reveal_rust_state_source(integer(args, "expected_revision")?, integer(args, "owner")?, &text(args, "group")?, args["from"].as_str(), args["to"].as_str())?;
             Ok(state(&workspace.session().borrow()))
         }
         "designer_project" => project(workspace, args["include_output"] == true),

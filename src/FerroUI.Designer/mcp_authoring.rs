@@ -87,7 +87,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("play_all",json!({"program":s::id(),"time":s::time()}), &[],true),
         ],true),
         s::tool("designer_states","Read source-backed visual-state groups, setters and directional transitions, optionally for one owner.",s::object(json!({"owner":s::id()}), &[]),false),
-        s::actions("designer_state","Author a validated visual-state group or remove it. Preview/advance/clear change live classes and animation clocks without changing source. Setter values use native XAML text and may contain bindings/resources.",vec![
+        s::actions("designer_state","Author a validated XAML state group or edit mapped Rust values and route timing in an existing group. Preview, advance and clear use the native state clock. XAML setters accept native text including bindings and resources.",vec![
             s::action("upsert",json!({"model":s::state_group()}), &["model"],true),
             s::action("remove",json!({"owner":s::id(),"group":s::string()}), &["owner","group"],true),
             s::action("preview",json!({"owner":s::id(),"group":s::string(),"state":s::nullable(s::string()),"time":s::time()}), &["owner","group","state"],true),
@@ -280,9 +280,17 @@ pub(super) fn call(
             return Ok(result);
         }
         "designer_states" => {
-            return Ok(
-                json!({"revision":session.document().revision(),"groups":session.state_groups().into_iter().filter(|group|args["owner"].as_u64().is_none_or(|owner|group.owner==owner)).collect::<Vec<_>>()}),
-            )
+            let owner = args["owner"].as_u64();
+            let groups = session.state_groups().into_iter().filter(|group| owner.is_none_or(|owner| group.owner == owner)).collect::<Vec<_>>();
+            let mut result = json!({"revision":session.document().revision(),"groups":groups});
+            if session.uses_rust_source() {
+                let index = ferroui_designer_language::LineIndex::new(session.authored_source());
+                let sources = groups.iter().filter_map(|group| {
+                    session.rust_state_group(group.owner, &group.name)?.source_ranges(group.owner, &index)
+                }).collect::<Vec<_>>();
+                result["sources"] = json!(sources);
+            }
+            return Ok(result);
         }
         "designer_state" => match text(args, "action")?.as_str() {
             "upsert" => {

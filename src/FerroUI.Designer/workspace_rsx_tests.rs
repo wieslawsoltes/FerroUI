@@ -1,8 +1,8 @@
 use super::{apply_keyframe, click, keyframe_editor, keyframe_input};
 use crate::{DesignerWorkspace, PreviewStatus};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Border, Button, ComboBox, Control, TextBox, Window};
-use ferroui_designer_animation::{KeyframeGroupEdit, KeyframeLocation};
+use ferroui_controls::{Border, Button, ComboBox, Control, Grid, StackPanel, TextBox, Window};
+use ferroui_designer_animation::{Easing, KeyframeGroupEdit, KeyframeLocation};
 use ferroui_designer_language::Schema;
 use ferroui_designer_project::{MarkupCatalog, Solution, file_uri};
 use ferroui_designer_rsx::RsxCatalog;
@@ -26,6 +26,21 @@ fn review() {
             Border { name: "Review", width: 180.0, height: 100.0, background: "#234976" }
         }
     }
+}"###;
+
+const STATE_SOURCE: &str = r###"// Review routes 🧭
+fn review() {
+    rsx! { StackPanel {
+        visual_states: [ferroui_view::visual_state_group("Review")
+            .state(ferroui_view::visual_state("Idle")
+                .set_on("Card", ferroui_base::layout::Layoutable::width_property(), 120.0))
+            .state(ferroui_view::visual_state("Ready")
+                .set_on("Card", ferroui_base::layout::Layoutable::width_property(), 260.0))
+            .transition(None, "Ready", ferroui_view::ms(350), "LinearEasing")
+            .transition(Some("Idle"), "Ready", ferroui_view::ms(/* keep */ 640), "CubicEaseIn")
+            .transition(Some("Ready"), "Idle", ferroui_view::ms(370), "LinearEasing")],
+        Border { name: "Card", width: 100.0, height: 80.0, background: "#234976" }
+    } }
 }"###;
 
 struct Fixture(PathBuf);
@@ -82,6 +97,69 @@ impl Drop for Fixture {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.0);
     }
+}
+
+#[test]
+fn studio_rust_states_edit_and_seek_the_original_source() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Fixture::new();
+    let source = STATE_SOURCE.replace('\n', "\r\n");
+    let uri = files.file("review_states.rs", &source);
+    let workspace = DesignerWorkspace::with_uri(XAML, files.file("Main.xaml", XAML)).unwrap();
+    workspace.set_solution(Solution::discover(&files.0).unwrap()).unwrap();
+    workspace.activate_document(&uri).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+
+    let session = workspace.session();
+    let mut group = session.borrow().state_groups().remove(0);
+    let owner = group.owner;
+    session.borrow_mut().select([owner]);
+    workspace.refresh(true);
+    let states = workspace.control().get_control::<Button>("StatesMode");
+    assert!(states.is_visible());
+    click(&states);
+    let panel = workspace.control().get_control::<StackPanel>("AuthoringPanel");
+    let picker = panel.children().to_vec().into_iter()
+        .filter_map(|control| control.cast::<Grid>())
+        .flat_map(|row| row.children().to_vec())
+        .filter_map(|control| control.cast::<ComboBox>())
+        .find(|picker| picker.name().as_deref() == Some("RustStateRoutes"))
+        .expect("the Rust states panel offers its authored routes");
+    assert_eq!(picker.items().count(), 3);
+    let revision = session.borrow().document().revision();
+    workspace.reveal_rust_state_source(revision, owner, "Review", Some("Idle"), Some("Ready")).unwrap();
+    let editor = workspace.control().get_control::<TextBox>("Source");
+    let selection = editor.selection_start().min(editor.selection_end()) as usize
+        ..editor.selection_start().max(editor.selection_end()) as usize;
+    let utf16 = source.encode_utf16().collect::<Vec<_>>();
+    assert!(String::from_utf16(&utf16[selection]).unwrap().starts_with("transition(Some(\"Idle\")"));
+    let target = ferroui_designer_animation::resolve_state_target(session.borrow().document(), owner, "Card").unwrap();
+    let width = || session.borrow().preview.visual(target).unwrap().cast::<Border>().unwrap().width();
+    for (from, to, time, expected) in [
+        (None, "Ready", 0.175, 180.0),
+        (Some("Ready"), "Idle", 0.185, 190.0),
+        (Some("Idle"), "Ready", 0.32, 137.5),
+    ] {
+        session.borrow_mut().preview_state_transition(owner, "Review", from, to, time).unwrap();
+        assert!((width() - expected).abs() < 0.000_01);
+    }
+    group.transitions[1].duration = 0.8;
+    group.transitions[1].easing = Easing::Linear;
+    group.states[1].setters[0].value = "280".to_owned();
+    session.borrow_mut().upsert_state_group(group.clone()).unwrap();
+    let edited = source.replace("640", "800").replace("CubicEaseIn", "LinearEasing").replace("260.0", "280.0");
+    assert_eq!(session.borrow().authored_source(), edited);
+    session.borrow_mut().preview_state_transition(owner, "Review", Some("Idle"), "Ready", 0.4).unwrap();
+    assert!((width() - 200.0).abs() < 0.000_01);
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
+    assert!(!session.borrow().can_undo());
+    assert!(!session.borrow_mut().update_source(source.replace("width: 100.0", "width: [")).valid);
+    assert!(session.borrow_mut().upsert_state_group(group).is_err());
+    window.close();
 }
 
 #[test]
