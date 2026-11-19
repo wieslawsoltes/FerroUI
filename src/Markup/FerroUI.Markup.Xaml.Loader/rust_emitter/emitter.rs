@@ -623,6 +623,28 @@ fn fused_deferred_resource_add(types: &dyn EmitTypes, last: &str, local: &str, c
     Some(format!("rt::add_deferred_resource({dictionary}, {key}, {result_type}, &context, {build}, {position})?;"))
 }
 
+ferroui_base::ferro_thread_local! {
+    /// Whether the emitter resolves declared properties at compile time
+    /// ([`set_compile_time_declared_properties`]).
+    static COMPILE_TIME_DECLARED_PROPERTIES: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Turns on (or off) the resolution of the declared properties of `rt::clr_property_info` and
+/// `rt::path_property` at compile time on this thread (#603), and returns what it was: the emitter
+/// then writes `rt::declared_clr_property_info` and `rt::declared_path_property` with the position
+/// of the property in its declaration, where the type system knows it, and the run-time helpers
+/// take the property at that position instead of searching the declaration by its name (they still
+/// find it by name when the declaration changed since). Off by default, so that the checked-in
+/// generated files stay what they are; a host turns it on around a compilation, and the files it
+/// writes are then to be regenerated.
+pub fn set_compile_time_declared_properties(enabled: bool) -> bool {
+    COMPILE_TIME_DECLARED_PROPERTIES.with(|cell| cell.replace(enabled))
+}
+
+fn compile_time_declared_properties() -> bool {
+    COMPILE_TIME_DECLARED_PROPERTIES.with(std::cell::Cell::get)
+}
+
 /// The arguments of `rt::clr_property_info` for `Setter.Value`, which
 /// `rt::setter_value_property()` passes.
 const SETTER_VALUE_PROPERTY_INFO_ARGUMENTS: &str =
@@ -3444,11 +3466,16 @@ impl<'a> Emitter<'a> {
     /// as a value: `rt::clr_property_info` over the declaration of its
     /// accessors.
     fn clr_property_info(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<dyn IXamlProperty>) -> EmitResult<String> {
-        let arguments = self.property_info_arguments(node, property)?;
+        let (markup, rest, index) = self.property_info_parts(node, property)?;
+        let arguments = format!("{markup}, {rest}");
         // `Setter.Value`, the target property of every markup extension that gives a setter its
         // value: the same description, without its arguments at every use.
         if arguments == SETTER_VALUE_PROPERTY_INFO_ARGUMENTS {
             return Ok("rt::setter_value_property()".to_string());
+        }
+        // The declared property resolved at compile time (#603), with the option on.
+        if let Some(index) = index {
+            return Ok(format!("rt::boxed(rt::declared_clr_property_info({markup}, {index}, {rest}))"));
         }
         Ok(format!("rt::boxed(rt::clr_property_info({arguments}))"))
     }
@@ -3458,6 +3485,19 @@ impl<'a> Emitter<'a> {
     /// static, the handle of its type, and whether its getter returns the
     /// shared boolean boxes.
     fn property_info_arguments(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<dyn IXamlProperty>) -> EmitResult<String> {
+        let (markup, rest, _) = self.property_info_parts(node, property)?;
+        Ok(format!("{markup}, {rest}"))
+    }
+
+    /// [`property_info_arguments`](Self::property_info_arguments) in parts: the metadata, the
+    /// other arguments, and, with the option of compile-time declared properties on (#603,
+    /// [`set_compile_time_declared_properties`]), the position of the property in its
+    /// declaration when the type system knows it.
+    fn property_info_parts(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        property: &Rc<dyn IXamlProperty>,
+    ) -> EmitResult<(String, String, Option<usize>)> {
         let name = property.name();
         let accessor = property
             .getter()
@@ -3494,11 +3534,15 @@ impl<'a> Emitter<'a> {
             _ => "::ferroui_base::data::core::ValueType::object()".to_string(),
         };
         let cached_boxed_boolean = property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean"));
-        Ok(format!(
-            "{markup}, {}, {}, {handle}, {cached_boxed_boolean}",
-            rust_string_literal(&name),
-            runtime.is_static
-        ))
+        let index = match compile_time_declared_properties() {
+            true => {
+                let metadata = self.types.metadata_of(&*declaring);
+                metadata.and_then(|metadata| metadata.property_index(&name, runtime.is_static))
+            }
+            false => None,
+        };
+        let rest = format!("{}, {}, {handle}, {cached_boxed_boolean}", rust_string_literal(&name), runtime.is_static);
+        Ok((markup, rest, index))
     }
 
     /// The builder call of an indexer of a binding path (`XamlIlClrIndexerPathElementNode`):
@@ -3687,12 +3731,17 @@ impl<'a> Emitter<'a> {
                     false => format!("builder.ferro_property(rt::property({definition}))"),
                 }
             }
-            XamlIlBindingPathElementNode::ClrProperty(e) => format!(
-                "rt::path_property(&builder, {}, {}, {})",
-                self.property_info_arguments(node, &e.property)?,
-                e.accepts_null,
-                e.emit_typed.get()
-            ),
+            XamlIlBindingPathElementNode::ClrProperty(e) => match self.property_info_parts(node, &e.property)? {
+                // The declared property resolved at compile time (#603), with the option on.
+                (markup, rest, Some(index)) => format!(
+                    "rt::declared_path_property(&builder, {markup}, {index}, {rest}, {}, {})",
+                    e.accepts_null,
+                    e.emit_typed.get()
+                ),
+                (markup, rest, None) => {
+                    format!("rt::path_property(&builder, {markup}, {rest}, {}, {})", e.accepts_null, e.emit_typed.get())
+                }
+            },
             XamlIlBindingPathElementNode::ArrayIndexer(e) => {
                 let indices: Vec<String> = e.values.iter().map(|value| format!("{value}_i32")).collect();
                 format!("builder.array_element(&[{}])", indices.join(", "))

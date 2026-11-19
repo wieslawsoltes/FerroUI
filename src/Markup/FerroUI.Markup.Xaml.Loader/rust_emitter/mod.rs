@@ -132,7 +132,7 @@ pub use transform::{
 };
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
-pub use emitter::{emit_document, UnsupportedNode};
+pub use emitter::{emit_document, set_compile_time_declared_properties, UnsupportedNode};
 pub use emitter::theme_styles::{
     resolves_template_bindings, with_resolved_template_bindings, DEFAULT_RESOLVED_TEMPLATE_BINDINGS,
 };

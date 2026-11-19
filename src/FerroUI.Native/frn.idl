@@ -1432,6 +1432,22 @@ interface IFrnPowerSettings : IUnknown
     void RegisterPowerChange(IFrnActionCallback* callback);
 }
 
+// Optional extension, as IFrnAccessibilitySettings: "Increase contrast" of the accessibility
+// display options and the system colours under the effective appearance of the application,
+// which the WinUI theme takes as its high contrast colours (#560,
+// docs/porting/winui-calculator-gaps.md, section 7.4). GetSystemColor answers the colour as
+// ARGB, 0 for an unknown index: 0 windowBackgroundColor, 1 labelColor, 2 controlColor,
+// 3 controlTextColor, 4 selectedContentBackgroundColor, 5 alternateSelectedControlTextColor,
+// 6 linkColor, 7 disabledControlTextColor. The change is the accessibility notification of
+// IFrnAccessibilitySettings and the appearance notification of RegisterColorsChange. A FerroUI
+// addition.
+[uuid(a5988779-2735-4da1-887c-6e6b03239289)]
+interface IFrnContrastSettings : IUnknown
+{
+    bool GetIncreaseContrast();
+    uint GetSystemColor(int index);
+}
+
 [uuid(12edf00d-5803-4d3f-9947-b4840e5e9372)]
 interface IFrnPlatformBehaviorInhibition : IUnknown
 {

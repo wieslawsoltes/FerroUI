@@ -1028,7 +1028,18 @@ impl Chart {
                 *current = current.retarget(scene.clone());
             }
         } else {
-            let previous = previous.or_else(|| self.heat_first_draw(&models, &scene));
+            // The first draw of a Cartesian chart takes the heat cells in from transparent and
+            // grows its financial and OHLC bars from their open.
+            let financial = series.iter().any(|s| {
+                use ferroui_livecharts::SeriesKind::{Financial, Ohlc};
+                matches!(s.kind, Financial | Ohlc)
+            });
+            let previous = previous
+                .or_else(|| self.heat_first_draw(&models, &scene))
+                .or_else(|| {
+                    (self.chart_kind() == ChartKind::Cartesian && financial)
+                        .then(|| Rc::new(CartesianChartEngine::first_draw_seed(&scene, &series, &y_scales)))
+                });
             if previous.as_deref() != Some(&*scene) {
                 self.start_transition(previous, scene.clone());
             }
