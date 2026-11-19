@@ -286,8 +286,17 @@
           "types": ["CornerRadius", "CornerRadiusFilterConverter", "CornerRadiusToDoubleConverter", "CornerRadiusToThicknessConverter", "ResourceDictionary"]
         },
         {
-          "name": "Resources/RepeatButton_themeresources.xaml",
+          "name": "Resources/MediaTransportControls_themeresources.xaml",
           "index": 28,
+          "documents": ["Resources/MediaTransportControls_themeresources.xaml"],
+          "keys": ["MediaTransportControlsAppBarButtonHeight", "MediaTransportControlsAppBarButtonWidth", "MediaTransportControlsBorderBrush", "MediaTransportControlsBorderThickness", "MediaTransportControlsFillMediaText", "MediaTransportControlsFillTimeElapsedText", "MediaTransportControlsFlyoutBackground", "MediaTransportControlsMargin", "MediaTransportControlsMaxWidth", "MediaTransportControlsMinWidth", "MediaTransportControlsPanelBackground", "MediaTransportControlsProgressSliderCompactMargin", "MediaTransportControlsProgressSliderMargin", "MediaTransportControlsSliderHeight", "MediaTransportControlsSliderWidth", "MediaTransportControlsThumbBorderBackground"],
+          "type_keys": [],
+          "references": ["AcrylicBackgroundFillColorDefaultBrush", "AcrylicInAppFillColorDefaultBrush", "ControlStrongFillColorDefaultBrush", "SurfaceStrokeColorFlyoutBrush", "SystemControlBackgroundBaseMediumBrush", "SystemControlForegroundBaseHighBrush", "SystemControlPageBackgroundAltMediumBrush", "SystemControlPageTextBaseMediumBrush", "TextFillColorPrimaryBrush", "TextFillColorSecondaryBrush"],
+          "types": ["ResourceDictionary", "StaticResource", "Thickness"]
+        },
+        {
+          "name": "Resources/RepeatButton_themeresources.xaml",
+          "index": 29,
           "documents": ["Resources/RepeatButton_themeresources.xaml"],
           "keys": ["RepeatButtonBackground", "RepeatButtonBackgroundDisabled", "RepeatButtonBackgroundPointerOver", "RepeatButtonBackgroundPressed", "RepeatButtonBorderBrush", "RepeatButtonBorderBrushDisabled", "RepeatButtonBorderBrushPointerOver", "RepeatButtonBorderBrushPressed", "RepeatButtonBorderThemeBrush", "RepeatButtonBorderThemeThickness", "RepeatButtonDisabledBackgroundThemeBrush", "RepeatButtonDisabledBorderThemeBrush", "RepeatButtonDisabledForegroundThemeBrush", "RepeatButtonForeground", "RepeatButtonForegroundDisabled", "RepeatButtonForegroundPointerOver", "RepeatButtonForegroundPressed", "RepeatButtonForegroundThemeBrush", "RepeatButtonPointerOverBackgroundThemeBrush", "RepeatButtonPointerOverForegroundThemeBrush", "RepeatButtonPressedBackgroundThemeBrush", "RepeatButtonPressedForegroundThemeBrush"],
           "type_keys": [],
@@ -296,7 +305,7 @@
         },
         {
           "name": "Resources/CalendarDatePicker_themeresources.xaml",
-          "index": 29,
+          "index": 30,
           "documents": ["Resources/CalendarDatePicker_themeresources.xaml"],
           "keys": ["CalendarDatePickerBackground", "CalendarDatePickerBackgroundDisabled", "CalendarDatePickerBackgroundFocused", "CalendarDatePickerBackgroundPointerOver", "CalendarDatePickerBackgroundPressed", "CalendarDatePickerBorderBrush", "CalendarDatePickerBorderBrushDisabled", "CalendarDatePickerBorderBrushPointerOver", "CalendarDatePickerBorderBrushPressed", "CalendarDatePickerBorderThemeThickness", "CalendarDatePickerCalendarGlyphForeground", "CalendarDatePickerCalendarGlyphForegroundDisabled", "CalendarDatePickerCalendarGlyphForegroundPointerOver", "CalendarDatePickerCalendarGlyphForegroundPressed", "CalendarDatePickerForeground", "CalendarDatePickerForegroundDisabled", "CalendarDatePickerHeaderForeground", "CalendarDatePickerHeaderForegroundDisabled", "CalendarDatePickerLightDismissOverlayBackground", "CalendarDatePickerTextForeground", "CalendarDatePickerTextForegroundDisabled", "CalendarDatePickerTextForegroundPointerOver", "CalendarDatePickerTextForegroundPressed", "CalendarDatePickerTextForegroundSelected", "CalendarDatePickerTopHeaderMargin"],
           "type_keys": [],
@@ -305,7 +314,7 @@
         },
         {
           "name": "Resources/CalendarView_themeresources.xaml",
-          "index": 30,
+          "index": 31,
           "documents": ["Resources/CalendarView_themeresources.xaml"],
           "keys": ["CalendarViewBackground", "CalendarViewBlackoutBackground", "CalendarViewBlackoutForeground", "CalendarViewBlackoutStrikethroughBrush", "CalendarViewBorderBrush", "CalendarViewCalendarItemBackground", "CalendarViewCalendarItemBorderBrush", "CalendarViewCalendarItemDisabledBackground", "CalendarViewCalendarItemForeground", "CalendarViewCalendarItemHoverBackground", "CalendarViewCalendarItemPressedBackground", "CalendarViewCalendarItemRevealBackground", "CalendarViewCalendarItemRevealBorderBrush", "CalendarViewDayItemFontSize", "CalendarViewDayItemMargin", "CalendarViewDisabledForeground", "CalendarViewFirstOfMonthLabelFontSize", "CalendarViewFirstOfMonthLabelMargin", "CalendarViewFirstOfYearDecadeLabelFontSize", "CalendarViewFirstOfYearDecadeLabelMargin", "CalendarViewFocusBorderBrush", "CalendarViewFocusVisualPrimaryBrush", "CalendarViewFocusVisualSecondaryBrush", "CalendarViewForeground", "CalendarViewHeaderNavigationButtonFontSize", "CalendarViewHeaderNavigationButtonForeground", "CalendarViewHeaderNavigationButtonForegroundDisabled", "CalendarViewHeaderNavigationButtonForegroundPointerOver", "CalendarViewHeaderNavigationButtonForegroundPressed", "CalendarViewHeaderNavigationButtonMargin", "CalendarViewHeaderNavigationButtonPadding", "CalendarViewHeaderNavigationFontWeight", "CalendarViewHoverBorderBrush", "CalendarViewMonthYearItemFontSize", "CalendarViewMonthYearItemMargin", "CalendarViewNavigationButtonBackground", "CalendarViewNavigationButtonBackgroundPointerOver", "CalendarViewNavigationButtonBackgroundPressed", "CalendarViewNavigationButtonBorderBrush", "CalendarViewNavigationButtonBorderBrushPointerOver", "CalendarViewNavigationButtonFocusVisualMargin", "CalendarViewNavigationButtonFontSize", "CalendarViewNavigationButtonForeground", "CalendarViewNavigationButtonForegroundDisabled", "CalendarViewNavigationButtonForegroundPointerOver", "CalendarViewNavigationButtonForegroundPressed", "CalendarViewNavigationButtonPadding", "CalendarViewNavigationButtonScalePressed", "CalendarViewNavigationNextButtonMargin", "CalendarViewNavigationPreviousButtonMargin", "CalendarViewOutOfScopeBackground", "CalendarViewOutOfScopeForeground", "CalendarViewOutOfScopeHoverForeground", "CalendarViewOutOfScopePressedForeground", "CalendarViewPressedBorderBrush", "CalendarViewPressedForeground", "CalendarViewSelectedBorderBrush", "CalendarViewSelectedDisabledBorderBrush", "CalendarViewSelectedDisabledForeground", "CalendarViewSelectedForeground", "CalendarViewSelectedHoverBorderBrush", "CalendarViewSelectedHoverForeground", "CalendarViewSelectedPressedBorderBrush", "CalendarViewSelectedPressedForeground", "CalendarViewTodayBackground", "CalendarViewTodayBlackoutBackground", "CalendarViewTodayBlackoutForeground", "CalendarViewTodayDisabledBackground", "CalendarViewTodayFontWeight", "CalendarViewTodayForeground", "CalendarViewTodayHoverBackground", "CalendarViewTodayPressedBackground", "CalendarViewTodaySelectedInnerBorderBrush", "CalendarViewWeekDayFontWeight", "CalendarViewWeekDayForegroundDisabled", "CalendarViewWeekDayMargin", "CalendarViewWeekDayPadding"],
           "type_keys": [],
@@ -314,7 +323,7 @@
         },
         {
           "name": "Resources/CheckBox_themeresources.xaml",
-          "index": 31,
+          "index": 32,
           "documents": ["Resources/CheckBox_themeresources.xaml"],
           "keys": ["CheckBoxBackgroundChecked", "CheckBoxBackgroundCheckedDisabled", "CheckBoxBackgroundCheckedPointerOver", "CheckBoxBackgroundCheckedPressed", "CheckBoxBackgroundIndeterminate", "CheckBoxBackgroundIndeterminateDisabled", "CheckBoxBackgroundIndeterminatePointerOver", "CheckBoxBackgroundIndeterminatePressed", "CheckBoxBackgroundThemeBrush", "CheckBoxBackgroundUnchecked", "CheckBoxBackgroundUncheckedDisabled", "CheckBoxBackgroundUncheckedPointerOver", "CheckBoxBackgroundUncheckedPressed", "CheckBoxBorderBrushChecked", "CheckBoxBorderBrushCheckedDisabled", "CheckBoxBorderBrushCheckedPointerOver", "CheckBoxBorderBrushCheckedPressed", "CheckBoxBorderBrushIndeterminate", "CheckBoxBorderBrushIndeterminateDisabled", "CheckBoxBorderBrushIndeterminatePointerOver", "CheckBoxBorderBrushIndeterminatePressed", "CheckBoxBorderBrushUnchecked", "CheckBoxBorderBrushUncheckedDisabled", "CheckBoxBorderBrushUncheckedPointerOver", "CheckBoxBorderBrushUncheckedPressed", "CheckBoxBorderThemeBrush", "CheckBoxBorderThickness", "CheckBoxCheckBackgroundFillChecked", "CheckBoxCheckBackgroundFillCheckedDisabled", "CheckBoxCheckBackgroundFillCheckedPointerOver", "CheckBoxCheckBackgroundFillCheckedPressed", "CheckBoxCheckBackgroundFillIndeterminate", "CheckBoxCheckBackgroundFillIndeterminateDisabled", "CheckBoxCheckBackgroundFillIndeterminatePointerOver", "CheckBoxCheckBackgroundFillIndeterminatePressed", "CheckBoxCheckBackgroundFillUnchecked", "CheckBoxCheckBackgroundFillUncheckedDisabled", "CheckBoxCheckBackgroundFillUncheckedPointerOver", "CheckBoxCheckBackgroundFillUncheckedPressed", "CheckBoxCheckBackgroundStrokeChecked", "CheckBoxCheckBackgroundStrokeCheckedDisabled", "CheckBoxCheckBackgroundStrokeCheckedPointerOver", "CheckBoxCheckBackgroundStrokeCheckedPressed", "CheckBoxCheckBackgroundStrokeIndeterminate", "CheckBoxCheckBackgroundStrokeIndeterminateDisabled", "CheckBoxCheckBackgroundStrokeIndeterminatePointerOver", "CheckBoxCheckBackgroundStrokeIndeterminatePressed", "CheckBoxCheckBackgroundStrokeUnchecked", "CheckBoxCheckBackgroundStrokeUncheckedDisabled", "CheckBoxCheckBackgroundStrokeUncheckedPointerOver", "CheckBoxCheckBackgroundStrokeUncheckedPressed", "CheckBoxCheckGlyphForegroundChecked", "CheckBoxCheckGlyphForegroundCheckedDisabled", "CheckBoxCheckGlyphForegroundCheckedPointerOver", "CheckBoxCheckGlyphForegroundCheckedPressed", "CheckBoxCheckGlyphForegroundIndeterminate", "CheckBoxCheckGlyphForegroundIndeterminateDisabled", "CheckBoxCheckGlyphForegroundIndeterminatePointerOver", "CheckBoxCheckGlyphForegroundIndeterminatePressed", "CheckBoxCheckGlyphForegroundUnchecked", "CheckBoxCheckGlyphForegroundUncheckedDisabled", "CheckBoxCheckGlyphForegroundUncheckedPointerOver", "CheckBoxCheckGlyphForegroundUncheckedPressed", "CheckBoxCheckedGlyph", "CheckBoxContentDisabledForegroundThemeBrush", "CheckBoxContentForegroundThemeBrush", "CheckBoxDisabledBackgroundThemeBrush", "CheckBoxDisabledBorderThemeBrush", "CheckBoxDisabledForegroundThemeBrush", "CheckBoxFocusVisualMargin", "CheckBoxForegroundChecked", "CheckBoxForegroundCheckedDisabled", "CheckBoxForegroundCheckedPointerOver", "CheckBoxForegroundCheckedPressed", "CheckBoxForegroundIndeterminate", "CheckBoxForegroundIndeterminateDisabled", "CheckBoxForegroundIndeterminatePointerOver", "CheckBoxForegroundIndeterminatePressed", "CheckBoxForegroundThemeBrush", "CheckBoxForegroundUnchecked", "CheckBoxForegroundUncheckedDisabled", "CheckBoxForegroundUncheckedPointerOver", "CheckBoxForegroundUncheckedPressed", "CheckBoxGlyphSize", "CheckBoxHeight", "CheckBoxIndeterminateGlyph", "CheckBoxMinWidth", "CheckBoxPadding", "CheckBoxPointerOverBackgroundThemeBrush", "CheckBoxPointerOverBorderThemeBrush", "CheckBoxPointerOverForegroundThemeBrush", "CheckBoxPressedBackgroundThemeBrush", "CheckBoxPressedBorderThemeBrush", "CheckBoxPressedForegroundThemeBrush", "CheckBoxSize"],
           "type_keys": [],
@@ -323,7 +332,7 @@
         },
         {
           "name": "Resources/ContentDialog_themeresources.xaml",
-          "index": 32,
+          "index": 33,
           "documents": ["Resources/ContentDialog_themeresources.xaml"],
           "keys": ["ContentDialogBackground", "ContentDialogBorderBrush", "ContentDialogBorderWidth", "ContentDialogButtonSpacing", "ContentDialogForeground", "ContentDialogMaxHeight", "ContentDialogMaxWidth", "ContentDialogMinHeight", "ContentDialogMinWidth", "ContentDialogPadding", "ContentDialogSeparatorBorderBrush", "ContentDialogSeparatorThickness", "ContentDialogSmokeFill", "ContentDialogTitleMargin", "ContentDialogTopOverlay"],
           "type_keys": [],
@@ -332,7 +341,7 @@
         },
         {
           "name": "Resources/DatePicker_themeresources.xaml",
-          "index": 33,
+          "index": 34,
           "documents": ["Resources/DatePicker_themeresources.xaml"],
           "keys": ["DatePickerBorderThemeThickness", "DatePickerButtonBackground", "DatePickerButtonBackgroundDisabled", "DatePickerButtonBackgroundFocused", "DatePickerButtonBackgroundPointerOver", "DatePickerButtonBackgroundPressed", "DatePickerButtonBorderBrush", "DatePickerButtonBorderBrushDisabled", "DatePickerButtonBorderBrushPointerOver", "DatePickerButtonBorderBrushPressed", "DatePickerButtonForeground", "DatePickerButtonForegroundDefault", "DatePickerButtonForegroundDisabled", "DatePickerButtonForegroundFocused", "DatePickerButtonForegroundPointerOver", "DatePickerButtonForegroundPressed", "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterAcceptMargin", "DatePickerFlyoutPresenterBackground", "DatePickerFlyoutPresenterBorderBrush", "DatePickerFlyoutPresenterDismissMargin", "DatePickerFlyoutPresenterHighlightFill", "DatePickerFlyoutPresenterHighlightForegroundColor", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DatePickerFlyoutPresenterSpacerFill", "DatePickerForegroundThemeBrush", "DatePickerHeaderForeground", "DatePickerHeaderForegroundDisabled", "DatePickerHeaderForegroundThemeBrush", "DatePickerHeaderThemeFontWeight", "DatePickerHeaderThemeMargin", "DatePickerHostMonthPadding", "DatePickerHostPadding", "DatePickerLightDismissOverlayBackground", "DatePickerSelectorThemeMinWidth", "DatePickerSpacerFill", "DatePickerSpacerFillDisabled", "DatePickerSpacerThemeWidth", "DatePickerSpacingThemeHeight", "DatePickerSpacingThemeWidth", "DatePickerThemeMaxWidth", "DatePickerThemeMinWidth", "DatePickerTopHeaderMargin"],
           "type_keys": [],
@@ -341,7 +350,7 @@
         },
         {
           "name": "Resources/DateTimePickerFlyout_themeresources.xaml",
-          "index": 34,
+          "index": 35,
           "documents": ["Resources/DateTimePickerFlyout_themeresources.xaml"],
           "keys": ["DateTimePickerFlyoutButtonBackground", "DateTimePickerFlyoutButtonBackgroundPointerOver", "DateTimePickerFlyoutButtonBackgroundPressed", "DateTimePickerFlyoutButtonBorderBrush", "DateTimePickerFlyoutButtonBorderBrushPointerOver", "DateTimePickerFlyoutButtonBorderBrushPressed", "DateTimePickerFlyoutButtonForegroundPointerOver", "DateTimePickerFlyoutButtonForegroundPressed", "LoopingSelectorItemBackgroundPointerOver", "LoopingSelectorItemBackgroundPressed", "LoopingSelectorItemBackgroundSelected", "LoopingSelectorItemForeground", "LoopingSelectorItemForegroundPointerOver", "LoopingSelectorItemForegroundPressed", "LoopingSelectorItemForegroundSelected", "LoopingSelectorItemMargin", "LoopingSelectorUpDownButtonBackground", "LoopingSelectorUpDownButtonBackgroundPointerOver", "LoopingSelectorUpDownButtonBackgroundPressed", "LoopingSelectorUpDownButtonForeground", "LoopingSelectorUpDownButtonForegroundPointerOver", "LoopingSelectorUpDownButtonForegroundPressed", "LoopingSelectorUpDownButtonHeight", "LoopingSelectorUpDownButtonMargin", "LoopingSelectorUpDownButtonScalePressed"],
           "type_keys": [],
@@ -350,7 +359,7 @@
         },
         {
           "name": "Resources/FlipView_themeresources.xaml",
-          "index": 35,
+          "index": 36,
           "documents": ["Resources/FlipView_themeresources.xaml"],
           "keys": ["FlipViewBackground", "FlipViewButtonBackgroundThemeBrush", "FlipViewButtonBorderThemeBrush", "FlipViewButtonBorderThemeThickness", "FlipViewButtonFontSize", "FlipViewButtonForegroundThemeBrush", "FlipViewButtonPointerOverBackgroundThemeBrush", "FlipViewButtonPointerOverBorderThemeBrush", "FlipViewButtonPointerOverForegroundThemeBrush", "FlipViewButtonPressedBackgroundThemeBrush", "FlipViewButtonPressedBorderThemeBrush", "FlipViewButtonPressedForegroundThemeBrush", "FlipViewButtonScalePressed", "FlipViewNextPreviousArrowForeground", "FlipViewNextPreviousArrowForegroundPointerOver", "FlipViewNextPreviousArrowForegroundPressed", "FlipViewNextPreviousButtonBackground", "FlipViewNextPreviousButtonBackgroundPointerOver", "FlipViewNextPreviousButtonBackgroundPressed", "FlipViewNextPreviousButtonBorderBrush", "FlipViewNextPreviousButtonBorderBrushPointerOver", "FlipViewNextPreviousButtonBorderBrushPressed"],
           "type_keys": [],
@@ -359,7 +368,7 @@
         },
         {
           "name": "Resources/FlipViewItem_themeresources.xaml",
-          "index": 36,
+          "index": 37,
           "documents": ["Resources/FlipViewItem_themeresources.xaml"],
           "keys": ["FlipViewItemBackground"],
           "type_keys": [],
@@ -368,7 +377,7 @@
         },
         {
           "name": "Resources/ScrollBar_themeresources.xaml",
-          "index": 37,
+          "index": 38,
           "documents": ["Resources/ScrollBar_themeresources.xaml"],
           "keys": ["ScrollBarBackground", "ScrollBarBackgroundDisabled", "ScrollBarBackgroundPointerOver", "ScrollBarBorderBrush", "ScrollBarBorderBrushDisabled", "ScrollBarBorderBrushPointerOver", "ScrollBarButtonArrowForeground", "ScrollBarButtonArrowForegroundDisabled", "ScrollBarButtonArrowForegroundPointerOver", "ScrollBarButtonArrowForegroundPressed", "ScrollBarButtonArrowIconFontSize", "ScrollBarButtonArrowScalePressed", "ScrollBarButtonBackground", "ScrollBarButtonBackgroundDisabled", "ScrollBarButtonBackgroundPointerOver", "ScrollBarButtonBackgroundPressed", "ScrollBarButtonBorderBrush", "ScrollBarButtonBorderBrushDisabled", "ScrollBarButtonBorderBrushPointerOver", "ScrollBarButtonBorderBrushPressed", "ScrollBarButtonForegroundThemeBrush", "ScrollBarButtonPointerOverBackgroundThemeBrush", "ScrollBarButtonPointerOverBorderThemeBrush", "ScrollBarButtonPointerOverForegroundThemeBrush", "ScrollBarButtonPressedBackgroundThemeBrush", "ScrollBarButtonPressedBorderThemeBrush", "ScrollBarButtonPressedForegroundThemeBrush", "ScrollBarColorChangeDuration", "ScrollBarContractBeginTime", "ScrollBarContractDelay", "ScrollBarContractDuration", "ScrollBarContractFinalKeyframe", "ScrollBarCornerRadius", "ScrollBarExpandBeginTime", "ScrollBarExpandDuration", "ScrollBarForeground", "ScrollBarHorizontalDecreaseMargin", "ScrollBarHorizontalIncreaseMargin", "ScrollBarHorizontalThumbMinHeight", "ScrollBarHorizontalThumbMinWidth", "ScrollBarOpacityChangeDuration", "ScrollBarPanningBackgroundThemeBrush", "ScrollBarPanningBorderThemeBrush", "ScrollBarPanningBorderThemeThickness", "ScrollBarPanningThumbBackground", "ScrollBarPanningThumbBackgroundColor", "ScrollBarPanningThumbBackgroundDisabled", "ScrollBarSize", "ScrollBarThumbBackground", "ScrollBarThumbBackgroundColor", "ScrollBarThumbBackgroundThemeBrush", "ScrollBarThumbBorderBrush", "ScrollBarThumbBorderThemeBrush", "ScrollBarThumbFill", "ScrollBarThumbFillDisabled", "ScrollBarThumbFillPointerOver", "ScrollBarThumbFillPressed", "ScrollBarThumbOffset", "ScrollBarThumbPointerOverBackgroundThemeBrush", "ScrollBarThumbPointerOverBorderThemeBrush", "ScrollBarThumbPressedBackgroundThemeBrush", "ScrollBarThumbPressedBorderThemeBrush", "ScrollBarThumbStrokeThickness", "ScrollBarTrackBackgroundThemeBrush", "ScrollBarTrackBorderThemeBrush", "ScrollBarTrackBorderThemeThickness", "ScrollBarTrackFill", "ScrollBarTrackFillDisabled", "ScrollBarTrackFillPointerOver", "ScrollBarTrackStroke", "ScrollBarTrackStrokeDisabled", "ScrollBarTrackStrokePointerOver", "ScrollBarVerticalDecreaseMargin", "ScrollBarVerticalIncreaseMargin", "ScrollBarVerticalThumbMinHeight", "ScrollBarVerticalThumbMinWidth"],
           "type_keys": [],
@@ -377,7 +386,7 @@
         },
         {
           "name": "Resources/ScrollViewer_themeresources.xaml",
-          "index": 38,
+          "index": 39,
           "documents": ["Resources/ScrollViewer_themeresources.xaml"],
           "keys": ["ScrollViewerScrollBarMargin", "ScrollViewerScrollBarSeparatorBackground", "ScrollViewerSeparatorContractBeginTime", "ScrollViewerSeparatorContractDelay", "ScrollViewerSeparatorContractDuration", "ScrollViewerSeparatorContractFinalKeyframe", "ScrollViewerSeparatorExpandBeginTime", "ScrollViewerSeparatorExpandDuration"],
           "type_keys": [],
@@ -386,7 +395,7 @@
         },
         {
           "name": "Resources/Slider_themeresources.xaml",
-          "index": 39,
+          "index": 40,
           "documents": ["Resources/Slider_themeresources.xaml"],
           "keys": ["SliderBorderThemeBrush", "SliderBorderThemeThickness", "SliderContainerBackground", "SliderContainerBackgroundDisabled", "SliderContainerBackgroundPointerOver", "SliderContainerBackgroundPressed", "SliderDisabledBorderThemeBrush", "SliderHeaderForeground", "SliderHeaderForegroundDisabled", "SliderHeaderForegroundThemeBrush", "SliderHeaderThemeFontWeight", "SliderHeaderThemeMargin", "SliderHorizontalHeight", "SliderHorizontalThumbHeight", "SliderHorizontalThumbWidth", "SliderInlineTickBarFill", "SliderInnerThumbHeight", "SliderInnerThumbWidth", "SliderOuterThumbBackground", "SliderOutsideTickBarThemeHeight", "SliderPostContentMargin", "SliderPreContentMargin", "SliderThumbBackground", "SliderThumbBackgroundDisabled", "SliderThumbBackgroundPointerOver", "SliderThumbBackgroundPressed", "SliderThumbBackgroundThemeBrush", "SliderThumbBorderBrush", "SliderThumbBorderThemeBrush", "SliderThumbCornerRadius", "SliderThumbDisabledBackgroundThemeBrush", "SliderThumbPointerOverBackgroundThemeBrush", "SliderThumbPointerOverBorderThemeBrush", "SliderThumbPressedBackgroundThemeBrush", "SliderThumbPressedBorderThemeBrush", "SliderTickBarFill", "SliderTickBarFillDisabled", "SliderTickMarkInlineBackgroundThemeBrush", "SliderTickMarkInlineDisabledForegroundThemeBrush", "SliderTickMarkOutsideDisabledForegroundThemeBrush", "SliderTickmarkOutsideBackgroundThemeBrush", "SliderTopHeaderMargin", "SliderTrackBackgroundThemeBrush", "SliderTrackCornerRadius", "SliderTrackDecreaseBackgroundThemeBrush", "SliderTrackDecreaseDisabledBackgroundThemeBrush", "SliderTrackDecreasePointerOverBackgroundThemeBrush", "SliderTrackDecreasePressedBackgroundThemeBrush", "SliderTrackDisabledBackgroundThemeBrush", "SliderTrackFill", "SliderTrackFillDisabled", "SliderTrackFillPointerOver", "SliderTrackFillPressed", "SliderTrackPointerOverBackgroundThemeBrush", "SliderTrackPressedBackgroundThemeBrush", "SliderTrackThemeHeight", "SliderTrackValueFill", "SliderTrackValueFillDisabled", "SliderTrackValueFillPointerOver", "SliderTrackValueFillPressed", "SliderVerticalThumbHeight", "SliderVerticalThumbWidth", "SliderVerticalWidth"],
           "type_keys": [],
@@ -395,7 +404,7 @@
         },
         {
           "name": "Resources/TimePicker_themeresources.xaml",
-          "index": 40,
+          "index": 41,
           "documents": ["Resources/TimePicker_themeresources.xaml"],
           "keys": ["TimePickerBorderThemeThickness", "TimePickerButtonBackground", "TimePickerButtonBackgroundDisabled", "TimePickerButtonBackgroundFocused", "TimePickerButtonBackgroundPointerOver", "TimePickerButtonBackgroundPressed", "TimePickerButtonBorderBrush", "TimePickerButtonBorderBrushDisabled", "TimePickerButtonBorderBrushPointerOver", "TimePickerButtonBorderBrushPressed", "TimePickerButtonForeground", "TimePickerButtonForegroundDefault", "TimePickerButtonForegroundDisabled", "TimePickerButtonForegroundFocused", "TimePickerButtonForegroundPointerOver", "TimePickerButtonForegroundPressed", "TimePickerFirstHostThemeMargin", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterBackground", "TimePickerFlyoutPresenterBorderBrush", "TimePickerFlyoutPresenterHighlightFill", "TimePickerFlyoutPresenterHighlightForegroundColor", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerFlyoutPresenterItemPadding", "TimePickerFlyoutPresenterSpacerFill", "TimePickerForegroundThemeBrush", "TimePickerHeaderForeground", "TimePickerHeaderForegroundDisabled", "TimePickerHeaderForegroundThemeBrush", "TimePickerHeaderThemeFontWeight", "TimePickerHeaderThemeMargin", "TimePickerHostPadding", "TimePickerLightDismissOverlayBackground", "TimePickerSelectorThemeMinWidth", "TimePickerSpacerFill", "TimePickerSpacerFillDisabled", "TimePickerSpacerThemeWidth", "TimePickerThemeMaxWidth", "TimePickerThemeMinWidth", "TimePickerThirdHostThemeMargin", "TimePickerTopHeaderMargin"],
           "type_keys": [],
@@ -404,7 +413,7 @@
         },
         {
           "name": "Resources/ToolTip_themeresources.xaml",
-          "index": 41,
+          "index": 42,
           "documents": ["Resources/ToolTip_themeresources.xaml"],
           "keys": ["ToolTipBackground", "ToolTipBackgroundBrush", "ToolTipBackgroundThemeBrush", "ToolTipBorderBrush", "ToolTipBorderPadding", "ToolTipBorderThemeBrush", "ToolTipBorderThemeThickness", "ToolTipContentThemeFontSize", "ToolTipForeground", "ToolTipForegroundBrush", "ToolTipForegroundThemeBrush", "ToolTipMaxWidth"],
           "type_keys": [],
@@ -413,7 +422,7 @@
         },
         {
           "name": "Resources/RatingControl_themeresources.xaml",
-          "index": 42,
+          "index": 43,
           "documents": ["Resources/RatingControl_themeresources.xaml"],
           "keys": ["RatingControlCaptionForeground", "RatingControlCaptionTopMargin", "RatingControlDisabledSelectedForeground", "RatingControlFontSizeForRendering", "RatingControlItemSpacing", "RatingControlPlaceholderForeground", "RatingControlPointerOverPlaceholderForeground", "RatingControlPointerOverSelectedForeground", "RatingControlPointerOverUnselectedForeground", "RatingControlSelectedForeground", "RatingControlUnselectedForeground"],
           "type_keys": [],
@@ -422,7 +431,7 @@
         },
         {
           "name": "Resources/InfoBadge_themeresources.xaml",
-          "index": 43,
+          "index": 44,
           "documents": ["Resources/InfoBadge_themeresources.xaml"],
           "keys": ["IconInfoBadgeFontIconMargin", "IconInfoBadgeIconMargin", "InfoBadgeBackground", "InfoBadgeForeground", "InfoBadgeIconHeight", "InfoBadgeIconWidth", "InfoBadgeMaxHeight", "InfoBadgeMinHeight", "InfoBadgeMinWidth", "InfoBadgePadding", "InfoBadgeValueFontSize", "ValueInfoBadgeTextMargin"],
           "type_keys": [],
@@ -431,7 +440,7 @@
         },
         {
           "name": "Resources/NavigationView_themeresources.xaml",
-          "index": 44,
+          "index": 45,
           "documents": ["Resources/NavigationView_themeresources.xaml"],
           "keys": ["NavigationViewAutoSuggestAreaHeight", "NavigationViewAutoSuggestBoxMargin", "NavigationViewBorderThickness", "NavigationViewButtonBackgroundDisabled", "NavigationViewButtonBackgroundPointerOver", "NavigationViewButtonBackgroundPressed", "NavigationViewButtonForegroundDisabled", "NavigationViewButtonForegroundPointerOver", "NavigationViewButtonForegroundPressed", "NavigationViewButtonHolderGridMargin", "NavigationViewCompactItemContentPresenterMargin", "NavigationViewCompactItemSeparatorMargin", "NavigationViewCompactPaneLength", "NavigationViewContentBackground", "NavigationViewContentGridBorderBrush", "NavigationViewContentGridBorderThickness", "NavigationViewContentGridCornerRadius", "NavigationViewContentMargin", "NavigationViewContentPresenterMargin", "NavigationViewDefaultPaneBackground", "NavigationViewExpandedPaneBackground", "NavigationViewHeaderMargin", "NavigationViewIconBoxWidth", "NavigationViewItemBackground", "NavigationViewItemBackgroundChecked", "NavigationViewItemBackgroundCheckedDisabled", "NavigationViewItemBackgroundCheckedPointerOver", "NavigationViewItemBackgroundCheckedPressed", "NavigationViewItemBackgroundDisabled", "NavigationViewItemBackgroundPointerOver", "NavigationViewItemBackgroundPressed", "NavigationViewItemBackgroundSelected", "NavigationViewItemBackgroundSelectedDisabled", "NavigationViewItemBackgroundSelectedPointerOver", "NavigationViewItemBackgroundSelectedPressed", "NavigationViewItemBorderBrush", "NavigationViewItemBorderBrushChecked", "NavigationViewItemBorderBrushCheckedDisabled", "NavigationViewItemBorderBrushCheckedPointerOver", "NavigationViewItemBorderBrushCheckedPressed", "NavigationViewItemBorderBrushDisabled", "NavigationViewItemBorderBrushPointerOver", "NavigationViewItemBorderBrushPressed", "NavigationViewItemBorderBrushSelected", "NavigationViewItemBorderBrushSelectedDisabled", "NavigationViewItemBorderBrushSelectedPointerOver", "NavigationViewItemBorderBrushSelectedPressed", "NavigationViewItemBorderThickness", "NavigationViewItemButtonMargin", "NavigationViewItemChildrenMenuFlyoutPadding", "NavigationViewItemContentPresenterMargin", "NavigationViewItemExpandChevronMargin", "NavigationViewItemExpandedGlyph", "NavigationViewItemExpandedGlyphFontSize", "NavigationViewItemForeground", "NavigationViewItemForegroundChecked", "NavigationViewItemForegroundCheckedDisabled", "NavigationViewItemForegroundCheckedPointerOver", "NavigationViewItemForegroundCheckedPressed", "NavigationViewItemForegroundDisabled", "NavigationViewItemForegroundPointerOver", "NavigationViewItemForegroundPressed", "NavigationViewItemForegroundSelected", "NavigationViewItemForegroundSelectedDisabled", "NavigationViewItemForegroundSelectedPointerOver", "NavigationViewItemForegroundSelectedPressed", "NavigationViewItemHeaderForeground", "NavigationViewItemIconBackground", "NavigationViewItemInnerHeaderMargin", "NavigationViewItemMargin", "NavigationViewItemOnLeftIconBoxHeight", "NavigationViewItemOnLeftIconBoxMargin", "NavigationViewItemOnLeftMinHeight", "NavigationViewItemSeparatorForeground", "NavigationViewItemSeparatorHeight", "NavigationViewItemSeparatorMargin", "NavigationViewMinimalContentGridBorderThickness", "NavigationViewMinimalContentGridCornerRadius", "NavigationViewMinimalContentMargin", "NavigationViewMinimalHeaderMargin", "NavigationViewPaneContentGridMargin", "NavigationViewPaneHeaderRowMinHeight", "NavigationViewPaneTitlePresenterMargin", "NavigationViewSelectionIndicatorForeground", "NavigationViewSelectionIndicatorHeight", "NavigationViewSelectionIndicatorRadius", "NavigationViewSelectionIndicatorWidth", "NavigationViewToggleBorderThickness", "NavigationViewTopPaneBackground", "NavigationViewTopPaneHeight", "PaneOverlayShadowDepth", "PaneToggleButtonHeight", "PaneToggleButtonWidth", "TopNavigationViewAutoSuggestBoxMargin", "TopNavigationViewContentGridBorderThickness", "TopNavigationViewContentGridCornerRadius", "TopNavigationViewContentMargin", "TopNavigationViewItemBackgroundPointerOver", "TopNavigationViewItemBackgroundPressed", "TopNavigationViewItemBackgroundSelected", "TopNavigationViewItemBackgroundSelectedPointerOver", "TopNavigationViewItemBackgroundSelectedPressed", "TopNavigationViewItemContentOnlyContentPresenterMargin", "TopNavigationViewItemContentOnlyExpandChevronMargin", "TopNavigationViewItemContentPresenterMargin", "TopNavigationViewItemExpandChevronMargin", "TopNavigationViewItemForeground", "TopNavigationViewItemForegroundDisabled", "TopNavigationViewItemForegroundPointerOver", "TopNavigationViewItemForegroundPressed", "TopNavigationViewItemForegroundSelected", "TopNavigationViewItemForegroundSelectedPointerOver", "TopNavigationViewItemForegroundSelectedPressed", "TopNavigationViewItemIconOnlyExpandChevronMargin", "TopNavigationViewItemInnerHeaderMargin", "TopNavigationViewItemMargin", "TopNavigationViewItemOnOverflowContentPresenterMargin", "TopNavigationViewItemOnOverflowExpandChevronMargin", "TopNavigationViewItemOnOverflowExpandChevronPadding", "TopNavigationViewItemOnOverflowNoIconContentPresenterMargin", "TopNavigationViewItemSeparatorForeground", "TopNavigationViewItemSeparatorMargin", "TopNavigationViewItemSeparatorWidth", "TopNavigationViewOverflowButtonHeight", "TopNavigationViewOverflowButtonMargin", "TopNavigationViewOverflowButtonWidth", "TopNavigationViewOverflowMenuPadding", "TopNavigationViewPaneCustomContentMinWidth", "TopNavigationViewSettingsButtonHeight", "TopNavigationViewSettingsButtonWidth", "TopNavigationViewTopNavGridMargin"],
           "type_keys": [],
@@ -440,7 +449,7 @@
         },
         {
           "name": "Resources/NavigationBackButton_themeresources.xaml",
-          "index": 45,
+          "index": 46,
           "documents": ["Resources/NavigationBackButton_themeresources.xaml"],
           "keys": ["NavigationBackButtonHeight", "NavigationBackButtonWidth", "NavigationViewBackButtonBackground"],
           "type_keys": [],
@@ -449,7 +458,7 @@
         },
         {
           "name": "Resources/PersonPicture_themeresources.xaml",
-          "index": 46,
+          "index": 47,
           "documents": ["Resources/PersonPicture_themeresources.xaml"],
           "keys": ["PersonPictureBadgeGridMargin", "PersonPictureEllipseBadgeFillThemeBrush", "PersonPictureEllipseBadgeForegroundThemeBrush", "PersonPictureEllipseBadgeImageSourceStrokeOpacity", "PersonPictureEllipseBadgeStrokeOpacity", "PersonPictureEllipseBadgeStrokeThemeBrush", "PersonPictureEllipseBadgeStrokeThickness", "PersonPictureEllipseFillStrokeBrush", "PersonPictureEllipseFillThemeBrush", "PersonPictureEllipseStrokeThickness", "PersonPictureForegroundThemeBrush"],
           "type_keys": [],
@@ -458,7 +467,7 @@
         },
         {
           "name": "Resources/RefreshContainer_themeresources.xaml",
-          "index": 47,
+          "index": 48,
           "documents": ["Resources/RefreshContainer_themeresources.xaml"],
           "keys": ["RefreshContainerBackgroundBrush", "RefreshContainerForegroundBrush"],
           "type_keys": [],
@@ -467,7 +476,7 @@
         },
         {
           "name": "Resources/RefreshVisualizer_themeresources.xaml",
-          "index": 48,
+          "index": 49,
           "documents": ["Resources/RefreshVisualizer_themeresources.xaml"],
           "keys": ["RefreshVisualizerBackground", "RefreshVisualizerForeground"],
           "type_keys": [],
@@ -476,7 +485,7 @@
         },
         {
           "name": "Resources/MenuBar_themeresources.xaml",
-          "index": 49,
+          "index": 50,
           "documents": ["Resources/MenuBar_themeresources.xaml"],
           "keys": ["MenuBarBackground", "MenuBarHeight", "MenuBarItemBackground", "MenuBarItemBackgroundPointerOver", "MenuBarItemBackgroundPressed", "MenuBarItemBackgroundSelected", "MenuBarItemBorderBrush", "MenuBarItemBorderBrushPointerOver", "MenuBarItemBorderBrushPressed", "MenuBarItemBorderBrushSelected", "MenuBarItemBorderThickness", "MenuBarItemButtonPadding", "MenuBarItemForeground", "MenuBarItemMargin"],
           "type_keys": [],
@@ -485,7 +494,7 @@
         },
         {
           "name": "Resources/TreeView_themeresources.xaml",
-          "index": 50,
+          "index": 51,
           "documents": ["Resources/TreeView_themeresources.xaml"],
           "keys": ["TreeViewItemBackground", "TreeViewItemBackgroundDisabled", "TreeViewItemBackgroundPointerOver", "TreeViewItemBackgroundPressed", "TreeViewItemBackgroundSelected", "TreeViewItemBackgroundSelectedDisabled", "TreeViewItemBackgroundSelectedPointerOver", "TreeViewItemBackgroundSelectedPressed", "TreeViewItemBorderBrush", "TreeViewItemBorderBrushDisabled", "TreeViewItemBorderBrushPointerOver", "TreeViewItemBorderBrushPressed", "TreeViewItemBorderBrushSelected", "TreeViewItemBorderBrushSelectedDisabled", "TreeViewItemBorderBrushSelectedPointerOver", "TreeViewItemBorderBrushSelectedPressed", "TreeViewItemBorderThemeThickness", "TreeViewItemCheckBoxBackgroundSelected", "TreeViewItemCheckBoxBorderSelected", "TreeViewItemCheckGlyphSelected", "TreeViewItemContentHeight", "TreeViewItemForeground", "TreeViewItemForegroundDisabled", "TreeViewItemForegroundPointerOver", "TreeViewItemForegroundPressed", "TreeViewItemForegroundSelected", "TreeViewItemForegroundSelectedDisabled", "TreeViewItemForegroundSelectedPointerOver", "TreeViewItemForegroundSelectedPressed", "TreeViewItemMinHeight", "TreeViewItemMultiSelectBorderBrushSelected", "TreeViewItemMultiSelectCheckBoxMinHeight", "TreeViewItemMultiSelectSelectedItemBorderMargin", "TreeViewItemPresenterMargin", "TreeViewItemPresenterPadding", "TreeViewItemSelectionIndicatorForeground", "TreeViewItemSelectionIndicatorForegroundDisabled", "TreeViewItemSelectionIndicatorForegroundPointerOver", "TreeViewItemSelectionIndicatorForegroundPressed"],
           "type_keys": [],
@@ -494,7 +503,7 @@
         },
         {
           "name": "Resources/SplitButton_themeresources.xaml",
-          "index": 51,
+          "index": 52,
           "documents": ["Resources/SplitButton_themeresources.xaml"],
           "keys": ["SplitButtonBackground", "SplitButtonBackgroundChecked", "SplitButtonBackgroundCheckedDisabled", "SplitButtonBackgroundCheckedPointerOver", "SplitButtonBackgroundCheckedPressed", "SplitButtonBackgroundDisabled", "SplitButtonBackgroundPointerOver", "SplitButtonBackgroundPressed", "SplitButtonBorderBrush", "SplitButtonBorderBrushChecked", "SplitButtonBorderBrushCheckedDisabled", "SplitButtonBorderBrushCheckedDivider", "SplitButtonBorderBrushCheckedPointerOver", "SplitButtonBorderBrushCheckedPressed", "SplitButtonBorderBrushDisabled", "SplitButtonBorderBrushDivider", "SplitButtonBorderBrushPointerOver", "SplitButtonBorderBrushPressed", "SplitButtonBorderThemeThickness", "SplitButtonForeground", "SplitButtonForegroundChecked", "SplitButtonForegroundCheckedDisabled", "SplitButtonForegroundCheckedPointerOver", "SplitButtonForegroundCheckedPressed", "SplitButtonForegroundDisabled", "SplitButtonForegroundPointerOver", "SplitButtonForegroundPressed", "SplitButtonForegroundSecondary", "SplitButtonForegroundSecondaryPressed", "SplitButtonInAppBarUnfocusedPointerOver", "SplitButtonPadding", "SplitButtonPrimaryButtonSize", "SplitButtonSecondaryButtonSize"],
           "type_keys": [],
@@ -503,7 +512,7 @@
         },
         {
           "name": "Resources/DropDownButton_themeresources.xaml",
-          "index": 52,
+          "index": 53,
           "documents": ["Resources/DropDownButton_themeresources.xaml"],
           "keys": ["DropDownButtonForegroundSecondary", "DropDownButtonForegroundSecondaryPointerOver", "DropDownButtonForegroundSecondaryPressed"],
           "type_keys": [],
@@ -512,7 +521,7 @@
         },
         {
           "name": "Resources/RadioButtons_themeresources.xaml",
-          "index": 53,
+          "index": 54,
           "documents": ["Resources/RadioButtons_themeresources.xaml"],
           "keys": ["RadioButtonsColumnSpacing", "RadioButtonsHeaderForeground", "RadioButtonsHeaderForegroundDisabled", "RadioButtonsRowSpacing", "RadioButtonsTopHeaderMargin"],
           "type_keys": [],
@@ -521,7 +530,7 @@
         },
         {
           "name": "Resources/TabView_themeresources.xaml",
-          "index": 54,
+          "index": 55,
           "documents": ["Resources/TabView_themeresources.xaml"],
           "keys": ["TabViewBackground", "TabViewBorderBrush", "TabViewButtonBackground", "TabViewButtonBackgroundActiveTab", "TabViewButtonBackgroundDisabled", "TabViewButtonBackgroundPointerOver", "TabViewButtonBackgroundPressed", "TabViewButtonBorderBrush", "TabViewButtonBorderBrushDisabled", "TabViewButtonBorderBrushPointerOver", "TabViewButtonBorderBrushPressed", "TabViewButtonBorderThickness", "TabViewButtonForeground", "TabViewButtonForegroundActiveTab", "TabViewButtonForegroundDisabled", "TabViewButtonForegroundPointerOver", "TabViewButtonForegroundPressed", "TabViewHeaderPadding", "TabViewItemAddButtonContainerPadding", "TabViewItemAddButtonFontSize", "TabViewItemAddButtonHeight", "TabViewItemAddButtonWidth", "TabViewItemBorderBrush", "TabViewItemBorderThickness", "TabViewItemHeaderBackground", "TabViewItemHeaderBackgroundDisabled", "TabViewItemHeaderBackgroundPointerOver", "TabViewItemHeaderBackgroundPressed", "TabViewItemHeaderBackgroundSelected", "TabViewItemHeaderCloseButtonBackground", "TabViewItemHeaderCloseButtonBackgroundPointerOver", "TabViewItemHeaderCloseButtonBackgroundPressed", "TabViewItemHeaderCloseButtonBorderBrush", "TabViewItemHeaderCloseButtonBorderBrushDisabled", "TabViewItemHeaderCloseButtonBorderBrushPointerOver", "TabViewItemHeaderCloseButtonBorderBrushPressed", "TabViewItemHeaderCloseButtonBorderBrushSelected", "TabViewItemHeaderCloseButtonBorderThickness", "TabViewItemHeaderCloseButtonForeground", "TabViewItemHeaderCloseButtonForegroundPointerOver", "TabViewItemHeaderCloseButtonForegroundPressed", "TabViewItemHeaderCloseButtonHeight", "TabViewItemHeaderCloseButtonSize", "TabViewItemHeaderCloseButtonWidth", "TabViewItemHeaderCloseFontSize", "TabViewItemHeaderCloseMargin", "TabViewItemHeaderDisabledCloseButtonBackground", "TabViewItemHeaderDisabledCloseButtonForeground", "TabViewItemHeaderDragBackground", "TabViewItemHeaderFontSize", "TabViewItemHeaderForeground", "TabViewItemHeaderForegroundDisabled", "TabViewItemHeaderForegroundPointerOver", "TabViewItemHeaderForegroundPressed", "TabViewItemHeaderForegroundSelected", "TabViewItemHeaderIconMargin", "TabViewItemHeaderIconSize", "TabViewItemHeaderPadding", "TabViewItemHeaderPaddingWithCloseButton", "TabViewItemHeaderPaddingWithoutCloseButton", "TabViewItemHeaderPointerOverCloseButtonBackground", "TabViewItemHeaderPointerOverCloseButtonForeground", "TabViewItemHeaderPressedCloseButtonBackground", "TabViewItemHeaderPressedCloseButtonForeground", "TabViewItemHeaderSelectedCloseButtonBackground", "TabViewItemHeaderSelectedCloseButtonForeground", "TabViewItemIconForeground", "TabViewItemIconForegroundDisabled", "TabViewItemIconForegroundPointerOver", "TabViewItemIconForegroundPressed", "TabViewItemIconForegroundSelected", "TabViewItemLeftScrollButtonContainerPadding", "TabViewItemMaxWidth", "TabViewItemMinHeight", "TabViewItemMinWidth", "TabViewItemRightScrollButtonContainerPadding", "TabViewItemScrollButonFontSize", "TabViewItemScrollButtonHeight", "TabViewItemScrollButtonPadding", "TabViewItemScrollButtonWidth", "TabViewItemSeparator", "TabViewItemSeparatorMargin", "TabViewScrollButtonBackground", "TabViewScrollButtonBackgroundDisabled", "TabViewScrollButtonBackgroundPointerOver", "TabViewScrollButtonBackgroundPressed", "TabViewScrollButtonBorderBrush", "TabViewScrollButtonBorderBrushDisabled", "TabViewScrollButtonBorderBrushPointerOver", "TabViewScrollButtonBorderBrushPressed", "TabViewScrollButtonForeground", "TabViewScrollButtonForegroundDisabled", "TabViewScrollButtonForegroundPointerOver", "TabViewScrollButtonForegroundPressed", "TabViewSelectedItemBorderBrush", "TabViewSelectedItemBorderThickness", "TabViewSelectedItemHeaderMargin", "TabViewSelectedItemHeaderPadding", "TabViewShadowDepth"],
           "type_keys": [],
@@ -530,7 +539,7 @@
         },
         {
           "name": "Resources/AutoSuggestBox_themeresources.xaml",
-          "index": 55,
+          "index": 56,
           "documents": ["Resources/AutoSuggestBox_themeresources.xaml"],
           "keys": ["AutoSuggestBoxDeleteButtonMargin", "AutoSuggestBoxIconFontSize", "AutoSuggestBoxInnerButtonMargin", "AutoSuggestBoxLeftButtonMargin", "AutoSuggestBoxLightDismissOverlayBackground", "AutoSuggestBoxQueryButtonPadding", "AutoSuggestBoxRightButtonMargin", "AutoSuggestBoxSuggestionsListBackground", "AutoSuggestBoxSuggestionsListBorderBrush", "AutoSuggestBoxTopHeaderMargin"],
           "type_keys": [],
@@ -539,7 +548,7 @@
         },
         {
           "name": "Resources/ComboBox_themeresources.xaml",
-          "index": 56,
+          "index": 57,
           "documents": ["Resources/ComboBox_themeresources.xaml"],
           "keys": ["ComboBoxArrowDisabledForegroundThemeBrush", "ComboBoxArrowForegroundThemeBrush", "ComboBoxArrowPressedForegroundThemeBrush", "ComboBoxArrowThemeFontSize", "ComboBoxBackground", "ComboBoxBackgroundBorderBrushFocused", "ComboBoxBackgroundBorderBrushUnfocused", "ComboBoxBackgroundBorderThicknessFocused", "ComboBoxBackgroundDisabled", "ComboBoxBackgroundFocused", "ComboBoxBackgroundPointerOver", "ComboBoxBackgroundPressed", "ComboBoxBackgroundThemeBrush", "ComboBoxBackgroundUnfocused", "ComboBoxBorderBrush", "ComboBoxBorderBrushDisabled", "ComboBoxBorderBrushPointerOver", "ComboBoxBorderBrushPressed", "ComboBoxBorderThemeBrush", "ComboBoxBorderThemeThickness", "ComboBoxDisabledBackgroundThemeBrush", "ComboBoxDisabledBorderThemeBrush", "ComboBoxDisabledForegroundThemeBrush", "ComboBoxDropDownBackground", "ComboBoxDropDownBackgroundPointerOver", "ComboBoxDropDownBackgroundPointerPressed", "ComboBoxDropDownBorderBrush", "ComboBoxDropDownButtonBackgroundCornerRadius", "ComboBoxDropDownForeground", "ComboBoxDropDownGlyphForeground", "ComboBoxDropDownGlyphForegroundDisabled", "ComboBoxDropDownGlyphForegroundFocused", "ComboBoxDropDownGlyphForegroundFocusedPressed", "ComboBoxDropdownBorderPadding", "ComboBoxDropdownBorderThickness", "ComboBoxDropdownContentMargin", "ComboBoxEditableDropDownGlyphForeground", "ComboBoxEditableTextPadding", "ComboBoxFocusedBackgroundThemeBrush", "ComboBoxFocusedBorderThemeBrush", "ComboBoxFocusedDropDownBackgroundPointerOver", "ComboBoxFocusedDropDownBackgroundPointerPressed", "ComboBoxFocusedForegroundThemeBrush", "ComboBoxForeground", "ComboBoxForegroundDisabled", "ComboBoxForegroundFocused", "ComboBoxForegroundFocusedPressed", "ComboBoxForegroundPointerOver", "ComboBoxForegroundPressed", "ComboBoxForegroundThemeBrush", "ComboBoxHeaderForeground", "ComboBoxHeaderForegroundDisabled", "ComboBoxHeaderForegroundThemeBrush", "ComboBoxHeaderThemeFontWeight", "ComboBoxHeaderThemeMargin", "ComboBoxHiglightBorderCornerRadius", "ComboBoxItemBackground", "ComboBoxItemBackgroundDisabled", "ComboBoxItemBackgroundPointerOver", "ComboBoxItemBackgroundPressed", "ComboBoxItemBackgroundSelected", "ComboBoxItemBackgroundSelectedDisabled", "ComboBoxItemBackgroundSelectedPointerOver", "ComboBoxItemBackgroundSelectedPressed", "ComboBoxItemBackgroundSelectedUnfocused", "ComboBoxItemBorderBrush", "ComboBoxItemBorderBrushDisabled", "ComboBoxItemBorderBrushPointerOver", "ComboBoxItemBorderBrushPressed", "ComboBoxItemBorderBrushSelected", "ComboBoxItemBorderBrushSelectedDisabled", "ComboBoxItemBorderBrushSelectedPointerOver", "ComboBoxItemBorderBrushSelectedPressed", "ComboBoxItemBorderBrushSelectedUnfocused", "ComboBoxItemCornerRadius", "ComboBoxItemDisabledForegroundThemeBrush", "ComboBoxItemForeground", "ComboBoxItemForegroundDisabled", "ComboBoxItemForegroundPointerOver", "ComboBoxItemForegroundPressed", "ComboBoxItemForegroundSelected", "ComboBoxItemForegroundSelectedDisabled", "ComboBoxItemForegroundSelectedPointerOver", "ComboBoxItemForegroundSelectedPressed", "ComboBoxItemForegroundSelectedUnfocused", "ComboBoxItemPillCornerRadius", "ComboBoxItemPillFillBrush", "ComboBoxItemPillHeight", "ComboBoxItemPillMinScale", "ComboBoxItemPillWidth", "ComboBoxItemPointerOverBackgroundThemeBrush", "ComboBoxItemPointerOverForegroundThemeBrush", "ComboBoxItemPressedBackgroundThemeBrush", "ComboBoxItemPressedForegroundThemeBrush", "ComboBoxItemScaleAnimationDuration", "ComboBoxItemSelectedBackgroundThemeBrush", "ComboBoxItemSelectedDisabledBackgroundThemeBrush", "ComboBoxItemSelectedDisabledForegroundThemeBrush", "ComboBoxItemSelectedForegroundThemeBrush", "ComboBoxItemSelectedPointerOverBackgroundThemeBrush", "ComboBoxItemThemeGameControllerPadding", "ComboBoxItemThemePadding", "ComboBoxItemThemeTouchPadding", "ComboBoxLightDismissOverlayBackground", "ComboBoxMinHeight", "ComboBoxPadding", "ComboBoxPlaceHolderForeground", "ComboBoxPlaceHolderForegroundDisabled", "ComboBoxPlaceHolderForegroundFocused", "ComboBoxPlaceHolderForegroundFocusedPressed", "ComboBoxPlaceHolderForegroundPointerOver", "ComboBoxPlaceHolderForegroundPressed", "ComboBoxPlaceholderTextForegroundThemeBrush", "ComboBoxPlaceholderTextThemeFontWeight", "ComboBoxPointerOverBackgroundThemeBrush", "ComboBoxPointerOverBorderThemeBrush", "ComboBoxPopupBackgroundThemeBrush", "ComboBoxPopupBorderThemeBrush", "ComboBoxPopupBorderThemeThickness", "ComboBoxPopupForegroundThemeBrush", "ComboBoxPopupMaxNumberOfItems", "ComboBoxPopupMaxNumberOfItemsThatCanBeShownOnOneSide", "ComboBoxPopupThemeMinWidth", "ComboBoxPopupThemeTouchMinWidth", "ComboBoxPressedBackgroundThemeBrush", "ComboBoxPressedBorderThemeBrush", "ComboBoxPressedForegroundThemeBrush", "ComboBoxPressedHighlightThemeBrush", "ComboBoxSelectedBackgroundThemeBrush", "ComboBoxSelectedPointerOverBackgroundThemeBrush", "ComboBoxThemeMinWidth", "ComboBoxTopHeaderMargin"],
           "type_keys": [],
@@ -548,7 +557,7 @@
         },
         {
           "name": "Resources/SplitView_themeresources.xaml",
-          "index": 57,
+          "index": 58,
           "documents": ["Resources/SplitView_themeresources.xaml"],
           "keys": ["SplitViewCompactPaneThemeLength", "SplitViewLeftBorderThemeThickness", "SplitViewLightDismissOverlayBackground", "SplitViewOpenPaneThemeLength", "SplitViewPaneAnimationCloseDuration", "SplitViewPaneAnimationOpenDuration", "SplitViewPaneAnimationOpenPreDuration", "SplitViewPaneRootCornerRadius", "SplitViewRightBorderThemeThickness"],
           "type_keys": [],
@@ -557,7 +566,7 @@
         },
         {
           "name": "Resources/ProgressBar_themeresources.xaml",
-          "index": 58,
+          "index": 59,
           "documents": ["Resources/ProgressBar_themeresources.xaml"],
           "keys": ["ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundColor", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundColor", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight"],
           "type_keys": [],
@@ -566,7 +575,7 @@
         },
         {
           "name": "Resources/ProgressRing_themeresources.xaml",
-          "index": 59,
+          "index": 60,
           "documents": ["Resources/ProgressRing_themeresources.xaml"],
           "keys": ["ProgressRingBackgroundThemeBrush", "ProgressRingForegroundThemeBrush", "ProgressRingStrokeThickness"],
           "type_keys": [],
@@ -575,7 +584,7 @@
         },
         {
           "name": "Resources/NumberBox_themeresources.xaml",
-          "index": 60,
+          "index": 61,
           "documents": ["Resources/NumberBox_themeresources.xaml"],
           "keys": ["NumberBoxIconMargin", "NumberBoxMinWidth", "NumberBoxPopupBackground", "NumberBoxPopupBorderBrush", "NumberBoxPopupBorderThickness", "NumberBoxPopupHorizonalOffset", "NumberBoxPopupIndicatorForeground", "NumberBoxPopupIndicatorMargin", "NumberBoxPopupShadowDepth", "NumberBoxPopupSpinButtonBackground", "NumberBoxPopupSpinButtonBorderThickness", "NumberBoxPopupVerticalOffset", "NumberBoxSpinButtonBorderThickness"],
           "type_keys": [],
@@ -584,7 +593,7 @@
         },
         {
           "name": "Resources/Expander_themeresources.xaml",
-          "index": 61,
+          "index": 62,
           "documents": ["Resources/Expander_themeresources.xaml"],
           "keys": ["ExpanderChevronBackground", "ExpanderChevronBorderBrush", "ExpanderChevronBorderPointerOverBrush", "ExpanderChevronBorderPressedBrush", "ExpanderChevronBorderThickness", "ExpanderChevronButtonSize", "ExpanderChevronDownGlyph", "ExpanderChevronForeground", "ExpanderChevronGlyphSize", "ExpanderChevronMargin", "ExpanderChevronPointerOverBackground", "ExpanderChevronPointerOverForeground", "ExpanderChevronPressedBackground", "ExpanderChevronPressedForeground", "ExpanderChevronUpGlyph", "ExpanderContentBackground", "ExpanderContentBorderBrush", "ExpanderContentDownBorderThickness", "ExpanderContentPadding", "ExpanderContentUpBorderThickness", "ExpanderHeaderBackground", "ExpanderHeaderBorderBrush", "ExpanderHeaderBorderPointerOverBrush", "ExpanderHeaderBorderPressedBrush", "ExpanderHeaderBorderThickness", "ExpanderHeaderDisabledBorderBrush", "ExpanderHeaderDisabledForeground", "ExpanderHeaderForeground", "ExpanderHeaderForegroundPointerOver", "ExpanderHeaderForegroundPressed", "ExpanderHeaderHorizontalContentAlignment", "ExpanderHeaderPadding", "ExpanderHeaderVerticalContentAlignment", "ExpanderMinHeight"],
           "type_keys": [],
@@ -593,7 +602,7 @@
         },
         {
           "name": "Resources/PagerControl_themeresources.xaml",
-          "index": 62,
+          "index": 63,
           "documents": ["Resources/PagerControl_themeresources.xaml"],
           "keys": ["PagerControlNumberPanelButtonWidth", "PagerControlPageNavigationButtonBackgroundDisabled", "PagerControlPageNavigationButtonBackgroundPointerOver", "PagerControlPageNavigationButtonBackgroundPressed", "PagerControlPageNavigationButtonForegroundDisabled", "PagerControlPageNavigationButtonForegroundPointerOver", "PagerControlPageNavigationButtonForegroundPressed", "PagerControlSelectionIndicatorForeground"],
           "type_keys": [],
@@ -602,7 +611,7 @@
         },
         {
           "name": "Resources/InfoBar_themeresources.xaml",
-          "index": 63,
+          "index": 64,
           "documents": ["Resources/InfoBar_themeresources.xaml"],
           "keys": ["InfoBarActionHorizontalOrientationMargin", "InfoBarActionVerticalOrientationMargin", "InfoBarBorderBrush", "InfoBarBorderThickness", "InfoBarCloseButtonGlyphSize", "InfoBarCloseButtonSize", "InfoBarCloseButtonSymbol", "InfoBarContentRootPadding", "InfoBarErrorIconGlyph", "InfoBarErrorSeverityBackgroundBrush", "InfoBarErrorSeverityIconBackground", "InfoBarErrorSeverityIconForeground", "InfoBarHyperlinkButtonForeground", "InfoBarHyperlinkButtonMargin", "InfoBarIconBackgroundGlyph", "InfoBarIconFontSize", "InfoBarIconMargin", "InfoBarInformationalIconGlyph", "InfoBarInformationalSeverityBackgroundBrush", "InfoBarInformationalSeverityIconBackground", "InfoBarInformationalSeverityIconForeground", "InfoBarMessageFontSize", "InfoBarMessageFontWeight", "InfoBarMessageForeground", "InfoBarMessageHorizontalOrientationMargin", "InfoBarMessageVerticalOrientationMargin", "InfoBarMinHeight", "InfoBarPanelHorizontalOrientationPadding", "InfoBarPanelMargin", "InfoBarPanelVerticalOrientationPadding", "InfoBarSuccessIconGlyph", "InfoBarSuccessSeverityBackgroundBrush", "InfoBarSuccessSeverityIconBackground", "InfoBarSuccessSeverityIconForeground", "InfoBarTitleFontSize", "InfoBarTitleFontWeight", "InfoBarTitleForeground", "InfoBarTitleHorizontalOrientationMargin", "InfoBarTitleVerticalOrientationMargin", "InfoBarWarningIconGlyph", "InfoBarWarningSeverityBackgroundBrush", "InfoBarWarningSeverityIconBackground", "InfoBarWarningSeverityIconForeground"],
           "type_keys": [],
@@ -611,7 +620,7 @@
         },
         {
           "name": "Resources/PipsPager_themeresources.xaml",
-          "index": 64,
+          "index": 65,
           "documents": ["Resources/PipsPager_themeresources.xaml"],
           "keys": ["PipsPagerButtonBorderThickness", "PipsPagerButtonHeight", "PipsPagerButtonWidth", "PipsPagerHorizontalOrientationButtonHeight", "PipsPagerHorizontalOrientationButtonWidth", "PipsPagerNavigationButtonBackground", "PipsPagerNavigationButtonBackgroundDisabled", "PipsPagerNavigationButtonBackgroundPointerOver", "PipsPagerNavigationButtonBackgroundPressed", "PipsPagerNavigationButtonBorderBrush", "PipsPagerNavigationButtonBorderBrushDisabled", "PipsPagerNavigationButtonBorderBrushPointerOver", "PipsPagerNavigationButtonBorderBrushPressed", "PipsPagerNavigationButtonBorderThickness", "PipsPagerNavigationButtonFontSize", "PipsPagerNavigationButtonForeground", "PipsPagerNavigationButtonForegroundDisabled", "PipsPagerNavigationButtonForegroundPointerOver", "PipsPagerNavigationButtonForegroundPressed", "PipsPagerNavigationButtonHeight", "PipsPagerNavigationButtonScalePressed", "PipsPagerNavigationButtonWidth", "PipsPagerNextPageButtonGlyph", "PipsPagerNormalGlyph", "PipsPagerNormalGlyphFontSize", "PipsPagerPreviousPageButtonGlyph", "PipsPagerSelectedGlyph", "PipsPagerSelectedGlyphFontSize", "PipsPagerSelectionIndicatorBackground", "PipsPagerSelectionIndicatorBackgroundDisabled", "PipsPagerSelectionIndicatorBackgroundPointerOver", "PipsPagerSelectionIndicatorBackgroundPressed", "PipsPagerSelectionIndicatorBackgroundSelected", "PipsPagerSelectionIndicatorBorderBrush", "PipsPagerSelectionIndicatorBorderBrushDisabled", "PipsPagerSelectionIndicatorBorderBrushPointerOver", "PipsPagerSelectionIndicatorBorderBrushPressed", "PipsPagerSelectionIndicatorBorderBrushSelected", "PipsPagerSelectionIndicatorForeground", "PipsPagerSelectionIndicatorForegroundDisabled", "PipsPagerSelectionIndicatorForegroundPointerOver", "PipsPagerSelectionIndicatorForegroundPressed", "PipsPagerSelectionIndicatorForegroundSelected", "PipsPagerVerticalOrientationButtonHeight", "PipsPagerVerticalOrientationButtonWidth"],
           "type_keys": [],
@@ -620,7 +629,7 @@
         },
         {
           "name": "Resources/SelectorBar_themeresources.xaml",
-          "index": 65,
+          "index": 66,
           "documents": ["Resources/SelectorBar_themeresources.xaml"],
           "keys": ["SelectorBarBackground", "SelectorBarBorderThickness", "SelectorBarItemBackground", "SelectorBarItemBackgroundDisabled", "SelectorBarItemBackgroundPointerOver", "SelectorBarItemBackgroundPressed", "SelectorBarItemBackgroundSelected", "SelectorBarItemBorderBrush", "SelectorBarItemBorderBrushDisabled", "SelectorBarItemBorderBrushPointerOver", "SelectorBarItemBorderBrushPressed", "SelectorBarItemBorderBrushSelected", "SelectorBarItemBorderThickness", "SelectorBarItemDisabledPillFill", "SelectorBarItemFocusVisualMargin", "SelectorBarItemForeground", "SelectorBarItemForegroundDisabled", "SelectorBarItemForegroundPointerOver", "SelectorBarItemForegroundPressed", "SelectorBarItemForegroundSelected", "SelectorBarItemIconScale", "SelectorBarItemIconVisualMargin", "SelectorBarItemPadding", "SelectorBarItemPillFill", "SelectorBarItemPillHeight", "SelectorBarItemPillWidth", "SelectorBarItemSelectionVisualMargin", "SelectorBarItemSpacing", "SelectorBarItemTextVisualMargin", "SelectorBarPadding", "SelectorBarSelectedInnerThickness"],
           "type_keys": [],
@@ -629,7 +638,7 @@
         },
         {
           "name": "Resources/TitleBar_themeresources.xaml",
-          "index": 66,
+          "index": 67,
           "documents": ["Resources/TitleBar_themeresources.xaml"],
           "keys": ["TitleBarBackButtonBackground", "TitleBarBackButtonBackgroundDisabled", "TitleBarBackButtonBackgroundPointerOver", "TitleBarBackButtonBackgroundPressed", "TitleBarBackButtonForeground", "TitleBarBackButtonForegroundDisabled", "TitleBarBackButtonForegroundPointerOver", "TitleBarBackButtonForegroundPressed", "TitleBarBackButtonWidth", "TitleBarCompactContentMargin", "TitleBarCompactHeight", "TitleBarContentHorizontalAlignment", "TitleBarContentVerticalAlignment", "TitleBarDeactivatedForegroundBrush", "TitleBarDeactivatedOpacity", "TitleBarExpandedHeight", "TitleBarForegroundBrush", "TitleBarHeaderNegativeInsetPaddingWidth", "TitleBarIconMargin", "TitleBarIconMaxHeight", "TitleBarIconMaxWidth", "TitleBarLeftHeaderHorizontalAlignment", "TitleBarLeftHeaderPaddingWidth", "TitleBarLeftHeaderVerticalAlignment", "TitleBarLeftPaddingWidth", "TitleBarMinDragRegionWidth", "TitleBarPaneToggleButtonBackground", "TitleBarPaneToggleButtonBackgroundDisabled", "TitleBarPaneToggleButtonBackgroundPointerOver", "TitleBarPaneToggleButtonBackgroundPressed", "TitleBarPaneToggleButtonForeground", "TitleBarPaneToggleButtonForegroundDisabled", "TitleBarPaneToggleButtonForegroundPointerOver", "TitleBarPaneToggleButtonForegroundPressed", "TitleBarPaneToggleButtonWidth", "TitleBarRightHeaderHorizontalAlignment", "TitleBarRightHeaderVerticalAlignment", "TitleBarRightPaddingWidth", "TitleBarSubtitleDeactivatedForegroundBrush", "TitleBarSubtitleForegroundBrush", "TitleBarSubtitleMargin", "TitleBarSubtitleMinWidth", "TitleBarTitleMargin", "TitleBarTitleMinWidth"],
           "type_keys": [],
@@ -638,7 +647,7 @@
         },
         {
           "name": "Resources/TabularSurfaces_themeresources.xaml",
-          "index": 67,
+          "index": 68,
           "documents": ["Resources/TabularSurfaces_themeresources.xaml"],
           "keys": ["TabularSurfaceGridLineBrush", "TabularSurfaceGroupHeaderBackgroundBrush", "TabularSurfaceGroupHeaderBorderBrush", "TabularSurfaceGroupHeaderBorderThickness", "TabularSurfaceGroupHeaderCountOpacity", "TabularSurfaceGroupHeaderForegroundBrush", "TabularSurfaceHeaderBackgroundBrush", "TabularSurfaceHeaderBackgroundPointerOverBrush", "TabularSurfaceHeaderBackgroundPressedBrush", "TabularSurfaceHeaderForegroundBrush", "TabularSurfaceHeaderForegroundPointerOverBrush", "TabularSurfaceHeaderForegroundPressedBrush", "TabularSurfaceHeaderSeparatorBrush", "TabularSurfaceRowBackgroundBrush", "TabularSurfaceRowBackgroundDisabledBrush", "TabularSurfaceRowBackgroundPointerOverBrush", "TabularSurfaceRowBackgroundPressedBrush", "TabularSurfaceRowBackgroundSelectedBrush", "TabularSurfaceRowBackgroundSelectedPointerOverBrush", "TabularSurfaceRowBackgroundSelectedPressedBrush", "TabularSurfaceRowForegroundBrush", "TabularSurfaceRowForegroundDisabledBrush", "TabularSurfaceRowForegroundPointerOverBrush", "TabularSurfaceRowForegroundPressedBrush", "TabularSurfaceRowForegroundSelectedBrush", "TabularSurfaceRowForegroundSelectedPointerOverBrush", "TabularSurfaceRowForegroundSelectedPressedBrush", "TabularSurfaceSelectionIndicatorBrush", "TabularSurfaceSelectionIndicatorDisabledBrush"],
           "type_keys": [],
@@ -647,7 +656,7 @@
         },
         {
           "name": "Resources/TableView_themeresources.xaml",
-          "index": 68,
+          "index": 69,
           "documents": ["Resources/TableView_themeresources.xaml"],
           "keys": ["TableViewCellFontSize", "TableViewCellPadding", "TableViewCellPaddingComfortable", "TableViewCellPaddingCompact", "TableViewHeaderCellPadding", "TableViewHeaderCellPaddingComfortable", "TableViewHeaderCellPaddingCompact", "TableViewHeaderFontSize", "TableViewHeaderFontWeight", "TableViewResizeGripperWidth", "TableViewRowMinHeight", "TableViewRowMinHeightComfortable", "TableViewRowMinHeightCompact"],
           "type_keys": [],
@@ -656,7 +665,7 @@
         },
         {
           "name": "Resources/ResizeGripper_themeresources.xaml",
-          "index": 69,
+          "index": 70,
           "documents": ["Resources/ResizeGripper_themeresources.xaml"],
           "keys": ["ResizeGripperSeparatorBrush", "ResizeGripperSeparatorThickness", "ResizeGripperSeparatorThicknessVertical"],
           "type_keys": [],
@@ -665,7 +674,7 @@
         },
         {
           "name": "Resources/ThemeShadows.xaml",
-          "index": 70,
+          "index": 71,
           "documents": ["Resources/ThemeShadows.xaml"],
           "keys": ["ThemeShadowFlyoutMargin", "ThemeShadowSubMenuMargin", "ThemeShadowToolTipMargin", "WinUIThemeShadow"],
           "type_keys": [],
@@ -674,16 +683,16 @@
         },
         {
           "name": "Resources/Glyphs.xaml",
-          "index": 71,
+          "index": 72,
           "documents": ["Resources/Glyphs.xaml"],
-          "keys": ["GlyphGeometryE700", "GlyphGeometryE70D", "GlyphGeometryE70E", "GlyphGeometryE711", "GlyphGeometryE712", "GlyphGeometryE72B", "GlyphGeometryE72C", "GlyphGeometryE73E", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE74A", "GlyphGeometryE76C", "GlyphGeometryE77F", "GlyphGeometryE787", "GlyphGeometryE7A6", "GlyphGeometryE7A7", "GlyphGeometryE7C3", "GlyphGeometryE894", "GlyphGeometryE8B7", "GlyphGeometryE8BB", "GlyphGeometryE8C6", "GlyphGeometryE8C8", "GlyphGeometryE8FB", "GlyphGeometryE915", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "GlyphGeometryE96E", "GlyphGeometryE972", "GlyphGeometryE974", "GlyphGeometryE9AE", "GlyphGeometryEA3B", "GlyphGeometryEC8F", "GlyphGeometryEDA2", "GlyphGeometryEDD9", "GlyphGeometryEDDA", "GlyphGeometryEDDB", "GlyphGeometryEDDC", "GlyphGeometryF136", "GlyphGeometryF13C", "GlyphGeometryF13D", "GlyphGeometryF13E", "GlyphGeometryF13F", "GlyphGeometryF78D", "NavigationPageMenuIcon"],
+          "keys": ["GlyphGeometryE15B", "GlyphGeometryE15D", "GlyphGeometryE198", "GlyphGeometryE1CC", "GlyphGeometryE1CD", "GlyphGeometryE1D8", "GlyphGeometryE1D9", "GlyphGeometryE627", "GlyphGeometryE628", "GlyphGeometryE700", "GlyphGeometryE70D", "GlyphGeometryE70E", "GlyphGeometryE711", "GlyphGeometryE712", "GlyphGeometryE72B", "GlyphGeometryE72C", "GlyphGeometryE73E", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE74A", "GlyphGeometryE76C", "GlyphGeometryE77F", "GlyphGeometryE787", "GlyphGeometryE799", "GlyphGeometryE7A6", "GlyphGeometryE7A7", "GlyphGeometryE7C3", "GlyphGeometryE894", "GlyphGeometryE8B7", "GlyphGeometryE8BB", "GlyphGeometryE8C6", "GlyphGeometryE8C8", "GlyphGeometryE8FB", "GlyphGeometryE915", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "GlyphGeometryE96E", "GlyphGeometryE972", "GlyphGeometryE974", "GlyphGeometryE9AE", "GlyphGeometryEA3B", "GlyphGeometryEC15", "GlyphGeometryEC57", "GlyphGeometryEC8F", "GlyphGeometryED1E", "GlyphGeometryED1F", "GlyphGeometryED3C", "GlyphGeometryED3D", "GlyphGeometryEDA2", "GlyphGeometryEDD9", "GlyphGeometryEDDA", "GlyphGeometryEDDB", "GlyphGeometryEDDC", "GlyphGeometryF136", "GlyphGeometryF13C", "GlyphGeometryF13D", "GlyphGeometryF13E", "GlyphGeometryF13F", "GlyphGeometryF5B0", "GlyphGeometryF78D", "GlyphGeometryF8AC", "GlyphGeometryF8AD", "GlyphGeometryF8AE", "NavigationPageMenuIcon"],
           "type_keys": [],
           "references": [],
           "types": ["ResourceDictionary", "StreamGeometry"]
         },
         {
           "name": "Strings/InvariantResources.xaml",
-          "index": 72,
+          "index": 73,
           "documents": ["Strings/InvariantResources.xaml"],
           "keys": ["StringTextFlyoutCopyText", "StringTextFlyoutCutText", "StringTextFlyoutPasteText", "StringTextFlyoutRedoText", "StringTextFlyoutSelectAllText", "StringTextFlyoutUndoText"],
           "type_keys": [],
@@ -692,7 +701,7 @@
         },
         {
           "name": "Controls/TextBlock.xaml",
-          "index": 73,
+          "index": 74,
           "documents": ["Controls/TextBlock.xaml"],
           "keys": ["BaseTextBlockStyle", "BodyLargeStrongTextBlockStyle", "BodyLargeTextBlockStyle", "BodyStrongTextBlockStyle", "BodyTextBlockStyle", "CaptionTextBlockStyle", "DisplayTextBlockStyle", "HeaderTextBlockStyle", "SubheaderTextBlockStyle", "SubtitleTextBlockStyle", "TitleLargeTextBlockStyle", "TitleTextBlockStyle"],
           "type_keys": [],
@@ -701,7 +710,7 @@
         },
         {
           "name": "Controls/Button.xaml",
-          "index": 74,
+          "index": 75,
           "documents": ["Controls/Button.xaml"],
           "keys": ["AccentButtonStyle", "DefaultButtonStyle", "SubtleButtonStyle", "TextBlockButtonStyle"],
           "type_keys": ["Button"],
@@ -710,7 +719,7 @@
         },
         {
           "name": "Controls/RepeatButton.xaml",
-          "index": 75,
+          "index": 76,
           "documents": ["Controls/RepeatButton.xaml"],
           "keys": ["DefaultRepeatButtonStyle"],
           "type_keys": ["RepeatButton"],
@@ -719,7 +728,7 @@
         },
         {
           "name": "Controls/ToggleButton.xaml",
-          "index": 76,
+          "index": 77,
           "documents": ["Controls/ToggleButton.xaml"],
           "keys": ["DefaultToggleButtonStyle"],
           "type_keys": ["ToggleButton"],
@@ -728,7 +737,7 @@
         },
         {
           "name": "Controls/RevealStyles.xaml",
-          "index": 77,
+          "index": 78,
           "documents": ["Controls/RevealStyles.xaml"],
           "keys": ["ButtonRevealStyle", "RepeatButtonRevealStyle", "ToggleButtonRevealStyle"],
           "type_keys": [],
@@ -737,7 +746,7 @@
         },
         {
           "name": "Controls/HyperlinkButton.xaml",
-          "index": 78,
+          "index": 79,
           "documents": ["Controls/HyperlinkButton.xaml"],
           "keys": ["DefaultHyperlinkButtonStyle"],
           "type_keys": ["HyperlinkButton"],
@@ -746,7 +755,7 @@
         },
         {
           "name": "Controls/CheckBox.xaml",
-          "index": 79,
+          "index": 80,
           "documents": ["Controls/CheckBox.xaml"],
           "keys": ["DefaultCheckBoxStyle"],
           "type_keys": ["CheckBox"],
@@ -755,7 +764,7 @@
         },
         {
           "name": "Controls/RadioButton.xaml",
-          "index": 80,
+          "index": 81,
           "documents": ["Controls/RadioButton.xaml"],
           "keys": ["DefaultRadioButtonStyle"],
           "type_keys": ["RadioButton"],
@@ -764,7 +773,7 @@
         },
         {
           "name": "Controls/Thumb.xaml",
-          "index": 81,
+          "index": 82,
           "documents": ["Controls/Thumb.xaml"],
           "keys": [],
           "type_keys": ["Thumb"],
@@ -773,7 +782,7 @@
         },
         {
           "name": "Controls/ScrollBar.xaml",
-          "index": 82,
+          "index": 83,
           "documents": ["Controls/ScrollBar.xaml"],
           "keys": ["DefaultScrollBarStyle", "ScrollBarHorizontalDecrementTemplate", "ScrollBarHorizontalIncrementTemplate", "ScrollBarHorizontalThumbTemplate", "ScrollBarRepeatButtonTemplate", "ScrollBarTrackCornerRadiusConverter", "ScrollBarVerticalDecrementTemplate", "ScrollBarVerticalIncrementTemplate", "ScrollBarVerticalThumbTemplate"],
           "type_keys": ["ScrollBar"],
@@ -782,7 +791,7 @@
         },
         {
           "name": "Controls/ScrollViewer.xaml",
-          "index": 83,
+          "index": 84,
           "documents": ["Controls/ScrollViewer.xaml"],
           "keys": ["DefaultScrollViewerStyle", "ScrollViewerScrollBarlessTemplate"],
           "type_keys": ["ScrollViewer"],
@@ -791,7 +800,7 @@
         },
         {
           "name": "Controls/TextBox.xaml",
-          "index": 84,
+          "index": 85,
           "documents": ["Controls/TextBox.xaml"],
           "keys": ["DefaultPasswordBoxStyle", "DefaultTextBoxStyle", "PasswordBoxContextFlyout", "PasswordBoxRevealButtonStyle", "TextBoxContextFlyout", "TextBoxDeleteButtonStyle"],
           "type_keys": ["TextBox"],
@@ -800,7 +809,7 @@
         },
         {
           "name": "Controls/ToolTip.xaml",
-          "index": 85,
+          "index": 86,
           "documents": ["Controls/ToolTip.xaml"],
           "keys": ["DefaultToolTipStyle"],
           "type_keys": ["ToolTip"],
@@ -809,7 +818,7 @@
         },
         {
           "name": "Controls/ProgressBar.xaml",
-          "index": 86,
+          "index": 87,
           "documents": ["Controls/ProgressBar.xaml"],
           "keys": ["DefaultProgressBarStyle", "ProgressBarTextFormatConverter"],
           "type_keys": ["ProgressBar"],
@@ -818,7 +827,7 @@
         },
         {
           "name": "Controls/Separator.xaml",
-          "index": 87,
+          "index": 88,
           "documents": ["Controls/Separator.xaml"],
           "keys": [],
           "type_keys": ["Separator"],
@@ -827,7 +836,7 @@
         },
         {
           "name": "Controls/PathIcon.xaml",
-          "index": 88,
+          "index": 89,
           "documents": ["Controls/PathIcon.xaml"],
           "keys": ["PathIconUnscaledTemplate"],
           "type_keys": ["PathIcon"],
@@ -836,7 +845,7 @@
         },
         {
           "name": "Controls/FontIcon.xaml",
-          "index": 89,
+          "index": 90,
           "documents": ["Controls/FontIcon.xaml"],
           "keys": [],
           "type_keys": ["FontIcon"],
@@ -845,7 +854,7 @@
         },
         {
           "name": "Controls/SymbolIcon.xaml",
-          "index": 90,
+          "index": 91,
           "documents": ["Controls/SymbolIcon.xaml"],
           "keys": [],
           "type_keys": ["SymbolIcon"],
@@ -854,7 +863,7 @@
         },
         {
           "name": "Controls/Label.xaml",
-          "index": 91,
+          "index": 92,
           "documents": ["Controls/Label.xaml"],
           "keys": [],
           "type_keys": ["Label"],
@@ -863,7 +872,7 @@
         },
         {
           "name": "Controls/ItemsControl.xaml",
-          "index": 92,
+          "index": 93,
           "documents": ["Controls/ItemsControl.xaml"],
           "keys": [],
           "type_keys": ["ItemsControl"],
@@ -872,7 +881,7 @@
         },
         {
           "name": "Controls/HeaderedContentControl.xaml",
-          "index": 93,
+          "index": 94,
           "documents": ["Controls/HeaderedContentControl.xaml"],
           "keys": [],
           "type_keys": ["HeaderedContentControl"],
@@ -881,7 +890,7 @@
         },
         {
           "name": "Controls/GroupBox.xaml",
-          "index": 94,
+          "index": 95,
           "documents": ["Controls/GroupBox.xaml"],
           "keys": [],
           "type_keys": ["GroupBox"],
@@ -890,7 +899,7 @@
         },
         {
           "name": "Controls/SelectableTextBlock.xaml",
-          "index": 95,
+          "index": 96,
           "documents": ["Controls/SelectableTextBlock.xaml"],
           "keys": [],
           "type_keys": ["SelectableTextBlock"],
@@ -899,7 +908,7 @@
         },
         {
           "name": "Controls/TransitioningContentControl.xaml",
-          "index": 96,
+          "index": 97,
           "documents": ["Controls/TransitioningContentControl.xaml"],
           "keys": [],
           "type_keys": ["TransitioningContentControl"],
@@ -908,7 +917,7 @@
         },
         {
           "name": "Controls/TextSelectionHandle.xaml",
-          "index": 97,
+          "index": 98,
           "documents": ["Controls/TextSelectionHandle.xaml"],
           "keys": [],
           "type_keys": ["TextSelectionHandle"],
@@ -917,7 +926,7 @@
         },
         {
           "name": "Controls/DataValidationErrors.xaml",
-          "index": 98,
+          "index": 99,
           "documents": ["Controls/DataValidationErrors.xaml"],
           "keys": ["TooltipDataValidationErrors"],
           "type_keys": ["DataValidationErrors"],
@@ -926,7 +935,7 @@
         },
         {
           "name": "Controls/GridSplitter.xaml",
-          "index": 99,
+          "index": 100,
           "documents": ["Controls/GridSplitter.xaml"],
           "keys": [],
           "type_keys": ["GridSplitter"],
@@ -935,7 +944,7 @@
         },
         {
           "name": "Controls/DateTimePickerShared.xaml",
-          "index": 100,
+          "index": 101,
           "documents": ["Controls/DateTimePickerShared.xaml"],
           "keys": ["DateTimePickerFlyoutButtonStyle", "DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle", "DateTimePickerLoopingSelectorDownButtonStyle", "DateTimePickerLoopingSelectorItemStyle", "DateTimePickerLoopingSelectorUpButtonStyle"],
           "type_keys": [],
@@ -944,7 +953,7 @@
         },
         {
           "name": "Controls/CalendarDayButton.xaml",
-          "index": 101,
+          "index": 102,
           "documents": ["Controls/CalendarDayButton.xaml"],
           "keys": [],
           "type_keys": ["CalendarDayButton"],
@@ -953,7 +962,7 @@
         },
         {
           "name": "Controls/CalendarButton.xaml",
-          "index": 102,
+          "index": 103,
           "documents": ["Controls/CalendarButton.xaml"],
           "keys": [],
           "type_keys": ["CalendarButton"],
@@ -962,7 +971,7 @@
         },
         {
           "name": "Controls/CalendarItem.xaml",
-          "index": 103,
+          "index": 104,
           "documents": ["Controls/CalendarItem.xaml"],
           "keys": ["CalendarItemHeaderNavigationButtonStyle", "CalendarItemNavigationButtonStyle", "CalendarItemWeekDayNameStyle"],
           "type_keys": ["CalendarItem"],
@@ -971,7 +980,7 @@
         },
         {
           "name": "Controls/Calendar.xaml",
-          "index": 104,
+          "index": 105,
           "documents": ["Controls/Calendar.xaml"],
           "keys": ["DefaultCalendarViewStyle"],
           "type_keys": ["Calendar"],
@@ -980,7 +989,7 @@
         },
         {
           "name": "Controls/CalendarDatePicker.xaml",
-          "index": 105,
+          "index": 106,
           "documents": ["Controls/CalendarDatePicker.xaml"],
           "keys": ["CalendarDatePickerButtonStyle", "CalendarDatePickerTextBoxStyle", "DefaultCalendarDatePicker"],
           "type_keys": ["CalendarDatePicker"],
@@ -989,7 +998,7 @@
         },
         {
           "name": "Controls/DatePicker.xaml",
-          "index": 106,
+          "index": 107,
           "documents": ["Controls/DatePicker.xaml"],
           "keys": ["DatePickerFlyoutButtonStyle", "DefaultDatePickerFlyoutPresenterStyle", "DefaultDatePickerStyle"],
           "type_keys": ["DatePicker", "DatePickerPresenter"],
@@ -998,7 +1007,7 @@
         },
         {
           "name": "Controls/TimePicker.xaml",
-          "index": 107,
+          "index": 108,
           "documents": ["Controls/TimePicker.xaml"],
           "keys": ["TimePickerFlyoutButtonStyle"],
           "type_keys": ["TimePicker", "TimePickerPresenter"],
@@ -1007,7 +1016,7 @@
         },
         {
           "name": "Controls/NotificationCard.xaml",
-          "index": 108,
+          "index": 109,
           "documents": ["Controls/NotificationCard.xaml"],
           "keys": ["InfoBarCloseButtonStyle"],
           "type_keys": ["NotificationCard"],
@@ -1016,7 +1025,7 @@
         },
         {
           "name": "Controls/InfoBar.xaml",
-          "index": 109,
+          "index": 110,
           "documents": ["Controls/InfoBar.xaml"],
           "keys": [],
           "type_keys": ["InfoBar"],
@@ -1025,7 +1034,7 @@
         },
         {
           "name": "Controls/InfoBadge.xaml",
-          "index": 110,
+          "index": 111,
           "documents": ["Controls/InfoBadge.xaml"],
           "keys": ["AttentionDotInfoBadgeStyle", "AttentionIconInfoBadgeStyle", "AttentionValueInfoBadgeStyle", "CautionDotInfoBadgeStyle", "CautionIconInfoBadgeStyle", "CautionValueInfoBadgeStyle", "CriticalDotInfoBadgeStyle", "CriticalIconInfoBadgeStyle", "CriticalValueInfoBadgeStyle", "DefaultInfoBadgeStyle", "InformationalDotInfoBadgeStyle", "InformationalIconInfoBadgeStyle", "InformationalValueInfoBadgeStyle", "SuccessDotInfoBadgeStyle", "SuccessIconInfoBadgeStyle", "SuccessValueInfoBadgeStyle"],
           "type_keys": ["InfoBadge"],
@@ -1034,7 +1043,7 @@
         },
         {
           "name": "Controls/TitleBar.xaml",
-          "index": 111,
+          "index": 112,
           "documents": ["Controls/TitleBar.xaml"],
           "keys": ["DefaultTitleBarControlStyle"],
           "type_keys": ["TitleBar"],
@@ -1043,7 +1052,7 @@
         },
         {
           "name": "Controls/ProgressRing.xaml",
-          "index": 112,
+          "index": 113,
           "documents": ["Controls/ProgressRing.xaml"],
           "keys": [],
           "type_keys": ["ProgressRing"],
@@ -1052,7 +1061,7 @@
         },
         {
           "name": "Controls/WindowNotificationManager.xaml",
-          "index": 113,
+          "index": 114,
           "documents": ["Controls/WindowNotificationManager.xaml"],
           "keys": [],
           "type_keys": ["WindowNotificationManager"],
@@ -1061,7 +1070,7 @@
         },
         {
           "name": "Controls/TableView.xaml",
-          "index": 114,
+          "index": 115,
           "documents": ["Controls/TableView.xaml"],
           "keys": ["TableViewScrollViewerStyle"],
           "type_keys": ["TableView"],
@@ -1070,7 +1079,7 @@
         },
         {
           "name": "Controls/TableViewCell.xaml",
-          "index": 115,
+          "index": 116,
           "documents": ["Controls/TableViewCell.xaml"],
           "keys": [],
           "type_keys": ["TableViewCell"],
@@ -1079,7 +1088,7 @@
         },
         {
           "name": "Controls/TableViewColumnHeader.xaml",
-          "index": 116,
+          "index": 117,
           "documents": ["Controls/TableViewColumnHeader.xaml"],
           "keys": ["TableViewColumnHeaderResizerStyle"],
           "type_keys": ["TableViewColumnHeader"],
@@ -1088,7 +1097,7 @@
         },
         {
           "name": "Controls/TableViewRow.xaml",
-          "index": 117,
+          "index": 118,
           "documents": ["Controls/TableViewRow.xaml"],
           "keys": [],
           "type_keys": ["TableViewRow"],
@@ -1097,7 +1106,7 @@
         },
         {
           "name": "Controls/ManagedFileChooser.xaml",
-          "index": 118,
+          "index": 119,
           "documents": ["Controls/ManagedFileChooser.xaml"],
           "keys": ["DefaultContentDialogStyle", "ManagedFileChooserListViewItemStyle", "ManagedFileChooserListViewStyle", "StringManagedFileChooserCancelText", "StringManagedFileChooserDateModifiedColumn", "StringManagedFileChooserFileNamePlaceholder", "StringManagedFileChooserNameColumn", "StringManagedFileChooserOkText", "StringManagedFileChooserOverwritePromptCancelText", "StringManagedFileChooserOverwritePromptConfirmText", "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", "StringManagedFileChooserShowHiddenFilesText", "StringManagedFileChooserSizeColumn", "StringManagedFileChooserTypeColumn"],
           "type_keys": ["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"],
@@ -1106,7 +1115,7 @@
         },
         {
           "name": "Controls/TabStrip.xaml",
-          "index": 119,
+          "index": 120,
           "documents": ["Controls/TabStrip.xaml"],
           "keys": ["DefaultSelectorBarStyle"],
           "type_keys": ["TabStrip"],
@@ -1115,7 +1124,7 @@
         },
         {
           "name": "Controls/TabStripItem.xaml",
-          "index": 120,
+          "index": 121,
           "documents": ["Controls/TabStripItem.xaml"],
           "keys": ["DefaultSelectorBarItemStyle"],
           "type_keys": ["TabStripItem"],
@@ -1124,7 +1133,7 @@
         },
         {
           "name": "Controls/TabControl.xaml",
-          "index": 121,
+          "index": 122,
           "documents": ["Controls/TabControl.xaml"],
           "keys": ["DefaultTabViewStyle", "TabScrollViewerStyle", "TabViewButtonStyle", "TabViewCloseButtonStyle", "TabViewScrollButtonStyle"],
           "type_keys": ["TabControl"],
@@ -1133,7 +1142,7 @@
         },
         {
           "name": "Controls/TabItem.xaml",
-          "index": 122,
+          "index": 123,
           "documents": ["Controls/TabItem.xaml"],
           "keys": [],
           "type_keys": ["TabItem"],
@@ -1142,7 +1151,7 @@
         },
         {
           "name": "Controls/SplitView.xaml",
-          "index": 123,
+          "index": 124,
           "documents": ["Controls/SplitView.xaml"],
           "keys": ["DefaultSplitViewStyle"],
           "type_keys": ["SplitView"],
@@ -1151,7 +1160,7 @@
         },
         {
           "name": "Controls/ContentPage.xaml",
-          "index": 124,
+          "index": 125,
           "documents": ["Controls/ContentPage.xaml"],
           "keys": [],
           "type_keys": ["ContentPage"],
@@ -1160,7 +1169,7 @@
         },
         {
           "name": "Controls/TabbedPage.xaml",
-          "index": 125,
+          "index": 126,
           "documents": ["Controls/TabbedPage.xaml"],
           "keys": ["TabbedPageTabControlTheme", "TabbedPageTabItemTheme"],
           "type_keys": ["TabbedPage"],
@@ -1169,7 +1178,7 @@
         },
         {
           "name": "Controls/NavigationPage.xaml",
-          "index": 126,
+          "index": 127,
           "documents": ["Controls/NavigationPage.xaml"],
           "keys": ["NavigationBackButtonNormalStyle", "NavigationBackButtonSmallStyle"],
           "type_keys": ["NavigationPage"],
@@ -1178,7 +1187,7 @@
         },
         {
           "name": "Controls/DrawerPage.xaml",
-          "index": 127,
+          "index": 128,
           "documents": ["Controls/DrawerPage.xaml"],
           "keys": ["DrawerPageNavigationViewItem", "DrawerPageNavigationViewMenu", "DrawerPagePaneToggleButton", "NavigationViewItemHeaderTextStyle", "NavigationViewTitleHeaderContentControlTextStyle", "PaneToggleButtonStyle"],
           "type_keys": ["DrawerPage"],
@@ -1187,7 +1196,7 @@
         },
         {
           "name": "Controls/Frame.xaml",
-          "index": 128,
+          "index": 129,
           "documents": ["Controls/Frame.xaml"],
           "keys": [],
           "type_keys": ["Frame"],
@@ -1196,7 +1205,7 @@
         },
         {
           "name": "Controls/NavigationView.xaml",
-          "index": 129,
+          "index": 130,
           "documents": ["Controls/NavigationView.xaml"],
           "keys": ["NavigationViewPaneSearchButtonStyle"],
           "type_keys": ["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"],
@@ -1205,7 +1214,7 @@
         },
         {
           "name": "Controls/Carousel.xaml",
-          "index": 130,
+          "index": 131,
           "documents": ["Controls/Carousel.xaml"],
           "keys": ["DefaultFlipViewItemStyle", "DefaultFlipViewStyle"],
           "type_keys": ["Carousel"],
@@ -1214,7 +1223,7 @@
         },
         {
           "name": "Controls/CarouselPage.xaml",
-          "index": 131,
+          "index": 132,
           "documents": ["Controls/CarouselPage.xaml"],
           "keys": [],
           "type_keys": ["CarouselPage"],
@@ -1223,7 +1232,7 @@
         },
         {
           "name": "Controls/CommandBar.xaml",
-          "index": 132,
+          "index": 133,
           "documents": ["Controls/CommandBar.xaml"],
           "keys": ["AppBarButtonOverflowStyle", "AppBarToggleButtonOverflowStyle", "DefaultAppBarButtonStyle", "DefaultAppBarSeparatorStyle", "DefaultAppBarToggleButtonStyle", "DefaultCommandBarOverflowPresenterStyle", "DefaultCommandBarStyle", "EllipsisButton"],
           "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
@@ -1232,7 +1241,7 @@
         },
         {
           "name": "Controls/DropDownButton.xaml",
-          "index": 133,
+          "index": 134,
           "documents": ["Controls/DropDownButton.xaml"],
           "keys": ["DefaultDropDownButtonStyle"],
           "type_keys": ["DropDownButton"],
@@ -1241,7 +1250,7 @@
         },
         {
           "name": "Controls/SplitButton.xaml",
-          "index": 134,
+          "index": 135,
           "documents": ["Controls/SplitButton.xaml"],
           "keys": ["SplitButtonCommandBarInnerButtonStyle", "SplitButtonCommandBarStyle", "SplitButtonInnerButtonStyle", "SplitButtonStyle"],
           "type_keys": ["SplitButton"],
@@ -1250,7 +1259,7 @@
         },
         {
           "name": "Controls/ToggleSwitch.xaml",
-          "index": 135,
+          "index": 136,
           "documents": ["Controls/ToggleSwitch.xaml"],
           "keys": ["DefaultToggleSwitchStyle"],
           "type_keys": ["ToggleSwitch"],
@@ -1259,7 +1268,7 @@
         },
         {
           "name": "Controls/Slider.xaml",
-          "index": 136,
+          "index": 137,
           "documents": ["Controls/Slider.xaml"],
           "keys": ["DefaultSliderStyle", "SliderHorizontalDecreaseButtonStyle", "SliderIncreaseButtonStyle", "SliderThumbStyle", "SliderVerticalDecreaseButtonStyle"],
           "type_keys": ["Slider"],
@@ -1268,16 +1277,16 @@
         },
         {
           "name": "Controls/MediaTransportControls.xaml",
-          "index": 137,
+          "index": 138,
           "documents": ["Controls/MediaTransportControls.xaml"],
-          "keys": [],
+          "keys": ["DefaultMediaTransportControlsStyle", "MediaTransportControlsAppBarButtonStyle", "MediaTransportControlsAppBarToggleButtonStyle", "MediaTransportControlsFlyoutStyle"],
           "type_keys": ["MediaTransportControls"],
-          "references": ["SystemControlBackgroundChromeMediumLowBrush", "SystemControlForegroundBaseHighBrush"],
-          "types": ["Border", "Button", "ControlTemplate", "ControlTheme", "Grid", "MediaTransportControls", "ResourceDictionary", "Setter", "Slider", "StackPanel", "TextBlock", "ToolTip"]
+          "references": ["CaptionTextBlockStyle", "DefaultAppBarButtonStyle", "DefaultAppBarToggleButtonStyle", "DefaultFlyoutPresenterStyle", "DefaultMediaTransportControlsStyle", "GlyphGeometryE15B", "GlyphGeometryE15D", "GlyphGeometryE198", "GlyphGeometryE1CC", "GlyphGeometryE1CD", "GlyphGeometryE1D8", "GlyphGeometryE1D9", "GlyphGeometryE627", "GlyphGeometryE628", "GlyphGeometryE799", "GlyphGeometryEC15", "GlyphGeometryEC57", "GlyphGeometryED1E", "GlyphGeometryED1F", "GlyphGeometryED3C", "GlyphGeometryED3D", "GlyphGeometryF5B0", "GlyphGeometryF8AC", "GlyphGeometryF8AD", "GlyphGeometryF8AE", "MediaTransportControlsAppBarButtonHeight", "MediaTransportControlsAppBarButtonStyle", "MediaTransportControlsAppBarButtonWidth", "MediaTransportControlsAppBarToggleButtonStyle", "MediaTransportControlsBorderBrush", "MediaTransportControlsFlyoutBackground", "MediaTransportControlsMargin", "MediaTransportControlsMaxWidth", "MediaTransportControlsMinWidth", "MediaTransportControlsPanelBackground", "MediaTransportControlsProgressSliderCompactMargin", "MediaTransportControlsProgressSliderMargin", "MediaTransportControlsSliderHeight", "OverlayCornerRadius"],
+          "types": ["Border", "CommandBarButton", "CommandBarToggleButton", "ControlTemplate", "ControlTheme", "DoubleTransition", "FlyoutPresenter", "Grid", "MediaTransportControls", "PathIcon", "ProgressBar", "ResourceDictionary", "Setter", "Slider", "StackPanel", "Style", "TextBlock", "Transitions"]
         },
         {
           "name": "Controls/CameraCaptureUI.xaml",
-          "index": 138,
+          "index": 139,
           "documents": ["Controls/CameraCaptureUI.xaml"],
           "keys": [],
           "type_keys": ["CameraCaptureUI"],
@@ -1286,7 +1295,7 @@
         },
         {
           "name": "Controls/NumericUpDown.xaml",
-          "index": 139,
+          "index": 140,
           "documents": ["Controls/NumericUpDown.xaml"],
           "keys": ["NumberBoxPopupSpinButtonStyle", "NumberBoxSpinButtonStyle", "NumberBoxTextBoxStyle", "NumericUpDownButtonSpinnerStyle", "NumericUpDownSpinButtonStyle"],
           "type_keys": ["NumericUpDown"],
@@ -1295,7 +1304,7 @@
         },
         {
           "name": "Controls/NumberBox.xaml",
-          "index": 140,
+          "index": 141,
           "documents": ["Controls/NumberBox.xaml"],
           "keys": ["NumberBoxPopupContentRootButtonStyle"],
           "type_keys": ["NumberBox"],
@@ -1304,7 +1313,7 @@
         },
         {
           "name": "Controls/ButtonSpinner.xaml",
-          "index": 141,
+          "index": 142,
           "documents": ["Controls/ButtonSpinner.xaml"],
           "keys": [],
           "type_keys": ["ButtonSpinner"],
@@ -1313,7 +1322,7 @@
         },
         {
           "name": "Controls/Expander.xaml",
-          "index": 142,
+          "index": 143,
           "documents": ["Controls/Expander.xaml"],
           "keys": ["DefaultExpanderStyle", "ExpanderHeaderDownStyle", "ExpanderHeaderLeftStyle", "ExpanderHeaderRightStyle", "ExpanderHeaderUpStyle"],
           "type_keys": ["Expander"],
@@ -1322,7 +1331,7 @@
         },
         {
           "name": "Controls/PipsPager.xaml",
-          "index": 143,
+          "index": 144,
           "documents": ["Controls/PipsPager.xaml"],
           "keys": ["PipsPagerButtonBaseStyle", "PipsPagerListStyle", "PipsPagerNavigationButtonBaseStyle", "PipsPagerNextPageButtonStyle", "PipsPagerNormalPipButtonStyle", "PipsPagerPipItemStyle", "PipsPagerPreviousPageButtonStyle", "PipsPagerSelectedPipButtonStyle"],
           "type_keys": ["PipsPager"],
@@ -1331,7 +1340,7 @@
         },
         {
           "name": "Controls/RatingControl.xaml",
-          "index": 144,
+          "index": 145,
           "documents": ["Controls/RatingControl.xaml"],
           "keys": [],
           "type_keys": ["RatingControl"],
@@ -1340,7 +1349,7 @@
         },
         {
           "name": "Controls/PersonPicture.xaml",
-          "index": 145,
+          "index": 146,
           "documents": ["Controls/PersonPicture.xaml"],
           "keys": ["DefaultPersonPictureStyle"],
           "type_keys": ["PersonPicture"],
@@ -1349,7 +1358,7 @@
         },
         {
           "name": "Controls/PagerControl.xaml",
-          "index": 146,
+          "index": 147,
           "documents": ["Controls/PagerControl.xaml"],
           "keys": ["PagerControlNumberPanelButtonStyle", "PagerControlPageNavigationButtonStyle"],
           "type_keys": ["PagerControl"],
@@ -1358,7 +1367,7 @@
         },
         {
           "name": "Controls/RefreshContainer.xaml",
-          "index": 147,
+          "index": 148,
           "documents": ["Controls/RefreshContainer.xaml"],
           "keys": ["DefaultRefreshContainerStyle"],
           "type_keys": ["RefreshContainer"],
@@ -1367,7 +1376,7 @@
         },
         {
           "name": "Controls/RefreshVisualizer.xaml",
-          "index": 148,
+          "index": 149,
           "documents": ["Controls/RefreshVisualizer.xaml"],
           "keys": [],
           "type_keys": ["RefreshVisualizer"],
@@ -1376,7 +1385,7 @@
         },
         {
           "name": "Controls/FlyoutPresenter.xaml",
-          "index": 149,
+          "index": 150,
           "documents": ["Controls/FlyoutPresenter.xaml"],
           "keys": ["DefaultFlyoutPresenterStyle"],
           "type_keys": ["FlyoutPresenter"],
@@ -1385,7 +1394,7 @@
         },
         {
           "name": "Controls/MenuScrollViewer.xaml",
-          "index": 150,
+          "index": 151,
           "documents": ["Controls/MenuScrollViewer.xaml"],
           "keys": ["MenuFlyoutPresenterScrollViewer"],
           "type_keys": [],
@@ -1394,7 +1403,7 @@
         },
         {
           "name": "Controls/MenuFlyoutPresenter.xaml",
-          "index": 151,
+          "index": 152,
           "documents": ["Controls/MenuFlyoutPresenter.xaml"],
           "keys": ["DefaultMenuFlyoutPresenterStyle"],
           "type_keys": ["MenuFlyoutPresenter"],
@@ -1403,7 +1412,7 @@
         },
         {
           "name": "Controls/ContextMenu.xaml",
-          "index": 152,
+          "index": 153,
           "documents": ["Controls/ContextMenu.xaml"],
           "keys": [],
           "type_keys": ["ContextMenu"],
@@ -1412,7 +1421,7 @@
         },
         {
           "name": "Controls/MenuItem.xaml",
-          "index": 153,
+          "index": 154,
           "documents": ["Controls/MenuItem.xaml"],
           "keys": ["DefaultMenuFlyoutItemStyle", "DefaultMenuFlyoutSubItemStyle", "DefaultRadioMenuFlyoutItemStyle", "DefaultToggleMenuFlyoutItemStyle", "MenuItemKeyGestureConverter", "RadioMenuFlyoutSubItemStyle"],
           "type_keys": ["MenuItem"],
@@ -1421,7 +1430,7 @@
         },
         {
           "name": "Controls/Menu.xaml",
-          "index": 154,
+          "index": 155,
           "documents": ["Controls/Menu.xaml"],
           "keys": ["DefaultMenuBarItemStyle", "DefaultMenuBarStyle"],
           "type_keys": ["Menu"],
@@ -1430,7 +1439,7 @@
         },
         {
           "name": "Controls/ListBoxItem.xaml",
-          "index": 155,
+          "index": 156,
           "documents": ["Controls/ListBoxItem.xaml"],
           "keys": ["DefaultListBoxItemStyle", "DefaultListViewItemStyle", "ListViewItemExpanded"],
           "type_keys": ["ListBoxItem"],
@@ -1439,7 +1448,7 @@
         },
         {
           "name": "Controls/ListBox.xaml",
-          "index": 156,
+          "index": 157,
           "documents": ["Controls/ListBox.xaml"],
           "keys": ["DefaultListBoxStyle"],
           "type_keys": ["ListBox"],
@@ -1448,7 +1457,7 @@
         },
         {
           "name": "Controls/ComboBoxItem.xaml",
-          "index": 157,
+          "index": 158,
           "documents": ["Controls/ComboBoxItem.xaml"],
           "keys": ["ComboBoxItemPill", "DefaultComboBoxItemStyle"],
           "type_keys": ["ComboBoxItem"],
@@ -1457,7 +1466,7 @@
         },
         {
           "name": "Controls/ComboBox.xaml",
-          "index": 158,
+          "index": 159,
           "documents": ["Controls/ComboBox.xaml"],
           "keys": ["ComboBoxTextBoxStyle", "DefaultComboBoxStyle"],
           "type_keys": ["ComboBox"],
@@ -1466,7 +1475,7 @@
         },
         {
           "name": "Controls/TreeViewItem.xaml",
-          "index": 159,
+          "index": 160,
           "documents": ["Controls/TreeViewItem.xaml"],
           "keys": ["MUX_TreeViewItemStyle", "TreeViewItemExpandCollapseChevron", "TreeViewItemIndentationConverter"],
           "type_keys": ["TreeViewItem"],
@@ -1475,7 +1484,7 @@
         },
         {
           "name": "Controls/TreeView.xaml",
-          "index": 160,
+          "index": 161,
           "documents": ["Controls/TreeView.xaml"],
           "keys": ["DefaultTreeViewStyle"],
           "type_keys": ["TreeView"],
@@ -1484,7 +1493,7 @@
         },
         {
           "name": "Controls/AutoCompleteBox.xaml",
-          "index": 161,
+          "index": 162,
           "documents": ["Controls/AutoCompleteBox.xaml"],
           "keys": ["AutoSuggestBoxDeleteButtonStyle", "AutoSuggestBoxTextBoxStyle", "DefaultAutoSuggestBoxStyle"],
           "type_keys": ["AutoCompleteBox"],
@@ -1493,7 +1502,7 @@
         },
         {
           "name": "Controls/AutoSuggestBox.xaml",
-          "index": 162,
+          "index": 163,
           "documents": ["Controls/AutoSuggestBox.xaml"],
           "keys": ["AutoSuggestBoxQueryButtonStyle", "AutoSuggestBoxQuerySymbolIconTemplate"],
           "type_keys": ["AutoSuggestBox"],
@@ -1502,7 +1511,7 @@
         },
         {
           "name": "Controls/RadioButtons.xaml",
-          "index": 163,
+          "index": 164,
           "documents": ["Controls/RadioButtons.xaml"],
           "keys": ["DefaultRadioButtonsStyle"],
           "type_keys": ["RadioButtons"],
@@ -1511,7 +1520,7 @@
         },
         {
           "name": "Controls/RichEditBox.xaml",
-          "index": 164,
+          "index": 165,
           "documents": ["Controls/RichEditBox.xaml"],
           "keys": ["DefaultRichEditBoxStyle", "StringRichEditBoldText", "StringRichEditItalicText", "StringRichEditUnderlineText", "WinUIRichEditBoxContextFlyout"],
           "type_keys": ["RichEditBox"],

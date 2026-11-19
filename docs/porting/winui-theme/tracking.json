@@ -90885,7 +90885,7 @@
    "winui": "MediaTransportControls: {MediaTransportControls}, DefaultMediaTransportControlsStyle, the template styles AppBarButtonStyle, AppBarToggleButtonStyle and FlyoutStyle (MediaTransportControls_themeresources.xaml): the parts, states and values of the source, the commands in three groups of AppBarButtons in place of the CommandBar. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 1,
-   "date": "2026-11-11"
+   "date": "2026-11-18"
   },
   {
    "document": "CameraCaptureUI.xaml",
