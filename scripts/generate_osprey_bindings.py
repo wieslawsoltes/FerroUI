@@ -1,52 +1,78 @@
 #!/usr/bin/env python3
 """The Osprey backend of the bindings of FerroUI: reads the API model
 (`bindings/model/ferroui-api.json`, written by `generate_api_model.py`) and
-writes the generated files of `bindings/osprey/ferroui/`:
+writes Osprey files:
 
     abi.osp       namespace `ferroui`: the `extern fn` declarations of the C ABI
-                  that Osprey can call, the fingerprint of the model, and every
-                  enumeration a property uses as a union with its member names
+                  that Osprey can call, the fingerprint of the model, the ID
+                  constants, and the enumerations of the properties as unions
     objects.osp   namespace `ferroobjects`, layer 1 (the fluent object model):
                   a constructor per class that can be created (`button()`), a
                   setter per property that takes the handle and returns it, so
                   that setters chain with the pipe
                   (`button() |> content("Click") |> fontSize(16.0)`), a getter
                   per property that returns a `Result`, and a helper per event
-                  (`onClick(object, tag)`: the tag goes to the one dispatcher of the
-                  application)
+                  (`onClick(object, tag)`: the tag goes to the one dispatcher of
+                  the application)
     views.osp     namespace `ferroviews`, layer 2 (frames, Elm-like): an element
                   function per class (`stackPanel(attrs, children)`), an
                   attribute per property (`spacing(8.0)`) and per event
-                  (`onClick(Increment)`, `onTextChanged(fn)`)
+                  (`onClick(Increment)`)
 
-The hand-written parts beside them (`core.osp`, `runtime.osp`) are the error
-helpers, the start of an application and the view/update loop of layer 2.
+Two kinds of output:
 
-Everything calls the ABI with the stable IDs of the model as constants: no
-name is looked up at run time, and `checkApi()` compares the fingerprint of
-the library with the one of these files at start.
+    the full bindings   bindings/osprey/full/: every class, property and event
+                        of the model (a reference, and for programs that want
+                        everything)
+    a selection         <application>/ferroui/, from the manifest
+                        <application>/ferroui.json: the classes it names and
+                        their bases, the properties and events of those classes,
+                        the enumerations they use, and the layers it asks for.
+                        Names are the names of the full bindings, so moving
+                        between the two changes no code.
 
-Naming follows Osprey: camelCase functions, PascalCase types and union
-variants. Union variants are global in Osprey, so a member is named after its
-enumeration (`OrientationHorizontal`). Exceptions are read from
-`bindings/osprey/overrides.json` (names to use for a class, a property or an
-event); reserved words get a suffix.
+    {"layers": ["objects"], "classes": ["Window", "StackPanel", "TextBlock", "Button"]}
+
+The hand-written parts (`bindings/osprey/runtime/`: `core.osp`, `runtime.osp`)
+are the error helpers, the start of an application, the one trampoline and the
+element tree and loop of layer 2; an application lists that directory and its
+selection as source roots.
+
+Everything calls the ABI with the stable IDs of the model as constants: no name
+is looked up at run time, and `checkApi()` compares the fingerprint of the
+library with the one of these files at start.
+
+Naming follows Osprey: camelCase functions, PascalCase types and union variants.
+Union variants are global in Osprey, so a member is named after its enumeration
+(`OrientationHorizontal`). Exceptions are read from
+`bindings/osprey/overrides.json`; reserved words get a suffix. Generated
+functions carry no type annotations that inference derives (the style the
+compiler's lints ask for; its check of redundant annotations is slow on a large
+file): the signature is in the comment above each function.
 
 How to run (from the repository root; Python 3, standard library only):
 
-    python3 scripts/generate_osprey_bindings.py            # writes the files
-    python3 scripts/generate_osprey_bindings.py --check    # exit 1 if stale
+    python3 scripts/generate_osprey_bindings.py            # the full bindings and every
+                                                           # manifest of the samples
+    python3 scripts/generate_osprey_bindings.py --check    # exit 1 if one is stale
+    python3 scripts/generate_osprey_bindings.py --select path/to/ferroui.json
 """
 
 import argparse
+import glob
 import json
 import os
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = os.path.join(ROOT, "bindings", "model", "ferroui-api.json")
-OUT = os.path.join(ROOT, "bindings", "osprey", "ferroui")
+OUT = os.path.join(ROOT, "bindings", "osprey", "full")
 OVERRIDES = os.path.join(ROOT, "bindings", "osprey", "overrides.json")
+# The manifests of the samples, generated with the full bindings.
+SAMPLE_MANIFESTS = os.path.join(ROOT, "samples", "CApi", "osprey-bindings", "*", "ferroui.json")
+LAYERS = ("objects", "views")
+# Property IDs the hand-written runtime uses, kept in every selection.
+RUNTIME_PROPERTIES = {"Text"}
 
 HEADER = """// @generated by scripts/generate_osprey_bindings.py from bindings/model/ferroui-api.json:
 // generated, do not edit. Write it again with python3 scripts/generate_osprey_bindings.py."""
@@ -226,38 +252,97 @@ def osprey_type(names, kind):
     return {"bool": "bool", "int": "int", "float": "float", "string": "string"}[kind]
 
 
+# ---- selections -------------------------------------------------------------------------------
+
+class Selection:
+    """What a manifest selects; everything when there is no manifest."""
+
+    def __init__(self, model, manifest=None):
+        self.full = manifest is None
+        self.layers = set(LAYERS if manifest is None else manifest.get("layers", LAYERS))
+        unknown = self.layers - set(LAYERS)
+        if unknown:
+            raise SystemExit(f"unknown layers in the manifest: {sorted(unknown)}")
+        bases = {cls["name"]: cls["base"] for cls in model["classes"]}
+        if manifest is None:
+            self.classes = set(bases)
+        else:
+            self.classes = set()
+            for name in manifest.get("classes", []):
+                if name not in bases:
+                    raise SystemExit(f"the manifest names {name}, which is no class of the model")
+                while name is not None and name not in self.classes:
+                    self.classes.add(name)
+                    name = bases.get(name)
+        self.named = set(manifest.get("classes", [])) if manifest else set(bases)
+        self.properties = {p["name"] for p in model["properties"]
+                           if self.full or any(d["owner"] in self.classes for d in p["declarations"])}
+        self.events = {e["name"] for e in model["events"]
+                       if self.full or any(d["owner"] in self.classes for d in e["declarations"])}
+        weight = weights(model)
+        self.enums = set()
+        for prop in model["properties"]:
+            if prop["name"] not in self.properties:
+                continue
+            for read_only in (False, True):
+                for kind, _ in scalar_kinds(model, prop, weight, read_only=read_only):
+                    if kind.startswith("enum:"):
+                        self.enums.add(kind[5:])
+
+    def cls(self, cls):
+        """A class whose constructor or element the selection has: the classes the manifest
+        names (their bases are there for their properties and events)."""
+        return cls["name"] in self.named
+
+    def prop(self, prop):
+        return prop["name"] in self.properties
+
+    def property_id(self, prop):
+        return prop["name"] in self.properties or prop["name"] in RUNTIME_PROPERTIES
+
+    def event(self, event):
+        return event["name"] in self.events
+
+    def enum(self, name):
+        return name in self.enums
+
+
 # ---- abi.osp --------------------------------------------------------------------------------
 
-def generate_abi(model, names):
+def generate_abi(model, names, selection):
     lines = [HEADER, "//", "// The C ABI of FerroUI for Osprey (docs/osprey.md): the extern declarations, the fingerprint",
              "// of the model the IDs of the bindings come from, and the enumerations of the properties.",
              "//", "// @link: ferroui_capi", "", "namespace ferroui;", ""]
-    lines.append(f"// The fingerprint of the API model (ferro_api_fingerprint), format {model['format']}.")
-    lines.append(f"fn apiFingerprint() -> int = {model['fingerprint']}")
-    lines.append(f"// The version of the ABI the bindings were generated for (ferro_abi_version).")
-    lines.append(f"fn abiVersion() -> int = {model['abi_version']}")
+    lines.append(f"// apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format"
+                 f" {model['format']}.")
+    lines.append(f"fn apiFingerprint() = {model['fingerprint']}")
+    lines.append(f"// abiVersion() -> int: the version of the ABI the bindings were generated for.")
+    lines.append(f"fn abiVersion() = {model['abi_version']}")
     lines.append("")
     lines.append("// ---- IDs -------------------------------------------------------------------------------------")
     lines.append("//")
-    lines.append("// The stable IDs of the model, for calls of the C ABI by hand: `buttonTypeId()`,")
-    lines.append("// `contentPropertyId()`, `clickEventId()`.")
+    lines.append("// The stable IDs of the model, for calls of the C ABI by hand (each `() -> int`):")
+    lines.append("// `buttonTypeId()`, `contentPropertyId()`, `clickEventId()`.")
     lines.append("")
     seen = set()
     for cls in model["classes"]:
         name = camel(cls["words"]) + "TypeId"
         if name not in seen:
             seen.add(name)
-            lines.append(f"fn {name}() -> int = {cls['id']}")
+            if cls["name"] in selection.classes:
+                lines.append(f"fn {name}() = {cls['id']}")
     for prop in model["properties"]:
         name = camel(prop["words"]) + "PropertyId"
         if name not in seen:
             seen.add(name)
-            lines.append(f"fn {name}() -> int = {prop['id']}")
+            if selection.property_id(prop):
+                lines.append(f"fn {name}() = {prop['id']}")
     for event in model["events"]:
         name = camel(event["words"]) + "EventId"
         if name not in seen:
             seen.add(name)
-            lines.append(f"fn {name}() -> int = {event['id']}")
+            if selection.event(event):
+                lines.append(f"fn {name}() = {event['id']}")
     lines.append("")
     lines.append("// ---- the C ABI -------------------------------------------------------------------------------")
     lines.append("")
@@ -290,12 +375,15 @@ def generate_abi(model, names):
     lines.append("// ---- enumerations ----------------------------------------------------------------------------")
     lines.append("")
     for enum in model["enums"]:
+        if not selection.enum(enum["name"]):
+            continue
         type_name = names.enum_type(enum["name"])
         lines += comment(enum["doc"])
         members = [names.member(enum["name"], member) for member in enum["members"]]
         lines.append(f"type {type_name} = " + " | ".join(members))
-        lines.append(f"// The name of a member of {type_name}, which the ABI sets by name.")
-        lines.append(f"fn {camel(enum['words'])}Name(value: {type_name}) -> string = match value {{")
+        lines.append(f"// {camel(enum['words'])}Name(value: {type_name}) -> string: the name of a member, which"
+                     " the ABI sets by name.")
+        lines.append(f"fn {camel(enum['words'])}Name(value) = match value {{")
         for member, osprey_member in zip(enum["members"], members):
             lines.append(f"    {osprey_member} => {osprey_string(member['name'])}")
         lines.append("}")
@@ -317,7 +405,12 @@ def setter_call(kind, object_expr, prop_id, value_expr):
     return f"ferro_set_str(object: {object_expr}, property: {prop_id}, text: {value_expr}, length: -1)"
 
 
-def generate_objects(model, names):
+def signature(name, params, returns, text):
+    """The comment above a generated function: its signature, then its documentation."""
+    return comment(f"{name}({params}) -> {returns}: {text}")
+
+
+def generate_objects(model, names, selection):
     lines = [HEADER, "//", "// Layer 1 of the Osprey bindings (docs/osprey.md): the fluent object model. A constructor per",
              "// class that can be created, a setter per property that takes the handle and returns it (setters",
              "// chain with the pipe), a getter per property that returns a Result, and a helper per event",
@@ -335,8 +428,10 @@ def generate_objects(model, names):
         if name in used:
             continue
         used.add(name)
-        lines += comment(f"Creates a {cls['name']}. {cls['doc']}")
-        lines.append(f"fn {name}() -> int = ferro_create(typeId: {cls['id']})")
+        if not selection.cls(cls):
+            continue
+        lines += signature(name, "", "int", f"creates a {cls['name']}. {cls['doc']}")
+        lines.append(f"fn {name}() = ferro_create(typeId: {cls['id']})")
         counts["constructors"] += 1
     lines.append("")
     lines.append("// ---- properties ----------------------------------------------------------------------------")
@@ -346,6 +441,7 @@ def generate_objects(model, names):
         kinds = scalar_kinds(model, prop, weight)
         kind = kinds[0][0] if kinds else None
         base = names.prop(prop)
+        emit = selection.prop(prop)
         doc = next((d["doc"] for d in prop["declarations"] if d["doc"]), "")
         owners = ", ".join(sorted({d["owner"] for d in prop["declarations"]}))
         for setter_kind, suffix in kinds:
@@ -355,25 +451,29 @@ def generate_objects(model, names):
             if name in used:
                 continue
             used.add(name)
+            if not emit:
+                continue
             type_ = osprey_type(names, setter_kind)
-            lines += comment(f"Sets {prop['name']} ({owners}). {doc}")
+            lines += signature(name, f"object: int, value: {type_}", "int", f"sets {prop['name']} ({owners}). {doc}")
             if setter_kind.startswith("enum:"):
                 enum = setter_kind[5:]
                 value = f"{camel(names.enums[enum]['words'])}Name(value: value)"
                 call = setter_call("string", "object", prop["id"], value)
             else:
                 call = setter_call(setter_kind, "object", prop["id"], "value")
-            lines.append(f"fn {name}(object: int, value: {type_}) -> int = {{")
+            lines.append(f"fn {name}(object, value) = {{")
             lines.append(f"    let _ = {call}")
             lines.append("    object")
             lines.append("}")
             counts["setters"] += 1
         if has_objects(prop) and writable(prop):
             name = base + "Object"
-            if name not in used:
-                used.add(name)
-                lines += comment(f"Sets {prop['name']} ({owners}) to an object; 0 is null.")
-                lines.append(f"fn {name}(object: int, value: int) -> int = {{")
+            fresh = name not in used
+            used.add(name)
+            if fresh and emit:
+                lines += signature(name, "object: int, value: int", "int", f"sets {prop['name']} ({owners}) to an"
+                                   " object; 0 is null.")
+                lines.append(f"fn {name}(object, value) = {{")
                 lines.append(f"    let _ = ferro_set_handle(object: object, property: {prop['id']}, value: value)")
                 lines.append("    object")
                 lines.append("}")
@@ -384,7 +484,10 @@ def generate_objects(model, names):
             name = "get" + base[:1].upper() + base[1:]
             if name not in used:
                 used.add(name)
-                lines += comment(f"Reads {prop['name']} ({owners}).")
+                getter = emit
+            else:
+                getter = False
+            if getter:
                 if kind == "string":
                     read = f"\"${{ferro_get_cstr_or(object: object, property: {prop['id']}, fallback: \"\")}}\""
                     type_ = "string"
@@ -397,7 +500,8 @@ def generate_objects(model, names):
                 else:
                     read = f"ferro_get_f64_or(object: object, property: {prop['id']}, fallback: 0.0)"
                     type_ = "float"
-                lines.append(f"fn {name}(object: int) -> Result<{type_}, string> = {{")
+                lines += signature(name, "object: int", f"Result<{type_}, string>", f"reads {prop['name']} ({owners}).")
+                lines.append(f"fn {name}(object) = {{")
                 lines.append("    ferro_clear_error()")
                 lines.append(f"    let value = {read}")
                 lines.append("    readResult(value: value)")
@@ -411,15 +515,19 @@ def generate_objects(model, names):
         if name in used:
             continue
         used.add(name)
+        if not selection.event(event):
+            continue
         owners = ", ".join(sorted({d["owner"] for d in event["declarations"]}))
         doc = next((d["doc"] for d in event["declarations"] if d["doc"]), "")
-        lines += comment(f"Dispatches `tag` to the dispatcher of the application on every {event['name']} ({owners}). {doc}")
-        lines.append(f"fn {name}(object: int, tag: int) -> int = {{")
+        lines += signature(name, "object: int, tag: int", "int", f"dispatches `tag` to the dispatcher of the"
+                           f" application on every {event['name']} ({owners}). {doc}")
+        lines.append(f"fn {name}(object, tag) = {{")
         lines.append(f"    let _ = ferro_subscribe(object: object, event: {event['id']}, function: dispatchEvent, token: tag)")
         lines.append("    object")
         lines.append("}")
-        lines += comment(f"Raises {event['name']} on the object, as the control does (for tests and scripts).")
-        lines.append(f"fn raise{pascal(event['words'])}(object: int) -> int = {{")
+        lines += signature(f"raise{pascal(event['words'])}", "object: int", "int", f"raises {event['name']} on the"
+                           " object, as the control does (for tests and scripts).")
+        lines.append(f"fn raise{pascal(event['words'])}(object) = {{")
         lines.append(f"    let _ = ferro_raise(object: object, event: {event['id']})")
         lines.append("    object")
         lines.append("}")
@@ -429,7 +537,7 @@ def generate_objects(model, names):
 
 # ---- views.osp (layer 2) ----------------------------------------------------------------------
 
-def generate_views(model, names):
+def generate_views(model, names, selection):
     lines = [HEADER, "//", "// Layer 2 of the Osprey bindings (docs/osprey.md): frames, Elm-like. An element function per",
              "// class that can be created, an attribute per property and per event. The view of an",
              "// application returns elements; runtime.osp writes them as a frame, and an event gives the",
@@ -446,12 +554,17 @@ def generate_views(model, names):
         if name in used:
             continue
         used.add(name)
-        lines += comment(f"An element of the class {cls['name']}. {cls['doc']}")
+        if not selection.cls(cls):
+            continue
         if cls["children"] == "none":
-            lines.append(f"fn {name}<M>(attrs: List<Attr<M>>) -> Element<M> = "
+            lines += signature(name, "attrs: List<Attr<M>>", "Element<M>", f"an element of the class {cls['name']}."
+                               f" {cls['doc']}")
+            lines.append(f"fn {name}(attrs) = "
                          f"Element {{ elementType: {cls['id']}, elementAttrs: attrs, elementChildren: [] }}")
         else:
-            lines.append(f"fn {name}<M>(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M> = "
+            lines += signature(name, "attrs: List<Attr<M>>, children: List<Element<M>>", "Element<M>",
+                               f"an element of the class {cls['name']}. {cls['doc']}")
+            lines.append(f"fn {name}(attrs, children) = "
                          f"Element {{ elementType: {cls['id']}, elementAttrs: attrs, elementChildren: children }}")
         counts["elements"] += 1
     lines.append("")
@@ -467,8 +580,10 @@ def generate_views(model, names):
             if name in used:
                 continue
             used.add(name)
-            lines += comment(f"Sets {prop['name']} ({owners}).")
+            if not selection.prop(prop):
+                continue
             type_ = osprey_type(names, kind)
+            lines += signature(name, f"value: {type_}", "Attr<M>", f"sets {prop['name']} ({owners}).")
             if kind == "bool":
                 body = f"AttrBool {{ attrBoolProperty: {prop['id']}, attrBoolValue: value }}"
             elif kind == "int":
@@ -481,7 +596,7 @@ def generate_views(model, names):
                         f"attrTextValue: {camel(names.enums[enum]['words'])}Name(value: value) }}")
             else:
                 body = f"AttrText {{ attrTextProperty: {prop['id']}, attrTextValue: value }}"
-            lines.append(f"fn {name}<M>(value: {type_}) -> Attr<M> = {body}")
+            lines.append(f"fn {name}(value) = {body}")
             counts["attributes"] += 1
     lines.append("")
     lines.append("// ---- attributes of events ------------------------------------------------------------------")
@@ -491,68 +606,112 @@ def generate_views(model, names):
         if name in used:
             continue
         used.add(name)
+        if not selection.event(event):
+            continue
         owners = ", ".join(sorted({d["owner"] for d in event["declarations"]}))
         value = event.get("value_property")
         value_prop = next((p for p in model["properties"] if p["name"] == value), None) if value else None
         if value_prop is not None:
-            lines += comment(f"Sends the message `message` on every {event['name']} ({owners}); `eventText()` is the"
-                             f" {value} of the sender while `update` runs.")
-            lines.append(f"fn {name}<M>(message: M) -> Attr<M> = AttrOnValue {{ attrValueEvent: {event['id']}, "
+            lines += signature(name, "message: M", "Attr<M>", f"sends the message on every {event['name']}"
+                               f" ({owners}); `eventText()` is the {value} of the sender while `update` runs.")
+            lines.append(f"fn {name}(message) = AttrOnValue {{ attrValueEvent: {event['id']}, "
                          f"attrValueProperty: {value_prop['id']}, attrValueMessage: message }}")
         else:
-            lines += comment(f"Sends the message `message` on every {event['name']} ({owners}).")
-            lines.append(f"fn {name}<M>(message: M) -> Attr<M> = AttrOn {{ attrOnEvent: {event['id']}, attrOnMessage: message }}")
+            lines += signature(name, "message: M", "Attr<M>", f"sends the message on every {event['name']} ({owners}).")
+            lines.append(f"fn {name}(message) = AttrOn {{ attrOnEvent: {event['id']}, attrOnMessage: message }}")
         counts["events"] += 1
     lines.append("")
     lines.append("// ---- driving an interface from a script --------------------------------------------------")
     lines.append("")
     for event in model["events"]:
-        if not any(d["raisable"] for d in event["declarations"]):
+        if not any(d["raisable"] for d in event["declarations"]) or not selection.event(event):
             continue
         name = f"raise{pascal(event['words'])}At"
-        lines += comment(f"Raises {event['name']} on the control of the element with the key `key`, as the control does.")
-        lines.append(f"fn {name}(key: int) -> int = toInt(ferro_raise(object: findKey(key: key), event: {event['id']}))")
+        lines += signature(name, "key: int", "int", f"raises {event['name']} on the control of the element with the"
+                           " key `key`, as the control does.")
+        lines.append(f"fn {name}(key) = toInt(ferro_raise(object: findKey(key: key), event: {event['id']}))")
     return "\n".join(lines).rstrip() + "\n", counts
 
 
-def outputs():
+def load_model():
     with open(MODEL, encoding="utf-8") as f:
         model = json.load(f)
     overrides = {}
     if os.path.exists(OVERRIDES):
         with open(OVERRIDES, encoding="utf-8") as f:
             overrides = json.load(f)
-    names = Names(model, overrides)
-    abi, skipped = generate_abi(model, names)
-    objects, object_counts = generate_objects(model, names)
-    views, view_counts = generate_views(model, names)
-    return [("abi.osp", abi), ("objects.osp", objects), ("views.osp", views)], (object_counts, view_counts, skipped)
+    return model, Names(model, overrides)
+
+
+def outputs(manifest=None, model=None, names=None):
+    """The files of the full bindings (no manifest) or of a selection: [(file name, text)], and
+    what was generated."""
+    if model is None:
+        model, names = load_model()
+    selection = Selection(model, manifest)
+    abi, skipped = generate_abi(model, names, selection)
+    files = [("abi.osp", abi)]
+    counts = {"skipped externs": skipped}
+    if "objects" in selection.layers:
+        objects, object_counts = generate_objects(model, names, selection)
+        files.append(("objects.osp", objects))
+        counts["objects"] = object_counts
+    if "views" in selection.layers:
+        views, view_counts = generate_views(model, names, selection)
+        files.append(("views.osp", views))
+        counts["views"] = view_counts
+    return files, counts
+
+
+def targets(selected=None):
+    """(directory, manifest) of everything to generate: the full bindings and the manifests of the
+    samples, or the one manifest given."""
+    if selected:
+        return [(os.path.join(os.path.dirname(os.path.abspath(selected)), "ferroui"), selected)]
+    return [(OUT, None)] + [(os.path.join(os.path.dirname(path), "ferroui"), path)
+                            for path in sorted(glob.glob(SAMPLE_MANIFESTS))]
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--report", action="store_true", help="print what was generated")
+    parser.add_argument("--select", help="a manifest (ferroui.json): write its selection beside it, in ferroui/")
     options = parser.parse_args()
-    files, counts = outputs()
+    model, names = load_model()
     stale = False
-    for name, text in files:
-        path = os.path.join(OUT, name)
-        current = open(path, encoding="utf-8").read() if os.path.exists(path) else None
-        if current == text:
-            continue
-        if options.check:
-            print(f"stale: {os.path.relpath(path, ROOT)}")
-            stale = True
-            continue
-        os.makedirs(OUT, exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
-        print(f"wrote {os.path.relpath(path, ROOT)}")
-    if options.report:
-        print(counts)
+    for directory, manifest_path in targets(options.select):
+        manifest = None
+        if manifest_path:
+            with open(manifest_path, encoding="utf-8") as f:
+                manifest = json.load(f)
+        files, counts = outputs(manifest, model, names)
+        wanted = {name for name, _ in files}
+        for name in LAYERS:
+            path = os.path.join(directory, f"{name}.osp")
+            if f"{name}.osp" not in wanted and os.path.exists(path):
+                if options.check:
+                    print(f"stale: {os.path.relpath(path, ROOT)} (the manifest does not ask for the layer)")
+                    stale = True
+                else:
+                    os.remove(path)
         for name, text in files:
-            print(f"{name}: {text.count(chr(10))} lines, {len(text.encode('utf-8'))} bytes")
+            path = os.path.join(directory, name)
+            current = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+            if current == text:
+                continue
+            if options.check:
+                print(f"stale: {os.path.relpath(path, ROOT)}")
+                stale = True
+                continue
+            os.makedirs(directory, exist_ok=True)
+            with open(path, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+            print(f"wrote {os.path.relpath(path, ROOT)}")
+        if options.report:
+            print(os.path.relpath(directory, ROOT), counts)
+            for name, text in files:
+                print(f"  {name}: {text.count(chr(10))} lines, {len(text.encode('utf-8'))} bytes")
     if stale:
         sys.exit(1)
 

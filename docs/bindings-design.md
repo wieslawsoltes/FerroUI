@@ -56,9 +56,10 @@ part of it; section 7 says what is done and what is next.
    native thunk per handler. Osprey does this with `dispatchEvent` and the one dispatcher of
    the application; a language with closures uses `ferro_subscribe` with one function and the
    token as the index of its table.
-6. **Selection trims both sides.** A manifest of what an application uses (classes,
-   properties, events) selects the part of the model a backend generates and the exports and
-   tables of the library (phase 2 of #636). The model already has what the manifest names.
+6. **Selection trims both sides.** A manifest of what an application uses (`ferroui.json`:
+   classes, whose bases come with them, and layers) selects the part of the model a backend
+   generates; the Osprey backend does this for every sample. Trimming the exports and tables of
+   the library with the same manifest is phase 2 of #636.
 7. **A benchmark per backend.** Each backend ships the same operations as the Rust benchmark
    of the ABI (`src/FerroUI.CApi/benches/call_overhead.rs`): a property write, a read, an
    event dispatch, frame commits. Section 6 of docs/osprey.md has the numbers of Osprey.
@@ -140,11 +141,12 @@ documentation from the model.
 Done in the Osprey MVP: the model and its tests, stable IDs compiled into the library and the
 fingerprint, the frame layout with the scalar writer and the buffer commit, UTF-16 entry
 points, getters with a fallback and `ferro_clear_error` for `Result` values, one trampoline,
-both layers of Osprey for every class, five samples and a benchmark.
+both layers of Osprey for every class, selections from a manifest (each sample builds in one
+to two seconds), five samples and a benchmark.
 
 Next:
 
-- The selection manifest (phase 2 of #636) for the bindings and the library together.
+- The library trimmed by the same manifest as the bindings (phase 2 of #636).
 - A buffer the library exposes for frames (`ferro_frame_buffer`) beside the commit of a
   caller's buffer, for languages that would rather write into library memory.
 - Object values in frames (an element as the value of a property, not only as a child), and

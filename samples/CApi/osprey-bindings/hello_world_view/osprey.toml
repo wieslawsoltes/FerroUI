@@ -1,7 +1,7 @@
 # Hello, World! with layer 2 (frames) of the generated Osprey bindings (docs/osprey.md).
 [project]
 name = "hello_world_view"
-source_roots = ["src", "../../../../bindings/osprey"]
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
 default_namespace = "app"
 entry = "src/main.osp"
 

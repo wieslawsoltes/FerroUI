@@ -8,12 +8,14 @@ same facts and a new language is one backend:
    metadata of the framework by `scripts/generate_api_model.py`. The script also writes the
    ID table that is compiled into the library (`src/FerroUI.CApi/api_ids.rs`).
 2. **Backends**, one per language, that read only the model and write the files of their
-   language (`bindings/<language>/`). Osprey is the first (`scripts/generate_osprey_bindings.py`,
-   `bindings/osprey/`, docs/osprey.md).
+   language: the full bindings (`bindings/<language>/full/`) and the **selection** of each
+   application from its manifest (`ferroui.json`: the classes it uses, with their bases, and
+   the layers). Osprey is the first (`scripts/generate_osprey_bindings.py`, `bindings/osprey/`,
+   docs/osprey.md).
 
 ```sh
 python3 scripts/generate_api_model.py          # the model and the ID table of the library
-python3 scripts/generate_osprey_bindings.py    # the Osprey bindings from the model
+python3 scripts/generate_osprey_bindings.py    # the Osprey bindings: full, and each sample's selection
 python3 scripts/test_generate_bindings.py      # the tests of both
 ```
 
@@ -78,6 +80,9 @@ them dispatches tags.
    in the generated file.
 3. Name with `words` and an override file of the language; escape its reserved words.
 4. Call the ABI with the IDs of the model as constants and check the fingerprint at start.
-5. Add the `--check` to the step "Generated API model and bindings are up to date" of
+5. Generate a selection from a manifest (`{"layers": [...], "classes": [...]}`): an
+   application builds against what it uses, not the whole model, and the names of a selection
+   are the names of the full bindings.
+6. Add the `--check` to the step "Generated API model and bindings are up to date" of
    `.github/workflows/ci.yml`, tests to `scripts/test_generate_bindings.py`, samples, and a
    benchmark of the same operations as `src/FerroUI.CApi/benches/call_overhead.rs`.

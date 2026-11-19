@@ -16,29 +16,63 @@ Both share the namespace `ferroui`: the `extern fn` declarations, the ID constan
 enumerations as unions, the fingerprint check and the start of an application. This is the
 MVP of the Osprey bindings (#950): it works end to end and is extended later (section 7).
 
-## 1. The files
+## 1. The files and the selection of an application
+
+An application builds against **its selection**: the generated files of the classes it names
+in a manifest, `ferroui.json` beside its `osprey.toml`, and of their bases:
+
+```json
+{
+  "layers": ["objects"],
+  "classes": ["Window", "StackPanel", "TextBlock", "Button"]
+}
+```
+
+`layers` is `objects` (layer 1), `views` (layer 2) or both. The selection has the
+constructors or elements of the named classes; the setters, getters and attributes of every
+property of those classes and their bases (`Width` of `Layoutable` for a `Button`); their
+events; the enumerations those properties use; and the ID constants of all of it. Names are
+the names of the full bindings, so adding a class to the manifest changes no code.
 
 | File | Namespace | What |
 | --- | --- | --- |
-| `bindings/osprey/ferroui/abi.osp` | `ferroui` | generated: the extern declarations, the ID constants (`buttonTypeId()`, `textPropertyId()`, `clickEventId()`), the fingerprint, the enumerations |
-| `bindings/osprey/ferroui/objects.osp` | `ferroobjects` | generated: layer 1 |
-| `bindings/osprey/ferroui/views.osp` | `ferroviews` | generated: layer 2, elements and attributes |
-| `bindings/osprey/ferroui/core.osp` | `ferroui` | hand-written: `failure()`, `checkApi()`, `add`, `children`, `run`, the one trampoline |
-| `bindings/osprey/ferroui/runtime.osp` | `ferroviews` | hand-written: `Element`, `Attr`, writing a frame, `render`, `messageAt`, `eventText` |
+| `<application>/ferroui/abi.osp` | `ferroui` | generated: the extern declarations, the ID constants (`buttonTypeId()`, `textPropertyId()`, `clickEventId()`), the fingerprint, the enumerations |
+| `<application>/ferroui/objects.osp` | `ferroobjects` | generated: layer 1 |
+| `<application>/ferroui/views.osp` | `ferroviews` | generated: layer 2, elements and attributes |
+| `bindings/osprey/runtime/core.osp` | `ferroui` | hand-written: `failure()`, `checkApi()`, `add`, `children`, `run`, the one trampoline |
+| `bindings/osprey/runtime/runtime.osp` | `ferroviews` | hand-written: `Element`, `Attr`, writing a frame, `render`, `messageAt`, `eventText` |
+| `bindings/osprey/full/` | | generated: the same three files for every class of the model, for reference |
 | `bindings/osprey/overrides.json` | | names the generator uses instead of its own |
 
-Generate them again after a change of the framework or the ABI:
+The `osprey.toml` of an application lists its selection and the runtime as source roots:
+
+```toml
+[project]
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
+entry = "src/main.osp"
+
+[modules]
+allow_wildcard_imports = true
+```
+
+Generate the bindings again after a change of the framework, the ABI or a manifest:
 
 ```sh
 python3 scripts/generate_api_model.py
-python3 scripts/generate_osprey_bindings.py
+python3 scripts/generate_osprey_bindings.py                       # full, and every sample
+python3 scripts/generate_osprey_bindings.py --select app/ferroui.json   # one application
 ```
 
-CI fails when they are stale. The generated files are large (about 1 MB of Osprey for all 507
-classes, 1042 properties and 96 events of FerroUI.Base and FerroUI.Controls); a program links
-only what it calls (the layer 1 hello world is a 98 KB executable on macOS), but the compiler
-reads all of it: a sample builds in about 10 to 16 seconds. A selection of what an
-application uses is phase 2 (#636).
+CI fails when they are stale, and `scripts/test_generate_bindings.py` fails when the selection
+of a sample grows past 200 KB of Osprey. The full bindings are about 1.1 MB (507 classes, 1042
+properties, 96 events); a selection of four controls is 60 to 130 KB, because the bases of a
+control (`Control`, `InputElement`, `Layoutable`, `Visual`) bring their properties.
+
+Generated functions carry no type annotations that inference derives: the signature is the
+first line of the comment above each one (`// fontSize(object: int, value: float) -> int:
+sets FontSize`). That is the style the lints of Osprey ask for, and it keeps the build fast:
+the check of redundant annotations of Osprey 0.29 is super-linear in the number of annotated
+functions of a file (section 5).
 
 ## 2. Naming
 
@@ -178,8 +212,9 @@ fn main() = {
 
 ## 5. Building and running the samples
 
-`samples/CApi/osprey-bindings/` has one Osprey project per sample: its `osprey.toml` names
-`bindings/osprey` as a source root and allows wildcard imports.
+`samples/CApi/osprey-bindings/` has one Osprey project per sample, each with its manifest
+(`ferroui.json`), its selection (`ferroui/`) and an `osprey.toml` that names the selection and
+`bindings/osprey/runtime` as source roots and allows wildcard imports.
 
 | Sample | Layer | What it shows |
 | --- | --- | --- |
@@ -198,6 +233,25 @@ LIBRARY_PATH=<target>/release osprey build . --memory=arc -o hello_world
 DYLD_LIBRARY_PATH=<target>/release ./hello_world            # LD_LIBRARY_PATH on Linux
 ```
 
+Build times of `osprey build . --memory=arc` with warnings on (2026-11-19, one Apple silicon
+Mac, Osprey 0.29.0, the wall time of the whole build and link):
+
+| Sample | Selection | Build |
+| --- | --- | ---: |
+| `hello_world` | 4 classes, layer 1, 115 KB | 2 s |
+| `counter` | 4 classes, layer 1, 132 KB | 2 s |
+| `hello_world_view` | 4 classes, layer 2, 63 KB | 1 s |
+| `counter_view` | 4 classes, layer 2, 69 KB | 2 s |
+| `temperature_view` | 4 classes, layer 2, 71 KB | 1 s |
+| `benchmark` | 4 classes, both layers, 124 KB | 2 s |
+
+Against the full bindings, the same hello world took 8.5 s with `--no-warnings` and did not
+finish in 90 s with warnings on, when the generated functions still carried type annotations:
+the check of redundant annotations of Osprey 0.29 grows faster than linearly with the
+annotated functions of a file (`osprey --check` with warnings: 0.3 s for 200 annotated setters,
+1.1 s for 400, 8.2 s for 800). Without the annotations the full layer 1 checks in 2.7 s with
+warnings on; with a selection a build is the 1 to 2 seconds above.
+
 `FERROUI_SMOKE_EXIT_MS=<n>` closes the windows after `n` milliseconds, and
 `FERROUI_SAMPLE_SCRIPT=1` makes each sample drive itself (clicks with `ferro_raise`, typing by
 writing a text box) and print the resulting state, the scenarios of the Rust 7GUIs tests:
@@ -215,16 +269,16 @@ script: Fahrenheit 5 gives Celsius: '-15': ok
 property write and a read with layer 1, an event raised to the one dispatcher, and two frames
 of layer 2 (one text block whose text changes; 100 text blocks of which one changes, built by
 Osprey every time). It uses the clock of macOS. First run (2026-11-19, one Apple silicon Mac,
-the median of 9 samples; Osprey with `--memory=arc` against the library in the `release`
-profile, the Rust benchmark in the `bench` profile):
+the median of 9 samples; Osprey with `--memory=arc` and the selection of the sample against
+the library in the `release` profile, the Rust benchmark in the `bench` profile):
 
 | Operation | Osprey | Rust through the ABI | Rust |
 | --- | ---: | ---: | ---: |
-| write `FontSize` | 42.6 ns | 41.8 ns | 31.1 ns |
-| read `FontSize` (a `Result` in Osprey) | 52.7 ns | 8.6 ns | 3.4 ns |
-| raise `Click` (Osprey: to the one dispatcher) | 102.9 ns | 68.8 ns | 50.4 ns |
-| frame: one text block, its text changes | 1.45 us | 0.61 us | 89.0 ns |
-| frame: 100 text blocks, one changes | 94.4 us | 27.7 us | 89.0 ns |
+| write `FontSize` | 45.9 ns | 41.8 ns | 31.1 ns |
+| read `FontSize` (a `Result` in Osprey) | 53.7 ns | 8.6 ns | 3.4 ns |
+| raise `Click` (Osprey: to the one dispatcher) | 94.4 ns | 68.8 ns | 50.4 ns |
+| frame: one text block, its text changes | 1.10 us | 0.61 us | 89.0 ns |
+| frame: 100 text blocks, one changes | 74.2 us | 27.7 us | 89.0 ns |
 
 The Rust column of the frames is the one `set_text` a frame comes down to. A setter of layer
 1 costs what the call of the ABI costs. A getter makes three calls (it clears the error of
@@ -232,7 +286,7 @@ the thread, reads with a fallback and reads the code again) to tell a failure fr
 A raise to the dispatcher adds the trampoline of the bindings and `ferro_frame_dispatch` to a
 C handler. A frame costs the writer calls, the decode and the reconcile: an unchanged element
 is compared, not written, so the 100 elements cost about 0.28 us each in the library (the
-decode of each text and the keyed match) and about as much again in Osprey (building the
+decode of each text and the keyed match) and about 0.47 us each in Osprey (building the
 list and the strings of the view every time). Those are the first things to make cheaper
 (section 7).
 
@@ -248,8 +302,10 @@ list and the strings of the view every time). Those are the first things to make
   yet.
 - **Two layers, two namespaces.** Importing both with wildcards makes their names ambiguous;
   import what one layer needs by name (`import ferroobjects::{fontSize as setFontSize}`).
-- **Every class is generated.** A selection manifest that trims the bindings and the library
-  together is phase 2.
+- **The selection trims the bindings, not yet the library**: the library is still the full
+  build (`type-tables`); trimming it with the same manifest is phase 2 of #636.
+- **Hand-written files keep their annotations** (`core.osp`, `runtime.osp`), so a build prints
+  their redundant-annotation lints (about 80); they are few and do not slow it down.
 - **Frame cost**: the reconcile decodes every text of a frame into a string and matches keys
   in a hash map; comparing the bytes with the retained value first, and a cheaper match of
   elements in order, are the next steps.

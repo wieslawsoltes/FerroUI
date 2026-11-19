@@ -1,7 +1,7 @@
 # The cost of the Osprey bindings against Rust (docs/osprey.md, section 6); macOS (the clock).
 [project]
 name = "benchmark"
-source_roots = ["src", "../../../../bindings/osprey"]
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
 default_namespace = "app"
 entry = "src/main.osp"
 
