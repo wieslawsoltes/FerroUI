@@ -1,0 +1,115 @@
+<!-- Material 3 Expressive theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/SwipeControl.xaml),
+     as docs/porting/material-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/SwipeControl/SwipeControl.xaml (DefaultSwipeControlStyle and the implicit style)
+    controls/dev/SwipeControl/SwipeControl_themeresources.xaml (SwipeItemStyle; its resources are
+    Resources/SwipeControl_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's SwipeControl, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-calculator-gaps.md, SW-1); the Fluent theme has no document for it.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The parts keep their names: RootGrid, SwipeContentRoot, SwipeContentStackPanel, ContentRoot,
+    ContentPresenter and InputEater. The content presenter's background, border and corner radius
+    are template bindings, as in WinUI; ContentTransitions is not a FerroUI property.
+  - ListViewItemMinHeight and ListViewItemMinWidth are the sizes of WinUI's list items (40 and 88);
+    the theme has no ListView yet, so the values are written here.
+  - SwipeItemStyle targets CommandBarButton, FerroUI's AppBarButton: the control makes one button
+    per SwipeItem with this theme. Its Pressed state (the Root background
+    SwipeItemBackgroundPressed) is the :pressed pseudo-class. AutomationProperties.AccessibilityView
+    Raw is kept on the label.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="360">
+      <SwipeControl>
+        <SwipeControl.RightItems>
+          <SwipeItems Mode="Reveal">
+            <SwipeItem Text="Delete" />
+          </SwipeItems>
+        </SwipeControl.RightItems>
+        <TextBlock Text="Swipe me" Margin="12" />
+      </SwipeControl>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="SwipeItemStyle" TargetType="CommandBarButton">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="MinWidth" Value="68" />
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root"
+                MinWidth="{TemplateBinding MinWidth}"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}">
+          <Grid x:Name="ContentRoot"
+                Margin="4,4,4,2"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                RowDefinitions="Auto,*">
+            <Viewbox MaxHeight="16" MinWidth="16">
+              <ContentPresenter x:Name="Content"
+                                Margin="0,0,0,2"
+                                Content="{TemplateBinding Icon}"
+                                Foreground="{TemplateBinding Foreground}" />
+            </Viewbox>
+            <!-- Font Size 12pt == 16px in the redlines -->
+            <TextBlock x:Name="TextLabel"
+                       Grid.Row="1"
+                       Text="{TemplateBinding Label}"
+                       Foreground="{TemplateBinding Foreground}"
+                       FontSize="12"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       AutomationProperties.AccessibilityView="Raw" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pressed /template/ Border#Root">
+      <Setter Property="Background" Value="{DynamicResource SwipeItemBackgroundPressed}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultSwipeControlStyle" TargetType="SwipeControl">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinWidth" Value="88" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid">
+          <Grid x:Name="SwipeContentRoot">
+            <StackPanel x:Name="SwipeContentStackPanel" />
+          </Grid>
+          <Grid x:Name="ContentRoot">
+            <ContentPresenter x:Name="ContentPresenter"
+                              Background="{TemplateBinding Background}"
+                              BorderBrush="{TemplateBinding BorderBrush}"
+                              BorderThickness="{TemplateBinding BorderThickness}"
+                              CornerRadius="{TemplateBinding CornerRadius}"
+                              Padding="{TemplateBinding Padding}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
+                              AutomationProperties.AccessibilityView="Raw" />
+            <Grid x:Name="InputEater" />
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type SwipeControl}" TargetType="SwipeControl" BasedOn="{StaticResource DefaultSwipeControlStyle}" />
+</ResourceDictionary>

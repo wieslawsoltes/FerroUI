@@ -12,9 +12,7 @@
 use crate::{examples, tests::start, CATALOG};
 use ferroui_base::Ref;
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{
-    CheckBox, Control, InfoBar, Slider, SplitView, StackPanel, TextBlock, TextBox, Window,
-};
+use ferroui_controls::{CheckBox, Control, InfoBar, SplitView, TextBlock, TextBox, Window};
 use ferroui_markup_xaml::markup_extensions::XBindings;
 
 /// The native pages that keep the x:Bind of their source.
@@ -48,15 +46,6 @@ fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap_or_else(|error| panic!("{id}: {error}"))
 }
 
-fn child<T: ferroui_base::ObjectType>(root: &Ref<Control>, index: usize) -> Ref<T> {
-    root.cast::<StackPanel>()
-        .expect("the root of the page is a stack panel")
-        .children()
-        .get(index)
-        .cast::<T>()
-        .expect("the child of the page")
-}
-
 #[test]
 fn native_pages_compile_the_x_bind_of_their_source_and_initialize_it() {
     let _application = start();
@@ -72,20 +61,25 @@ fn native_pages_compile_the_x_bind_of_their_source_and_initialize_it() {
     }
 }
 
-/// The Binding page: OneWay x:Bind of a slider and a text box (the source's
-/// `SourceTextBoxOneWay.Text, Mode=OneWay`).
+/// The Binding page: the source's OneWay and TwoWay x:Bind between its text boxes, and the x:Bind of
+/// a text box's text through a converter.
 #[test]
-fn binding_page_one_way_x_bind_follows_the_slider_and_the_text_box() {
+fn binding_page_x_bind_mirrors_the_text_boxes_and_converts_the_input() {
     let _application = start();
     let root = page("Binding");
-    let sized = child::<TextBlock>(&root, 1);
-    let mirror = child::<TextBlock>(&root, 3);
-    assert_eq!(sized.font_size(), 20.0);
-    assert_eq!(mirror.text().as_deref(), Some("FerroUI"));
-    root.get_control::<Slider>("SizeSlider").set_range_value(30.0);
-    assert_eq!(sized.font_size(), 30.0);
-    root.get_control::<TextBox>("NameInput").set_text(Some("x:Bind"));
-    assert_eq!(mirror.text().as_deref(), Some("x:Bind"));
+    let text = |name: &str| root.get_control::<TextBox>(name).text().unwrap_or_default();
+    root.get_control::<TextBox>("SourceTextBoxOneWay").set_text(Some("one way"));
+    assert_eq!(text("TargetTextBoxOneWay"), "one way");
+    root.get_control::<TextBox>("TargetTextBoxOneWay").set_text(Some("edited"));
+    assert_eq!(text("SourceTextBoxOneWay"), "one way", "OneWay does not write back");
+    root.get_control::<TextBox>("SourceTextBoxTwoWay").set_text(Some("two"));
+    assert_eq!(text("TargetTextBoxTwoWay"), "two");
+    root.get_control::<TextBox>("TargetTextBoxTwoWay").set_text(Some("way"));
+    assert_eq!(text("SourceTextBoxTwoWay"), "way", "TwoWay writes back");
+    let not_empty = root.get_control::<TextBlock>("NotEmptyText");
+    assert!(!not_empty.is_visible());
+    root.get_control::<TextBox>("InputTextBox").set_text(Some("x"));
+    assert!(not_empty.is_visible());
 }
 
 /// SplitView: the TwoWay x:Bind of a nullable `IsChecked` with a `bool` target, read in both
