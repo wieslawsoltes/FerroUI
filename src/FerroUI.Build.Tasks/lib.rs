@@ -385,6 +385,9 @@ pub struct Build {
     themes: Vec<String>,
     /// What `compiled_markup::register()` registers ([`Build::export_plan`], #857).
     export_plan: ExportPlan,
+    /// Whether declared properties are resolved at compile time
+    /// ([`Build::compile_time_declared_properties`]).
+    compile_time_declared_properties: bool,
 }
 
 impl Build {
@@ -439,7 +442,18 @@ impl Build {
             theme_roots: Roots::default(),
             themes: Vec::new(),
             export_plan: ExportPlan::all(),
+            compile_time_declared_properties: false,
         }
+    }
+
+    /// Whether the compiled markup resolves the declared properties of nested markup extensions
+    /// and of compiled binding paths at compile time (#603): `rt::declared_clr_property_info` and
+    /// `rt::declared_path_property` with the position of the property in its declaration, in place
+    /// of `rt::clr_property_info` and `rt::path_property`, which search the declaration by name at
+    /// run time. Off without the call, so that the generated files stay what they are.
+    pub fn compile_time_declared_properties(mut self, value: bool) -> Self {
+        self.compile_time_declared_properties = value;
+        self
     }
 
     /// Selects typed bytecode for this package's compiled XAML. `from_env` reads
@@ -940,6 +954,9 @@ impl Build {
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
+        // The option of the emitter for the groups of this build (#603), restored after them.
+        use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
+        let declared_properties = set_compile_time_declared_properties(self.compile_time_declared_properties);
         for group in &self.groups {
             if self.assembly.is_none() && !on_models {
                 break;
@@ -1128,6 +1145,7 @@ impl Build {
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
         }
+        set_compile_time_declared_properties(declared_properties);
         for path in &self.checked_in_metadata {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
