@@ -12,6 +12,7 @@
 mod ast;
 pub mod design_fixtures;
 mod document;
+mod history;
 mod markup;
 mod source_anchor;
 
@@ -19,6 +20,7 @@ pub use ast::{Ast, Attribute, Node, NodeId, NodeKind, SourceSpan};
 pub use document::{
     ChangeSet, DesignerError, Diagnostic, Document, Edit, SourceUpdate, TextPatch, Transaction,
 };
+pub use history::SourceHistory;
 pub use markup::{MarkupArgument, MarkupExtension, MarkupValue};
 pub use source_anchor::{SourceAnchor, SourceSegment};
 

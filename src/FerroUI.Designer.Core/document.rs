@@ -2,11 +2,10 @@ mod changes;
 mod editing;
 mod insertion;
 
-use crate::{Ast, NodeId, SourceSpan};
+use crate::{Ast, NodeId, SourceHistory, SourceSpan};
 use changes::{diff, unchanged};
 use editing::{apply_edits, patched_source};
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
 use std::fmt;
 use std::sync::Arc;
 
@@ -137,6 +136,12 @@ impl TextPatch {
     pub fn between(before: &str, after: &str) -> Option<Self> {
         changes::minimal_patch(before, after)
     }
+
+    /// Apply simultaneous UTF-8 patches without changing or interpreting the source language.
+    pub fn apply_all(source: &str, patches: Vec<Self>) -> Result<String, DesignerError> {
+        let patches = editing::checked_patches(source, patches)?;
+        editing::splice(source, &patches)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -171,13 +176,6 @@ struct Snapshot {
     ast: Arc<Ast>,
     diagnostics: Vec<Diagnostic>,
 }
-#[derive(Clone)]
-struct HistoryEntry {
-    label: String,
-    before: Snapshot,
-    after: Snapshot,
-}
-
 /// An owned source buffer with a last-valid syntax snapshot and bounded history.
 /// Runtime acceptance is deliberately separate: the host may keep an older live
 /// tree when compilation fails, while authored and syntactically valid XAML stays
@@ -187,9 +185,7 @@ pub struct Document {
     current: Snapshot,
     revision: u64,
     next_id: NodeId,
-    undo: VecDeque<HistoryEntry>,
-    redo: VecDeque<HistoryEntry>,
-    history_limit: usize,
+    history: SourceHistory<Snapshot>,
     saved_source: Arc<str>,
 }
 impl Document {
@@ -209,9 +205,7 @@ impl Document {
             },
             revision: 0,
             next_id,
-            undo: VecDeque::new(),
-            redo: VecDeque::new(),
-            history_limit: 256,
+            history: SourceHistory::default(),
         })
     }
     pub fn source(&self) -> &str {
@@ -232,9 +226,7 @@ impl Document {
             current: self.current.clone(),
             revision: self.revision,
             next_id: self.next_id,
-            undo: VecDeque::new(),
-            redo: VecDeque::new(),
-            history_limit: self.history_limit,
+            history: self.history.without_entries(),
             saved_source: self.saved_source.clone(),
         }
     }
@@ -277,21 +269,19 @@ impl Document {
         self.saved_source = source.into().into();
     }
     pub fn can_undo(&self) -> bool {
-        !self.undo.is_empty()
+        self.history.undo_label().is_some()
     }
     pub fn can_redo(&self) -> bool {
-        !self.redo.is_empty()
+        self.history.redo_label().is_some()
     }
     pub fn undo_label(&self) -> Option<&str> {
-        self.undo.back().map(|entry| entry.label.as_str())
+        self.history.undo_label()
     }
     pub fn redo_label(&self) -> Option<&str> {
-        self.redo.back().map(|entry| entry.label.as_str())
+        self.history.redo_label()
     }
     pub fn set_history_limit(&mut self, limit: usize) {
-        self.history_limit = limit;
-        trim_history(&mut self.undo, limit);
-        trim_history(&mut self.redo, limit);
+        self.history.set_limit(limit);
     }
     pub fn apply(
         &mut self,
@@ -411,44 +401,38 @@ impl Document {
         self.try_update_source(label, source)
     }
     pub fn undo(&mut self) -> Result<ChangeSet, DesignerError> {
-        if self.undo.is_empty() {
+        if !self.can_undo() {
             return Err(DesignerError::NothingToUndo);
         }
         let revision = self.next_revision()?;
-        let entry = self.undo.pop_back().expect("nonempty undo history");
-        let before = std::mem::replace(&mut self.current, entry.before.clone());
+        let (label, restored) = self.history.undo().expect("nonempty undo history");
+        let before = std::mem::replace(&mut self.current, restored);
         let previous_revision = self.revision;
         self.revision = revision;
-        let change = diff(
+        Ok(diff(
             &before,
             &self.current,
-            format!("Undo {}", entry.label),
+            label,
             previous_revision,
             self.revision,
-        );
-        self.redo.push_back(entry);
-        trim_history(&mut self.redo, self.history_limit);
-        Ok(change)
+        ))
     }
     pub fn redo(&mut self) -> Result<ChangeSet, DesignerError> {
-        if self.redo.is_empty() {
+        if !self.can_redo() {
             return Err(DesignerError::NothingToRedo);
         }
         let revision = self.next_revision()?;
-        let entry = self.redo.pop_back().expect("nonempty redo history");
-        let before = std::mem::replace(&mut self.current, entry.after.clone());
+        let (label, restored) = self.history.redo().expect("nonempty redo history");
+        let before = std::mem::replace(&mut self.current, restored);
         let previous_revision = self.revision;
         self.revision = revision;
-        let change = diff(
+        Ok(diff(
             &before,
             &self.current,
-            format!("Redo {}", entry.label),
+            label,
             previous_revision,
             self.revision,
-        );
-        self.undo.push_back(entry);
-        trim_history(&mut self.undo, self.history_limit);
-        Ok(change)
+        ))
     }
     fn check_revision(&self, expected: Option<u64>) -> Result<(), DesignerError> {
         if let Some(expected) = expected {
@@ -485,15 +469,7 @@ impl Document {
             previous_revision,
             self.revision,
         );
-        if self.history_limit > 0 {
-            self.undo.push_back(HistoryEntry {
-                label,
-                before,
-                after: self.current.clone(),
-            });
-            trim_history(&mut self.undo, self.history_limit);
-        }
-        self.redo.clear();
+        self.history.commit(label, before, self.current.clone());
         Ok(change)
     }
 }
@@ -524,12 +500,6 @@ fn parse_snapshot(
         ast: Arc::new(ast),
         diagnostics: Vec::new(),
     })
-}
-
-fn trim_history(history: &mut VecDeque<HistoryEntry>, limit: usize) {
-    if history.len() > limit {
-        history.drain(..history.len() - limit);
-    }
 }
 
 #[cfg(test)]
