@@ -69,6 +69,9 @@ ferro_properties! {impl MediaPlayerElement {
     pub fn poster_source_property()->StyledProperty<Option<Rc<dyn IImage>>> {FerroProperty::register::<Self,_>("PosterSource",None)}
     pub fn is_full_window_property()->StyledProperty<bool> {FerroProperty::register::<Self,_>("IsFullWindow",false)}
     pub fn stretch_property()->StyledProperty<Stretch> {FerroProperty::register::<Self,_>("Stretch",Stretch::Uniform)}
+    /// WinUI's `TransportControls`, as markup sets it: setting it replaces the controls of the
+    /// element (`set_transport_controls`); `transport_controls` returns the controls in use.
+    pub fn transport_controls_property()->StyledProperty<Option<Ref<MediaTransportControls>>> {FerroProperty::register::<Self,_>("TransportControls",None)}
 }}
 impl FerroObjectImpl for MediaPlayerElement {
     fn constructed(this: &Self) {
@@ -79,21 +82,7 @@ impl FerroObjectImpl for MediaPlayerElement {
         poster.set_is_hit_test_visible(false);
         poster.set_stretch(this.stretch());
         let chrome = MediaTransportControls::new();
-        let weak = this.to_ref().downgrade();
-        chrome.set_full_window_handler(Some(Rc::new(move || {
-            if let Some(view) = weak.upgrade() {
-                view.set_is_full_window(!view.is_full_window());
-            }
-        })));
-        let weak = this.to_ref().downgrade();
-        chrome.set_zoom_handler(Rc::new(move |zoomed| {
-            if let Some(view) = weak.upgrade() {
-                view.update_stretch(zoomed);
-            }
-        }));
-        chrome.set_vertical_alignment(VerticalAlignment::Bottom);
-        chrome.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
-        chrome.set_is_visible(false);
+        this.install_transport_controls(&chrome);
         let placeholder = TextBlock::new();
         placeholder.set_text(Some("No media"));
         let caption = TextBlock::new();
@@ -143,7 +132,6 @@ impl FerroObjectImpl for MediaPlayerElement {
                     view.show_placeholder(false);
                 }
             }));
-        chrome.set_z_index(2);
         placeholder.set_z_index(1);
         this.children().add(&presenter);
         this.children().add(&poster);
@@ -172,6 +160,10 @@ impl FerroObjectImpl for MediaPlayerElement {
             this.show_placeholder(!this.has_presentation.get());
         } else if args.property() == Self::is_full_window_property().as_property() {
             this.update_full_window();
+        } else if args.property() == Self::transport_controls_property().as_property() {
+            if let Some(controls) = this.get_value(Self::transport_controls_property()) {
+                this.set_transport_controls(&controls);
+            }
         } else if args.property() == Self::are_transport_controls_enabled_property().as_property() {
             if let Some(chrome) = this.chrome.borrow().as_ref() {
                 chrome.set_is_visible(this.are_transport_controls_enabled());
@@ -471,6 +463,51 @@ impl MediaPlayerElement {
     }
     pub fn set_is_full_window(&self, value: bool) {
         self.set_value(Self::is_full_window_property(), value);
+    }
+    /// Connects transport controls to this element: its full window and zoom actions, the
+    /// overlay placement over the bottom of the video and the visibility of
+    /// `AreTransportControlsEnabled`.
+    fn install_transport_controls(&self, chrome: &MediaTransportControls) {
+        let weak = self.to_ref().downgrade();
+        chrome.set_full_window_handler(Some(Rc::new(move || {
+            if let Some(view) = weak.upgrade() {
+                view.set_is_full_window(!view.is_full_window());
+            }
+        })));
+        let weak = self.to_ref().downgrade();
+        chrome.set_zoom_handler(Rc::new(move |zoomed| {
+            if let Some(view) = weak.upgrade() {
+                view.update_stretch(zoomed);
+            }
+        }));
+        chrome.set_vertical_alignment(VerticalAlignment::Bottom);
+        chrome.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
+        chrome.set_is_visible(self.are_transport_controls_enabled());
+        chrome.set_is_full_window(self.is_full_window());
+        chrome.set_z_index(2);
+    }
+    /// Replaces the transport controls of the element (WinUI's `TransportControls` setter):
+    /// the new controls present the element's player and get its full window and zoom
+    /// actions; the old ones are disconnected from both, and a zoom they applied is undone.
+    pub fn set_transport_controls(&self, controls: &MediaTransportControls) {
+        let controls = controls.to_ref();
+        let old = self.chrome.borrow().clone();
+        if old.as_ref().is_some_and(|old| old.ptr_eq(&controls)) {
+            return;
+        }
+        if let Some(old) = old {
+            old.set_media_player(None);
+            old.set_full_window_handler(None);
+            old.set_zoom_handler(Rc::new(|_| {}));
+            old.set_is_full_window(false);
+            self.children().remove(&old);
+        }
+        self.install_transport_controls(&controls);
+        self.children().add(&controls);
+        self.update_stretch(controls.is_zoomed());
+        let player = self.media_player();
+        controls.set_media_player(player.as_ref());
+        *self.chrome.borrow_mut() = Some(controls);
     }
     pub fn transport_controls(&self) -> Ref<MediaTransportControls> {
         self.chrome.borrow().as_ref().unwrap().clone()
@@ -1291,6 +1328,37 @@ mod presentation_tests {
         testing::{TestServices, UnitTestApplication},
         Window,
     };
+    #[test]
+    fn replaced_transport_controls_take_over_the_actions_of_the_element() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let view = MediaPlayerElement::new();
+        view.set_are_transport_controls_enabled(true);
+        let old = view.transport_controls();
+        old.set_is_zoomed(true);
+        assert_eq!(view.presenter().stretch(), Stretch::UniformToFill);
+        let controls = MediaTransportControls::new();
+        view.set_transport_controls(&controls);
+        assert!(view.transport_controls().ptr_eq(&controls));
+        // The zoom of the old controls is undone, and they no longer reach the element.
+        assert_eq!(view.presenter().stretch(), Stretch::Uniform);
+        old.set_is_zoomed(false);
+        old.set_is_zoomed(true);
+        assert_eq!(view.presenter().stretch(), Stretch::Uniform);
+        let children = view.children();
+        assert!(children.contains(&controls.clone().upcast::<Control>()));
+        assert!(!children.contains(&old.clone().upcast::<Control>()));
+        assert!(controls.is_visible());
+        controls.set_is_zoomed(true);
+        assert_eq!(view.presenter().stretch(), Stretch::UniformToFill);
+        // The same controls again change nothing.
+        view.set_transport_controls(&controls);
+        assert_eq!(view.presenter().stretch(), Stretch::UniformToFill);
+        // Markup sets the property.
+        let compact = MediaTransportControls::new();
+        compact.set_is_compact(true);
+        view.set_value(MediaPlayerElement::transport_controls_property(), Some(compact.clone()));
+        assert!(view.transport_controls().ptr_eq(&compact));
+    }
     #[test]
     fn poster_is_replaced_only_by_an_accepted_frame_and_returns_on_clear() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
