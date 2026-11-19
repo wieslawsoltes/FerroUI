@@ -5,6 +5,10 @@ workspace. The exception-like flows that production code relies on are converted
 clean (section 5); the rest is deferred with its reason (section 6). 2026-11-19: the flows of
 the development tools are converted too (hot reload, the previewer, the Designer's stages and
 animation preview, section 10); what is left as (E) is listed with its reason in section 3.
+0.6 (breaking changes allowed): the boundaries where the framework calls the application's own
+code get fallible forms, and errors of application code reach one defined place, the
+unhandled-exception events of the dispatcher, without a panic (section 11). What still catches
+a panic is listed in 11.4: boundaries that only matter in a build that unwinds.
 
 Issue #567 replaces panics that carry an error between framework functions with `Result`, and
 keeps `catch_unwind` only at true boundaries. The owner decided (issue #567, 2026-11-06) that the
@@ -276,8 +280,8 @@ a load error. What remained were the trait contracts, which return a value. Afte
 - **The run-time loader stops early.** `ferroui-markup-xaml-loader` checks
   `xaml_error_scope::has_error()` after each node it evaluates (`Interpreter`'s
   `evaluate_node`) and returns a load error, which the scope replaces with the error reported.
-- **`throw` stays the fatal fallback** (`xaml_error_scope::throw(error) -> !`, now a plain
-  `panic!`) for members that a scoped load does not reach and that have no value to go on with:
+- **`throw` stayed the fatal fallback** until 0.6, which removes it (11.2)
+  (`xaml_error_scope::throw(error) -> !`, a plain `panic!`) for members that a scoped load does not reach and that have no value to go on with:
   `XamlIlRuntimeHelpers::deferred_transformation_factory_v1` to `_v3` and `_for` (the loader and
   metadata call `try_deferred_transformation_factory_for`), `RelativeSourceExtension::provide_value`,
   `OnFormFactorExtension::should_provide_option`,
@@ -297,9 +301,8 @@ once. A `catch_unwind` inside the scope no longer sees these errors. Outside a s
 changes. Tests: `xaml_error_scope::tests`.
 
 Run-time loading of application XAML outside the WinUI importer (`FerroRuntimeXamlLoader::load`,
-`parse`) opens no scope: a failing deferred resource of such a load panics, with unwinding and
-with abort, as before. Opening a scope there is a behaviour change (a panic becomes `Err`) for a
-later step.
+`parse`) opened no scope before 0.6: a failing deferred resource of such a load panicked. Since
+0.6 the loader opens one, and the error is the `Err` of the load (11.2).
 
 ### 5.2 Failures of page transitions (`ferroui-base`, `ferroui-system`)
 
@@ -455,10 +458,10 @@ timing an instance refuses: a negative speed ratio, delay, duration or delay bet
 iterations, an iteration count above `i64::MAX`) and returns it as `Err(AnimationError)` with the
 message the panic has. The messages are shared with the panics (`NO_SETTER_PROPERTY`,
 `CSS_TRANSFORM_TARGET`, `no_animator_message`, `not_a_visual_message`, and the `check_*`
-functions `AnimationInstance::fetch_properties` and `validate_timing` both call). What stays a
-panic is what an animator checks itself: an animator given explicitly for a property of another
-value type (`AnimatorBase::styled_property`) and the checks of an application's animator; a
-fallible `IAnimator::apply` would change a public trait. The designer calls
+functions `AnimationInstance::fetch_properties` and `validate_timing` both call). What stayed a
+panic until 0.6 is what an animator checks itself: an animator given explicitly for a property
+of another value type (`AnimatorBase::styled_property`) and the checks of an application's
+animator. In 0.6 `IAnimator::apply` is fallible and these are errors too (11.2). The designer calls
 `try_apply_for_preview`; its catch stays as the boundary (B) of those and of the application's
 property changed handlers.
 
@@ -479,9 +482,8 @@ conversion, or that the panic comes from a third-party crate.
   of type is not supported", which aborts with `panic = "abort"`. The default modes are not
   affected. A fallible `create_backend_context`, falling back to software, or a platform that
   offers only the modes the backend renders, is its own step.
-- **Run-time loading of application XAML outside a scope** (5.1): a failing deferred resource,
-  include or template of `FerroRuntimeXamlLoader::load` panics, with abort too; that is fatal
-  either way, and turning it into `Err` is a behaviour change.
+- **Run-time loading of application XAML outside a scope** (5.1): converted in 0.6, the load
+  has its own scope and returns the error (11.2).
 
 ### 6.3 Development tools that need a build that unwinds
 
@@ -1270,3 +1272,88 @@ a `with_xaml_errors` scope (5.1) whose first error fails the stage with the same
 removed as before. Both catches stay as the boundary (B) of the registered constructors and
 layout overrides of the application, as the comment at `:1658` says. Development tool. Test:
 `an_error_of_the_xaml_runtime_in_a_stage_layout_is_its_error_without_unwinding`.
+
+## 11. Errors of application code as values (0.6)
+
+0.6 allows breaking changes. The (B) sites of sections 4 to 10 that isolate the application's
+own code (its constructors, handlers, layout callbacks and animators, run by the framework or
+previewed by a tool) caught a panic because a callback had no other way to fail. In 0.6 the
+callbacks get fallible forms, their errors go to one place that exists already, and a panic is
+what it is with `panic = "abort"`: a bug that ends the process after the panic hook.
+
+### 11.1 The defined place: the unhandled-exception events of the dispatcher
+
+- **`Dispatcher::raise_unhandled_exception(error)`** (`impl Into<Box<dyn Error + Send + Sync>>`)
+  gives an error of application code that has no caller to return it to to
+  `unhandled_exception_filter` and `unhandled_exception`, the events the panic of a posted
+  callback reaches (`try_catch_when`). The payload of the event is the error
+  (`Box<dyn Error + Send + Sync>`): `DispatcherUnhandledExceptionEventArgs::error()` (and the
+  filter's) return it, `exception_message()` its text. Off the dispatcher thread it is posted.
+- An error no handler handles is fatal, as an unhandled exception is in the reference: under
+  `panic = "unwind"` it is logged and unwinds with its message as the payload, marked as seen
+  by the operations it unwinds through (no second filtering); under `panic = "abort"` the
+  process ends with a panic with the message.
+- **`CallbackResult`** (`()` or `Result<(), E>`) is what a callback returns: `Dispatcher::post`,
+  `post_local`, `Interactive::add_handler`, `add_handler_with`, `add_handler_as` and the
+  disposable forms accept both, so a closure that returned `()` still compiles.
+- **`Dispatcher::capture_unhandled_exceptions(work) -> Result<T, String>`** runs `work` and
+  returns the message of the first exception that reaches the events while it runs and that no
+  other handler handles (marked handled); only the innermost capture of a thread records. This
+  is how the development tools fail a step with the error of the code they preview.
+- ReactiveUI: `RxState::default_exception_handler` of the core library still panics with an
+  `UnhandledError` on the main thread scheduler (the library knows no dispatcher, `rx_state.rs`,
+  (R)); a FerroUI application (`with_ferro`) gets a handler that posts a job returning the
+  `UnhandledError` to the dispatcher of the user interface thread, unless the builder has one
+  (`ReactiveUIBuilder::exception_handler`, `UnhandledError::of_broken_pipeline`, new).
+
+### 11.2 The converted flows
+
+| Flow | Before | After | Test |
+|---|---|---|---|
+| posted jobs (`Dispatcher::post`, `post_local`) | a job could only panic | a job returns `Result`; the error reaches the events | `an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_a_panic`, `an_error_no_handler_handles_unwinds_with_its_message_once`, `an_error_raised_off_the_dispatcher_thread_is_posted_to_it` |
+| routed event handlers (`add_handler` and its forms) | a handler could only panic, which stopped the route | the error reaches the events; handled, the route goes on | `an_error_a_handler_returns_reaches_the_dispatcher_and_the_route_goes_on` |
+| markup event handlers and method bindings (`MarkupDelegate::invoke`) | the failure of a `try fn` handler was discarded | it reaches the events | `delegates_of_declared_methods_know_their_method_and_target` |
+| animators (`IAnimator::apply`, `Animator::apply`) | the type of the property (`AnimatorBase::styled_property`), the target of `TransformAnimator` and the timing were panics when the animation ran | `apply` returns `Result<Option<..>, AnimationError>` and checks first (`try_styled_property`, `validate_timing`); `Animation::try_apply` (new) removes the steps applied and returns the error; `Animation::apply` raises it on the dispatcher; `try_apply_for_preview` returns it | `an_animator_that_rejects_its_property_is_an_error_of_apply_without_a_panic` |
+| the members of the XAML runtime outside a load (deferred resources, includes, templates built on first use) | a panic with the message (`throw_or` outside a scope) | the error reaches the events (`xaml_error_scope::report_or_raise`, new); the member goes on with its fallback | `a_failing_builder_outside_a_load_raises_its_error_on_the_dispatcher`, `without_a_scope_a_failing_member_raises_its_error_on_the_dispatcher` |
+| the fatal throw of the XAML runtime (5.1) | `xaml_error_scope::throw` and `crate::throw` | removed: `deferred_transformation_factory_v1` to `_v3` return `Result`; the panicking `deferred_transformation_factory_for`, `StyleInclude::loaded`, `ResourceInclude::loaded`, `RelativeSourceExtension::provide_value`, `OnFormFactorExtension::should_provide_option` and `PropertyInfoAccessorFactory::create_ferro_property_accessor` are removed (their `try_` forms); `WindowDrawnDecorationsTemplate::build` reports and builds empty decorations | the tests of the `try_` forms |
+| run-time loading (`FerroRuntimeXamlLoader::load_document`, `load_group`) | a failing deferred resource of the load panicked | the load runs in a scope; the error is its `Err` | `fresh_root_deferred_resource_error_is_returned_by_the_importer_and_the_default_loader` |
+| ReactiveUI pipelines nothing handles, in a FerroUI application | a panic on the main thread scheduler | a failing job on the dispatcher | `with_ferro_raises_unhandled_pipeline_errors_on_the_dispatcher_without_a_panic` |
+| hot reload (`catch_reload`) | the errors of the candidate's code were panics | captured from the dispatcher: `ReloadError::Failed`; `raise_reload_error` outside a step raises on the dispatcher instead of `panic_any` (`ReloadError` implements `Error`) | `an_error_the_application_raises_on_the_dispatcher_in_a_reload_step_is_its_error_without_unwinding` |
+| the Designer's stages (`with_runtime_errors`) and animation preview (`seek`) | panics of the previewed code | captured: the stage fails, the seek answers "Native animation rejected the program" | `an_error_the_previewed_code_raises_on_the_dispatcher_fails_the_stage_without_unwinding` |
+| the previewer's load and show | panics of the previewed code, answered as `Panic` | captured, answered as an `Exception` | `an_error_the_previewed_code_raises_on_the_dispatcher_is_answered_without_unwinding` |
+
+Constructors: a markup type declares a fallible constructor with `try (..) => ..` in
+`ferro_markup_type!` (this existed before 0.6); the run-time loader and the compiled markup
+turn its error into a load error, which the load returns. Layout and property
+changed callbacks (`measure_override`, `arrange_override`, property changed handlers) keep their
+signatures: one that fails raises its error with `Dispatcher::raise_unhandled_exception` and
+returns its fallback (a size, nothing), as the XAML runtime does. `XBinding::create_instance`
+keeps a panic for a missing target property, which the loader and the property system always
+pass: an assertion of a bug. Class handlers (`RoutedEvent::add_class_handler`) keep their
+signature: they are the framework's own (244 call sites name their target type explicitly);
+one that fails raises its error the same way.
+
+### 11.3 Breaking changes
+
+`IAnimator::apply` and `Animator::apply` return `Result`; `deferred_transformation_factory_v1`
+to `_v3` return `Result`; the panicking members of 11.2 are removed; `add_handler_as` has a
+third type parameter (an explicit `add_handler_as::<Args, _>` becomes `::<Args, _, _>`); a
+failing markup delegate and a failing member of the XAML runtime outside a load are errors on
+the dispatcher, fatal unless a handler handles them.
+
+### 11.4 What still catches a panic, and why
+
+Every other (B) and (R) site of sections 4 to 10 stays, and none is needed for correct
+operation: each isolates code that can only fail by a bug, and does so only in a build that
+unwinds (`dev`, `fast-release`, `release-unwind`, `dist-unwind`); with `panic = "abort"` it
+never sees a panic. They are: the FFI guards (a panic must not unwind into native code: Win32,
+X11/GLib, Wayland, the native backend, Android, the browser, DevTools); the dispatcher's own
+try/finally sites and the top of its loop, the render loops and the task executors (they turn a
+panic into the exception of an operation, as the reference does, and now also carry the errors
+of 11.1); the native control hosts and the destructors and cleanup-and-rethrow sites (Dock,
+Behaviors, DynamicData, Splat, `LocalBindingReload`, `apply_for_preview`); the headless test
+session and the testing crates (tests always unwind); and the catches of the development tools
+(Designer, previewer, hot reload, hot patch, Inspect, MCP), which keep a previewed application's
+bug from ending the tool in a build that unwinds. The (E) sites left are those of section 2,
+less hot reload's `raise_reload_error`, converted here: third-party panics (Vello), the
+`Canceled` of a test task, and misconfiguration panics (a missing view locator or log manager).
