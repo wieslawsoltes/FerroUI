@@ -139,7 +139,7 @@ fn read_property(expr: &Expr, catalog: &RsxCatalog) -> Option<(String, Property)
     Some((if absolute { format!("::{getter}") } else { getter }, property))
 }
 
-pub(super) const BUILTINS: &[(&str, &str, ValueShape)] = &[
+pub(crate) const BUILTINS: &[(&str, &str, ValueShape)] = &[
     ("ferroui_base::Visual::opacity_property", "Opacity", ValueShape::NUMBER),
     ("ferroui_base::layout::Layoutable::width_property", "Width", ValueShape::NUMBER),
     ("ferroui_base::layout::Layoutable::height_property", "Height", ValueShape::NUMBER),

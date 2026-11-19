@@ -3,7 +3,7 @@ use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
-use crate::programs::StyleSlot;
+use crate::source_array::ArraySlot;
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
 use crate::states::{self, ProjectedStates};
@@ -28,7 +28,8 @@ pub struct RsxNode {
     pub(crate) open: usize,
     pub(crate) close: usize,
     pub(crate) complete_children: bool,
-    pub(crate) style_slot: StyleSlot,
+    pub(crate) style_slot: ArraySlot,
+    pub(crate) state_slot: ArraySlot,
 }
 
 impl RsxNode {
@@ -63,7 +64,7 @@ pub struct RsxProjection<'a> {
     pub animation_issues: Vec<RsxAnimationIssue>,
     inner_trivia: bool,
     pub(crate) styles: BTreeMap<usize, Vec<AnimationStyle>>,
-    states: BTreeMap<usize, ProjectedStates>,
+    pub(crate) states: BTreeMap<usize, ProjectedStates>,
 }
 
 impl RsxProjection<'_> {
@@ -266,10 +267,15 @@ impl State {
             open: node.braces.open().byte_range().end,
             close: node.braces.close().byte_range().start,
             complete_children: true,
-            style_slot: if class.xaml_property(None, "styles").is_none() {
-                StyleSlot::Missing
+            state_slot: if class.xaml_property(None, "visual_states").is_none() {
+                ArraySlot::Missing
             } else {
-                StyleSlot::Unavailable
+                ArraySlot::Unavailable
+            },
+            style_slot: if class.xaml_property(None, "styles").is_none() {
+                ArraySlot::Missing
+            } else {
+                ArraySlot::Unavailable
             },
         });
         let mut seen = BTreeSet::new();
@@ -281,8 +287,11 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    if setter == "visual_states" {
+                        self.nodes[index].state_slot = ArraySlot::Unavailable;
+                    }
                     if setter == "styles" {
-                        self.nodes[index].style_slot = StyleSlot::Unavailable;
+                        self.nodes[index].style_slot = ArraySlot::Unavailable;
                     }
                     if setter.starts_with("on_") {
                         let span = arguments
@@ -304,6 +313,12 @@ impl State {
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
             if owner.is_none() && setter == "visual_states" && class.xaml_property(None, &setter).is_none() {
+                let slot = &mut self.nodes[index].state_slot;
+                *slot = if matches!(slot, ArraySlot::Missing) {
+                    ArraySlot::from_expression(value)
+                } else {
+                    ArraySlot::Unavailable
+                };
                 state_fields.push(value.as_ref());
                 continue;
             }
@@ -312,10 +327,10 @@ impl State {
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
             if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
                 let slot = &mut self.nodes[index].style_slot;
-                *slot = if matches!(slot, StyleSlot::Missing) {
-                    StyleSlot::from_expression(value)
+                *slot = if matches!(slot, ArraySlot::Missing) {
+                    ArraySlot::from_expression(value)
                 } else {
-                    StyleSlot::Unavailable
+                    ArraySlot::Unavailable
                 };
                 if let Some(projected) = projected_styles(source, value, catalog) {
                     self.animation_issues.extend(projected.unavailable);
@@ -407,6 +422,7 @@ impl State {
                 self.states.insert(index, groups);
             }
             if !issues.is_empty() {
+                self.nodes[index].state_slot = ArraySlot::Unavailable;
                 self.animation_issues.extend(issues);
                 self.omit(format!("{class}.visual_states expression"));
             }

@@ -1,6 +1,5 @@
 //! Source transactions on the inline styles of an accepted RSX invocation.
-mod styles;
-pub(crate) use styles::StyleSlot;
+use crate::source_array::ArraySlot;
 
 use crate::RsxProjection;
 use crate::animation::program_comment::{AnimationAttachment, annotation_text};
@@ -26,7 +25,7 @@ impl RsxProjection<'_> {
     pub fn can_create_animation(&self, owner: usize) -> bool {
         self.nodes
             .get(owner)
-            .is_some_and(|node| !matches!(node.style_slot, StyleSlot::Unavailable))
+            .is_some_and(|node| !matches!(node.style_slot, ArraySlot::Unavailable))
     }
 
     pub fn create_animation(
@@ -50,7 +49,7 @@ impl RsxProjection<'_> {
         }
         let identity = identity(name, None)?;
         let label = annotation_text(&identity);
-        let patches = node.style_slot.insert(self.source, node.open, |indent, eol| format!(
+        let patches = node.style_slot.insert(self.source, node.open, "styles", |indent, eol| format!(
             "ferroui_view::style({selector:?}).animation({eol}{indent}    {label}{eol}{indent}    ferroui_view::animation(ferroui_view::ms({millis:.0})){eol}{indent})"
         ))?;
         self.check_animation_plan(patches, Some(identity.key()), 1)

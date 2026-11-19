@@ -88,5 +88,111 @@ fn an_instant_rust_route_retains_its_authored_duration() {
     let document = Document::new(markup.source).unwrap();
     let [state] = VisualStateGroup::read(&document).try_into().unwrap();
     assert_eq!(state.transitions[0].duration, 0.0);
-    assert!(markup.state_groups[0].1.patch_model(&state).unwrap().is_empty());
+    assert!(markup.state_groups[0]
+        .1
+        .patch_model(&state)
+        .unwrap()
+        .is_empty());
+}
+
+#[test]
+fn state_structure_targets_one_invocation_and_preserves_retired_method_comments() {
+    use ferroui_designer_animation::{StateSetter, StateTransition, VisualState};
+
+    let source = r#"fn report() {
+    let title = rsx! { TextBlock { text: "Résumé 🪴" } };
+    let card = rsx! { Border {
+        child: make_content(), // unchanged Rust expression
+    } };
+}
+"#
+    .replace('\n', "\r\n");
+    let caret = source.find("child:").unwrap();
+    let mut group = VisualStateGroup {
+        owner: 1,
+        name: "Review".into(),
+        states: vec![VisualState {
+            name: "Idle".into(),
+            setters: vec![],
+        }],
+        transitions: Vec::new(),
+    };
+    let original = project_rust(&source, caret).unwrap();
+    assert!(original.can_create_state_group(0));
+    let mut added =
+        TextPatch::apply_all(&source, original.upsert_state_group(0, &group).unwrap()).unwrap();
+    added = added.replace(
+        ".state(::ferroui_view::visual_state(",
+        ".state(/* preserve 🪴 */ ::ferroui_view::visual_state(",
+    );
+    let caret = added.find("child:").unwrap();
+    let projection = project_rust(&added, caret).unwrap();
+
+    let new_state = VisualState {
+        name: "Ready".into(),
+        setters: vec![StateSetter {
+            target: "".into(),
+            property: "Opacity".into(),
+            value: "0.42".into(),
+        }],
+    };
+    let route = StateTransition {
+        from: Some("Idle".into()),
+        to: "Ready".into(),
+        duration: 0.23,
+        easing: Easing::Linear,
+    };
+    group.states.push(new_state);
+    group.transitions.push(route);
+    let edited =
+        TextPatch::apply_all(&added, projection.upsert_state_group(0, &group).unwrap()).unwrap();
+    assert!(edited.contains(".set(::ferroui_base::Visual::opacity_property(), 0.42)"));
+    assert!(edited.contains(
+        ".transition(Some(\"Idle\"), \"Ready\", ::ferroui_view::ms(230), \"LinearEasing\")"
+    ));
+    assert_eq!(edited.lines().nth(1), source.lines().nth(1));
+    assert!(edited.contains("child: make_content(), // unchanged Rust expression\r\n"));
+    assert!(!edited.replace("\r\n", "").contains('\n'));
+
+    let caret = edited.find("child:").unwrap();
+    let projection = project_rust(&edited, caret).unwrap();
+    group.transitions[0].duration = 0.2301;
+    assert!(projection.upsert_state_group(0, &group).is_err());
+    group.transitions.clear();
+    group.states.remove(0);
+    let edited =
+        TextPatch::apply_all(&edited, projection.upsert_state_group(0, &group).unwrap()).unwrap();
+    assert!(edited.contains("/* preserve 🪴 */"));
+    assert!(!edited.contains("visual_state(\"Idle\")"));
+    assert!(!edited.contains(".transition("));
+    let projection = project_rust(&edited, edited.find("child:").unwrap()).unwrap();
+    let removed =
+        TextPatch::apply_all(&edited, projection.remove_state_group(0, "Review").unwrap()).unwrap();
+    let projection = project_rust(&removed, removed.find("child:").unwrap()).unwrap();
+    assert!(!projection.has_projected_states());
+    assert!(projection.can_create_state_group(0));
+    assert!(removed.contains("/* preserve 🪴 */"));
+    assert!(removed.contains("child: make_content(), // unchanged Rust expression\r\n"));
+}
+
+#[test]
+fn mapped_group_removal_keeps_an_opaque_array_member_and_its_comment() {
+    let source = r#"rsx! { Border {
+        visual_states: [
+            procedural_group() /* owned by app */,
+            ::ferroui_view::visual_state_group("Review")
+                .state(::ferroui_view::visual_state("Normal"))
+        ],
+    } }"#;
+    let project = project_rust(source, 0).unwrap();
+    assert!(!project.can_create_state_group(0));
+    let mut group = VisualStateGroup::read(&Document::new(project.xaml()).unwrap()).remove(0);
+    group.name = "Second".into();
+    assert!(project.upsert_state_group(0, &group).is_err());
+    let edited =
+        TextPatch::apply_all(source, project.remove_state_group(0, "Review").unwrap()).unwrap();
+    assert!(edited.contains("procedural_group() /* owned by app */\n"));
+    let result = project_rust(&edited, 0).unwrap();
+    assert!(!result.has_projected_states());
+    assert_eq!(result.animation_issues.len(), 1);
 }

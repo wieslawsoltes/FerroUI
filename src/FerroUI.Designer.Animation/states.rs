@@ -333,13 +333,23 @@ impl VisualStateGroup {
             targets.entry(&setter.target).or_default().push(setter);
         }
         let mut result = String::new();
+        let class = self.class_name(&state.name);
+        let condition = if let Some(from) = from {
+            format!(".{}", self.transition_class(from, &state.name))
+        } else if projected {
+            // The Rust builder selects one rule. Keep its projected endpoint from
+            // starting a second animation and becoming the directional route's base.
+            self.transitions.iter()
+                .filter(|route| route.to == state.name)
+                .filter_map(|route| route.from.as_deref())
+                .map(|from| format!(":not(.{})", self.transition_class(from, &state.name)))
+                .collect::<String>()
+        } else {
+            String::new()
+        };
         for (target, setters) in targets {
-            let class = self.class_name(&state.name);
-            let transition = from
-                .map(|from| format!(".{}", self.transition_class(from, &state.name)))
-                .unwrap_or_default();
             let selector = format!(
-                "^.{class}{transition}{}",
+                "^.{class}{condition}{}",
                 if target.is_empty() {
                     String::new()
                 } else {
@@ -455,6 +465,13 @@ impl VisualStateGroup {
         }
         Ok(result)
     }
+    /// Whether the group comes from a native Rust projection.
+    pub fn is_projected(&self, document: &Document) -> bool {
+        group_nodes(document).into_iter().any(|(_, group, projected)| {
+            projected && group.owner == self.owner && group.name == self.name
+        })
+    }
+
     pub fn read(document: &Document) -> Vec<Self> {
         group_nodes(document)
             .into_iter()

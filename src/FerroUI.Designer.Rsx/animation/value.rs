@@ -16,7 +16,7 @@ impl ValueShape {
     pub(crate) const NUMBER: Self = Self(ValueKind::Number);
     pub(crate) const CORNER_RADIUS: Self = Self(ValueKind::CornerRadius);
 
-    pub(super) fn kind(self) -> ValueKind { self.0 }
+    pub(crate) fn kind(self) -> ValueKind { self.0 }
 
     pub(crate) fn from_type(path: &str) -> Option<Self> {
         if path == "f64" {
@@ -110,7 +110,7 @@ impl ValueSource {
     }
 }
 
-pub(super) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
+pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));
     }

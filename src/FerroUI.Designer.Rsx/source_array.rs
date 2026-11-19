@@ -1,9 +1,9 @@
 use crate::source_edits::{insert_field, line_indent, line_prefix};
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::{Expr, spanned::Spanned};
+use syn::{spanned::Spanned, Expr};
 
-/// Existing array delimiters belong to the author, including commas around opaque members.
-pub(crate) enum StyleSlot {
+/// Anchors for adding a member to an authored RSX inline array.
+pub(crate) enum ArraySlot {
     Missing,
     Array {
         close: usize,
@@ -12,7 +12,7 @@ pub(crate) enum StyleSlot {
     Unavailable,
 }
 
-impl StyleSlot {
+impl ArraySlot {
     pub(crate) fn from_expression(expression: &Expr) -> Self {
         let Expr::Array(array) = expression else {
             return Self::Unavailable;
@@ -29,11 +29,12 @@ impl StyleSlot {
         }
     }
 
-    pub(super) fn insert(
+    pub(crate) fn insert(
         &self,
         source: &str,
         open: usize,
-        rule: impl FnOnce(&str, &str) -> String,
+        field: &str,
+        member: impl FnOnce(&str, &str) -> String,
     ) -> Result<Vec<TextPatch>, String> {
         let eol = if source.contains("\r\n") {
             "\r\n"
@@ -43,9 +44,9 @@ impl StyleSlot {
         match *self {
             Self::Missing => {
                 let field_indent = format!("{}    ", line_indent(source, open));
-                let rule_indent = format!("{field_indent}    ");
-                let rule = rule(&rule_indent, eol);
-                let field = format!("styles: [{eol}{rule_indent}{rule},{eol}{field_indent}]");
+                let member_indent = format!("{field_indent}    ");
+                let member = member(&member_indent, eol);
+                let field = format!("{field}: [{eol}{member_indent}{member},{eol}{field_indent}]");
                 Ok(vec![insert_field(source, open, &field)])
             }
             Self::Array {
@@ -55,8 +56,8 @@ impl StyleSlot {
                 let mut patches = Vec::new();
                 let prefix = line_prefix(source, Some(close));
                 let closing_indent = line_indent(source, close);
-                let rule_indent = format!("{closing_indent}    ");
-                let rule = rule(&rule_indent, eol);
+                let member_indent = format!("{closing_indent}    ");
+                let member = member(&member_indent, eol);
                 let offset = if prefix.is_empty() {
                     close
                 } else {
@@ -75,10 +76,11 @@ impl StyleSlot {
                 } else {
                     ""
                 };
+                let trailing = if comma_before.is_some() { "" } else { "," };
                 let replacement = if prefix.is_empty() {
-                    format!("{comma} {rule}, ")
+                    format!("{comma} {member}{trailing}")
                 } else {
-                    format!("{comma}{rule_indent}{rule},{eol}")
+                    format!("{comma}{member_indent}{member}{trailing}{eol}")
                 };
                 patches.push(TextPatch {
                     span: SourceSpan::new(offset, offset),
@@ -86,10 +88,9 @@ impl StyleSlot {
                 });
                 Ok(patches)
             }
-            Self::Unavailable => Err(
-                "Choose a control with an inline styles array, or add the animation in Rust source"
-                    .into(),
-            ),
+            Self::Unavailable => Err(format!(
+                "Choose a control with a mapped inline {field} array"
+            )),
         }
     }
 }

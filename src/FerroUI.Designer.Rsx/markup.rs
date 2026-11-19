@@ -36,6 +36,7 @@ struct ControlSource {
     name: SourceSpan,
     properties: BTreeMap<String, SourceSpan>,
     can_create_animation: bool,
+    can_create_state_group: bool,
 }
 
 impl RsxSourceMap {
@@ -54,6 +55,10 @@ impl RsxSourceMap {
 
     pub fn can_create_animation(&self, offset: usize) -> bool {
         self.control(offset).is_some_and(|(index, _)| self.controls[index].can_create_animation)
+    }
+
+    pub fn can_create_state_group(&self, offset: usize) -> bool {
+        self.control(offset).is_some_and(|(index, _)| self.controls[index].can_create_state_group)
     }
 
     pub fn animation(&self, offset: usize) -> Option<&RsxAnimation> {
@@ -88,6 +93,7 @@ impl RsxProjection<'_> {
                     offset,
                     name: node.name,
                     can_create_animation: self.can_create_animation(index),
+                    can_create_state_group: self.can_create_state_group(index),
                     properties: node
                         .properties
                         .iter()

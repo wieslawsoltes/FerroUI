@@ -248,6 +248,6 @@ pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
     SourceSpan::new(range.start, range.end)
 }
 
-pub(super) fn method_suffix(method: &ExprMethodCall) -> SourceSpan {
+pub(crate) fn method_suffix(method: &ExprMethodCall) -> SourceSpan {
     SourceSpan::new(span(&method.dot_token).start, span(method).end)
 }

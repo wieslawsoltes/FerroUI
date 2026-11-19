@@ -12,6 +12,7 @@ mod placement;
 mod programs;
 mod project;
 mod registered;
+mod source_array;
 mod source_edits;
 mod states;
 mod tree;

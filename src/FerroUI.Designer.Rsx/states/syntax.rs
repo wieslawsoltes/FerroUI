@@ -1,10 +1,11 @@
-use super::{mapped_easing, RouteSource, RsxStateGroup};
+use super::{RouteSource, RsxStateGroup, SetterSource, StateSource, mapped_easing};
 use crate::animation::{
-    syntax::{argument, chain, path, span, unsigned, view_argument},
-    view_property, ValueSource,
+    ValueSource,
+    syntax::{argument, chain, method_suffix, path, span, unsigned, view_argument},
+    view_property,
 };
 use ferroui_designer_animation::{
-    native_key_time, Easing, StateSetter, StateTransition, VisualState, VisualStateGroup,
+    Easing, StateSetter, StateTransition, VisualState, VisualStateGroup, native_key_time,
 };
 use ferroui_designer_core::SourceSpan;
 use syn::{Expr, ExprMethodCall, Lit};
@@ -19,8 +20,9 @@ pub(super) fn group(expr: &Expr, catalog: &crate::RsxCatalog) -> Option<RsxState
             transitions: Vec::new(),
         },
         declaration: span(expr),
+        comma: None,
         routes: Vec::new(),
-        values: Vec::new(),
+        states: Vec::new(),
     };
     for method in methods {
         if let Some(declaration) = argument(method, "state") {
@@ -30,14 +32,21 @@ pub(super) fn group(expr: &Expr, catalog: &crate::RsxCatalog) -> Option<RsxState
                 name,
                 setters: Vec::new(),
             };
-            let mut values = Vec::new();
-            for setter in methods {
-                let (setter, value) = state_setter(setter, catalog)?;
-                values.push(value);
+            let mut source = StateSource {
+                suffix: method_suffix(method),
+                body: span(declaration),
+                setters: Vec::new(),
+            };
+            for method in methods {
+                let (setter, value) = state_setter(method, catalog)?;
+                source.setters.push(SetterSource {
+                    suffix: method_suffix(method),
+                    value,
+                });
                 state.setters.push(setter);
             }
             group.model.states.push(state);
-            group.values.push(values);
+            group.states.push(source);
         } else {
             let (route, source) = transition(method)?;
             group.model.transitions.push(route);
@@ -109,6 +118,7 @@ fn transition(method: &ExprMethodCall) -> Option<(StateTransition, RouteSource)>
             easing,
         },
         RouteSource {
+            suffix: method_suffix(method),
             declaration: SourceSpan::new(
                 method.method.span().byte_range().start,
                 method.paren_token.span.close().byte_range().end,

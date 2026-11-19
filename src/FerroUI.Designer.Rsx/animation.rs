@@ -10,8 +10,8 @@ mod value;
 use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::Expr;
-pub(crate) use keyframe::property as view_property;
-pub(crate) use value::{ValueShape, ValueSource};
+pub(crate) use keyframe::{BUILTINS as BUILTIN_PROPERTIES, property as view_property};
+pub(crate) use value::{ValueShape, ValueSource, rust_literal};
 
 pub(crate) const TRACK_TARGET: u64 = 1;
 
