@@ -7,7 +7,7 @@ use crate::handles;
 use crate::thread;
 use crate::{FerroHandle, FerroStartFn, FerroStatus, FERRO_INVALID_ARGUMENT, FERRO_INVALID_STATE, FERRO_TYPE_MISMATCH};
 use ferroui_base::threading::CancellationToken;
-use ferroui_base::{Ref, WeakRef};
+use ferroui_base::Ref;
 use ferroui_controls::Window;
 use std::cell::{Cell, RefCell};
 use std::ffi::c_void;
@@ -19,8 +19,9 @@ struct AppState {
     started: Cell<bool>,
     /// Ends the main loop.
     stop: RefCell<Option<CancellationToken>>,
-    /// The windows shown with `ferro_show` that are open.
-    open: RefCell<Vec<WeakRef<Window>>>,
+    /// The windows shown with `ferro_show` that are open: held here until they close, so that a
+    /// caller can release their handles once they are shown.
+    open: RefCell<Vec<Ref<Window>>>,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -44,7 +45,7 @@ fn window(handle: FerroHandle) -> Result<Ref<Window>> {
 }
 
 /// Shows the window `window` ([`ferro_create`](crate::ferro_create) of the type `Window`). While
-/// it is open the platform holds it, and the main loop of [`ferro_app_run`] runs until the last
+/// it is open the library holds it (its handle can be released), and the main loop of [`ferro_app_run`] runs until the last
 /// window shown this way closes. [`FERRO_INVALID_STATE`] before `ferro_app_run` has started.
 /// UI thread only.
 #[no_mangle]
@@ -54,17 +55,20 @@ pub extern "C" fn ferro_show(window: FerroHandle) -> FerroStatus {
         if !APP.with(|app| app.started.get()) {
             return Err(Error::new(FERRO_INVALID_STATE, "a window is shown once the application runs (ferro_app_run)"));
         }
-        let known = APP.with(|app| app.open.borrow().iter().any(|open| open.points_to(&window)));
+        let known = APP.with(|app| app.open.borrow().iter().any(|open| open.ptr_eq(&window)));
         if !known {
-            APP.with(|app| app.open.borrow_mut().push(window.downgrade()));
+            APP.with(|app| app.open.borrow_mut().push(window.clone()));
             let weak = window.downgrade();
             window
                 .closed(move || {
-                    let empty = APP.with(|app| {
+                    let (closed, empty) = APP.with(|app| {
                         let mut open = app.open.borrow_mut();
-                        open.retain(|open| !open.ptr_eq(&weak) && open.upgrade().is_some());
-                        open.is_empty()
+                        let index = open.iter().position(|open| weak.points_to(open));
+                        let closed = index.map(|index| open.remove(index));
+                        (closed, open.is_empty())
                     });
+                    // Dropped with no borrow of the state held.
+                    drop(closed);
                     if empty {
                         stop_loop();
                     }
@@ -168,8 +172,7 @@ fn smoke_exit() {
     };
     DispatcherTimer::run_once(
         || {
-            let open: Vec<Ref<Window>> =
-                APP.with(|app| app.open.borrow().iter().filter_map(WeakRef::upgrade).collect());
+            let open: Vec<Ref<Window>> = APP.with(|app| app.open.borrow().clone());
             for window in open {
                 window.close();
             }
