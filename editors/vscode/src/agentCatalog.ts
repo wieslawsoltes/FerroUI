@@ -19,6 +19,9 @@ const hostedFrameRequired = ['session', 'expected_generation', 'expected_revisio
 const hostedState = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['program', 'duration', 'easing'],
         properties: { program: node, duration: time, easing: text } } };
+const hostedClips = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', additionalProperties: false, required: ['programs'],
+        properties: { programs: { type: 'array', items: node, minItems: 1, maxItems: 4096 }, start: time, gap: { type: 'number' } } } };
 const placement = { ...frame, asset: text, project_asset: text, node, selection: { type: 'array', items: node, minItems: 2, maxItems: 128 }, moving_anchor: node, anchor: node,
     position: choice('inside', 'before', 'after'), x: { type: 'number' }, y: { type: 'number' } };
 
@@ -58,9 +61,9 @@ export const agentCatalog = {
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, source issues, frame and elapsed time.', session, ['session']),
     designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
-    designer_hosted_animation: tool('Control a native clip or Rust state route in the app-hosted preview. Use its current generation, revision and frame sequence.', {
+    designer_hosted_animation: tool('Control a native clip, a Rust state route, or all playable clips on a shared elapsed clock. Use the current app preview generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
-            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
+            required: ['action'], properties: { action: choice('select', 'seek', 'play', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue'), program: node,
                 index: integer(0), elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
     designer_hosted_curve: tool('Sample values or signed velocity from a running project’s animation track. Read the track’s curve_channels for its available components.',
@@ -78,6 +81,10 @@ export const agentCatalog = {
         hostedState, hostedFrameRequired),
     designer_hosted_state_route: tool('Apply the mapped Rust state route duration in seconds and easing together as one undoable source edit.',
         hostedState, hostedFrameRequired, true),
+    designer_hosted_clip_placement_draft: tool('Preview checked XAML or mapped Rust patches that arrange native clips in the supplied order. Start and signed gap use elapsed seconds. Omit start to keep the first clip’s delay.',
+        hostedClips, hostedFrameRequired),
+    designer_hosted_clip_placement: tool('Place or sequence native animation clips in the app-preview source buffer as one undoable edit. Use editable clip IDs from the current frame.',
+        hostedClips, hostedFrameRequired, true),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),
     designer_animation_issue: tool('Reveal an unsupported Rust clip from designer_programs. Supply the current designer revision and its zero-based sourceIssues index.',

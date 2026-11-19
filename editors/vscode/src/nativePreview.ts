@@ -8,7 +8,7 @@ import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from '.
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframePlan, HostedStateDraft, HostedStatePlan } from './hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframePlan, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -123,8 +123,11 @@ export class NativePreview implements vscode.Disposable {
     planHostedKeyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
         return this.send('hostedKeyframe', { ...frame, ...draft }, 12_000);
     }
-    planHostedState(frame: HostedAnimationFrame, draft: HostedStateDraft): Promise<HostedStatePlan> {
+    planHostedState(frame: HostedAnimationFrame, draft: HostedStateDraft): Promise<HostedSourcePlan> {
         return this.send('hostedState', { revision: frame.revision, sequence: frame.sequence, ...draft });
+    }
+    planHostedClipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft): Promise<HostedSourcePlan> {
+        return this.send('hostedClipPlacement', { ...frame, ...draft });
     }
     hostedCurve(frame: HostedAnimationFrame, query: HostedCurveQuery): Promise<CurvePoint[]> {
         const { metric, channel, ...track } = query;

@@ -92,7 +92,7 @@ let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 let appliedProgramEdit: string | undefined;
 let clipEdit: FrameTarget | undefined;
-const clips = new TimelineClips(Boolean(typeof saved === 'object' && saved.clips), {
+const clips = new TimelineClips<FrameTarget>(Boolean(typeof saved === 'object' && saved.clips), {
     changed: () => {
         queued = undefined;
         keyframeEditor.close();
@@ -114,7 +114,9 @@ const clips = new TimelineClips(Boolean(typeof saved === 'object' && saved.clips
         vscode.postMessage({ type: 'clipPlacement', frame, programs, start, gap });
         showPosition();
     },
-    keys: selected => {
+    keys: id => {
+        const selected = model.programs.find(program => program.id === id);
+        if (!selected) return;
         timedProgramSession = undefined;
         remember(selected);
         saveTimeline();
@@ -264,7 +266,7 @@ function positionFor(selected: TimelineProgram | undefined) {
 function showTracks(): void {
     if (model.transition) {
         toolbar.hidden = container.hidden = true;
-        clips.follow(model, false, true, 0);
+        clips.follow({ programs: [] }, false, true, 0);
         closeViewOptions();
         trackFilter.follow(false, []);
         workArea.follow(0, false);
@@ -482,7 +484,14 @@ function showPosition(): void {
     const playing = Boolean(position?.playing);
     const editing = Boolean(keyEdit || keyframeEditor.applying);
     const combined = model.position?.all ? model.position.elapsed : undefined;
-    clips.follow(model, pending, editing || Boolean(clipEdit), queued ?? submitted ?? combined ?? 0);
+    const reference = model.position?.all && model.programs.some(program => program.id === model.position?.program)
+        ? model.position.program : model.programs.find(canPreviewProgram)?.id;
+    const clipRows = model.programs.flatMap(program => program.clip ? [{
+        id: program.id, name: program.name, clip: program.clip, sourceKey: program.source_key,
+        duration: program.preview?.duration ?? program.timeline?.duration ?? 1, keys: Boolean(program.timeline),
+    }] : []);
+    clips.follow({ frame: model.frame, scope: model.clipScope, programs: clipRows, reference, position: model.position },
+        pending, editing || Boolean(clipEdit), queued ?? submitted ?? combined ?? 0);
     container.hidden = !timeline || clips.visible;
     if (clips.visible) {
         nativePreview.show(undefined, {}, 0, false, false);

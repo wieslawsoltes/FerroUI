@@ -455,6 +455,10 @@ The placement uses native XAML `Delay` or a mapped Rust `.delay(...)` and preser
 and existing triggers. Use the compare icon again to return to the selected program's keys.
 [VS Code workflow and MCP arguments](vscode/motion.md#compare-and-sequence-clips)
 
+App Preview uses the same placement rules with the selected binary’s registered animators and
+resolved timing. It samples the combined pose before displaying a compatible source replacement.
+[App Preview clip workflow](vscode/motion.md#compare-clips-in-app-preview)
+
 ### Edit tracks and keyframes
 
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**

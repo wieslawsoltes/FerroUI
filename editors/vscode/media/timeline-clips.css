@@ -1,11 +1,30 @@
-#timeline-toolbar[data-clips] :is(.timeline-program-bar, .timeline-tools) { display: none; }
+#timeline-toolbar:has(#timeline-compare[aria-pressed="true"]) :is(.timeline-program-bar, .timeline-tools) { display: none; }
 #timeline-compare[aria-pressed="true"] { background: var(--tool-active); }
 .clip-tools { flex: 1; flex-wrap: wrap; min-inline-size: 0; }
 .clip-zoom { margin-inline-start: auto; }
+.clip-clock { display: flex; align-items: center; gap: 3px; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
 #clip-time { inline-size: 7ch; text-align: end; }
 #clip-time::-webkit-inner-spin-button { appearance: none; }
-.clip-grid { margin-block-start: 4px; --clip-inset: 12px; }
-.clip-axis { padding-inline: calc(var(--track-label-width) + var(--clip-inset)) var(--clip-inset); }
+.clip-grid {
+    flex: 1;
+    min-block-size: 72px;
+    margin-block-start: 4px;
+    overflow: auto;
+    scroll-padding-block: 35px 17px;
+    --track-label-width: clamp(64px, 25%, 172px);
+    --clip-inset: 12px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--vscode-editor-background);
+}
+.clip-axis, .clip-pan {
+    position: sticky;
+    z-index: 3;
+    padding-inline: calc(var(--track-label-width) + var(--clip-inset)) var(--clip-inset);
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+.clip-axis { inset-block-start: 0; border-block-end: 1px solid var(--line); }
+.clip-pan { inset-block-end: 0; border-block-start: 1px solid var(--line); }
 .clip-ruler { position: relative; padding-block-end: 15px; }
 #clip-seek { appearance: none; display: block; inline-size: calc(100% + 10px); min-block-size: 19px; margin: 0 -5px; padding: 0; border: 0; background: transparent; }
 #clip-seek::-webkit-slider-runnable-track { block-size: 1px; background: var(--line); }
@@ -32,3 +51,6 @@
 #clip-placement-form { display: flex; flex-wrap: wrap; gap: 5px; align-items: end; }
 #clip-placement-form label { display: grid; gap: 2px; }
 #clip-placement-form input { inline-size: 8ch; }
+@media (max-width: 480px) {
+    .clip-grid { --track-label-width: clamp(100px, 37%, 144px); }
+}

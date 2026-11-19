@@ -34,9 +34,11 @@ export interface TimelineProgram {
     selector: string;
     timeline: AuthoredTimeline | null;
     preview?: TimelineProgramPreview;
-    clip?: { start: number; end: number | null; editable: boolean };
+    clip?: TimelineClipTiming;
     diagnostics?: string[];
 }
+
+export interface TimelineClipTiming { start: number; end: number | null; editable: boolean }
 
 export interface TimelineClock {
     duration: number;

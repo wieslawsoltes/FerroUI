@@ -1,4 +1,4 @@
-import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
+import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 
@@ -16,9 +16,11 @@ export interface HostedAnimationProgram {
     defaultTargets: number[];
     compatibleTargets: number[];
     sourceOffset: number | null;
+    sourceKey?: string;
     customAnimator: boolean;
     authoring?: { codec: string; tracks: TimelineTrack[] } | null;
     curveTracks?: TimelineTrack[] | null;
+    clip?: TimelineClipTiming | null;
     stateRoute?: HostedStateRoute;
 }
 
@@ -32,6 +34,7 @@ export interface HostedAnimationCatalog {
     programs: HostedAnimationProgram[];
     targets: HostedAnimationTarget[];
     sourceIssues?: AnimationSourceIssue[];
+    clipScope?: string;
 }
 
 export interface HostedAnimationFrame {
@@ -42,6 +45,7 @@ export interface HostedAnimationFrame {
 export interface HostedAnimationRequest extends HostedAnimationFrame {
     program?: number;
     targets?: number[];
+    clips?: { program: number; targets?: number[] }[];
     elapsed: number;
     restart: boolean;
 }
@@ -50,6 +54,8 @@ export type HostedAnimationControl =
     | { action: 'select'; program: number }
     | { action: 'seek'; program: number; elapsed: number }
     | { action: 'play'; program: number; elapsed?: number }
+    | { action: 'scrub_all'; elapsed: number }
+    | { action: 'play_all'; elapsed?: number }
     | { action: 'pause' }
     | { action: 'stop' }
     | { action: 'targets'; program: number; targets?: number[] };
@@ -63,6 +69,7 @@ export interface HostedAnimationPosition {
     elapsed: number;
     playing: boolean;
     completed: boolean;
+    clips?: number[];
 }
 
 export interface HostedAnimationPresentation {
@@ -85,8 +92,9 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
 export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric' | 'channel'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
+export interface HostedClipDraft { programs: number[]; start?: number; gap?: number }
 export interface HostedSourcePatch { start: number; end: number; expected: string; replacement: string }
-export interface HostedStatePlan { patches: HostedSourcePatch[] }
+export interface HostedSourcePlan { patches: HostedSourcePatch[] }
 
 export interface HostedKeyframePlan extends KeyframeDraftPreview {
     patch: HostedSourcePatch | null;

@@ -3,6 +3,7 @@ import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import { element, labelButton } from './dom';
 import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
+import { TimelineClips } from './timelineClips';
 
 export class HostedAnimationView {
     private readonly section = element('hosted-animations');
@@ -25,15 +26,37 @@ export class HostedAnimationView {
     private pending?: number;
     private documentVersion = 0;
     private readonly curves: HostedCurves;
+    private readonly clips: TimelineClips<HostedAnimationFrame>;
     readonly keyframes: HostedKeyframeEditor;
 
-    constructor(private readonly send: (message: FromHosted) => void) {
+    constructor(private readonly send: (message: FromHosted) => void, compare: boolean, rememberComparison: (enabled: boolean) => void) {
         this.keyframes = new HostedKeyframeEditor(send, () => {
             // Applying a key retires the animation toolbar until the next frame.
             const button = this.edit.disabled || this.edit.hidden ? element('hosted-refresh') : this.edit;
             button.focus({ preventScroll: true });
         });
         this.curves = new HostedCurves(send, this.keyframes);
+        this.clips = new TimelineClips<HostedAnimationFrame>(compare, {
+            changed: () => {
+                this.queued = undefined;
+                this.keyframes.close();
+                rememberComparison(this.clips.enabled);
+                this.paint();
+            },
+            seek: elapsed => this.queueSeek(elapsed),
+            transport: action => action === 'play_all'
+                ? this.control({ action }) : this.control({ action }, true),
+            place: (frame, programs, start, gap) => {
+                if (!this.canUse() || this.state.position?.playing) return;
+                this.queued = undefined;
+                this.send({ type: 'clipPlacement', frame, request: this.pending = ++this.request, draft: { programs, start, gap } });
+                this.paint();
+            },
+            keys: program => {
+                rememberComparison(false);
+                this.control({ action: 'select', program });
+            },
+        });
         this.programs.onchange = () => {
             this.queued = undefined;
             this.keyframes.close();
@@ -50,13 +73,10 @@ export class HostedAnimationView {
             else this.control({ action: 'play', program: Number(this.programs.value) });
         };
         this.stop.onclick = () => this.control({ action: 'stop' }, true);
-        this.seek.oninput = () => {
-            this.queued = this.seek.valueAsNumber;
-            this.flush();
-            this.paint();
-        };
+        this.seek.oninput = () => this.queueSeek(this.seek.valueAsNumber);
         this.section.addEventListener('keydown', event => {
-            if (event.key === 'Escape' && !this.stop.disabled) {
+            if (event.key === 'Escape' && this.state.position && this.canUse(true)
+                && !this.section.querySelector(':popover-open, .clip-bar[data-dragging]')) {
                 event.preventDefault();
                 event.stopPropagation();
                 this.control({ action: 'stop' }, true);
@@ -69,6 +89,7 @@ export class HostedAnimationView {
             this.queued = this.submitted = this.pending = undefined;
         }
         const selected = state.selection ?? state.position?.program;
+        if (state.position?.clips && !this.state.position?.clips) this.clips.enabled = true;
         this.state = state;
         this.documentVersion = documentVersion;
         const catalog = JSON.stringify(state.programs.map(({ id, name, stateRoute }) => [id, name, Boolean(stateRoute)]));
@@ -133,18 +154,39 @@ export class HostedAnimationView {
         if (this.queued === undefined || this.state.position?.playing || !this.canUse()) return;
         const elapsed = this.submitted = this.queued;
         this.queued = undefined;
-        this.control({ action: 'seek', program: Number(this.programs.value), elapsed });
+        if (this.clips.visible) {
+            const end = this.playableClips.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
+            this.control({ action: 'scrub_all', elapsed: Math.min(elapsed, end) });
+        } else this.control({ action: 'seek', program: Number(this.programs.value), elapsed });
+    }
+
+    private queueSeek(elapsed: number): void {
+        this.queued = elapsed;
+        this.flush();
+        this.paint();
+    }
+
+    private get playableClips() {
+        return this.state.programs.filter(program => program.clip && (this.state.overrides[program.id] ?? program.defaultTargets).length);
     }
 
     private paint(): void {
         const program = this.selectedProgram;
         const position = this.state.position;
         const playing = Boolean(position?.playing);
-        const current = position?.program === program?.id ? position : undefined;
+        const current = !position?.clips && position?.program === program?.id ? position : undefined;
         const usable = this.canUse() && !playing;
         const selectedTargets = program && (this.state.overrides[program.id] ?? program.defaultTargets);
         const available = Boolean(selectedTargets?.length);
         this.section.hidden = !program;
+        const comparisonPosition = position && { ...position, all: Boolean(position.clips) };
+        this.clips.follow({
+            frame: this.state.frame, scope: this.state.clipScope, position: comparisonPosition,
+            reference: this.playableClips[0]?.id,
+            programs: this.state.programs.flatMap(program => program.clip ? [{
+                id: program.id, name: program.name, sourceKey: program.sourceKey, clip: program.clip, duration: program.duration, keys: true,
+            }] : []),
+        }, !this.canUse(), false, this.clips.enabled ? this.queued ?? this.submitted ?? (position?.clips ? position.elapsed : 0) : 0);
         this.programs.disabled = !usable;
         this.programs.title = program?.customAnimator ? `${program.name} · Registered animator` : program?.name ?? '';
         this.targets.hidden = Boolean(program?.stateRoute);
@@ -158,9 +200,10 @@ export class HostedAnimationView {
         this.edit.hidden = !program?.authoring && !program?.stateRoute;
         this.edit.disabled = !usable;
         labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
-        this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
+        const keyframeUsable = usable && !this.clips.visible;
+        this.keyframes.follow(keyframeUsable ? this.state.frame : undefined, this.documentVersion, program?.id);
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
-            this.state.frame, this.documentVersion, usable, Boolean(this.state.canShowVelocity));
+            this.state.frame, this.documentVersion, keyframeUsable, Boolean(this.state.canShowVelocity));
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
             playing ? 'debug-pause' : 'play');

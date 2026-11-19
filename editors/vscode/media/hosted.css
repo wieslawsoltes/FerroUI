@@ -4,6 +4,9 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 #hosted-fixture { max-inline-size: calc(100% - 20px); }
 #hosted-animation-program { flex: 1 1 100px; min-inline-size: 0; }
 .hosted-animation-toolbar { flex-wrap: wrap; }
+.hosted-animation-selection { display: flex; flex: 1 1 220px; flex-wrap: wrap; align-items: center; gap: 4px; min-inline-size: 0; }
+#hosted-animations:has(#timeline-compare[aria-pressed="true"]) .hosted-single-animation { display: none; }
+#hosted-animations .clip-grid { margin: 4px 8px; max-block-size: clamp(80px, 29vh, 220px); }
 .hosted-animation-clock { display: flex; align-items: center; gap: 6px; padding: 2px 8px; }
 .timeline-keyframe-editor { margin-inline: 8px; max-block-size: 44vh; overflow: auto; }
 #hosted-animation-seek { flex: 1 1 auto; min-inline-size: 0; accent-color: var(--focus); }

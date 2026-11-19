@@ -1,9 +1,9 @@
-import type { FrameTarget } from '../src/protocol';
+import { sameClipFrame, type ClipFrame } from './clipFrame';
 import { clamp, type TimelineViewport } from './timelineViewport';
 
-export function bindClipDrag(bar: HTMLButtonElement, lane: HTMLElement, initial: number,
-    viewport: () => TimelineViewport, frame: () => FrameTarget | undefined,
-    show: (start: number) => void, apply: (start: number, frame: FrameTarget) => void): void {
+export function bindClipDrag<Frame extends ClipFrame>(bar: HTMLButtonElement, lane: HTMLElement, initial: number,
+    viewport: () => TimelineViewport, frame: () => Frame | undefined,
+    show: (start: number) => void, apply: (start: number, frame: Frame) => void): void {
     let swallowClick = false;
     bar.onpointerdown = event => {
         const accepted = frame();
@@ -14,10 +14,7 @@ export function bindClipDrag(bar: HTMLButtonElement, lane: HTMLElement, initial:
         const origin = event.clientX;
         const listeners = new AbortController();
         const options = { signal: listeners.signal };
-        const current = () => {
-            const next = frame();
-            return next?.session === accepted.session && next.token === accepted.token && viewport() === view;
-        };
+        const current = () => sameClipFrame(frame(), accepted) && viewport() === view;
         const startAt = (x: number) => clamp(initial + (x - origin) * view.span / width, 0, view.duration);
         let dragging = false;
         swallowClick = false;

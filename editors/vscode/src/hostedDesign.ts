@@ -4,7 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedCurveQuery, HostedKeyframeDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
@@ -130,6 +130,13 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.stateRoute(frame, draft, apply, signal);
+    }
+
+    clipPlacement(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedClipDraft,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.clipPlacement(frame, draft, apply, signal);
     }
 
     curve(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
@@ -401,14 +408,26 @@ class HostedSession {
         }
     }
 
-    async stateRoute(frame: HostedAnimationFrame, draft: HostedStateDraft, apply: boolean, signal: AbortSignal) {
+    stateRoute(frame: HostedAnimationFrame, draft: HostedStateDraft, apply: boolean, signal: AbortSignal) {
+        return this.editAnimationSource(frame, apply, signal, client => {
+            if (!this.animations.program(frame, draft.program).stateRoute) {
+                throw new Error('Choose a mapped Rust state route in the current application preview.');
+            }
+            return client.planHostedState(frame, draft);
+        });
+    }
+
+    clipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft, apply: boolean, signal: AbortSignal) {
+        return this.editAnimationSource(frame, apply, signal, client => client.planHostedClipPlacement(frame, draft));
+    }
+
+    private async editAnimationSource(frame: HostedAnimationFrame, apply: boolean, signal: AbortSignal,
+        planEdit: (client: NativePreview) => Promise<HostedSourcePlan>) {
         await this.polling;
         signal.throwIfAborted();
-        if (!this.animations.program(frame, draft.program).stateRoute) {
-            throw new Error('Choose a mapped Rust state route in the current application preview.');
-        }
         const client = this.client;
-        if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
+        const current = this.currentFrame;
+        if (!client || this.pending || this.animations.driving || current?.revision !== frame.revision || current.sequence !== frame.sequence) {
             throw new Error('Wait for the current application preview or pause playback.');
         }
         const document = this.editor.document;
@@ -416,10 +435,10 @@ class HostedSession {
         clearTimeout(this.timer);
         this.pending = true;
         try {
-            const plan = await client.planHostedState(frame, draft);
+            const plan = await planEdit(client);
             signal.throwIfAborted();
             if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
-                throw new Error('The application preview source changed while planning the state route.');
+                throw new Error('The application preview source changed while planning the animation edit.');
             }
             if (apply) await applyHostedSourcePatches(document, version, plan.patches);
             return { ...plan, applied: apply && plan.patches.length > 0, version: document.version };
@@ -520,6 +539,12 @@ class HostedSession {
         if (message.type === 'editStateRoute') {
             try { await this.promptStateRoute(message.frame, message.program); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            return;
+        }
+        if (message.type === 'clipPlacement') {
+            try { await this.clipPlacement(message.frame, message.draft, true, AbortSignal.timeout(15_000)); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            this.post({ type: 'animationReply', request: message.request });
             return;
         }
         if (message.type === 'animation' || message.type === 'animationTargets' || message.type === 'animationSource') {

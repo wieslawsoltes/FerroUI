@@ -2,9 +2,14 @@ import type { FromHosted, HostedFrame, ToHosted } from '../src/hostedProtocol';
 import { element } from './dom';
 import { HostedAnimationView } from './hostedAnimations';
 
-declare function acquireVsCodeApi(): { postMessage(message: FromHosted): void };
+declare function acquireVsCodeApi(): {
+    postMessage(message: FromHosted): void;
+    getState(): { compare?: boolean } | undefined;
+    setState(state: { compare: boolean }): void;
+};
 const vscode = acquireVsCodeApi();
-const animations = new HostedAnimationView(message => vscode.postMessage(message));
+const animations = new HostedAnimationView(message => vscode.postMessage(message), Boolean(vscode.getState()?.compare),
+    compare => vscode.setState({ compare }));
 const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');

@@ -1,25 +1,40 @@
-import type { FrameTarget } from '../src/protocol';
-import type { TimelineProgram, TimelineState } from '../src/timelineProtocol';
-import { canPreviewProgram } from '../src/timelinePrograms';
+import type { TimelineClipTiming } from '../src/timelineProtocol';
+import type { ClipFrame } from './clipFrame';
 import { create, element, labelButton } from './dom';
 import { bindClipDrag } from './timelineClipDrag';
 import { TimelineClipPlacement } from './timelineClipPlacement';
 import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
 
-type Clip = TimelineProgram & { clip: NonNullable<TimelineProgram['clip']> };
-interface Row { key: string; program: Clip; label: HTMLButtonElement; order: HTMLElement; bar: HTMLButtonElement }
+export interface TimelineClipRow {
+    id: number;
+    name: string;
+    sourceKey?: string | null;
+    clip: TimelineClipTiming;
+    duration: number;
+    keys: boolean;
+}
 
-interface ClipActions {
+interface ClipState<Frame> {
+    frame?: Frame;
+    scope?: string;
+    programs: readonly TimelineClipRow[];
+    reference?: number;
+    position?: { program: number; playing: boolean; completed?: boolean; all?: boolean };
+}
+
+interface Row { key: string; program: TimelineClipRow; label: HTMLButtonElement; order: HTMLElement; bar: HTMLButtonElement }
+
+interface ClipActions<Frame> {
     changed(): void;
     seek(time: number): void;
     transport(action: 'play_all' | 'pause' | 'stop', program: number): void;
-    place(frame: FrameTarget, programs: number[], start: number | undefined, gap: number): void;
-    keys(program: Clip): void;
+    place(frame: Frame, programs: number[], start: number | undefined, gap: number): void;
+    keys(program: number): void;
 }
 
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 
-export class TimelineClips {
+export class TimelineClips<Frame extends ClipFrame> {
     private readonly toggle = element<HTMLButtonElement>('timeline-compare');
     private readonly pane = element('timeline-clips');
     private readonly tools = element('timeline-clip-tools');
@@ -38,14 +53,14 @@ export class TimelineClips {
     private programRows: Row[] = [];
     private selection: string[] = [];
     private signature = '';
-    private state?: TimelineState;
+    private state?: ClipState<Frame>;
     private seconds = 0;
     private locked = true;
     private drafting = false;
-    private readonly placement: TimelineClipPlacement;
+    private readonly placement: TimelineClipPlacement<Frame>;
     visible = false;
 
-    constructor(public enabled: boolean, private readonly actions: ClipActions) {
+    constructor(public enabled: boolean, private readonly actions: ClipActions<Frame>) {
         this.placement = new TimelineClipPlacement((...args) => actions.place(...args));
         this.toggle.onclick = () => { this.enabled = !this.enabled; this.actions.changed(); };
         this.seek.oninput = () => this.actions.seek(this.seek.valueAsNumber);
@@ -67,7 +82,7 @@ export class TimelineClips {
         };
         this.keys.onclick = () => {
             const program = this.selected[0];
-            if (program) { this.enabled = false; this.actions.keys(program); }
+            if (program) { this.enabled = false; this.actions.keys(program.id); }
         };
         this.zoomIn.onclick = () => this.zoom(1.25);
         this.zoomOut.onclick = () => this.zoom(.8);
@@ -83,40 +98,35 @@ export class TimelineClips {
         };
     }
 
-    get reference(): number | undefined {
-        const position = this.state?.position;
-        if (position?.all && this.state?.programs.some(program => program.id === position.program)) return position.program;
-        return this.state?.programs.find(canPreviewProgram)?.id;
-    }
+    get reference(): number | undefined { return this.state?.reference; }
 
-    private get frame(): FrameTarget | undefined { return !this.locked && this.visible ? this.state?.frame : undefined; }
+    private get frame(): Frame | undefined { return !this.locked && this.visible ? this.state?.frame : undefined; }
 
-    private get selected(): Clip[] {
+    private get selected(): TimelineClipRow[] {
         const programs = new Map(this.programRows.map(row => [row.key, row.program]));
         return this.selection.flatMap(key => programs.get(key) ?? []);
     }
 
-    follow(state: TimelineState, pending: boolean, editing: boolean, seconds: number): void {
+    follow(state: ClipState<Frame>, pending: boolean, editing: boolean, seconds: number): void {
         this.state = state;
         const playing = Boolean(state.position?.playing);
         const locked = pending || editing || playing;
         this.locked = locked;
         this.seconds = seconds;
-        const clips = state.programs.filter((program): program is Clip => Boolean(program.clip));
-        if (state.clipScope && this.scope !== state.clipScope) {
-            this.scope = state.clipScope;
+        const clips = state.programs;
+        if (state.scope && this.scope !== state.scope) {
+            this.scope = state.scope;
             this.selection = [];
         }
-        const available = Boolean(clips.length && !state.transition && (state.clipScope || (!state.frame && this.scope)));
+        const available = Boolean(clips.length && (state.scope || (!state.frame && this.scope)));
         this.toggle.hidden = !available;
         this.visible = this.enabled && available;
         this.toggle.disabled = !state.frame || locked;
         this.toggle.setAttribute('aria-pressed', String(this.visible));
         labelButton(this.toggle, this.visible ? 'Return to animation keyframes' : 'Compare animation clips');
         this.pane.hidden = this.tools.hidden = !this.visible;
-        element('timeline-toolbar').toggleAttribute('data-clips', this.visible);
         if (!this.visible) { this.placement.follow(undefined, []); return; }
-        const signature = JSON.stringify([this.scope, clips.map(({id, name, source_key, clip}) => [id, name, source_key, clip])]);
+        const signature = JSON.stringify([this.scope, clips]);
         if (signature !== this.signature) {
             this.signature = signature;
             this.renderRows(clips);
@@ -131,18 +141,18 @@ export class TimelineClips {
         this.showSelection();
     }
 
-    private renderRows(programs: readonly Clip[]): void {
+    private renderRows(programs: readonly TimelineClipRow[]): void {
         const focused = this.programRows.find(row => row.bar === document.activeElement || row.label === document.activeElement);
         const wasBar = focused?.bar === document.activeElement;
         const counts = new Map<string, number>();
-        for (const { source_key } of programs) {
-            if (source_key) counts.set(source_key, (counts.get(source_key) ?? 0) + 1);
+        for (const { sourceKey } of programs) {
+            if (sourceKey) counts.set(sourceKey, (counts.get(sourceKey) ?? 0) + 1);
         }
         this.programRows = programs.map(program => this.row(program,
-            program.source_key && counts.get(program.source_key) === 1 ? program.source_key : String(program.id)));
+            program.sourceKey && counts.get(program.sourceKey) === 1 ? program.sourceKey : String(program.id)));
         const visible = new Set(this.programRows.map(row => row.key));
         this.selection = this.selection.filter(key => visible.has(key));
-        const duration = programs.reduce((end, program) => Math.max(end, program.clip.end ?? (program.clip.start + (program.preview?.duration ?? program.timeline?.duration ?? 1))), 0.05);
+        const duration = programs.reduce((end, program) => Math.max(end, program.clip.end ?? (program.clip.start + program.duration)), 0.05);
         if (this.view.duration !== duration) this.view = fitTimeline(duration);
         this.rows.replaceChildren(...this.programRows.map(row => row.label.parentElement!));
         this.layout();
@@ -152,7 +162,7 @@ export class TimelineClips {
         }
     }
 
-    private row(program: Clip, key: string): Row {
+    private row(program: TimelineClipRow, key: string): Row {
         const item = create('li');
         item.className = 'clip-row';
         const label = create('button');
@@ -197,7 +207,7 @@ export class TimelineClips {
             row.bar.toggleAttribute('data-editable', row.program.clip.editable && Boolean(this.frame));
         }
         this.placement.follow(this.frame, selected);
-        this.keys.disabled = !this.frame || selected.length !== 1 || !selected[0].timeline;
+        this.keys.disabled = !this.frame || selected.length !== 1 || !selected[0].keys;
     }
 
     private showTime(): void {

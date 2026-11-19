@@ -81,7 +81,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
-        for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe']) {
+        for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe', 'clip_placement_draft', 'clip_placement']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -90,6 +90,11 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
         const keyDraft = await invoke('designer_hosted_keyframe_draft', hostedKey);
         assert.ok(keyDraft.isError && !keyDraft.content[0]?.text?.includes('allowWrites'));
+        const clipPlacement = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
+            arguments: { programs: [1, 2], start: .25, gap: -.125 } };
+        assert.match((await invoke('designer_hosted_clip_placement', clipPlacement)).content[0]?.text ?? '', /allowWrites/);
+        const clipDraft = await invoke('designer_hosted_clip_placement_draft', clipPlacement);
+        assert.ok(clipDraft.isError && !clipDraft.content[0]?.text?.includes('allowWrites'));
         assert.deepEqual(content(await invoke('ferroui_reload_history', { limit: 1 })), { records: [] });
         const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);

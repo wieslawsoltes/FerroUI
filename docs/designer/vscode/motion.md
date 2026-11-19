@@ -145,6 +145,19 @@ Placement edits the native `Delay` attribute in XAML or the literal `.delay(ferr
 
 Agents can read each clip's `start`, `end`, and `editable` fields in `designer_programs`. Use `designer_program` with `place_clips` and the ordered `programs` IDs, optional `start`, and optional `gap` through `designer_studio_edit`. Use `scrub_all` with elapsed `time` to sample the combined pose. Studio exposes both actions directly through `designer_program`. VS Code also offers `scrub_all` in `designer_timeline_control`.
 
+### Compare clips in App Preview
+
+![App Preview shows two overlapping clips, their XAML delays, and the application artboard at 1.2 seconds](../images/vscode-app-preview-clip-sequence.png)
+
+1. Open a source file inside the Cargo package and start [App Preview](runtime.md#render-with-your-app-in-app-preview). To try the walkthrough above with Todo Workbench, copy `ClipSequence.xaml` beside its `Cargo.toml` and choose **Source preview**.
+2. Choose **Compare animation clips** in the App Preview animation toolbar. Drag the elapsed playhead or choose **Play all clips**. The app samples its loaded clips and draws the combined pose with its registered controls and animators. To include a clip that requires a target, open its animation and choose compatible preview controls.
+3. Pause playback and drag a clip bar, or select clip names in order and choose **Sequence selected clips**. Set **Start** and **Gap** in seconds. Use **Set selected clip start** for a keyboard-only placement. XAML delays and mapped Rust delay literals update in the current buffer in one Undo step.
+4. Keep scrubbing across the updated clips. When their declarations and targets resolve in the new source, the first replacement frame retains the shared playhead. Choose **Stop clips** to remove the sampled pose. Select a clip and choose **Open selected animation** to see its targets, keyframes, and curves.
+
+App Preview shows comparison controls when the selected binary supports shared clip playback. Rebuild the binary with the current `ferroui-designer-support` to use them. A compiled Rust view fixture exposes the animation data it makes available to preview. Choose **Source preview** to edit mapped animations in the current RSX invocation.
+
+Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` or `play_all` in `designer_hosted_animation`. Pass an elapsed time in seconds as `elapsed`. Use `designer_hosted_clip_placement_draft` to review the checked patch and `designer_hosted_clip_placement` to apply it. Both accept ordered `programs`, optional `start`, and signed `gap` in seconds. Supply the current app generation, revision, and sequence with each request.
+
 ## Compare design data and environments
 
 1. Open [PreviewStages.xaml](../samples/PreviewStages.xaml). Run **FerroUI: Show Design Data**. Add a named XAML fixture with typed JSON values, such as a string title and an array of items. Apply it once to store the design-only fixture in the view. Choose **Application values** to return to the regular bindings.

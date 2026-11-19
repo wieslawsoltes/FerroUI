@@ -9,6 +9,7 @@ import type { HostedFrame } from '../src/hostedProtocol';
 import type { NativePreview } from '../src/nativePreview';
 import type { Source } from '../src/protocol';
 import type { AnimationSourceIssue, TimelineProgram } from '../src/timelineProtocol';
+import { applyClipDraft } from './hostedClips';
 
 const getter = 'crate::app_preview::motion::review_corner_property';
 const style = `styles: [ferroui_view::style("Border#ReviewCard")
@@ -99,6 +100,22 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         const after = await render(44, frozen(20));
         assert.equal(paused.frame.image.png, before.image.png, 'The registered CornerRadius animator reaches 8 at one second');
         assert.equal(next.image.png, after.image.png, 'The first frame after a Rust key edit is already sampled at the retained time');
+        const withDelay = source.replace('.key_frame(0.0,', '.delay(ferroui_view::ms(/* hold ⏱ */ 125u64))\r\n        .key_frame(0.0,');
+        const delayed = await render(45, withDelay);
+        const delayedClip = delayed.animations?.programs[0];
+        assert.equal(delayedClip?.clip?.start, .125);
+        assert.ok(delayedClip?.clip?.editable);
+        const placement = await preview.planHostedClipPlacement({ revision: delayed.revision, sequence: delayed.sequence },
+            { programs: [delayedClip.id], start: .375 });
+        const placed = applyClipDraft(withDelay, placement.patches);
+        assert.equal(placed, withDelay.replace('125u64', '375u64'));
+        const placedFrame = await render(46, placed);
+        const placedClip = placedFrame.animations?.programs[0];
+        assert.equal(placedClip?.clip?.start, .375);
+        assert.ok(placedClip);
+        const shared = await preview.sampleHostedAnimation({ revision: placedFrame.revision, sequence: placedFrame.sequence,
+            clips: [{ program: placedClip.id }], elapsed: 1.375, restart: true });
+        assert.equal(shared.frame.image.png, before.image.png);
         console.log('App Preview validated a registered typed Rust key, preserved CRLF and comments, and restored paused and playing native poses');
     } finally { await rm(sandbox, { recursive: true, force: true }); }
 }

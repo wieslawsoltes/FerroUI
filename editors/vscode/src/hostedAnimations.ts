@@ -7,10 +7,13 @@ import { drivePreviewClock } from './previewClock';
 
 const empty: HostedAnimationCatalog = { programs: [], targets: [] };
 
+type Bindings = Pick<HostedAnimationRequest, 'program' | 'targets' | 'clips'>;
+type PlaybackAction = Extract<HostedAnimationControl, { action: 'seek' | 'play' | 'scrub_all' | 'play_all' }>;
+
 interface Playback {
     revision: number;
     position: HostedAnimationPosition;
-    targets?: number[];
+    bindings: Bindings;
     loop?: Promise<void>;
 }
 
@@ -49,7 +52,7 @@ export class HostedAnimations {
         }
         this.previousSequence = this.frame?.sequence;
         this.frame = { revision: frame.revision, sequence: frame.sequence };
-        if (restored) this.beginPlayback(frame.revision, restored, this.overrides[restored.program]);
+        if (restored) this.beginPlayback(frame.revision, restored);
         this.publish();
     }
 
@@ -102,6 +105,10 @@ export class HostedAnimations {
         if (action.action === 'pause') return this.state;
         if (action.action === 'stop') {
             await this.sample(frame.revision, { elapsed: 0, restart: true }, signal, () => { this.playback = undefined; });
+        } else if (action.action === 'play_all' || action.action === 'scrub_all') {
+            const clips = this.catalog.programs.filter(program =>
+                program.clip && (this.overrides[program.id] ?? program.defaultTargets).length);
+            await this.start(frame.revision, clips, action, signal);
         } else {
             const program = this.program(frame, action.program);
             if (action.action === 'select') {
@@ -118,47 +125,59 @@ export class HostedAnimations {
                     if (targets.length) this.overrides[program.id] = targets;
                     else delete this.overrides[program.id];
                 };
-                if (this.playback?.position.program === program.id) {
+                const position = this.playback?.position;
+                if (position?.program === program.id || position?.clips?.includes(program.id)) {
                     await this.sample(frame.revision, { elapsed: 0, restart: true }, signal, () => {
                         this.playback = undefined;
                         assign();
                     });
                 } else assign();
             } else {
-                await this.start(frame.revision, program, action, signal);
+                await this.start(frame.revision, [program], action, signal);
             }
         }
         this.publish();
         return this.state;
     }
 
-    private async start(revision: number, program: HostedAnimationProgram,
-        action: Extract<HostedAnimationControl, { action: 'seek' | 'play' }>, signal: AbortSignal): Promise<void> {
-        const targets = this.overrides[program.id];
-        if (!(targets ?? program.defaultTargets).length) throw new Error('Choose controls to preview this animation.');
-        const previous = this.playback?.position.program === program.id ? this.playback.position : undefined;
-        const resume = action.action === 'play' && action.elapsed === undefined && previous && !previous.completed;
+    private async start(revision: number, programs: HostedAnimationProgram[], action: PlaybackAction, signal: AbortSignal): Promise<void> {
+        const first = programs[0];
+        if (!first || !(this.overrides[first.id] ?? first.defaultTargets).length) {
+            throw new Error('Choose controls to preview this animation.');
+        }
+        const clips = 'program' in action ? undefined : programs.map(program => program.id);
+        const playing = action.action === 'play' || action.action === 'play_all';
+        const previous = this.playback?.position;
+        const sameClips = clips ? previous?.clips?.length === clips.length && clips.every((id, index) => id === previous.clips![index])
+            : !previous?.clips;
+        const resume = playing && action.elapsed === undefined && previous?.program === first.id && sameClips && !previous.completed;
         const elapsed = action.elapsed ?? (resume ? previous.elapsed : 0);
-        if ((action.action === 'seek' && action.elapsed === undefined) || !Number.isFinite(elapsed) || elapsed < 0
-            || (!resume && program.totalDuration !== null && elapsed > program.totalDuration)) {
+        const end = programs.reduce((end, program) => Math.max(end, program.totalDuration ?? Infinity), 0);
+        if ((!playing && action.elapsed === undefined) || !Number.isFinite(elapsed) || elapsed < 0 || (!resume && elapsed > end)) {
             throw new Error('Choose a time within the animation duration.');
         }
-        await this.sample(revision, { program: program.id, targets, elapsed, restart: !resume }, signal, point => {
-            this.selection = program.id;
-            this.beginPlayback(revision, { program: program.id, elapsed: point.elapsed, completed: point.completed,
-                playing: action.action === 'play' && !point.completed }, targets);
+        const position = clips ? { program: first.id, clips } : { program: first.id };
+        await this.sample(revision, { ...this.bindings(position), elapsed, restart: !resume }, signal, point => {
+            if (!clips) this.selection = first.id;
+            this.beginPlayback(revision, { ...position, elapsed: point.elapsed, completed: point.completed,
+                playing: playing && !point.completed });
         });
     }
 
-    private beginPlayback(revision: number, position: HostedAnimationPosition, targets?: number[]): void {
-        const playback: Playback = this.playback = { revision, targets, position: { ...position } };
+    private bindings({ program, clips }: Pick<HostedAnimationPosition, 'program' | 'clips'>): Bindings {
+        return clips ? { clips: clips.map(program => ({ program, targets: this.overrides[program] })) }
+            : { program, targets: this.overrides[program] };
+    }
+
+    private beginPlayback(revision: number, position: HostedAnimationPosition): void {
+        const playback: Playback = this.playback = { revision, bindings: this.bindings(position), position: { ...position } };
         if (position.playing) playback.loop = this.run(playback);
     }
 
     private async run(playback: Playback): Promise<void> {
         try {
             await drivePreviewClock(() => playback.position.playing, async seconds => {
-                const point = await this.sample(playback.revision, { program: playback.position.program, targets: playback.targets,
+                const point = await this.sample(playback.revision, { ...playback.bindings,
                     elapsed: playback.position.elapsed + seconds, restart: false }, AbortSignal.timeout(15_000), point => {
                     playback.position = { ...playback.position, elapsed: point.elapsed, completed: point.completed,
                         playing: playback.position.playing && !point.completed };
