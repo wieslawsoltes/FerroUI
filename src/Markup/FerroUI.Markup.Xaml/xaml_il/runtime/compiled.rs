@@ -32,7 +32,7 @@ use ferroui_base::data::{
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
 use ferroui_base::styling::{Setter, SetterBase, StyleBase};
-use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, TypeInfo, UnsetValueType};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, ObjectType, Ref, StyledElement, TypeInfo, UnsetValueType};
 
 use super::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
@@ -1297,7 +1297,7 @@ pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &Doc
 /// `context.push_parent(rt::to_value(object.clone()))`: `object` on the parent stack of the
 /// context, as the value of the node ([`to_value`]).
 #[inline(never)]
-pub fn push_parent<T: PartialEq + Clone + 'static>(context: &Rc<XamlIlContext>, object: &T) {
+pub fn push_parent<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
     context.push_parent(to_value(object.clone()));
 }
 
@@ -1305,7 +1305,7 @@ pub fn push_parent<T: PartialEq + Clone + 'static>(context: &Rc<XamlIlContext>, 
 /// intermediate root of the context (the root of deferred content), as the value of the node
 /// ([`to_value`]).
 #[inline(never)]
-pub fn set_intermediate_root<T: PartialEq + Clone + 'static>(context: &Rc<XamlIlContext>, object: &T) {
+pub fn set_intermediate_root<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
     context.set_intermediate_root_object(to_value(object.clone()));
 }
 
@@ -1336,9 +1336,9 @@ pub fn pop_parent_end_init(
 /// statements of generated code did. One function for each class of element; `styled` is the
 /// element as a styled element.
 #[inline(never)]
-pub fn name_element<T: PartialEq + Clone + 'static>(
+pub fn name_element<T: ObjectType>(
     scope: Option<&Rc<dyn INameScope>>,
-    element: &T,
+    element: &Ref<T>,
     styled: &StyledElement,
     name: &str,
     line: i32,

@@ -6063,6 +6063,8 @@ mod tests {
         ] {
             assert!(native.contains(shared), "{shared} in\n{native}");
         }
+        // The control template itself is no styled element: only its content shares them.
+        let content = native.split("fn build_template_xaml_deferred_0(").nth(1).expect("the content of the template");
         for inline in [
             "context.set_intermediate_root_object(",
             "push_parent(rt::to_value(",
@@ -6072,7 +6074,7 @@ mod tests {
             "StyledElement::name_property()",
             "CompiledBindingExtension::__markup_ProvideValue_0",
         ] {
-            assert!(!native.contains(inline), "{inline} in\n{native}");
+            assert!(!content.contains(inline), "{inline} in\n{content}");
         }
         let typed = emit(XamlBackend::Bytecode);
         let helpers = [
