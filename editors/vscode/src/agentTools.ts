@@ -8,7 +8,7 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
-import type { HostedAnimationControl, HostedKeyframeDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationControl, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
@@ -149,6 +149,9 @@ export class AgentTools {
             case 'designer_hosted_fixture':
                 return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
             case 'designer_hosted_animations': return this.hosted.animations(document.uri);
+            case 'designer_hosted_curve':
+                return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedCurveQuery, signal);
             case 'designer_hosted_image': return this.hosted.image(document.uri);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },

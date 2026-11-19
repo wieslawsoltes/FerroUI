@@ -79,7 +79,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
-        for (const name of ['open', 'animations', 'animation', 'image', 'keyframe_draft', 'keyframe']) {
+        for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);

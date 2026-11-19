@@ -2,8 +2,8 @@ import type { HostedAnimationFrame, HostedKeyframeSelection } from '../src/hoste
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 
-function editorFrame(frame: HostedAnimationFrame) {
-    return { session: 1, token: frame.sequence };
+export function editorFrame(frame: HostedAnimationFrame) {
+    return { session: frame.revision, token: frame.sequence };
 }
 
 export class HostedKeyframeEditor {
@@ -13,16 +13,21 @@ export class HostedKeyframeEditor {
     constructor(send: (message: FromHosted) => void, restoreFocus: () => void) {
         this.editor = new TimelineKeyframeEditor(request => {
             const frame = this.frame;
-            if (frame?.sequence === request.frame.token) {
+            if (frame?.revision === request.frame.session && frame.sequence === request.frame.token) {
                 send({ type: 'keyframeDraft', frame, request: request.request, draft: request.draft, apply: request.apply });
             }
         }, undefined, undefined, restoreFocus);
     }
 
-    open(key: HostedKeyframeSelection) {
+    open(key: HostedKeyframeSelection, focus = true) {
         this.frame = key.frame;
         this.editor.open(editorFrame(key.frame), key.version, key.program, key.target, key.property,
-            key.keyframe, key.targetName, key.duration, true);
+            key.keyframe, key.targetName, key.duration, focus);
+    }
+
+    drag(key: HostedKeyframeSelection, time: number, value: number) {
+        this.open(key, false);
+        this.editor.applyCurveDrag(editorFrame(key.frame), time, value);
     }
 
     follow(frame: HostedAnimationFrame | undefined, version: number, program: number | undefined) {

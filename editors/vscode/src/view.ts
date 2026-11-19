@@ -273,6 +273,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
             ${tool('hosted-animation-targets', 'target', 'Choose preview targets')}
             ${tool('hosted-animation-source', 'go-to-file', 'Reveal animation in source')}
             ${tool('hosted-animation-keyframe', 'edit', 'Edit application keyframe', 'hidden')}
+            ${tool('hosted-animation-curves', 'graph-line', 'Application animation curves', 'aria-pressed="false" aria-controls="hosted-curves" hidden')}
             <span class="toolbar-divider" aria-hidden="true"></span>
             ${tool('hosted-animation-play', 'play', 'Play application animation')}
             ${tool('hosted-animation-stop', 'debug-stop', 'Stop application animation')}
@@ -282,6 +283,20 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <input id="hosted-animation-seek" type="range" min="0" step="0.001" aria-label="Application animation playhead">
         <output id="hosted-animation-time" for="hosted-animation-seek"></output>
     </div>
+    <section id="hosted-curves" aria-label="Authored animation curves" hidden>
+        <div class="toolbar hosted-curve-toolbar">
+            <select id="hosted-curve-track" aria-label="Scalar animation track"></select>
+            <span id="hosted-curve-scale" title="Visible value range"></span>
+            <div class="tool-group" role="group" aria-label="Curve zoom">
+                ${tool('hosted-curve-fit-key', 'selection', 'Fit selected keyframe', 'disabled')}
+                ${tool('hosted-curve-out', 'zoom-out', 'Zoom out on curve')}
+                ${tool('hosted-curve-fit', 'screen-normal', 'Fit complete curve')}
+                ${tool('hosted-curve-in', 'zoom-in', 'Zoom in on curve')}
+            </div>
+        </div>
+        <div class="hosted-curve-axis" id="hosted-curve-axis" aria-label="Authored time"></div>
+        <div id="hosted-curve-lane" class="timeline-lane" aria-label="Value curve"></div>
+    </section>
 </section>
 ${keyframeEditorHtml(false)}
 <p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
@@ -289,7 +304,7 @@ ${keyframeEditorHtml(false)}
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`, ['keyframe-editor']);
+</form>`, ['timeline-curve', 'keyframe-editor']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -426,7 +441,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
         </div>
         ${keyframeEditorHtml()}
     </section>
-</main>`, ['keyframe-editor']);
+</main>`, ['timeline-curve', 'keyframe-editor']);
 }
 
 export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): string {

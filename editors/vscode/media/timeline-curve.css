@@ -1,0 +1,63 @@
+.timeline-key {
+    position: absolute;
+    inset-block-start: 50%;
+    display: grid;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    inline-size: 22px;
+    block-size: 24px;
+    min-block-size: 0;
+    border: 0;
+    padding: 0;
+    z-index: 1;
+    touch-action: none;
+}
+.timeline-key::before {
+    content: '';
+    inline-size: 8px;
+    block-size: 8px;
+    transform: rotate(45deg);
+    border: 1px solid var(--vscode-button-foreground);
+    border-radius: 1px;
+    background: var(--vscode-button-background);
+}
+.timeline-key:hover::before, .timeline-key-dragging::before { background: var(--vscode-button-hoverBackground); }
+.timeline-key[aria-pressed="true"] {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+.timeline-key[aria-pressed="true"]::before { border-color: currentColor; }
+.timeline-key-dragging { cursor: ew-resize; }
+.timeline-curve-scale, .timeline-curve-plot, .timeline-curve-status { display: none; }
+.timeline-track:has([data-curve]) .timeline-curve-scale, #hosted-curve-scale[data-active] .timeline-curve-scale {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    color: var(--muted);
+    font-size: .8em;
+    font-variant-numeric: tabular-nums;
+}
+.timeline-curve-scale span:nth-child(2)::before { content: '–'; margin-inline-end: 4px; }
+[data-curve] .timeline-curve-plot {
+    position: absolute;
+    display: block;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    fill: none;
+    stroke: var(--vscode-charts-blue, var(--focus));
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+}
+[data-curve] .timeline-curve-status:not(:empty) {
+    position: absolute;
+    display: block;
+    inset: 5px;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: .85em;
+    pointer-events: none;
+}
+[data-curve] .timeline-key-dragging { cursor: move; }

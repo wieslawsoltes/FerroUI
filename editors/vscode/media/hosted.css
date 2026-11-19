@@ -8,6 +8,30 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 .timeline-keyframe-editor { margin-inline: 8px; max-block-size: 44vh; overflow: auto; }
 #hosted-animation-seek { flex: 1 1 auto; min-inline-size: 0; accent-color: var(--focus); }
 #hosted-animation-time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#hosted-curves { margin: 4px 8px; border: 1px solid var(--line); border-radius: 4px; }
+.hosted-curve-toolbar { gap: 5px; padding: 2px 5px; }
+#hosted-curve-track { flex: 1 1 65px; min-inline-size: 0; }
+.hosted-curve-axis {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 8px 1px;
+    color: var(--muted);
+    font-size: .85em;
+    font-variant-numeric: tabular-nums;
+}
+#hosted-curve-lane {
+    position: relative;
+    block-size: clamp(66px, 16vh, 105px);
+    margin: 0 12px 5px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%),
+        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 25%);
+    border-inline-end: 1px solid var(--line);
+    user-select: none;
+}
+@media (max-width: 240px) {
+    .hosted-curve-axis span:nth-child(even) { display: none; }
+    #hosted-curve-scale { display: none; }
+}
 #hosted-status { flex: none; margin-block: 5px; }
 .hosted-canvas {
     flex: 1;

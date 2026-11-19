@@ -1,6 +1,7 @@
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
-import type { FromHosted } from '../src/hostedProtocol';
+import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import { element, labelButton } from './dom';
+import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
 
 export class HostedAnimationView {
@@ -22,6 +23,7 @@ export class HostedAnimationView {
     private request = 0;
     private pending?: number;
     private documentVersion = 0;
+    private readonly curves: HostedCurves;
     readonly keyframes: HostedKeyframeEditor;
 
     constructor(private readonly send: (message: FromHosted) => void) {
@@ -30,6 +32,7 @@ export class HostedAnimationView {
             const button = this.edit.disabled || this.edit.hidden ? element('hosted-refresh') : this.edit;
             button.focus({ preventScroll: true });
         });
+        this.curves = new HostedCurves(send, this.keyframes);
         this.programs.onchange = () => {
             this.queued = undefined;
             this.keyframes.close();
@@ -88,6 +91,8 @@ export class HostedAnimationView {
         this.paint();
     }
 
+    curve(reply: Extract<ToHosted, { type: 'curveReply' }>) { this.curves.receive(reply); }
+
     private canUse(interrupt = false): boolean {
         const frame = this.state.frame;
         const decoded = this.decoded;
@@ -132,6 +137,8 @@ export class HostedAnimationView {
         this.edit.hidden = !program?.authoring;
         this.edit.disabled = !usable;
         this.keyframes.follow(usable ? this.state.frame : undefined, this.documentVersion, program?.id);
+        this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
+            usable ? this.state.frame : undefined, this.documentVersion);
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         labelButton(this.play, playing ? 'Pause application animation' : current && !current.completed ? 'Resume application animation' : 'Play application animation',
             playing ? 'debug-pause' : 'play');

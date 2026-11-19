@@ -1,4 +1,4 @@
-import type { KeyframeDraft, KeyframeDraftPreview, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
+import type { KeyframeDraft, KeyframeDraftPreview, TimelineCurveRequest, TimelineKeyframe, TimelineTrack } from './timelineProtocol';
 
 export interface HostedAnimationProgram {
     id: number;
@@ -11,6 +11,7 @@ export interface HostedAnimationProgram {
     sourceOffset: number;
     customAnimator: boolean;
     authoring?: { codec: string; tracks: TimelineTrack[] } | null;
+    curveTracks?: TimelineTrack[] | null;
 }
 
 export interface HostedAnimationTarget {
@@ -68,6 +69,7 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
 }
 
 export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
+export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window'>;
 
 export interface HostedKeyframePlan extends KeyframeDraftPreview {
     patch: { start: number; end: number; expected: string; replacement: string } | null;

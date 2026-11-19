@@ -1,7 +1,7 @@
 import type { Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
-    HostedAnimationState, HostedKeyframeDraft, HostedKeyframeSelection } from './hostedAnimationProtocol';
-import type { KeyframeDraftPreview } from './timelineProtocol';
+    HostedAnimationState, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeSelection } from './hostedAnimationProtocol';
+import type { CurvePoint, KeyframeDraftPreview } from './timelineProtocol';
 
 export interface HostedSource {
     document: Source;
@@ -43,11 +43,13 @@ export type FromHosted = HostedInput | { type: 'ready' | 'refresh' }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
     | { type: 'animationTargets' | 'animationSource'; frame: HostedAnimationFrame; program: number }
     | { type: 'chooseKeyframe'; frame: HostedAnimationFrame; program: number }
+    | { type: 'curve'; frame: HostedAnimationFrame; request: number; query: HostedCurveQuery }
     | { type: 'keyframeDraft'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeDraft; apply: boolean }
     | { type: 'fixture'; revision: number; name: string | null };
 export type ToHosted = { type: 'frame'; frame: HostedFrame }
     | { type: 'animations'; state: HostedAnimationState; version: number }
     | { type: 'animationReply'; request: number }
     | { type: 'openKeyframe'; key: HostedKeyframeSelection }
+    | { type: 'curveReply'; request: number; frame: HostedAnimationFrame; points?: CurvePoint[]; error?: string }
     | { type: 'keyframeReply'; frame: HostedAnimationFrame; request: number; preview?: KeyframeDraftPreview; applied?: boolean; error?: string }
     | { type: 'status'; message: string; interactive: boolean; fixtures: HostedFixtureCatalog };

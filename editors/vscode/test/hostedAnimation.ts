@@ -55,3 +55,41 @@ export async function verifyHostedAnimation(preview: NativePreview, update: (rev
     await assert.rejects(preview.sampleHostedAnimation({ ...retired, program: style.id, elapsed: 1, restart: true }), /frame changed/i);
     console.log('App-hosted Timeline used the registered animator for a style and resource, matched the expected native frame and rejected retired samples');
 }
+
+export async function verifyHostedScalarCurve(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
+    const authored = animationFixture(8, `<!-- Keep this preview note 🚀 -->
+    <Window.Styles><Style Selector="Border#ReviewCard"><Style.Animations>
+        <Animation Duration="0:0:2" FillMode="Both">
+            <KeyFrame Cue="0%"><Setter Property="Width" Value="140"/></KeyFrame>
+            <KeyFrame Cue="50%" KeySpline="0.2,0.4,0.5,1.7"><Setter Property="Width" Value="220"/></KeyFrame>
+            <KeyFrame Cue="100%"><Setter Property="Width" Value="180"/></KeyFrame>
+        </Animation>
+    </Style.Animations></Style></Window.Styles>`).replaceAll('\n', '\r\n');
+    const first = await preview.renderHosted(update(30, authored));
+    const program = first.animations?.programs.find(clip => clip.curveTracks?.some(track => track.property === 'Width'));
+    const track = program?.curveTracks?.find(track => track.property === 'Width');
+    assert.ok(program && track && program.authoring, 'Publish a scalar graph and the native codec for its exact authored track');
+    const active = await preview.sampleHostedAnimation({ revision: first.revision, sequence: first.sequence,
+        program: program.id, elapsed: 1, restart: true });
+    const frame = { revision: first.revision, sequence: active.frame.sequence };
+    const query = { program: program.id, target: program.defaultTargets[0], property: 'Width', window: { start: 0, end: 2 } };
+    const trace = await preview.hostedCurve(frame, query);
+    assert.deepEqual(trace.find(point => point.time === 1), { time: 1, value: 220 });
+    assert.ok(trace.some(point => point.value > 220), 'Use the loaded easing and include values beyond the authored keys');
+    await assert.rejects(preview.hostedCurve({ ...frame, sequence: first.sequence }, query), /frame changed/i);
+    await assert.rejects(preview.hostedCurve(frame, { ...query, window: { start: 1, end: 3 } }), /range/i);
+    const draft = await preview.planHostedKeyframe(frame, { program: program.id, target: track.target, property: 'Width',
+        previous: 1, time: 1.25, value: '208', easing: track.keyframes[1].easing_text });
+    assert.ok(draft.patch);
+    const { start, end, expected, replacement } = draft.patch;
+    assert.equal(authored.slice(start, end), expected);
+    const changed = authored.slice(0, start) + replacement + authored.slice(end);
+    assert.ok(changed.includes('Keep this preview note 🚀'));
+    assert.ok(!changed.replaceAll('\r\n', '').includes('\n'));
+    assert.match(changed, /Property="Width" Value="208"/);
+    const staticPose = await preview.renderHosted(update(31, animationFixture(8).replace('Width="180"', 'Width="220"')));
+    assert.equal(active.frame.image.png, staticPose.image.png, 'The graph and native frame reach the same midpoint width');
+    const rebuilt = await preview.renderHosted(update(32, changed));
+    assert.equal(rebuilt.animations?.programs[0]?.curveTracks?.[0]?.keyframes[1]?.time, 1.25);
+    console.log('App-hosted curves matched the native frame, exposed overshoot, rejected retired identities, and edited one CRLF source patch');
+}

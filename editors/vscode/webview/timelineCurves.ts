@@ -45,7 +45,7 @@ export class TimelineCurvePlot {
 
     has(key: string): boolean { return this.accepted?.key === key; }
 
-    receive(key: string, message: TimelineCurveResponse): void {
+    receive(key: string, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
         if (message.points?.length && message.points.every(point => Number.isFinite(point.time) && Number.isFinite(point.value))) {
             this.accepted = { key, points: message.points };
             this.failed = undefined;

@@ -4,7 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest, HostedKeyframeDraft } from './hostedAnimationProtocol';
+import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { applyHostedKeyframePatch, chooseHostedKeyframe } from './hostedKeyframes';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
@@ -116,6 +116,12 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.keyframe(frame, draft, apply, signal);
+    }
+
+    curve(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.curve(frame, query, signal);
     }
 
     async chooseFixture(uri: vscode.Uri, generation: number, revision: number, name: string | null, signal: AbortSignal): Promise<HostedFixtureCatalog> {
@@ -341,7 +347,7 @@ class HostedSession {
         await this.polling;
         signal.throwIfAborted();
         const program = this.animations.program(frame, draft.program);
-        if (this.language !== 'xaml' || !program.authoring) throw new Error('Choose an XAML animation with a registered project codec.');
+        if (this.language !== 'xaml' || !program.authoring) throw new Error('Choose an editable animation in the current XAML preview.');
         const client = this.client;
         if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
             throw new Error('Wait for the current application preview frame.');
@@ -362,6 +368,27 @@ class HostedSession {
             this.pending = false;
             this.schedule(this.requested === this.revision ? 160 : 0);
         }
+    }
+
+    async curve(frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
+        await this.polling;
+        signal.throwIfAborted();
+        const program = this.animations.program(frame, query.program);
+        if (!program.curveTracks?.some(track => track.property === query.property)
+            || !program.compatibleTargets.includes(query.target)) {
+            throw new Error('Choose a scalar track and a compatible live control.');
+        }
+        const client = this.client;
+        if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
+            throw new Error('Wait for the current application preview or pause playback.');
+        }
+        const points = await client.hostedCurve(frame, query);
+        signal.throwIfAborted();
+        if (client !== this.client || this.disposed || frame.revision !== this.revision
+            || frame.sequence !== this.currentFrame?.sequence) {
+            throw new Error('The application preview changed while sampling the curve.');
+        }
+        return points;
     }
 
     private async openKeyframe(frame: HostedAnimationFrame, id: number): Promise<void> {
@@ -389,6 +416,14 @@ class HostedSession {
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'curve') {
+            const reply = { type: 'curveReply' as const, request: message.request, frame: message.frame };
+            try {
+                const points = await this.curve(message.frame, message.query, AbortSignal.timeout(12_000));
+                this.post({ ...reply, points });
+            } catch (error) { this.post({ ...reply, error: errorMessage(error) }); }
+            return;
+        }
         if (message.type === 'keyframeDraft') {
             const reply = { type: 'keyframeReply' as const, frame: message.frame, request: message.request };
             try {

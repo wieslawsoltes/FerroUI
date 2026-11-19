@@ -4,11 +4,11 @@ import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
-import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
+import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
-import type { HostedAnimationFrame, HostedAnimationRequest, HostedKeyframeDraft, HostedKeyframePlan } from './hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationRequest, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframePlan } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -115,6 +115,9 @@ export class NativePreview implements vscode.Disposable {
 
     planHostedKeyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
         return this.send('hostedKeyframe', { ...frame, ...draft }, 12_000);
+    }
+    hostedCurve(frame: HostedAnimationFrame, query: HostedCurveQuery): Promise<CurvePoint[]> {
+        return this.send('hostedCurve', { ...frame, ...query }, 12_000);
     }
 
     syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {

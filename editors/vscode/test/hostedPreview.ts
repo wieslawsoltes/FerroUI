@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import type { NativePreview } from '../src/nativePreview';
 import type { HostedSource } from '../src/hostedProtocol';
-import { verifyHostedAnimation } from './hostedAnimation';
+import { verifyHostedAnimation, verifyHostedScalarCurve } from './hostedAnimation';
 import { verifyHostedCodec } from './hostedCodec';
 import { verifyHostedContinuity } from './hostedContinuity';
 
@@ -65,6 +65,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedAnimation(preview, update);
         await verifyHostedCodec(preview, update);
         await verifyHostedContinuity(preview, update);
+        await verifyHostedScalarCurve(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

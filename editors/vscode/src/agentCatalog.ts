@@ -60,9 +60,16 @@ export const agentCatalog = {
             required: ['action'], properties: { action: choice('select', 'seek', 'play', 'pause', 'stop', 'targets', 'reveal'), program: node,
                 elapsed: { type: 'number', minimum: 0 }, targets: { type: 'array', items: node, maxItems: 2000 } } },
     }, ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'], true, false),
-    designer_hosted_keyframe_draft: tool('Validate a keyframe through the app preview’s registered project codec. Return easing samples and a checked XAML patch. Use the current app generation, revision, sequence, and authored track.',
+    designer_hosted_curve: tool('Sample an authored scalar animation track with the running project’s preview animator. Supply the current app generation, frame, live target and authored time window.',
+        { ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: {
+            type: 'object', additionalProperties: false, required: ['program', 'target', 'property', 'window'],
+            properties: { program: node, target: node, property: text, window: {
+                type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: time, end: time },
+            } },
+        } }, hostedKeyframeRequired),
+    designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe through its animation codec. Return easing samples and a checked XAML patch. Use the current app generation, revision, sequence, and authored track.',
         hostedKeyframe, hostedKeyframeRequired),
-    designer_hosted_keyframe: tool('Apply a validated project codec keyframe as one undoable edit to the current XAML buffer. Omit previous to insert a key on the existing track.',
+    designer_hosted_keyframe: tool('Apply a validated animation keyframe as one undoable edit to the current XAML buffer. Omit previous to insert a key on the existing track.',
         hostedKeyframe, hostedKeyframeRequired, true),
     designer_wait: tool('Wait for the native preview of the current authored buffer. Return the revision, RSX invocation ranges, and rendering diagnostics.',
         session, ['session']),

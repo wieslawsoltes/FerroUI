@@ -233,6 +233,10 @@ offsets, values and easing; collisions reject the
 entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
 keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
+Use **Show value curves** to graph scalar properties on the same ruler and playhead. Each
+track scales to its visible values, including overshoot. Drag a key to edit time and value
+in one undo step. Select a key to edit its time, value and easing with the keyboard. The
+fit icon frames a selection in Curves mode.
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name
@@ -446,8 +450,10 @@ animation value.
 The `designer_animation_curve` query plots a scalar track over a range of authored seconds. Typed
 tracks use the same compiled target and underlying value as Studio’s scrubber. Registered scalar
 animators use the loaded native interpolation with temporary setter bindings. The query leaves the
-active playhead and target property unchanged. VS Code uses these samples in its Curves mode and
-applies key drags through the same checked transaction as the keyframe editor.
+active playhead and target property unchanged. Studio and VS Code route curve drags through
+the same checked transaction as the keyframe editor. With the negotiated animation curve
+protocol, App Preview also samples its loaded native animator and uses the source document's
+animation codec to plan editable XAML keys.
 
 Programs with native object payloads also use the accepted runtime Animation objects directly.
 Source provenance identifies the matching style or resource program, and an explicit preview clock
