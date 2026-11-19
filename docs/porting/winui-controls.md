@@ -96,6 +96,8 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `NavigationViewItemSeparator` | WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `RichEditBox` | WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4) | R8 of #243 |
 | `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
+| `ListView` | WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-1 (#443) |
+| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes | LV-1 (#443) |
 | `Pivot` | WinUI's Pivot: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |

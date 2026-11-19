@@ -525,6 +525,29 @@ lines of WinUI), incremental loading, semantic zoom, grouping and sticky headers
 animation helpers (FerroUI's `ConnectedAnimationService` serves them from application code), the
 scrolling placeholders.
 
+**Status (LV-1, done).** `ListViewBase`, `ListView`, `ListViewBaseItem`, `ListViewItem`,
+`ListViewItemTemplateSettings`, `ItemsStackPanel`, `ItemClickEventArgs`,
+`ContainerContentChangingEventArgs`, `ChoosingItemContainerEventArgs`, `ItemIndexRange` and the
+enums `ListViewSelectionMode`, `ScrollIntoViewAlignment`, `ListViewReorderMode`,
+`IncrementalLoadingTrigger`, `ItemsUpdatingScrollMode`, `GroupHeaderPlacement` in
+`ferroui-controls` (`list_view/`), with the peers `ListViewBaseAutomationPeer`,
+`ListViewAutomationPeer` (List, Selection), `ListViewBaseItemAutomationPeer` and
+`ListViewItemAutomationPeer` (ListItem, SelectionItem, Invoke while item clicks are enabled).
+`SelectionMode` of `ListViewBase` is its own property (found first by name on a list view) that
+sets the flags of the base as the table above says; `None` clears the selection and keeps input
+from selecting. Item clicks follow WinUI's `OnItemClick` (a tap, Enter, the Invoke pattern) with
+the data item as `ClickedItem`. `ContainerContentChanging` is raised in phase 0 when a container
+is prepared and when it is cleared (`InRecycleQueue`); `ChoosingItemContainer` lets a handler give
+the container. `ScrollIntoView` with `Leading` puts the item at the start of the viewport.
+`ItemsStackPanel` is FerroUI's virtualizing stack panel with WinUI's visible and cache indexes;
+the grouping members are accepted. `ListViewBase` and `ListViewBaseItem` have no markup
+constructor (WinUI's are protected). The WinUI theme has `Controls/ListView.xaml` (the ListView
+style of `generic.xaml`, with the header and the footer as content presenters around the items
+presenter, and the implicit theme of `ListViewItem` based on `DefaultListViewItemStyle`); the
+ListView waiver is removed and G-23 and LBI-8 are updated. `ListView` and `ListViewItem` join the
+WinUI-only list. The catalog has a "ListView" page in "Collections & Data". Tests:
+`list_view/list_view_tests.rs`.
+
 ### 6.3 Templates and resources (WinUI theme)
 
 - `Controls/ListView.xaml` and `Controls/GridView.xaml` from GX 9284 and 9348:

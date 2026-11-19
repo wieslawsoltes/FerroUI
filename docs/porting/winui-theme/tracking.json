@@ -77725,7 +77725,7 @@
    "kind": "Style",
    "target_type": "RichTextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77735,7 +77735,7 @@
    "kind": "Style",
    "target_type": "RichTextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77835,7 +77835,7 @@
    "kind": "Style",
    "target_type": "ContentPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77845,7 +77845,7 @@
    "kind": "Style",
    "target_type": "TextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77855,7 +77855,7 @@
    "kind": "Style",
    "target_type": "GridViewItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77895,7 +77895,7 @@
    "kind": "Style",
    "target_type": "MenuFlyoutItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77905,7 +77905,7 @@
    "kind": "Style",
    "target_type": "MenuFlyoutItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77915,7 +77915,7 @@
    "kind": "DataTemplate",
    "target_type": "",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78125,7 +78125,7 @@
    "kind": "Style",
    "target_type": "AppBarElementContainer",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78135,7 +78135,7 @@
    "kind": "Style",
    "target_type": "AppBar",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78175,7 +78175,7 @@
    "kind": "Style",
    "target_type": "GridViewHeaderItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78185,7 +78185,7 @@
    "kind": "Style",
    "target_type": "GridView",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78195,7 +78195,7 @@
    "kind": "Style",
    "target_type": "GroupItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78205,7 +78205,7 @@
    "kind": "Style",
    "target_type": "HubSection",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78215,7 +78215,7 @@
    "kind": "Style",
    "target_type": "Hub",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78225,7 +78225,7 @@
    "kind": "Style",
    "target_type": "ListPickerFlyoutPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78235,7 +78235,7 @@
    "kind": "Style",
    "target_type": "ListViewHeaderItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78244,8 +78244,8 @@
    "key": "{ListView}",
    "kind": "Style",
    "target_type": "ListView",
-   "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -78265,7 +78265,7 @@
    "kind": "Style",
    "target_type": "PickerFlyoutPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78275,7 +78275,7 @@
    "kind": "Style",
    "target_type": "SemanticZoom",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -90096,6 +90096,7 @@
   "Controls/Label.xaml",
   "Controls/ListBox.xaml",
   "Controls/ListBoxItem.xaml",
+  "Controls/ListView.xaml",
   "Controls/ManagedFileChooser.xaml",
   "Controls/MediaTransportControls.xaml",
   "Controls/Menu.xaml",
@@ -90657,6 +90658,18 @@
    "status": "ported",
    "deviations": 4,
    "date": "2026-10-17"
+  },
+  {
+   "document": "ListView.xaml",
+   "themes": [
+    "{ListView}",
+    "{ListViewItem}"
+   ],
+   "batch": "B3",
+   "winui": "ListView: {ListView} (generic.xaml) and {ListViewItem} (ListViewItem_themeresources.xaml, based on DefaultListViewItemStyle of ListBoxItem.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-18"
   },
   {
    "document": "ListBoxItem.xaml",
@@ -91433,10 +91446,10 @@
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-   "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+   "key": "re:\\{(Hub|HubSection|SemanticZoom|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
    "variant": null,
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
-   "items": 20
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "items": 19
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
@@ -91899,10 +91912,14 @@
    "ferroui": "ListBoxItem",
    "batch": "B3"
   },
+  "ListView": {
+   "ferroui": "ListView",
+   "batch": "B3"
+  },
   "ListViewItem": {
-   "ferroui": "ListBoxItem",
+   "ferroui": "ListViewItem",
    "batch": "B3",
-   "note": "the keyed ListViewItem styles; the implicit one has no FerroUI control (no ListView)"
+   "note": "the implicit style; the keyed ListViewItem styles are keyed themes of ListBoxItem, which ListViewItem derives from"
   },
   "LoopingSelector": {
    "ferroui": null,

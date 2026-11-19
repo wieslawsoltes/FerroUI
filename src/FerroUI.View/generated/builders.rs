@@ -764,6 +764,19 @@ pub fn items_presenter() -> El<ferroui_controls::presenters::ItemsPresenter> {
     El::new()
 }
 
+pub use ferroui_controls::ItemsStackPanel;
+
+impl ViewClass for ferroui_controls::ItemsStackPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ItemsStackPanel>::new()
+    }
+}
+
+/// Starts an element of [`ItemsStackPanel`](ferroui_controls::ItemsStackPanel).
+pub fn items_stack_panel() -> El<ferroui_controls::ItemsStackPanel> {
+    El::new()
+}
+
 pub use ferroui_controls::Label;
 
 impl ViewClass for ferroui_controls::Label {
@@ -839,6 +852,32 @@ impl ViewClass for ferroui_controls::ListBoxItem {
 
 /// Starts an element of [`ListBoxItem`](ferroui_controls::ListBoxItem).
 pub fn list_box_item() -> El<ferroui_controls::ListBoxItem> {
+    El::new()
+}
+
+pub use ferroui_controls::ListView;
+
+impl ViewClass for ferroui_controls::ListView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ListView>::new()
+    }
+}
+
+/// Starts an element of [`ListView`](ferroui_controls::ListView).
+pub fn list_view() -> El<ferroui_controls::ListView> {
+    El::new()
+}
+
+pub use ferroui_controls::ListViewItem;
+
+impl ViewClass for ferroui_controls::ListViewItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ListViewItem>::new()
+    }
+}
+
+/// Starts an element of [`ListViewItem`](ferroui_controls::ListViewItem).
+pub fn list_view_item() -> El<ferroui_controls::ListViewItem> {
     El::new()
 }
 
@@ -5080,6 +5119,30 @@ pub trait ItemsPresenterProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::presenters::ItemsPresenter>> ItemsPresenterProps for El<T> {}
 
+/// The properties and routed events of [`ItemsStackPanel`](ferroui_controls::ItemsStackPanel).
+pub trait ItemsStackPanelProps: ElementBuilder {
+    /// Sets [`ItemsStackPanel::items_updating_scroll_mode_property`](ferroui_controls::ItemsStackPanel::items_updating_scroll_mode_property).
+    fn items_updating_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ItemsUpdatingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsStackPanel>::items_updating_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ItemsStackPanel::group_padding_property`](ferroui_controls::ItemsStackPanel::group_padding_property).
+    fn group_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsStackPanel>::group_padding_property(), value)
+    }
+
+    /// Sets [`ItemsStackPanel::group_header_placement_property`](ferroui_controls::ItemsStackPanel::group_header_placement_property).
+    fn group_header_placement<M>(self, value: impl IntoProp<ferroui_controls::GroupHeaderPlacement, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsStackPanel>::group_header_placement_property(), value)
+    }
+
+    /// Sets [`ItemsStackPanel::are_sticky_group_headers_enabled_property`](ferroui_controls::ItemsStackPanel::are_sticky_group_headers_enabled_property).
+    fn are_sticky_group_headers_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsStackPanel>::are_sticky_group_headers_enabled_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ItemsStackPanel>> ItemsStackPanelProps for El<T> {}
+
 /// The properties and routed events of [`KeyBinding`](ferroui_base::input::KeyBinding).
 pub trait KeyBindingProps: ElementBuilder {
     /// Sets [`KeyBinding::command_property`](ferroui_base::input::KeyBinding::command_property).
@@ -5226,6 +5289,90 @@ pub trait ListBoxItemProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ListBoxItem>> ListBoxItemProps for El<T> {}
+
+/// The properties and routed events of [`ListViewBase`](ferroui_controls::ListViewBase).
+pub trait ListViewBaseProps: ElementBuilder {
+    /// Sets [`ListViewBase::list_view_selection_mode_property`](ferroui_controls::ListViewBase::list_view_selection_mode_property).
+    fn list_view_selection_mode<M>(self, value: impl IntoProp<ferroui_controls::ListViewSelectionMode, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::list_view_selection_mode_property(), value)
+    }
+
+    /// Sets [`ListViewBase::is_item_click_enabled_property`](ferroui_controls::ListViewBase::is_item_click_enabled_property).
+    fn is_item_click_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::is_item_click_enabled_property(), value)
+    }
+
+    /// Sets [`ListViewBase::header_property`](ferroui_controls::ListViewBase::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::header_property(), value)
+    }
+
+    /// Sets [`ListViewBase::header_template_property`](ferroui_controls::ListViewBase::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::header_template_property(), value)
+    }
+
+    /// Sets [`ListViewBase::footer_property`](ferroui_controls::ListViewBase::footer_property).
+    fn footer<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::footer_property(), value)
+    }
+
+    /// Sets [`ListViewBase::footer_template_property`](ferroui_controls::ListViewBase::footer_template_property).
+    fn footer_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::footer_template_property(), value)
+    }
+
+    /// Sets [`ListViewBase::single_selection_follows_focus_property`](ferroui_controls::ListViewBase::single_selection_follows_focus_property).
+    fn single_selection_follows_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::single_selection_follows_focus_property(), value)
+    }
+
+    /// Sets [`ListViewBase::is_multi_select_check_box_enabled_property`](ferroui_controls::ListViewBase::is_multi_select_check_box_enabled_property).
+    fn is_multi_select_check_box_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::is_multi_select_check_box_enabled_property(), value)
+    }
+
+    /// Sets [`ListViewBase::shows_scrolling_placeholders_property`](ferroui_controls::ListViewBase::shows_scrolling_placeholders_property).
+    fn shows_scrolling_placeholders<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::shows_scrolling_placeholders_property(), value)
+    }
+
+    /// Sets [`ListViewBase::is_swipe_enabled_property`](ferroui_controls::ListViewBase::is_swipe_enabled_property).
+    fn is_swipe_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::is_swipe_enabled_property(), value)
+    }
+
+    /// Sets [`ListViewBase::can_drag_items_property`](ferroui_controls::ListViewBase::can_drag_items_property).
+    fn can_drag_items<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::can_drag_items_property(), value)
+    }
+
+    /// Sets [`ListViewBase::can_reorder_items_property`](ferroui_controls::ListViewBase::can_reorder_items_property).
+    fn can_reorder_items<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::can_reorder_items_property(), value)
+    }
+
+    /// Sets [`ListViewBase::reorder_mode_property`](ferroui_controls::ListViewBase::reorder_mode_property).
+    fn reorder_mode<M>(self, value: impl IntoProp<ferroui_controls::ListViewReorderMode, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::reorder_mode_property(), value)
+    }
+
+    /// Sets [`ListViewBase::incremental_loading_trigger_property`](ferroui_controls::ListViewBase::incremental_loading_trigger_property).
+    fn incremental_loading_trigger<M>(self, value: impl IntoProp<ferroui_controls::IncrementalLoadingTrigger, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::incremental_loading_trigger_property(), value)
+    }
+
+    /// Sets [`ListViewBase::incremental_loading_threshold_property`](ferroui_controls::ListViewBase::incremental_loading_threshold_property).
+    fn incremental_loading_threshold<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::incremental_loading_threshold_property(), value)
+    }
+
+    /// Sets [`ListViewBase::data_fetch_size_property`](ferroui_controls::ListViewBase::data_fetch_size_property).
+    fn data_fetch_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ListViewBase>::data_fetch_size_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ListViewBase>> ListViewBaseProps for El<T> {}
 
 /// The properties and routed events of [`MaskedTextBox`](ferroui_controls::MaskedTextBox).
 pub trait MaskedTextBoxProps: ElementBuilder {

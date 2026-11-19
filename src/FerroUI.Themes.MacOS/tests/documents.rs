@@ -275,6 +275,7 @@ document_tests! {
     controls_frame => "/Controls/Frame.xaml";
     controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
+    controls_list_view => "/Controls/ListView.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
 }

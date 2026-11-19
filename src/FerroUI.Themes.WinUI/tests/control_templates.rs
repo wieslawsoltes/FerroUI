@@ -219,6 +219,8 @@ control_tests! {
     hyperlink_button => "HyperlinkButton";
     list_box => "ListBox";
     list_box_item => "ListBoxItem";
+    list_view => "ListView";
+    list_view_item => "ListViewItem";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
