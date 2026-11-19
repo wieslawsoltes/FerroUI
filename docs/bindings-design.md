@@ -197,7 +197,7 @@ writes a class. Every backend follows the same rules:
 | Go | exported cgo functions on the locked UI thread, a `cgo.Handle` | an interface the type implements (optional interfaces per member) |
 | Python | `cffi` `@ffi.def_extern` (or `ctypes` callbacks), a kept handle | a class with methods the binding checks for at registration |
 | JavaScript (WebAssembly) | imported functions of the module | a class with methods, or a record of functions |
-| Osprey | named functions at the call site; state in registered properties | a record of named functions given to `ferro_class_on_*` (docs/osprey.md, section 8) |
+| Osprey | named functions at the call site; state in registered properties | named functions given to `ferro_class_on_*` and the helpers of `core.osp` (docs/osprey.md, section 8) |
 
 The typical cost of one callback per language is in docs/c-abi-languages.md, section 4; those
 are typical for each FFI, not measurements of FerroUI.
