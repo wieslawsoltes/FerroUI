@@ -25,9 +25,10 @@
 //!   renders that read it); one inlined sampler (linear, the edges clamped).
 //! - **Uniforms.** A [`Scene3DMetalViewport`] holds the uniform buffers of a viewport in
 //!   [`UNIFORM_SLOTS`] slots used in turn, so that the CPU never writes a buffer a submitted render
-//!   still reads; a slot whose last render has not run waits for it. A render writes into its slot
-//!   only the bytes that differ from what the slot holds: a camera that moves writes the frame
-//!   uniforms alone once every slot holds the draws.
+//!   still reads; a slot whose last render has not run waits for it. The buffers of all the slots
+//!   are made together, by the first render that needs them. A render writes into its slot only
+//!   the bytes that differ from what the slot holds: a camera that moves writes the frame uniforms
+//!   alone once every slot holds the draws.
 //! - **Targets.** The multisampled colour, the depth (`Depth32Float`) and the resolved colour of
 //!   decision N are private textures pooled by the size of the output and the sample count; depth
 //!   is cleared once per render and not stored. 4x MSAA where the device takes it, 1x for aliased
@@ -1111,8 +1112,9 @@ impl Scene3DMetalExecutor {
     }
 
     /// Writes into the next uniform slot of `viewport` the uniforms of the render that differ from
-    /// what the slot holds, making (or growing) its buffers first when they are missing or too
-    /// small, after the render that last read the slot has run. Returns the index of the slot.
+    /// what the slot holds, after the render that last read the slot has run; the buffers of all
+    /// the slots are made (or grown) first when they are missing or too small. Returns the index of
+    /// the slot.
     fn write_uniforms(
         &self,
         viewport: &mut Scene3DMetalViewport,
@@ -1127,6 +1129,30 @@ impl Scene3DMetalExecutor {
         viewport.frame_scratch.clear();
         frame.write_std140(&mut viewport.frame_scratch);
         let draws = viewport.draws.len().max(1);
+
+        // The buffers of every slot are made (or grown) together, by the render that first needs
+        // them: the renders after it make none while the draws fit. A render still running keeps
+        // the buffers it reads (a command buffer retains them).
+        let frame_length = viewport.frame_scratch.len();
+        let mut made = 0u32;
+        for slot in &mut viewport.slots {
+            if slot.frame.is_none() {
+                slot.frame = Some(self.buffer(&[], frame_length).ok_or_else(no_buffer)?);
+                slot.frame_bytes.clear();
+                made += 1;
+            }
+            if slot.draws.is_none() || slot.brushes.is_none() || slot.capacity < draws {
+                let capacity = draws.next_power_of_two();
+                slot.draws = Some(self.buffer(&[], capacity * DRAW_STRIDE).ok_or_else(no_buffer)?);
+                slot.brushes = Some(self.buffer(&[], capacity * BRUSH_STRIDE).ok_or_else(no_buffer)?);
+                slot.capacity = capacity;
+                slot.draw_bytes.clear();
+                slot.brush_bytes.clear();
+                made += 2;
+            }
+        }
+        report.resources_created += made;
+        count(|counters| counters.buffers_created += u64::from(made));
         let slot = &mut viewport.slots[index];
 
         // The GPU may still read the slot: its render is waited for (a frame or two behind).
@@ -1140,22 +1166,6 @@ impl Scene3DMetalExecutor {
 
         let mut writes = 0u64;
         let mut bytes = 0u64;
-        if slot.frame.is_none() {
-            slot.frame = Some(self.buffer(&[], viewport.frame_scratch.len()).ok_or_else(no_buffer)?);
-            slot.frame_bytes.clear();
-            report.resources_created += 1;
-            count(|counters| counters.buffers_created += 1);
-        }
-        if slot.draws.is_none() || slot.brushes.is_none() || slot.capacity < draws {
-            let capacity = draws.next_power_of_two();
-            slot.draws = Some(self.buffer(&[], capacity * DRAW_STRIDE).ok_or_else(no_buffer)?);
-            slot.brushes = Some(self.buffer(&[], capacity * BRUSH_STRIDE).ok_or_else(no_buffer)?);
-            slot.capacity = capacity;
-            slot.draw_bytes.clear();
-            slot.brush_bytes.clear();
-            report.resources_created += 2;
-            count(|counters| counters.buffers_created += 2);
-        }
         if let Some(buffer) = &slot.frame {
             if slot.frame_bytes != viewport.frame_scratch {
                 write_range(buffer, 0, &viewport.frame_scratch);

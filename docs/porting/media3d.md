@@ -1059,9 +1059,10 @@ to the Metal contracts and their `unsafe` calls; `ferroui-render3d` keeps
 - **Uniforms.** A `Scene3DMetalViewport` has three slots of uniform buffers (frame, draws,
   brushes, at a stride of 256 bytes) used in turn, so that the CPU never writes a buffer a
   submitted render reads; a slot whose last render has not run is waited for (counted as
-  `uniform_waits`). A render writes into its slot only the bytes that differ from what the slot
-  holds: once each slot holds the draws (the first three renders), a moving camera writes the
-  1376 bytes of the frame uniforms alone.
+  `uniform_waits`). The buffers of the three slots are made together by the first render that
+  needs them (and grown together), so the renders after it make none. A render writes into its
+  slot only the bytes that differ from what the slot holds: once each slot holds the draws (the
+  first three renders), a moving camera writes the 1376 bytes of the frame uniforms alone.
 - **Targets.** The multisampled colour, the depth (`Depth32Float`) and the resolved colour are
   private textures pooled by the size of the output and the sample count; depth is cleared once
   per render and not stored. 4x MSAA where the device takes it, one sample for `EdgeMode`

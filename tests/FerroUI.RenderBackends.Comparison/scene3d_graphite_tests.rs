@@ -11,7 +11,7 @@ use crate::custom_effect_scenes::{MOVED_MEAN, SIDE};
 use crate::scene3d_scenes::{
     draw_plain, lit_cube_scene, moving_brush_group, orbiting_cube, scenes, versioned_image_scene,
 };
-use crate::{read_pixels, Pixels};
+use crate::Pixels;
 use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextLayerImpl, IPlatformRenderInterfaceContext};
 use ferroui_base::{Matrix, PixelSize, Vector};
 use ferroui_metal::offscreen::OffscreenMetalDevice;
@@ -48,9 +48,21 @@ impl Graphite {
         let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().expect("a surface render target");
         let snapshot = target.create_non_affined_snapshot();
         let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().expect("a raster snapshot");
-        let pixels = read_pixels(bitmap);
+        // The snapshot is a raster image of the pixels the context read back from the GPU (no
+        // bitmap to lock): its pixels are read as premultiplied RGBA.
+        let image = bitmap.image();
+        let (width, height) = (image.width() as usize, image.height() as usize);
+        let info = skia_safe::ImageInfo::new(
+            (width as i32, height as i32),
+            skia_safe::ColorType::RGBA8888,
+            skia_safe::AlphaType::Premul,
+            None,
+        );
+        let mut rgba = vec![0u8; width * height * 4];
+        let read = image.read_pixels(&info, &mut rgba, width * 4, (0, 0), skia_safe::image::CachingHint::Allow);
+        assert!(read, "the pixels of the Graphite snapshot are read");
         layer.dispose();
-        pixels
+        Pixels { width, height, rgba }
     }
 }
 
