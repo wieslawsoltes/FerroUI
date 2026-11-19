@@ -204,8 +204,10 @@ fn animation_preview_rejections_are_errors_with_the_message_of_the_panic() {
         }))
         .err()
         .expect("apply_for_preview panics");
-        let message =
-            panic.downcast_ref::<String>().cloned().or_else(|| panic.downcast_ref::<&str>().map(|text| text.to_string()));
+        let message = panic
+            .downcast_ref::<String>()
+            .cloned()
+            .or_else(|| panic.downcast_ref::<&str>().map(|text| text.to_string()));
         assert_eq!(Some(error.0), message);
     }
 
