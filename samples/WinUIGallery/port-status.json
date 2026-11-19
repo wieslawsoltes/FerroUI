@@ -1864,7 +1864,7 @@
       ]
     },
     "RatingControl": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/RatingControl.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1886,9 +1886,13 @@
         {
           "path": "samples/WinUIGallery/feedback_samples_tests.rs",
           "name": "feedback_pages_and_callbacks_release_their_native_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/x_bind_tests.rs",
+          "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending.",
+      "notes": "Both source examples use native RatingControl with RatingControl1_ValueChanged of RatingControlPage.xaml.cs in Rust (feedback_samples.rs): the simple control with its caption, which a user's change sets to Your rating while a programmatic Value keeps it, the output of its Value (the source's OneWay x:Bind, written by the sample as Value.ToString()), and the IsClearEnabled and IsReadOnly options with the source's OneWay x:Bind (IsChecked.Value is IsChecked); and the control whose fractional PlaceholderValue keeps the source's TwoWay x:Bind of the slider (StepFrequency 0.5 is TickFrequency with IsSnapToTickEnabled; the Header is composed). The glyphs need the platform's symbol font.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RatingControl/RatingControlSimple.txt",
