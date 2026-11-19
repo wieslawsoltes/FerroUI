@@ -232,7 +232,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, MarkupReferencesModel};
+use crate::model::{AssemblyModel, MarkupReferencesModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -245,9 +245,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units, parts_constructor, parts_static_name,
-    parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, Roots, ThemeTrimming,
-    TypeGraph,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, parts_constructor,
+    parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
+    Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -1153,6 +1153,10 @@ impl Build {
                 Ok(read) if read.name == assembly_name => {
                     metadata.documents.extend(read.documents);
                     metadata.theme_units.extend(read.theme_units);
+                    // What its documents name, for the applications that trim (#848): the
+                    // references travel with the documents they are of.
+                    exported_roots.types.extend(read.references.types);
+                    exported_roots.keys.extend(read.references.keys);
                 }
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
@@ -1280,19 +1284,45 @@ impl Build {
                 all: trimming.all || !trimming.enabled,
                 ..Roots::default()
             };
-            let sources: [(&str, &Roots); 5] = [
-                ("manifest", &from_manifest),
-                ("build script", &self.theme_roots),
-                ("documents", &document_roots),
-                ("sources", &from_sources),
-                ("dependencies", &from_dependencies),
-            ];
+            // The themes used together are closed over together (#848): what a kept unit of one
+            // references or constructs roots the units of the others.
+            let used_units: Vec<(String, &ThemeUnitsModel)> = used
+                .into_iter()
+                .filter_map(|class| {
+                    let units = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class)?;
+                    Some((class, units))
+                })
+                .collect();
+            let themes: Vec<&ThemeUnitsModel> = used_units.iter().map(|(_, units)| *units).collect();
+            let kept_of_themes = kept_units_across(&themes, &roots, &graph, self.full_themes);
+            // What the kept units of the other themes reference and construct: the roots the
+            // closure over the themes added to a theme, so that its reasons explain what it kept.
+            let from_other_themes: Vec<Roots> = (0..themes.len())
+                .map(|position| {
+                    let mut roots = Roots::default();
+                    for (other, (units, kept)) in themes.iter().zip(&kept_of_themes).enumerate() {
+                        if other == position {
+                            continue;
+                        }
+                        for unit in units.units.iter().filter(|unit| kept.contains(&unit.index)) {
+                            roots.keys.extend(unit.references.iter().cloned());
+                            roots.types.extend(unit.types.iter().cloned());
+                        }
+                    }
+                    roots
+                })
+                .collect();
             let mut why = String::new();
-            for class in used {
-                let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
-                    continue;
-                };
-                let kept = kept_units(units, &roots, &graph, self.full_themes);
+            let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
+            for (((class, units), kept), from_others) in together {
+                let sources: [(&str, &Roots); 6] = [
+                    ("manifest", &from_manifest),
+                    ("build script", &self.theme_roots),
+                    ("documents", &document_roots),
+                    ("sources", &from_sources),
+                    ("dependencies", &from_dependencies),
+                    ("other themes used together", from_others),
+                ];
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());

@@ -60,12 +60,19 @@ bindings build (Skia m153, skia-safe 0.153.3, `external/rust-skia-bindings`).
   default of the axis: 357.129 is what Core Text gives at 12 points for that optical size), 10 to
   15 % narrower than the glyphs drawn up to 14 points. Now it is what Core Text gives for the
   instance of the typeface at every size.
-- Not done (issue #859): the optical size. The system font has an `opsz` axis from 17 to 96 and Core Text
+- The optical size (issue #859). The system font has an `opsz` axis from 17 to 96 and Core Text
   moves along it with the size of the text (17 up to 17 points, the size above); a typeface of
-  Skia stays at one optical size for every size, the one it was made at (17 here), and so do the
-  glyphs drawn and now their advances. From 20 points up a line is therefore the text design at
-  a large size, 10 to 13 % wider than the same line of a native application. Following Core Text
-  needs a typeface for each optical size, which is a change to how typefaces are made and kept.
+  Skia stays at one optical size for every size, the one it was made at (17 here), and so did the
+  glyphs drawn and their advances: from 20 points up a line was the text design at a large size,
+  10 to 13 % wider than the same line of a native application. A text is now shaped and drawn
+  with the instance of its typeface at its optical size (`GlyphTypeface::at_optical_size`): the
+  size of the text rounded to a whole point and clamped to the axis, one instance a whole point,
+  kept by the typeface it is made from, so the glyph caches and the HarfBuzz font are shared
+  inside a class. The run properties choose it once (`cached_glyph_typeface`, also for a font a
+  fallback found). The backends make the instance: Skia clones the typeface at the variation
+  position (`SkTypeface::makeClone`), Vello makes a typeface of the same data at the axis values.
+  A font without the axis, and a family whose name names an optical size (`Segoe UI Variable
+  Display`), keep their typeface. The table above at 9 to 96 points is to be measured again.
 - Still to do: the same measurement against DirectWrite on Windows.
 - Windows is tuned already (docs/porting/text-rendering.md). That document's section 2.3 should be
   checked: this Skia version's build appears to define `SK_GAMMA_APPLY_TO_A8` for every library
