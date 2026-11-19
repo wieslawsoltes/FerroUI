@@ -47,12 +47,14 @@ export async function keyframeOptions(context: StudioContext, program: number, d
     await item?.run();
 }
 
-export async function chooseKeyframeGroupEdit(count: number): Promise<KeyframeGroupEdit | undefined> {
-    const picked = await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, [
+export async function chooseKeyframeGroupEdit(count: number, moveOnly = false): Promise<KeyframeGroupEdit | undefined> {
+    const actions = [
         { action: 'move_keyframes', label: '$(arrow-both) Move by offset…' },
         { action: 'duplicate_keyframes', label: '$(copy) Duplicate at offset…' },
         { action: 'remove_keyframes', label: '$(trash) Delete' },
-    ] as const);
+    ] as const;
+    const picked = moveOnly ? actions[0] :
+        await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, actions);
     if (!picked) return;
     if (picked.action === 'remove_keyframes') return { action: picked.action };
     const value = await editText('Offset in seconds. Use a negative value to move earlier.', '0.1', input =>

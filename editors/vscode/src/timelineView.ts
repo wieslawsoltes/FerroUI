@@ -237,12 +237,14 @@ export class TimelineView implements vscode.Disposable {
                     return;
                 }
                 if (message.type === 'keyframeGroup') {
-                    if (panel.language !== 'xaml' || !message.keys.length) throw new Error('Select authored XAML keyframes to edit.');
-                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length);
+                    const rust = panel.language === 'rust';
+                    if (!message.keys.length || (rust && !program.sourceRange)) throw new Error('Select mapped keyframes to edit.');
+                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, rust);
                     if (!edit) {
                         this.view.post({ type: 'keyframesEdited', before: message.frame });
                         return;
                     }
+                    if (rust && edit.action !== 'move_keyframes') throw new Error('Add or remove Rust keys in source.');
                     await context.edit('designer_program', { ...edit, program: program.id, keyframes: message.keys });
                     await panel.waitForSnapshot(AbortSignal.timeout(15_000));
                     const keys = edit.action === 'remove_keyframes' ? [] : message.keys.map(key => ({ ...key, time: key.time + edit.offset }));
@@ -257,7 +259,10 @@ export class TimelineView implements vscode.Disposable {
                         AbortSignal.timeout(15_000));
                 });
             }
-        } catch (error) { this.report(error); }
+        } catch (error) {
+            if (message.type === 'keyframeGroup') this.view.post({ type: 'keyframesEdited', before: message.frame });
+            this.report(error);
+        }
     }
 
     private async recordKeyframe(context: StudioContext, program: TimelineProgram, timeline: NonNullable<TimelineProgram['timeline']>,

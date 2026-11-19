@@ -111,11 +111,17 @@ async function verifyIsolatedRustAnimation(preview: NativePreview, document: Sou
     const [program] = catalog.programs;
     const track = program?.timeline?.tracks[0];
     assert.ok(program.sourceRange && track);
+    const groupMove = await preview.studioEdit(document, frame, 'designer_program', {
+        action: 'move_keyframes', program: program.id, offset: -0.4,
+        keyframes: [{ target: track.target, property: 'CornerRadius', time: 2 }],
+    }, []);
+    assert.deepEqual(groupMove.edits.map(edit => edit.newText), ['0.8']);
+    await preview.render(document, { width: 380, height: 220, dark: false }, frame + 1);
     const draft = { program: program.id, target: track.target, property: 'CornerRadius', previous: 2, time: 2,
         value: '40,42,44,46', easing: track.keyframes[1].easing_text };
-    const check = await preview.studioQuery(frame, 'designer_keyframe_draft', draft) as { valueKind: string };
+    const check = await preview.studioQuery(frame + 1, 'designer_keyframe_draft', draft) as { valueKind: string };
     assert.equal(check.valueKind, 'CornerRadius');
-    const plan = await preview.studioEdit(document, frame, 'designer_program', { action: 'upsert_keyframe', ...draft }, []);
+    const plan = await preview.studioEdit(document, frame + 1, 'designer_program', { action: 'upsert_keyframe', ...draft }, []);
     assert.deepEqual(plan.edits.map(edit => edit.newText), ['40.0', '42.0', '44.0', '46.0']);
 }
 

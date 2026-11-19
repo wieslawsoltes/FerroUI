@@ -389,7 +389,8 @@ export class DesignerPanel implements vscode.Disposable {
 
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
         validate?: () => void): Promise<void> {
-        const rustKeyframe = name === 'designer_program' && (args as { action?: string }).action === 'upsert_keyframe'
+        const action = (args as { action?: string }).action;
+        const rustKeyframe = name === 'designer_program' && (action === 'upsert_keyframe' || action === 'move_keyframes')
             && this.supportsTimelineKeyframeDrafts;
         if (this.language === 'rust' && !rustKeyframe && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');

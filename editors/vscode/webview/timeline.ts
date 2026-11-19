@@ -291,7 +291,7 @@ function showTracks(): void {
                     return true;
                 };
                 const editableCurve = plot && Number.isFinite(value) && model.canEditKeyframes && (model.writable || selected.sourceRange);
-                if ((model.writable || editableCurve) && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
+                if (canRetimeKeys() && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
                     () => selection.has(location) ? renderedKeys.filter(item => selection.has(item.key)) : [rendered],
                     gestureFrame,
                     time => Math.round(time * (frameRate || 1000)) / (frameRate || 1000),
@@ -421,13 +421,18 @@ function showPosition(): void {
 }
 
 function showKeySelection(): void {
-    keyActions.hidden = !current()?.timeline || !model.writable || selection.size === 0;
+    keyActions.hidden = !current()?.timeline || !canRetimeKeys() || selection.size === 0;
     for (const { button, key } of renderedKeys) button.setAttribute('aria-pressed', String(selection.has(key)));
     showCurves();
 }
 
+function canRetimeKeys(): boolean {
+    return Boolean(model.writable || (model.canEditKeyframes && current()?.sourceRange));
+}
+
 function editKeys(keys: KeyframeLocation[], frame?: FrameTarget, edit?: KeyframeGroupEdit): void {
-    if (!frame || program === undefined || pending || keyEdit || !model.writable || !keys.length) return;
+    if (!frame || program === undefined || pending || keyEdit || !canRetimeKeys() || !keys.length
+        || (!model.writable && edit && edit.action !== 'move_keyframes')) return;
     keyEdit = { before: frame };
     keyframeEditor.close();
     vscode.postMessage({ type: 'keyframeGroup', frame, program, keys, edit });
@@ -458,12 +463,12 @@ function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration
         showKeySelection();
         return;
     }
-    if (!model.writable) return;
+    if (!canRetimeKeys()) return;
     const keys = selection.size ? selection.keys : [location];
     const step = frameRate ? 1 / frameRate : Math.min(0.1, duration / 20);
     let edit: KeyframeGroupEdit | undefined;
-    if (command === 'delete' || command === 'backspace') edit = { action: 'remove_keyframes' };
-    else if (modifier && command === 'd') edit = { action: 'duplicate_keyframes', offset: step };
+    if (model.writable && (command === 'delete' || command === 'backspace')) edit = { action: 'remove_keyframes' };
+    else if (model.writable && modifier && command === 'd') edit = { action: 'duplicate_keyframes', offset: step };
     else if (!modifier && (command === 'arrowleft' || command === 'arrowright')) {
         edit = { action: 'move_keyframes', offset: command === 'arrowleft' ? -step : step };
     }

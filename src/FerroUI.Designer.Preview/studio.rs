@@ -84,7 +84,7 @@ fn is_query(tool: &Value) -> bool {
     tool["annotations"]["readOnlyHint"] == true
         && !matches!(
             tool["name"].as_str(),
-            Some("designer_document" | "designer_collaboration_state")
+            Some("designer_document" | "designer_collaboration_state" | "designer_rsx_views")
         )
 }
 
@@ -153,14 +153,18 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if rust_keyframe {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
-        let patches = rsx.patches(&arguments)?;
-        // Studio checks the native target, timeline and easing. The result is applied
-        // to Rust by the editor without mutating the generated projection.
-        let mut draft = arguments;
-        let object = draft.as_object_mut().expect("validated action");
-        object.remove("action");
-        object.remove("expected_revision");
-        provider.call("designer_keyframe_draft", &draft, Permissions::default())?;
+        let patches = if arguments["action"] == "move_keyframes" {
+            rsx.move_keys(&stage.session.borrow(), &arguments)?
+        } else {
+            let patches = rsx.patches(&arguments)?;
+            // Validate against the native timeline and send only the original Rust edits.
+            let mut draft = arguments;
+            let object = draft.as_object_mut().expect("validated action");
+            object.remove("action");
+            object.remove("expected_revision");
+            provider.call("designer_keyframe_draft", &draft, Permissions::default())?;
+            patches
+        };
         let result = editor_edits(&design, patches)?;
         if !result.edits.is_empty() {
             renderer.stage.take();

@@ -1,5 +1,5 @@
 use crate::document::DesignDocument;
-use ferroui_designer_animation::KeyframeEdit;
+use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation};
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue};
@@ -15,7 +15,7 @@ pub(crate) struct AuthoredRsxFrame {
 }
 
 pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
-    tool == "designer_program" && action == Some("upsert_keyframe")
+    tool == "designer_program" && matches!(action, Some("upsert_keyframe" | "move_keyframes"))
 }
 
 impl AuthoredRsxFrame {
@@ -74,10 +74,7 @@ impl AuthoredRsxFrame {
     }
 
     pub(crate) fn patches(&self, args: &Value) -> Result<Vec<TextPatch>, String> {
-        let clip = args["program"]
-            .as_u64()
-            .and_then(|id| self.clips.get(&id))
-            .ok_or("Choose an animation with a mapped Rust declaration")?;
+        let clip = self.clip(args)?;
         clip.patch_keyframe(
             args["property"]
                 .as_str()
@@ -89,6 +86,27 @@ impl AuthoredRsxFrame {
                 easing: args["easing"].as_str().ok_or("Supply a keyframe easing")?,
             },
         )
+    }
+
+    pub(crate) fn move_keys(
+        &self, session: &ferroui_designer::DesignerSession, args: &Value,
+    ) -> Result<Vec<TextPatch>, String> {
+        let clip = self.clip(args)?;
+        let program = session.animation_programs().iter()
+            .find(|program| Some(program.id) == args["program"].as_u64())
+            .and_then(|program| program.timeline.as_ref())
+            .ok_or("Choose a typed native timeline")?;
+        let keys: Vec<KeyframeLocation> = serde_json::from_value(args["keyframes"].clone())
+            .map_err(|error| error.to_string())?;
+        let offset = args["offset"].as_f64().ok_or("Supply a keyframe offset")?;
+        let (_, moved) = program.with_keyframe_edit(&keys, KeyframeGroupEdit::Move(offset))
+            .map_err(|error| error.to_string())?;
+        clip.patch_key_times(keys.iter().zip(moved).map(|(from, to)| (from.property.as_str(), from.time, to.time)))
+    }
+
+    fn clip(&self, args: &Value) -> Result<&RsxAnimation, String> {
+        args["program"].as_u64().and_then(|id| self.clips.get(&id))
+            .ok_or_else(|| "Choose an animation with a mapped Rust declaration".into())
     }
 
     pub(crate) fn map_hosted_program(&self, program: &mut DesignAnimationProgram) {
@@ -132,10 +150,7 @@ impl AuthoredRsxFrame {
                 easing: &draft.easing,
             },
         )?;
-        let mut edited = self.source.to_string();
-        for patch in patches.into_iter().rev() {
-            edited.replace_range(patch.span.range(), &patch.replacement);
-        }
+        let edited = TextPatch::apply_all(&self.source, patches).map_err(|error| error.to_string())?;
         TextPatch::between(&self.source, &edited)
             .map(|patch| {
                 DesignAnimationSourcePatch::from_utf8(
