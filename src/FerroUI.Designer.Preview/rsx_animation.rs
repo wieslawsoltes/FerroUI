@@ -16,7 +16,7 @@ pub(crate) struct AuthoredRsxFrame {
 }
 
 pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
-    tool == "designer_program" && matches!(action, Some("upsert_keyframe" | "move_keyframes"))
+    tool == "designer_program" && matches!(action, Some("upsert_keyframe" | "move_keyframes" | "scale_keyframes"))
 }
 
 pub(crate) fn state_edit(tool: &str, action: Option<&str>) -> bool {
@@ -117,7 +117,7 @@ impl AuthoredRsxFrame {
         )
     }
 
-    pub(crate) fn move_keys(
+    pub(crate) fn retime_keys(
         &self, session: &ferroui_designer::DesignerSession, args: &Value,
     ) -> Result<Vec<TextPatch>, String> {
         let clip = self.clip(args)?;
@@ -127,8 +127,15 @@ impl AuthoredRsxFrame {
             .ok_or("Choose a typed native timeline")?;
         let keys: Vec<KeyframeLocation> = serde_json::from_value(args["keyframes"].clone())
             .map_err(|error| error.to_string())?;
-        let offset = args["offset"].as_f64().ok_or("Supply a keyframe offset")?;
-        let (_, moved) = program.with_keyframe_edit(&keys, KeyframeGroupEdit::Move(offset))
+        let edit = if args["action"] == "scale_keyframes" {
+            KeyframeGroupEdit::Scale {
+                pivot: args["pivot"].as_f64().ok_or("Supply a keyframe scale pivot")?,
+                factor: args["factor"].as_f64().ok_or("Supply a keyframe scale factor")?,
+            }
+        } else {
+            KeyframeGroupEdit::Move(args["offset"].as_f64().ok_or("Supply a keyframe offset")?)
+        };
+        let (_, moved) = program.with_keyframe_edit(&keys, edit)
             .map_err(|error| error.to_string())?;
         clip.patch_key_times(keys.iter().zip(moved).map(|(from, to)| (from.property.as_str(), from.time, to.time)))
     }

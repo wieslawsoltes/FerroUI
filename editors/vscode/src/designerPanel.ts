@@ -25,6 +25,7 @@ interface Frame {
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
+    timelineKeyframeScale: boolean;
     timelineCurves: boolean;
     timelineCombinedPlayback: boolean;
     stateTransitionPreview: boolean;
@@ -155,6 +156,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
     }
+    get supportsTimelineKeyframeScale(): boolean { return Boolean(this.frame?.timelineKeyframeScale); }
     get supportsTimelineCurves(): boolean { return Boolean(this.frame?.timelineCurves); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
@@ -393,8 +395,9 @@ export class DesignerPanel implements vscode.Disposable {
     async studioEdit(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal,
         validate?: () => void): Promise<void> {
         const action = (args as { action?: string }).action;
-        const rustKeyframe = name === 'designer_program' && (action === 'upsert_keyframe' || action === 'move_keyframes')
-            && this.supportsTimelineKeyframeDrafts;
+        const rustKeyframe = name === 'designer_program' && this.supportsTimelineKeyframeDrafts
+            && (action === 'upsert_keyframe' || action === 'move_keyframes'
+                || (action === 'scale_keyframes' && this.supportsTimelineKeyframeScale));
         const rustState = name === 'designer_state' && action === 'upsert' && this.supportsRustStates;
         if (this.language === 'rust' && !rustKeyframe && !rustState && !mappedStudioEdits.has(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
@@ -583,6 +586,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
+                timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
                 timelineCurves: Boolean(client.capabilities.timelineCurves),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),

@@ -47,16 +47,26 @@ export async function keyframeOptions(context: StudioContext, program: number, d
     await item?.run();
 }
 
-export async function chooseKeyframeGroupEdit(count: number, moveOnly = false): Promise<KeyframeGroupEdit | undefined> {
+export async function chooseKeyframeGroupEdit(count: number, rust: boolean, pivot?: number): Promise<KeyframeGroupEdit | undefined> {
     const actions = [
         { action: 'move_keyframes', label: '$(arrow-both) Move by offset…' },
+        { action: 'scale_keyframes', label: '$(arrow-swap) Scale from playhead…' },
         { action: 'duplicate_keyframes', label: '$(copy) Duplicate at offset…' },
         { action: 'remove_keyframes', label: '$(trash) Delete' },
     ] as const;
-    const picked = moveOnly ? actions[0] :
-        await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, actions);
+    const available = actions.filter(({ action }) => action === 'scale_keyframes' ? count > 1 && pivot !== undefined
+        : !rust || action === 'move_keyframes');
+    const picked = available.length === 1 ? available[0] :
+        await choose(count === 1 ? 'Selected keyframe' : `${count} selected keyframes`, available);
     if (!picked) return;
     if (picked.action === 'remove_keyframes') return { action: picked.action };
+    if (picked.action === 'scale_keyframes' && pivot !== undefined) {
+        const factor = await editText(`Scale key times around ${Number(pivot.toFixed(6))} s. Use 0.5 to compress or 2 to stretch.`, '2', input =>
+            Number.isFinite(Number(input)) && Number(input) > 0 && Number(input) !== 1 ? undefined : 'Enter a positive factor other than 1.');
+        if (factor !== undefined) return { action: picked.action, factor: Number(factor), pivot };
+        return;
+    }
+    if (picked.action === 'scale_keyframes') return;
     const value = await editText('Offset in seconds. Use a negative value to move earlier.', '0.1', input =>
         input.trim() && Number.isFinite(Number(input)) && Number(input) !== 0 ? undefined : 'Enter a nonzero number.');
     if (value !== undefined) return { action: picked.action, offset: Number(value) };

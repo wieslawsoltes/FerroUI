@@ -435,6 +435,11 @@ Selectors are matched by the native style system; per-target underlying values a
 are retained. Resource programs can be previewed against explicit targets. Graphical track lanes
 support scrubbing, keyframe selection and dragging, with explicit time, easing and removal controls.
 
+To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the
+selection inspector, and choose **Scale from playhead**. For example, `0.5` halves each key's
+distance from the playhead. Studio preserves each key's value and easing and applies the change in
+one Undo step. For a shared Rust cue, include each setter on the cue in the selection.
+
 Supported values include numbers, colors, points, vectors, sizes, rectangles, corner radii,
 relative points/scalars, thicknesses and discrete values. The portable
 engine implements linear-light color interpolation, cubic Bézier inversion, named FerroUI easing

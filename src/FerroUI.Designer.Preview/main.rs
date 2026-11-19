@@ -113,6 +113,7 @@ fn respond(
                 "timelineRecording": true,
                 "timelineGeometryRecording": true,
                 "timelineKeyframeDrafts": true,
+                "timelineKeyframeScale": true,
                 "timelineCurves": true,
                 "timelineCombinedPlayback": true,
                 "timelineProgramTargets": true,

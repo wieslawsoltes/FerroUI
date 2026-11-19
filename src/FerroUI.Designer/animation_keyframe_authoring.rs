@@ -25,13 +25,13 @@ impl DesignerSession {
             .map_err(|error| error.to_string())?;
         if &timeline != authored {
             if let Some(rust) = &self.rust {
-                if !matches!(edit, KeyframeGroupEdit::Move(_)) {
+                if !edit.retimes() {
                     return Err("Add or remove Rust keyframes in source".into());
                 }
                 let patches = rust.animation(&self.document, id)?.patch_key_times(
                     keys.iter().zip(&changed).map(|(from, to)| (from.property.as_str(), from.time, to.time))
                 )?;
-                self.commit_rust_patches("Move Rust keyframes", patches).map_err(|error| error.to_string())?;
+                self.commit_rust_patches("Retime Rust keyframes", patches).map_err(|error| error.to_string())?;
                 self.changed(true);
             } else {
                 self.update_animation_program(id, timeline)?;

@@ -266,15 +266,24 @@ export class TimelineView implements vscode.Disposable {
                 if (message.type === 'keyframeGroup') {
                     const rust = panel.language === 'rust';
                     if (!message.keys.length || (rust && !program.sourceRange)) throw new Error('Select mapped keyframes to edit.');
-                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, rust);
+                    const pose = panel.authoredTimelinePose;
+                    const pivot = panel.supportsTimelineKeyframeScale && !program.preview?.native
+                        ? pose?.program === program.id ? pose.time : 0 : undefined;
+                    const edit = message.edit ?? await chooseKeyframeGroupEdit(message.keys.length, rust, pivot);
                     if (!edit) {
                         this.view.post({ type: 'keyframesEdited', before: message.frame });
                         return;
                     }
-                    if (rust && edit.action !== 'move_keyframes') throw new Error('Add or remove Rust keys in source.');
+                    if (rust && edit.action !== 'move_keyframes' && edit.action !== 'scale_keyframes') throw new Error('Add or remove Rust keys in source.');
+                    const version = panel.document.version;
                     await context.edit('designer_program', { ...edit, program: program.id, keyframes: message.keys });
+                    if (panel.document.version === version) {
+                        this.view.post({ type: 'keyframesEdited', before: message.frame });
+                        return;
+                    }
                     await panel.waitForSnapshot(AbortSignal.timeout(15_000));
-                    const keys = edit.action === 'remove_keyframes' ? [] : message.keys.map(key => ({ ...key, time: key.time + edit.offset }));
+                    const keys = edit.action === 'remove_keyframes' ? [] : message.keys.map(key => ({ ...key,
+                        time: edit.action === 'scale_keyframes' ? edit.pivot + (key.time - edit.pivot) * edit.factor : key.time + edit.offset }));
                     this.view.post({ type: 'keyframesEdited', keys, before: message.frame });
                     return;
                 }

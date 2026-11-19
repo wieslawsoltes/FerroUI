@@ -75,6 +75,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("record_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("remove_keyframe",json!({"program":s::id(),"target":s::id(),"property":s::string(),"time":s::time()}), &["program","target","property","time"],true),
             s::action("move_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
+            s::action("scale_keyframes",json!({"program":s::id(),"keyframes":keys(),"pivot":s::time(),"factor":s::number()}), &["program","keyframes","pivot","factor"],true),
             s::action("duplicate_keyframes",json!({"program":s::id(),"keyframes":keys(),"offset":s::number()}), &["program","keyframes","offset"],true),
             s::action("remove_keyframes",json!({"program":s::id(),"keyframes":keys()}), &["program","keyframes"],true),
             s::action("preview_targets",json!({"program":s::id(),"targets":s::nullable(s::array(s::id(),4096))}), &["program","targets"],true),
@@ -220,9 +221,13 @@ pub(super) fn call(
                     node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
                     KeyframeEdit::Remove(number(args, "time")?),
                 )?,
-                action @ ("move_keyframes" | "duplicate_keyframes" | "remove_keyframes") => {
+                action @ ("move_keyframes" | "scale_keyframes" | "duplicate_keyframes" | "remove_keyframes") => {
                     let edit = match action {
                         "move_keyframes" => KeyframeGroupEdit::Move(number(args, "offset")?),
+                        "scale_keyframes" => KeyframeGroupEdit::Scale {
+                            pivot: number(args, "pivot")?,
+                            factor: number(args, "factor")?,
+                        },
                         "duplicate_keyframes" => KeyframeGroupEdit::Duplicate(number(args, "offset")?),
                         _ => KeyframeGroupEdit::Remove,
                     };

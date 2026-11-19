@@ -17,6 +17,12 @@ Open the source with **FerroUI: Open Designer** first. The animation and stage t
 
 Escape dismisses the filter popup when it has focus.
 
+### Scale selected key times
+
+Select at least two keys, then seek to the time that should stay fixed. Open **Keyframe Selection Actions**, choose **Scale from playhead**, and enter a factor. Use `0.5` to halve the spacing from the playhead or `2` to double it. The edit preserves key values and easing. If a destination would collide or leave the clip, adjust the selection, playhead, or factor and try again.
+
+Scaling works with XAML and mapped Rust cues. For a Rust cue with multiple setters, select each of its keys when moving the cue. One Undo restores the complete selection's original times. Agents can pass the `scale_keyframes` action with `keyframes`, `pivot`, and `factor` to the shared `designer_program` authoring tool.
+
 | With the Timeline ruler or a key focused | Action |
 | --- | --- |
 | `[` and `]` | Seek to the previous or next key among the visible tracks. The ruler pans when the key is outside the current zoom. |

@@ -1,6 +1,27 @@
 use super::*;
 
 #[test]
+fn scale_key_times_preserves_ordered_selection_values_and_native_precision() {
+    let mut timeline = numeric();
+    timeline.record(1, "Opacity", 0.5, AnimationValue::Number(0.25)).unwrap();
+    timeline.record(1, "Opacity", 1.0, AnimationValue::Number(0.5)).unwrap();
+    let keys: Vec<_> = [1.0, 0.5].into_iter().map(|time| KeyframeLocation {
+        target: 1, property: "Opacity".into(), time,
+    }).collect();
+    let (scaled, changed) = timeline.with_keyframe_edit(&keys, KeyframeGroupEdit::Scale {
+        pivot: 1.5, factor: 0.5,
+    }).unwrap();
+    assert_eq!(changed.iter().map(|key| key.time).collect::<Vec<_>>(), [1.25, 1.0]);
+    let track = scaled.track(1, "Opacity").unwrap();
+    assert_eq!(track.keyframes.iter().map(|key| key.time).collect::<Vec<_>>(), [0.0, 1.0, 1.25, 2.0]);
+    assert_eq!(track.keyframes[1].value, AnimationValue::Number(0.25));
+    assert_eq!(track.keyframes[2].value, AnimationValue::Number(0.5));
+    for factor in [0.0, -1.0, f64::INFINITY, 1e-9, 8.0] {
+        assert!(timeline.with_keyframe_edit(&keys, KeyframeGroupEdit::Scale { pivot: 1.5, factor }).is_err());
+    }
+}
+
+#[test]
 fn keyframe_presets_use_native_incoming_easing() {
     let presets = keyframe_easing_presets();
     assert!(!presets.is_empty());

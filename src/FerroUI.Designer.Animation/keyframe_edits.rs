@@ -1,6 +1,6 @@
-use crate::{AnimationError, Result, Timeline, require};
+use crate::{AnimationError, Result, Timeline, native_key_time, require};
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -37,8 +37,53 @@ impl KeyframeLocation {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum KeyframeGroupEdit {
     Move(f64),
+    Scale { pivot: f64, factor: f64 },
     Duplicate(f64),
     Remove,
+}
+
+impl KeyframeGroupEdit {
+    pub fn retimes(self) -> bool {
+        matches!(self, Self::Move(_) | Self::Scale { .. })
+    }
+
+    fn validate(self, duration: f64) -> Result<()> {
+        match self {
+            Self::Move(offset) | Self::Duplicate(offset) => {
+                require(offset.is_finite(), "The keyframe offset must be finite")
+            }
+            Self::Scale { pivot, factor } => {
+                require(
+                    (0.0..=duration).contains(&pivot),
+                    "Choose a scale pivot within the timeline",
+                )?;
+                require(
+                    factor.is_finite() && factor > 0.0,
+                    "The keyframe scale must be positive and finite",
+                )
+            }
+            Self::Remove => Ok(()),
+        }
+    }
+
+    fn destination(self, time: f64, duration: f64) -> Result<f64> {
+        let destination = normalized_time(match self {
+            Self::Move(offset) | Self::Duplicate(offset) => time + offset,
+            Self::Scale { pivot, factor } if factor != 1.0 => pivot + (time - pivot) * factor,
+            _ => time,
+        });
+        require(
+            (0.0..=duration).contains(&destination),
+            "The selected keyframes would leave the animation duration",
+        )?;
+        if matches!(self, Self::Scale { .. }) && destination != time {
+            // Scaled keys can land within one native TimeSpan tick of each other.
+            // Check collisions at the precision that both source encodings accept.
+            native_key_time(destination)
+        } else {
+            Ok(destination)
+        }
+    }
 }
 
 impl Timeline {
@@ -50,36 +95,44 @@ impl Timeline {
         edit: KeyframeGroupEdit,
     ) -> Result<(Self, Vec<KeyframeLocation>)> {
         require(!keys.is_empty(), "Select one or more keyframes")?;
-        let delta = match edit {
-            KeyframeGroupEdit::Move(delta) | KeyframeGroupEdit::Duplicate(delta) => {
-                require(delta.is_finite(), "The keyframe offset must be finite")?;
-                Some(delta)
-            }
-            KeyframeGroupEdit::Remove => None,
-        };
-        let mut groups = BTreeMap::<(u64, &str), BTreeSet<u64>>::new();
+        edit.validate(self.duration)?;
+        let mut groups = BTreeMap::<(u64, &str), BTreeMap<u64, f64>>::new();
+        let mut changed = Vec::new();
+        let remove = matches!(edit, KeyframeGroupEdit::Remove);
         for key in keys {
             require(
                 key.time.is_finite() && (0.0..=self.duration).contains(&key.time),
                 "A selected keyframe lies outside the timeline",
             )?;
             let time = normalized_time(key.time);
+            let destination = edit.destination(time, self.duration)?;
             let unique = groups
                 .entry((key.target, &key.property))
                 .or_default()
-                .insert(time.to_bits());
+                .insert(time.to_bits(), destination)
+                .is_none();
             require(unique, "Select each keyframe only once")?;
+            if !remove {
+                changed.push(KeyframeLocation {
+                    time: destination,
+                    ..key.clone()
+                });
+            }
         }
         let mut timeline = self.clone();
         for ((target, property), times) in groups {
             let track = timeline
                 .track_mut(target, property)
                 .ok_or_else(|| AnimationError("Animation track no longer exists".into()))?;
-            let mut moving = track
+            let moving = track
                 .keyframes
                 .iter()
-                .filter(|key| times.contains(&normalized_time(key.time).to_bits()))
-                .cloned()
+                .filter_map(|key| {
+                    let time = times.get(&normalized_time(key.time).to_bits())?;
+                    let mut key = key.clone();
+                    key.time = *time;
+                    Some(key)
+                })
                 .collect::<Vec<_>>();
             require(
                 moving.len() == times.len(),
@@ -90,14 +143,15 @@ impl Timeline {
             if !matches!(edit, KeyframeGroupEdit::Duplicate(_)) {
                 track
                     .keyframes
-                    .retain(|key| !times.contains(&normalized_time(key.time).to_bits()));
+                    .retain(|key| !times.contains_key(&normalized_time(key.time).to_bits()));
             }
-            if let Some(delta) = delta {
-                for key in &mut moving {
-                    key.time = normalized_time(key.time + delta);
+            if !remove {
+                if matches!(edit, KeyframeGroupEdit::Scale { .. }) {
                     require(
-                        key.time.is_finite() && (0.0..=self.duration).contains(&key.time),
-                        "The selected keyframes would leave the animation duration",
+                        moving
+                            .windows(2)
+                            .all(|keys| keys[1].time - keys[0].time > 1e-9),
+                        "Selected keyframes would share a destination time; no keys were changed",
                     )?;
                 }
                 let stationary = std::mem::take(&mut track.keyframes);
@@ -122,14 +176,6 @@ impl Timeline {
         }
         timeline.tracks.retain(|track| !track.keyframes.is_empty());
         timeline.validate()?;
-        let changed = delta.map_or_else(Vec::new, |delta| {
-            keys.iter()
-                .map(|key| KeyframeLocation {
-                    time: normalized_time(key.time + delta),
-                    ..key.clone()
-                })
-                .collect()
-        });
         Ok((timeline, changed))
     }
 }

@@ -92,6 +92,22 @@ fn selected_lane(workspace: &DesignerWorkspace) -> Ref<TimelineLane> {
 }
 
 #[test]
+fn scaling_selected_tracks_from_the_playhead_is_one_source_edit() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    select(&workspace, target);
+    let original = workspace.session.borrow().document().source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    workspace.scale_selected_keyframes(2.0, 0.5).unwrap();
+    for property in ["Width", "Opacity"] {
+        assert_eq!(times(&workspace, target, property), [0.0, 1.5, 2.0, 4.0, 6.0]);
+    }
+    assert_eq!(workspace.session.borrow().document().revision(), revision + 1);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), original);
+}
+
+#[test]
 fn multi_track_shift_crosses_original_times_atomically_and_undo_restores_curves() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let (workspace, target) = workspace();

@@ -6,6 +6,7 @@ export interface TimelineTrack { target: number; property: string; keyframes: Ti
 export interface AnimationSourceIssue { range: Range; reason: string }
 export interface KeyframeLocation { target: number; property: string; time: number }
 export type KeyframeGroupEdit = { action: 'move_keyframes' | 'duplicate_keyframes'; offset: number }
+    | { action: 'scale_keyframes'; pivot: number; factor: number }
     | { action: 'remove_keyframes' };
 export interface AuthoredTimeline {
     duration: number;

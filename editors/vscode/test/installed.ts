@@ -53,6 +53,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
         assert.ok(native.capabilities.timelineCurves, 'The installed preview samples scalar animation curves');
+        assert.ok(native.capabilities.timelineKeyframeScale, 'The installed preview scales authored key selections');
         assert.ok(native.capabilities.timelineCombinedPlayback, 'The installed preview plays combined animation programs');
         assert.ok(native.capabilities.timelineProgramTargets, 'The installed preview retains animation resource targets');
         assert.ok(native.capabilities.stateTransitionPreview, 'The installed preview samples explicit state transitions');
@@ -67,7 +68,8 @@ export async function run(): Promise<void> {
         const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'animation_view.rs'));
         const declaration = rust.getText().indexOf('ferroui_view::animation(');
         assert.ok(declaration >= 0);
-        const animated = await native.render(sourceOf(rust, 'rust', rust.positionAt(declaration)), { width: 640, height: 420, dark: false }, 2);
+        const animationSource = sourceOf(rust, 'rust', rust.positionAt(declaration));
+        const animated = await native.render(animationSource, { width: 640, height: 420, dark: false }, 2);
         assert.ok(animated.image, animated.renderError ?? undefined);
         assert.ok(animated.mappedRustAnimations, 'The installed native preview maps an RSX animation declaration');
         const { programs } = await native.studioQuery(2, 'designer_programs', { include_source: false }) as { programs: TimelineProgram[] };
@@ -77,6 +79,11 @@ export async function run(): Promise<void> {
         const curve = await native.studioQuery(2, 'designer_animation_curve', { program: program.id,
             target: track.target, property: track.property, window: { start: 0, end: 2 } }) as { points: CurvePoint[] };
         assert.equal(curve.points.find(point => point.time === .5)?.value, .65);
+        const scaled = await native.studioEdit(animationSource, 2, 'designer_program', {
+            action: 'scale_keyframes', program: program.id, pivot: 0, factor: .5,
+            keyframes: track.keyframes.slice(1).map(({ time }) => ({ target: track.target, property: track.property, time })),
+        }, []);
+        assert.deepEqual(scaled.edits.map(edit => edit.newText), ['0.125', '0.5']);
         const stateSource = { uri: vscode.Uri.joinPath(workspace.uri, 'review_states.rs').toString(),
             language: 'rust' as const, source: reviewStateSource, caret: { line: 3, character: 2 } };
         const states = await native.render(stateSource, { width: 640, height: 420, dark: false }, 3);

@@ -110,6 +110,16 @@ export async function verifyTimelineMcp(mcp: McpFixture, session: number, docume
     await undo();
     assert.equal(document.getText(), timedSource);
     frame = await wait();
+    const beforeScale = (await pulse()).timeline.tracks[0].keyframes;
+    const scale = { action: 'scale_keyframes', program, keyframes, pivot: 1, factor: .5 };
+    content(await edit(frame.revision, scale));
+    frame = await wait();
+    const scaled = (await pulse()).timeline.tracks[0].keyframes;
+    assert.deepEqual(scaled, beforeScale.map(key => key.time === 1.5 ? { ...key, time: 1.25 } : key));
+    assert.ok((await edit(frame.revision, { ...scale, factor: 0 })).isError);
+    await undo();
+    assert.equal(document.getText(), timedSource);
+    frame = await wait();
     const collision = await editKeys('duplicate_keyframes', .5);
     assert.ok(collision.isError && collision.content[0]?.text?.includes('occupies a destination time'));
     assert.equal(document.getText(), timedSource);

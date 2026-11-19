@@ -719,6 +719,11 @@ impl DesignerWorkspace {
         self.refresh(true);
         Ok(())
     }
+    pub fn scale_selected_keyframes(self: &Rc<Self>, pivot: f64, factor: f64) -> Result<(), String> {
+        self.edit_selected_keys(KeyframeEdit::Scale { pivot, factor })?;
+        self.refresh(true);
+        Ok(())
+    }
     pub fn duplicate_selected_keyframes(self: &Rc<Self>, delta: f64) -> Result<(), String> {
         self.edit_selected_keys(KeyframeEdit::Duplicate(delta))?;
         self.refresh(true);
@@ -853,12 +858,14 @@ impl DesignerWorkspace {
             .add(key_caption(&format!("{count} keyframes selected")).upcast::<Control>());
         let rust = self.session.borrow().uses_rust_source();
         let offset = key_field(&row, "Offset", "KeyframeOffset", "0.1", 64.0);
+        let factor = key_field(&row, "Factor", "KeyframeScaleFactor", "2", 56.0);
         for (name, label) in [
             ("MoveKeyframes", "Move"),
+            ("ScaleKeyframes", "Scale from playhead"),
             ("DuplicateKeyframes", "Duplicate"),
             ("RemoveKeyframes", "Delete"),
         ] {
-            if rust && name != "MoveKeyframes" {
+            if rust && matches!(name, "DuplicateKeyframes" | "RemoveKeyframes") {
                 continue;
             }
             let control = button(label);
@@ -872,7 +879,7 @@ impl DesignerWorkspace {
             control.set_min_height(26.0);
             control.set_font_size(11.0);
             let weak = Rc::downgrade(self);
-            let weak_offset = offset.downgrade();
+            let field = if name == "ScaleKeyframes" { &factor } else { &offset }.downgrade();
             let context = context.clone();
             control.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
@@ -880,17 +887,17 @@ impl DesignerWorkspace {
                         let operation = if name == "RemoveKeyframes" {
                             KeyframeEdit::Remove
                         } else {
-                            let delta: f64 = weak_offset
+                            let value: f64 = field
                                 .upgrade()
-                                .ok_or("The offset editor was closed")?
+                                .ok_or("The timing editor was closed")?
                                 .text()
                                 .unwrap_or_default()
                                 .parse()
-                                .map_err(|_| "Enter an offset in seconds")?;
-                            if name == "MoveKeyframes" {
-                                KeyframeEdit::Move(delta)
-                            } else {
-                                KeyframeEdit::Duplicate(delta)
+                                .map_err(|_| "Enter a numeric offset or scale factor")?;
+                            match name {
+                                "MoveKeyframes" => KeyframeEdit::Move(value),
+                                "ScaleKeyframes" => KeyframeEdit::Scale { pivot: this.session.borrow().time(), factor: value },
+                                _ => KeyframeEdit::Duplicate(value),
                             }
                         };
                         this.edit_selected_keys(operation)

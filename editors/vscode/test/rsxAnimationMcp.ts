@@ -36,7 +36,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,
-        ['upsert_keyframe', 'move_keyframes']);
+        ['upsert_keyframe', 'move_keyframes', 'scale_keyframes']);
 
     const draft = { program: program.id, target: program.timeline.tracks[0].target, property: 'Opacity',
         previous: .5, time: 1.4, value: '0.82', easing: '0.25,0.3,0.75,1.4' };
@@ -84,11 +84,19 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     await until(() => document.version !== movedVersion);
     assert.equal(document.getText(), original);
     frame = await outline();
+    const scale = { action: 'scale_keyframes', program: restored.id, keyframes, pivot: 0, factor: .5 };
+    content(await edit(frame.revision, scale));
+    assert.equal(document.getText(), original.replace('.key_frame(0.25,', '.key_frame(0.125,')
+        .replace('.key_frame(1.0,', '.key_frame(0.5,'));
+    assert.ok((await edit(frame.revision, scale)).isError);
+    content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+    assert.equal(document.getText(), original);
+    frame = await outline();
     content(await invoke('designer_block', { session, expected_revision: frame.revision, index: 0 }));
     await outline();
     assert.deepEqual(await programs(), []);
     const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(fixtureTabs);
-    console.log('RSX animation validated native keyframes, moved a Rust selection in one edit, rejected a stale revision, and restored CRLF and Unicode with Undo');
+    console.log('RSX animation validated native keyframes, moved and scaled a Rust selection, rejected a stale revision, and restored CRLF and Unicode with Undo');
 }

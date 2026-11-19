@@ -173,8 +173,8 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if rust_keyframe {
         let rsx = stage.authored_rsx.as_ref().ok_or("Render the current Rust animation before editing")?;
-        let patches = if arguments["action"] == "move_keyframes" {
-            rsx.move_keys(&stage.session.borrow(), &arguments)?
+        let patches = if matches!(arguments["action"].as_str(), Some("move_keyframes" | "scale_keyframes")) {
+            rsx.retime_keys(&stage.session.borrow(), &arguments)?
         } else {
             let patches = rsx.patches(&arguments)?;
             // Validate against the native timeline and send only the original Rust edits.
@@ -249,7 +249,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_program" => matches!(
             action,
             Some("create" | "rename" | "duplicate" | "remove" | "selector" | "source" | "update" | "update_timing" |
-                "upsert_keyframe" | "record_keyframe" | "remove_keyframe" | "move_keyframes" | "duplicate_keyframes" | "remove_keyframes")
+                "upsert_keyframe" | "record_keyframe" | "remove_keyframe" | "move_keyframes" | "scale_keyframes" | "duplicate_keyframes" | "remove_keyframes")
         ),
         "designer_state" => matches!(action, Some("upsert" | "remove")),
         "designer_behavior" => matches!(action, Some("upsert" | "remove" | "source")),
