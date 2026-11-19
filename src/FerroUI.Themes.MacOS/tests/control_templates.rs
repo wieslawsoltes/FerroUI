@@ -307,6 +307,8 @@ control_tests! {
     tree_view_item => "TreeViewItem";
     list_view => "ListView";
     list_view_item => "ListViewItem";
+    grid_view => "GridView";
+    grid_view_item => "GridViewItem";
     pivot => "Pivot";
     pivot_header_item => "PivotHeaderItem";
     pivot_item => "PivotItem";

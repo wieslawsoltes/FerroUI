@@ -548,6 +548,20 @@ ListView waiver is removed and G-23 and LBI-8 are updated. `ListView` and `ListV
 WinUI-only list. The catalog has a "ListView" page in "Collections & Data". Tests:
 `list_view/list_view_tests.rs`.
 
+**Status (LV-2, done).** `GridView`, `GridViewItem`, `GridViewItemTemplateSettings`,
+`ItemsWrapGrid` and the peers `GridViewAutomationPeer` (List) and `GridViewItemAutomationPeer`
+(ListItem, SelectionItem, Invoke) in `ferroui-controls` (`list_view/`). `ItemsWrapGrid` derives
+from `WrapPanel` (decision D5): cells of one size (`ItemWidth` by `ItemHeight`, or the size of the
+first item, as in WinUI), in rows or columns that wrap at the edge or after
+`MaximumRowsOrColumns` items; it does not virtualize (recorded). The WinUI theme has
+`Controls/GridView.xaml` (the GridView style of `generic.xaml`, and `DefaultGridViewItemStyle`
+with the chrome of `ListViewItemPresenter` drawn with elements: the background of the state, the
+accent selection border of `GridViewItemSelectedBorderThickness`, the disabled opacity; the check
+mark and the multi-select check box are left out, as for the list items) and the converted
+`Resources/GridViewItem_themeresources.xaml`; the GridView waivers are removed. `GridView` and
+`GridViewItem` join the WinUI-only list; the catalog has a "GridView" page in "Collections &
+Data". Tests: the grid tests of `list_view/list_view_tests.rs`.
+
 ### 6.3 Templates and resources (WinUI theme)
 
 - `Controls/ListView.xaml` and `Controls/GridView.xaml` from GX 9284 and 9348:

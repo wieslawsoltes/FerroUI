@@ -9,7 +9,7 @@ use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, ICo
 use crate::test_support::{boxed_str, string_of, test_scope, TestRoot};
 use crate::{Control, ItemsControl, ItemsSource, Panel, ScrollViewer, SelectionMode};
 use ferroui_base::data::TemplateBinding;
-use ferroui_base::{Ref, StaticType};
+use ferroui_base::{Ref, StaticType as _};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -168,4 +168,45 @@ fn the_peers_are_a_list_and_list_items() {
     let invoke = item_peer.get_provider::<dyn IInvokeProvider>().expect("the Invoke pattern");
     invoke.invoke().unwrap();
     assert_eq!(*clicked.borrow(), 1);
+}
+
+#[test]
+fn a_grid_view_has_grid_view_items_in_an_items_wrap_grid() {
+    let _scope = test_scope();
+    let grid = GridView::new();
+    grid.set_template(list_view_template());
+    grid.set_width(300.0);
+    grid.set_height(300.0);
+    grid.set_items_source(Some(ItemsSource::from_items((0..5).map(|index| boxed_str(&format!("Item {index}"))))));
+    let root = TestRoot::with_child(grid.clone());
+    root.layout_manager().execute_initial_layout_pass();
+    let panel = grid.items_panel_root().and_then(|panel| panel.cast::<ItemsWrapGrid>()).expect("an ItemsWrapGrid");
+    assert_eq!(panel.orientation(), ferroui_base::layout::Orientation::Horizontal);
+    assert!(grid.container_from_index(4).is_some_and(|container| container.downcast_ref::<GridViewItem>().is_some()));
+    let peer = ControlAutomationPeer::create_peer_for_element(&grid.clone().upcast());
+    assert_eq!(peer.get_automation_control_type(), AutomationControlType::List);
+    let item_peer = ControlAutomationPeer::create_peer_for_element(&grid.container_from_index(0).unwrap());
+    assert_eq!(item_peer.get_automation_control_type(), AutomationControlType::ListItem);
+}
+
+#[test]
+fn the_wrap_grid_lays_out_cells_of_one_size() {
+    let _scope = test_scope();
+    let panel = ItemsWrapGrid::new();
+    panel.set_orientation(ferroui_base::layout::Orientation::Horizontal);
+    panel.set_item_width(100.0);
+    panel.set_item_height(50.0);
+    let children: Vec<Ref<Control>> = (0..5).map(|_| crate::Border::new().upcast()).collect();
+    for child in &children {
+        panel.children().add(child.clone());
+    }
+    panel.measure(ferroui_base::Size::new(350.0, f64::INFINITY));
+    // Three cells fit in a row: two rows.
+    assert_eq!(panel.desired_size(), ferroui_base::Size::new(300.0, 100.0));
+    panel.arrange(ferroui_base::Rect::new(0.0, 0.0, 350.0, 100.0));
+    assert_eq!(children[3].bounds(), ferroui_base::Rect::new(0.0, 50.0, 100.0, 50.0));
+    // At most two in a row: three rows.
+    panel.set_maximum_rows_or_columns(2);
+    panel.measure(ferroui_base::Size::new(350.0, f64::INFINITY));
+    assert_eq!(panel.desired_size(), ferroui_base::Size::new(200.0, 150.0));
 }

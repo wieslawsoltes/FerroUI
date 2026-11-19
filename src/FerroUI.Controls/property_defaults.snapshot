@@ -436,6 +436,7 @@ FerroUI.Controls.ItemsStackPanel.AreStickyGroupHeadersEnabled: bool = True; OneW
 FerroUI.Controls.ItemsStackPanel.GroupHeaderPlacement: GroupHeaderPlacement = Top; OneWay
 FerroUI.Controls.ItemsStackPanel.GroupPadding: Thickness = 0,0,0,0; OneWay
 FerroUI.Controls.ItemsStackPanel.ItemsUpdatingScrollMode: ItemsUpdatingScrollMode = KeepItemsInView; OneWay
+FerroUI.Controls.ItemsWrapGrid.MaximumRowsOrColumns: i32 = -1; OneWay
 FerroUI.Controls.Label overrides FerroUI.Input.KeyboardNavigation.IsTabStop = False; OneWay
 FerroUI.Controls.Label.Target: Option<ElementRef<InputElement>> = (null); OneWay
 FerroUI.Controls.LayoutTransformControl overrides FerroUI.Visual.ClipToBounds = True; OneWay

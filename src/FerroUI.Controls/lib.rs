@@ -323,8 +323,8 @@ mod progress_ring_tests;
 // WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
 mod list_view;
 pub use list_view::{
-    ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GroupHeaderPlacement, IncrementalLoadingTrigger,
-    ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsUpdatingScrollMode, ListView, ListViewBase,
+    ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GridView, GridViewItem, GridViewItemTemplateSettings,
+    GroupHeaderPlacement, IncrementalLoadingTrigger, ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsWrapGrid, ItemsUpdatingScrollMode, ListView, ListViewBase,
     ListViewBaseItem, ListViewItem, ListViewItemTemplateSettings, ListViewReorderMode, ListViewSelectionMode,
     ScrollIntoViewAlignment,
 };
