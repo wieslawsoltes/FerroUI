@@ -16183,9 +16183,7 @@ fn populate_winuitheme_xaml_deferred_319(
     // WinUITheme.xaml(198,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.33_f64);
     // WinUITheme.xaml(198,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorSecondary"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 198, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorSecondary", 198, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 198, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 198, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -16197,9 +16195,7 @@ fn populate_winuitheme_xaml_deferred_319(
     // WinUITheme.xaml(199,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(199,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 199, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 199, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 199, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 199, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -16227,9 +16223,7 @@ fn populate_winuitheme_xaml_deferred_320(
     // WinUITheme.xaml(204,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.7_f64);
     // WinUITheme.xaml(204,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorSecondary"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 204, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorSecondary", 204, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 204, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 204, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -16241,9 +16235,7 @@ fn populate_winuitheme_xaml_deferred_320(
     // WinUITheme.xaml(205,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.5_f64);
     // WinUITheme.xaml(205,39) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 205, 39)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 205, 39)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 205, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 205, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -16279,9 +16271,7 @@ fn populate_winuitheme_xaml_deferred_321(
     // WinUITheme.xaml(213,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.33_f64);
     // WinUITheme.xaml(213,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorOnAccentSecondary"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 213, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorOnAccentSecondary", 213, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 213, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 213, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -16293,9 +16283,7 @@ fn populate_winuitheme_xaml_deferred_321(
     // WinUITheme.xaml(214,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(214,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorOnAccentDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 214, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorOnAccentDefault", 214, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 214, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 214, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -16349,9 +16337,7 @@ fn populate_winuitheme_xaml_deferred_378(
     // WinUITheme.xaml(63,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.5_f64);
     // WinUITheme.xaml(63,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrongStrokeColorDefault"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 63, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrongStrokeColorDefault", 63, 38)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 63, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 63, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -16363,9 +16349,7 @@ fn populate_winuitheme_xaml_deferred_378(
     // WinUITheme.xaml(64,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(64,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 64, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 64, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 64, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 64, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -16412,9 +16396,7 @@ fn populate_winuitheme_xaml_deferred_379(
     // WinUITheme.xaml(73,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(73,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 73, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 73, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 73, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -16431,16 +16413,12 @@ fn populate_winuitheme_xaml_deferred_452(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(18,61) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 18, 61)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 18, 61)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 18, position: 61 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(18,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(18,133) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 18, 133)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 18, 133)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 18, position: 133 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16455,16 +16433,12 @@ fn populate_winuitheme_xaml_deferred_453(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(19,62) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 19, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 19, 62)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 19, position: 62 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(19,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(19,134) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 19, 134)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 19, 134)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 19, position: 134 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16587,16 +16561,12 @@ fn populate_winuitheme_xaml_deferred_460(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(26,71) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 26, 71)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 26, 71)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 26, position: 71 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(26,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(26,143) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 26, 143)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 26, 143)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 26, position: 143 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16611,16 +16581,12 @@ fn populate_winuitheme_xaml_deferred_461(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(27,72) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 27, 72)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 27, 72)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 27, position: 72 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(27,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(27,144) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 27, 144)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 27, 144)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 27, position: 144 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16635,16 +16601,12 @@ fn populate_winuitheme_xaml_deferred_462(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(28,82) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 28, 82)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 28, 82)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 28, position: 82 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(28,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(28,154) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 28, 154)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 28, 154)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 28, position: 154 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16659,16 +16621,12 @@ fn populate_winuitheme_xaml_deferred_463(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(29,83) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 29, 83)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 29, 83)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 29, position: 83 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(29,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(29,155) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 29, 155)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 29, 155)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 29, position: 155 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16683,16 +16641,12 @@ fn populate_winuitheme_xaml_deferred_464(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(30,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 30, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 30, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 30, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(30,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(30,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 30, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 30, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 30, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16707,16 +16661,12 @@ fn populate_winuitheme_xaml_deferred_465(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(31,70) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 31, 70)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 31, position: 70 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(31,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(31,142) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 142)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 31, 142)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 31, position: 142 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16731,16 +16681,12 @@ fn populate_winuitheme_xaml_deferred_466(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(32,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 32, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 32, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(32,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(32,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 32, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 32, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16755,16 +16701,12 @@ fn populate_winuitheme_xaml_deferred_467(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(33,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 33, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 33, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 33, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(33,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(33,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 33, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 33, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 33, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16779,16 +16721,12 @@ fn populate_winuitheme_xaml_deferred_468(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(34,75) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 34, 75)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 34, 75)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 34, position: 75 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(34,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(34,147) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 34, 147)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 34, 147)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 34, position: 147 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16803,16 +16741,12 @@ fn populate_winuitheme_xaml_deferred_469(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(35,76) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 76)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 35, 76)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 35, position: 76 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(35,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(35,148) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 148)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 35, 148)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 35, position: 148 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16827,16 +16761,12 @@ fn populate_winuitheme_xaml_deferred_470(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(36,70) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 36, 70)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 36, position: 70 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(36,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(36,142) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 142)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeLowColor", 36, 142)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 36, position: 142 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16851,16 +16781,12 @@ fn populate_winuitheme_xaml_deferred_471(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(37,71) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 71)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 37, 71)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 37, position: 71 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(37,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(37,143) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 143)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeLowColor", 37, 143)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 37, position: 143 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16875,16 +16801,12 @@ fn populate_winuitheme_xaml_deferred_472(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(38,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 38, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 38, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 38, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(38,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(38,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 38, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 38, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 38, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16899,16 +16821,12 @@ fn populate_winuitheme_xaml_deferred_473(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(39,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 39, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 39, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(39,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(39,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 39, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 39, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16923,16 +16841,12 @@ fn populate_winuitheme_xaml_deferred_474(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(40,77) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 77)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 40, 77)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 77 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(40,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(40,149) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 149)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeHighColor", 40, 149)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 149 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16947,16 +16861,12 @@ fn populate_winuitheme_xaml_deferred_475(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(41,78) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 41, 78)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 41, 78)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 41, position: 78 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(41,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(41,150) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 41, 150)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeHighColor", 41, 150)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 41, position: 150 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16971,16 +16881,12 @@ fn populate_winuitheme_xaml_deferred_476(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(42,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 42, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 42, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(42,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(42,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 42, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 42, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -16995,16 +16901,12 @@ fn populate_winuitheme_xaml_deferred_477(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(43,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 43, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 43, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(43,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(43,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 43, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 43, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17019,16 +16921,12 @@ fn populate_winuitheme_xaml_deferred_478(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(44,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 44, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 44, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 44, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(44,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(44,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 44, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 44, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 44, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17043,16 +16941,12 @@ fn populate_winuitheme_xaml_deferred_479(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(45,81) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 81)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 45, 81)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 45, position: 81 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(45,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(45,153) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 153)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 45, 153)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 45, position: 153 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17067,16 +16961,12 @@ fn populate_winuitheme_xaml_deferred_480(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(46,67) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 67)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 46, 67)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 46, position: 67 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(46,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(46,139) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 139)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltLowColor", 46, 139)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 46, position: 139 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17091,16 +16981,12 @@ fn populate_winuitheme_xaml_deferred_481(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(47,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 47, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(47,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(47,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltLowColor", 47, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17115,16 +17001,12 @@ fn populate_winuitheme_xaml_deferred_482(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(48,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 48, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(48,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(48,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltMediumLowColor", 48, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17139,16 +17021,12 @@ fn populate_winuitheme_xaml_deferred_483(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(49,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 49, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 49, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 49, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(49,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(49,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 49, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltMediumLowColor", 49, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 49, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17163,16 +17041,12 @@ fn populate_winuitheme_xaml_deferred_484(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(50,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 50, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 50, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(50,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(50,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 50, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 50, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17187,16 +17061,12 @@ fn populate_winuitheme_xaml_deferred_485(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(51,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 51, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(51,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(51,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 51, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -17438,14 +17308,10 @@ fn populate_winuitheme_xaml_deferred_499(
     // WinUITheme.xaml(38,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(38,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 38, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 38, 109)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 38, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(38,159) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 38, 159)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 38, 159)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 38, position: 159 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17480,14 +17346,10 @@ fn populate_winuitheme_xaml_deferred_501(
     // WinUITheme.xaml(40,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(40,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealAltHighColor", 40, 109)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(40,159) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 159)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 40, 159)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 159 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17552,14 +17414,10 @@ fn populate_winuitheme_xaml_deferred_505(
     // WinUITheme.xaml(44,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(44,111) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 44, 111)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 44, 111)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 44, position: 111 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(44,164) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 44, 164)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 44, 164)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 44, position: 164 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17576,14 +17434,10 @@ fn populate_winuitheme_xaml_deferred_506(
     // WinUITheme.xaml(45,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(45,108) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 108)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListLowColor", 45, 108)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 45, position: 108 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(45,158) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 158)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListLowColor", 45, 158)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 45, position: 158 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17600,14 +17454,10 @@ fn populate_winuitheme_xaml_deferred_507(
     // WinUITheme.xaml(46,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(46,122) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 122)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 46, 122)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 46, position: 122 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(46,178) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 178)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 46, 178)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 46, position: 178 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17624,14 +17474,10 @@ fn populate_winuitheme_xaml_deferred_508(
     // WinUITheme.xaml(47,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(47,120) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 120)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 47, 120)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 120 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(47,176) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 176)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 47, 176)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 176 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17648,14 +17494,10 @@ fn populate_winuitheme_xaml_deferred_509(
     // WinUITheme.xaml(48,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(48,118) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 118)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 48, 118)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 118 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(48,171) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 171)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 48, 171)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 171 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -17704,14 +17546,10 @@ fn populate_winuitheme_xaml_deferred_512(
     // WinUITheme.xaml(51,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(51,102) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 102)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseHighColor", 51, 102)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 102 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(51,153) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 153)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 51, 153)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 153 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17728,14 +17566,10 @@ fn populate_winuitheme_xaml_deferred_513(
     // WinUITheme.xaml(52,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(52,101) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 52, 101)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 52, 101)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 52, position: 101 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(52,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 52, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 52, 151)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 52, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17752,14 +17586,10 @@ fn populate_winuitheme_xaml_deferred_514(
     // WinUITheme.xaml(53,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(53,104) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 53, 104)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumColor", 53, 104)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 53, position: 104 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(53,157) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 53, 157)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumColor", 53, 157)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 53, position: 157 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17776,14 +17606,10 @@ fn populate_winuitheme_xaml_deferred_515(
     // WinUITheme.xaml(54,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(54,108) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 54, 108)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumHighColor", 54, 108)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 54, position: 108 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(54,165) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 54, 165)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumHighColor", 54, 165)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 54, position: 165 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17800,14 +17626,10 @@ fn populate_winuitheme_xaml_deferred_516(
     // WinUITheme.xaml(55,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(55,107) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 55, 107)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 55, 107)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 55, position: 107 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(55,163) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 55, 163)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 55, 163)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 55, position: 163 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17824,14 +17646,10 @@ fn populate_winuitheme_xaml_deferred_517(
     // WinUITheme.xaml(56,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(56,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeBlackHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeBlackHighColor", 56, 109)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 56, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(56,167) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeBlackHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 167)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeBlackHighColor", 56, 167)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 56, position: 167 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17848,14 +17666,10 @@ fn populate_winuitheme_xaml_deferred_518(
     // WinUITheme.xaml(57,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(57,117) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeBlackMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 57, 117)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeBlackMediumColor", 57, 117)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 57, position: 117 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(57,177) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeBlackMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 57, 177)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeBlackMediumColor", 57, 177)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 57, position: 177 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17872,14 +17686,10 @@ fn populate_winuitheme_xaml_deferred_519(
     // WinUITheme.xaml(58,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(58,106) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 58, 106)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeMediumColor", 58, 106)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 58, position: 106 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(58,161) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 58, 161)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 58, 161)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 58, position: 161 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17896,14 +17706,10 @@ fn populate_winuitheme_xaml_deferred_520(
     // WinUITheme.xaml(59,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(59,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeMediumLowColor", 59, 109)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 59, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(59,167) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 167)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 59, 167)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 59, position: 167 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17920,14 +17726,10 @@ fn populate_winuitheme_xaml_deferred_521(
     // WinUITheme.xaml(60,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(60,105) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeWhiteColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 105)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeWhiteColor", 60, 105)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 60, position: 105 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(60,159) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeWhiteColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 159)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeWhiteColor", 60, 159)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 60, position: 159 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17962,14 +17764,10 @@ fn populate_winuitheme_xaml_deferred_523(
     // WinUITheme.xaml(62,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(62,101) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 62, 101)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListLowColor", 62, 101)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 62, position: 101 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(62,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 62, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListLowColor", 62, 151)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 62, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -17986,14 +17784,10 @@ fn populate_winuitheme_xaml_deferred_524(
     // WinUITheme.xaml(63,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(63,104) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 63, 104)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 63, 104)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 63, position: 104 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(63,157) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 63, 157)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 63, 157)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 63, position: 157 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18116,14 +17910,10 @@ fn populate_winuitheme_xaml_deferred_531(
     // WinUITheme.xaml(70,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(70,101) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 101)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseHighColor", 70, 101)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 70, position: 101 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(70,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 70, 152)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 70, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18140,14 +17930,10 @@ fn populate_winuitheme_xaml_deferred_532(
     // WinUITheme.xaml(71,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(71,100) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 100)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 71, 100)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 100 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(71,150) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 150)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 71, 150)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 150 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18164,14 +17950,10 @@ fn populate_winuitheme_xaml_deferred_533(
     // WinUITheme.xaml(72,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(72,103) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 103)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumColor", 72, 103)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 72, position: 103 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(72,156) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 156)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumColor", 72, 156)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 72, position: 156 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18188,14 +17970,10 @@ fn populate_winuitheme_xaml_deferred_534(
     // WinUITheme.xaml(73,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(73,107) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 107)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumHighColor", 73, 107)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 73, position: 107 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(73,164) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 164)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumHighColor", 73, 164)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 73, position: 164 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18212,14 +17990,10 @@ fn populate_winuitheme_xaml_deferred_535(
     // WinUITheme.xaml(74,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Dark);
     // WinUITheme.xaml(74,106) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 106)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 74, 106)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 74, position: 106 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(74,162) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 162)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 74, 162)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 74, position: 162 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -18490,9 +18264,7 @@ fn populate_winuitheme_xaml_deferred_2249(
     // WinUITheme.xaml(397,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.33_f64);
     // WinUITheme.xaml(397,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorSecondary"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 397, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorSecondary", 397, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 397, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 397, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -18504,9 +18276,7 @@ fn populate_winuitheme_xaml_deferred_2249(
     // WinUITheme.xaml(398,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(398,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 398, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 398, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 398, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 398, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -18534,9 +18304,7 @@ fn populate_winuitheme_xaml_deferred_2250(
     // WinUITheme.xaml(403,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.5_f64);
     // WinUITheme.xaml(403,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 403, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 403, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 403, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 403, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -18548,9 +18316,7 @@ fn populate_winuitheme_xaml_deferred_2250(
     // WinUITheme.xaml(404,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.7_f64);
     // WinUITheme.xaml(404,39) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorSecondary"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 404, 39)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorSecondary", 404, 39)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 404, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 404, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -18586,9 +18352,7 @@ fn populate_winuitheme_xaml_deferred_2251(
     // WinUITheme.xaml(412,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.33_f64);
     // WinUITheme.xaml(412,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorOnAccentSecondary"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 412, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorOnAccentSecondary", 412, 39)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 412, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 412, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -18600,9 +18364,7 @@ fn populate_winuitheme_xaml_deferred_2251(
     // WinUITheme.xaml(413,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(413,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorOnAccentDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 413, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorOnAccentDefault", 413, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 413, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 413, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -18656,9 +18418,7 @@ fn populate_winuitheme_xaml_deferred_2316(
     // WinUITheme.xaml(126,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.5_f64);
     // WinUITheme.xaml(126,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrongStrokeColorDefault"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 126, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrongStrokeColorDefault", 126, 38)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 126, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 126, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -18670,9 +18430,7 @@ fn populate_winuitheme_xaml_deferred_2316(
     // WinUITheme.xaml(127,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(127,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 127, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 127, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 127, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 127, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -18719,9 +18477,7 @@ fn populate_winuitheme_xaml_deferred_2317(
     // WinUITheme.xaml(136,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(136,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 136, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 136, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 136, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 136, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -18738,16 +18494,12 @@ fn populate_winuitheme_xaml_deferred_2390(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(70,61) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 61)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 70, 61)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 70, position: 61 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(70,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(70,133) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 133)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 70, 133)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 70, position: 133 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18762,16 +18514,12 @@ fn populate_winuitheme_xaml_deferred_2391(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(71,62) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 71, 62)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 62 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(71,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(71,134) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 134)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 71, 134)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 134 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18894,16 +18642,12 @@ fn populate_winuitheme_xaml_deferred_2398(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(78,71) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 71)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 78, 71)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 78, position: 71 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(78,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(78,143) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 143)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 78, 143)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 78, position: 143 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18918,16 +18662,12 @@ fn populate_winuitheme_xaml_deferred_2399(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(79,72) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 72)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 79, 72)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 79, position: 72 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(79,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(79,144) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 144)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 79, 144)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 79, position: 144 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18942,16 +18682,12 @@ fn populate_winuitheme_xaml_deferred_2400(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(80,82) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 82)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 80, 82)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 80, position: 82 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(80,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(80,154) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 154)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 80, 154)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 80, position: 154 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18966,16 +18702,12 @@ fn populate_winuitheme_xaml_deferred_2401(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(81,83) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 81, 83)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 81, 83)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 81, position: 83 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(81,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(81,155) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 81, 155)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 81, 155)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 81, position: 155 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -18990,16 +18722,12 @@ fn populate_winuitheme_xaml_deferred_2402(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(82,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 82, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 82, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(82,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(82,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 82, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 82, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19014,16 +18742,12 @@ fn populate_winuitheme_xaml_deferred_2403(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(83,70) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 83, 70)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 83, position: 70 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(83,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(83,142) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 142)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 83, 142)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 83, position: 142 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19038,16 +18762,12 @@ fn populate_winuitheme_xaml_deferred_2404(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(84,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 84, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 84, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(84,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(84,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 84, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 84, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19062,16 +18782,12 @@ fn populate_winuitheme_xaml_deferred_2405(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(85,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 85, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 85, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(85,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.7_f64);
     // WinUITheme.xaml(85,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 85, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 85, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19086,16 +18802,12 @@ fn populate_winuitheme_xaml_deferred_2406(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(86,75) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 86, 75)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 86, 75)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 86, position: 75 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(86,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(86,147) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 86, 147)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 86, 147)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 86, position: 147 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19110,16 +18822,12 @@ fn populate_winuitheme_xaml_deferred_2407(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(87,76) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 87, 76)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 87, 76)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 87, position: 76 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(87,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(87,148) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 87, 148)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 87, 148)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 87, position: 148 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19134,16 +18842,12 @@ fn populate_winuitheme_xaml_deferred_2408(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(88,70) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 88, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 88, 70)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 88, position: 70 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(88,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(88,142) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 88, 142)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeLowColor", 88, 142)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 88, position: 142 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19158,16 +18862,12 @@ fn populate_winuitheme_xaml_deferred_2409(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(89,71) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 89, 71)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 89, 71)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 89, position: 71 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(89,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(89,143) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 89, 143)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeLowColor", 89, 143)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 89, position: 143 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19182,16 +18882,12 @@ fn populate_winuitheme_xaml_deferred_2410(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(90,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 90, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 90, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(90,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(90,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 90, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 90, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19206,16 +18902,12 @@ fn populate_winuitheme_xaml_deferred_2411(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(91,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 91, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 91, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 91, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(91,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(91,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 91, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 91, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 91, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19230,16 +18922,12 @@ fn populate_winuitheme_xaml_deferred_2412(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(92,77) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 77)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 92, 77)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 92, position: 77 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(92,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(92,149) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 149)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeHighColor", 92, 149)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 92, position: 149 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19254,16 +18942,12 @@ fn populate_winuitheme_xaml_deferred_2413(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(93,78) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 78)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 93, 78)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 93, position: 78 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(93,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(93,150) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 150)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeHighColor", 93, 150)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 93, position: 150 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19278,16 +18962,12 @@ fn populate_winuitheme_xaml_deferred_2414(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(94,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 94, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 94, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 94, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(94,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(94,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 94, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 94, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 94, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19302,16 +18982,12 @@ fn populate_winuitheme_xaml_deferred_2415(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(95,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 95, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 95, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 95, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(95,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(95,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 95, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 95, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 95, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19326,16 +19002,12 @@ fn populate_winuitheme_xaml_deferred_2416(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(96,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 96, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 96, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 96, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(96,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(96,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 96, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 96, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 96, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19350,16 +19022,12 @@ fn populate_winuitheme_xaml_deferred_2417(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(97,81) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 97, 81)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 97, 81)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 97, position: 81 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(97,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(97,153) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 97, 153)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 97, 153)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 97, position: 153 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19374,16 +19042,12 @@ fn populate_winuitheme_xaml_deferred_2418(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(98,67) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 98, 67)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 98, 67)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 98, position: 67 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(98,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(98,139) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 98, 139)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltLowColor", 98, 139)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 98, position: 139 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19398,16 +19062,12 @@ fn populate_winuitheme_xaml_deferred_2419(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(99,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 99, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 99, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 99, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(99,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(99,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 99, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltLowColor", 99, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 99, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19422,16 +19082,12 @@ fn populate_winuitheme_xaml_deferred_2420(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(100,79) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 79)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 100, 79)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 100, position: 79 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(100,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(100,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltMediumLowColor", 100, 151)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 100, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19446,16 +19102,12 @@ fn populate_winuitheme_xaml_deferred_2421(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(101,80) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 101, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 101, 80)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 101, position: 80 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(101,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.6_f64);
     // WinUITheme.xaml(101,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 101, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltMediumLowColor", 101, 152)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 101, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19470,16 +19122,12 @@ fn populate_winuitheme_xaml_deferred_2422(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(102,68) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 68)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 102, 68)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 102, position: 68 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(102,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(102,140) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 140)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 102, 140)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 102, position: 140 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19494,16 +19142,12 @@ fn populate_winuitheme_xaml_deferred_2423(
     let acrylic_brush_0 = ::ferroui_base::media::AcrylicBrush::new();
     context.push_parent(rt::to_value(acrylic_brush_0.clone()));
     // WinUITheme.xaml(103,69) TintColor (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::AcrylicBrush::tint_color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 103, 69)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::AcrylicBrush::tint_color_property(), "SystemChromeAltHighColor", 103, 69)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::AcrylicBrush::tint_color_property(), value_0, &rt::ResourceChoice { name: "TintColor", member: "FerroUI.Media.AcrylicBrush.set_TintColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 103, position: 69 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(103,8) TintOpacity
     acrylic_brush_0.set_value(::ferroui_base::media::AcrylicBrush::tint_opacity_property(), 0.8_f64);
     // WinUITheme.xaml(103,141) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 103, 141)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 103, 141)?;
     rt::assign_resource_value(acrylic_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 103, position: 141 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(acrylic_brush_0.clone()))
@@ -19745,14 +19389,10 @@ fn populate_winuitheme_xaml_deferred_2437(
     // WinUITheme.xaml(143,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(143,110) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 143, 110)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 143, 110)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 143, position: 110 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(143,160) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 143, 160)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 143, 160)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 143, position: 160 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19787,14 +19427,10 @@ fn populate_winuitheme_xaml_deferred_2439(
     // WinUITheme.xaml(145,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(145,110) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealAltHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 145, 110)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealAltHighColor", 145, 110)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 145, position: 110 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(145,160) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemAltHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 145, 160)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemAltHighColor", 145, 160)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 145, position: 160 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19859,14 +19495,10 @@ fn populate_winuitheme_xaml_deferred_2443(
     // WinUITheme.xaml(149,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(149,112) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 112)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 149, 112)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 149, position: 112 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(149,165) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 165)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 149, 165)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 149, position: 165 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19883,14 +19515,10 @@ fn populate_winuitheme_xaml_deferred_2444(
     // WinUITheme.xaml(150,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(150,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListLowColor", 150, 109)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 150, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(150,159) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 159)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListLowColor", 150, 159)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 150, position: 159 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19907,14 +19535,10 @@ fn populate_winuitheme_xaml_deferred_2445(
     // WinUITheme.xaml(151,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(151,123) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 151, 123)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 151, 123)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 151, position: 123 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(151,179) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 151, 179)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 151, 179)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 151, position: 179 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19931,14 +19555,10 @@ fn populate_winuitheme_xaml_deferred_2446(
     // WinUITheme.xaml(152,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(152,121) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 152, 121)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 152, 121)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 152, position: 121 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(152,177) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 152, 177)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 152, 177)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 152, position: 177 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -19955,14 +19575,10 @@ fn populate_winuitheme_xaml_deferred_2447(
     // WinUITheme.xaml(153,8) TargetTheme
     reveal_background_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(153,119) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 119)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 153, 119)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 153, position: 119 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(153,172) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 172)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 153, 172)?;
     rt::assign_resource_value(reveal_background_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 153, position: 172 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_background_brush_0.clone()))
@@ -20011,14 +19627,10 @@ fn populate_winuitheme_xaml_deferred_2450(
     // WinUITheme.xaml(156,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(156,103) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 103)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseHighColor", 156, 103)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 156, position: 103 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(156,154) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 154)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 156, 154)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 156, position: 154 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20035,14 +19647,10 @@ fn populate_winuitheme_xaml_deferred_2451(
     // WinUITheme.xaml(157,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(157,102) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 102)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 157, 102)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 157, position: 102 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(157,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 157, 152)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 157, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20059,14 +19667,10 @@ fn populate_winuitheme_xaml_deferred_2452(
     // WinUITheme.xaml(158,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(158,105) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 158, 105)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumColor", 158, 105)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 158, position: 105 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(158,158) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 158, 158)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumColor", 158, 158)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 158, position: 158 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20083,14 +19687,10 @@ fn populate_winuitheme_xaml_deferred_2453(
     // WinUITheme.xaml(159,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(159,109) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 109)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumHighColor", 159, 109)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 159, position: 109 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(159,166) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 166)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumHighColor", 159, 166)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 159, position: 166 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20107,14 +19707,10 @@ fn populate_winuitheme_xaml_deferred_2454(
     // WinUITheme.xaml(160,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(160,108) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 108)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 160, 108)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 160, position: 108 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(160,164) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 164)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 160, 164)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 160, position: 164 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20131,14 +19727,10 @@ fn populate_winuitheme_xaml_deferred_2455(
     // WinUITheme.xaml(161,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(161,110) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeBlackHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 161, 110)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeBlackHighColor", 161, 110)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 161, position: 110 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(161,168) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeBlackHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 161, 168)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeBlackHighColor", 161, 168)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 161, position: 168 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20155,14 +19747,10 @@ fn populate_winuitheme_xaml_deferred_2456(
     // WinUITheme.xaml(162,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(162,118) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeBlackMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 162, 118)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeBlackMediumColor", 162, 118)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 162, position: 118 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(162,178) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeBlackMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 162, 178)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeBlackMediumColor", 162, 178)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 162, position: 178 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20179,14 +19767,10 @@ fn populate_winuitheme_xaml_deferred_2457(
     // WinUITheme.xaml(163,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(163,107) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 163, 107)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeMediumColor", 163, 107)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 163, position: 107 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(163,162) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 163, 162)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumColor", 163, 162)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 163, position: 162 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20203,14 +19787,10 @@ fn populate_winuitheme_xaml_deferred_2458(
     // WinUITheme.xaml(164,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(164,110) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 164, 110)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeMediumLowColor", 164, 110)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 164, position: 110 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(164,168) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 164, 168)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeMediumLowColor", 164, 168)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 164, position: 168 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20227,14 +19807,10 @@ fn populate_winuitheme_xaml_deferred_2459(
     // WinUITheme.xaml(165,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(165,106) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealChromeWhiteColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 106)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealChromeWhiteColor", 165, 106)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 165, position: 106 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(165,160) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemChromeWhiteColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 160)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemChromeWhiteColor", 165, 160)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 165, position: 160 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20269,14 +19845,10 @@ fn populate_winuitheme_xaml_deferred_2461(
     // WinUITheme.xaml(167,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(167,102) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 167, 102)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListLowColor", 167, 102)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 167, position: 102 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(167,152) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 167, 152)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListLowColor", 167, 152)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 167, position: 152 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20293,14 +19865,10 @@ fn populate_winuitheme_xaml_deferred_2462(
     // WinUITheme.xaml(168,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(168,105) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealListMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 168, 105)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealListMediumColor", 168, 105)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 168, position: 105 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(168,158) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemListMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 168, 158)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemListMediumColor", 168, 158)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 168, position: 158 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20423,14 +19991,10 @@ fn populate_winuitheme_xaml_deferred_2469(
     // WinUITheme.xaml(175,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(175,102) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 175, 102)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseHighColor", 175, 102)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 175, position: 102 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(175,153) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 175, 153)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseHighColor", 175, 153)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 175, position: 153 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20447,14 +20011,10 @@ fn populate_winuitheme_xaml_deferred_2470(
     // WinUITheme.xaml(176,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(176,101) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 101)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseLowColor", 176, 101)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 176, position: 101 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(176,151) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 151)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseLowColor", 176, 151)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 176, position: 151 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20471,14 +20031,10 @@ fn populate_winuitheme_xaml_deferred_2471(
     // WinUITheme.xaml(177,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(177,104) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 104)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumColor", 177, 104)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 177, position: 104 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(177,157) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 157)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumColor", 177, 157)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 177, position: 157 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20495,14 +20051,10 @@ fn populate_winuitheme_xaml_deferred_2472(
     // WinUITheme.xaml(178,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(178,108) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 178, 108)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumHighColor", 178, 108)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 178, position: 108 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(178,165) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumHighColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 178, 165)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumHighColor", 178, 165)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 178, position: 165 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20519,14 +20071,10 @@ fn populate_winuitheme_xaml_deferred_2473(
     // WinUITheme.xaml(179,8) TargetTheme
     reveal_border_brush_0.set_value(::ferroui_controls::media::RevealBrush::target_theme_property(), ::ferroui_controls::media::ApplicationTheme::Light);
     // WinUITheme.xaml(179,107) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemRevealBaseMediumLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::media::RevealBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 179, 107)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::media::RevealBrush::color_property(), "SystemRevealBaseMediumLowColor", 179, 107)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::media::RevealBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.RevealBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 179, position: 107 }, ::core::option::Option::None)?;
     // WinUITheme.xaml(179,163) FallbackColor (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SystemBaseMediumLowColor"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 179, 163)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), "SystemBaseMediumLowColor", 179, 163)?;
     rt::assign_resource_value(reveal_border_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::XamlCompositionBrushBase::fallback_color_property(), value_1, &rt::ResourceChoice { name: "FallbackColor", member: "FerroUI.Media.XamlCompositionBrushBase.set_FallbackColor", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 179, position: 163 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(reveal_border_brush_0.clone()))
@@ -20653,9 +20201,7 @@ fn populate_winuitheme_xaml_deferred_4246(
     // WinUITheme.xaml(170,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.5_f64);
     // WinUITheme.xaml(170,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlAAStrokeColorDefault"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 170, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlAAStrokeColorDefault", 170, 38)?;
     rt::assign_resource_value(gradient_stop_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 170, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 170, 12)?, ::core::clone::Clone::clone(&gradient_stop_0));
@@ -20667,9 +20213,7 @@ fn populate_winuitheme_xaml_deferred_4246(
     // WinUITheme.xaml(171,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(171,38) Color (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 171, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 171, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_1, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 171, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 171, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -20716,9 +20260,7 @@ fn populate_winuitheme_xaml_deferred_4247(
     // WinUITheme.xaml(180,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
     // WinUITheme.xaml(180,38) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlStrokeColorDefault"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::GradientStop::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 180, 38)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::GradientStop::color_property(), "ControlStrokeColorDefault", 180, 38)?;
     rt::assign_resource_value(gradient_stop_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::GradientStop::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.GradientStop.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 180, position: 38 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 180, 12)?, ::core::clone::Clone::clone(&gradient_stop_1));
@@ -53739,9 +53281,7 @@ fn build_controls_winuicontrols_xaml_deferred_14(
     rt::bind_template_bindings(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_11)?;
     // Controls/WinUIControls.xaml(36,20) Height (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorHeight"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 20)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "MenuFlyoutSeparatorHeight", 36, 20)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_0, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 36, position: 20 }, ::core::option::Option::Some(priority_0))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 34, 10)?;
     ::core::result::Result::Ok(rt::to_value(rectangle_0.clone()))
@@ -54101,9 +53641,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 70, 19)?;
     // Controls/WinUIControls.xaml(71,19) Padding (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderPadding"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "ExpanderHeaderPadding", 71, 19)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_0, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 19 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(72,14) Child
     // Controls/WinUIControls.xaml(72,14) ContentPresenter
@@ -54129,15 +53667,11 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 75, 31)?;
     // Controls/WinUIControls.xaml(76,31) HorizontalContentAlignment (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderHorizontalContentAlignment"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 76, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), "ExpanderHeaderHorizontalContentAlignment", 76, 31)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), value_2, &rt::ResourceChoice { name: "HorizontalContentAlignment", member: "ContentControl.HorizontalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::HorizontalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 76, position: 31 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(77,31) VerticalContentAlignment (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderVerticalContentAlignment"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 77, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), "ExpanderHeaderVerticalContentAlignment", 77, 31)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), value_3, &rt::ResourceChoice { name: "VerticalContentAlignment", member: "ContentControl.VerticalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::VerticalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 77, position: 31 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(72,14) RecognizesAccessKey
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -54750,9 +54284,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::bind_template_bindings(border_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_38)?;
     // Controls/WinUIControls.xaml(64,19) Padding (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarContentRootPadding"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 64, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "InfoBarContentRootPadding", 64, 19)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_0, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 64, position: 19 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(65,14) Child
     // Controls/WinUIControls.xaml(65,14) Grid
@@ -54811,21 +54343,15 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_5);
     // Controls/WinUIControls.xaml(71,28) Margin (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 71, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 71, position: 28 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(72,28) FontSize (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarIconFontSize", 72, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_2, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 72, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(73,28) Text (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconBackgroundGlyph"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 28)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "InfoBarIconBackgroundGlyph", 73, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_3, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 73, position: 28 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(74,28) Foreground
     rt::bind_dynamic_resources(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_39)?;
@@ -54844,21 +54370,15 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     text_block_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_9);
     // Controls/WinUIControls.xaml(78,28) Margin (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 78, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_4, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 78, position: 28 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(79,28) FontSize (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 28)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarIconFontSize", 79, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_5, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 79, position: 28 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(80,28) Text (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarInformationalIconGlyph"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 28)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "InfoBarInformationalIconGlyph", 80, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_6, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 80, position: 28 }, ::core::option::Option::Some(priority_12))?;
     // Controls/WinUIControls.xaml(81,28) Foreground
     rt::bind_dynamic_resources(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_40)?;
@@ -54906,21 +54426,15 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     info_bar_panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_16);
     // Controls/WinUIControls.xaml(93,29) Margin (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 29)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelMargin", 93, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_7, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 93, position: 29 }, ::core::option::Option::Some(priority_17))?;
     // Controls/WinUIControls.xaml(94,29) HorizontalOrientationPadding (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelHorizontalOrientationPadding"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 94, 29)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property(), "InfoBarPanelHorizontalOrientationPadding", 94, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property(), value_8, &rt::ResourceChoice { name: "HorizontalOrientationPadding", member: "InfoBarPanel.HorizontalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 94, position: 29 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(95,29) VerticalOrientationPadding (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 95, 29)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property(), "InfoBarPanelVerticalOrientationPadding", 95, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property(), value_9, &rt::ResourceChoice { name: "VerticalOrientationPadding", member: "InfoBarPanel.VerticalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 95, position: 29 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(96,18) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(info_bar_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -54937,30 +54451,22 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarTitleForeground", 98, 28)?;
     // Controls/WinUIControls.xaml(99,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleHorizontalOrientationMargin"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 99, 28)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarTitleHorizontalOrientationMargin", 99, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_10, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 99, position: 28 }, ::core::option::Option::Some(priority_20))?;
     // Controls/WinUIControls.xaml(100,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleVerticalOrientationMargin"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 28)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarTitleVerticalOrientationMargin", 100, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_11, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 100, position: 28 }, ::core::option::Option::Some(priority_21))?;
     // Controls/WinUIControls.xaml(96,18) TextWrapping
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::WrapWithOverflow, priority_22);
     // Controls/WinUIControls.xaml(102,28) FontWeight (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontWeight"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 28)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarTitleFontWeight", 102, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_12, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 102, position: 28 }, ::core::option::Option::Some(priority_23))?;
     // Controls/WinUIControls.xaml(103,28) FontSize (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontSize"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 103, 28)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarTitleFontSize", 103, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_13, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 103, position: 28 }, ::core::option::Option::Some(priority_24))?;
     rt::pop_parent_end_init(&context, &text_block_2, 96, 18)?;
     // Controls/WinUIControls.xaml(104,18) Children
@@ -54978,30 +54484,22 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 106, 28)?;
     // Controls/WinUIControls.xaml(107,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageHorizontalOrientationMargin"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 28)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarMessageHorizontalOrientationMargin", 107, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_14, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 107, position: 28 }, ::core::option::Option::Some(priority_25))?;
     // Controls/WinUIControls.xaml(108,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageVerticalOrientationMargin"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 108, 28)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarMessageVerticalOrientationMargin", 108, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_15, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 108, position: 28 }, ::core::option::Option::Some(priority_26))?;
     // Controls/WinUIControls.xaml(104,18) TextWrapping
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::WrapWithOverflow, priority_27);
     // Controls/WinUIControls.xaml(110,28) FontWeight (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 110, 28)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 110, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_16, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 110, position: 28 }, ::core::option::Option::Some(priority_28))?;
     // Controls/WinUIControls.xaml(111,28) FontSize (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 111, 28)?;
-    let value_17: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_17: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 111, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_17, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 111, position: 28 }, ::core::option::Option::Some(priority_29))?;
     rt::pop_parent_end_init(&context, &text_block_3, 104, 18)?;
     // Controls/WinUIControls.xaml(112,18) Children
@@ -55013,15 +54511,11 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::push_parent(&context, &content_presenter_0);
     // Controls/WinUIControls.xaml(112,35) HorizontalOrientationMargin (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarActionHorizontalOrientationMargin"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 112, 35)?;
-    let value_18: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_18: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarActionHorizontalOrientationMargin", 112, 35)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_18, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 112, position: 35 }, ::core::option::Option::Some(priority_30))?;
     // Controls/WinUIControls.xaml(113,35) VerticalOrientationMargin (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_19 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarActionVerticalOrientationMargin"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_19, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 113, 35)?;
-    let value_19: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_19: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarActionVerticalOrientationMargin", 113, 35)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_19, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 113, position: 35 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(112,18) VerticalAlignment
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -55121,15 +54615,11 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::push_parent(&context, &viewbox_1);
     // Controls/WinUIControls.xaml(135,26) Width (setter chosen at run time)
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_21 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonGlyphSize"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_21, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 135, 26)?;
-    let value_23: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_23: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "InfoBarCloseButtonGlyphSize", 135, 26)?;
     rt::assign_resource_value(viewbox_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_23, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 135, position: 26 }, ::core::option::Option::Some(priority_40))?;
     // Controls/WinUIControls.xaml(136,26) Height (setter chosen at run time)
     let priority_41 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_22 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonGlyphSize"));
-    let provided_48 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_22, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 136, 26)?;
-    let value_24: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_48);
+    let value_24: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "InfoBarCloseButtonGlyphSize", 136, 26)?;
     rt::assign_resource_value(viewbox_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_24, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 136, position: 26 }, ::core::option::Option::Some(priority_41))?;
     // Controls/WinUIControls.xaml(135,18) HorizontalAlignment
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
@@ -55145,9 +54635,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     rt::push_parent(&context, &symbol_icon_0);
     // Controls/WinUIControls.xaml(139,31) Symbol (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_23 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonSymbol"));
-    let provided_49 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::SymbolIcon::symbol_property()), &static_resource_extension_23, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 139, 31)?;
-    let value_25: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_49);
+    let value_25: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::SymbolIcon::symbol_property(), "InfoBarCloseButtonSymbol", 139, 31)?;
     rt::assign_resource_value(symbol_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::SymbolIcon::symbol_property(), value_25, &rt::ResourceChoice { name: "Symbol", member: "SymbolIcon.Symbol", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_controls::Symbol as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 139, position: 31 }, ::core::option::Option::Some(priority_44))?;
     rt::pop_parent_end_init(&context, &symbol_icon_0, 139, 20)?;
     rt::pop_parent_end_init(&context, &viewbox_1, 135, 18)?;
@@ -55334,15 +54822,11 @@ fn build_controls_winuicontrols_xaml_deferred_45(
     rt::push_parent(&context, &info_bar_panel_0);
     // Controls/WinUIControls.xaml(35,40) HorizontalOrientationPadding (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelHorizontalOrientationPadding"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 40)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_padding_property(), "InfoBarPanelHorizontalOrientationPadding", 35, 40)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_padding_property(), value_0, &rt::ResourceChoice { name: "HorizontalOrientationPadding", member: "InfoBarPanel.HorizontalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 35, position: 40 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(36,40) VerticalOrientationPadding (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_padding_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 40)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_padding_property(), "InfoBarPanelVerticalOrientationPadding", 36, 40)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_padding_property(), value_1, &rt::ResourceChoice { name: "VerticalOrientationPadding", member: "InfoBarPanel.VerticalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 36, position: 40 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(37,18) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(info_bar_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -55374,29 +54858,21 @@ fn build_controls_winuicontrols_xaml_deferred_45(
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 38, 28)?;
     // Controls/WinUIControls.xaml(39,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleHorizontalOrientationMargin"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 28)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarTitleHorizontalOrientationMargin", 39, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_3, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 39, position: 28 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(40,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleVerticalOrientationMargin"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarTitleVerticalOrientationMargin", 40, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_4, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 28 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(41,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarTitleForeground", 41, 28)?;
     // Controls/WinUIControls.xaml(42,28) FontSize (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontSize"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 28)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarTitleFontSize", 42, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_5, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 42, position: 28 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(43,28) FontWeight (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontWeight"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 28)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarTitleFontWeight", 43, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_6, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 43, position: 28 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(37,18) TextWrapping
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -55432,29 +54908,21 @@ fn build_controls_winuicontrols_xaml_deferred_45(
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_10, 46, 28)?;
     // Controls/WinUIControls.xaml(47,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageHorizontalOrientationMargin"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 28)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarMessageHorizontalOrientationMargin", 47, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_8, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(48,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageVerticalOrientationMargin"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 28)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarMessageVerticalOrientationMargin", 48, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_9, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 28 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(49,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 49, 28)?;
     // Controls/WinUIControls.xaml(50,28) FontSize (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 28)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 50, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_10, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 50, position: 28 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(51,28) FontWeight (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 28)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 51, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_11, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 28 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(45,18) TextWrapping
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
@@ -55476,9 +54944,7 @@ fn build_controls_winuicontrols_xaml_deferred_46(
     rt::push_parent(&context, &text_block_0);
     // Controls/WinUIControls.xaml(56,26) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelVerticalOrientationPadding", 56, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 56, position: 26 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(57,26) Text
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
@@ -55490,15 +54956,11 @@ fn build_controls_winuicontrols_xaml_deferred_46(
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 58, 26)?;
     // Controls/WinUIControls.xaml(59,26) FontSize (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 26)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 59, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_1, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 59, position: 26 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(60,26) FontWeight (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 26)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 60, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_2, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 60, position: 26 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(56,16) TextWrapping
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -55965,9 +55427,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     rt::bind_template_bindings(border_4.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_47)?;
     // Controls/WinUIControls.xaml(138,21) Padding (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewItemHeaderPaddingWithoutCloseButton"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 138, 21)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "TabViewItemHeaderPaddingWithoutCloseButton", 138, 21)?;
     rt::assign_resource_value(border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_4, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 138, position: 21 }, ::core::option::Option::Some(priority_35))?;
     // Controls/WinUIControls.xaml(139,21) CornerRadius
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -56157,15 +55617,11 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/WinUIControls.xaml(283,28) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 283, 28)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 283, 28)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 283, position: 28 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(284,28) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 284, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 284, 28)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 284, position: 28 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 278, 18)?;
     rt::pop_parent_end_init(&context, &panel_1, 277, 16)?;
@@ -56386,15 +55842,11 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/WinUIControls.xaml(412,28) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 412, 28)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 412, 28)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 412, position: 28 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(413,28) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 413, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 413, 28)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 413, position: 28 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 407, 18)?;
     rt::pop_parent_end_init(&context, &panel_1, 406, 16)?;
@@ -57276,9 +56728,7 @@ fn build_controls_winuicontrols_xaml_deferred_66(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_IncreaseButton", 67, 31)?;
     // Controls/WinUIControls.xaml(68,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 68, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 68, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 68, position: 31 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(67,18) Margin
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -57293,9 +56743,7 @@ fn build_controls_winuicontrols_xaml_deferred_66(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(71,25) Data (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 71, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 71, position: 25 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(72,25) Fill
     let path_1 = {
@@ -57330,9 +56778,7 @@ fn build_controls_winuicontrols_xaml_deferred_66(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_DecreaseButton", 78, 31)?;
     // Controls/WinUIControls.xaml(79,31) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 79, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 79, position: 31 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(78,18) Margin
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
@@ -57347,9 +56793,7 @@ fn build_controls_winuicontrols_xaml_deferred_66(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(82,25) Data (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 25)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 82, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 82, position: 25 }, ::core::option::Option::Some(priority_12))?;
     // Controls/WinUIControls.xaml(83,25) Fill
     let path_3 = {
@@ -57491,15 +56935,11 @@ fn build_controls_winuicontrols_xaml_deferred_69(
     stack_panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(20.0_f64, 20.0_f64, 0.0_f64, 20.0_f64), priority_4);
     // Controls/WinUIControls.xaml(84,25) Spacing (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlItemSpacing"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::StackPanel::spacing_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::StackPanel::spacing_property(), "RatingControlItemSpacing", 84, 25)?;
     rt::assign_resource_value(stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::spacing_property(), value_0, &rt::ResourceChoice { name: "Spacing", member: "StackPanel.Spacing", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 84, position: 25 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(85,25) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlFontSizeForRendering"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::documents::TextElement::font_size_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::documents::TextElement::font_size_property(), "RatingControlFontSizeForRendering", 85, 25)?;
     rt::assign_resource_value(stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::font_size_property(), value_1, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 85, position: 25 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(86,25) Foreground
     rt::bind_dynamic_resource(&context, stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::foreground_property(), "RatingControlUnselectedForeground", 86, 25)?;
@@ -57515,9 +56955,7 @@ fn build_controls_winuicontrols_xaml_deferred_69(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "Caption", 87, 24)?;
     // Controls/WinUIControls.xaml(88,24) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 88, 24)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 88, 24)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 88, position: 24 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(87,14) Margin
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -57584,15 +57022,11 @@ fn build_controls_winuicontrols_xaml_deferred_69(
     stack_panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(40.0_f64, 40.0_f64, 40.0_f64, 40.0_f64), priority_18);
     // Controls/WinUIControls.xaml(104,27) Spacing (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlItemSpacing"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::StackPanel::spacing_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 104, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::StackPanel::spacing_property(), "RatingControlItemSpacing", 104, 27)?;
     rt::assign_resource_value(stack_panel_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::spacing_property(), value_3, &rt::ResourceChoice { name: "Spacing", member: "StackPanel.Spacing", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 104, position: 27 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(105,27) FontSize (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlFontSizeForRendering"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::documents::TextElement::font_size_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 105, 27)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::documents::TextElement::font_size_property(), "RatingControlFontSizeForRendering", 105, 27)?;
     rt::assign_resource_value(stack_panel_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::font_size_property(), value_4, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 105, position: 27 }, ::core::option::Option::Some(priority_20))?;
     rt::pop_parent_end_init(&context, &stack_panel_3, 100, 16)?;
     rt::pop_parent_end_init(&context, &stack_panel_2, 99, 14)?;
@@ -57635,9 +57069,7 @@ fn build_controls_winuicontrols_xaml_deferred_71(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(34,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72C"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 34, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72C", 34, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 34, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(35,17) Fill
     let path_1 = {
@@ -57724,9 +57156,7 @@ fn build_controls_winuicontrols_xaml_deferred_75(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(64,38) Shadow (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 64, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 64, 38)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_1, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 64, position: 38 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 65, 17)?;
@@ -57751,9 +57181,7 @@ fn build_controls_winuicontrols_xaml_deferred_75(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 27)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 72, 27)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 72, position: 27 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(73,27) Margin
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_72)?;
@@ -58720,15 +58148,11 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_2);
     // Controls/WinUIControls.xaml(71,19) Height (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxSize"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "CheckBoxSize", 71, 19)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_0, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 71, position: 19 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(72,19) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "CheckBoxSize", 72, 19)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 72, position: 19 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(73,16) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
@@ -58743,24 +58167,18 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     rt::bind_dynamic_resources(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_113)?;
     // Controls/WinUIControls.xaml(76,26) StrokeThickness (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxBorderThickness"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Shape::stroke_thickness_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 76, 26)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Shape::stroke_thickness_property(), "CheckBoxBorderThickness", 76, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::stroke_thickness_property(), value_2, &rt::ResourceChoice { name: "StrokeThickness", member: "Shape.StrokeThickness", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 76, position: 26 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(73,16) UseLayoutRounding
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::use_layout_rounding_property(), ::core::clone::Clone::clone(&false), priority_6);
     // Controls/WinUIControls.xaml(78,26) Height (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 26)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "CheckBoxSize", 78, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_3, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 78, position: 26 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(79,26) Width (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxSize"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 26)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "CheckBoxSize", 79, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_4, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 79, position: 26 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(80,26) RadiusX
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -58796,9 +58214,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckGlyphForegroundUnchecked", 84, 21)?;
     // Controls/WinUIControls.xaml(85,21) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 85, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 85, position: 21 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(83,16) Stretch
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
@@ -59241,9 +58657,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/WinUIControls.xaml(77,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDA"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 77, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDA", 77, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 77, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(78,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 78, 17)?;
@@ -59252,9 +58666,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/WinUIControls.xaml(80,17) Height (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarButtonArrowIconFontSize", 80, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 80, position: 17 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(75,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -59309,9 +58721,7 @@ fn build_controls_winuicontrols_xaml_deferred_132(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/WinUIControls.xaml(109,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDD9"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 109, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDD9", 109, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 109, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(110,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 110, 17)?;
@@ -59320,9 +58730,7 @@ fn build_controls_winuicontrols_xaml_deferred_132(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/WinUIControls.xaml(112,17) Height (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 112, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarButtonArrowIconFontSize", 112, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 112, position: 17 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(107,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -59377,9 +58785,7 @@ fn build_controls_winuicontrols_xaml_deferred_134(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/WinUIControls.xaml(141,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 141, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 141, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 141, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(142,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 142, 17)?;
@@ -59388,9 +58794,7 @@ fn build_controls_winuicontrols_xaml_deferred_134(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/WinUIControls.xaml(144,17) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 144, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarButtonArrowIconFontSize", 144, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 144, position: 17 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(139,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -59445,9 +58849,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/WinUIControls.xaml(173,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 173, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 173, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 173, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(174,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 174, 17)?;
@@ -59456,9 +58858,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/WinUIControls.xaml(176,17) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarButtonArrowIconFontSize", 176, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 176, position: 17 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(171,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -59712,15 +59112,11 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     repeat_button_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_6);
     // Controls/WinUIControls.xaml(281,31) Height (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 281, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarSize", 281, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 281, position: 31 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(282,31) MinWidth (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_width_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 282, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_width_property(), "ScrollBarSize", 282, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), value_2, &rt::ResourceChoice { name: "MinWidth", member: "Layoutable.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 282, position: 31 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(278,18) Focusable
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
@@ -59732,9 +59128,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarVerticalDecreaseMargin", 285, 31)?;
     // Controls/WinUIControls.xaml(286,31) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalDecrementTemplate"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 286, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalDecrementTemplate", 286, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 286, position: 31 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(278,18) HorizontalAlignment
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
@@ -59793,9 +59187,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     repeat_button_1.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_18);
     // Controls/WinUIControls.xaml(306,35) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 306, 35)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 306, 35)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 306, position: 35 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 303, 22)?;
     // Controls/WinUIControls.xaml(309,22) IncreaseButton
@@ -59815,9 +59207,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     repeat_button_2.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_22);
     // Controls/WinUIControls.xaml(312,35) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 312, 35)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 312, 35)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 312, position: 35 }, ::core::option::Option::Some(priority_23))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 309, 22)?;
     // Controls/WinUIControls.xaml(314,20) Thumb
@@ -59832,17 +59222,13 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_133)?;
     // Controls/WinUIControls.xaml(317,26) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalThumbTemplate"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 317, 26)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalThumbTemplate", 317, 26)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 317, position: 26 }, ::core::option::Option::Some(priority_24))?;
     // Controls/WinUIControls.xaml(318,26) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarVerticalThumbMinWidth", 318, 26)?;
     // Controls/WinUIControls.xaml(319,26) MinHeight (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalThumbMinHeight"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 319, 26)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "ScrollBarVerticalThumbMinHeight", 319, 26)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_8, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 319, position: 26 }, ::core::option::Option::Some(priority_25))?;
     // Controls/WinUIControls.xaml(314,20) RenderTransformOrigin
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -59900,15 +59286,11 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     repeat_button_3.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_30);
     // Controls/WinUIControls.xaml(335,31) Height (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 335, 31)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarSize", 335, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_14, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 335, position: 31 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(336,31) MinWidth (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_26 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_width_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 336, 31)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_26);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_width_property(), "ScrollBarSize", 336, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), value_15, &rt::ResourceChoice { name: "MinWidth", member: "Layoutable.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 336, position: 31 }, ::core::option::Option::Some(priority_32))?;
     // Controls/WinUIControls.xaml(332,18) Focusable
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
@@ -59920,9 +59302,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarVerticalIncreaseMargin", 339, 31)?;
     // Controls/WinUIControls.xaml(340,31) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalIncrementTemplate"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 340, 31)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalIncrementTemplate", 340, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_16, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 340, position: 31 }, ::core::option::Option::Some(priority_35))?;
     // Controls/WinUIControls.xaml(332,18) HorizontalAlignment
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
@@ -60055,15 +59435,11 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     repeat_button_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_6);
     // Controls/WinUIControls.xaml(382,31) MinHeight (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 382, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "ScrollBarSize", 382, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_1, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 382, position: 31 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(383,31) Width (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 383, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarSize", 383, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_2, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 383, position: 31 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(379,18) Focusable
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
@@ -60075,9 +59451,7 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarHorizontalDecreaseMargin", 386, 31)?;
     // Controls/WinUIControls.xaml(387,31) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalDecrementTemplate"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 387, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalDecrementTemplate", 387, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 387, position: 31 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(379,18) VerticalAlignment
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
@@ -60133,9 +59507,7 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     repeat_button_1.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_17);
     // Controls/WinUIControls.xaml(406,35) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 406, 35)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 406, 35)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 406, position: 35 }, ::core::option::Option::Some(priority_18))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 403, 22)?;
     // Controls/WinUIControls.xaml(409,22) IncreaseButton
@@ -60155,9 +59527,7 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     repeat_button_2.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_21);
     // Controls/WinUIControls.xaml(412,35) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 412, 35)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 412, 35)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 412, position: 35 }, ::core::option::Option::Some(priority_22))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 409, 22)?;
     // Controls/WinUIControls.xaml(414,20) Thumb
@@ -60172,17 +59542,13 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_138)?;
     // Controls/WinUIControls.xaml(417,26) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalThumbTemplate"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 417, 26)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalThumbTemplate", 417, 26)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 417, position: 26 }, ::core::option::Option::Some(priority_23))?;
     // Controls/WinUIControls.xaml(418,26) Height
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarHorizontalThumbMinHeight", 418, 26)?;
     // Controls/WinUIControls.xaml(419,26) MinWidth (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalThumbMinWidth"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_width_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 419, 26)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_width_property(), "ScrollBarHorizontalThumbMinWidth", 419, 26)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), value_8, &rt::ResourceChoice { name: "MinWidth", member: "Layoutable.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 419, position: 26 }, ::core::option::Option::Some(priority_24))?;
     // Controls/WinUIControls.xaml(414,20) RenderTransformOrigin
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
@@ -60240,15 +59606,11 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     repeat_button_3.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_29);
     // Controls/WinUIControls.xaml(435,31) MinHeight (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_26 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 435, 31)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_26);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "ScrollBarSize", 435, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_14, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 435, position: 31 }, ::core::option::Option::Some(priority_30))?;
     // Controls/WinUIControls.xaml(436,31) Width (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarSize"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 436, 31)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarSize", 436, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_15, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 436, position: 31 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(432,18) Focusable
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -60260,9 +59622,7 @@ fn build_controls_winuicontrols_xaml_deferred_143(
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarHorizontalIncreaseMargin", 439, 31)?;
     // Controls/WinUIControls.xaml(440,31) Theme (setter chosen at run time)
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalIncrementTemplate"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 440, 31)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalIncrementTemplate", 440, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_16, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 440, position: 31 }, ::core::option::Option::Some(priority_34))?;
     // Controls/WinUIControls.xaml(432,18) VerticalAlignment
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
@@ -60709,9 +60069,7 @@ fn build_controls_winuicontrols_xaml_deferred_151(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 81, 17)?;
     // Controls/WinUIControls.xaml(82,17) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE894"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE894", 82, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 82, position: 17 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(80,12) Stretch
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
@@ -60778,9 +60136,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 131, 17)?;
     // Controls/WinUIControls.xaml(132,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF78D"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 132, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF78D", 132, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 132, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(130,12) Stretch
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -60857,9 +60213,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
     menu_item_0.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     rt::push_parent(&context, &path_icon_0);
     // Controls/WinUIControls.xaml(176,19) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8C6"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 19)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE8C6", 176, 19)?;
     rt::assign_resource_value(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 176, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_0, 176, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_0, 170, 6)?;
@@ -60913,9 +60267,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
     menu_item_1.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_1)));
     rt::push_parent(&context, &path_icon_1);
     // Controls/WinUIControls.xaml(185,19) Data (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8C8"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 185, 19)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE8C8", 185, 19)?;
     rt::assign_resource_value(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 185, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_1, 185, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_1, 179, 6)?;
@@ -60969,9 +60321,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
     menu_item_2.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_2)));
     rt::push_parent(&context, &path_icon_2);
     // Controls/WinUIControls.xaml(194,19) Data (setter chosen at run time)
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE77F"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 194, 19)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE77F", 194, 19)?;
     rt::assign_resource_value(path_icon_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_8, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 194, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_2, 194, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_2, 188, 6)?;
@@ -61022,9 +60372,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
     menu_item_3.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_3)));
     rt::push_parent(&context, &path_icon_3);
     // Controls/WinUIControls.xaml(202,19) Data (setter chosen at run time)
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7A7"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 202, 19)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE7A7", 202, 19)?;
     rt::assign_resource_value(path_icon_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_10, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 202, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_3, 202, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_3, 197, 6)?;
@@ -61075,9 +60423,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
     menu_item_4.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_4)));
     rt::push_parent(&context, &path_icon_4);
     // Controls/WinUIControls.xaml(210,19) Data (setter chosen at run time)
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7A6"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 210, 19)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE7A6", 210, 19)?;
     rt::assign_resource_value(path_icon_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_12, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 210, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_4, 210, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_4, 205, 6)?;
@@ -61183,9 +60529,7 @@ fn build_controls_winuicontrols_xaml_deferred_155(
     menu_item_0.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     rt::push_parent(&context, &path_icon_0);
     // Controls/WinUIControls.xaml(226,19) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE77F"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 226, 19)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE77F", 226, 19)?;
     rt::assign_resource_value(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 226, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_0, 226, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_0, 220, 6)?;
@@ -61454,9 +60798,7 @@ fn build_controls_winuicontrols_xaml_deferred_157(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_9);
     // Controls/WinUIControls.xaml(332,21) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxDeleteButtonStyle"));
-    let provided_42 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 332, 21)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_42);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TextBoxDeleteButtonStyle", 332, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 332, position: 21 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(333,21) Command
     let path_2 = {
@@ -61499,9 +60841,7 @@ fn build_controls_winuicontrols_xaml_deferred_157(
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_15);
     // Controls/WinUIControls.xaml(346,27) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxRevealButtonStyle"));
-    let provided_48 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 346, 27)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_48);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PasswordBoxRevealButtonStyle", 346, 27)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 346, position: 27 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(347,27) IsChecked
     let template_binding_43 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::reveal_password_property()));
@@ -62597,9 +61937,7 @@ fn build_controls_winuicontrols_xaml_deferred_165(
     rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 25)?;
     // Controls/WinUIControls.xaml(87,25) CornerRadius (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarTrackCornerRadius"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::corner_radius_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 87, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ProgressBarTrackCornerRadius", 87, 25)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_0, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 87, position: 25 }, ::core::option::Option::Some(priority_1))?;
     rt::pop_parent_end_init(&context, &border_2, 85, 18)?;
     // Controls/WinUIControls.xaml(88,18) Children
@@ -63130,9 +62468,7 @@ fn build_controls_winuicontrols_xaml_deferred_176(
     // Controls/WinUIControls.xaml(104,12) Stretch
     path_0.set_value(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform);
     // Controls/WinUIControls.xaml(107,17) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF136", 107, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.Shapes.Path.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 107, position: 17 }, ::core::option::Option::None)?;
     // Controls/WinUIControls.xaml(108,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarErrorSeverityIconBackground", 108, 17)?;
@@ -63155,9 +62491,7 @@ fn build_controls_winuicontrols_xaml_deferred_176(
     // Controls/WinUIControls.xaml(110,12) VerticalAlignment
     path_1.set_value(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center);
     // Controls/WinUIControls.xaml(115,17) Data (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13D"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 115, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF13D", 115, 17)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.Shapes.Path.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 115, position: 17 }, ::core::option::Option::None)?;
     // Controls/WinUIControls.xaml(116,17) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarErrorSeverityIconForeground", 116, 17)?;
@@ -63342,9 +62676,7 @@ fn build_controls_winuicontrols_xaml_deferred_183(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(193,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 193, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 193, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 193, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(194,17) Fill
     let path_1 = {
@@ -63405,9 +62737,7 @@ fn build_controls_winuicontrols_xaml_deferred_185(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(221,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 221, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 221, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(222,17) Fill
     let path_1 = {
@@ -63461,9 +62791,7 @@ fn build_controls_winuicontrols_xaml_deferred_187(
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
     // Controls/WinUIControls.xaml(248,17) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LoopingSelectorItemMargin"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 248, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "LoopingSelectorItemMargin", 248, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 248, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(249,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 249, 17)?;
@@ -63683,9 +63011,7 @@ fn build_controls_winuicontrols_xaml_deferred_196(
     context.set_target_property(::core::option::Option::None);
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 207, 20)?;
     // Controls/WinUIControls.xaml(207,37) Theme (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemWeekDayNameStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 207, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemWeekDayNameStyle", 207, 37)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "FerroUI.StyledElement.set_Theme", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 207, position: 37 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &text_block_0, 207, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
@@ -63763,9 +63089,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_HeaderButton", 220, 23)?;
     // Controls/WinUIControls.xaml(221,23) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemHeaderNavigationButtonStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemHeaderNavigationButtonStyle", 221, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 221, position: 23 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(222,23) Foreground
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 222, 23)?;
@@ -63787,9 +63111,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_3);
     // Controls/WinUIControls.xaml(226,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemNavigationButtonStyle"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 226, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemNavigationButtonStyle", 226, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 226, position: 23 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(227,23) Foreground
     rt::bind_template_binding(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 227, 23)?;
@@ -63819,9 +63141,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(232,25) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 232, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 232, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 232, position: 25 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(233,25) Fill
     let path_1 = {
@@ -63860,9 +63180,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     button_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
     // Controls/WinUIControls.xaml(242,23) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemNavigationButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 242, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemNavigationButtonStyle", 242, 23)?;
     rt::assign_resource_value(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 242, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(243,23) Foreground
     rt::bind_template_binding(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 243, 23)?;
@@ -63892,9 +63210,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(248,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 248, 25)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 248, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 248, position: 25 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(249,25) Fill
     let path_3 = {
@@ -64659,9 +63975,7 @@ fn build_controls_winuicontrols_xaml_deferred_207(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_4);
     // Controls/WinUIControls.xaml(201,22) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarDatePickerTextBoxStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 201, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarDatePickerTextBoxStyle", 201, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 201, position: 22 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(202,22) Foreground
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_193)?;
@@ -64688,9 +64002,7 @@ fn build_controls_winuicontrols_xaml_deferred_207(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_8);
     // Controls/WinUIControls.xaml(213,21) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarDatePickerButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 213, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarDatePickerButtonStyle", 213, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 213, position: 21 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(215,16) Content
     // Controls/WinUIControls.xaml(215,16) Path
@@ -64702,9 +64014,7 @@ fn build_controls_winuicontrols_xaml_deferred_207(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "CalendarGlyph", 215, 21)?;
     // Controls/WinUIControls.xaml(216,21) Data (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE787"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 216, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE787", 216, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 216, position: 21 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(217,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CalendarDatePickerCalendarGlyphForeground", 217, 21)?;
@@ -64757,17 +64067,13 @@ fn build_controls_winuicontrols_xaml_deferred_207(
     border_1.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_3));
     // Controls/WinUIControls.xaml(229,44) Shadow (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 229, 44)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 229, 44)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_4, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 229, position: 44 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(230,23) CornerRadius
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 230, 23)?;
     // Controls/WinUIControls.xaml(231,23) Margin (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 231, 23)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 231, 23)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 231, position: 23 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(232,18) Child
     // Controls/WinUIControls.xaml(232,18) Calendar
@@ -64945,9 +64251,7 @@ fn build_controls_winuicontrols_xaml_deferred_213(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FlyoutButton", 145, 21)?;
     // Controls/WinUIControls.xaml(146,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutButtonStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 146, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DatePickerFlyoutButtonStyle", 146, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 146, position: 21 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(147,21) Background
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_200)?;
@@ -65129,9 +64433,7 @@ fn build_controls_winuicontrols_xaml_deferred_213(
     rt::name_element(name_scope.as_ref(), &date_picker_presenter_0, &date_picker_presenter_0, "PART_PickerPresenter", 199, 36)?;
     // Controls/WinUIControls.xaml(199,66) Margin (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 199, 66)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 199, 66)?;
     rt::assign_resource_value(date_picker_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 199, position: 66 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &date_picker_presenter_0, 199, 16)?;
     rt::pop_parent_end_init(&context, &popup_0, 194, 14)?;
@@ -65176,9 +64478,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(249,38) Shadow (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 249, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 249, 38)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_1, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 249, position: 38 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(250,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_204)?;
@@ -65290,9 +64590,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_9);
     // Controls/WinUIControls.xaml(277,31) Template (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 277, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 277, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_2, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 277, position: 31 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(278,20) Content
     // Controls/WinUIControls.xaml(278,20) DateTimePickerPanel
@@ -65323,9 +64621,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_MonthUpButton", 283, 31)?;
     // Controls/WinUIControls.xaml(283,59) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 283, 59)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 283, 59)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 283, position: 59 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 283, 18)?;
     // Controls/WinUIControls.xaml(284,18) Children
@@ -65339,9 +64635,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_MonthDownButton", 284, 31)?;
     // Controls/WinUIControls.xaml(284,61) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 284, 61)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 284, 61)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 284, position: 61 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 284, 18)?;
     rt::pop_parent_end_init(&context, &grid_2, 274, 16)?;
@@ -65369,9 +64663,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     scroll_viewer_1.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_16);
     // Controls/WinUIControls.xaml(289,31) Template (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 289, 31)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 289, 31)?;
     rt::assign_resource_value(scroll_viewer_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_5, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 289, position: 31 }, ::core::option::Option::Some(priority_17))?;
     // Controls/WinUIControls.xaml(290,20) Content
     // Controls/WinUIControls.xaml(290,20) DateTimePickerPanel
@@ -65402,9 +64694,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_DayUpButton", 295, 31)?;
     // Controls/WinUIControls.xaml(295,57) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 295, 57)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 295, 57)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 295, position: 57 }, ::core::option::Option::Some(priority_20))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 295, 18)?;
     // Controls/WinUIControls.xaml(296,18) Children
@@ -65418,9 +64708,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_DayDownButton", 296, 31)?;
     // Controls/WinUIControls.xaml(296,59) Theme (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 296, 59)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 296, 59)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 296, position: 59 }, ::core::option::Option::Some(priority_21))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 296, 18)?;
     rt::pop_parent_end_init(&context, &grid_3, 286, 16)?;
@@ -65448,9 +64736,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_23);
     // Controls/WinUIControls.xaml(301,31) Template (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 301, 31)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 301, 31)?;
     rt::assign_resource_value(scroll_viewer_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_8, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 301, position: 31 }, ::core::option::Option::Some(priority_24))?;
     // Controls/WinUIControls.xaml(302,20) Content
     // Controls/WinUIControls.xaml(302,20) DateTimePickerPanel
@@ -65481,9 +64767,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_YearUpButton", 307, 31)?;
     // Controls/WinUIControls.xaml(307,58) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 307, 58)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 307, 58)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 307, position: 58 }, ::core::option::Option::Some(priority_27))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 307, 18)?;
     // Controls/WinUIControls.xaml(308,18) Children
@@ -65497,9 +64781,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_YearDownButton", 308, 31)?;
     // Controls/WinUIControls.xaml(308,60) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 308, 60)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 308, 60)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 308, position: 60 }, ::core::option::Option::Some(priority_28))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 308, 18)?;
     rt::pop_parent_end_init(&context, &grid_4, 298, 16)?;
@@ -65606,9 +64888,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_38);
     // Controls/WinUIControls.xaml(333,23) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 333, 23)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 333, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_11, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 333, position: 23 }, ::core::option::Option::Some(priority_39))?;
     // Controls/WinUIControls.xaml(331,16) FontSize
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
@@ -65627,9 +64907,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     button_0.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_44);
     // Controls/WinUIControls.xaml(339,23) Margin (setter chosen at run time)
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterAcceptMargin"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 339, 23)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterAcceptMargin", 339, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_12, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 339, position: 23 }, ::core::option::Option::Some(priority_45))?;
     // Controls/WinUIControls.xaml(331,16) Padding
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
@@ -65642,9 +64920,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(342,23) Data (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8FB"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 342, 23)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8FB", 342, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_13, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 342, position: 23 }, ::core::option::Option::Some(priority_47))?;
     // Controls/WinUIControls.xaml(343,23) Fill
     let path_1 = {
@@ -65676,9 +64952,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_50);
     // Controls/WinUIControls.xaml(349,23) Theme (setter chosen at run time)
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 349, 23)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 349, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 349, position: 23 }, ::core::option::Option::Some(priority_51))?;
     // Controls/WinUIControls.xaml(347,16) FontSize
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
@@ -65697,9 +64971,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     button_1.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_56);
     // Controls/WinUIControls.xaml(355,23) Margin (setter chosen at run time)
     let priority_57 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 355, 23)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 355, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_15, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 355, position: 23 }, ::core::option::Option::Some(priority_57))?;
     // Controls/WinUIControls.xaml(347,16) Padding
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
@@ -65712,9 +64984,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(358,23) Data (setter chosen at run time)
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 358, 23)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 358, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_16, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 358, position: 23 }, ::core::option::Option::Some(priority_59))?;
     // Controls/WinUIControls.xaml(359,23) Fill
     let path_3 = {
@@ -65876,9 +65146,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FlyoutButton", 136, 21)?;
     // Controls/WinUIControls.xaml(137,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TimePickerFlyoutButtonStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 137, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TimePickerFlyoutButtonStyle", 137, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 137, position: 21 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(138,21) Background
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_208)?;
@@ -66123,9 +65391,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &time_picker_presenter_0, &time_picker_presenter_0, "PART_PickerPresenter", 209, 36)?;
     // Controls/WinUIControls.xaml(209,66) Margin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 209, 66)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 209, 66)?;
     rt::assign_resource_value(time_picker_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 209, position: 66 }, ::core::option::Option::Some(priority_25))?;
     rt::pop_parent_end_init(&context, &time_picker_presenter_0, 209, 16)?;
     rt::pop_parent_end_init(&context, &popup_0, 204, 14)?;
@@ -66161,9 +65427,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(259,38) Shadow (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 259, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 259, 38)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_1, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 259, position: 38 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(260,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_213)?;
@@ -66278,9 +65542,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_10);
     // Controls/WinUIControls.xaml(287,31) Template (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 287, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_2, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 287, position: 31 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(288,20) Content
     // Controls/WinUIControls.xaml(288,20) DateTimePickerPanel
@@ -66311,9 +65573,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_HourUpButton", 293, 31)?;
     // Controls/WinUIControls.xaml(293,58) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 293, 58)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 293, 58)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 293, position: 58 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 293, 18)?;
     // Controls/WinUIControls.xaml(294,18) Children
@@ -66327,9 +65587,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_HourDownButton", 294, 31)?;
     // Controls/WinUIControls.xaml(294,60) Theme (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 294, 60)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 294, 60)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 294, position: 60 }, ::core::option::Option::Some(priority_15))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 294, 18)?;
     rt::pop_parent_end_init(&context, &grid_2, 284, 16)?;
@@ -66383,9 +65641,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     scroll_viewer_1.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_21);
     // Controls/WinUIControls.xaml(305,31) Template (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 305, 31)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 305, 31)?;
     rt::assign_resource_value(scroll_viewer_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_5, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 305, position: 31 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(306,20) Content
     // Controls/WinUIControls.xaml(306,20) DateTimePickerPanel
@@ -66416,9 +65672,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_MinuteUpButton", 311, 31)?;
     // Controls/WinUIControls.xaml(311,60) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 311, 60)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 311, 60)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 311, position: 60 }, ::core::option::Option::Some(priority_25))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 311, 18)?;
     // Controls/WinUIControls.xaml(312,18) Children
@@ -66432,9 +65686,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_MinuteDownButton", 312, 31)?;
     // Controls/WinUIControls.xaml(312,62) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 312, 62)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 312, 62)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 312, position: 62 }, ::core::option::Option::Some(priority_26))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 312, 18)?;
     rt::pop_parent_end_init(&context, &grid_3, 302, 16)?;
@@ -66488,9 +65740,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_32);
     // Controls/WinUIControls.xaml(323,31) Template (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 323, 31)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 323, 31)?;
     rt::assign_resource_value(scroll_viewer_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_8, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 323, position: 31 }, ::core::option::Option::Some(priority_33))?;
     // Controls/WinUIControls.xaml(324,20) Content
     // Controls/WinUIControls.xaml(324,20) DateTimePickerPanel
@@ -66521,9 +65771,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_SecondUpButton", 329, 31)?;
     // Controls/WinUIControls.xaml(329,60) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 329, 60)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 329, 60)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 329, position: 60 }, ::core::option::Option::Some(priority_36))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 329, 18)?;
     // Controls/WinUIControls.xaml(330,18) Children
@@ -66537,9 +65785,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_SecondDownButton", 330, 31)?;
     // Controls/WinUIControls.xaml(330,62) Theme (setter chosen at run time)
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 330, 62)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 330, 62)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 330, position: 62 }, ::core::option::Option::Some(priority_37))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 330, 18)?;
     rt::pop_parent_end_init(&context, &grid_4, 320, 16)?;
@@ -66593,9 +65839,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     scroll_viewer_3.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_43);
     // Controls/WinUIControls.xaml(341,31) Template (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 341, 31)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 341, 31)?;
     rt::assign_resource_value(scroll_viewer_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_11, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 341, position: 31 }, ::core::option::Option::Some(priority_44))?;
     // Controls/WinUIControls.xaml(342,20) Content
     // Controls/WinUIControls.xaml(342,20) DateTimePickerPanel
@@ -66626,9 +65870,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_6, &repeat_button_6, "PART_PeriodUpButton", 347, 31)?;
     // Controls/WinUIControls.xaml(347,60) Theme (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 347, 60)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 347, 60)?;
     rt::assign_resource_value(repeat_button_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 347, position: 60 }, ::core::option::Option::Some(priority_47))?;
     rt::pop_parent_end_init(&context, &repeat_button_6, 347, 18)?;
     // Controls/WinUIControls.xaml(348,18) Children
@@ -66642,9 +65884,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::name_element(name_scope.as_ref(), &repeat_button_7, &repeat_button_7, "PART_PeriodDownButton", 348, 31)?;
     // Controls/WinUIControls.xaml(348,62) Theme (setter chosen at run time)
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 348, 62)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 348, 62)?;
     rt::assign_resource_value(repeat_button_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_13, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 348, position: 62 }, ::core::option::Option::Some(priority_48))?;
     rt::pop_parent_end_init(&context, &repeat_button_7, 348, 18)?;
     rt::pop_parent_end_init(&context, &grid_5, 338, 16)?;
@@ -66705,9 +65945,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_52);
     // Controls/WinUIControls.xaml(361,23) Theme (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 361, 23)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 361, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 361, position: 23 }, ::core::option::Option::Some(priority_53))?;
     // Controls/WinUIControls.xaml(359,16) FontSize
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
@@ -66726,9 +65964,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     button_0.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_58);
     // Controls/WinUIControls.xaml(367,23) Margin (setter chosen at run time)
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 367, 23)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 367, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_15, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 367, position: 23 }, ::core::option::Option::Some(priority_59))?;
     // Controls/WinUIControls.xaml(359,16) Padding
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
@@ -66741,9 +65977,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(370,23) Data (setter chosen at run time)
     let priority_61 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8FB"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 370, 23)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8FB", 370, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_16, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 370, position: 23 }, ::core::option::Option::Some(priority_61))?;
     // Controls/WinUIControls.xaml(371,23) Fill
     let path_1 = {
@@ -66775,9 +66009,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_64);
     // Controls/WinUIControls.xaml(377,23) Theme (setter chosen at run time)
     let priority_65 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 377, 23)?;
-    let value_17: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_17: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 377, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_17, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 377, position: 23 }, ::core::option::Option::Some(priority_65))?;
     // Controls/WinUIControls.xaml(375,16) FontSize
     let priority_66 = ::ferroui_base::data::BindingPriority::Template;
@@ -66796,9 +66028,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     button_1.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_70);
     // Controls/WinUIControls.xaml(383,23) Margin (setter chosen at run time)
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_40 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 383, 23)?;
-    let value_18: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_40);
+    let value_18: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 383, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_18, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 383, position: 23 }, ::core::option::Option::Some(priority_71))?;
     // Controls/WinUIControls.xaml(375,16) Padding
     let priority_72 = ::ferroui_base::data::BindingPriority::Template;
@@ -66811,9 +66041,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(386,23) Data (setter chosen at run time)
     let priority_73 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_19 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_41 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_19, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 386, 23)?;
-    let value_19: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_41);
+    let value_19: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 386, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_19, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 386, position: 23 }, ::core::option::Option::Some(priority_73))?;
     // Controls/WinUIControls.xaml(387,23) Fill
     let path_3 = {
@@ -66936,9 +66164,7 @@ fn build_controls_winuicontrols_xaml_deferred_229(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 135, 17)?;
     // Controls/WinUIControls.xaml(136,17) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 136, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 136, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 136, position: 17 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(137,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 137, 17)?;
@@ -66989,9 +66215,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 186, 17)?;
     // Controls/WinUIControls.xaml(187,17) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 187, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 187, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 187, position: 17 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(188,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 188, 17)?;
@@ -67153,9 +66377,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "PART_TitleText", 270, 28)?;
     // Controls/WinUIControls.xaml(271,28) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 271, 28)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 271, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 271, position: 28 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(272,28) Text
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_property()), 272, 28)?;
@@ -67210,9 +66432,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FullScreenButton", 286, 25)?;
     // Controls/WinUIControls.xaml(287,25) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowCaptionButton", 287, 25)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 25 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(286,18) ElementRole
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -67225,9 +66445,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(289,25) Data (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE740"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 289, 25)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE740", 289, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 289, position: 25 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(290,25) Fill
     let path_1 = {
@@ -67256,9 +66474,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_1, &button_1, "PART_MinimizeButton", 294, 25)?;
     // Controls/WinUIControls.xaml(295,25) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 295, 25)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowCaptionButton", 295, 25)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 295, position: 25 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(294,18) ElementRole
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
@@ -67271,9 +66487,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(297,25) Data (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE921"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 297, 25)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE921", 297, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 297, position: 25 }, ::core::option::Option::Some(priority_21))?;
     // Controls/WinUIControls.xaml(298,25) Fill
     let path_3 = {
@@ -67302,9 +66516,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_2, &button_2, "PART_MaximizeButton", 302, 25)?;
     // Controls/WinUIControls.xaml(303,25) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 303, 25)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowCaptionButton", 303, 25)?;
     rt::assign_resource_value(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 303, position: 25 }, ::core::option::Option::Some(priority_24))?;
     // Controls/WinUIControls.xaml(302,18) ElementRole
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
@@ -67319,9 +66531,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &path_4, &path_4, "RestoreButtonPath", 305, 25)?;
     // Controls/WinUIControls.xaml(306,25) Data (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE922"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 306, 25)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE922", 306, 25)?;
     rt::assign_resource_value(path_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_7, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 306, position: 25 }, ::core::option::Option::Some(priority_26))?;
     // Controls/WinUIControls.xaml(307,25) Fill
     let path_5 = {
@@ -67350,9 +66560,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_3, &button_3, "PART_CloseButton", 311, 25)?;
     // Controls/WinUIControls.xaml(312,25) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 312, 25)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowDrawnDecorationsCloseButton", 312, 25)?;
     rt::assign_resource_value(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 312, position: 25 }, ::core::option::Option::Some(priority_29))?;
     // Controls/WinUIControls.xaml(311,18) ElementRole
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
@@ -67365,9 +66573,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::push_parent(&context, &path_6);
     // Controls/WinUIControls.xaml(314,25) Data (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8BB"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 314, 25)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8BB", 314, 25)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 314, position: 25 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(315,25) Fill
     let path_7 = {
@@ -67414,9 +66620,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "PART_PopoverTitleText", 328, 26)?;
     // Controls/WinUIControls.xaml(329,26) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 329, 26)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 329, 26)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 329, position: 26 }, ::core::option::Option::Some(priority_36))?;
     // Controls/WinUIControls.xaml(330,26) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_property()), 330, 26)?;
@@ -67463,9 +66667,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_4, &button_4, "PART_PopoverFullScreenButton", 339, 25)?;
     // Controls/WinUIControls.xaml(340,25) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 340, 25)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowCaptionButton", 340, 25)?;
     rt::assign_resource_value(button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 340, position: 25 }, ::core::option::Option::Some(priority_44))?;
     // Controls/WinUIControls.xaml(339,18) ElementRole
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -67478,9 +66680,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::push_parent(&context, &path_8);
     // Controls/WinUIControls.xaml(342,25) Data (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73F"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 342, 25)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73F", 342, 25)?;
     rt::assign_resource_value(path_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_13, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 342, position: 25 }, ::core::option::Option::Some(priority_46))?;
     // Controls/WinUIControls.xaml(343,25) Fill
     let path_9 = {
@@ -67509,9 +66709,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::name_element(name_scope.as_ref(), &button_5, &button_5, "PART_PopoverCloseButton", 347, 25)?;
     // Controls/WinUIControls.xaml(348,25) Theme (setter chosen at run time)
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 348, 25)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowDrawnDecorationsCloseButton", 348, 25)?;
     rt::assign_resource_value(button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 348, position: 25 }, ::core::option::Option::Some(priority_49))?;
     // Controls/WinUIControls.xaml(347,18) ElementRole
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
@@ -67524,9 +66722,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     rt::push_parent(&context, &path_10);
     // Controls/WinUIControls.xaml(350,25) Data (setter chosen at run time)
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8BB"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 350, 25)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8BB", 350, 25)?;
     rt::assign_resource_value(path_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_15, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 350, position: 25 }, ::core::option::Option::Some(priority_51))?;
     // Controls/WinUIControls.xaml(351,25) Fill
     let path_11 = {
@@ -67880,9 +67076,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     rt::bind_template_bindings(border_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_223)?;
     // Controls/WinUIControls.xaml(124,19) Padding (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarContentRootPadding"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 124, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "InfoBarContentRootPadding", 124, 19)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_1, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 124, position: 19 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(125,14) Child
     // Controls/WinUIControls.xaml(125,14) Grid
@@ -67914,24 +67108,18 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     rt::name_element(name_scope.as_ref(), &panel_0, &panel_0, "StandardIconArea", 126, 22)?;
     // Controls/WinUIControls.xaml(127,22) Width (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 127, 22)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "InfoBarIconFontSize", 127, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_2, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 127, position: 22 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(128,22) Height (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 128, 22)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "InfoBarIconFontSize", 128, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_3, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 128, position: 22 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(126,16) VerticalAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_7);
     // Controls/WinUIControls.xaml(130,22) Margin (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 130, 22)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 130, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_4, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 130, position: 22 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(131,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
@@ -67944,9 +67132,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "IconBackground", 131, 23)?;
     // Controls/WinUIControls.xaml(132,23) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 132, 23)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF136", 132, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 132, position: 23 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(133,23) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarInformationalSeverityIconBackground", 133, 23)?;
@@ -67974,9 +67160,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "StandardIcon", 138, 23)?;
     // Controls/WinUIControls.xaml(139,23) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13F"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 139, 23)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF13F", 139, 23)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_6, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 139, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(140,23) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarInformationalSeverityIconForeground", 140, 23)?;
@@ -68008,9 +67192,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_19);
     // Controls/WinUIControls.xaml(148,33) Margin (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelMargin"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 33)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelMargin", 148, 33)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_7, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 148, position: 33 }, ::core::option::Option::Some(priority_20))?;
     // Controls/WinUIControls.xaml(149,33) Content (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
@@ -68039,9 +67221,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_22);
     // Controls/WinUIControls.xaml(155,23) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonStyle"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 155, 23)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "InfoBarCloseButtonStyle", 155, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 155, position: 23 }, ::core::option::Option::Some(priority_23))?;
     // Controls/WinUIControls.xaml(153,16) CloseOnClick
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
@@ -68054,9 +67234,7 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(157,23) Data (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 23)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 157, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_10, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 157, position: 23 }, ::core::option::Option::Some(priority_25))?;
     // Controls/WinUIControls.xaml(158,23) Fill
     let path_3 = {
@@ -68604,15 +67782,11 @@ fn build_controls_winuicontrols_xaml_deferred_269(
     content_control_0.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_0);
     // Controls/WinUIControls.xaml(171,27) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotPortraitThemePadding"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 171, 27)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "PivotPortraitThemePadding", 171, 27)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 171, position: 27 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(172,27) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleContentControlStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 172, 27)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleContentControlStyle", 172, 27)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 172, position: 27 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(169,12) IsVisible
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -68674,9 +67848,7 @@ fn build_controls_winuicontrols_xaml_deferred_269(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::zoom_mode_property(), ::ferroui_controls::ZoomMode::Disabled, priority_12);
     // Controls/WinUIControls.xaml(186,27) Template (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 186, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 186, 27)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_3, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 186, position: 27 }, ::core::option::Option::Some(priority_13))?;
     // Controls/WinUIControls.xaml(177,14) BringIntoViewOnFocusChange
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -68838,9 +68010,7 @@ fn build_controls_winuicontrols_xaml_deferred_269(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_28);
     // Controls/WinUIControls.xaml(212,27) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotPreviousButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 212, 27)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PivotPreviousButtonStyle", 212, 27)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 212, position: 27 }, ::core::option::Option::Some(priority_29))?;
     // Controls/WinUIControls.xaml(210,20) Width
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
@@ -68883,9 +68053,7 @@ fn build_controls_winuicontrols_xaml_deferred_269(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_38);
     // Controls/WinUIControls.xaml(224,27) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotNextButtonStyle"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 224, 27)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PivotNextButtonStyle", 224, 27)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 224, position: 27 }, ::core::option::Option::Some(priority_39))?;
     // Controls/WinUIControls.xaml(222,20) Width
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
@@ -69555,9 +68723,7 @@ fn build_controls_winuicontrols_xaml_deferred_283(
     button_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_15);
     // Controls/WinUIControls.xaml(85,19) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleBarBackButtonStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleBarBackButtonStyle", 85, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 85, position: 19 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(86,19) IsEnabled
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_enabled_property(), rt::property(::ferroui_controls::TitleBar::is_back_button_enabled_property()), 86, 19)?;
@@ -69579,9 +68745,7 @@ fn build_controls_winuicontrols_xaml_deferred_283(
     button_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_18);
     // Controls/WinUIControls.xaml(91,19) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleBarPaneToggleButtonStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 91, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleBarPaneToggleButtonStyle", 91, 19)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 91, position: 19 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &button_1, 88, 12)?;
     // Controls/WinUIControls.xaml(93,12) Children
@@ -69661,9 +68825,7 @@ fn build_controls_winuicontrols_xaml_deferred_283(
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::TitleBar::title_property()), 112, 22)?;
     // Controls/WinUIControls.xaml(113,22) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 113, 22)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 113, 22)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 113, position: 22 }, ::core::option::Option::Some(priority_28))?;
     // Controls/WinUIControls.xaml(114,22) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 114, 22)?;
@@ -69704,9 +68866,7 @@ fn build_controls_winuicontrols_xaml_deferred_283(
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::TitleBar::subtitle_property()), 125, 22)?;
     // Controls/WinUIControls.xaml(126,22) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 126, 22)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 126, 22)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 126, position: 22 }, ::core::option::Option::Some(priority_35))?;
     // Controls/WinUIControls.xaml(127,22) Foreground
     rt::bind_dynamic_resources(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_237)?;
@@ -70127,9 +69287,7 @@ fn build_controls_winuicontrols_xaml_deferred_288(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "PART_ScrollViewer", 155, 25)?;
     // Controls/WinUIControls.xaml(156,25) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TableViewScrollViewerStyle", 156, 25)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 156, position: 25 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(157,25) VerticalSnapPointsType
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_245)?;
@@ -70268,9 +69426,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "PART_Resizer", 99, 18)?;
     // Controls/WinUIControls.xaml(100,18) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerStyle"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 18)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TableViewColumnHeaderResizerStyle", 100, 18)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 100, position: 18 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(101,18) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "TableViewResizeGripperWidth", 101, 18)?;
@@ -70529,15 +69685,11 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     list_box_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 160.0_f64, priority_2);
     // Controls/WinUIControls.xaml(237,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 237, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ManagedFileChooserListViewStyle", 237, 22)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 237, position: 22 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(238,22) ItemContainerTheme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewItemStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 238, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "ManagedFileChooserListViewItemStyle", 238, 22)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 238, position: 22 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(239,22) ItemsSource
     let path_0 = {
@@ -70624,9 +69776,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     rt::push_parent(&context, &path_3);
     // Controls/WinUIControls.xaml(280,23) Data (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE74A"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 280, 23)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE74A", 280, 23)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 280, position: 23 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(281,23) Fill
     let path_4 = {
@@ -70707,9 +69857,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     rt::push_parent(&context, &path_8);
     // Controls/WinUIControls.xaml(291,23) Data (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72C"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 291, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72C", 291, 23)?;
     rt::assign_resource_value(path_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 291, position: 23 }, ::core::option::Option::Some(priority_17))?;
     // Controls/WinUIControls.xaml(292,23) Fill
     let path_9 = {
@@ -71203,15 +70351,11 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     list_box_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_69);
     // Controls/WinUIControls.xaml(371,24) Theme (setter chosen at run time)
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 371, 24)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ManagedFileChooserListViewStyle", 371, 24)?;
     rt::assign_resource_value(list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 371, position: 24 }, ::core::option::Option::Some(priority_70))?;
     // Controls/WinUIControls.xaml(372,24) ItemContainerTheme (setter chosen at run time)
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewItemStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 372, 24)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "ManagedFileChooserListViewItemStyle", 372, 24)?;
     rt::assign_resource_value(list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_10, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 372, position: 24 }, ::core::option::Option::Some(priority_71))?;
     // Controls/WinUIControls.xaml(373,24) ItemsSource
     let path_18 = {
@@ -71296,9 +70440,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(246,29) Data (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8B7"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 246, 29)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8B7", 246, 29)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 246, position: 29 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(247,29) Fill
     let path_1 = {
@@ -71343,9 +70485,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     rt::push_parent(&context, &path_3);
     // Controls/WinUIControls.xaml(252,29) Data (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7C3"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 252, 29)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE7C3", 252, 29)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 252, position: 29 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(253,29) Fill
     let path_4 = {
@@ -71390,9 +70530,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     rt::push_parent(&context, &path_6);
     // Controls/WinUIControls.xaml(258,29) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDA2"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 258, 29)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDA2", 258, 29)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 258, position: 29 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(259,29) Fill
     let path_7 = {
@@ -71604,9 +70742,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(391,31) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8B7"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 391, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8B7", 391, 31)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 391, position: 31 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(392,31) Fill
     let path_1 = {
@@ -71651,9 +70787,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     rt::push_parent(&context, &path_3);
     // Controls/WinUIControls.xaml(397,31) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7C3"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 397, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE7C3", 397, 31)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 397, position: 31 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(398,31) Fill
     let path_4 = {
@@ -71698,9 +70832,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     rt::push_parent(&context, &path_6);
     // Controls/WinUIControls.xaml(403,31) Data (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDA2"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 403, 31)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDA2", 403, 31)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 403, position: 31 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(404,31) Fill
     let path_7 = {
@@ -72077,15 +71209,11 @@ fn build_controls_winuicontrols_xaml_deferred_304(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "Content", 467, 28)?;
     // Controls/WinUIControls.xaml(468,28) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlContentThemeFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 468, 28)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "ControlContentThemeFontSize", 468, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_0, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 468, position: 28 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(469,28) FontFamily (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ContentControlThemeFontFamily"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_family_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 469, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_family_property(), "ContentControlThemeFontFamily", 469, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_family_property(), value_1, &rt::ResourceChoice { name: "FontFamily", member: "TextElement.FontFamily", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontFamily as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 469, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(470,28) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 470, 28)?;
@@ -72179,9 +71307,7 @@ fn build_controls_winuicontrols_xaml_deferred_304(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_12);
     // Controls/WinUIControls.xaml(494,27) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AccentButtonStyle"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 494, 27)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AccentButtonStyle", 494, 27)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 494, position: 27 }, ::core::option::Option::Some(priority_13))?;
     // Controls/WinUIControls.xaml(492,20) HorizontalAlignment
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -72468,15 +71594,11 @@ fn build_controls_winuicontrols_xaml_deferred_312(
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SelectorBarItemPillFill", 109, 24)?;
     // Controls/WinUIControls.xaml(110,24) Height (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SelectorBarItemPillHeight"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 110, 24)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "SelectorBarItemPillHeight", 110, 24)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 110, position: 24 }, ::core::option::Option::Some(priority_6))?;
     // Controls/WinUIControls.xaml(111,24) Width (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SelectorBarItemPillWidth"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 111, 24)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "SelectorBarItemPillWidth", 111, 24)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_2, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 111, position: 24 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(106,14) RadiusX
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -72893,9 +72015,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "ScrollDecreaseButton", 284, 29)?;
     // Controls/WinUIControls.xaml(285,29) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 285, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabViewScrollButtonStyle", 285, 29)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 285, position: 29 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(284,16) IsTabStop
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
@@ -72995,9 +72115,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     rt::push_parent(&context, &path_9);
     // Controls/WinUIControls.xaml(299,23) Data (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDD9"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 299, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDD9", 299, 23)?;
     rt::assign_resource_value(path_9.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 299, position: 23 }, ::core::option::Option::Some(priority_15))?;
     // Controls/WinUIControls.xaml(300,23) Fill
     let path_10 = {
@@ -73012,9 +72130,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     path_9.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_16);
     // Controls/WinUIControls.xaml(302,23) Height (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewItemScrollButonFontSize"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 302, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "TabViewItemScrollButonFontSize", 302, 23)?;
     rt::assign_resource_value(path_9.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_4, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 302, position: 23 }, ::core::option::Option::Some(priority_17))?;
     rt::pop_parent_end_init(&context, &path_9, 299, 18)?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 284, 16)?;
@@ -73185,9 +72301,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "ScrollIncreaseButton", 330, 29)?;
     // Controls/WinUIControls.xaml(331,29) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 331, 29)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabViewScrollButtonStyle", 331, 29)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 331, position: 29 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(330,16) IsTabStop
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
@@ -73287,9 +72401,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     rt::push_parent(&context, &path_25);
     // Controls/WinUIControls.xaml(345,23) Data (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDA"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 345, 23)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDA", 345, 23)?;
     rt::assign_resource_value(path_25.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_8, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 345, position: 23 }, ::core::option::Option::Some(priority_26))?;
     // Controls/WinUIControls.xaml(346,23) Fill
     let path_26 = {
@@ -73304,9 +72416,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     path_25.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_27);
     // Controls/WinUIControls.xaml(348,23) Height (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewItemScrollButonFontSize"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 348, 23)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "TabViewItemScrollButonFontSize", 348, 23)?;
     rt::assign_resource_value(path_25.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_9, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 348, position: 23 }, ::core::option::Option::Some(priority_28))?;
     rt::pop_parent_end_init(&context, &path_25, 345, 18)?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 330, 16)?;
@@ -73437,9 +72547,7 @@ fn build_controls_winuicontrols_xaml_deferred_324(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "ScrollViewer", 392, 31)?;
     // Controls/WinUIControls.xaml(393,31) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabScrollViewerStyle"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 393, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabScrollViewerStyle", 393, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 393, position: 31 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(392,18) HorizontalScrollBarVisibility
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
@@ -74592,9 +73700,7 @@ fn build_controls_winuicontrols_xaml_deferred_339(
     rt::name_element(name_scope.as_ref(), &border_0, &border_0, "LayoutRoot", 158, 17)?;
     // Controls/WinUIControls.xaml(159,17) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemButtonMargin"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 159, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 159, position: 17 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(160,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_301)?;
@@ -74834,15 +73940,11 @@ fn build_controls_winuicontrols_xaml_deferred_341(
     rt::name_element(name_scope.as_ref(), &tab_control_0, &tab_control_0, "PART_TabControl", 276, 23)?;
     // Controls/WinUIControls.xaml(277,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 277, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabbedPageTabControlTheme", 277, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 277, position: 23 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(278,23) ItemContainerTheme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabItemTheme"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 278, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "TabbedPageTabItemTheme", 278, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 278, position: 23 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(276,12) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -74925,9 +74027,7 @@ fn build_controls_winuicontrols_xaml_deferred_344(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 82, 19)?;
     // Controls/WinUIControls.xaml(83,19) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 83, 19)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 83, position: 19 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(84,19) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 84, 19)?;
@@ -75172,9 +74272,7 @@ fn build_controls_winuicontrols_xaml_deferred_347(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_14);
     // Controls/WinUIControls.xaml(221,23) Theme (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 221, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 221, position: 23 }, ::core::option::Option::Some(priority_15))?;
     // Controls/WinUIControls.xaml(222,23) IsVisible
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::NavigationPage::is_back_button_effectively_visible_property()), 222, 23)?;
@@ -75201,9 +74299,7 @@ fn build_controls_winuicontrols_xaml_deferred_347(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "PART_BackButtonDefaultIcon", 226, 25)?;
     // Controls/WinUIControls.xaml(227,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 227, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 227, 25)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 227, position: 25 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(228,25) Fill
     let path_2 = {
@@ -75260,9 +74356,7 @@ fn build_controls_winuicontrols_xaml_deferred_347(
     content_presenter_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_26);
     // Controls/WinUIControls.xaml(242,33) FontSize (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SubtitleTextBlockFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::font_size_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 242, 33)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::font_size_property(), "SubtitleTextBlockFontSize", 242, 33)?;
     rt::assign_resource_value(content_presenter_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::font_size_property(), value_3, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 242, position: 33 }, ::core::option::Option::Some(priority_27))?;
     // Controls/WinUIControls.xaml(240,16) FontWeight
     let value_4 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 243, 33)?;
@@ -75522,9 +74616,7 @@ fn build_controls_winuicontrols_xaml_deferred_351(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Icon", 123, 21)?;
     // Controls/WinUIControls.xaml(124,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 124, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 124, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 124, position: 21 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(123,16) Width
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -75636,9 +74728,7 @@ fn build_controls_winuicontrols_xaml_deferred_353(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Icon", 200, 21)?;
     // Controls/WinUIControls.xaml(201,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 201, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 201, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 201, position: 21 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(200,16) Width
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -75769,15 +74859,11 @@ fn build_controls_winuicontrols_xaml_deferred_355(
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/WinUIControls.xaml(255,26) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 255, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 255, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 255, position: 26 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(256,26) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 256, 26)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 256, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 256, position: 26 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 250, 16)?;
     rt::pop_parent_end_init(&context, &panel_1, 249, 14)?;
@@ -75984,9 +75070,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_1);
     // Controls/WinUIControls.xaml(392,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 392, 29)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 392, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 392, position: 29 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(393,29) Margin
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewButtonHolderGridMargin", 393, 29)?;
@@ -76207,9 +75291,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
     rt::name_element(name_scope.as_ref(), &toggle_button_1, &toggle_button_1, "PART_PaneButton", 445, 35)?;
     // Controls/WinUIControls.xaml(446,35) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 446, 35)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 446, 35)?;
     rt::assign_resource_value(toggle_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 446, position: 35 }, ::core::option::Option::Some(priority_26))?;
     // Controls/WinUIControls.xaml(447,35) IsChecked
     let path_2 = {
@@ -76258,9 +75340,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
     rt::name_element(name_scope.as_ref(), &content_control_0, &content_control_0, "PART_TitlePresenter", 453, 37)?;
     // Controls/WinUIControls.xaml(454,37) Theme (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 454, 37)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 454, 37)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 454, position: 37 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(455,37) Content (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -76330,9 +75410,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
     rt::name_element(name_scope.as_ref(), &toggle_button_2, &toggle_button_2, "PART_BottomPaneButton", 469, 35)?;
     // Controls/WinUIControls.xaml(470,35) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 470, 35)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 470, 35)?;
     rt::assign_resource_value(toggle_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 470, position: 35 }, ::core::option::Option::Some(priority_39))?;
     // Controls/WinUIControls.xaml(471,35) IsChecked
     let path_3 = {
@@ -76381,9 +75459,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
     rt::name_element(name_scope.as_ref(), &content_control_1, &content_control_1, "PART_BottomTitlePresenter", 477, 37)?;
     // Controls/WinUIControls.xaml(478,37) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_43 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 478, 37)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_43);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 478, 37)?;
     rt::assign_resource_value(content_control_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 478, position: 37 }, ::core::option::Option::Some(priority_44))?;
     // Controls/WinUIControls.xaml(479,37) Content (setter chosen at run time)
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -76615,9 +75691,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "NavigationViewBackButton", 164, 23)?;
     // Controls/WinUIControls.xaml(165,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 165, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 165, position: 23 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(166,23) Width
     let path_1 = {
@@ -76657,9 +75731,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     rt::name_element(name_scope.as_ref(), &button_1, &button_1, "NavigationViewCloseButton", 171, 23)?;
     // Controls/WinUIControls.xaml(172,23) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 172, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 172, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 172, position: 23 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(171,16) VerticalAlignment
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -76721,9 +75793,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_13);
     // Controls/WinUIControls.xaml(185,28) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemHeaderTextStyle"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 185, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewItemHeaderTextStyle", 185, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 185, position: 28 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &text_block_0, 180, 18)?;
     rt::pop_parent_end_init(&context, &button_2, 175, 16)?;
@@ -77313,9 +76383,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     button_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_70);
     // Controls/WinUIControls.xaml(295,29) Theme (setter chosen at run time)
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewPaneSearchButtonStyle"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 295, 29)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewPaneSearchButtonStyle", 295, 29)?;
     rt::assign_resource_value(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 295, position: 29 }, ::core::option::Option::Some(priority_71))?;
     // Controls/WinUIControls.xaml(296,29) Width
     let path_11 = {
@@ -77582,9 +76650,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     content_control_10.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_97);
     // Controls/WinUIControls.xaml(351,35) MinHeight (setter chosen at run time)
     let priority_98 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PaneToggleButtonHeight"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 351, 35)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "PaneToggleButtonHeight", 351, 35)?;
     rt::assign_resource_value(content_control_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_5, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 351, position: 35 }, ::core::option::Option::Some(priority_98))?;
     // Controls/WinUIControls.xaml(348,20) IsTabStop
     let priority_99 = ::ferroui_base::data::BindingPriority::Template;
@@ -77609,9 +76675,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
     content_control_10.set_value_with_priority(::ferroui_controls::ContentControl::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_102);
     // Controls/WinUIControls.xaml(357,35) Theme (setter chosen at run time)
     let priority_103 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_50 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 357, 35)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_50);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 357, 35)?;
     rt::assign_resource_value(content_control_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 357, position: 35 }, ::core::option::Option::Some(priority_103))?;
     rt::pop_parent_end_init(&context, &content_control_10, 348, 20)?;
     // Controls/WinUIControls.xaml(358,20) Children
@@ -77747,15 +76811,11 @@ fn build_controls_winuicontrols_xaml_deferred_366(
     selection_indicator_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/WinUIControls.xaml(515,30) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 515, 30)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 515, 30)?;
     rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 515, position: 30 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(516,30) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 516, 30)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 516, 30)?;
     rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 516, position: 30 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &selection_indicator_0, 510, 20)?;
     rt::pop_parent_end_init(&context, &panel_2, 509, 18)?;
@@ -77964,9 +77024,7 @@ fn build_controls_winuicontrols_xaml_deferred_366(
     text_block_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_22);
     // Controls/WinUIControls.xaml(568,34) Text (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemExpandedGlyph"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 568, 34)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "NavigationViewItemExpandedGlyph", 568, 34)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_4, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 568, position: 34 }, ::core::option::Option::Some(priority_23))?;
     // Controls/WinUIControls.xaml(569,34) FontFamily
     rt::bind_dynamic_resources(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_333)?;
@@ -78675,9 +77733,7 @@ fn build_controls_winuicontrols_xaml_deferred_382(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "OverflowCheckGlyph", 358, 19)?;
     // Controls/WinUIControls.xaml(359,19) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 359, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 359, 19)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 359, position: 19 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(360,19) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "AppBarToggleButtonCheckGlyphForeground", 360, 19)?;
@@ -78878,21 +77934,15 @@ fn build_controls_winuicontrols_xaml_deferred_386(
     rt::name_element(name_scope.as_ref(), &rectangle_0, &rectangle_0, "SeparatorRectangle", 723, 22)?;
     // Controls/WinUIControls.xaml(724,22) RadiusX (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 724, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "AppBarSeparatorCornerRadius", 724, 22)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 724, position: 22 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(725,22) RadiusY (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 725, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "AppBarSeparatorCornerRadius", 725, 22)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 725, position: 22 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(726,22) Width (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorWidth"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 726, 22)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "AppBarSeparatorWidth", 726, 22)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_2, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 726, position: 22 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(723,12) VerticalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -78966,9 +78016,7 @@ fn build_controls_winuicontrols_xaml_deferred_389(
     rt::bind_template_bindings(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_356)?;
     // Controls/WinUIControls.xaml(783,29) Margin (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarEllipsisButtonInnerBorderMargin"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 783, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "AppBarEllipsisButtonInnerBorderMargin", 783, 29)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 783, position: 29 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(774,12) Padding
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -79101,9 +78149,7 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     column_definition_1.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_2);
     // Controls/WinUIControls.xaml(873,48) MinWidth (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarMoreButtonColumnMinWidth"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ColumnDefinition::min_width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 873, 48)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ColumnDefinition::min_width_property(), "AppBarMoreButtonColumnMinWidth", 873, 48)?;
     rt::assign_resource_value(column_definition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ColumnDefinition::min_width_property(), value_0, &rt::ResourceChoice { name: "MinWidth", member: "ColumnDefinition.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 873, position: 48 }, ::core::option::Option::Some(priority_3))?;
     context.pop_parent();
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, ::core::clone::Clone::clone(&column_definition_1));
@@ -79210,9 +78256,7 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
     // Controls/WinUIControls.xaml(899,23) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("EllipsisButton"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 899, 23)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "EllipsisButton", 899, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 899, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(900,23) Foreground
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 900, 23)?;
@@ -79233,9 +78277,7 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "EllipsisIcon", 905, 23)?;
     // Controls/WinUIControls.xaml(906,23) Data (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE712"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 906, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE712", 906, 23)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 906, position: 23 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(907,23) Fill
     let path_2 = {
@@ -79351,15 +78393,11 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     border_2.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(935,42) Shadow (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 935, 42)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 935, 42)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_5, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 935, position: 42 }, ::core::option::Option::Some(priority_30))?;
     // Controls/WinUIControls.xaml(936,21) Margin (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 936, 21)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 936, 21)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_6, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 936, position: 21 }, ::core::option::Option::Some(priority_31))?;
     // Controls/WinUIControls.xaml(937,21) CornerRadius
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 937, 21)?;
@@ -79373,9 +78411,7 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     rt::name_element(name_scope.as_ref(), &items_control_1, &items_control_1, "PART_OverflowPresenter", 938, 29)?;
     // Controls/WinUIControls.xaml(939,29) Theme (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultCommandBarOverflowPresenterStyle"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 939, 29)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DefaultCommandBarOverflowPresenterStyle", 939, 29)?;
     rt::assign_resource_value(items_control_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 939, position: 29 }, ::core::option::Option::Some(priority_32))?;
     // Controls/WinUIControls.xaml(938,16) IsTabStop
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
@@ -79578,9 +78614,7 @@ fn build_controls_winuicontrols_xaml_deferred_399(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "ChevronIcon", 88, 21)?;
     // Controls/WinUIControls.xaml(89,21) Data (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 89, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE96E", 89, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 89, position: 21 }, ::core::option::Option::Some(priority_7))?;
     // Controls/WinUIControls.xaml(90,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DropDownButtonForegroundSecondary", 90, 21)?;
@@ -79865,9 +78899,7 @@ fn build_controls_winuicontrols_xaml_deferred_406(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
     // Controls/WinUIControls.xaml(174,21) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonInnerButtonStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 174, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonInnerButtonStyle", 174, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 174, position: 21 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(175,21) Foreground
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_371)?;
@@ -79929,9 +78961,7 @@ fn build_controls_winuicontrols_xaml_deferred_406(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_19);
     // Controls/WinUIControls.xaml(195,21) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonInnerButtonStyle"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 195, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonInnerButtonStyle", 195, 21)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 195, position: 21 }, ::core::option::Option::Some(priority_20))?;
     // Controls/WinUIControls.xaml(196,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "SplitButtonForegroundSecondary", 196, 21)?;
@@ -79990,9 +79020,7 @@ fn build_controls_winuicontrols_xaml_deferred_406(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(212,23) Data (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 212, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE96E", 212, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 212, position: 23 }, ::core::option::Option::Some(priority_33))?;
     // Controls/WinUIControls.xaml(213,23) Fill
     let path_3 = {
@@ -80331,9 +79359,7 @@ fn build_controls_winuicontrols_xaml_deferred_413(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
     // Controls/WinUIControls.xaml(489,21) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonCommandBarInnerButtonStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 489, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonCommandBarInnerButtonStyle", 489, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 489, position: 21 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(490,21) Foreground
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_382)?;
@@ -80393,9 +79419,7 @@ fn build_controls_winuicontrols_xaml_deferred_413(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
     // Controls/WinUIControls.xaml(510,21) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonCommandBarInnerButtonStyle"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 510, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonCommandBarInnerButtonStyle", 510, 21)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 510, position: 21 }, ::core::option::Option::Some(priority_13))?;
     // Controls/WinUIControls.xaml(511,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "AppBarButtonForeground", 511, 21)?;
@@ -80433,9 +79457,7 @@ fn build_controls_winuicontrols_xaml_deferred_413(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(523,21) Data (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE972"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 523, 21)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE972", 523, 21)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 523, position: 21 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(524,21) Fill
     let path_3 = {
@@ -81581,9 +80603,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 235, 37)?;
     // Controls/WinUIControls.xaml(236,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderHorizontalDecreaseButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 236, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderHorizontalDecreaseButtonStyle", 236, 37)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 236, position: 37 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(237,37) Background
     rt::bind_template_bindings(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_403)?;
@@ -81602,9 +80622,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 242, 37)?;
     // Controls/WinUIControls.xaml(243,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 243, 37)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderIncreaseButtonStyle", 243, 37)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 243, position: 37 }, ::core::option::Option::Some(priority_25))?;
     // Controls/WinUIControls.xaml(242,24) Focusable
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -81620,9 +80638,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "HorizontalThumb", 246, 28)?;
     // Controls/WinUIControls.xaml(247,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 247, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderThumbStyle", 247, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 247, position: 28 }, ::core::option::Option::Some(priority_27))?;
     // Controls/WinUIControls.xaml(248,28) DataContext (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
@@ -81638,9 +80654,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_406)?;
     // Controls/WinUIControls.xaml(251,28) CornerRadius (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlCornerRadius"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 251, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), "ControlCornerRadius", 251, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), value_4, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 251, position: 28 }, ::core::option::Option::Some(priority_29))?;
     rt::pop_parent_end_init(&context, &thumb_0, 246, 22)?;
     rt::pop_parent_end_init(&context, &track_0, 225, 20)?;
@@ -81912,9 +80926,7 @@ fn build_controls_winuicontrols_xaml_deferred_429(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 332, 37)?;
     // Controls/WinUIControls.xaml(333,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderVerticalDecreaseButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 333, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderVerticalDecreaseButtonStyle", 333, 37)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 333, position: 37 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(334,37) Background
     rt::bind_template_bindings(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_410)?;
@@ -81933,9 +80945,7 @@ fn build_controls_winuicontrols_xaml_deferred_429(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 339, 37)?;
     // Controls/WinUIControls.xaml(340,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 340, 37)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderIncreaseButtonStyle", 340, 37)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 340, position: 37 }, ::core::option::Option::Some(priority_25))?;
     // Controls/WinUIControls.xaml(339,24) Focusable
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -81951,9 +80961,7 @@ fn build_controls_winuicontrols_xaml_deferred_429(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "VerticalThumb", 343, 28)?;
     // Controls/WinUIControls.xaml(344,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 344, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderThumbStyle", 344, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 344, position: 28 }, ::core::option::Option::Some(priority_27))?;
     // Controls/WinUIControls.xaml(345,28) DataContext (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
@@ -81969,9 +80977,7 @@ fn build_controls_winuicontrols_xaml_deferred_429(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_413)?;
     // Controls/WinUIControls.xaml(348,28) CornerRadius (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlCornerRadius"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 348, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), "ControlCornerRadius", 348, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), value_4, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 348, position: 28 }, ::core::option::Option::Some(priority_29))?;
     rt::pop_parent_end_init(&context, &thumb_0, 343, 22)?;
     rt::pop_parent_end_init(&context, &track_0, 322, 20)?;
@@ -82288,9 +81294,7 @@ fn build_controls_winuicontrols_xaml_deferred_435(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
     // Controls/WinUIControls.xaml(207,19) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxDeleteButtonStyle"));
-    let provided_44 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 207, 19)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_44);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TextBoxDeleteButtonStyle", 207, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 207, position: 19 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(208,19) Command
     let path_2 = {
@@ -82357,15 +81361,11 @@ fn build_controls_winuicontrols_xaml_deferred_435(
     path_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_26);
     // Controls/WinUIControls.xaml(227,17) Margin (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupIndicatorMargin"));
-    let provided_50 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 227, 17)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_50);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "NumberBoxPopupIndicatorMargin", 227, 17)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_9, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 227, position: 17 }, ::core::option::Option::Some(priority_27))?;
     // Controls/WinUIControls.xaml(228,17) Data (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEC8F"));
-    let provided_51 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 228, 17)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_51);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEC8F", 228, 17)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_10, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 228, position: 17 }, ::core::option::Option::Some(priority_28))?;
     // Controls/WinUIControls.xaml(229,17) Fill
     rt::bind_dynamic_resource(&context, path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NumberBoxPopupIndicatorForeground", 229, 17)?;
@@ -82455,9 +81455,7 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_IncreaseButton", 268, 27)?;
     // Controls/WinUIControls.xaml(269,27) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 269, 27)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 269, 27)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 269, position: 27 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(268,14) Margin
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -82472,9 +81470,7 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     rt::push_parent(&context, &path_0);
     // Controls/WinUIControls.xaml(272,21) Data (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 272, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 272, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 272, position: 21 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(273,21) Fill
     let path_1 = {
@@ -82509,9 +81505,7 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_DecreaseButton", 279, 27)?;
     // Controls/WinUIControls.xaml(280,27) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 280, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 280, 27)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 280, position: 27 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(279,14) Margin
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
@@ -82526,9 +81520,7 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     rt::push_parent(&context, &path_2);
     // Controls/WinUIControls.xaml(283,21) Data (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 283, 21)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 283, 21)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 283, position: 21 }, ::core::option::Option::Some(priority_12))?;
     // Controls/WinUIControls.xaml(284,21) Fill
     let path_3 = {
@@ -82587,9 +81579,7 @@ fn build_controls_winuicontrols_xaml_deferred_439(
     rt::name_element(name_scope.as_ref(), &button_spinner_0, &button_spinner_0, "PART_Spinner", 316, 26)?;
     // Controls/WinUIControls.xaml(317,26) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownButtonSpinnerStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 317, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownButtonSpinnerStyle", 317, 26)?;
     rt::assign_resource_value(button_spinner_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 317, position: 26 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(318,26) CornerRadius
     rt::bind_template_bindings(button_spinner_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_423)?;
@@ -82609,9 +81599,7 @@ fn build_controls_winuicontrols_xaml_deferred_439(
     rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "PART_TextBox", 324, 22)?;
     // Controls/WinUIControls.xaml(325,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 325, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxTextBoxStyle", 325, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 325, position: 22 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(326,22) FontSize
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_424)?;
@@ -82779,9 +81767,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_7);
     // Controls/WinUIControls.xaml(125,20) Theme (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 125, 20)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxTextBoxStyle", 125, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 125, position: 20 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(126,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_426)?;
@@ -82833,9 +81819,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::push_parent(&context, &border_0);
     // Controls/WinUIControls.xaml(148,21) Margin (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowToolTipMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowToolTipMargin", 148, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_3, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 148, position: 21 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(149,16) Child
     // Controls/WinUIControls.xaml(149,16) Border
@@ -82855,9 +81839,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     border_1.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(155,44) Shadow (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 155, 44)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 155, 44)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_5, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 155, position: 44 }, ::core::option::Option::Some(priority_18))?;
     // Controls/WinUIControls.xaml(156,18) Child
     // Controls/WinUIControls.xaml(156,18) Grid
@@ -82886,9 +81868,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PopupUpSpinButton", 157, 33)?;
     // Controls/WinUIControls.xaml(158,33) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 158, 33)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxPopupContentRootButtonStyle", 158, 33)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 158, position: 33 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(157,20) Margin
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
@@ -82901,9 +81881,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::push_parent(&context, &path_1);
     // Controls/WinUIControls.xaml(160,27) Data (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 27)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 160, 27)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_7, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 160, position: 27 }, ::core::option::Option::Some(priority_21))?;
     // Controls/WinUIControls.xaml(161,27) Fill
     let path_2 = {
@@ -82941,9 +81919,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     repeat_button_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_26);
     // Controls/WinUIControls.xaml(169,33) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 169, 33)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxPopupContentRootButtonStyle", 169, 33)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 169, position: 33 }, ::core::option::Option::Some(priority_27))?;
     // Controls/WinUIControls.xaml(170,22) Content
     // Controls/WinUIControls.xaml(170,22) Path
@@ -82953,9 +81929,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::push_parent(&context, &path_3);
     // Controls/WinUIControls.xaml(170,27) Data (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_32 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 170, 27)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_32);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 170, 27)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 170, position: 27 }, ::core::option::Option::Some(priority_28))?;
     // Controls/WinUIControls.xaml(171,27) Fill
     let path_4 = {
@@ -83038,9 +82012,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::bind_template_binding(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::font_size_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), 194, 25)?;
     // Controls/WinUIControls.xaml(195,25) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 195, 25)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 195, 25)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 195, position: 25 }, ::core::option::Option::Some(priority_44))?;
     // Controls/WinUIControls.xaml(190,12) Margin
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -83055,9 +82027,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::push_parent(&context, &path_5);
     // Controls/WinUIControls.xaml(198,19) Data (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 198, 19)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 198, 19)?;
     rt::assign_resource_value(path_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_11, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 198, position: 19 }, ::core::option::Option::Some(priority_46))?;
     // Controls/WinUIControls.xaml(199,19) Fill
     let path_6 = {
@@ -83103,9 +82073,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::bind_template_binding(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::font_size_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), 209, 25)?;
     // Controls/WinUIControls.xaml(210,25) Theme (setter chosen at run time)
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_40 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 210, 25)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_40);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 210, 25)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 210, position: 25 }, ::core::option::Option::Some(priority_54))?;
     // Controls/WinUIControls.xaml(205,12) Margin
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
@@ -83120,9 +82088,7 @@ fn build_controls_winuicontrols_xaml_deferred_442(
     rt::push_parent(&context, &path_7);
     // Controls/WinUIControls.xaml(213,19) Data (setter chosen at run time)
     let priority_56 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_42 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 213, 19)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_42);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 213, 19)?;
     rt::assign_resource_value(path_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_13, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 213, position: 19 }, ::core::option::Option::Some(priority_56))?;
     // Controls/WinUIControls.xaml(214,19) Fill
     let path_8 = {
@@ -83307,15 +82273,11 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     rt::push_parent(&context, &grid_1);
     // Controls/WinUIControls.xaml(120,21) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderChevronGlyphSize"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 120, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ExpanderChevronGlyphSize", 120, 21)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 120, position: 21 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(121,21) Height (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderChevronGlyphSize"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 121, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ExpanderChevronGlyphSize", 121, 21)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_2, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 121, position: 21 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(120,16) HorizontalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -83334,9 +82296,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "ExpandCollapseChevron", 124, 23)?;
     // Controls/WinUIControls.xaml(125,23) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 125, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 125, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 125, position: 23 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(126,23) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ExpanderChevronForeground", 126, 23)?;
@@ -83461,15 +82421,11 @@ fn build_controls_winuicontrols_xaml_deferred_447(
     rt::push_parent(&context, &grid_1);
     // Controls/WinUIControls.xaml(231,21) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderChevronGlyphSize"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 231, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ExpanderChevronGlyphSize", 231, 21)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 231, position: 21 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(232,21) Height (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderChevronGlyphSize"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 232, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ExpanderChevronGlyphSize", 232, 21)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_2, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 232, position: 21 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(231,16) HorizontalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -83488,9 +82444,7 @@ fn build_controls_winuicontrols_xaml_deferred_447(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "ExpandCollapseChevron", 235, 23)?;
     // Controls/WinUIControls.xaml(236,23) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 236, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 236, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 236, position: 23 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(237,23) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ExpanderChevronForeground", 237, 23)?;
@@ -83579,30 +82533,22 @@ fn build_controls_winuicontrols_xaml_deferred_451(
     rt::bind_template_bindings(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_443)?;
     // Controls/WinUIControls.xaml(301,25) Padding (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderPadding"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 301, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ExpanderHeaderPadding", 301, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), value_0, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 301, position: 25 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(302,25) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderDownStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 302, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ExpanderHeaderDownStyle", 302, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 302, position: 25 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(292,12) HorizontalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_3);
     // Controls/WinUIControls.xaml(304,25) HorizontalContentAlignment (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderHorizontalContentAlignment"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 304, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ContentControl::horizontal_content_alignment_property(), "ExpanderHeaderHorizontalContentAlignment", 304, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::horizontal_content_alignment_property(), value_2, &rt::ResourceChoice { name: "HorizontalContentAlignment", member: "ContentControl.HorizontalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::HorizontalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 304, position: 25 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(305,25) VerticalContentAlignment (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderVerticalContentAlignment"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ContentControl::vertical_content_alignment_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 305, 25)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ContentControl::vertical_content_alignment_property(), "ExpanderHeaderVerticalContentAlignment", 305, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::vertical_content_alignment_property(), value_3, &rt::ResourceChoice { name: "VerticalContentAlignment", member: "ContentControl.VerticalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::VerticalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 305, position: 25 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(306,25) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -83659,9 +82605,7 @@ fn build_controls_winuicontrols_xaml_deferred_451(
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 316, 21)?;
     // Controls/WinUIControls.xaml(317,21) BorderThickness (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderContentDownBorderThickness"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::border_thickness_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 317, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::border_thickness_property(), "ExpanderContentDownBorderThickness", 317, 21)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), value_5, &rt::ResourceChoice { name: "BorderThickness", member: "Border.BorderThickness", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 317, position: 21 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(318,21) MinHeight
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 318, 21)?;
@@ -83877,15 +82821,11 @@ fn build_controls_winuicontrols_xaml_deferred_460(
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 181, 17)?;
     // Controls/WinUIControls.xaml(182,17) Width (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerHorizontalOrientationButtonWidth"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 182, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "PipsPagerHorizontalOrientationButtonWidth", 182, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_0, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 182, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(183,17) Height (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerHorizontalOrientationButtonHeight"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 183, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "PipsPagerHorizontalOrientationButtonHeight", 183, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 183, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(184,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 184, 17)?;
@@ -83899,9 +82839,7 @@ fn build_controls_winuicontrols_xaml_deferred_460(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 186, 17)?;
     // Controls/WinUIControls.xaml(187,17) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 187, 17)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEA3B", 187, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 187, position: 17 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(188,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 188, 17)?;
@@ -84003,9 +82941,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 286, 17)?;
     // Controls/WinUIControls.xaml(287,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEA3B", 287, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(288,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 288, 17)?;
@@ -84118,15 +83054,11 @@ fn build_controls_winuicontrols_xaml_deferred_469(
     rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_PipsPagerList", 376, 20)?;
     // Controls/WinUIControls.xaml(377,20) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerListStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 377, 20)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PipsPagerListStyle", 377, 20)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 377, position: 20 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(378,20) ItemContainerTheme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerPipItemStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 378, 20)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "PipsPagerPipItemStyle", 378, 20)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 378, position: 20 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(379,20) ItemsSource
     let path_0 = {
@@ -84970,9 +83902,7 @@ fn build_controls_winuicontrols_xaml_deferred_486(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(63,38) Shadow (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 63, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 63, 38)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_1, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 63, position: 38 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(64,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 64, 17)?;
@@ -85057,9 +83987,7 @@ fn build_controls_winuicontrols_xaml_deferred_489(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(64,38) Shadow (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 64, 38)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 64, 38)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_1, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 64, position: 38 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 65, 17)?;
@@ -85084,9 +84012,7 @@ fn build_controls_winuicontrols_xaml_deferred_489(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 27)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 72, 27)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 72, position: 27 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(73,27) Margin
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_483)?;
@@ -85168,9 +84094,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 100, 19)?;
     // Controls/WinUIControls.xaml(101,19) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutItemMargin"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 101, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutItemMargin", 101, 19)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 101, position: 19 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(102,19) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 102, 19)?;
@@ -85243,9 +84167,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
     // Controls/WinUIControls.xaml(114,21) Data (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 114, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 114, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 114, position: 21 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(115,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSubItemChevron", 115, 21)?;
@@ -85369,9 +84291,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_32);
     // Controls/WinUIControls.xaml(149,26) Theme (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 26)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 149, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 149, position: 26 }, ::core::option::Option::Some(priority_33))?;
     // Controls/WinUIControls.xaml(150,26) Text
     let template_binding_10 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::MenuItem::input_gesture_property()));
@@ -85419,9 +84339,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     path_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_38);
     // Controls/WinUIControls.xaml(161,21) Data (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE974"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 161, 21)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE974", 161, 21)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_7, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 161, position: 21 }, ::core::option::Option::Some(priority_39))?;
     // Controls/WinUIControls.xaml(162,21) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSubItemChevron", 162, 21)?;
@@ -85483,15 +84401,11 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     border_1.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_8));
     // Controls/WinUIControls.xaml(179,42) Shadow (setter chosen at run time)
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 179, 42)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 179, 42)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_9, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 179, position: 42 }, ::core::option::Option::Some(priority_49))?;
     // Controls/WinUIControls.xaml(180,21) Margin (setter chosen at run time)
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowSubMenuMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 180, 21)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowSubMenuMargin", 180, 21)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_10, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 180, position: 21 }, ::core::option::Option::Some(priority_50))?;
     // Controls/WinUIControls.xaml(181,21) CornerRadius
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 181, 21)?;
@@ -85505,9 +84419,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     rt::bind_dynamic_resources(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_486)?;
     // Controls/WinUIControls.xaml(187,23) MinHeight (setter chosen at run time)
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutThemeMinHeight"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 187, 23)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "MenuFlyoutThemeMinHeight", 187, 23)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_11, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 187, position: 23 }, ::core::option::Option::Some(priority_51))?;
     // Controls/WinUIControls.xaml(182,16) BackgroundSizing
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
@@ -85522,15 +84434,11 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 189, 31)?;
     // Controls/WinUIControls.xaml(190,31) Theme (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 190, 31)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 190, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 190, position: 31 }, ::core::option::Option::Some(priority_53))?;
     // Controls/WinUIControls.xaml(191,31) Margin (setter chosen at run time)
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterThemePadding"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 191, 31)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutPresenterThemePadding", 191, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_13, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 191, position: 31 }, ::core::option::Option::Some(priority_54))?;
     // Controls/WinUIControls.xaml(192,20) Content
     // Controls/WinUIControls.xaml(192,20) ItemsPresenter
@@ -85573,15 +84481,11 @@ fn build_controls_winuicontrols_xaml_deferred_494(
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSeparatorBackground", 398, 22)?;
     // Controls/WinUIControls.xaml(399,22) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorThemePadding"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 399, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutSeparatorThemePadding", 399, 22)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 399, position: 22 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(400,22) Height (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorHeight"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 400, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "MenuFlyoutSeparatorHeight", 400, 22)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 400, position: 22 }, ::core::option::Option::Some(priority_1))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 397, 12)?;
     ::core::result::Result::Ok(rt::to_value(rectangle_0.clone()))
@@ -85740,9 +84644,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
     // Controls/WinUIControls.xaml(100,33) Padding (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuBarItemButtonPadding"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 33)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::padding_property(), "MenuBarItemButtonPadding", 100, 33)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), value_1, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 100, position: 33 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(101,33) CornerRadius
     rt::bind_dynamic_resources(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_492)?;
@@ -85809,15 +84711,11 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     border_2.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_3));
     // Controls/WinUIControls.xaml(120,42) Shadow (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 120, 42)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 120, 42)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_4, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 120, position: 42 }, ::core::option::Option::Some(priority_12))?;
     // Controls/WinUIControls.xaml(121,21) Margin (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 121, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 121, 21)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 121, position: 21 }, ::core::option::Option::Some(priority_13))?;
     // Controls/WinUIControls.xaml(122,21) CornerRadius
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 122, 21)?;
@@ -85831,9 +84729,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     rt::bind_dynamic_resources(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_493)?;
     // Controls/WinUIControls.xaml(128,23) MinHeight (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutThemeMinHeight"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 128, 23)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "MenuFlyoutThemeMinHeight", 128, 23)?;
     rt::assign_resource_value(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_6, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 128, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/WinUIControls.xaml(123,16) BackgroundSizing
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -85848,15 +84744,11 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 130, 31)?;
     // Controls/WinUIControls.xaml(131,31) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 131, 31)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 131, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 131, position: 31 }, ::core::option::Option::Some(priority_16))?;
     // Controls/WinUIControls.xaml(132,31) Margin (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterThemePadding"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 132, 31)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutPresenterThemePadding", 132, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_8, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 132, position: 31 }, ::core::option::Option::Some(priority_17))?;
     // Controls/WinUIControls.xaml(133,20) Content
     // Controls/WinUIControls.xaml(133,20) ItemsPresenter
@@ -86475,9 +85367,7 @@ fn build_controls_winuicontrols_xaml_deferred_521(
     rt::name_element(name_scope.as_ref(), &border_1, &border_1, "Pill", 82, 21)?;
     // Controls/WinUIControls.xaml(83,21) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxItemPill"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ComboBoxItemPill", 83, 21)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 83, position: 21 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(82,14) Opacity
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -86743,15 +85633,11 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     border_0.set_value_with_priority(::ferroui_controls::Border::background_sizing_property(), ::ferroui_base::media::BackgroundSizing::InnerBorderEdge, priority_3);
     // Controls/WinUIControls.xaml(213,21) BorderThickness (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxBackgroundBorderThicknessFocused"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::border_thickness_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 213, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::border_thickness_property(), "ComboBoxBackgroundBorderThicknessFocused", 213, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), value_0, &rt::ResourceChoice { name: "BorderThickness", member: "Border.BorderThickness", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 213, position: 21 }, ::core::option::Option::Some(priority_4))?;
     // Controls/WinUIControls.xaml(214,21) CornerRadius (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxHiglightBorderCornerRadius"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::corner_radius_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 214, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ComboBoxHiglightBorderCornerRadius", 214, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_1, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 214, position: 21 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(206,14) Opacity
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -86796,9 +85682,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
     // Controls/WinUIControls.xaml(228,21) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxItemPill"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 228, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ComboBoxItemPill", 228, 21)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 228, position: 21 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(226,14) Margin
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
@@ -86912,9 +85796,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_18);
     // Controls/WinUIControls.xaml(257,22) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxTextBoxStyle"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 257, 22)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ComboBoxTextBoxStyle", 257, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 257, position: 22 }, ::core::option::Option::Some(priority_19))?;
     // Controls/WinUIControls.xaml(258,22) Padding
     rt::bind_dynamic_resource(&context, text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ComboBoxEditableTextPadding", 258, 22)?;
@@ -86952,9 +85834,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     border_3.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_23);
     // Controls/WinUIControls.xaml(271,21) CornerRadius (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxDropDownButtonBackgroundCornerRadius"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::corner_radius_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 271, 21)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ComboBoxDropDownButtonBackgroundCornerRadius", 271, 21)?;
     rt::assign_resource_value(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_8, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 271, position: 21 }, ::core::option::Option::Some(priority_24))?;
     // Controls/WinUIControls.xaml(267,14) Width
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
@@ -87005,9 +85885,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     rt::name_element(name_scope.as_ref(), &path_2, &path_2, "DropDownGlyph", 286, 21)?;
     // Controls/WinUIControls.xaml(287,21) Data (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 21)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE96E", 287, 21)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 21 }, ::core::option::Option::Some(priority_35))?;
     // Controls/WinUIControls.xaml(288,21) Fill
     rt::bind_dynamic_resource(&context, path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ComboBoxDropDownGlyphForeground", 288, 21)?;
@@ -87068,9 +85946,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
     border_4.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_11));
     // Controls/WinUIControls.xaml(303,44) Shadow (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 303, 44)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 303, 44)?;
     rt::assign_resource_value(border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_12, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 303, position: 44 }, ::core::option::Option::Some(priority_44))?;
     // Controls/WinUIControls.xaml(302,16) Margin
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -87213,9 +86089,7 @@ fn build_controls_winuicontrols_xaml_deferred_530(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "CollapsedGlyph", 76, 19)?;
     // Controls/WinUIControls.xaml(77,19) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE76C"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 77, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE76C", 77, 19)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 77, position: 19 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(78,19) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 78, 19)?;
@@ -87243,9 +86117,7 @@ fn build_controls_winuicontrols_xaml_deferred_530(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "ExpandedGlyph", 84, 19)?;
     // Controls/WinUIControls.xaml(85,19) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 85, 19)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 85, position: 19 }, ::core::option::Option::Some(priority_8))?;
     // Controls/WinUIControls.xaml(86,19) Fill
     rt::bind_template_binding(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 86, 19)?;
@@ -87436,9 +86308,7 @@ fn build_controls_winuicontrols_xaml_deferred_533(
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_9);
     // Controls/WinUIControls.xaml(166,33) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TreeViewItemExpandCollapseChevron"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 166, 33)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TreeViewItemExpandCollapseChevron", 166, 33)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 166, position: 33 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(167,33) IsChecked
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TreeViewItem::is_expanded_property()));
@@ -87605,9 +86475,7 @@ fn build_controls_winuicontrols_xaml_deferred_539(
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TextControlButtonBackground", 60, 17)?;
     // Controls/WinUIControls.xaml(61,17) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxDeleteButtonMargin"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 61, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestBoxDeleteButtonMargin", 61, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 61, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/WinUIControls.xaml(62,17) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 62, 17)?;
@@ -87623,9 +86491,7 @@ fn build_controls_winuicontrols_xaml_deferred_539(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 66, 17)?;
     // Controls/WinUIControls.xaml(67,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE894"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE894", 67, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 67, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/WinUIControls.xaml(65,12) Stretch
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -87873,9 +86739,7 @@ fn build_controls_winuicontrols_xaml_deferred_541(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
     // Controls/WinUIControls.xaml(188,21) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxDeleteButtonStyle"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 188, 21)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxDeleteButtonStyle", 188, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 188, position: 21 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(189,21) Command
     let path_2 = {
@@ -87975,9 +86839,7 @@ fn build_controls_winuicontrols_xaml_deferred_543(
     rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "PART_TextBox", 263, 20)?;
     // Controls/WinUIControls.xaml(264,20) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 264, 20)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxTextBoxStyle", 264, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 264, position: 20 }, ::core::option::Option::Some(priority_0))?;
     // Controls/WinUIControls.xaml(265,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_547)?;
@@ -88056,15 +86918,11 @@ fn build_controls_winuicontrols_xaml_deferred_543(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_3));
     // Controls/WinUIControls.xaml(293,42) Shadow (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 293, 42)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 293, 42)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_4, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 293, position: 42 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(294,21) Margin (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 294, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 294, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 294, position: 21 }, ::core::option::Option::Some(priority_10))?;
     // Controls/WinUIControls.xaml(295,21) MinWidth
     let path_0 = {
@@ -88091,9 +86949,7 @@ fn build_controls_winuicontrols_xaml_deferred_543(
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 303, 24)?;
     // Controls/WinUIControls.xaml(304,24) ItemContainerTheme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultListViewItemStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 304, 24)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 304, 24)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_6, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 304, position: 24 }, ::core::option::Option::Some(priority_11))?;
     // Controls/WinUIControls.xaml(305,24) Margin
     rt::bind_dynamic_resource(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestListPadding", 305, 24)?;
@@ -88316,9 +87172,7 @@ fn build_controls_winuicontrols_xaml_deferred_550(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
     // Controls/WinUIControls.xaml(149,20) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 20)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxTextBoxStyle", 149, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 149, position: 20 }, ::core::option::Option::Some(priority_5))?;
     // Controls/WinUIControls.xaml(150,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_555)?;
@@ -88341,9 +87195,7 @@ fn build_controls_winuicontrols_xaml_deferred_550(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "QueryButton", 164, 23)?;
     // Controls/WinUIControls.xaml(165,23) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxQueryButtonStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxQueryButtonStyle", 165, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 165, position: 23 }, ::core::option::Option::Some(priority_9))?;
     // Controls/WinUIControls.xaml(166,23) CornerRadius
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_556)?;
@@ -88412,15 +87264,11 @@ fn build_controls_winuicontrols_xaml_deferred_550(
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_5));
     // Controls/WinUIControls.xaml(185,42) Shadow (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WinUIThemeShadow"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::Visual::shadow_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 185, 42)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 185, 42)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_6, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 185, position: 42 }, ::core::option::Option::Some(priority_20))?;
     // Controls/WinUIControls.xaml(186,21) Margin (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 186, 21)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 186, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_7, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 186, position: 21 }, ::core::option::Option::Some(priority_21))?;
     // Controls/WinUIControls.xaml(187,21) Padding
     rt::bind_dynamic_resources(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_558)?;
@@ -88436,9 +87284,7 @@ fn build_controls_winuicontrols_xaml_deferred_550(
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::ItemsControl::item_template_property()), 193, 24)?;
     // Controls/WinUIControls.xaml(194,24) ItemContainerTheme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultListViewItemStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 194, 24)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 194, 24)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_8, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 194, position: 24 }, ::core::option::Option::Some(priority_22))?;
     // Controls/WinUIControls.xaml(195,24) MaxHeight
     rt::bind_dynamic_resources(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_559)?;

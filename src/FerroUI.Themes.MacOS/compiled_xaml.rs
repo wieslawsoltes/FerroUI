@@ -48609,9 +48609,7 @@ fn build_controls_macoscontrols_xaml_deferred_14(
     rt::bind_template_bindings(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_10)?;
     // Controls/MacOSControls.xaml(21,91) Height (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorHeight"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 21, 91)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "MenuFlyoutSeparatorHeight", 21, 91)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_0, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 21, position: 91 }, ::core::option::Option::Some(priority_0))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 21, 10)?;
     ::core::result::Result::Ok(rt::to_value(rectangle_0.clone()))
@@ -48994,15 +48992,11 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), "TextFillColorSecondaryBrush", 31, 147)?;
     // Controls/MacOSControls.xaml(31,206) HorizontalContentAlignment (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderHorizontalContentAlignment"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 206)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), "ExpanderHeaderHorizontalContentAlignment", 31, 206)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), value_1, &rt::ResourceChoice { name: "HorizontalContentAlignment", member: "ContentControl.HorizontalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::HorizontalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 31, position: 206 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(31,293) VerticalContentAlignment (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderVerticalContentAlignment"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 293)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), "ExpanderHeaderVerticalContentAlignment", 31, 293)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), value_2, &rt::ResourceChoice { name: "VerticalContentAlignment", member: "ContentControl.VerticalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::VerticalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 31, position: 293 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(31,14) RecognizesAccessKey
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
@@ -49633,15 +49627,11 @@ fn build_controls_macoscontrols_xaml_deferred_41(
     rt::push_parent(&context, &info_bar_panel_0);
     // Controls/MacOSControls.xaml(35,40) HorizontalOrientationPadding (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelHorizontalOrientationPadding"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 40)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_padding_property(), "InfoBarPanelHorizontalOrientationPadding", 35, 40)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_padding_property(), value_0, &rt::ResourceChoice { name: "HorizontalOrientationPadding", member: "InfoBarPanel.HorizontalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 35, position: 40 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(36,40) VerticalOrientationPadding (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_padding_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 40)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_padding_property(), "InfoBarPanelVerticalOrientationPadding", 36, 40)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_padding_property(), value_1, &rt::ResourceChoice { name: "VerticalOrientationPadding", member: "InfoBarPanel.VerticalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 36, position: 40 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(37,18) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(info_bar_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -49673,29 +49663,21 @@ fn build_controls_macoscontrols_xaml_deferred_41(
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 38, 28)?;
     // Controls/MacOSControls.xaml(39,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleHorizontalOrientationMargin"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 28)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarTitleHorizontalOrientationMargin", 39, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_3, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 39, position: 28 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(40,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleVerticalOrientationMargin"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 40, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarTitleVerticalOrientationMargin", 40, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_4, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 40, position: 28 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(41,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarTitleForeground", 41, 28)?;
     // Controls/MacOSControls.xaml(42,28) FontSize (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontSize"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 28)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarTitleFontSize", 42, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_5, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 42, position: 28 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(43,28) FontWeight (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontWeight"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 28)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarTitleFontWeight", 43, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_6, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 43, position: 28 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(37,18) TextWrapping
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -49731,29 +49713,21 @@ fn build_controls_macoscontrols_xaml_deferred_41(
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_10, 46, 28)?;
     // Controls/MacOSControls.xaml(47,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageHorizontalOrientationMargin"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 47, 28)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarMessageHorizontalOrientationMargin", 47, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_8, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 47, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(48,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageVerticalOrientationMargin"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(crate::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 48, 28)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarMessageVerticalOrientationMargin", 48, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), crate::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_9, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 48, position: 28 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(49,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 49, 28)?;
     // Controls/MacOSControls.xaml(50,28) FontSize (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 28)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 50, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_10, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 50, position: 28 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(51,28) FontWeight (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 28)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 51, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_11, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 51, position: 28 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(45,18) TextWrapping
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
@@ -49775,9 +49749,7 @@ fn build_controls_macoscontrols_xaml_deferred_42(
     rt::push_parent(&context, &text_block_0);
     // Controls/MacOSControls.xaml(56,26) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelVerticalOrientationPadding", 56, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 56, position: 26 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(57,26) Text
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
@@ -49789,15 +49761,11 @@ fn build_controls_macoscontrols_xaml_deferred_42(
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 58, 26)?;
     // Controls/MacOSControls.xaml(59,26) FontSize (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 26)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 59, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_1, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 59, position: 26 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(60,26) FontWeight (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 26)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 60, 26)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_2, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 60, position: 26 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(56,16) TextWrapping
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -50861,9 +50829,7 @@ fn build_controls_macoscontrols_xaml_deferred_60(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_IncreaseButton", 63, 31)?;
     // Controls/MacOSControls.xaml(64,31) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 64, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 64, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 64, position: 31 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(63,18) Margin
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
@@ -50879,9 +50845,7 @@ fn build_controls_macoscontrols_xaml_deferred_60(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(67,25) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 67, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 67, position: 25 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(68,25) Fill
     let path_1 = {
@@ -50916,9 +50880,7 @@ fn build_controls_macoscontrols_xaml_deferred_60(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_DecreaseButton", 74, 31)?;
     // Controls/MacOSControls.xaml(75,31) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 75, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 75, position: 31 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(74,18) Margin
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -50934,9 +50896,7 @@ fn build_controls_macoscontrols_xaml_deferred_60(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(78,25) Data (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 25)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 78, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 78, position: 25 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(79,25) Fill
     let path_3 = {
@@ -51022,9 +50982,7 @@ fn build_controls_macoscontrols_xaml_deferred_62(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(34,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72C"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 34, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72C", 34, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 34, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(35,17) Fill
     let path_1 = {
@@ -51153,9 +51111,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 39, 29)?;
     // Controls/MacOSControls.xaml(39,70) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 39, 70)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 39, position: 70 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(39,127) Margin
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_51)?;
@@ -51229,9 +51185,7 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::bind_template_bindings(border_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_53)?;
     // Controls/MacOSControls.xaml(66,19) Padding (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarContentRootPadding"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "InfoBarContentRootPadding", 66, 19)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_0, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 66, position: 19 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(67,14) Child
     // Controls/MacOSControls.xaml(67,14) Grid
@@ -51290,21 +51244,15 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_5);
     // Controls/MacOSControls.xaml(73,28) Margin (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 73, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 73, position: 28 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(74,28) FontSize (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarIconFontSize", 74, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_2, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 74, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(75,28) Text (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconBackgroundGlyph"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 28)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "InfoBarIconBackgroundGlyph", 75, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_3, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 75, position: 28 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(76,28) Foreground
     rt::bind_dynamic_resources(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_54)?;
@@ -51323,21 +51271,15 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     text_block_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_9);
     // Controls/MacOSControls.xaml(80,28) Margin (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 28)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 80, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_4, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 80, position: 28 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(81,28) FontSize (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 81, 28)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarIconFontSize", 81, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_5, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 81, position: 28 }, ::core::option::Option::Some(priority_11))?;
     // Controls/MacOSControls.xaml(82,28) Text (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarInformationalIconGlyph"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 28)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "InfoBarInformationalIconGlyph", 82, 28)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_6, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 82, position: 28 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(83,28) Foreground
     rt::bind_dynamic_resources(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_55)?;
@@ -51385,21 +51327,15 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     info_bar_panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_16);
     // Controls/MacOSControls.xaml(95,29) Margin (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 95, 29)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelMargin", 95, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_7, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 95, position: 29 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(96,29) HorizontalOrientationPadding (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelHorizontalOrientationPadding"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 96, 29)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property(), "InfoBarPanelHorizontalOrientationPadding", 96, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property(), value_8, &rt::ResourceChoice { name: "HorizontalOrientationPadding", member: "InfoBarPanel.HorizontalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 96, position: 29 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(97,29) VerticalOrientationPadding (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelVerticalOrientationPadding"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 97, 29)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property(), "InfoBarPanelVerticalOrientationPadding", 97, 29)?;
     rt::assign_resource_value(info_bar_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property(), value_9, &rt::ResourceChoice { name: "VerticalOrientationPadding", member: "InfoBarPanel.VerticalOrientationPadding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 97, position: 29 }, ::core::option::Option::Some(priority_19))?;
     // Controls/MacOSControls.xaml(98,18) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(info_bar_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -51416,30 +51352,22 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarTitleForeground", 100, 28)?;
     // Controls/MacOSControls.xaml(101,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleHorizontalOrientationMargin"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 101, 28)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarTitleHorizontalOrientationMargin", 101, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_10, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 101, position: 28 }, ::core::option::Option::Some(priority_20))?;
     // Controls/MacOSControls.xaml(102,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleVerticalOrientationMargin"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 28)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarTitleVerticalOrientationMargin", 102, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_11, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 102, position: 28 }, ::core::option::Option::Some(priority_21))?;
     // Controls/MacOSControls.xaml(98,18) TextWrapping
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::WrapWithOverflow, priority_22);
     // Controls/MacOSControls.xaml(104,28) FontWeight (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontWeight"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 104, 28)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarTitleFontWeight", 104, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_12, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 104, position: 28 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(105,28) FontSize (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarTitleFontSize"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 105, 28)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarTitleFontSize", 105, 28)?;
     rt::assign_resource_value(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_13, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 105, position: 28 }, ::core::option::Option::Some(priority_24))?;
     rt::pop_parent_end_init(&context, &text_block_2, 98, 18)?;
     // Controls/MacOSControls.xaml(106,18) Children
@@ -51457,30 +51385,22 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "InfoBarMessageForeground", 108, 28)?;
     // Controls/MacOSControls.xaml(109,28) HorizontalOrientationMargin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageHorizontalOrientationMargin"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 109, 28)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarMessageHorizontalOrientationMargin", 109, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_14, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 109, position: 28 }, ::core::option::Option::Some(priority_25))?;
     // Controls/MacOSControls.xaml(110,28) VerticalOrientationMargin (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageVerticalOrientationMargin"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 110, 28)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarMessageVerticalOrientationMargin", 110, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_15, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 110, position: 28 }, ::core::option::Option::Some(priority_26))?;
     // Controls/MacOSControls.xaml(106,18) TextWrapping
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::WrapWithOverflow, priority_27);
     // Controls/MacOSControls.xaml(112,28) FontWeight (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontWeight"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_weight_property()), &static_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 112, 28)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_weight_property(), "InfoBarMessageFontWeight", 112, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_weight_property(), value_16, &rt::ResourceChoice { name: "FontWeight", member: "TextElement.FontWeight", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontWeight as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 112, position: 28 }, ::core::option::Option::Some(priority_28))?;
     // Controls/MacOSControls.xaml(113,28) FontSize (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarMessageFontSize"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 113, 28)?;
-    let value_17: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_17: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "InfoBarMessageFontSize", 113, 28)?;
     rt::assign_resource_value(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_17, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 113, position: 28 }, ::core::option::Option::Some(priority_29))?;
     rt::pop_parent_end_init(&context, &text_block_3, 106, 18)?;
     // Controls/MacOSControls.xaml(114,18) Children
@@ -51492,15 +51412,11 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::push_parent(&context, &content_presenter_0);
     // Controls/MacOSControls.xaml(114,35) HorizontalOrientationMargin (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarActionHorizontalOrientationMargin"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property()), &static_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 114, 35)?;
-    let value_18: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_18: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), "InfoBarActionHorizontalOrientationMargin", 114, 35)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property(), value_18, &rt::ResourceChoice { name: "HorizontalOrientationMargin", member: "InfoBarPanel.HorizontalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 114, position: 35 }, ::core::option::Option::Some(priority_30))?;
     // Controls/MacOSControls.xaml(115,35) VerticalOrientationMargin (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_19 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarActionVerticalOrientationMargin"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property()), &static_resource_extension_19, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 115, 35)?;
-    let value_19: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_19: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), "InfoBarActionVerticalOrientationMargin", 115, 35)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property(), value_19, &rt::ResourceChoice { name: "VerticalOrientationMargin", member: "InfoBarPanel.VerticalOrientationMargin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 115, position: 35 }, ::core::option::Option::Some(priority_31))?;
     // Controls/MacOSControls.xaml(114,18) VerticalAlignment
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -51600,15 +51516,11 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::push_parent(&context, &viewbox_1);
     // Controls/MacOSControls.xaml(137,26) Width (setter chosen at run time)
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_21 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonGlyphSize"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_21, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 137, 26)?;
-    let value_23: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_23: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "InfoBarCloseButtonGlyphSize", 137, 26)?;
     rt::assign_resource_value(viewbox_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_23, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 137, position: 26 }, ::core::option::Option::Some(priority_40))?;
     // Controls/MacOSControls.xaml(138,26) Height (setter chosen at run time)
     let priority_41 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_22 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonGlyphSize"));
-    let provided_48 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_22, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 138, 26)?;
-    let value_24: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_48);
+    let value_24: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "InfoBarCloseButtonGlyphSize", 138, 26)?;
     rt::assign_resource_value(viewbox_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_24, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 138, position: 26 }, ::core::option::Option::Some(priority_41))?;
     // Controls/MacOSControls.xaml(137,18) HorizontalAlignment
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
@@ -51624,9 +51536,7 @@ fn build_controls_macoscontrols_xaml_deferred_68(
     rt::push_parent(&context, &symbol_icon_0);
     // Controls/MacOSControls.xaml(141,31) Symbol (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_23 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonSymbol"));
-    let provided_49 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::SymbolIcon::symbol_property()), &static_resource_extension_23, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 141, 31)?;
-    let value_25: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_49);
+    let value_25: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::SymbolIcon::symbol_property(), "InfoBarCloseButtonSymbol", 141, 31)?;
     rt::assign_resource_value(symbol_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::SymbolIcon::symbol_property(), value_25, &rt::ResourceChoice { name: "Symbol", member: "SymbolIcon.Symbol", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_controls::Symbol as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 141, position: 31 }, ::core::option::Option::Some(priority_44))?;
     rt::pop_parent_end_init(&context, &symbol_icon_0, 141, 20)?;
     rt::pop_parent_end_init(&context, &viewbox_1, 137, 18)?;
@@ -51837,15 +51747,11 @@ fn build_controls_macoscontrols_xaml_deferred_73(
     stack_panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(20.0_f64, 20.0_f64, 0.0_f64, 20.0_f64), priority_4);
     // Controls/MacOSControls.xaml(86,25) Spacing (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlItemSpacing"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::StackPanel::spacing_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 86, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::StackPanel::spacing_property(), "RatingControlItemSpacing", 86, 25)?;
     rt::assign_resource_value(stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::spacing_property(), value_0, &rt::ResourceChoice { name: "Spacing", member: "StackPanel.Spacing", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 86, position: 25 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(87,25) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlFontSizeForRendering"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::documents::TextElement::font_size_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 87, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::documents::TextElement::font_size_property(), "RatingControlFontSizeForRendering", 87, 25)?;
     rt::assign_resource_value(stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::font_size_property(), value_1, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 87, position: 25 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(88,25) Foreground
     rt::bind_dynamic_resource(&context, stack_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::foreground_property(), "RatingControlUnselectedForeground", 88, 25)?;
@@ -51861,9 +51767,7 @@ fn build_controls_macoscontrols_xaml_deferred_73(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "Caption", 89, 24)?;
     // Controls/MacOSControls.xaml(90,24) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 24)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 90, 24)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 90, position: 24 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(89,14) Margin
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -51930,15 +51834,11 @@ fn build_controls_macoscontrols_xaml_deferred_73(
     stack_panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(40.0_f64, 40.0_f64, 40.0_f64, 40.0_f64), priority_18);
     // Controls/MacOSControls.xaml(106,27) Spacing (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlItemSpacing"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::StackPanel::spacing_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 106, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::StackPanel::spacing_property(), "RatingControlItemSpacing", 106, 27)?;
     rt::assign_resource_value(stack_panel_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::spacing_property(), value_3, &rt::ResourceChoice { name: "Spacing", member: "StackPanel.Spacing", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 106, position: 27 }, ::core::option::Option::Some(priority_19))?;
     // Controls/MacOSControls.xaml(107,27) FontSize (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RatingControlFontSizeForRendering"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::documents::TextElement::font_size_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 27)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::documents::TextElement::font_size_property(), "RatingControlFontSizeForRendering", 107, 27)?;
     rt::assign_resource_value(stack_panel_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::documents::TextElement::font_size_property(), value_4, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 107, position: 27 }, ::core::option::Option::Some(priority_20))?;
     rt::pop_parent_end_init(&context, &stack_panel_3, 102, 16)?;
     rt::pop_parent_end_init(&context, &stack_panel_2, 101, 14)?;
@@ -53005,9 +52905,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     rt::bind_dynamic_resources(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_80)?;
     // Controls/MacOSControls.xaml(62,26) StrokeThickness (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CheckBoxBorderThickness"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Shape::stroke_thickness_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 62, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Shape::stroke_thickness_property(), "CheckBoxBorderThickness", 62, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::stroke_thickness_property(), value_0, &rt::ResourceChoice { name: "StrokeThickness", member: "Shape.StrokeThickness", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 62, position: 26 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(59,16) UseLayoutRounding
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -53074,9 +52972,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckGlyphForegroundUnchecked", 77, 21)?;
     // Controls/MacOSControls.xaml(78,21) Data (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 78, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 78, position: 21 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(76,16) Stretch
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -53539,9 +53435,7 @@ fn build_controls_macoscontrols_xaml_deferred_135(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/MacOSControls.xaml(27,64) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDA"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 27, 64)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDA", 27, 64)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 27, position: 64 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(27,106) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 27, 106)?;
@@ -53550,9 +53444,7 @@ fn build_controls_macoscontrols_xaml_deferred_135(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/MacOSControls.xaml(27,180) Height (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 27, 180)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarButtonArrowIconFontSize", 27, 180)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 27, position: 180 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(27,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -53607,9 +53499,7 @@ fn build_controls_macoscontrols_xaml_deferred_137(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/MacOSControls.xaml(46,64) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDD9"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 64)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDD9", 46, 64)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 46, position: 64 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(46,106) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 46, 106)?;
@@ -53618,9 +53508,7 @@ fn build_controls_macoscontrols_xaml_deferred_137(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/MacOSControls.xaml(46,180) Height (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 180)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "ScrollBarButtonArrowIconFontSize", 46, 180)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 46, position: 180 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(46,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -53675,9 +53563,7 @@ fn build_controls_macoscontrols_xaml_deferred_139(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/MacOSControls.xaml(65,64) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 65, 64)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 65, 64)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 65, position: 64 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(65,106) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 65, 106)?;
@@ -53686,9 +53572,7 @@ fn build_controls_macoscontrols_xaml_deferred_139(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/MacOSControls.xaml(65,180) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 65, 180)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarButtonArrowIconFontSize", 65, 180)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 65, position: 180 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(65,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -53743,9 +53627,7 @@ fn build_controls_macoscontrols_xaml_deferred_141(
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
     // Controls/MacOSControls.xaml(84,64) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 64)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 84, 64)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 84, position: 64 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(84,106) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarButtonArrowForeground", 84, 106)?;
@@ -53754,9 +53636,7 @@ fn build_controls_macoscontrols_xaml_deferred_141(
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_3);
     // Controls/MacOSControls.xaml(84,180) Width (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarButtonArrowIconFontSize"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 180)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "ScrollBarButtonArrowIconFontSize", 84, 180)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 84, position: 180 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(84,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -54008,9 +53888,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarVerticalDecreaseMargin", 156, 139)?;
     // Controls/MacOSControls.xaml(156,199) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalDecrementTemplate"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 199)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalDecrementTemplate", 156, 199)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 156, position: 199 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(156,18) HorizontalAlignment
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -54084,9 +53962,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     repeat_button_1.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_23);
     // Controls/MacOSControls.xaml(165,94) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 94)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 165, 94)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 165, position: 94 }, ::core::option::Option::Some(priority_24))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 165, 22)?;
     // Controls/MacOSControls.xaml(168,22) IncreaseButton
@@ -54106,9 +53982,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     repeat_button_2.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_27);
     // Controls/MacOSControls.xaml(168,96) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 168, 96)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 168, 96)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 168, position: 96 }, ::core::option::Option::Some(priority_28))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 168, 22)?;
     // Controls/MacOSControls.xaml(170,20) Thumb
@@ -54123,18 +53997,14 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_98)?;
     // Controls/MacOSControls.xaml(170,170) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalThumbTemplate"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 170, 170)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalThumbTemplate", 170, 170)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 170, position: 170 }, ::core::option::Option::Some(priority_29))?;
     // Controls/MacOSControls.xaml(170,20) Width
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     thumb_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 6.0_f64, priority_30);
     // Controls/MacOSControls.xaml(170,236) MinHeight (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalThumbMinHeight"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 170, 236)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "ScrollBarVerticalThumbMinHeight", 170, 236)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_4, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 170, position: 236 }, ::core::option::Option::Some(priority_31))?;
     // Controls/MacOSControls.xaml(170,20) RenderTransformOrigin
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -54213,9 +54083,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarVerticalIncreaseMargin", 179, 141)?;
     // Controls/MacOSControls.xaml(179,201) Theme (setter chosen at run time)
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarVerticalIncrementTemplate"));
-    let provided_26 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 179, 201)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_26);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarVerticalIncrementTemplate", 179, 201)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 179, position: 201 }, ::core::option::Option::Some(priority_42))?;
     // Controls/MacOSControls.xaml(179,18) HorizontalAlignment
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
@@ -54383,9 +54251,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarHorizontalDecreaseMargin", 205, 142)?;
     // Controls/MacOSControls.xaml(205,204) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalDecrementTemplate"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 205, 204)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalDecrementTemplate", 205, 204)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 205, position: 204 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(205,18) VerticalAlignment
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -54456,9 +54322,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     repeat_button_1.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_22);
     // Controls/MacOSControls.xaml(214,94) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 214, 94)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 214, 94)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 214, position: 94 }, ::core::option::Option::Some(priority_23))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 214, 22)?;
     // Controls/MacOSControls.xaml(217,22) IncreaseButton
@@ -54478,9 +54342,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     repeat_button_2.set_value_with_priority(::ferroui_controls::RepeatButton::interval_property(), 50_i32, priority_26);
     // Controls/MacOSControls.xaml(217,96) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarRepeatButtonTemplate"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 217, 96)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarRepeatButtonTemplate", 217, 96)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 217, position: 96 }, ::core::option::Option::Some(priority_27))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 217, 22)?;
     // Controls/MacOSControls.xaml(219,20) Thumb
@@ -54495,18 +54357,14 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     rt::bind_dynamic_resources(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_102)?;
     // Controls/MacOSControls.xaml(219,172) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalThumbTemplate"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 219, 172)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalThumbTemplate", 219, 172)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 219, position: 172 }, ::core::option::Option::Some(priority_28))?;
     // Controls/MacOSControls.xaml(219,20) Height
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     thumb_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 6.0_f64, priority_29);
     // Controls/MacOSControls.xaml(219,241) MinWidth (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalThumbMinWidth"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_width_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 219, 241)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_width_property(), "ScrollBarHorizontalThumbMinWidth", 219, 241)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), value_4, &rt::ResourceChoice { name: "MinWidth", member: "Layoutable.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 219, position: 241 }, ::core::option::Option::Some(priority_30))?;
     // Controls/MacOSControls.xaml(219,20) RenderTransformOrigin
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
@@ -54585,9 +54443,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ScrollBarHorizontalIncreaseMargin", 228, 144)?;
     // Controls/MacOSControls.xaml(228,206) Theme (setter chosen at run time)
     let priority_41 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarHorizontalIncrementTemplate"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 228, 206)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ScrollBarHorizontalIncrementTemplate", 228, 206)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 228, position: 206 }, ::core::option::Option::Some(priority_41))?;
     // Controls/MacOSControls.xaml(228,18) VerticalAlignment
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
@@ -55125,9 +54981,7 @@ fn build_controls_macoscontrols_xaml_deferred_158(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 85, 17)?;
     // Controls/MacOSControls.xaml(86,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF78D"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 86, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF78D", 86, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 86, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(84,12) Stretch
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -55204,9 +55058,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     menu_item_0.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     rt::push_parent(&context, &path_icon_0);
     // Controls/MacOSControls.xaml(130,19) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8C6"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 130, 19)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE8C6", 130, 19)?;
     rt::assign_resource_value(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 130, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_0, 130, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_0, 124, 6)?;
@@ -55260,9 +55112,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     menu_item_1.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_1)));
     rt::push_parent(&context, &path_icon_1);
     // Controls/MacOSControls.xaml(139,19) Data (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8C8"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 139, 19)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE8C8", 139, 19)?;
     rt::assign_resource_value(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 139, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_1, 139, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_1, 133, 6)?;
@@ -55316,9 +55166,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     menu_item_2.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_2)));
     rt::push_parent(&context, &path_icon_2);
     // Controls/MacOSControls.xaml(148,19) Data (setter chosen at run time)
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE77F"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 19)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE77F", 148, 19)?;
     rt::assign_resource_value(path_icon_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_8, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 148, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_2, 148, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_2, 142, 6)?;
@@ -55369,9 +55217,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     menu_item_3.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_3)));
     rt::push_parent(&context, &path_icon_3);
     // Controls/MacOSControls.xaml(156,19) Data (setter chosen at run time)
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7A7"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 19)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE7A7", 156, 19)?;
     rt::assign_resource_value(path_icon_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_10, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 156, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_3, 156, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_3, 151, 6)?;
@@ -55422,9 +55268,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     menu_item_4.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_4)));
     rt::push_parent(&context, &path_icon_4);
     // Controls/MacOSControls.xaml(164,19) Data (setter chosen at run time)
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7A6"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 164, 19)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE7A6", 164, 19)?;
     rt::assign_resource_value(path_icon_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_12, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 164, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_4, 164, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_4, 159, 6)?;
@@ -55530,9 +55374,7 @@ fn build_controls_macoscontrols_xaml_deferred_160(
     menu_item_0.set_value(::ferroui_controls::MenuItem::icon_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     rt::push_parent(&context, &path_icon_0);
     // Controls/MacOSControls.xaml(180,19) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE77F"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 180, 19)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::PathIcon::data_property(), "GlyphGeometryE77F", 180, 19)?;
     rt::assign_resource_value(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.PathIcon.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 180, position: 19 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &path_icon_0, 180, 10)?;
     rt::pop_parent_end_init(&context, &menu_item_0, 174, 6)?;
@@ -55898,9 +55740,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
     // Controls/MacOSControls.xaml(311,21) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxDeleteButtonStyle"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 311, 21)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TextBoxDeleteButtonStyle", 311, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 311, position: 21 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(312,21) Command
     let path_2 = {
@@ -55943,9 +55783,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_23);
     // Controls/MacOSControls.xaml(325,27) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxRevealButtonStyle"));
-    let provided_53 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 325, 27)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_53);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PasswordBoxRevealButtonStyle", 325, 27)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 325, position: 27 }, ::core::option::Option::Some(priority_24))?;
     // Controls/MacOSControls.xaml(326,27) IsChecked
     let template_binding_44 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::reveal_password_property()));
@@ -56346,9 +56184,7 @@ fn build_controls_macoscontrols_xaml_deferred_170(
     let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 117, 20)?;
     animation_0.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/MacOSControls.xaml(117,46) Duration (setter chosen at run time)
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSProgressPulseDuration"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::animation::Animation::duration_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 117, 46)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::animation::Animation::duration_property(), "MacOSProgressPulseDuration", 117, 46)?;
     if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::unset_value(animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property());
     } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
@@ -57048,9 +56884,7 @@ fn build_controls_macoscontrols_xaml_deferred_182(
     // Controls/MacOSControls.xaml(104,12) Stretch
     path_0.set_value(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform);
     // Controls/MacOSControls.xaml(107,17) Data (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF136", 107, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.Shapes.Path.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 107, position: 17 }, ::core::option::Option::None)?;
     // Controls/MacOSControls.xaml(108,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarErrorSeverityIconBackground", 108, 17)?;
@@ -57073,9 +56907,7 @@ fn build_controls_macoscontrols_xaml_deferred_182(
     // Controls/MacOSControls.xaml(110,12) VerticalAlignment
     path_1.set_value(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center);
     // Controls/MacOSControls.xaml(115,17) Data (setter chosen at run time)
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13D"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 115, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF13D", 115, 17)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "FerroUI.Controls.Shapes.Path.set_Data", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 115, position: 17 }, ::core::option::Option::None)?;
     // Controls/MacOSControls.xaml(116,17) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarErrorSeverityIconForeground", 116, 17)?;
@@ -57269,9 +57101,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(153,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 153, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 153, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(154,17) Fill
     let path_1 = {
@@ -57332,9 +57162,7 @@ fn build_controls_macoscontrols_xaml_deferred_191(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(181,17) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 181, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 181, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 181, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(182,17) Fill
     let path_1 = {
@@ -57388,9 +57216,7 @@ fn build_controls_macoscontrols_xaml_deferred_193(
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(208,17) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LoopingSelectorItemMargin"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 208, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "LoopingSelectorItemMargin", 208, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 208, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(209,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 209, 17)?;
@@ -57610,9 +57436,7 @@ fn build_controls_macoscontrols_xaml_deferred_202(
     context.set_target_property(::core::option::Option::None);
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 207, 20)?;
     // Controls/MacOSControls.xaml(207,37) Theme (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemWeekDayNameStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 207, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemWeekDayNameStyle", 207, 37)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "FerroUI.StyledElement.set_Theme", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 207, position: 37 }, ::core::option::Option::None)?;
     rt::pop_parent_end_init(&context, &text_block_0, 207, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
@@ -57690,9 +57514,7 @@ fn build_controls_macoscontrols_xaml_deferred_203(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_HeaderButton", 220, 23)?;
     // Controls/MacOSControls.xaml(221,23) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemHeaderNavigationButtonStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemHeaderNavigationButtonStyle", 221, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 221, position: 23 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(222,23) Foreground
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 222, 23)?;
@@ -57714,9 +57536,7 @@ fn build_controls_macoscontrols_xaml_deferred_203(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_3);
     // Controls/MacOSControls.xaml(226,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemNavigationButtonStyle"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 226, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemNavigationButtonStyle", 226, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 226, position: 23 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(227,23) Foreground
     rt::bind_template_binding(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 227, 23)?;
@@ -57746,9 +57566,7 @@ fn build_controls_macoscontrols_xaml_deferred_203(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(232,25) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDB"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 232, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDB", 232, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 232, position: 25 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(233,25) Fill
     let path_1 = {
@@ -57787,9 +57605,7 @@ fn build_controls_macoscontrols_xaml_deferred_203(
     button_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
     // Controls/MacOSControls.xaml(242,23) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemNavigationButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 242, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarItemNavigationButtonStyle", 242, 23)?;
     rt::assign_resource_value(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 242, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(243,23) Foreground
     rt::bind_template_binding(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 243, 23)?;
@@ -57819,9 +57635,7 @@ fn build_controls_macoscontrols_xaml_deferred_203(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(248,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDC"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 248, 25)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDC", 248, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 248, position: 25 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(249,25) Fill
     let path_3 = {
@@ -58600,9 +58414,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_9);
     // Controls/MacOSControls.xaml(166,22) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarDatePickerTextBoxStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 166, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarDatePickerTextBoxStyle", 166, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 166, position: 22 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(167,22) Foreground
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_155)?;
@@ -58629,9 +58441,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
     // Controls/MacOSControls.xaml(178,21) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarDatePickerButtonStyle"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 178, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CalendarDatePickerButtonStyle", 178, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 178, position: 21 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(180,16) Content
     // Controls/MacOSControls.xaml(180,16) Path
@@ -58643,9 +58453,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "CalendarGlyph", 180, 21)?;
     // Controls/MacOSControls.xaml(181,21) Data (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE787"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 181, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE787", 181, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 181, position: 21 }, ::core::option::Option::Some(priority_15))?;
     // Controls/MacOSControls.xaml(182,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CalendarDatePickerCalendarGlyphForeground", 182, 21)?;
@@ -58697,9 +58505,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
     rt::bind_dynamic_resources(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_159)?;
     // Controls/MacOSControls.xaml(196,23) Margin (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 196, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 196, 23)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_3, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 196, position: 23 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(197,18) Child
     // Controls/MacOSControls.xaml(197,18) Calendar
@@ -58890,9 +58696,7 @@ fn build_controls_macoscontrols_xaml_deferred_219(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FlyoutButton", 96, 21)?;
     // Controls/MacOSControls.xaml(97,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutButtonStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 97, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DatePickerFlyoutButtonStyle", 97, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 97, position: 21 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(98,21) Background
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_163)?;
@@ -59074,9 +58878,7 @@ fn build_controls_macoscontrols_xaml_deferred_219(
     rt::name_element(name_scope.as_ref(), &date_picker_presenter_0, &date_picker_presenter_0, "PART_PickerPresenter", 151, 36)?;
     // Controls/MacOSControls.xaml(151,66) Margin (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 151, 66)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 151, 66)?;
     rt::assign_resource_value(date_picker_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 151, position: 66 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &date_picker_presenter_0, 151, 16)?;
     rt::pop_parent_end_init(&context, &popup_0, 146, 14)?;
@@ -59228,9 +59030,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_8);
     // Controls/MacOSControls.xaml(229,31) Template (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 229, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 229, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_0, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 229, position: 31 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(230,20) Content
     // Controls/MacOSControls.xaml(230,20) DateTimePickerPanel
@@ -59261,9 +59061,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_MonthUpButton", 235, 31)?;
     // Controls/MacOSControls.xaml(235,59) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 235, 59)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 235, 59)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 235, position: 59 }, ::core::option::Option::Some(priority_12))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 235, 18)?;
     // Controls/MacOSControls.xaml(236,18) Children
@@ -59277,9 +59075,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_MonthDownButton", 236, 31)?;
     // Controls/MacOSControls.xaml(236,61) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 236, 61)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 236, 61)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 236, position: 61 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 236, 18)?;
     rt::pop_parent_end_init(&context, &grid_2, 226, 16)?;
@@ -59307,9 +59103,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     scroll_viewer_1.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_15);
     // Controls/MacOSControls.xaml(241,31) Template (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 241, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 241, 31)?;
     rt::assign_resource_value(scroll_viewer_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_3, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 241, position: 31 }, ::core::option::Option::Some(priority_16))?;
     // Controls/MacOSControls.xaml(242,20) Content
     // Controls/MacOSControls.xaml(242,20) DateTimePickerPanel
@@ -59340,9 +59134,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_DayUpButton", 247, 31)?;
     // Controls/MacOSControls.xaml(247,57) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 247, 57)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 247, 57)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 247, position: 57 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 247, 18)?;
     // Controls/MacOSControls.xaml(248,18) Children
@@ -59356,9 +59148,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_DayDownButton", 248, 31)?;
     // Controls/MacOSControls.xaml(248,59) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 248, 59)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 248, 59)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 248, position: 59 }, ::core::option::Option::Some(priority_20))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 248, 18)?;
     rt::pop_parent_end_init(&context, &grid_3, 238, 16)?;
@@ -59386,9 +59176,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_22);
     // Controls/MacOSControls.xaml(253,31) Template (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 253, 31)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 253, 31)?;
     rt::assign_resource_value(scroll_viewer_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_6, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 253, position: 31 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(254,20) Content
     // Controls/MacOSControls.xaml(254,20) DateTimePickerPanel
@@ -59419,9 +59207,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_YearUpButton", 259, 31)?;
     // Controls/MacOSControls.xaml(259,58) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 259, 58)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 259, 58)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 259, position: 58 }, ::core::option::Option::Some(priority_26))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 259, 18)?;
     // Controls/MacOSControls.xaml(260,18) Children
@@ -59435,9 +59221,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_YearDownButton", 260, 31)?;
     // Controls/MacOSControls.xaml(260,60) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 260, 60)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 260, 60)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 260, position: 60 }, ::core::option::Option::Some(priority_27))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 260, 18)?;
     rt::pop_parent_end_init(&context, &grid_4, 250, 16)?;
@@ -59544,9 +59328,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_37);
     // Controls/MacOSControls.xaml(285,23) Theme (setter chosen at run time)
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 285, 23)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 285, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 285, position: 23 }, ::core::option::Option::Some(priority_38))?;
     // Controls/MacOSControls.xaml(283,16) FontSize
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
@@ -59565,9 +59347,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     button_0.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_43);
     // Controls/MacOSControls.xaml(291,23) Margin (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterAcceptMargin"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 291, 23)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterAcceptMargin", 291, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_10, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 291, position: 23 }, ::core::option::Option::Some(priority_44))?;
     // Controls/MacOSControls.xaml(283,16) Padding
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -59580,9 +59360,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(294,23) Data (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8FB"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 294, 23)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8FB", 294, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_11, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 294, position: 23 }, ::core::option::Option::Some(priority_46))?;
     // Controls/MacOSControls.xaml(295,23) Fill
     let path_1 = {
@@ -59614,9 +59392,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_49);
     // Controls/MacOSControls.xaml(301,23) Theme (setter chosen at run time)
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_33 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 301, 23)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_33);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 301, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 301, position: 23 }, ::core::option::Option::Some(priority_50))?;
     // Controls/MacOSControls.xaml(299,16) FontSize
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
@@ -59635,9 +59411,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     button_1.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_55);
     // Controls/MacOSControls.xaml(307,23) Margin (setter chosen at run time)
     let priority_56 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 307, 23)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 307, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_13, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 307, position: 23 }, ::core::option::Option::Some(priority_56))?;
     // Controls/MacOSControls.xaml(299,16) Padding
     let priority_57 = ::ferroui_base::data::BindingPriority::Template;
@@ -59650,9 +59424,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(310,23) Data (setter chosen at run time)
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 310, 23)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 310, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_14, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 310, position: 23 }, ::core::option::Option::Some(priority_58))?;
     // Controls/MacOSControls.xaml(311,23) Fill
     let path_3 = {
@@ -59827,9 +59599,7 @@ fn build_controls_macoscontrols_xaml_deferred_229(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FlyoutButton", 93, 21)?;
     // Controls/MacOSControls.xaml(94,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TimePickerFlyoutButtonStyle"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 94, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TimePickerFlyoutButtonStyle", 94, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 94, position: 21 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(95,21) Background
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_171)?;
@@ -60074,9 +59844,7 @@ fn build_controls_macoscontrols_xaml_deferred_229(
     rt::name_element(name_scope.as_ref(), &time_picker_presenter_0, &time_picker_presenter_0, "PART_PickerPresenter", 167, 36)?;
     // Controls/MacOSControls.xaml(167,66) Margin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 167, 66)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 167, 66)?;
     rt::assign_resource_value(time_picker_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 167, position: 66 }, ::core::option::Option::Some(priority_25))?;
     rt::pop_parent_end_init(&context, &time_picker_presenter_0, 167, 16)?;
     rt::pop_parent_end_init(&context, &popup_0, 162, 14)?;
@@ -60222,9 +59990,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_9);
     // Controls/MacOSControls.xaml(245,31) Template (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 245, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 245, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_0, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 245, position: 31 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(246,20) Content
     // Controls/MacOSControls.xaml(246,20) DateTimePickerPanel
@@ -60255,9 +60021,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_HourUpButton", 251, 31)?;
     // Controls/MacOSControls.xaml(251,58) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 251, 58)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 251, 58)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 251, position: 58 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 251, 18)?;
     // Controls/MacOSControls.xaml(252,18) Children
@@ -60271,9 +60035,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_HourDownButton", 252, 31)?;
     // Controls/MacOSControls.xaml(252,60) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 252, 60)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 252, 60)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 252, position: 60 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 252, 18)?;
     rt::pop_parent_end_init(&context, &grid_2, 242, 16)?;
@@ -60327,9 +60089,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     scroll_viewer_1.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_20);
     // Controls/MacOSControls.xaml(263,31) Template (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 263, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 263, 31)?;
     rt::assign_resource_value(scroll_viewer_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_3, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 263, position: 31 }, ::core::option::Option::Some(priority_21))?;
     // Controls/MacOSControls.xaml(264,20) Content
     // Controls/MacOSControls.xaml(264,20) DateTimePickerPanel
@@ -60360,9 +60120,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_MinuteUpButton", 269, 31)?;
     // Controls/MacOSControls.xaml(269,60) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 269, 60)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 269, 60)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 269, position: 60 }, ::core::option::Option::Some(priority_24))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 269, 18)?;
     // Controls/MacOSControls.xaml(270,18) Children
@@ -60376,9 +60134,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_MinuteDownButton", 270, 31)?;
     // Controls/MacOSControls.xaml(270,62) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_19 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 270, 62)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 270, 62)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 270, position: 62 }, ::core::option::Option::Some(priority_25))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 270, 18)?;
     rt::pop_parent_end_init(&context, &grid_3, 260, 16)?;
@@ -60432,9 +60188,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_31);
     // Controls/MacOSControls.xaml(281,31) Template (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 281, 31)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 281, 31)?;
     rt::assign_resource_value(scroll_viewer_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_6, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 281, position: 31 }, ::core::option::Option::Some(priority_32))?;
     // Controls/MacOSControls.xaml(282,20) Content
     // Controls/MacOSControls.xaml(282,20) DateTimePickerPanel
@@ -60465,9 +60219,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_SecondUpButton", 287, 31)?;
     // Controls/MacOSControls.xaml(287,60) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 60)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 287, 60)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 60 }, ::core::option::Option::Some(priority_35))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 287, 18)?;
     // Controls/MacOSControls.xaml(288,18) Children
@@ -60481,9 +60233,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_SecondDownButton", 288, 31)?;
     // Controls/MacOSControls.xaml(288,62) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 288, 62)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 288, 62)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 288, position: 62 }, ::core::option::Option::Some(priority_36))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 288, 18)?;
     rt::pop_parent_end_init(&context, &grid_4, 278, 16)?;
@@ -60537,9 +60287,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     scroll_viewer_3.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_42);
     // Controls/MacOSControls.xaml(299,31) Template (setter chosen at run time)
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 299, 31)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 299, 31)?;
     rt::assign_resource_value(scroll_viewer_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_9, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 299, position: 31 }, ::core::option::Option::Some(priority_43))?;
     // Controls/MacOSControls.xaml(300,20) Content
     // Controls/MacOSControls.xaml(300,20) DateTimePickerPanel
@@ -60570,9 +60318,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_6, &repeat_button_6, "PART_PeriodUpButton", 305, 31)?;
     // Controls/MacOSControls.xaml(305,60) Theme (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 305, 60)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorUpButtonStyle", 305, 60)?;
     rt::assign_resource_value(repeat_button_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 305, position: 60 }, ::core::option::Option::Some(priority_46))?;
     rt::pop_parent_end_init(&context, &repeat_button_6, 305, 18)?;
     // Controls/MacOSControls.xaml(306,18) Children
@@ -60586,9 +60332,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::name_element(name_scope.as_ref(), &repeat_button_7, &repeat_button_7, "PART_PeriodDownButton", 306, 31)?;
     // Controls/MacOSControls.xaml(306,62) Theme (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 306, 62)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerLoopingSelectorDownButtonStyle", 306, 62)?;
     rt::assign_resource_value(repeat_button_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_11, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 306, position: 62 }, ::core::option::Option::Some(priority_47))?;
     rt::pop_parent_end_init(&context, &repeat_button_7, 306, 18)?;
     rt::pop_parent_end_init(&context, &grid_5, 296, 16)?;
@@ -60649,9 +60393,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_51);
     // Controls/MacOSControls.xaml(319,23) Theme (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 319, 23)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 319, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 319, position: 23 }, ::core::option::Option::Some(priority_52))?;
     // Controls/MacOSControls.xaml(317,16) FontSize
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
@@ -60670,9 +60412,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     button_0.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_57);
     // Controls/MacOSControls.xaml(325,23) Margin (setter chosen at run time)
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 325, 23)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 325, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_13, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 325, position: 23 }, ::core::option::Option::Some(priority_58))?;
     // Controls/MacOSControls.xaml(317,16) Padding
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
@@ -60685,9 +60425,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(328,23) Data (setter chosen at run time)
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8FB"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 328, 23)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8FB", 328, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_14, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 328, position: 23 }, ::core::option::Option::Some(priority_60))?;
     // Controls/MacOSControls.xaml(329,23) Fill
     let path_1 = {
@@ -60719,9 +60457,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_63);
     // Controls/MacOSControls.xaml(335,23) Theme (setter chosen at run time)
     let priority_64 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerFlyoutButtonStyle"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 335, 23)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DateTimePickerFlyoutButtonStyle", 335, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_15, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 335, position: 23 }, ::core::option::Option::Some(priority_64))?;
     // Controls/MacOSControls.xaml(333,16) FontSize
     let priority_65 = ::ferroui_base::data::BindingPriority::Template;
@@ -60740,9 +60476,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     button_1.set_value_with_priority(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_69);
     // Controls/MacOSControls.xaml(341,23) Margin (setter chosen at run time)
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutPresenterDismissMargin"));
-    let provided_40 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 341, 23)?;
-    let value_16: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_40);
+    let value_16: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "DatePickerFlyoutPresenterDismissMargin", 341, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_16, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 341, position: 23 }, ::core::option::Option::Some(priority_70))?;
     // Controls/MacOSControls.xaml(333,16) Padding
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
@@ -60755,9 +60489,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(344,23) Data (setter chosen at run time)
     let priority_72 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_41 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 344, 23)?;
-    let value_17: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_41);
+    let value_17: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 344, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_17, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 344, position: 23 }, ::core::option::Option::Some(priority_72))?;
     // Controls/MacOSControls.xaml(345,23) Fill
     let path_3 = {
@@ -60963,9 +60695,7 @@ fn build_controls_macoscontrols_xaml_deferred_242(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 67, 17)?;
     // Controls/MacOSControls.xaml(67,34) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 34)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 67, 34)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 67, position: 34 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(67,76) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 67, 76)?;
@@ -61016,9 +60746,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 102, 17)?;
     // Controls/MacOSControls.xaml(102,34) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 34)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 102, 34)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 102, position: 34 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(102,76) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 102, 76)?;
@@ -61196,9 +60924,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "PART_TitleText", 150, 28)?;
     // Controls/MacOSControls.xaml(150,52) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 150, 52)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 150, position: 52 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(150,99) Text
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_property()), 150, 99)?;
@@ -61258,9 +60984,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_CloseButton", 153, 25)?;
     // Controls/MacOSControls.xaml(153,51) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 51)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowDrawnDecorationsCloseButton", 153, 51)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 153, position: 51 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(153,18) ElementRole
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
@@ -61273,9 +60997,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(154,25) Data (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficCloseGeometry"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 154, 25)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficCloseGeometry", 154, 25)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 154, position: 25 }, ::core::option::Option::Some(priority_19))?;
     // Controls/MacOSControls.xaml(154,75) Fill
     let path_1 = {
@@ -61307,9 +61029,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_1, &button_1, "PART_MinimizeButton", 156, 25)?;
     // Controls/MacOSControls.xaml(156,54) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSMinimizeCaptionButton"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 54)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MacOSMinimizeCaptionButton", 156, 54)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 156, position: 54 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(156,18) ElementRole
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
@@ -61322,9 +61042,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(157,25) Data (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficMinimizeGeometry"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 25)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficMinimizeGeometry", 157, 25)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 157, position: 25 }, ::core::option::Option::Some(priority_25))?;
     // Controls/MacOSControls.xaml(157,78) Fill
     let path_3 = {
@@ -61356,9 +61074,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_2, &button_2, "PART_FullScreenButton", 159, 25)?;
     // Controls/MacOSControls.xaml(159,56) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 56)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MacOSZoomCaptionButton", 159, 56)?;
     rt::assign_resource_value(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 159, position: 56 }, ::core::option::Option::Some(priority_29))?;
     // Controls/MacOSControls.xaml(159,18) ElementRole
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
@@ -61371,9 +61087,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::push_parent(&context, &path_4);
     // Controls/MacOSControls.xaml(160,25) Data (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficZoomGeometry"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 25)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficZoomGeometry", 160, 25)?;
     rt::assign_resource_value(path_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_7, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 160, position: 25 }, ::core::option::Option::Some(priority_31))?;
     // Controls/MacOSControls.xaml(160,74) Fill
     let path_5 = {
@@ -61405,9 +61119,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_3, &button_3, "PART_MaximizeButton", 162, 25)?;
     // Controls/MacOSControls.xaml(162,54) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
-    let provided_26 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 162, 54)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_26);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MacOSZoomCaptionButton", 162, 54)?;
     rt::assign_resource_value(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 162, position: 54 }, ::core::option::Option::Some(priority_35))?;
     // Controls/MacOSControls.xaml(162,18) ElementRole
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
@@ -61422,9 +61134,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &path_6, &path_6, "RestoreButtonPath", 163, 25)?;
     // Controls/MacOSControls.xaml(163,52) Data (setter chosen at run time)
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficZoomGeometry"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 163, 52)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficZoomGeometry", 163, 52)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 163, position: 52 }, ::core::option::Option::Some(priority_37))?;
     // Controls/MacOSControls.xaml(163,101) Fill
     let path_7 = {
@@ -61474,9 +61184,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "PART_PopoverTitleText", 170, 26)?;
     // Controls/MacOSControls.xaml(170,57) Theme (setter chosen at run time)
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 170, 57)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 170, 57)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 170, position: 57 }, ::core::option::Option::Some(priority_43))?;
     // Controls/MacOSControls.xaml(170,104) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_property()), 170, 104)?;
@@ -61528,9 +61236,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_4, &button_4, "PART_PopoverCloseButton", 172, 25)?;
     // Controls/MacOSControls.xaml(172,58) Theme (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 172, 58)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "WindowDrawnDecorationsCloseButton", 172, 58)?;
     rt::assign_resource_value(button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 172, position: 58 }, ::core::option::Option::Some(priority_52))?;
     // Controls/MacOSControls.xaml(172,18) ElementRole
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
@@ -61543,9 +61249,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::push_parent(&context, &path_8);
     // Controls/MacOSControls.xaml(173,25) Data (setter chosen at run time)
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficCloseGeometry"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 173, 25)?;
-    let value_13: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_13: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficCloseGeometry", 173, 25)?;
     rt::assign_resource_value(path_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_13, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 173, position: 25 }, ::core::option::Option::Some(priority_54))?;
     // Controls/MacOSControls.xaml(173,75) Fill
     let path_9 = {
@@ -61577,9 +61281,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::name_element(name_scope.as_ref(), &button_5, &button_5, "PART_PopoverFullScreenButton", 175, 25)?;
     // Controls/MacOSControls.xaml(175,63) Theme (setter chosen at run time)
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 175, 63)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MacOSZoomCaptionButton", 175, 63)?;
     rt::assign_resource_value(button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 175, position: 63 }, ::core::option::Option::Some(priority_58))?;
     // Controls/MacOSControls.xaml(175,18) ElementRole
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
@@ -61592,9 +61294,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     rt::push_parent(&context, &path_10);
     // Controls/MacOSControls.xaml(176,25) Data (setter chosen at run time)
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficRestoreGeometry"));
-    let provided_40 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 25)?;
-    let value_15: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_40);
+    let value_15: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "MacOSTrafficRestoreGeometry", 176, 25)?;
     rt::assign_resource_value(path_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_15, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 176, position: 25 }, ::core::option::Option::Some(priority_60))?;
     // Controls/MacOSControls.xaml(176,77) Fill
     let path_11 = {
@@ -61957,9 +61657,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     rt::bind_template_bindings(border_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_189)?;
     // Controls/MacOSControls.xaml(124,19) Padding (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarContentRootPadding"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Decorator::padding_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 124, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Decorator::padding_property(), "InfoBarContentRootPadding", 124, 19)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), value_0, &rt::ResourceChoice { name: "Padding", member: "Decorator.Padding", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 124, position: 19 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(125,14) Child
     // Controls/MacOSControls.xaml(125,14) Grid
@@ -61991,24 +61689,18 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     rt::name_element(name_scope.as_ref(), &panel_0, &panel_0, "StandardIconArea", 126, 22)?;
     // Controls/MacOSControls.xaml(127,22) Width (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 127, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "InfoBarIconFontSize", 127, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_1, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 127, position: 22 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(128,22) Height (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 128, 22)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "InfoBarIconFontSize", 128, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_2, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 128, position: 22 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(126,16) VerticalAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_7);
     // Controls/MacOSControls.xaml(130,22) Margin (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconMargin"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 130, 22)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarIconMargin", 130, 22)?;
     rt::assign_resource_value(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_3, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 130, position: 22 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(131,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
@@ -62021,9 +61713,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "IconBackground", 131, 23)?;
     // Controls/MacOSControls.xaml(132,23) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 132, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF136", 132, 23)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 132, position: 23 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(133,23) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarInformationalSeverityIconBackground", 133, 23)?;
@@ -62051,9 +61741,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "StandardIcon", 138, 23)?;
     // Controls/MacOSControls.xaml(139,23) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13F"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 139, 23)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryF13F", 139, 23)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 139, position: 23 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(140,23) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "InfoBarInformationalSeverityIconForeground", 140, 23)?;
@@ -62085,9 +61773,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_19);
     // Controls/MacOSControls.xaml(148,33) Margin (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarPanelMargin"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 33)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "InfoBarPanelMargin", 148, 33)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_6, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 148, position: 33 }, ::core::option::Option::Some(priority_20))?;
     // Controls/MacOSControls.xaml(149,33) Content (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
@@ -62116,9 +61802,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_22);
     // Controls/MacOSControls.xaml(155,23) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarCloseButtonStyle"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 155, 23)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "InfoBarCloseButtonStyle", 155, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 155, position: 23 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(153,16) CloseOnClick
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
@@ -62131,9 +61815,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(157,23) Data (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE711"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 23)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE711", 157, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 157, position: 23 }, ::core::option::Option::Some(priority_25))?;
     // Controls/MacOSControls.xaml(158,23) Fill
     let path_3 = {
@@ -62494,9 +62176,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "PART_ScrollViewer", 155, 25)?;
     // Controls/MacOSControls.xaml(156,25) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TableViewScrollViewerStyle", 156, 25)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 156, position: 25 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(157,25) VerticalSnapPointsType
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_196)?;
@@ -62635,9 +62315,7 @@ fn build_controls_macoscontrols_xaml_deferred_260(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "PART_Resizer", 99, 18)?;
     // Controls/MacOSControls.xaml(100,18) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerStyle"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 100, 18)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TableViewColumnHeaderResizerStyle", 100, 18)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 100, position: 18 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(101,18) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "TableViewResizeGripperWidth", 101, 18)?;
@@ -62896,15 +62574,11 @@ fn build_controls_macoscontrols_xaml_deferred_267(
     list_box_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 160.0_f64, priority_2);
     // Controls/MacOSControls.xaml(237,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 237, 22)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ManagedFileChooserListViewStyle", 237, 22)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 237, position: 22 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(238,22) ItemContainerTheme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewItemStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 238, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "ManagedFileChooserListViewItemStyle", 238, 22)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 238, position: 22 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(239,22) ItemsSource
     let path_0 = {
@@ -62991,9 +62665,7 @@ fn build_controls_macoscontrols_xaml_deferred_267(
     rt::push_parent(&context, &path_3);
     // Controls/MacOSControls.xaml(280,23) Data (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE74A"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 280, 23)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE74A", 280, 23)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 280, position: 23 }, ::core::option::Option::Some(priority_11))?;
     // Controls/MacOSControls.xaml(281,23) Fill
     let path_4 = {
@@ -63074,9 +62746,7 @@ fn build_controls_macoscontrols_xaml_deferred_267(
     rt::push_parent(&context, &path_8);
     // Controls/MacOSControls.xaml(291,23) Data (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72C"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 291, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72C", 291, 23)?;
     rt::assign_resource_value(path_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 291, position: 23 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(292,23) Fill
     let path_9 = {
@@ -63570,15 +63240,11 @@ fn build_controls_macoscontrols_xaml_deferred_267(
     list_box_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_69);
     // Controls/MacOSControls.xaml(371,24) Theme (setter chosen at run time)
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 371, 24)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ManagedFileChooserListViewStyle", 371, 24)?;
     rt::assign_resource_value(list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 371, position: 24 }, ::core::option::Option::Some(priority_70))?;
     // Controls/MacOSControls.xaml(372,24) ItemContainerTheme (setter chosen at run time)
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ManagedFileChooserListViewItemStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 372, 24)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "ManagedFileChooserListViewItemStyle", 372, 24)?;
     rt::assign_resource_value(list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_10, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 372, position: 24 }, ::core::option::Option::Some(priority_71))?;
     // Controls/MacOSControls.xaml(373,24) ItemsSource
     let path_18 = {
@@ -63663,9 +63329,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(246,29) Data (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8B7"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 246, 29)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8B7", 246, 29)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 246, position: 29 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(247,29) Fill
     let path_1 = {
@@ -63710,9 +63374,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     rt::push_parent(&context, &path_3);
     // Controls/MacOSControls.xaml(252,29) Data (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7C3"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 252, 29)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE7C3", 252, 29)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 252, position: 29 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(253,29) Fill
     let path_4 = {
@@ -63757,9 +63419,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     rt::push_parent(&context, &path_6);
     // Controls/MacOSControls.xaml(258,29) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDA2"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 258, 29)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDA2", 258, 29)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 258, position: 29 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(259,29) Fill
     let path_7 = {
@@ -63971,9 +63631,7 @@ fn build_controls_macoscontrols_xaml_deferred_270(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(391,31) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE8B7"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 391, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE8B7", 391, 31)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 391, position: 31 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(392,31) Fill
     let path_1 = {
@@ -64018,9 +63676,7 @@ fn build_controls_macoscontrols_xaml_deferred_270(
     rt::push_parent(&context, &path_3);
     // Controls/MacOSControls.xaml(397,31) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE7C3"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 397, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE7C3", 397, 31)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 397, position: 31 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(398,31) Fill
     let path_4 = {
@@ -64065,9 +63721,7 @@ fn build_controls_macoscontrols_xaml_deferred_270(
     rt::push_parent(&context, &path_6);
     // Controls/MacOSControls.xaml(403,31) Data (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDA2"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 403, 31)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDA2", 403, 31)?;
     rt::assign_resource_value(path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 403, position: 31 }, ::core::option::Option::Some(priority_22))?;
     // Controls/MacOSControls.xaml(404,31) Fill
     let path_7 = {
@@ -64448,15 +64102,11 @@ fn build_controls_macoscontrols_xaml_deferred_272(
     rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "Content", 467, 28)?;
     // Controls/MacOSControls.xaml(468,28) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlContentThemeFontSize"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_size_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 468, 28)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_size_property(), "ControlContentThemeFontSize", 468, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_size_property(), value_0, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 468, position: 28 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(469,28) FontFamily (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ContentControlThemeFontFamily"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::font_family_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 469, 28)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::font_family_property(), "ContentControlThemeFontFamily", 469, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::font_family_property(), value_1, &rt::ResourceChoice { name: "FontFamily", member: "TextElement.FontFamily", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::media::FontFamily as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 469, position: 28 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(470,28) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 470, 28)?;
@@ -64550,9 +64200,7 @@ fn build_controls_macoscontrols_xaml_deferred_272(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_12);
     // Controls/MacOSControls.xaml(494,27) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AccentButtonStyle"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 494, 27)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AccentButtonStyle", 494, 27)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 494, position: 27 }, ::core::option::Option::Some(priority_13))?;
     // Controls/MacOSControls.xaml(492,20) HorizontalAlignment
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -65124,9 +64772,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "ScrollDecreaseButton", 150, 29)?;
     // Controls/MacOSControls.xaml(150,59) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 59)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabViewScrollButtonStyle", 150, 59)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 150, position: 59 }, ::core::option::Option::Some(priority_13))?;
     // Controls/MacOSControls.xaml(150,16) IsTabStop
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -65226,9 +64872,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     rt::push_parent(&context, &path_9);
     // Controls/MacOSControls.xaml(159,23) Data (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDD9"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 23)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDD9", 159, 23)?;
     rt::assign_resource_value(path_9.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 159, position: 23 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(159,65) Fill
     let path_10 = {
@@ -65243,9 +64887,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     path_9.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_18);
     // Controls/MacOSControls.xaml(159,133) Height (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewItemScrollButonFontSize"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 133)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "TabViewItemScrollButonFontSize", 159, 133)?;
     rt::assign_resource_value(path_9.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_4, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 159, position: 133 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &path_9, 159, 18)?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 150, 16)?;
@@ -65416,9 +65058,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "ScrollIncreaseButton", 176, 29)?;
     // Controls/MacOSControls.xaml(176,59) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 59)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabViewScrollButtonStyle", 176, 59)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 176, position: 59 }, ::core::option::Option::Some(priority_24))?;
     // Controls/MacOSControls.xaml(176,16) IsTabStop
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
@@ -65518,9 +65158,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     rt::push_parent(&context, &path_25);
     // Controls/MacOSControls.xaml(185,23) Data (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEDDA"));
-    let provided_36 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 185, 23)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_36);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEDDA", 185, 23)?;
     rt::assign_resource_value(path_25.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_8, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 185, position: 23 }, ::core::option::Option::Some(priority_28))?;
     // Controls/MacOSControls.xaml(185,65) Fill
     let path_26 = {
@@ -65535,9 +65173,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     path_25.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_29);
     // Controls/MacOSControls.xaml(185,133) Height (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewItemScrollButonFontSize"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 185, 133)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "TabViewItemScrollButonFontSize", 185, 133)?;
     rt::assign_resource_value(path_25.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_9, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 185, position: 133 }, ::core::option::Option::Some(priority_30))?;
     rt::pop_parent_end_init(&context, &path_25, 185, 18)?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 176, 16)?;
@@ -65679,9 +65315,7 @@ fn build_controls_macoscontrols_xaml_deferred_292(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "ScrollViewer", 214, 31)?;
     // Controls/MacOSControls.xaml(214,53) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabScrollViewerStyle"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 214, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabScrollViewerStyle", 214, 53)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 214, position: 53 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(214,18) HorizontalScrollBarVisibility
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -67084,9 +66718,7 @@ fn build_controls_macoscontrols_xaml_deferred_307(
     rt::name_element(name_scope.as_ref(), &border_0, &border_0, "LayoutRoot", 158, 17)?;
     // Controls/MacOSControls.xaml(159,17) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemButtonMargin"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 159, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 159, position: 17 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(160,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_244)?;
@@ -67326,15 +66958,11 @@ fn build_controls_macoscontrols_xaml_deferred_309(
     rt::name_element(name_scope.as_ref(), &tab_control_0, &tab_control_0, "PART_TabControl", 276, 23)?;
     // Controls/MacOSControls.xaml(277,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 277, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabbedPageTabControlTheme", 277, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 277, position: 23 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(278,23) ItemContainerTheme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabItemTheme"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 278, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "TabbedPageTabItemTheme", 278, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 278, position: 23 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(276,12) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -67417,9 +67045,7 @@ fn build_controls_macoscontrols_xaml_deferred_312(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 82, 19)?;
     // Controls/MacOSControls.xaml(83,19) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 83, 19)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 83, position: 19 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(84,19) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 84, 19)?;
@@ -67664,9 +67290,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_14);
     // Controls/MacOSControls.xaml(199,23) Theme (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 199, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 199, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 199, position: 23 }, ::core::option::Option::Some(priority_15))?;
     // Controls/MacOSControls.xaml(200,23) IsVisible
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::NavigationPage::is_back_button_effectively_visible_property()), 200, 23)?;
@@ -67693,9 +67317,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "PART_BackButtonDefaultIcon", 204, 25)?;
     // Controls/MacOSControls.xaml(205,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 205, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE72B", 205, 25)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 205, position: 25 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(206,25) Fill
     let path_2 = {
@@ -67752,9 +67374,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     content_presenter_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_26);
     // Controls/MacOSControls.xaml(220,33) FontSize (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SubtitleTextBlockFontSize"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::font_size_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 220, 33)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::presenters::ContentPresenter::font_size_property(), "SubtitleTextBlockFontSize", 220, 33)?;
     rt::assign_resource_value(content_presenter_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::font_size_property(), value_3, &rt::ResourceChoice { name: "FontSize", member: "TextElement.FontSize", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 220, position: 33 }, ::core::option::Option::Some(priority_27))?;
     // Controls/MacOSControls.xaml(218,16) FontWeight
     let value_4 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 221, 33)?;
@@ -68014,9 +67634,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Icon", 123, 21)?;
     // Controls/MacOSControls.xaml(124,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 124, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 124, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 124, position: 21 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(123,16) Width
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -68128,9 +67746,7 @@ fn build_controls_macoscontrols_xaml_deferred_321(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Icon", 200, 21)?;
     // Controls/MacOSControls.xaml(201,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 201, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE700", 201, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 201, position: 21 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(200,16) Width
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -68261,15 +67877,11 @@ fn build_controls_macoscontrols_xaml_deferred_323(
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/MacOSControls.xaml(255,26) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 255, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 255, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 255, position: 26 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(256,26) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 256, 26)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 256, 26)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 256, position: 26 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 250, 16)?;
     rt::pop_parent_end_init(&context, &panel_1, 249, 14)?;
@@ -68476,9 +68088,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_1);
     // Controls/MacOSControls.xaml(392,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 392, 29)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 392, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 392, position: 29 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(393,29) Margin
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewButtonHolderGridMargin", 393, 29)?;
@@ -68699,9 +68309,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
     rt::name_element(name_scope.as_ref(), &toggle_button_1, &toggle_button_1, "PART_PaneButton", 445, 35)?;
     // Controls/MacOSControls.xaml(446,35) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 446, 35)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_30);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 446, 35)?;
     rt::assign_resource_value(toggle_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 446, position: 35 }, ::core::option::Option::Some(priority_26))?;
     // Controls/MacOSControls.xaml(447,35) IsChecked
     let path_2 = {
@@ -68750,9 +68358,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
     rt::name_element(name_scope.as_ref(), &content_control_0, &content_control_0, "PART_TitlePresenter", 453, 37)?;
     // Controls/MacOSControls.xaml(454,37) Theme (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 454, 37)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 454, 37)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 454, position: 37 }, ::core::option::Option::Some(priority_31))?;
     // Controls/MacOSControls.xaml(455,37) Content (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
@@ -68822,9 +68428,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
     rt::name_element(name_scope.as_ref(), &toggle_button_2, &toggle_button_2, "PART_BottomPaneButton", 469, 35)?;
     // Controls/MacOSControls.xaml(470,35) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
-    let provided_39 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 470, 35)?;
-    let value_12: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_39);
+    let value_12: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DrawerPagePaneToggleButton", 470, 35)?;
     rt::assign_resource_value(toggle_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_12, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 470, position: 35 }, ::core::option::Option::Some(priority_39))?;
     // Controls/MacOSControls.xaml(471,35) IsChecked
     let path_3 = {
@@ -68873,9 +68477,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
     rt::name_element(name_scope.as_ref(), &content_control_1, &content_control_1, "PART_BottomTitlePresenter", 477, 37)?;
     // Controls/MacOSControls.xaml(478,37) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_43 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 478, 37)?;
-    let value_14: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_43);
+    let value_14: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 478, 37)?;
     rt::assign_resource_value(content_control_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_14, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 478, position: 37 }, ::core::option::Option::Some(priority_44))?;
     // Controls/MacOSControls.xaml(479,37) Content (setter chosen at run time)
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
@@ -69428,9 +69030,7 @@ fn build_controls_macoscontrols_xaml_deferred_340(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "OverflowCheckGlyph", 208, 19)?;
     // Controls/MacOSControls.xaml(208,47) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 208, 47)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 208, 47)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 208, position: 47 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(208,89) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "AppBarToggleButtonCheckGlyphForeground", 208, 89)?;
@@ -69631,21 +69231,15 @@ fn build_controls_macoscontrols_xaml_deferred_344(
     rt::name_element(name_scope.as_ref(), &rectangle_0, &rectangle_0, "SeparatorRectangle", 513, 22)?;
     // Controls/MacOSControls.xaml(513,50) RadiusX (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 513, 50)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "AppBarSeparatorCornerRadius", 513, 50)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 513, position: 50 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(513,105) RadiusY (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 513, 105)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "AppBarSeparatorCornerRadius", 513, 105)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 513, position: 105 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(513,160) Width (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorWidth"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 513, 160)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "AppBarSeparatorWidth", 513, 160)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_2, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 513, position: 160 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(513,12) VerticalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -69719,9 +69313,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     rt::bind_template_bindings(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_286)?;
     // Controls/MacOSControls.xaml(551,409) Margin (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarEllipsisButtonInnerBorderMargin"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 551, 409)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "AppBarEllipsisButtonInnerBorderMargin", 551, 409)?;
     rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_1, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 551, position: 409 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(551,12) Padding
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -69879,9 +69471,7 @@ fn build_controls_macoscontrols_xaml_deferred_351(
     column_definition_1.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_4);
     // Controls/MacOSControls.xaml(618,50) MinWidth (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarMoreButtonColumnMinWidth"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ColumnDefinition::min_width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 618, 50)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ColumnDefinition::min_width_property(), "AppBarMoreButtonColumnMinWidth", 618, 50)?;
     rt::assign_resource_value(column_definition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ColumnDefinition::min_width_property(), value_0, &rt::ResourceChoice { name: "MinWidth", member: "ColumnDefinition.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 618, position: 50 }, ::core::option::Option::Some(priority_5))?;
     context.pop_parent();
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, ::core::clone::Clone::clone(&column_definition_1));
@@ -69988,9 +69578,7 @@ fn build_controls_macoscontrols_xaml_deferred_351(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_15);
     // Controls/MacOSControls.xaml(630,70) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("EllipsisButton"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 630, 70)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "EllipsisButton", 630, 70)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 630, position: 70 }, ::core::option::Option::Some(priority_16))?;
     // Controls/MacOSControls.xaml(630,110) Foreground
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 630, 110)?;
@@ -70011,9 +69599,7 @@ fn build_controls_macoscontrols_xaml_deferred_351(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "EllipsisIcon", 631, 25)?;
     // Controls/MacOSControls.xaml(631,47) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE712"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 631, 47)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE712", 631, 47)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_3, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 631, position: 47 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(631,89) Fill
     let path_2 = {
@@ -70129,9 +69715,7 @@ fn build_controls_macoscontrols_xaml_deferred_351(
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 639, 65)?;
     // Controls/MacOSControls.xaml(639,111) Margin (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 639, 111)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 639, 111)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_4, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 639, position: 111 }, ::core::option::Option::Some(priority_32))?;
     // Controls/MacOSControls.xaml(639,161) CornerRadius
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 639, 161)?;
@@ -70145,9 +69729,7 @@ fn build_controls_macoscontrols_xaml_deferred_351(
     rt::name_element(name_scope.as_ref(), &items_control_1, &items_control_1, "PART_OverflowPresenter", 640, 29)?;
     // Controls/MacOSControls.xaml(640,61) Theme (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultCommandBarOverflowPresenterStyle"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 640, 61)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "DefaultCommandBarOverflowPresenterStyle", 640, 61)?;
     rt::assign_resource_value(items_control_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 640, position: 61 }, ::core::option::Option::Some(priority_33))?;
     // Controls/MacOSControls.xaml(640,16) IsTabStop
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
@@ -70347,9 +69929,7 @@ fn build_controls_macoscontrols_xaml_deferred_357(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "ChevronIcon", 73, 21)?;
     // Controls/MacOSControls.xaml(74,21) Data (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 21)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE96E", 74, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 74, position: 21 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(75,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DropDownButtonForegroundSecondary", 75, 21)?;
@@ -70712,9 +70292,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
     // Controls/MacOSControls.xaml(127,21) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonInnerButtonStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 127, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonInnerButtonStyle", 127, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 127, position: 21 }, ::core::option::Option::Some(priority_11))?;
     // Controls/MacOSControls.xaml(128,21) Foreground
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_299)?;
@@ -70776,9 +70354,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_19);
     // Controls/MacOSControls.xaml(148,21) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonInnerButtonStyle"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonInnerButtonStyle", 148, 21)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 148, position: 21 }, ::core::option::Option::Some(priority_20))?;
     // Controls/MacOSControls.xaml(149,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "SplitButtonForegroundSecondary", 149, 21)?;
@@ -70837,9 +70413,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(165,23) Data (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 165, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE96E", 165, 23)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 165, position: 23 }, ::core::option::Option::Some(priority_33))?;
     // Controls/MacOSControls.xaml(166,23) Fill
     let path_3 = {
@@ -71174,9 +70748,7 @@ fn build_controls_macoscontrols_xaml_deferred_375(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
     // Controls/MacOSControls.xaml(432,21) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonCommandBarInnerButtonStyle"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 432, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonCommandBarInnerButtonStyle", 432, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 432, position: 21 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(433,21) Foreground
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_308)?;
@@ -71236,9 +70808,7 @@ fn build_controls_macoscontrols_xaml_deferred_375(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
     // Controls/MacOSControls.xaml(453,21) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SplitButtonCommandBarInnerButtonStyle"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 453, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SplitButtonCommandBarInnerButtonStyle", 453, 21)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 453, position: 21 }, ::core::option::Option::Some(priority_13))?;
     // Controls/MacOSControls.xaml(454,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "AppBarButtonForeground", 454, 21)?;
@@ -71276,9 +70846,7 @@ fn build_controls_macoscontrols_xaml_deferred_375(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(466,21) Data (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE972"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 466, 21)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE972", 466, 21)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 466, position: 21 }, ::core::option::Option::Some(priority_22))?;
     // Controls/MacOSControls.xaml(467,21) Fill
     let path_3 = {
@@ -72232,9 +71800,7 @@ fn build_controls_macoscontrols_xaml_deferred_390(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 194, 37)?;
     // Controls/MacOSControls.xaml(195,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderHorizontalDecreaseButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 195, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderHorizontalDecreaseButtonStyle", 195, 37)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 195, position: 37 }, ::core::option::Option::Some(priority_22))?;
     // Controls/MacOSControls.xaml(196,37) Background
     rt::bind_template_bindings(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_325)?;
@@ -72253,9 +71819,7 @@ fn build_controls_macoscontrols_xaml_deferred_390(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 201, 37)?;
     // Controls/MacOSControls.xaml(202,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 202, 37)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderIncreaseButtonStyle", 202, 37)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 202, position: 37 }, ::core::option::Option::Some(priority_25))?;
     // Controls/MacOSControls.xaml(201,24) Focusable
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -72271,9 +71835,7 @@ fn build_controls_macoscontrols_xaml_deferred_390(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "HorizontalThumb", 205, 28)?;
     // Controls/MacOSControls.xaml(206,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 206, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderThumbStyle", 206, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 206, position: 28 }, ::core::option::Option::Some(priority_27))?;
     // Controls/MacOSControls.xaml(207,28) DataContext (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
@@ -72560,9 +72122,7 @@ fn build_controls_macoscontrols_xaml_deferred_391(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 291, 37)?;
     // Controls/MacOSControls.xaml(292,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderVerticalDecreaseButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 292, 37)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderVerticalDecreaseButtonStyle", 292, 37)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 292, position: 37 }, ::core::option::Option::Some(priority_22))?;
     // Controls/MacOSControls.xaml(293,37) Background
     rt::bind_template_bindings(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_332)?;
@@ -72581,9 +72141,7 @@ fn build_controls_macoscontrols_xaml_deferred_391(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 298, 37)?;
     // Controls/MacOSControls.xaml(299,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
-    let provided_34 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 299, 37)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_34);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderIncreaseButtonStyle", 299, 37)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 299, position: 37 }, ::core::option::Option::Some(priority_25))?;
     // Controls/MacOSControls.xaml(298,24) Focusable
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -72599,9 +72157,7 @@ fn build_controls_macoscontrols_xaml_deferred_391(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "VerticalThumb", 302, 28)?;
     // Controls/MacOSControls.xaml(303,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 303, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderThumbStyle", 303, 28)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 303, position: 28 }, ::core::option::Option::Some(priority_27))?;
     // Controls/MacOSControls.xaml(304,28) DataContext (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
@@ -72981,9 +72537,7 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_22);
     // Controls/MacOSControls.xaml(178,19) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxDeleteButtonStyle"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 178, 19)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TextBoxDeleteButtonStyle", 178, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 178, position: 19 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(179,19) Command
     let path_2 = {
@@ -73050,15 +72604,11 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     path_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_33);
     // Controls/MacOSControls.xaml(198,17) Margin (setter chosen at run time)
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupIndicatorMargin"));
-    let provided_53 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 198, 17)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_53);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "NumberBoxPopupIndicatorMargin", 198, 17)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_9, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 198, position: 17 }, ::core::option::Option::Some(priority_34))?;
     // Controls/MacOSControls.xaml(199,17) Data (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEC8F"));
-    let provided_54 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 199, 17)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_54);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEC8F", 199, 17)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_10, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 199, position: 17 }, ::core::option::Option::Some(priority_35))?;
     // Controls/MacOSControls.xaml(200,17) Fill
     rt::bind_dynamic_resource(&context, path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NumberBoxPopupIndicatorForeground", 200, 17)?;
@@ -73154,9 +72704,7 @@ fn build_controls_macoscontrols_xaml_deferred_399(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_IncreaseButton", 245, 27)?;
     // Controls/MacOSControls.xaml(246,27) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 246, 27)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 246, 27)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 246, position: 27 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(245,14) Margin
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -73172,9 +72720,7 @@ fn build_controls_macoscontrols_xaml_deferred_399(
     rt::push_parent(&context, &path_0);
     // Controls/MacOSControls.xaml(249,21) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 249, 21)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 249, 21)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 249, position: 21 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(250,21) Fill
     let path_1 = {
@@ -73209,9 +72755,7 @@ fn build_controls_macoscontrols_xaml_deferred_399(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_DecreaseButton", 256, 27)?;
     // Controls/MacOSControls.xaml(257,27) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 257, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 257, 27)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 257, position: 27 }, ::core::option::Option::Some(priority_13))?;
     // Controls/MacOSControls.xaml(256,14) Margin
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -73227,9 +72771,7 @@ fn build_controls_macoscontrols_xaml_deferred_399(
     rt::push_parent(&context, &path_2);
     // Controls/MacOSControls.xaml(260,21) Data (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 260, 21)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 260, 21)?;
     rt::assign_resource_value(path_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_4, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 260, position: 21 }, ::core::option::Option::Some(priority_16))?;
     // Controls/MacOSControls.xaml(261,21) Fill
     let path_3 = {
@@ -73288,9 +72830,7 @@ fn build_controls_macoscontrols_xaml_deferred_401(
     rt::name_element(name_scope.as_ref(), &button_spinner_0, &button_spinner_0, "PART_Spinner", 296, 26)?;
     // Controls/MacOSControls.xaml(297,26) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownButtonSpinnerStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 297, 26)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownButtonSpinnerStyle", 297, 26)?;
     rt::assign_resource_value(button_spinner_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 297, position: 26 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(298,26) CornerRadius
     rt::bind_template_bindings(button_spinner_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_345)?;
@@ -73310,9 +72850,7 @@ fn build_controls_macoscontrols_xaml_deferred_401(
     rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "PART_TextBox", 304, 22)?;
     // Controls/MacOSControls.xaml(305,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 305, 22)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxTextBoxStyle", 305, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 305, position: 22 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(306,22) MinHeight
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_346)?;
@@ -73831,24 +73369,18 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     toggle_button_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::padding_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 3.0_f64, 2.0_f64, 3.0_f64), priority_3);
     // Controls/MacOSControls.xaml(289,25) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderDownStyle"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 289, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ExpanderHeaderDownStyle", 289, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 289, position: 25 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(279,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_5);
     // Controls/MacOSControls.xaml(291,25) HorizontalContentAlignment (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderHorizontalContentAlignment"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 291, 25)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ContentControl::horizontal_content_alignment_property(), "ExpanderHeaderHorizontalContentAlignment", 291, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::horizontal_content_alignment_property(), value_1, &rt::ResourceChoice { name: "HorizontalContentAlignment", member: "ContentControl.HorizontalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::HorizontalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 291, position: 25 }, ::core::option::Option::Some(priority_6))?;
     // Controls/MacOSControls.xaml(292,25) VerticalContentAlignment (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ExpanderHeaderVerticalContentAlignment"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ContentControl::vertical_content_alignment_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 292, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ContentControl::vertical_content_alignment_property(), "ExpanderHeaderVerticalContentAlignment", 292, 25)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::vertical_content_alignment_property(), value_2, &rt::ResourceChoice { name: "VerticalContentAlignment", member: "ContentControl.VerticalContentAlignment", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::layout::VerticalAlignment as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 292, position: 25 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(293,25) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -74120,15 +73652,11 @@ fn build_controls_macoscontrols_xaml_deferred_419(
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 181, 17)?;
     // Controls/MacOSControls.xaml(182,17) Width (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerHorizontalOrientationButtonWidth"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 182, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::width_property(), "PipsPagerHorizontalOrientationButtonWidth", 182, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), value_0, &rt::ResourceChoice { name: "Width", member: "Layoutable.Width", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 182, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(183,17) Height (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerHorizontalOrientationButtonHeight"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 183, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "PipsPagerHorizontalOrientationButtonHeight", 183, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 183, position: 17 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(184,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 184, 17)?;
@@ -74142,9 +73670,7 @@ fn build_controls_macoscontrols_xaml_deferred_419(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 186, 17)?;
     // Controls/MacOSControls.xaml(187,17) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 187, 17)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEA3B", 187, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_2, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 187, position: 17 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(188,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 188, 17)?;
@@ -74246,9 +73772,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "Content", 286, 17)?;
     // Controls/MacOSControls.xaml(287,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryEA3B", 287, 17)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(288,17) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 288, 17)?;
@@ -74361,15 +73885,11 @@ fn build_controls_macoscontrols_xaml_deferred_428(
     rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_PipsPagerList", 376, 20)?;
     // Controls/MacOSControls.xaml(377,20) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerListStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 377, 20)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PipsPagerListStyle", 377, 20)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 377, position: 20 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(378,20) ItemContainerTheme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerPipItemStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 378, 20)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "PipsPagerPipItemStyle", 378, 20)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 378, position: 20 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(379,20) ItemsSource
     let path_0 = {
@@ -74706,9 +74226,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 35, 29)?;
     // Controls/MacOSControls.xaml(35,70) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 70)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 35, 70)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 35, position: 70 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(35,127) Margin
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_383)?;
@@ -74866,9 +74384,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_11);
     // Controls/MacOSControls.xaml(45,57) Data (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 57)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 45, 57)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 45, position: 57 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(45,99) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSubItemChevron", 45, 99)?;
@@ -74992,9 +74508,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_33);
     // Controls/MacOSControls.xaml(50,80) Theme (setter chosen at run time)
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 80)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 50, 80)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 50, position: 80 }, ::core::option::Option::Some(priority_34))?;
     // Controls/MacOSControls.xaml(50,127) Text
     let template_binding_10 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::MenuItem::input_gesture_property()));
@@ -75044,9 +74558,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     path_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_39);
     // Controls/MacOSControls.xaml(51,61) Data (setter chosen at run time)
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE974"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 51, 61)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE974", 51, 61)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_6, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 51, position: 61 }, ::core::option::Option::Some(priority_40))?;
     // Controls/MacOSControls.xaml(51,103) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSubItemChevron", 51, 103)?;
@@ -75107,9 +74619,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 55, 49)?;
     // Controls/MacOSControls.xaml(55,95) Margin (setter chosen at run time)
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowSubMenuMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 55, 95)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowSubMenuMargin", 55, 95)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_7, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 55, position: 95 }, ::core::option::Option::Some(priority_50))?;
     // Controls/MacOSControls.xaml(55,146) CornerRadius
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 55, 146)?;
@@ -75126,9 +74636,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     rt::bind_dynamic_resources(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_386)?;
     // Controls/MacOSControls.xaml(56,289) MinHeight (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutThemeMinHeight"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 289)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "MenuFlyoutThemeMinHeight", 56, 289)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_8, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 56, position: 289 }, ::core::option::Option::Some(priority_52))?;
     // Controls/MacOSControls.xaml(56,16) BackgroundSizing
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
@@ -75165,15 +74673,11 @@ fn build_controls_macoscontrols_xaml_deferred_441(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 59, 33)?;
     // Controls/MacOSControls.xaml(59,74) Theme (setter chosen at run time)
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 74)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 59, 74)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_9, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 59, position: 74 }, ::core::option::Option::Some(priority_55))?;
     // Controls/MacOSControls.xaml(59,131) Margin (setter chosen at run time)
     let priority_56 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterThemePadding"));
-    let provided_32 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 131)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_32);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutPresenterThemePadding", 59, 131)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_10, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 59, position: 131 }, ::core::option::Option::Some(priority_56))?;
     // Controls/MacOSControls.xaml(60,22) Content
     // Controls/MacOSControls.xaml(60,22) ItemsPresenter
@@ -75217,15 +74721,11 @@ fn build_controls_macoscontrols_xaml_deferred_442(
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSeparatorBackground", 241, 50)?;
     // Controls/MacOSControls.xaml(241,105) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorThemePadding"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 241, 105)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutSeparatorThemePadding", 241, 105)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 241, position: 105 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(241,163) Height (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutSeparatorHeight"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 241, 163)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::height_property(), "MenuFlyoutSeparatorHeight", 241, 163)?;
     rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), value_1, &rt::ResourceChoice { name: "Height", member: "Layoutable.Height", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 241, position: 163 }, ::core::option::Option::Some(priority_1))?;
     rt::pop_parent_end_init(&context, &rectangle_0, 241, 12)?;
     ::core::result::Result::Ok(rt::to_value(rectangle_0.clone()))
@@ -75440,9 +74940,7 @@ fn build_controls_macoscontrols_xaml_deferred_450(
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 42, 49)?;
     // Controls/MacOSControls.xaml(42,95) Margin (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 95)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 42, 95)?;
     rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_2, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 42, position: 95 }, ::core::option::Option::Some(priority_12))?;
     // Controls/MacOSControls.xaml(42,145) CornerRadius
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "OverlayCornerRadius", 42, 145)?;
@@ -75459,9 +74957,7 @@ fn build_controls_macoscontrols_xaml_deferred_450(
     rt::bind_dynamic_resources(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_392)?;
     // Controls/MacOSControls.xaml(43,289) MinHeight (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutThemeMinHeight"));
-    let provided_21 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 289)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_21);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "MenuFlyoutThemeMinHeight", 43, 289)?;
     rt::assign_resource_value(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_3, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 43, position: 289 }, ::core::option::Option::Some(priority_14))?;
     // Controls/MacOSControls.xaml(43,16) BackgroundSizing
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -75498,15 +74994,11 @@ fn build_controls_macoscontrols_xaml_deferred_450(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "MenuFlyoutPresenterScrollViewer", 46, 33)?;
     // Controls/MacOSControls.xaml(46,74) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 74)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "MenuFlyoutPresenterScrollViewer", 46, 74)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 46, position: 74 }, ::core::option::Option::Some(priority_17))?;
     // Controls/MacOSControls.xaml(46,131) Margin (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterThemePadding"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 46, 131)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "MenuFlyoutPresenterThemePadding", 46, 131)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 46, position: 131 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(47,22) Content
     // Controls/MacOSControls.xaml(47,22) ItemsPresenter
@@ -76071,9 +75563,7 @@ fn build_controls_macoscontrols_xaml_deferred_469(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "MacOSSelectionCheck", 42, 19)?;
     // Controls/MacOSControls.xaml(42,48) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 48)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE73E", 42, 48)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 42, position: 48 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(42,90) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 42, 90)?;
@@ -76544,9 +76034,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_9);
     // Controls/MacOSControls.xaml(219,22) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxTextBoxStyle"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 219, 22)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "ComboBoxTextBoxStyle", 219, 22)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 219, position: 22 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(220,22) Padding
     rt::bind_dynamic_resource(&context, text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), "ComboBoxEditableTextPadding", 220, 22)?;
@@ -76584,9 +76072,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), priority_14);
     // Controls/MacOSControls.xaml(233,21) CornerRadius (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxDropDownButtonBackgroundCornerRadius"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::corner_radius_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 233, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ComboBoxDropDownButtonBackgroundCornerRadius", 233, 21)?;
     rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_5, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 233, position: 21 }, ::core::option::Option::Some(priority_15))?;
     // Controls/MacOSControls.xaml(229,14) Width
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
@@ -76839,9 +76325,7 @@ fn build_controls_macoscontrols_xaml_deferred_479(
     rt::name_element(name_scope.as_ref(), &path_0, &path_0, "CollapsedGlyph", 31, 19)?;
     // Controls/MacOSControls.xaml(31,43) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE76C"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 43)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE76C", 31, 43)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 31, position: 43 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(31,85) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 31, 85)?;
@@ -76872,9 +76356,7 @@ fn build_controls_macoscontrols_xaml_deferred_479(
     rt::name_element(name_scope.as_ref(), &path_1, &path_1, "ExpandedGlyph", 32, 19)?;
     // Controls/MacOSControls.xaml(32,42) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 42)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 32, 42)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_1, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 32, position: 42 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(32,84) Fill
     rt::bind_template_binding(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 32, 84)?;
@@ -77032,9 +76514,7 @@ fn build_controls_macoscontrols_xaml_deferred_482(
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_4);
     // Controls/MacOSControls.xaml(70,80) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TreeViewItemExpandCollapseChevron"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 80)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TreeViewItemExpandCollapseChevron", 70, 80)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 70, position: 80 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(70,139) IsChecked
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TreeViewItem::is_expanded_property()));
@@ -77201,9 +76681,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TextControlButtonBackground", 28, 17)?;
     // Controls/MacOSControls.xaml(29,17) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxDeleteButtonMargin"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 29, 17)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestBoxDeleteButtonMargin", 29, 17)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 29, position: 17 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(30,17) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "MacOSControlCornerRadius", 30, 17)?;
@@ -77515,9 +76993,7 @@ fn build_controls_macoscontrols_xaml_deferred_490(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
     // Controls/MacOSControls.xaml(168,21) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxDeleteButtonStyle"));
-    let provided_41 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 168, 21)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_41);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxDeleteButtonStyle", 168, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 168, position: 21 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(169,21) Command
     let path_2 = {
@@ -77617,9 +77093,7 @@ fn build_controls_macoscontrols_xaml_deferred_492(
     rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "PART_TextBox", 247, 20)?;
     // Controls/MacOSControls.xaml(248,20) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 248, 20)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxTextBoxStyle", 248, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 248, position: 20 }, ::core::option::Option::Some(priority_0))?;
     // Controls/MacOSControls.xaml(249,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_441)?;
@@ -77697,9 +77171,7 @@ fn build_controls_macoscontrols_xaml_deferred_492(
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 277, 21)?;
     // Controls/MacOSControls.xaml(278,21) Margin (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 278, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 278, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_3, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 278, position: 21 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(279,21) MinWidth
     let path_0 = {
@@ -77726,9 +77198,7 @@ fn build_controls_macoscontrols_xaml_deferred_492(
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 287, 24)?;
     // Controls/MacOSControls.xaml(288,24) ItemContainerTheme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultListViewItemStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 288, 24)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 288, 24)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_4, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 288, position: 24 }, ::core::option::Option::Some(priority_10))?;
     // Controls/MacOSControls.xaml(289,24) Margin
     rt::bind_dynamic_resource(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestListPadding", 289, 24)?;
@@ -78137,9 +77607,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_7);
     // Controls/MacOSControls.xaml(127,20) Theme (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 127, 20)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxTextBoxStyle", 127, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 127, position: 20 }, ::core::option::Option::Some(priority_8))?;
     // Controls/MacOSControls.xaml(128,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_446)?;
@@ -78191,9 +77659,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::push_parent(&context, &border_0);
     // Controls/MacOSControls.xaml(150,21) Margin (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowToolTipMargin"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 21)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowToolTipMargin", 150, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_3, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 150, position: 21 }, ::core::option::Option::Some(priority_16))?;
     // Controls/MacOSControls.xaml(151,16) Child
     // Controls/MacOSControls.xaml(151,16) Border
@@ -78235,9 +77701,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PopupUpSpinButton", 159, 33)?;
     // Controls/MacOSControls.xaml(160,33) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 33)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_28);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxPopupContentRootButtonStyle", 160, 33)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 160, position: 33 }, ::core::option::Option::Some(priority_18))?;
     // Controls/MacOSControls.xaml(159,20) Margin
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
@@ -78250,9 +77714,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::push_parent(&context, &path_1);
     // Controls/MacOSControls.xaml(162,27) Data (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 162, 27)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 162, 27)?;
     rt::assign_resource_value(path_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_5, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 162, position: 27 }, ::core::option::Option::Some(priority_20))?;
     // Controls/MacOSControls.xaml(163,27) Fill
     let path_2 = {
@@ -78290,9 +77752,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     repeat_button_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_25);
     // Controls/MacOSControls.xaml(171,33) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 171, 33)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumberBoxPopupContentRootButtonStyle", 171, 33)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 171, position: 33 }, ::core::option::Option::Some(priority_26))?;
     // Controls/MacOSControls.xaml(172,22) Content
     // Controls/MacOSControls.xaml(172,22) Path
@@ -78302,9 +77762,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::push_parent(&context, &path_3);
     // Controls/MacOSControls.xaml(172,27) Data (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_32 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 172, 27)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_32);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 172, 27)?;
     rt::assign_resource_value(path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_7, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 172, position: 27 }, ::core::option::Option::Some(priority_27))?;
     // Controls/MacOSControls.xaml(173,27) Fill
     let path_4 = {
@@ -78387,9 +77845,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::bind_template_binding(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::font_size_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), 196, 25)?;
     // Controls/MacOSControls.xaml(197,25) Theme (setter chosen at run time)
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_35 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 197, 25)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_35);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 197, 25)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 197, position: 25 }, ::core::option::Option::Some(priority_43))?;
     // Controls/MacOSControls.xaml(192,12) Margin
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
@@ -78404,9 +77860,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::push_parent(&context, &path_5);
     // Controls/MacOSControls.xaml(200,19) Data (setter chosen at run time)
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
-    let provided_37 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 200, 19)?;
-    let value_9: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_37);
+    let value_9: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70E", 200, 19)?;
     rt::assign_resource_value(path_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_9, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 200, position: 19 }, ::core::option::Option::Some(priority_45))?;
     // Controls/MacOSControls.xaml(201,19) Fill
     let path_6 = {
@@ -78452,9 +77906,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::bind_template_binding(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::font_size_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), 211, 25)?;
     // Controls/MacOSControls.xaml(212,25) Theme (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
-    let provided_40 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 212, 25)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_40);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NumericUpDownSpinButtonStyle", 212, 25)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 212, position: 25 }, ::core::option::Option::Some(priority_53))?;
     // Controls/MacOSControls.xaml(207,12) Margin
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
@@ -78469,9 +77921,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     rt::push_parent(&context, &path_7);
     // Controls/MacOSControls.xaml(215,19) Data (setter chosen at run time)
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
-    let provided_42 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 215, 19)?;
-    let value_11: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_42);
+    let value_11: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "GlyphGeometryE70D", 215, 19)?;
     rt::assign_resource_value(path_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_11, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 215, position: 19 }, ::core::option::Option::Some(priority_55))?;
     // Controls/MacOSControls.xaml(216,19) Fill
     let path_8 = {
@@ -78721,9 +78171,7 @@ fn build_controls_macoscontrols_xaml_deferred_520(
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
     // Controls/MacOSControls.xaml(151,20) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 151, 20)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxTextBoxStyle", 151, 20)?;
     rt::assign_resource_value(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 151, position: 20 }, ::core::option::Option::Some(priority_5))?;
     // Controls/MacOSControls.xaml(152,20) PlaceholderText
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_454)?;
@@ -78746,9 +78194,7 @@ fn build_controls_macoscontrols_xaml_deferred_520(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "QueryButton", 166, 23)?;
     // Controls/MacOSControls.xaml(167,23) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxQueryButtonStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 167, 23)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "AutoSuggestBoxQueryButtonStyle", 167, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 167, position: 23 }, ::core::option::Option::Some(priority_9))?;
     // Controls/MacOSControls.xaml(168,23) CornerRadius
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_455)?;
@@ -78816,9 +78262,7 @@ fn build_controls_macoscontrols_xaml_deferred_520(
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 187, 21)?;
     // Controls/MacOSControls.xaml(188,21) Margin (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 188, 21)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 188, 21)?;
     rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 188, position: 21 }, ::core::option::Option::Some(priority_20))?;
     // Controls/MacOSControls.xaml(189,21) Padding
     rt::bind_dynamic_resources(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_457)?;
@@ -78834,9 +78278,7 @@ fn build_controls_macoscontrols_xaml_deferred_520(
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::ItemsControl::item_template_property()), 195, 24)?;
     // Controls/MacOSControls.xaml(196,24) ItemContainerTheme (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultListViewItemStyle"));
-    let provided_31 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 196, 24)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_31);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 196, 24)?;
     rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_6, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 196, position: 24 }, ::core::option::Option::Some(priority_21))?;
     // Controls/MacOSControls.xaml(197,24) MaxHeight
     rt::bind_dynamic_resources(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_458)?;
@@ -80369,9 +79811,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "NavigationViewBackButton", 166, 23)?;
     // Controls/MacOSControls.xaml(167,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 167, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 167, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 167, position: 23 }, ::core::option::Option::Some(priority_4))?;
     // Controls/MacOSControls.xaml(168,23) Width
     let path_1 = {
@@ -80411,9 +79851,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     rt::name_element(name_scope.as_ref(), &button_1, &button_1, "NavigationViewCloseButton", 173, 23)?;
     // Controls/MacOSControls.xaml(174,23) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 174, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationBackButtonNormalStyle", 174, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 174, position: 23 }, ::core::option::Option::Some(priority_7))?;
     // Controls/MacOSControls.xaml(173,16) VerticalAlignment
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -80475,9 +79913,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_13);
     // Controls/MacOSControls.xaml(187,28) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemHeaderTextStyle"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 187, 28)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewItemHeaderTextStyle", 187, 28)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 187, position: 28 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &text_block_0, 182, 18)?;
     rt::pop_parent_end_init(&context, &button_2, 177, 16)?;
@@ -81067,9 +80503,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     button_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_70);
     // Controls/MacOSControls.xaml(297,29) Theme (setter chosen at run time)
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewPaneSearchButtonStyle"));
-    let provided_38 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 297, 29)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_38);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewPaneSearchButtonStyle", 297, 29)?;
     rt::assign_resource_value(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 297, position: 29 }, ::core::option::Option::Some(priority_71))?;
     // Controls/MacOSControls.xaml(298,29) Width
     let path_11 = {
@@ -81336,9 +80770,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     content_control_10.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_97);
     // Controls/MacOSControls.xaml(353,35) MinHeight (setter chosen at run time)
     let priority_98 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PaneToggleButtonHeight"));
-    let provided_47 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_height_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 353, 35)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_47);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_height_property(), "PaneToggleButtonHeight", 353, 35)?;
     rt::assign_resource_value(content_control_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), value_5, &rt::ResourceChoice { name: "MinHeight", member: "Layoutable.MinHeight", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 353, position: 35 }, ::core::option::Option::Some(priority_98))?;
     // Controls/MacOSControls.xaml(350,20) IsTabStop
     let priority_99 = ::ferroui_base::data::BindingPriority::Template;
@@ -81363,9 +80795,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
     content_control_10.set_value_with_priority(::ferroui_controls::ContentControl::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_102);
     // Controls/MacOSControls.xaml(359,35) Theme (setter chosen at run time)
     let priority_103 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
-    let provided_50 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 359, 35)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_50);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "NavigationViewTitleHeaderContentControlTextStyle", 359, 35)?;
     rt::assign_resource_value(content_control_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 359, position: 35 }, ::core::option::Option::Some(priority_103))?;
     rt::pop_parent_end_init(&context, &content_control_10, 350, 20)?;
     // Controls/MacOSControls.xaml(360,20) Children
@@ -81501,15 +80931,11 @@ fn build_controls_macoscontrols_xaml_deferred_545(
     selection_indicator_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/MacOSControls.xaml(517,30) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 517, 30)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_x_property(), "NavigationViewSelectionIndicatorRadius", 517, 30)?;
     rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 517, position: 30 }, ::core::option::Option::Some(priority_3))?;
     // Controls/MacOSControls.xaml(518,30) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 518, 30)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Rectangle::radius_y_property(), "NavigationViewSelectionIndicatorRadius", 518, 30)?;
     rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 518, position: 30 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &selection_indicator_0, 512, 20)?;
     rt::pop_parent_end_init(&context, &panel_2, 511, 18)?;
@@ -81718,9 +81144,7 @@ fn build_controls_macoscontrols_xaml_deferred_545(
     text_block_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_22);
     // Controls/MacOSControls.xaml(570,34) Text (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemExpandedGlyph"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 570, 34)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::TextBlock::text_property(), "NavigationViewItemExpandedGlyph", 570, 34)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), value_4, &rt::ResourceChoice { name: "Text", member: "TextBlock.Text", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<::std::string::String>), null: true, line: 570, position: 34 }, ::core::option::Option::Some(priority_23))?;
     // Controls/MacOSControls.xaml(571,34) FontFamily
     rt::bind_dynamic_resources(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_487)?;
@@ -82159,9 +81583,7 @@ fn build_controls_macoscontrols_xaml_deferred_551(
     button_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_15);
     // Controls/MacOSControls.xaml(87,19) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleBarBackButtonStyle"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 87, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_6);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleBarBackButtonStyle", 87, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 87, position: 19 }, ::core::option::Option::Some(priority_16))?;
     // Controls/MacOSControls.xaml(88,19) IsEnabled
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_enabled_property(), rt::property(::ferroui_controls::TitleBar::is_back_button_enabled_property()), 88, 19)?;
@@ -82183,9 +81605,7 @@ fn build_controls_macoscontrols_xaml_deferred_551(
     button_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_18);
     // Controls/MacOSControls.xaml(93,19) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleBarPaneToggleButtonStyle"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 19)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleBarPaneToggleButtonStyle", 93, 19)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 93, position: 19 }, ::core::option::Option::Some(priority_19))?;
     rt::pop_parent_end_init(&context, &button_1, 90, 12)?;
     // Controls/MacOSControls.xaml(95,12) Children
@@ -82265,9 +81685,7 @@ fn build_controls_macoscontrols_xaml_deferred_551(
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::TitleBar::title_property()), 114, 22)?;
     // Controls/MacOSControls.xaml(115,22) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 115, 22)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 115, 22)?;
     rt::assign_resource_value(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 115, position: 22 }, ::core::option::Option::Some(priority_28))?;
     // Controls/MacOSControls.xaml(116,22) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 116, 22)?;
@@ -82308,9 +81726,7 @@ fn build_controls_macoscontrols_xaml_deferred_551(
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::TitleBar::subtitle_property()), 127, 22)?;
     // Controls/MacOSControls.xaml(128,22) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
-    let provided_22 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 128, 22)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "CaptionTextBlockStyle", 128, 22)?;
     rt::assign_resource_value(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 128, position: 22 }, ::core::option::Option::Some(priority_35))?;
     // Controls/MacOSControls.xaml(129,22) Foreground
     rt::bind_dynamic_resources(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_493)?;
@@ -82663,15 +82079,11 @@ fn build_controls_macoscontrols_xaml_deferred_564(
     content_control_0.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_0);
     // Controls/MacOSControls.xaml(173,27) Margin (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotPortraitThemePadding"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::margin_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 173, 27)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "PivotPortraitThemePadding", 173, 27)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_0, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 173, position: 27 }, ::core::option::Option::Some(priority_1))?;
     // Controls/MacOSControls.xaml(174,27) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TitleContentControlStyle"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 174, 27)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TitleContentControlStyle", 174, 27)?;
     rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 174, position: 27 }, ::core::option::Option::Some(priority_2))?;
     // Controls/MacOSControls.xaml(171,12) IsVisible
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -82733,9 +82145,7 @@ fn build_controls_macoscontrols_xaml_deferred_564(
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::zoom_mode_property(), ::ferroui_controls::ZoomMode::Disabled, priority_12);
     // Controls/MacOSControls.xaml(188,27) Template (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollViewerScrollBarlessTemplate"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 188, 27)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "ScrollViewerScrollBarlessTemplate", 188, 27)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_3, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 188, position: 27 }, ::core::option::Option::Some(priority_13))?;
     // Controls/MacOSControls.xaml(179,14) BringIntoViewOnFocusChange
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -82897,9 +82307,7 @@ fn build_controls_macoscontrols_xaml_deferred_564(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_28);
     // Controls/MacOSControls.xaml(214,27) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotPreviousButtonStyle"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 214, 27)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PivotPreviousButtonStyle", 214, 27)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 214, position: 27 }, ::core::option::Option::Some(priority_29))?;
     // Controls/MacOSControls.xaml(212,20) Width
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
@@ -82942,9 +82350,7 @@ fn build_controls_macoscontrols_xaml_deferred_564(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_38);
     // Controls/MacOSControls.xaml(226,27) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PivotNextButtonStyle"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 226, 27)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "PivotNextButtonStyle", 226, 27)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 226, position: 27 }, ::core::option::Option::Some(priority_39))?;
     // Controls/MacOSControls.xaml(224,20) Width
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;

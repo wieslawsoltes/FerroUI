@@ -489,9 +489,7 @@ fn populate_simpletheme_xaml_deferred_60(
     // SimpleTheme.xaml(139,4) Opacity
     solid_color_brush_0.set_value(::ferroui_base::media::Brush::opacity_property(), 0.4_f64);
     // SimpleTheme.xaml(142,5) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 142, 5)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeAccentColor", 142, 5)?;
     rt::assign_resource_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.SolidColorBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 142, position: 5 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
@@ -508,9 +506,7 @@ fn populate_simpletheme_xaml_deferred_61(
     // SimpleTheme.xaml(143,4) Opacity
     solid_color_brush_0.set_value(::ferroui_base::media::Brush::opacity_property(), 0.4_f64);
     // SimpleTheme.xaml(146,5) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 146, 5)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeAccentColor", 146, 5)?;
     rt::assign_resource_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0, &rt::ResourceChoice { name: "Color", member: "FerroUI.Media.SolidColorBrush.set_Color", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 146, position: 5 }, ::core::option::Option::None)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
@@ -14813,9 +14809,7 @@ fn build_controls_simplecontrols_xaml_deferred_38(
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 18, 25)?;
     // Controls/SimpleControls.xaml(19,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleMenuScrollViewer"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 19, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleMenuScrollViewer", 19, 25)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 19, position: 25 }, ::core::option::Option::Some(priority_0))?;
     // Controls/SimpleControls.xaml(20,25) VerticalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property()), 20, 25)?;
@@ -16138,9 +16132,7 @@ fn build_controls_simplecontrols_xaml_deferred_80(
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(20,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleMenuScrollViewer"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 20, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleMenuScrollViewer", 20, 25)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 20, position: 25 }, ::core::option::Option::Some(priority_0))?;
     // Controls/SimpleControls.xaml(21,14) Content
     // Controls/SimpleControls.xaml(21,14) ItemsPresenter
@@ -18721,9 +18713,7 @@ fn build_controls_simplecontrols_xaml_deferred_116(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_7, 141, 29)?;
     // Controls/SimpleControls.xaml(143,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleExpanderToggleButtonRightTheme"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 143, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleExpanderToggleButtonRightTheme", 143, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 143, position: 29 }, ::core::option::Option::Some(priority_2))?;
     rt::pop_parent_end_init(&context, &toggle_button_0, 136, 16)?;
     // Controls/SimpleControls.xaml(144,16) Children
@@ -18818,9 +18808,7 @@ fn build_controls_simplecontrols_xaml_deferred_117(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_7, 173, 29)?;
     // Controls/SimpleControls.xaml(175,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleExpanderToggleButtonRightTheme"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 175, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleExpanderToggleButtonRightTheme", 175, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 175, position: 29 }, ::core::option::Option::Some(priority_2))?;
     rt::pop_parent_end_init(&context, &toggle_button_0, 168, 16)?;
     // Controls/SimpleControls.xaml(176,16) Children
@@ -18915,9 +18903,7 @@ fn build_controls_simplecontrols_xaml_deferred_118(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_7, 205, 29)?;
     // Controls/SimpleControls.xaml(207,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleExpanderToggleButtonLeftTheme"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 207, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleExpanderToggleButtonLeftTheme", 207, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 207, position: 29 }, ::core::option::Option::Some(priority_2))?;
     rt::pop_parent_end_init(&context, &toggle_button_0, 200, 16)?;
     // Controls/SimpleControls.xaml(208,16) Children
@@ -19012,9 +18998,7 @@ fn build_controls_simplecontrols_xaml_deferred_119(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_7, 237, 29)?;
     // Controls/SimpleControls.xaml(239,29) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleExpanderToggleButtonRightTheme"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 239, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleExpanderToggleButtonRightTheme", 239, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 239, position: 29 }, ::core::option::Option::Some(priority_2))?;
     rt::pop_parent_end_init(&context, &toggle_button_0, 232, 16)?;
     // Controls/SimpleControls.xaml(240,16) Children
@@ -19122,9 +19106,7 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     grid_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_3);
     // Controls/SimpleControls.xaml(70,17) MinWidth (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ToggleSwitchThemeMinWidth"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::layout::Layoutable::min_width_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 17)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::min_width_property(), "ToggleSwitchThemeMinWidth", 70, 17)?;
     rt::assign_resource_value(grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), value_1, &rt::ResourceChoice { name: "MinWidth", member: "Layoutable.MinWidth", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 70, position: 17 }, ::core::option::Option::Some(priority_4))?;
     // Controls/SimpleControls.xaml(69,12) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
@@ -19471,9 +19453,7 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     rt::bind_template_binding(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_tab_stop_property(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), 42, 31)?;
     // Controls/SimpleControls.xaml(43,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleButtonSpinnerRepeatButton"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 43, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleButtonSpinnerRepeatButton", 43, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 43, position: 31 }, ::core::option::Option::Some(priority_3))?;
     // Controls/SimpleControls.xaml(44,20) Content
     // Controls/SimpleControls.xaml(44,20) Path
@@ -19517,9 +19497,7 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     rt::bind_template_binding(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_tab_stop_property(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), 53, 31)?;
     // Controls/SimpleControls.xaml(54,31) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleButtonSpinnerRepeatButton"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 54, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleButtonSpinnerRepeatButton", 54, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 54, position: 31 }, ::core::option::Option::Some(priority_10))?;
     // Controls/SimpleControls.xaml(55,20) Content
     // Controls/SimpleControls.xaml(55,20) Path
@@ -19779,9 +19757,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::name_element(name_scope.as_ref(), &button_0, &button_0, "PART_FullScreenButton", 81, 25)?;
     // Controls/SimpleControls.xaml(82,25) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 82, 25)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 82, position: 25 }, ::core::option::Option::Some(priority_14))?;
     // Controls/SimpleControls.xaml(81,18) ElementRole
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -19829,9 +19805,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::name_element(name_scope.as_ref(), &button_1, &button_1, "PART_MinimizeButton", 91, 25)?;
     // Controls/SimpleControls.xaml(92,25) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 25)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 92, 25)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 92, position: 25 }, ::core::option::Option::Some(priority_20))?;
     // Controls/SimpleControls.xaml(91,18) ElementRole
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
@@ -19880,9 +19854,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::name_element(name_scope.as_ref(), &button_2, &button_2, "PART_MaximizeButton", 101, 25)?;
     // Controls/SimpleControls.xaml(102,25) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 102, 25)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 102, 25)?;
     rt::assign_resource_value(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 102, position: 25 }, ::core::option::Option::Some(priority_27))?;
     // Controls/SimpleControls.xaml(101,18) ElementRole
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
@@ -19943,9 +19915,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::bind_dynamic_resources(&context, button_3.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_SIMPLECONTROLS_XAML_RESOURCES_109)?;
     // Controls/SimpleControls.xaml(118,25) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_18 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 118, 25)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 118, 25)?;
     rt::assign_resource_value(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 118, position: 25 }, ::core::option::Option::Some(priority_36))?;
     // Controls/SimpleControls.xaml(115,18) ElementRole
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
@@ -20055,9 +20025,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::name_element(name_scope.as_ref(), &button_4, &button_4, "PART_PopoverFullScreenButton", 147, 25)?;
     // Controls/SimpleControls.xaml(148,25) Theme (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 25)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 148, 25)?;
     rt::assign_resource_value(button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 148, position: 25 }, ::core::option::Option::Some(priority_53))?;
     // Controls/SimpleControls.xaml(147,18) ElementRole
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
@@ -20105,9 +20073,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     rt::bind_dynamic_resources(&context, button_5.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_SIMPLECONTROLS_XAML_RESOURCES_110)?;
     // Controls/SimpleControls.xaml(159,25) Theme (setter chosen at run time)
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDrawnCaptionButton"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 159, 25)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDrawnCaptionButton", 159, 25)?;
     rt::assign_resource_value(button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 159, position: 25 }, ::core::option::Option::Some(priority_59))?;
     // Controls/SimpleControls.xaml(156,18) ElementRole
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
@@ -20364,9 +20330,7 @@ fn build_controls_simplecontrols_xaml_deferred_136(
     path_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_4);
     // Controls/SimpleControls.xaml(32,19) Data (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxClearButtonData"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Path::data_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::shapes::Path::data_property(), "TextBoxClearButtonData", 32, 19)?;
     rt::assign_resource_value(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), value_0, &rt::ResourceChoice { name: "Data", member: "Path.Data", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE), null: true, line: 32, position: 19 }, ::core::option::Option::Some(priority_5))?;
     // Controls/SimpleControls.xaml(33,19) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ThemeForegroundColor", 33, 19)?;
@@ -20781,9 +20745,7 @@ fn build_controls_simplecontrols_xaml_deferred_141(
     button_0.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_0);
     // Controls/SimpleControls.xaml(210,19) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleTextBoxClearButtonTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 210, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleTextBoxClearButtonTheme", 210, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 210, position: 19 }, ::core::option::Option::Some(priority_1))?;
     // Controls/SimpleControls.xaml(208,12) ClipToBounds
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -20856,9 +20818,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_0, 230, 27)?;
     // Controls/SimpleControls.xaml(231,27) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimplePasswordBoxRevealButtonTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 231, 27)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimplePasswordBoxRevealButtonTheme", 231, 27)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 231, position: 27 }, ::core::option::Option::Some(priority_3))?;
     // Controls/SimpleControls.xaml(228,14) ClipToBounds
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -22548,9 +22508,7 @@ fn build_controls_simplecontrols_xaml_deferred_160(
     rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_6, 56, 29)?;
     // Controls/SimpleControls.xaml(58,29) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleTreeViewItemToggleButtonTheme"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 58, 29)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleTreeViewItemToggleButtonTheme", 58, 29)?;
     rt::assign_resource_value(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 58, position: 29 }, ::core::option::Option::Some(priority_4))?;
     rt::pop_parent_end_init(&context, &toggle_button_0, 53, 16)?;
     // Controls/SimpleControls.xaml(59,16) Children
@@ -23200,9 +23158,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(37,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleMenuScrollViewer"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_12);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleMenuScrollViewer", 37, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 37, position: 31 }, ::core::option::Option::Some(priority_3))?;
     // Controls/SimpleControls.xaml(38,20) Content
     // Controls/SimpleControls.xaml(38,20) ItemsPresenter
@@ -23560,9 +23516,7 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(74,31) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleMenuScrollViewer"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_15);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleMenuScrollViewer", 74, 31)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 74, position: 31 }, ::core::option::Option::Some(priority_29))?;
     // Controls/SimpleControls.xaml(75,20) Content
     // Controls/SimpleControls.xaml(75,20) ItemsPresenter
@@ -23803,9 +23757,7 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 40, 31)?;
     // Controls/SimpleControls.xaml(41,31) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderRepeatTrackTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 41, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderRepeatTrackTheme", 41, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 41, position: 31 }, ::core::option::Option::Some(priority_11))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 40, 18)?;
     // Controls/SimpleControls.xaml(44,18) IncreaseButton
@@ -23819,9 +23771,7 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 44, 31)?;
     // Controls/SimpleControls.xaml(45,31) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderRepeatTrackTheme"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderRepeatTrackTheme", 45, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 45, position: 31 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 44, 18)?;
     // Controls/SimpleControls.xaml(47,16) Thumb
@@ -23970,9 +23920,7 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_DecreaseButton", 87, 31)?;
     // Controls/SimpleControls.xaml(88,31) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderRepeatTrackTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 88, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderRepeatTrackTheme", 88, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 88, position: 31 }, ::core::option::Option::Some(priority_11))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 87, 18)?;
     // Controls/SimpleControls.xaml(91,18) IncreaseButton
@@ -23986,9 +23934,7 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_IncreaseButton", 91, 31)?;
     // Controls/SimpleControls.xaml(92,31) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderRepeatTrackTheme"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SliderRepeatTrackTheme", 92, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 92, position: 31 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 91, 18)?;
     // Controls/SimpleControls.xaml(94,16) Thumb
@@ -24325,9 +24271,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     button_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::is_template_focus_target_property(), ::core::clone::Clone::clone(&true), priority_2);
     // Controls/SimpleControls.xaml(107,21) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDatePickerFlyoutButton"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDatePickerFlyoutButton", 107, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 107, position: 21 }, ::core::option::Option::Some(priority_3))?;
     // Controls/SimpleControls.xaml(108,16) Content
     // Controls/SimpleControls.xaml(108,16) Grid
@@ -24617,9 +24561,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_MonthUpButton", 208, 31)?;
     // Controls/SimpleControls.xaml(209,31) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 209, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 209, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 209, position: 31 }, ::core::option::Option::Some(priority_5))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 208, 18)?;
     // Controls/SimpleControls.xaml(210,18) Children
@@ -24633,9 +24575,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_MonthDownButton", 210, 31)?;
     // Controls/SimpleControls.xaml(211,31) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 211, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 211, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 211, position: 31 }, ::core::option::Option::Some(priority_6))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 210, 18)?;
     rt::pop_parent_end_init(&context, &panel_0, 200, 16)?;
@@ -24690,9 +24630,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_DayUpButton", 221, 31)?;
     // Controls/SimpleControls.xaml(222,31) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 222, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 222, 31)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 222, position: 31 }, ::core::option::Option::Some(priority_11))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 221, 18)?;
     // Controls/SimpleControls.xaml(223,18) Children
@@ -24706,9 +24644,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_DayDownButton", 223, 31)?;
     // Controls/SimpleControls.xaml(224,31) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 224, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 224, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 224, position: 31 }, ::core::option::Option::Some(priority_12))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 223, 18)?;
     rt::pop_parent_end_init(&context, &panel_1, 213, 16)?;
@@ -24763,9 +24699,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_YearUpButton", 234, 31)?;
     // Controls/SimpleControls.xaml(235,31) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 235, 31)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 235, 31)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 235, position: 31 }, ::core::option::Option::Some(priority_17))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 234, 18)?;
     // Controls/SimpleControls.xaml(236,18) Children
@@ -24779,9 +24713,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_YearDownButton", 236, 31)?;
     // Controls/SimpleControls.xaml(237,31) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 237, 31)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 237, 31)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 237, position: 31 }, ::core::option::Option::Some(priority_18))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 236, 18)?;
     rt::pop_parent_end_init(&context, &panel_2, 226, 16)?;
@@ -24927,9 +24859,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_35);
     // Controls/SimpleControls.xaml(275,23) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerButton"));
-    let provided_24 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 275, 23)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerButton", 275, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 275, position: 23 }, ::core::option::Option::Some(priority_36))?;
     // Controls/SimpleControls.xaml(276,18) Content
     // Controls/SimpleControls.xaml(276,18) Path
@@ -24979,9 +24909,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     button_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_42);
     // Controls/SimpleControls.xaml(286,23) Theme (setter chosen at run time)
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerButton"));
-    let provided_27 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 286, 23)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_27);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerButton", 286, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 286, position: 23 }, ::core::option::Option::Some(priority_43))?;
     // Controls/SimpleControls.xaml(287,18) Content
     // Controls/SimpleControls.xaml(287,18) Path
@@ -25111,9 +25039,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     rt::bind_template_bindings(button_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_150)?;
     // Controls/SimpleControls.xaml(104,21) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleTimePickerFlyoutButton"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 104, 21)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleTimePickerFlyoutButton", 104, 21)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 104, position: 21 }, ::core::option::Option::Some(priority_2))?;
     // Controls/SimpleControls.xaml(106,16) Content
     // Controls/SimpleControls.xaml(106,16) Grid
@@ -25488,9 +25414,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_0, &repeat_button_0, "PART_HourUpButton", 241, 31)?;
     // Controls/SimpleControls.xaml(242,31) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 242, 31)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 242, 31)?;
     rt::assign_resource_value(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 242, position: 31 }, ::core::option::Option::Some(priority_6))?;
     rt::pop_parent_end_init(&context, &repeat_button_0, 241, 18)?;
     // Controls/SimpleControls.xaml(243,18) Children
@@ -25504,9 +25428,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_1, &repeat_button_1, "PART_HourDownButton", 243, 31)?;
     // Controls/SimpleControls.xaml(244,31) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 244, 31)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 244, 31)?;
     rt::assign_resource_value(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_1, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 244, position: 31 }, ::core::option::Option::Some(priority_7))?;
     rt::pop_parent_end_init(&context, &repeat_button_1, 243, 18)?;
     rt::pop_parent_end_init(&context, &panel_0, 232, 16)?;
@@ -25564,9 +25486,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_2, &repeat_button_2, "PART_MinuteUpButton", 256, 31)?;
     // Controls/SimpleControls.xaml(257,31) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 257, 31)?;
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 257, 31)?;
     rt::assign_resource_value(repeat_button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_2, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 257, position: 31 }, ::core::option::Option::Some(priority_13))?;
     rt::pop_parent_end_init(&context, &repeat_button_2, 256, 18)?;
     // Controls/SimpleControls.xaml(258,18) Children
@@ -25580,9 +25500,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_3, &repeat_button_3, "PART_MinuteDownButton", 258, 31)?;
     // Controls/SimpleControls.xaml(259,31) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 259, 31)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_11);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 259, 31)?;
     rt::assign_resource_value(repeat_button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 259, position: 31 }, ::core::option::Option::Some(priority_14))?;
     rt::pop_parent_end_init(&context, &repeat_button_3, 258, 18)?;
     rt::pop_parent_end_init(&context, &panel_1, 247, 16)?;
@@ -25640,9 +25558,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_4, &repeat_button_4, "PART_SecondUpButton", 271, 31)?;
     // Controls/SimpleControls.xaml(272,31) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 272, 31)?;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_13);
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 272, 31)?;
     rt::assign_resource_value(repeat_button_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_4, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 272, position: 31 }, ::core::option::Option::Some(priority_20))?;
     rt::pop_parent_end_init(&context, &repeat_button_4, 271, 18)?;
     // Controls/SimpleControls.xaml(273,18) Children
@@ -25656,9 +25572,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_5, &repeat_button_5, "PART_SecondDownButton", 273, 31)?;
     // Controls/SimpleControls.xaml(274,31) Theme (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 274, 31)?;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 274, 31)?;
     rt::assign_resource_value(repeat_button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_5, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 274, position: 31 }, ::core::option::Option::Some(priority_21))?;
     rt::pop_parent_end_init(&context, &repeat_button_5, 273, 18)?;
     rt::pop_parent_end_init(&context, &panel_2, 262, 16)?;
@@ -25716,9 +25630,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_6, &repeat_button_6, "PART_PeriodUpButton", 286, 31)?;
     // Controls/SimpleControls.xaml(287,31) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerUpButton"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 287, 31)?;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_16);
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerUpButton", 287, 31)?;
     rt::assign_resource_value(repeat_button_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_6, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 287, position: 31 }, ::core::option::Option::Some(priority_27))?;
     rt::pop_parent_end_init(&context, &repeat_button_6, 286, 18)?;
     // Controls/SimpleControls.xaml(288,18) Children
@@ -25732,9 +25644,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::name_element(name_scope.as_ref(), &repeat_button_7, &repeat_button_7, "PART_PeriodDownButton", 288, 31)?;
     // Controls/SimpleControls.xaml(289,31) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerDownButton"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 289, 31)?;
-    let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
+    let value_7: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerDownButton", 289, 31)?;
     rt::assign_resource_value(repeat_button_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_7, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 289, position: 31 }, ::core::option::Option::Some(priority_28))?;
     rt::pop_parent_end_init(&context, &repeat_button_7, 288, 18)?;
     rt::pop_parent_end_init(&context, &panel_3, 277, 16)?;
@@ -25897,9 +25807,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_46);
     // Controls/SimpleControls.xaml(332,23) Theme (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerButton"));
-    let provided_29 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 332, 23)?;
-    let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_29);
+    let value_8: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerButton", 332, 23)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_8, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 332, position: 23 }, ::core::option::Option::Some(priority_47))?;
     // Controls/SimpleControls.xaml(333,18) Content
     // Controls/SimpleControls.xaml(333,18) Path
@@ -25952,9 +25860,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     button_1.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::font_size_property(), 16.0_f64, priority_54);
     // Controls/SimpleControls.xaml(344,23) Theme (setter chosen at run time)
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleDateTimePickerButton"));
-    let provided_32 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 344, 23)?;
-    let value_10: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_32);
+    let value_10: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleDateTimePickerButton", 344, 23)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_10, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 344, position: 23 }, ::core::option::Option::Some(priority_55))?;
     // Controls/SimpleControls.xaml(345,18) Content
     // Controls/SimpleControls.xaml(345,18) Path
@@ -26947,9 +26853,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     context.push_parent(rt::to_value(drawing_image_0.clone()));
     // Controls/SimpleControls.xaml(67,35) Drawing (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LevelUp"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 35)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::DrawingImage::drawing_property(), "LevelUp", 67, 35)?;
     rt::assign_resource_value(drawing_image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), value_0, &rt::ResourceChoice { name: "Drawing", member: "DrawingImage.Drawing", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Drawing as ::ferroui_base::StaticType>::TYPE), null: true, line: 67, position: 35 }, ::core::option::Option::Some(priority_5))?;
     context.pop_parent();
     image_0.set_value(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_0.clone(), 67, 35)?);
@@ -27009,9 +26913,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     context.push_parent(rt::to_value(drawing_image_1.clone()));
     // Controls/SimpleControls.xaml(75,35) Drawing (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Refresh"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 35)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_10);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::media::DrawingImage::drawing_property(), "Refresh", 75, 35)?;
     rt::assign_resource_value(drawing_image_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), value_1, &rt::ResourceChoice { name: "Drawing", member: "DrawingImage.Drawing", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Drawing as ::ferroui_base::StaticType>::TYPE), null: true, line: 75, position: 35 }, ::core::option::Option::Some(priority_8))?;
     context.pop_parent();
     image_1.set_value(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_1.clone(), 75, 35)?);
@@ -28342,9 +28244,7 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
     // Controls/SimpleControls.xaml(140,19) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleSplitButtonComponent"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 140, 19)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleSplitButtonComponent", 140, 19)?;
     rt::assign_resource_value(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 140, position: 19 }, ::core::option::Option::Some(priority_4))?;
     // Controls/SimpleControls.xaml(141,19) MinWidth
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), "SplitButtonPrimaryButtonSize", 141, 19)?;
@@ -28455,9 +28355,7 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
     // Controls/SimpleControls.xaml(171,19) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SimpleSplitButtonComponent"));
-    let provided_23 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 171, 19)?;
-    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_23);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "SimpleSplitButtonComponent", 171, 19)?;
     rt::assign_resource_value(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_3, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 171, position: 19 }, ::core::option::Option::Some(priority_14))?;
     // Controls/SimpleControls.xaml(172,19) MinWidth
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), "SplitButtonSecondaryButtonSize", 172, 19)?;
@@ -30970,15 +30868,11 @@ fn build_controls_simplecontrols_xaml_deferred_276(
     rt::name_element(name_scope.as_ref(), &tab_control_0, &tab_control_0, "PART_TabControl", 251, 23)?;
     // Controls/SimpleControls.xaml(252,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 252, 23)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TabbedPageTabControlTheme", 252, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 252, position: 23 }, ::core::option::Option::Some(priority_0))?;
     // Controls/SimpleControls.xaml(253,23) ItemContainerTheme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabItemTheme"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_container_theme_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 253, 23)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "TabbedPageTabItemTheme", 253, 23)?;
     rt::assign_resource_value(tab_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_1, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 253, position: 23 }, ::core::option::Option::Some(priority_1))?;
     // Controls/SimpleControls.xaml(251,12) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -31210,9 +31104,7 @@ fn build_controls_simplecontrols_xaml_deferred_280(
     rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "PART_ScrollViewer", 82, 25)?;
     // Controls/SimpleControls.xaml(83,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerTheme"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 25)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_5);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::StyledElement::theme_property(), "TableViewScrollViewerTheme", 83, 25)?;
     rt::assign_resource_value(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "StyledElement.Theme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 83, position: 25 }, ::core::option::Option::Some(priority_0))?;
     // Controls/SimpleControls.xaml(84,25) VerticalSnapPointsType
     rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_SIMPLECONTROLS_XAML_BINDINGS_202)?;
@@ -31342,9 +31234,7 @@ fn build_controls_simplecontrols_xaml_deferred_285(
     rt::name_element(name_scope.as_ref(), &thumb_0, &thumb_0, "PART_Resizer", 41, 18)?;
     // Controls/SimpleControls.xaml(42,18) Template (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerTemplate"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 42, 18)?;
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::primitives::TemplatedControl::template_property(), "TableViewColumnHeaderResizerTemplate", 42, 18)?;
     rt::assign_resource_value(thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::template_property(), value_1, &rt::ResourceChoice { name: "Template", member: "TemplatedControl.Template", index: 1, unset: false, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IControlTemplate as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 42, position: 18 }, ::core::option::Option::Some(priority_1))?;
     // Controls/SimpleControls.xaml(43,18) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "TableViewColumnResizerWidth", 43, 18)?;
