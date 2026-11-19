@@ -102,11 +102,10 @@ impl DesignerWorkspace {
                     };
                     let result = workspace
                         .apply_curve_drag(&context, &selection, time, value)
-                        .and_then(|time| {
-                            let sample = workspace.session.borrow_mut().seek(time);
-                            workspace.refresh(true);
-                            sample
-                        });
+                        .and_then(|time| workspace.session.borrow_mut().seek(time));
+                    if result.is_ok() || context.check(&workspace).is_err() {
+                        workspace.refresh(true);
+                    }
                     workspace.report(result);
                 }
             },
@@ -121,14 +120,18 @@ impl DesignerWorkspace {
         time: f64,
         value: f64,
     ) -> Result<f64, String> {
-        let easing = self
-            .session
-            .borrow()
+        context.check(self)?;
+        let session = self.session.borrow();
+        if !session.can_manipulate() {
+            return Err("Wait for the current editable animation preview".into());
+        }
+        let easing = session
             .timeline()
             .track(selected.target, &selected.property)
             .and_then(|track| track.keyframes.iter().find(|key| key.time == selected.time))
             .map(|key| key.easing.to_xaml())
             .ok_or("Choose an authored curve key")?;
+        drop(session);
         self.apply_timeline_keyframe(context, selected, time, &value.to_string(), &easing)
     }
 
