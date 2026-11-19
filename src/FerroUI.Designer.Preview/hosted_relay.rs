@@ -7,6 +7,7 @@ use crate::{
     rsx_animation::AuthoredRsxFrame,
 };
 use ferroui_remote_protocol::designer::{
+    DesignKeyframeSelectionResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
@@ -50,6 +51,8 @@ struct Events {
     animation_request: Option<i64>,
     animation_result: Option<DesignAnimationResultMessage>,
     keyframe_result: Option<DesignAnimationAuthoringResult>,
+    keyframe_selection: bool,
+    keyframe_selection_result: Option<DesignKeyframeSelectionResult>,
     curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
     curve_programs: BTreeSet<i64>,
@@ -187,6 +190,7 @@ impl Relay {
             if let Some(catalog) = message.downcast_ref::<DesignAnimationCatalogMessage>() {
                 if state.requested == Some(catalog.revision) {
                     state.animation_supported = true;
+                    state.keyframe_selection = catalog.keyframe_selection == Some(true);
                     state.curve_programs = catalog.programs.iter().filter(|program| program.curve_tracks.is_some())
                         .map(|program| program.id).collect();
                     state.animation_catalog = Some(catalog.clone());
@@ -199,6 +203,11 @@ impl Relay {
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationAuthoringResult>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.keyframe_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignKeyframeSelectionResult>() {
+                if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
+                    state.keyframe_selection_result = Some(outcome.clone());
                     result.1.notify_all();
                 }
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationCurveResult>() {

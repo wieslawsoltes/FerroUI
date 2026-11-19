@@ -16,8 +16,28 @@ impl AnimationCodecRegistry {
         program: &AnimationProgram,
         timeline: &Timeline,
     ) -> Result<String> {
+        self.encode_in_scope(document, program, timeline, false)
+    }
+
+    /// Encode just the authored keys, leaving implicit endpoints to the runtime.
+    pub fn encode_keyframes_for_document(
+        &self,
+        document: &Document,
+        program: &AnimationProgram,
+        timeline: &Timeline,
+    ) -> Result<String> {
+        self.encode_in_scope(document, program, timeline, true)
+    }
+
+    fn encode_in_scope(
+        &self,
+        document: &Document,
+        program: &AnimationProgram,
+        timeline: &Timeline,
+        authored_keys: bool,
+    ) -> Result<String> {
         let original = fragment(document, program.id)?;
-        let generated = self.encode(program, &original, timeline)?;
+        let generated = self.encode_program(program, &original, timeline, authored_keys)?;
         if program.codec.as_deref() == Some(NativeAnimationCodec.id())
             && !timeline.tracks.is_empty()
         {

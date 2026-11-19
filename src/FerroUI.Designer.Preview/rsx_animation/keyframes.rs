@@ -1,3 +1,6 @@
+#[path = "hosted_keyframe_selection.rs"]
+mod hosted_selection;
+
 use super::AuthoredRsxFrame;
 use ferroui_designer::{DesignerSession, TimelinePreviewPose};
 use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, KeyframePaste};

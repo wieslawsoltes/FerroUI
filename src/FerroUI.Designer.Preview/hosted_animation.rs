@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{ClipClock, CurveChannel, CurveMetric, CurveWindow};
+use ferroui_designer_animation::{ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection};
 use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
@@ -61,6 +61,15 @@ pub(crate) struct KeyframeDraft {
     pub(crate) time: f64,
     pub(crate) value: String,
     pub(crate) easing: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct KeyframeSelectionDraft {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+    pub(crate) program: i64,
+    pub(crate) command: KeyframeSelection,
 }
 
 #[derive(Deserialize)]
@@ -160,5 +169,5 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
             })
         })
         .collect::<Vec<_>>();
-    json!({"programs": programs, "targets": targets})
+    json!({"programs": programs, "targets": targets, "keyframeSelection": catalog.keyframe_selection.unwrap_or(false)})
 }

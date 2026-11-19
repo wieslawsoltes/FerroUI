@@ -28,6 +28,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationCatalogMessage, DesignAnimationClip, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
+    DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult, DESIGN_KEYFRAME_SELECTION_QUERY,
     DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_STATE_ROUTES_QUERY,
@@ -39,6 +40,7 @@ use url::Url;
 ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
+    static KEYFRAME_SELECTION: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static CLIPS: Cell<bool> = const { Cell::new(false) };
@@ -54,6 +56,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     let enabled = requested(DESIGN_ANIMATION_QUERY);
     ENABLED.set(enabled);
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
+    KEYFRAME_SELECTION.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_SELECTION_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
@@ -99,6 +102,7 @@ pub(super) fn accept(
     let revision = revision?;
     let mut catalog = DesignAnimationCatalogMessage {
         revision,
+        keyframe_selection: KEYFRAME_SELECTION.get().then_some(true),
         ..Default::default()
     };
     if let Some(source) = source {
@@ -162,6 +166,29 @@ pub(super) fn plan_keyframe(request: &DesignAnimationAuthoringRequest) -> Design
         Err(_) => "The animation codec could not plan this edit".into(),
     };
     DesignAnimationAuthoringResult {
+        revision: request.revision, request: request.request, error: Some(error), ..Default::default()
+    }
+}
+
+pub(super) fn plan_keyframe_selection(request: &DesignKeyframeSelectionRequest) -> DesignKeyframeSelectionResult {
+    let plan = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        if !KEYFRAME_SELECTION.get() {
+            return Err("The application preview did not negotiate keyframe selection editing".into());
+        }
+        ACTIVE.with(|active| {
+            let mut active = active.borrow_mut();
+            let host = active.as_mut().ok_or("Open an app-hosted animation preview first")?;
+            host.claim(request.revision, request.request)?;
+            host.keyframes.as_ref().ok_or("The application preview has no editable animation tracks")?
+                .plan_selection(request)
+        })
+    }));
+    let error = match plan {
+        Ok(Ok(plan)) => return plan,
+        Ok(Err(error)) => error,
+        Err(_) => "The animation codec could not plan this keyframe selection".into(),
+    };
+    DesignKeyframeSelectionResult {
         revision: request.revision, request: request.request, error: Some(error), ..Default::default()
     }
 }

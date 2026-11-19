@@ -158,13 +158,14 @@ fn respond(
             use ferroui_remote_protocol::designer::{
                 DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
                 DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
-                DESIGN_STATE_ROUTES_QUERY,
+                DESIGN_STATE_ROUTES_QUERY, DESIGN_KEYFRAME_SELECTION_QUERY,
             };
             let port = relay.port();
             *hosted = Some(relay);
             let query = [
                 DESIGN_ANIMATION_QUERY,
                 DESIGN_ANIMATION_AUTHORING_QUERY,
+                DESIGN_KEYFRAME_SELECTION_QUERY,
                 DESIGN_ANIMATION_CLIPS_QUERY,
                 DESIGN_ANIMATION_CURVE_QUERY,
                 DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
@@ -183,6 +184,8 @@ fn respond(
             .and_then(|command| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.animate(command))),
         "hostedKeyframe" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_mut().ok_or("Start an app-hosted session")?.plan_keyframe(draft)),
+        "hostedKeyframeSelection" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|draft| hosted.as_mut().ok_or("Start an app-hosted session")?.plan_keyframe_selection(draft)),
         "hostedState" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_state(draft)),
         "hostedClipPlacement" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

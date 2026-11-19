@@ -29,6 +29,7 @@ mod default_message_type_resolver;
 mod design_animation_authoring;
 mod design_animation_curve;
 mod design_animation_messages;
+mod design_keyframe_selection;
 mod design_messages;
 mod error;
 mod event_stash;
@@ -77,6 +78,7 @@ pub mod designer {
     pub use crate::design_animation_authoring::*;
     pub use crate::design_animation_curve::*;
     pub use crate::design_animation_messages::*;
+    pub use crate::design_keyframe_selection::*;
     pub use crate::design_messages::*;
 }
 

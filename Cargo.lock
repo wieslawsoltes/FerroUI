@@ -2022,6 +2022,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-skia",
  "ferroui-win32",
+ "serde_json",
  "url",
  "uuid",
  "xamlx",

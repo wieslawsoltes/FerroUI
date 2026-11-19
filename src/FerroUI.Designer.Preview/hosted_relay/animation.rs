@@ -1,3 +1,6 @@
+#[path = "keyframe_selection.rs"]
+mod keyframe_selection;
+
 use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
 use ferroui_designer_animation::{CurveChannel, CurvePoint};

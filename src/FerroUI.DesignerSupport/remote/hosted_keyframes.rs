@@ -1,3 +1,6 @@
+#[path = "hosted_keyframe_selection.rs"]
+mod selection;
+
 use crate::animation_codecs::with_codecs;
 use ferroui_designer_animation::native::{native_keyframe_options, NativeProgramIndex};
 use ferroui_designer_animation::{
@@ -141,16 +144,7 @@ impl HostedKeyframes {
         let preview = accepted_timeline
             .inspect_keyframe(target, property, location.time)
             .map_err(|error| error.to_string())?;
-        let edits = compose_animation_edit(&self.document, program.id, &source)
-            .map_err(|error| error.to_string())?;
-        let mut candidate = self.document.clone();
-        candidate
-            .apply("Edit application animation keyframe", edits)
-            .map_err(|error| error.to_string())?;
-        let original = self.document.source();
-        let patch = TextPatch::between(original, candidate.source())
-            .map(|patch| DesignAnimationSourcePatch::from_utf8(original, patch.span.range(), patch.replacement))
-            .transpose()?;
+        let patch = self.source_patch(program.id, &source)?;
         Ok(DesignAnimationAuthoringResult {
             revision: request.revision,
             request: request.request,
@@ -159,6 +153,19 @@ impl HostedKeyframes {
             value_kind: format!("{:?}", preview.value_kind),
             error: None,
         })
+    }
+
+    fn source_patch(&self, program: NodeId, source: &str) -> Result<Option<DesignAnimationSourcePatch>, String> {
+        let edits = compose_animation_edit(&self.document, program, source)
+            .map_err(|error| error.to_string())?;
+        let mut candidate = self.document.clone();
+        candidate
+            .apply("Edit application animation keys", edits)
+            .map_err(|error| error.to_string())?;
+        let original = self.document.source();
+        TextPatch::between(original, candidate.source())
+            .map(|patch| DesignAnimationSourcePatch::from_utf8(original, patch.span.range(), patch.replacement))
+            .transpose()
     }
 }
 

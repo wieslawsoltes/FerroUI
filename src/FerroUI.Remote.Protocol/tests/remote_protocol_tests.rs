@@ -18,6 +18,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
+    DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
     ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::input::{
@@ -188,6 +189,7 @@ fn entities() -> Vec<Message> {
                 clip: Some(DesignAnimationClip { delay: 0.5, speed_ratio: 1.0, editable: true }),
             }],
             targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
+            keyframe_selection: Some(true),
         }),
         Arc::new(DesignAnimationRequestMessage {
             revision: 40, request: 31, program: None, targets: None, elapsed: 1.25, restart: true,
@@ -213,6 +215,14 @@ fn entities() -> Vec<Message> {
             revision: 40, request: 33, program: 6, target: 12, property: "CornerRadius".into(),
             channel: Some("top_left".into()),
             start: 0.2, end: 1.8,
+        }),
+        Arc::new(DesignKeyframeSelectionRequest {
+            revision: 40, request: 34, program: 6,
+            command: r#"{"action":"copy_keyframes","keyframes":[]}"#.into(), projected: true,
+        }),
+        Arc::new(DesignKeyframeSelectionResult {
+            revision: 40, request: 34, clipboard: Some("typed clipboard".into()),
+            timeline: Some("typed timeline".into()), ..Default::default()
         }),
         Arc::new(DesignAnimationCurveResult {
             revision: 40, request: 33,

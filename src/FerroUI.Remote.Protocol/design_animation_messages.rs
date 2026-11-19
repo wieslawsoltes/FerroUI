@@ -15,6 +15,7 @@ pub struct DesignAnimationCatalogMessage {
     pub revision: i64,
     pub programs: Vec<DesignAnimationProgram>,
     pub targets: Vec<DesignAnimationTarget>,
+    pub keyframe_selection: Option<bool>,
 }
 
 ferro_remote_message_guid!(
@@ -25,6 +26,7 @@ bson_class!(DesignAnimationCatalogMessage as "DesignAnimationCatalogMessage" {
     "Revision" => revision: i64,
     "Programs" => programs: Vec<DesignAnimationProgram>,
     "Targets" => targets: Vec<DesignAnimationTarget>,
+    "KeyframeSelection" => keyframe_selection: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

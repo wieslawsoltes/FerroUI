@@ -9,6 +9,7 @@ use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
+    DesignKeyframeSelectionRequest,
     DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage, ExceptionDetails, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::viewport::{
@@ -354,6 +355,12 @@ impl RemoteDesignerEntryPoint {
 
     /// The part of `OnTransportMessage` that runs on the UI thread.
     fn on_transport_message(arg: &Message) {
+        if let Some(request) = arg.downcast_ref::<DesignKeyframeSelectionRequest>() {
+            if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
+                transport.send(Arc::new(hosted_animation::plan_keyframe_selection(request)));
+            }
+            return;
+        }
         if let Some(request) = arg.downcast_ref::<DesignAnimationCurveRequest>() {
             if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
                 transport.send(Arc::new(hosted_animation::curve(request)));

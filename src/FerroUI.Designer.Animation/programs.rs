@@ -135,6 +135,16 @@ impl AnimationCodecRegistry {
         original: &str,
         timeline: &Timeline,
     ) -> Result<String> {
+        self.encode_program(program, original, timeline, false)
+    }
+
+    fn encode_program(
+        &self,
+        program: &AnimationProgram,
+        original: &str,
+        timeline: &Timeline,
+        authored_keys: bool,
+    ) -> Result<String> {
         timeline.validate()?;
         let id = program.codec.as_deref().ok_or_else(|| {
             AnimationError("Select a codec or edit this opaque program's source".into())
@@ -144,7 +154,12 @@ impl AnimationCodecRegistry {
             .iter()
             .find(|codec| codec.id() == id)
             .ok_or_else(|| AnimationError(format!("Animation codec {id} is not registered")))?;
-        let generated = codec.encode(original, timeline, program.primary_target())?;
+        let target = program.primary_target();
+        let generated = if authored_keys && id == NativeAnimationCodec.id() {
+            retain_native_annotations(original, timeline.to_xaml_authored_keys(target)?)?
+        } else {
+            codec.encode(original, timeline, target)?
+        };
         let original_document = Document::new(original).map_err(core_error)?;
         let root = original_document
             .ast()
@@ -227,42 +242,45 @@ impl AnimationCodec for NativeAnimationCodec {
         Timeline::import_xaml(document.source(), target, options)
     }
     fn encode(&self, original: &str, timeline: &Timeline, target: NodeId) -> Result<String> {
-        let mut generated = timeline.to_xaml(target)?;
-        // Timeline edits may normalize keyframe formatting, but authored comments are retained.
-        if let Ok(document) = Document::new(original) {
-            let comments = document
-                .ast()
-                .nodes()
-                .filter(|node| node.kind == NodeKind::Comment)
-                .map(|node| &original[node.span.start..node.span.end])
-                .collect::<Vec<_>>()
-                .join("\n");
-            if !comments.is_empty() {
-                let offset = generated.find('>').expect("generated XML") + 1;
-                generated.insert_str(offset, &format!("\n{comments}"));
-            }
-        }
-        let original_document = Document::new(original).map_err(core_error)?;
-        let original_root = original_document
-            .ast()
-            .node(original_document.ast().root())
-            .expect("root");
-        let mut output = Document::new(generated).map_err(core_error)?;
-        let edits = original_root
-            .attributes
-            .iter()
-            .filter(|attribute| attribute.is_namespace() || xaml_annotation(attribute))
-            .map(|attribute| Edit::SetAttribute {
-                node: output.ast().root(),
-                name: attribute.name.clone(),
-                value: attribute.value.clone(),
-            })
-            .collect::<Vec<_>>();
-        output
-            .apply("Retain animation identity", edits)
-            .map_err(core_error)?;
-        Ok(output.source().into())
+        retain_native_annotations(original, timeline.to_xaml(target)?)
     }
+}
+
+fn retain_native_annotations(original: &str, mut generated: String) -> Result<String> {
+    // Timeline edits may normalize keyframe formatting, but authored comments are retained.
+    if let Ok(document) = Document::new(original) {
+        let comments = document
+            .ast()
+            .nodes()
+            .filter(|node| node.kind == NodeKind::Comment)
+            .map(|node| &original[node.span.start..node.span.end])
+            .collect::<Vec<_>>()
+            .join("\n");
+        if !comments.is_empty() {
+            let offset = generated.find('>').expect("generated XML") + 1;
+            generated.insert_str(offset, &format!("\n{comments}"));
+        }
+    }
+    let original_document = Document::new(original).map_err(core_error)?;
+    let original_root = original_document
+        .ast()
+        .node(original_document.ast().root())
+        .expect("root");
+    let mut output = Document::new(generated).map_err(core_error)?;
+    let edits = original_root
+        .attributes
+        .iter()
+        .filter(|attribute| attribute.is_namespace() || xaml_annotation(attribute))
+        .map(|attribute| Edit::SetAttribute {
+            node: output.ast().root(),
+            name: attribute.name.clone(),
+            value: attribute.value.clone(),
+        })
+        .collect::<Vec<_>>();
+    output
+        .apply("Retain animation identity", edits)
+        .map_err(core_error)?;
+    Ok(output.source().into())
 }
 fn xaml_identity(attribute: &ferroui_designer_core::Attribute) -> bool {
     attribute.namespace_uri.as_deref() == Some("http://schemas.microsoft.com/winfx/2006/xaml")
