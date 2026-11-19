@@ -40,7 +40,7 @@ pub fn build_x_bind_root_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_ROOT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_root.xaml(3,13) Tag
     stack_panel_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("construction value"));
     // x_bind_root.xaml(1,2) Column
@@ -51,10 +51,9 @@ pub fn build_x_bind_root_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_root.xaml(4,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
-    rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "initial", 4, 14)?;
     // x_bind_root.xaml(4,31) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -64,18 +63,16 @@ pub fn build_x_bind_root_xaml(
     let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 4, 31)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 4, 31)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 4, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 4, 4)?;
     // x_bind_root.xaml(5,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_root.xaml(5,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_root.xaml(5,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
-    rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 5, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "mirror", 5, 14)?;
     // x_bind_root.xaml(5,30) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -87,18 +84,16 @@ pub fn build_x_bind_root_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::OneWay);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 5, 30)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 5, 30)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 5, 4)?;
     // x_bind_root.xaml(6,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_root.xaml(6,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_root.xaml(6,12) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
-    rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 6, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "editor", 6, 12)?;
     // x_bind_root.xaml(6,28) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -110,18 +105,16 @@ pub fn build_x_bind_root_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 28)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_2, 6, 28)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 6, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 6, 4)?;
     // x_bind_root.xaml(7,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_root.xaml(7,4) TextBox
     let text_box_1 = ::ferroui_controls::TextBox::new();
     text_box_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_box_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_1.clone()));
+    rt::push_parent(&context, &text_box_1);
     // x_bind_root.xaml(7,12) Name
-    text_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("live")));
-    rt::register_name_value(name_scope.as_ref(), "live", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_1)), 7, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_1, &text_box_1, "live", 7, 12)?;
     // x_bind_root.xaml(7,26) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -135,18 +128,16 @@ pub fn build_x_bind_root_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_UpdateSourceTrigger(&x_bind_extension_3, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 26)?;
     rt::bind(text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_3, 7, 26)?;
-    context.pop_parent();
-    rt::invoked(text_box_1.try_end_init(), 7, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_1, 7, 4)?;
     // x_bind_root.xaml(8,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_root.xaml(8,4) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_root.xaml(8,14) Name
-    text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("named")));
-    rt::register_name_value(name_scope.as_ref(), "named", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 8, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_2, &text_block_2, "named", 8, 14)?;
     // x_bind_root.xaml(8,29) Text
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -159,18 +150,16 @@ pub fn build_x_bind_root_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_4, ::ferroui_base::data::BindingMode::OneWay);
     let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 29)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_4, 8, 29)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 8, 4)?;
     // x_bind_root.xaml(9,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_root.xaml(9,4) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_3.clone()));
+    rt::push_parent(&context, &text_block_3);
     // x_bind_root.xaml(9,14) Name
-    text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("attached")));
-    rt::register_name_value(name_scope.as_ref(), "attached", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 9, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_3, &text_block_3, "attached", 9, 14)?;
     // x_bind_root.xaml(9,32) Tag (setter chosen at run time)
     let path_5 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -185,10 +174,8 @@ pub fn build_x_bind_root_xaml(
     } else {
         text_block_3.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Control.set_Tag", 0, 9, 32)?);
     }
-    context.pop_parent();
-    rt::invoked(text_block_3.try_end_init(), 9, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 9, 4)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
@@ -212,7 +199,7 @@ pub fn build_x_bind_template_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_TEMPLATE_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // x_bind_template.xaml(4,6) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
@@ -223,8 +210,7 @@ pub fn build_x_bind_template_xaml(
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &content_control_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(content_control_0)
 }
@@ -237,16 +223,16 @@ fn build_x_bind_template_xaml_deferred_0(
     let name_scope = context.name_scope_field();
     // x_bind_template.xaml(5,8) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
+    rt::set_intermediate_root(&context, &stack_panel_0);
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_template.xaml(6,10) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_template.xaml(6,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_template.xaml(6,20) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -258,18 +244,16 @@ fn build_x_bind_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 20)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 6, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 6, 10)?;
     // x_bind_template.xaml(7,10) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_template.xaml(7,10) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_template.xaml(7,18) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
-    rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 7, 18)?;
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "editor", 7, 18)?;
     // x_bind_template.xaml(7,34) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -285,15 +269,14 @@ fn build_x_bind_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_1, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 34)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_1, 7, 34)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 7, 10)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 7, 10)?;
     // x_bind_template.xaml(8,10) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_template.xaml(8,10) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_template.xaml(8,20) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -307,15 +290,14 @@ fn build_x_bind_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_2, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 20)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 8, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 8, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 8, 10)?;
     // x_bind_template.xaml(9,10) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_template.xaml(9,10) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_template.xaml(9,20) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -330,10 +312,8 @@ fn build_x_bind_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_3, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 20)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_3, 9, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 9, 10)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 5, 8)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 9, 10)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 5, 8)?;
     ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
 
@@ -356,7 +336,7 @@ pub fn build_x_bind_functions_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_FUNCTIONS_XAML_DOCUMENT, rt::to_value(x_bind_page_0.clone()));
     let name_scope = context.name_scope_field();
     x_bind_page_0.begin_init();
-    context.push_parent(rt::to_value(x_bind_page_0.clone()));
+    rt::push_parent(&context, &x_bind_page_0);
     // x_bind_functions.xaml(4,18) Title
     x_bind_page_0.set_value(::ferroui_markup_xaml_tests::support::x_bind::XBindPage::title_property(), ::core::option::Option::Some(::std::string::String::from("Ada")));
     // x_bind_functions.xaml(5,4) Children
@@ -365,10 +345,9 @@ pub fn build_x_bind_functions_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_functions.xaml(5,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("rootOnce")));
-    rt::register_name_value(name_scope.as_ref(), "rootOnce", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 5, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "rootOnce", 5, 14)?;
     // x_bind_functions.xaml(5,32) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -383,18 +362,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_1.clone());
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 5, 32)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 5, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 5, 4)?;
     // x_bind_functions.xaml(6,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(6,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_functions.xaml(6,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("rootFunction")));
-    rt::register_name_value(name_scope.as_ref(), "rootFunction", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 6, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "rootFunction", 6, 14)?;
     // x_bind_functions.xaml(6,36) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -411,18 +388,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::OneWay);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 36)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 6, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 6, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 6, 4)?;
     // x_bind_functions.xaml(7,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(7,4) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_functions.xaml(7,14) Name
-    text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("pathFunction")));
-    rt::register_name_value(name_scope.as_ref(), "pathFunction", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 7, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_2, &text_block_2, "pathFunction", 7, 14)?;
     // x_bind_functions.xaml(7,36) Text
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -440,18 +415,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 36)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 7, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 7, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 7, 4)?;
     // x_bind_functions.xaml(8,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(8,4) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_3.clone()));
+    rt::push_parent(&context, &text_block_3);
     // x_bind_functions.xaml(8,14) Name
-    text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("modelArgument")));
-    rt::register_name_value(name_scope.as_ref(), "modelArgument", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 8, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_3, &text_block_3, "modelArgument", 8, 14)?;
     // x_bind_functions.xaml(8,37) Text
     let path_6 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -469,18 +442,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_3, ::ferroui_base::data::BindingMode::OneWay);
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 37)?;
     rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_3, 8, 37)?;
-    context.pop_parent();
-    rt::invoked(text_block_3.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 8, 4)?;
     // x_bind_functions.xaml(9,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(9,4) TextBlock
     let text_block_4 = ::ferroui_controls::TextBlock::new();
     text_block_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_4).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_4.clone()));
+    rt::push_parent(&context, &text_block_4);
     // x_bind_functions.xaml(9,14) Name
-    text_block_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("staticFunction")));
-    rt::register_name_value(name_scope.as_ref(), "staticFunction", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_4)), 9, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_4, &text_block_4, "staticFunction", 9, 14)?;
     // x_bind_functions.xaml(9,38) Text
     let path_8 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -497,18 +468,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_4, ::ferroui_base::data::BindingMode::OneWay);
     let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 38)?;
     rt::bind(text_block_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_4, 9, 38)?;
-    context.pop_parent();
-    rt::invoked(text_block_4.try_end_init(), 9, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_4, 9, 4)?;
     // x_bind_functions.xaml(10,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(10,4) TextBlock
     let text_block_5 = ::ferroui_controls::TextBlock::new();
     text_block_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&text_block_5).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_5.clone()));
+    rt::push_parent(&context, &text_block_5);
     // x_bind_functions.xaml(10,14) Name
-    text_block_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("literals")));
-    rt::register_name_value(name_scope.as_ref(), "literals", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_5)), 10, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_5, &text_block_5, "literals", 10, 14)?;
     // x_bind_functions.xaml(10,32) Text
     let path_10 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -518,18 +487,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_5 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_10.clone());
     let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_5, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 10, 32)?;
     rt::bind(text_block_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_5, 10, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_5.try_end_init(), 10, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_5, 10, 4)?;
     // x_bind_functions.xaml(11,4) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(11,4) TextBlock
     let text_block_6 = ::ferroui_controls::TextBlock::new();
     text_block_6.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&text_block_6).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_6.clone()));
+    rt::push_parent(&context, &text_block_6);
     // x_bind_functions.xaml(11,14) Name
-    text_block_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("notifying")));
-    rt::register_name_value(name_scope.as_ref(), "notifying", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_6)), 11, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_6, &text_block_6, "notifying", 11, 14)?;
     // x_bind_functions.xaml(11,33) Text
     let path_11 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -542,18 +509,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_6, ::ferroui_base::data::BindingMode::OneWay);
     let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_6, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 11, 33)?;
     rt::bind(text_block_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_6, 11, 33)?;
-    context.pop_parent();
-    rt::invoked(text_block_6.try_end_init(), 11, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_6, 11, 4)?;
     // x_bind_functions.xaml(12,4) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(12,4) TextBlock
     let text_block_7 = ::ferroui_controls::TextBlock::new();
     text_block_7.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&text_block_7).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_7.clone()));
+    rt::push_parent(&context, &text_block_7);
     // x_bind_functions.xaml(12,14) Name
-    text_block_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("namedArgument")));
-    rt::register_name_value(name_scope.as_ref(), "namedArgument", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_7)), 12, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_7, &text_block_7, "namedArgument", 12, 14)?;
     // x_bind_functions.xaml(12,37) Text
     let path_12 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -571,18 +536,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_7, ::ferroui_base::data::BindingMode::OneWay);
     let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_7, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 12, 37)?;
     rt::bind(text_block_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_7, 12, 37)?;
-    context.pop_parent();
-    rt::invoked(text_block_7.try_end_init(), 12, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_7, 12, 4)?;
     // x_bind_functions.xaml(13,4) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(13,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_functions.xaml(13,12) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("bindBack")));
-    rt::register_name_value(name_scope.as_ref(), "bindBack", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 13, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "bindBack", 13, 12)?;
     // x_bind_functions.xaml(13,30) Text
     let path_14 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -603,18 +566,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_UpdateSourceTrigger(&x_bind_extension_8, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
     let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_8, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 13, 30)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_8, 13, 30)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 13, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 13, 4)?;
     // x_bind_functions.xaml(14,4) Children
     let children_collection_9 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(14,4) TextBox
     let text_box_1 = ::ferroui_controls::TextBox::new();
     text_box_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&text_box_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_1.clone()));
+    rt::push_parent(&context, &text_box_1);
     // x_bind_functions.xaml(14,12) Name
-    text_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("pathBindBack")));
-    rt::register_name_value(name_scope.as_ref(), "pathBindBack", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_1)), 14, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_1, &text_box_1, "pathBindBack", 14, 12)?;
     // x_bind_functions.xaml(14,34) Text
     let path_16 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -642,18 +603,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_UpdateSourceTrigger(&x_bind_extension_9, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
     let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_9, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 14, 34)?;
     rt::bind(text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_9, 14, 34)?;
-    context.pop_parent();
-    rt::invoked(text_box_1.try_end_init(), 14, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_1, 14, 4)?;
     // x_bind_functions.xaml(15,4) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(15,4) TextBox
     let text_box_2 = ::ferroui_controls::TextBox::new();
     text_box_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&text_box_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_2.clone()));
+    rt::push_parent(&context, &text_box_2);
     // x_bind_functions.xaml(15,12) Name
-    text_box_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("staticBindBack")));
-    rt::register_name_value(name_scope.as_ref(), "staticBindBack", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_2)), 15, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_2, &text_box_2, "staticBindBack", 15, 12)?;
     // x_bind_functions.xaml(15,36) Text
     let path_19 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -672,18 +631,16 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_BindBack(&x_bind_extension_10, ::core::option::Option::Some(::std::string::String::from("local:XBindHelpers.Store")));
     let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_10, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 15, 36)?;
     rt::bind(text_box_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_10, 15, 36)?;
-    context.pop_parent();
-    rt::invoked(text_box_2.try_end_init(), 15, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_2, 15, 4)?;
     // x_bind_functions.xaml(16,4) Children
     let children_collection_11 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(16,4) TextBlock
     let text_block_8 = ::ferroui_controls::TextBlock::new();
     text_block_8.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&text_block_8).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_8.clone()));
+    rt::push_parent(&context, &text_block_8);
     // x_bind_functions.xaml(16,14) Name
-    text_block_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("staticMember")));
-    rt::register_name_value(name_scope.as_ref(), "staticMember", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_8)), 16, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_8, &text_block_8, "staticMember", 16, 14)?;
     // x_bind_functions.xaml(16,36) Text
     let path_21 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -693,18 +650,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_11 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_21.clone());
     let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_11, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 16, 36)?;
     rt::bind(text_block_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_11, 16, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_8.try_end_init(), 16, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_8, 16, 4)?;
     // x_bind_functions.xaml(17,4) Children
     let children_collection_12 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(17,4) TextBlock
     let text_block_9 = ::ferroui_controls::TextBlock::new();
     text_block_9.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&text_block_9).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_9.clone()));
+    rt::push_parent(&context, &text_block_9);
     // x_bind_functions.xaml(17,14) Name
-    text_block_9.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("index")));
-    rt::register_name_value(name_scope.as_ref(), "index", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_9)), 17, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_9, &text_block_9, "index", 17, 14)?;
     // x_bind_functions.xaml(17,29) Text
     let path_22 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -716,18 +671,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_12 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_22.clone());
     let provided_12 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_12, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 17, 29)?;
     rt::bind(text_block_9.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_12, 17, 29)?;
-    context.pop_parent();
-    rt::invoked(text_block_9.try_end_init(), 17, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_9, 17, 4)?;
     // x_bind_functions.xaml(18,4) Children
     let children_collection_13 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(18,4) TextBlock
     let text_block_10 = ::ferroui_controls::TextBlock::new();
     text_block_10.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&text_block_10).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_10.clone()));
+    rt::push_parent(&context, &text_block_10);
     // x_bind_functions.xaml(18,14) Name
-    text_block_10.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("key")));
-    rt::register_name_value(name_scope.as_ref(), "key", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_10)), 18, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_10, &text_block_10, "key", 18, 14)?;
     // x_bind_functions.xaml(18,27) Text
     let path_23 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -739,18 +692,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_13 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_23.clone());
     let provided_13 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_13, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 18, 27)?;
     rt::bind(text_block_10.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_13, 18, 27)?;
-    context.pop_parent();
-    rt::invoked(text_block_10.try_end_init(), 18, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_10, 18, 4)?;
     // x_bind_functions.xaml(19,4) Children
     let children_collection_14 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(19,4) TextBlock
     let text_block_11 = ::ferroui_controls::TextBlock::new();
     text_block_11.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&text_block_11).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_11.clone()));
+    rt::push_parent(&context, &text_block_11);
     // x_bind_functions.xaml(19,14) Name
-    text_block_11.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("interfaceMember")));
-    rt::register_name_value(name_scope.as_ref(), "interfaceMember", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_11)), 19, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_11, &text_block_11, "interfaceMember", 19, 14)?;
     // x_bind_functions.xaml(19,39) Text
     let path_24 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -761,18 +712,16 @@ pub fn build_x_bind_functions_xaml(
     let x_bind_extension_14 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_24.clone());
     let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_14, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 19, 39)?;
     rt::bind(text_block_11.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_14, 19, 39)?;
-    context.pop_parent();
-    rt::invoked(text_block_11.try_end_init(), 19, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_11, 19, 4)?;
     // x_bind_functions.xaml(20,4) Children
     let children_collection_15 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_functions.xaml(20,4) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     content_control_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_15, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // x_bind_functions.xaml(20,19) Name
-    content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("itemHost")));
-    rt::register_name_value(name_scope.as_ref(), "itemHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 20, 19)?;
+    rt::name_element(name_scope.as_ref(), &content_control_0, &content_control_0, "itemHost", 20, 19)?;
     // x_bind_functions.xaml(22,8) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
@@ -783,10 +732,8 @@ pub fn build_x_bind_functions_xaml(
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 20, 4)?;
-    context.pop_parent();
-    rt::invoked(x_bind_page_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &content_control_0, 20, 4)?;
+    rt::pop_parent_end_init(&context, &x_bind_page_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&x_bind_page_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(x_bind_page_0)
 }
@@ -798,9 +745,9 @@ fn build_x_bind_functions_xaml_deferred_0(
     let context = rt::deferred_context(service_provider, &BUILD_X_BIND_FUNCTIONS_XAML_DOCUMENT);
     // x_bind_functions.xaml(23,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
+    rt::set_intermediate_root(&context, &text_block_0);
     text_block_0.begin_init();
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_functions.xaml(23,20) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -819,8 +766,7 @@ fn build_x_bind_functions_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_0, ::core::option::Option::Some(rt::markup_handle(<::ferroui_markup_xaml_tests::support::x_bind::XBindModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 23, 20)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 23, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 23, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 23, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 
@@ -843,17 +789,16 @@ pub fn build_x_bind_casts_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_CASTS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_casts.xaml(4,4) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(4,4) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_casts.xaml(4,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castRoot")));
-    rt::register_name_value(name_scope.as_ref(), "castRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "castRoot", 4, 14)?;
     // x_bind_casts.xaml(4,32) Tag (setter chosen at run time)
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -871,18 +816,16 @@ pub fn build_x_bind_casts_xaml(
     } else {
         text_block_0.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Control.set_Tag", 0, 4, 32)?);
     }
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 4, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 4, 4)?;
     // x_bind_casts.xaml(5,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(5,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_casts.xaml(5,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castMember")));
-    rt::register_name_value(name_scope.as_ref(), "castMember", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 5, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "castMember", 5, 14)?;
     // x_bind_casts.xaml(5,34) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -896,18 +839,16 @@ pub fn build_x_bind_casts_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::OneWay);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 5, 34)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 5, 34)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 5, 4)?;
     // x_bind_casts.xaml(6,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(6,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_casts.xaml(6,12) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castTwoWay")));
-    rt::register_name_value(name_scope.as_ref(), "castTwoWay", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 6, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "castTwoWay", 6, 12)?;
     // x_bind_casts.xaml(6,32) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -923,18 +864,16 @@ pub fn build_x_bind_casts_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_UpdateSourceTrigger(&x_bind_extension_2, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 32)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_2, 6, 32)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 6, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 6, 4)?;
     // x_bind_casts.xaml(7,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(7,4) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_casts.xaml(7,14) Name
-    text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castLeaf")));
-    rt::register_name_value(name_scope.as_ref(), "castLeaf", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 7, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_2, &text_block_2, "castLeaf", 7, 14)?;
     // x_bind_casts.xaml(7,32) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -947,18 +886,16 @@ pub fn build_x_bind_casts_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_3, ::ferroui_base::data::BindingMode::OneWay);
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 32)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_3, 7, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 7, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 7, 4)?;
     // x_bind_casts.xaml(8,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(8,4) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_3.clone()));
+    rt::push_parent(&context, &text_block_3);
     // x_bind_casts.xaml(8,14) Name
-    text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castFunction")));
-    rt::register_name_value(name_scope.as_ref(), "castFunction", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 8, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_3, &text_block_3, "castFunction", 8, 14)?;
     // x_bind_casts.xaml(8,36) Text
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -979,18 +916,16 @@ pub fn build_x_bind_casts_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_4, ::ferroui_base::data::BindingMode::OneWay);
     let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 36)?;
     rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_4, 8, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_3.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 8, 4)?;
     // x_bind_casts.xaml(9,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(9,4) TextBlock
     let text_block_4 = ::ferroui_controls::TextBlock::new();
     text_block_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&text_block_4).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_4.clone()));
+    rt::push_parent(&context, &text_block_4);
     // x_bind_casts.xaml(9,14) Name
-    text_block_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("castInterface")));
-    rt::register_name_value(name_scope.as_ref(), "castInterface", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_4)), 9, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_4, &text_block_4, "castInterface", 9, 14)?;
     // x_bind_casts.xaml(9,37) Text
     let path_6 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1001,8 +936,7 @@ pub fn build_x_bind_casts_xaml(
     let x_bind_extension_5 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_6.clone());
     let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_5, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 37)?;
     rt::bind(text_block_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_5, 9, 37)?;
-    context.pop_parent();
-    rt::invoked(text_block_4.try_end_init(), 9, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_4, 9, 4)?;
     // x_bind_casts.xaml(10,4) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(10,4) Border
@@ -1010,21 +944,19 @@ pub fn build_x_bind_casts_xaml(
     border_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // x_bind_casts.xaml(10,11) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("rowHolder")));
-    rt::register_name_value(name_scope.as_ref(), "rowHolder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 10, 11)?;
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "rowHolder", 10, 11)?;
     // x_bind_casts.xaml(10,4) Row
     border_0.set_value(::ferroui_controls::Grid::row_property(), 4_i32);
-    rt::invoked(border_0.try_end_init(), 10, 4)?;
+    rt::end_init(&border_0, 10, 4)?;
     // x_bind_casts.xaml(11,4) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_casts.xaml(11,4) TextBlock
     let text_block_5 = ::ferroui_controls::TextBlock::new();
     text_block_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&text_block_5).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_5.clone()));
+    rt::push_parent(&context, &text_block_5);
     // x_bind_casts.xaml(11,14) Name
-    text_block_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("attachedPath")));
-    rt::register_name_value(name_scope.as_ref(), "attachedPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_5)), 11, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_5, &text_block_5, "attachedPath", 11, 14)?;
     // x_bind_casts.xaml(11,36) Tag (setter chosen at run time)
     let path_7 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1040,10 +972,8 @@ pub fn build_x_bind_casts_xaml(
     } else {
         text_block_5.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Control.set_Tag", 0, 11, 36)?);
     }
-    context.pop_parent();
-    rt::invoked(text_block_5.try_end_init(), 11, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &text_block_5, 11, 4)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
@@ -1067,7 +997,7 @@ pub fn build_x_bind_converters_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_CONVERTERS_XAML_DOCUMENT, rt::to_value(x_bind_page_0.clone()));
     let name_scope = context.name_scope_field();
     x_bind_page_0.begin_init();
-    context.push_parent(rt::to_value(x_bind_page_0.clone()));
+    rt::push_parent(&context, &x_bind_page_0);
     // x_bind_converters.xaml(4,18) Title
     x_bind_page_0.set_value(::ferroui_markup_xaml_tests::support::x_bind::XBindPage::title_property(), ::core::option::Option::Some(::std::string::String::from("Ada")));
     // x_bind_converters.xaml(6,6) Resources (resource)
@@ -1080,10 +1010,9 @@ pub fn build_x_bind_converters_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_converters.xaml(8,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("converted")));
-    rt::register_name_value(name_scope.as_ref(), "converted", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 8, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "converted", 8, 14)?;
     // x_bind_converters.xaml(8,33) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1101,18 +1030,16 @@ pub fn build_x_bind_converters_xaml(
     context.pop_parent();
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 33)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 8, 33)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 8, 4)?;
     // x_bind_converters.xaml(9,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(9,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_converters.xaml(9,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("parameter")));
-    rt::register_name_value(name_scope.as_ref(), "parameter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 9, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "parameter", 9, 14)?;
     // x_bind_converters.xaml(9,33) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1133,18 +1060,16 @@ pub fn build_x_bind_converters_xaml(
     context.pop_parent();
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 33)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_3, 9, 33)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 9, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 9, 4)?;
     // x_bind_converters.xaml(10,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(10,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_converters.xaml(10,12) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("convertBack")));
-    rt::register_name_value(name_scope.as_ref(), "convertBack", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 10, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "convertBack", 10, 12)?;
     // x_bind_converters.xaml(10,33) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1166,18 +1091,16 @@ pub fn build_x_bind_converters_xaml(
     context.pop_parent();
     let provided_5 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 10, 33)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_5, 10, 33)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 10, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 10, 4)?;
     // x_bind_converters.xaml(11,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(11,4) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_converters.xaml(11,14) Name
-    text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("fallbackOnce")));
-    rt::register_name_value(name_scope.as_ref(), "fallbackOnce", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 11, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_2, &text_block_2, "fallbackOnce", 11, 14)?;
     // x_bind_converters.xaml(11,36) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1191,18 +1114,16 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_FallbackValue(&x_bind_extension_3, rt::string_object("no model"));
     let provided_6 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 11, 36)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_6, 11, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 11, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 11, 4)?;
     // x_bind_converters.xaml(12,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(12,4) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_3.clone()));
+    rt::push_parent(&context, &text_block_3);
     // x_bind_converters.xaml(12,14) Name
-    text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("fallback")));
-    rt::register_name_value(name_scope.as_ref(), "fallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 12, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_3, &text_block_3, "fallback", 12, 14)?;
     // x_bind_converters.xaml(12,32) Text
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1218,18 +1139,16 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_FallbackValue(&x_bind_extension_4, rt::string_object("no model"));
     let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 12, 32)?;
     rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_7, 12, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_3.try_end_init(), 12, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 12, 4)?;
     // x_bind_converters.xaml(13,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(13,4) TextBox
     let text_box_1 = ::ferroui_controls::TextBox::new();
     text_box_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&text_box_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_1.clone()));
+    rt::push_parent(&context, &text_box_1);
     // x_bind_converters.xaml(13,12) Name
-    text_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("fallbackTwoWay")));
-    rt::register_name_value(name_scope.as_ref(), "fallbackTwoWay", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_1)), 13, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_1, &text_box_1, "fallbackTwoWay", 13, 12)?;
     // x_bind_converters.xaml(13,36) Text
     let path_5 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1247,18 +1166,16 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_FallbackValue(&x_bind_extension_5, rt::string_object("no model"));
     let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_5, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 13, 36)?;
     rt::bind(text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_8, 13, 36)?;
-    context.pop_parent();
-    rt::invoked(text_box_1.try_end_init(), 13, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_1, 13, 4)?;
     // x_bind_converters.xaml(14,4) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(14,4) TextBlock
     let text_block_4 = ::ferroui_controls::TextBlock::new();
     text_block_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&text_block_4).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_4.clone()));
+    rt::push_parent(&context, &text_block_4);
     // x_bind_converters.xaml(14,14) Name
-    text_block_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("nullFallback")));
-    rt::register_name_value(name_scope.as_ref(), "nullFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_4)), 14, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_4, &text_block_4, "nullFallback", 14, 14)?;
     // x_bind_converters.xaml(14,36) Text
     let path_6 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1274,18 +1191,16 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_FallbackValue(&x_bind_extension_6, ::core::option::Option::None);
     let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_6, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 14, 36)?;
     rt::bind(text_block_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_9, 14, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_4.try_end_init(), 14, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_4, 14, 4)?;
     // x_bind_converters.xaml(15,4) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(15,4) TextBlock
     let text_block_5 = ::ferroui_controls::TextBlock::new();
     text_block_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&text_block_5).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_5.clone()));
+    rt::push_parent(&context, &text_block_5);
     // x_bind_converters.xaml(15,14) Name
-    text_block_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("nullValue")));
-    rt::register_name_value(name_scope.as_ref(), "nullValue", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_5)), 15, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_5, &text_block_5, "nullValue", 15, 14)?;
     // x_bind_converters.xaml(15,33) Text
     let path_7 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1299,18 +1214,16 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_TargetNullValue(&x_bind_extension_7, rt::string_object("untitled"));
     let provided_10 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_7, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 15, 33)?;
     rt::bind(text_block_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_10, 15, 33)?;
-    context.pop_parent();
-    rt::invoked(text_block_5.try_end_init(), 15, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_5, 15, 4)?;
     // x_bind_converters.xaml(16,4) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_converters.xaml(16,4) TextBox
     let text_box_2 = ::ferroui_controls::TextBox::new();
     text_box_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&text_box_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_2.clone()));
+    rt::push_parent(&context, &text_box_2);
     // x_bind_converters.xaml(16,12) Name
-    text_box_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("nullTwoWay")));
-    rt::register_name_value(name_scope.as_ref(), "nullTwoWay", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_2)), 16, 12)?;
+    rt::name_element(name_scope.as_ref(), &text_box_2, &text_box_2, "nullTwoWay", 16, 12)?;
     // x_bind_converters.xaml(16,32) Text
     let path_8 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1326,10 +1239,8 @@ pub fn build_x_bind_converters_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_TargetNullValue(&x_bind_extension_8, rt::string_object("untitled"));
     let provided_11 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_8, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 16, 32)?;
     rt::bind(text_box_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_11, 16, 32)?;
-    context.pop_parent();
-    rt::invoked(text_box_2.try_end_init(), 16, 4)?;
-    context.pop_parent();
-    rt::invoked(x_bind_page_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &text_box_2, 16, 4)?;
+    rt::pop_parent_end_init(&context, &x_bind_page_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&x_bind_page_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(x_bind_page_0)
 }
@@ -1362,7 +1273,7 @@ pub fn build_x_bind_events_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_EVENTS_XAML_DOCUMENT, rt::to_value(x_bind_page_0.clone()));
     let name_scope = context.name_scope_field();
     x_bind_page_0.begin_init();
-    context.push_parent(rt::to_value(x_bind_page_0.clone()));
+    rt::push_parent(&context, &x_bind_page_0);
     // x_bind_events.xaml(4,18) Title
     x_bind_page_0.set_value(::ferroui_markup_xaml_tests::support::x_bind::XBindPage::title_property(), ::core::option::Option::Some(::std::string::String::from("Ada")));
     // x_bind_events.xaml(4,30) Pinged
@@ -1380,10 +1291,9 @@ pub fn build_x_bind_events_xaml(
     let button_0 = ::ferroui_controls::Button::new();
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_0.clone()));
+    rt::push_parent(&context, &button_0);
     // x_bind_events.xaml(5,11) Name
-    button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("regular")));
-    rt::register_name_value(name_scope.as_ref(), "regular", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 5, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_0, &button_0, "regular", 5, 11)?;
     // x_bind_events.xaml(5,28) Click
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1393,18 +1303,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_1 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_1.clone());
     let provided_1 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 5, 28)?;
     rt::x_bind_routed_event(&button_0, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_1, 5, 28)?;
-    context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &button_0, 5, 4)?;
     // x_bind_events.xaml(6,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(6,4) Button
     let button_1 = ::ferroui_controls::Button::new();
     button_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_1.clone()));
+    rt::push_parent(&context, &button_1);
     // x_bind_events.xaml(6,11) Name
-    button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("noArguments")));
-    rt::register_name_value(name_scope.as_ref(), "noArguments", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 6, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_1, &button_1, "noArguments", 6, 11)?;
     // x_bind_events.xaml(6,32) Click
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1414,18 +1322,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_2 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_2.clone());
     let provided_2 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 32)?;
     rt::x_bind_routed_event(&button_1, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_2, 6, 32)?;
-    context.pop_parent();
-    rt::invoked(button_1.try_end_init(), 6, 4)?;
+    rt::pop_parent_end_init(&context, &button_1, 6, 4)?;
     // x_bind_events.xaml(7,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(7,4) Button
     let button_2 = ::ferroui_controls::Button::new();
     button_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_2.clone()));
+    rt::push_parent(&context, &button_2);
     // x_bind_events.xaml(7,11) Name
-    button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("baseArguments")));
-    rt::register_name_value(name_scope.as_ref(), "baseArguments", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 7, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_2, &button_2, "baseArguments", 7, 11)?;
     // x_bind_events.xaml(7,34) Click
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1435,18 +1341,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_3 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_3.clone());
     let provided_3 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 34)?;
     rt::x_bind_routed_event(&button_2, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_3, 7, 34)?;
-    context.pop_parent();
-    rt::invoked(button_2.try_end_init(), 7, 4)?;
+    rt::pop_parent_end_init(&context, &button_2, 7, 4)?;
     // x_bind_events.xaml(8,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(8,4) Button
     let button_3 = ::ferroui_controls::Button::new();
     button_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_3.clone()));
+    rt::push_parent(&context, &button_3);
     // x_bind_events.xaml(8,11) Name
-    button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("modelPath")));
-    rt::register_name_value(name_scope.as_ref(), "modelPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 8, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_3, &button_3, "modelPath", 8, 11)?;
     // x_bind_events.xaml(8,30) Click
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1457,18 +1361,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_4 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_4.clone());
     let provided_4 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 30)?;
     rt::x_bind_routed_event(&button_3, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_4, 8, 30)?;
-    context.pop_parent();
-    rt::invoked(button_3.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &button_3, 8, 4)?;
     // x_bind_events.xaml(9,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(9,4) Button
     let button_4 = ::ferroui_controls::Button::new();
     button_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&button_4).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_4.clone()));
+    rt::push_parent(&context, &button_4);
     // x_bind_events.xaml(9,11) Name
-    button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("currentPath")));
-    rt::register_name_value(name_scope.as_ref(), "currentPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_4)), 9, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_4, &button_4, "currentPath", 9, 11)?;
     // x_bind_events.xaml(9,32) Click
     let path_5 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1479,18 +1381,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_5 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_5.clone());
     let provided_5 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_5, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 32)?;
     rt::x_bind_routed_event(&button_4, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_5, 9, 32)?;
-    context.pop_parent();
-    rt::invoked(button_4.try_end_init(), 9, 4)?;
+    rt::pop_parent_end_init(&context, &button_4, 9, 4)?;
     // x_bind_events.xaml(10,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(10,4) Button
     let button_5 = ::ferroui_controls::Button::new();
     button_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&button_5).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_5.clone()));
+    rt::push_parent(&context, &button_5);
     // x_bind_events.xaml(10,11) Name
-    button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("staticHandler")));
-    rt::register_name_value(name_scope.as_ref(), "staticHandler", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_5)), 10, 11)?;
+    rt::name_element(name_scope.as_ref(), &button_5, &button_5, "staticHandler", 10, 11)?;
     // x_bind_events.xaml(10,34) Click
     let path_6 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1500,18 +1400,16 @@ pub fn build_x_bind_events_xaml(
     let x_bind_extension_6 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_6.clone());
     let provided_6 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_6, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 10, 34)?;
     rt::x_bind_routed_event(&button_5, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_6, 10, 34)?;
-    context.pop_parent();
-    rt::invoked(button_5.try_end_init(), 10, 4)?;
+    rt::pop_parent_end_init(&context, &button_5, 10, 4)?;
     // x_bind_events.xaml(11,4) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(x_bind_page_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_events.xaml(11,4) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     content_control_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // x_bind_events.xaml(11,19) Name
-    content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("itemHost")));
-    rt::register_name_value(name_scope.as_ref(), "itemHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 11, 19)?;
+    rt::name_element(name_scope.as_ref(), &content_control_0, &content_control_0, "itemHost", 11, 19)?;
     // x_bind_events.xaml(13,8) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
@@ -1522,10 +1420,8 @@ pub fn build_x_bind_events_xaml(
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 11, 4)?;
-    context.pop_parent();
-    rt::invoked(x_bind_page_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &content_control_0, 11, 4)?;
+    rt::pop_parent_end_init(&context, &x_bind_page_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&x_bind_page_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(x_bind_page_0)
 }
@@ -1537,9 +1433,9 @@ fn build_x_bind_events_xaml_deferred_0(
     let context = rt::deferred_context(service_provider, &BUILD_X_BIND_EVENTS_XAML_DOCUMENT);
     // x_bind_events.xaml(14,10) Button
     let button_0 = ::ferroui_controls::Button::new();
-    context.set_intermediate_root_object(rt::to_value(button_0.clone()));
+    rt::set_intermediate_root(&context, &button_0);
     button_0.begin_init();
-    context.push_parent(rt::to_value(button_0.clone()));
+    rt::push_parent(&context, &button_0);
     // x_bind_events.xaml(14,17) Click
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1551,8 +1447,7 @@ fn build_x_bind_events_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_0, ::core::option::Option::Some(rt::markup_handle(<::ferroui_markup_xaml_tests::support::x_bind::XBindModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
     let provided_0 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 14, 17)?;
     rt::x_bind_routed_event(&button_0, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_0, 14, 17)?;
-    context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 14, 10)?;
+    rt::pop_parent_end_init(&context, &button_0, 14, 10)?;
     ::core::result::Result::Ok(rt::to_value(button_0.clone()))
 }
 
@@ -1575,7 +1470,7 @@ pub fn build_x_bind_default_mode_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_DEFAULT_MODE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_default_mode.xaml(5,13) Tag
     stack_panel_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("construction value"));
     // x_bind_default_mode.xaml(6,4) Children
@@ -1584,7 +1479,7 @@ pub fn build_x_bind_default_mode_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_default_mode.xaml(6,14) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1596,15 +1491,14 @@ pub fn build_x_bind_default_mode_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_0, ::ferroui_base::data::BindingMode::OneWay);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 14)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 14)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 6, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 6, 4)?;
     // x_bind_default_mode.xaml(7,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_default_mode.xaml(7,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_default_mode.xaml(7,14) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1616,22 +1510,21 @@ pub fn build_x_bind_default_mode_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::OneTime);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 14)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 7, 14)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 7, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 7, 4)?;
     // x_bind_default_mode.xaml(8,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_default_mode.xaml(8,4) StackPanel
     let stack_panel_1 = ::ferroui_controls::StackPanel::new();
     stack_panel_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(stack_panel_1.clone()));
+    rt::push_parent(&context, &stack_panel_1);
     // x_bind_default_mode.xaml(9,6) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_default_mode.xaml(9,6) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_default_mode.xaml(9,16) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1643,17 +1536,15 @@ pub fn build_x_bind_default_mode_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::OneTime);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 16)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 9, 16)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 9, 6)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_1.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 9, 6)?;
+    rt::pop_parent_end_init(&context, &stack_panel_1, 8, 4)?;
     // x_bind_default_mode.xaml(11,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_default_mode.xaml(11,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // x_bind_default_mode.xaml(11,39) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1667,15 +1558,14 @@ pub fn build_x_bind_default_mode_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_3, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 11, 39)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_3, 11, 39)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 11, 4)?;
+    rt::pop_parent_end_init(&context, &text_box_0, 11, 4)?;
     // x_bind_default_mode.xaml(12,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_default_mode.xaml(12,4) Button
     let button_0 = ::ferroui_controls::Button::new();
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(button_0.clone()));
+    rt::push_parent(&context, &button_0);
     // x_bind_default_mode.xaml(12,11) Click
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1685,10 +1575,8 @@ pub fn build_x_bind_default_mode_xaml(
     let x_bind_extension_4 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_4.clone());
     let provided_4 = rt::provide_value_invoked(&context, rt::boxed(::std::string::String::from("Click")), &x_bind_extension_4, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 12, 11)?;
     rt::x_bind_routed_event(&button_0, &::ferroui_controls::Button::__markup_field_ClickEvent(), provided_4, 12, 11)?;
-    context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 12, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &button_0, 12, 4)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
@@ -1712,7 +1600,7 @@ pub fn build_x_bind_phases_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_PHASES_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // x_bind_phases.xaml(4,6) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
@@ -1723,8 +1611,7 @@ pub fn build_x_bind_phases_xaml(
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &content_control_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(content_control_0)
 }
@@ -1736,16 +1623,16 @@ fn build_x_bind_phases_xaml_deferred_0(
     let context = rt::deferred_context(service_provider, &BUILD_X_BIND_PHASES_XAML_DOCUMENT);
     // x_bind_phases.xaml(5,8) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
+    rt::set_intermediate_root(&context, &stack_panel_0);
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_phases.xaml(6,10) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_phases.xaml(6,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_phases.xaml(6,20) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1757,15 +1644,14 @@ fn build_x_bind_phases_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 20)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 6, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 6, 10)?;
     // x_bind_phases.xaml(7,10) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_phases.xaml(7,10) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_phases.xaml(7,32) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1779,15 +1665,14 @@ fn build_x_bind_phases_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_1, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 32)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 7, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 7, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 7, 10)?;
     // x_bind_phases.xaml(8,10) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_phases.xaml(8,10) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_2.clone()));
+    rt::push_parent(&context, &text_block_2);
     // x_bind_phases.xaml(8,32) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1801,15 +1686,14 @@ fn build_x_bind_phases_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_2, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 32)?;
     rt::bind(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 8, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_2.try_end_init(), 8, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 8, 10)?;
     // x_bind_phases.xaml(9,10) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_phases.xaml(9,10) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_3.clone()));
+    rt::push_parent(&context, &text_block_3);
     // x_bind_phases.xaml(9,32) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1825,10 +1709,8 @@ fn build_x_bind_phases_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_3, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_3, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 32)?;
     rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_3, 9, 32)?;
-    context.pop_parent();
-    rt::invoked(text_block_3.try_end_init(), 9, 10)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 5, 8)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 9, 10)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 5, 8)?;
     ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
 
@@ -1851,7 +1733,7 @@ pub fn build_x_bind_load_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_LOAD_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_load.xaml(3,13) Tag
     stack_panel_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("root tag"));
     // x_bind_load.xaml(4,4) Children
@@ -1860,10 +1742,9 @@ pub fn build_x_bind_load_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_load.xaml(4,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("always")));
-    rt::register_name_value(name_scope.as_ref(), "always", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "always", 4, 14)?;
     // x_bind_load.xaml(4,30) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1873,15 +1754,14 @@ pub fn build_x_bind_load_xaml(
     let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 4, 30)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 4, 30)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 4, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 4, 4)?;
     // x_bind_load.xaml(5,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_load.xaml(5,4) DeferredElement
     let deferred_element_0 = ::ferroui_markup_xaml::markup_extensions::DeferredElement::new();
     deferred_element_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&deferred_element_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(deferred_element_0.clone()));
+    rt::push_parent(&context, &deferred_element_0);
     // x_bind_load.xaml(5,4) ElementName
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_ElementName(&deferred_element_0, ::core::option::Option::Some(::std::string::String::from("lazy")));
     // x_bind_load.xaml(5,4) Content
@@ -1889,15 +1769,14 @@ pub fn build_x_bind_load_xaml(
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_Content(&deferred_element_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     // x_bind_load.xaml(5,4) Load
     deferred_element_0.set_value(::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property(), ::core::clone::Clone::clone(&false));
-    context.pop_parent();
-    rt::invoked(deferred_element_0.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &deferred_element_0, 5, 4)?;
     // x_bind_load.xaml(8,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_load.xaml(8,4) DeferredElement
     let deferred_element_1 = ::ferroui_markup_xaml::markup_extensions::DeferredElement::new();
     deferred_element_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&deferred_element_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(deferred_element_1.clone()));
+    rt::push_parent(&context, &deferred_element_1);
     // x_bind_load.xaml(8,4) ElementName
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_ElementName(&deferred_element_1, ::core::option::Option::Some(::std::string::String::from("bound")));
     // x_bind_load.xaml(8,4) Content
@@ -1914,15 +1793,14 @@ pub fn build_x_bind_load_xaml(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::OneWay);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 26)?;
     rt::bind(deferred_element_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property(), provided_1, 8, 26)?;
-    context.pop_parent();
-    rt::invoked(deferred_element_1.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &deferred_element_1, 8, 4)?;
     // x_bind_load.xaml(11,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_load.xaml(11,4) DeferredElement
     let deferred_element_2 = ::ferroui_markup_xaml::markup_extensions::DeferredElement::new();
     deferred_element_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&deferred_element_2).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(deferred_element_2.clone()));
+    rt::push_parent(&context, &deferred_element_2);
     // x_bind_load.xaml(11,4) ElementName
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_ElementName(&deferred_element_2, ::core::option::Option::Some(::std::string::String::from("later")));
     // x_bind_load.xaml(11,4) Content
@@ -1930,8 +1808,7 @@ pub fn build_x_bind_load_xaml(
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_Content(&deferred_element_2, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     // x_bind_load.xaml(11,4) Load
     deferred_element_2.set_value(::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property(), ::core::clone::Clone::clone(&false));
-    context.pop_parent();
-    rt::invoked(deferred_element_2.try_end_init(), 11, 4)?;
+    rt::pop_parent_end_init(&context, &deferred_element_2, 11, 4)?;
     // x_bind_load.xaml(12,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_load.xaml(12,4) TextBlock
@@ -1939,13 +1816,11 @@ pub fn build_x_bind_load_xaml(
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
     // x_bind_load.xaml(12,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("eager")));
-    rt::register_name_value(name_scope.as_ref(), "eager", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 12, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_1, &text_block_1, "eager", 12, 14)?;
     // x_bind_load.xaml(12,43) Text
     text_block_1.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("created with the document")));
-    rt::invoked(text_block_1.try_end_init(), 12, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::end_init(&text_block_1, 12, 4)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
@@ -1958,21 +1833,19 @@ fn build_x_bind_load_xaml_deferred_0(
     let name_scope = context.name_scope_field();
     // x_bind_load.xaml(5,4) Border
     let border_0 = ::ferroui_controls::Border::new();
-    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
-    context.push_parent(rt::to_value(border_0.clone()));
+    rt::push_parent(&context, &border_0);
     // x_bind_load.xaml(5,11) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("lazy")));
-    rt::register_name_value(name_scope.as_ref(), "lazy", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 5, 11)?;
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "lazy", 5, 11)?;
     // x_bind_load.xaml(6,6) Child
     // x_bind_load.xaml(6,6) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_load.xaml(6,16) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("lazyText")));
-    rt::register_name_value(name_scope.as_ref(), "lazyText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 6, 16)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "lazyText", 6, 16)?;
     // x_bind_load.xaml(6,34) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -1984,10 +1857,8 @@ fn build_x_bind_load_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_0, ::ferroui_base::data::BindingMode::OneWay);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 34)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 34)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 6, 6)?;
-    context.pop_parent();
-    rt::invoked(border_0.try_end_init(), 5, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 6, 6)?;
+    rt::pop_parent_end_init(&context, &border_0, 5, 4)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -1999,18 +1870,17 @@ fn build_x_bind_load_xaml_deferred_1(
     let name_scope = context.name_scope_field();
     // x_bind_load.xaml(8,4) Border
     let border_0 = ::ferroui_controls::Border::new();
-    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
-    context.push_parent(rt::to_value(border_0.clone()));
+    rt::push_parent(&context, &border_0);
     // x_bind_load.xaml(8,11) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("bound")));
-    rt::register_name_value(name_scope.as_ref(), "bound", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 8, 11)?;
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "bound", 8, 11)?;
     // x_bind_load.xaml(9,6) Child
     // x_bind_load.xaml(9,6) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_load.xaml(9,16) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2022,10 +1892,8 @@ fn build_x_bind_load_xaml_deferred_1(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_0, ::ferroui_base::data::BindingMode::OneWay);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 16)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 9, 16)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 9, 6)?;
-    context.pop_parent();
-    rt::invoked(border_0.try_end_init(), 8, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 9, 6)?;
+    rt::pop_parent_end_init(&context, &border_0, 8, 4)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -2037,12 +1905,11 @@ fn build_x_bind_load_xaml_deferred_2(
     let name_scope = context.name_scope_field();
     // x_bind_load.xaml(11,4) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
+    rt::set_intermediate_root(&context, &text_block_0);
     text_block_0.begin_init();
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_load.xaml(11,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("later")));
-    rt::register_name_value(name_scope.as_ref(), "later", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 11, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "later", 11, 14)?;
     // x_bind_load.xaml(11,56) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2052,8 +1919,7 @@ fn build_x_bind_load_xaml_deferred_2(
     let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 11, 56)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 11, 56)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 11, 4)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 11, 4)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 
@@ -2076,7 +1942,7 @@ pub fn build_x_bind_control_template_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_CONTROL_TEMPLATE_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // x_bind_control_template.xaml(3,17) Tag
     content_control_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("host tag"));
     // x_bind_control_template.xaml(4,17) Content
@@ -2091,8 +1957,7 @@ pub fn build_x_bind_control_template_xaml(
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &content_control_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(content_control_0)
 }
@@ -2104,16 +1969,16 @@ fn build_x_bind_control_template_xaml_deferred_0(
     let context = rt::deferred_context(service_provider, &BUILD_X_BIND_CONTROL_TEMPLATE_XAML_DOCUMENT);
     // x_bind_control_template.xaml(7,8) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
+    rt::set_intermediate_root(&context, &stack_panel_0);
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // x_bind_control_template.xaml(8,10) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_control_template.xaml(8,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_control_template.xaml(8,20) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2127,15 +1992,14 @@ fn build_x_bind_control_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_0, ::ferroui_base::data::BindingMode::OneWay);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 20)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 8, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 8, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 8, 10)?;
     // x_bind_control_template.xaml(9,10) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_control_template.xaml(9,10) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // x_bind_control_template.xaml(9,20) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2149,15 +2013,14 @@ fn build_x_bind_control_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_TargetType(&x_bind_extension_1, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE)));
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 9, 20)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 9, 20)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 9, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 9, 10)?;
     // x_bind_control_template.xaml(10,10) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // x_bind_control_template.xaml(10,10) DeferredElement
     let deferred_element_0 = ::ferroui_markup_xaml::markup_extensions::DeferredElement::new();
     deferred_element_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&deferred_element_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(deferred_element_0.clone()));
+    rt::push_parent(&context, &deferred_element_0);
     // x_bind_control_template.xaml(10,10) ElementName
     ::ferroui_markup_xaml::markup_extensions::DeferredElement::__markup_set_ElementName(&deferred_element_0, ::core::option::Option::Some(::std::string::String::from("panel")));
     // x_bind_control_template.xaml(10,10) Content
@@ -2176,10 +2039,8 @@ fn build_x_bind_control_template_xaml_deferred_0(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 10, 32)?;
     rt::bind(deferred_element_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_markup_xaml::markup_extensions::DeferredElement::load_property(), provided_2, 10, 32)?;
-    context.pop_parent();
-    rt::invoked(deferred_element_0.try_end_init(), 10, 10)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 7, 8)?;
+    rt::pop_parent_end_init(&context, &deferred_element_0, 10, 10)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 7, 8)?;
     ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
 
@@ -2191,18 +2052,17 @@ fn build_x_bind_control_template_xaml_deferred_1(
     let name_scope = context.name_scope_field();
     // x_bind_control_template.xaml(10,10) Border
     let border_0 = ::ferroui_controls::Border::new();
-    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
-    context.push_parent(rt::to_value(border_0.clone()));
+    rt::push_parent(&context, &border_0);
     // x_bind_control_template.xaml(10,17) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("panel")));
-    rt::register_name_value(name_scope.as_ref(), "panel", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 10, 17)?;
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "panel", 10, 17)?;
     // x_bind_control_template.xaml(11,12) Child
     // x_bind_control_template.xaml(11,12) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_control_template.xaml(11,22) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2216,10 +2076,8 @@ fn build_x_bind_control_template_xaml_deferred_1(
     ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_0, ::ferroui_base::data::BindingMode::OneWay);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 11, 22)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 11, 22)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 11, 12)?;
-    context.pop_parent();
-    rt::invoked(border_0.try_end_init(), 10, 10)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 11, 12)?;
+    rt::pop_parent_end_init(&context, &border_0, 10, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -2242,7 +2100,7 @@ pub fn build_x_bind_window_xaml(
     let context = rt::populate_context(service_provider, &BUILD_X_BIND_WINDOW_XAML_DOCUMENT, rt::to_value(window_0.clone()));
     let name_scope = context.name_scope_field();
     window_0.begin_init();
-    context.push_parent(rt::to_value(window_0.clone()));
+    rt::push_parent(&context, &window_0);
     // x_bind_window.xaml(3,9) Tag
     window_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("construction value"));
     // x_bind_window.xaml(4,4) Content
@@ -2250,10 +2108,9 @@ pub fn build_x_bind_window_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     window_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_0)));
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // x_bind_window.xaml(4,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("title")));
-    rt::register_name_value(name_scope.as_ref(), "title", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "title", 4, 14)?;
     // x_bind_window.xaml(4,29) Text
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
@@ -2263,10 +2120,8 @@ pub fn build_x_bind_window_xaml(
     let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 4, 29)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 4, 29)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 4, 4)?;
-    context.pop_parent();
-    rt::invoked(window_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 4, 4)?;
+    rt::pop_parent_end_init(&context, &window_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&window_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(window_0)
 }
