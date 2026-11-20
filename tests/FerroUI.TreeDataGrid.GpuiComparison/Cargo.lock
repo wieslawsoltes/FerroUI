@@ -1429,10 +1429,8 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup-xaml-loader",
- "quote",
  "roxmltree 0.20.0",
  "serde_json",
- "syn 2.0.119",
  "toml 1.2.1+spec-1.1.0",
  "xamlx",
 ]
