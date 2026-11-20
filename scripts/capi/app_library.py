@@ -130,7 +130,13 @@ def build(selection, out, options):
             f"-Wl,-exported_symbols_list,{os.path.join(out, 'exports.txt')}", "-Wl,-dead_strip", *undefined,
             archive, *native]
     print("+ " + " ".join(link[:8]) + " ...", flush=True)
-    subprocess.run(link, check=True)
+    # With SDKROOT, so that cc finds the libraries rustc names (`-lm`) as rustc's own link does.
+    link_env = dict(os.environ)
+    if not link_env.get("SDKROOT"):
+        sdk = subprocess.run(["xcrun", "--sdk", "macosx", "--show-sdk-path"], text=True, capture_output=True)
+        if sdk.returncode == 0 and sdk.stdout.strip():
+            link_env["SDKROOT"] = sdk.stdout.strip()
+    subprocess.run(link, check=True, env=link_env)
     stripped = dylib + ".stripped"
     subprocess.run(["strip", "-x", "-o", stripped, dylib], check=True)
     os.replace(stripped, dylib)
