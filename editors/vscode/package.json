@@ -227,6 +227,30 @@
         "icon": "$(close)"
       },
       {
+        "command": "ferroui.moveXamlFile",
+        "title": "Move XAML File…",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.project.moveXamlFile",
+        "title": "Move XAML File…",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.fileMoveReview.apply",
+        "title": "Apply File Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.fileMoveReview.cancel",
+        "title": "Cancel File Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
         "command": "ferroui.showResources",
         "title": "Show Resources",
         "category": "FerroUI",
@@ -387,6 +411,22 @@
           "when": "resourceScheme == ferroui-dictionary-review"
         },
         {
+          "command": "ferroui.moveXamlFile",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.project.moveXamlFile",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.fileMoveReview.apply",
+          "when": "ferroui.reviewingFileMove"
+        },
+        {
+          "command": "ferroui.fileMoveReview.cancel",
+          "when": "ferroui.reviewingFileMove"
+        },
+        {
           "command": "ferroui.openDesigner",
           "when": "editorLangId == ferroui-xaml || editorLangId == rust"
         },
@@ -447,12 +487,27 @@
           "command": "ferroui.dictionaryReview.cancel",
           "when": "resourceScheme == ferroui-dictionary-review",
           "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.fileMoveReview.apply",
+          "when": "ferroui.reviewingFileMove",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.fileMoveReview.cancel",
+          "when": "ferroui.reviewingFileMove",
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [
         {
           "command": "ferroui.openDesigner",
           "when": "resourceExtname == .xaml || resourceExtname == .rs"
+        },
+        {
+          "command": "ferroui.moveXamlFile",
+          "when": "resourceExtname =~ /^\\.xaml$/i && resourceScheme == file && isWorkspaceTrusted && !explorerResourceIsFolder",
+          "group": "ferroui"
         }
       ],
       "view/title": [
@@ -513,6 +568,11 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.project.moveXamlFile",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectXaml && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
         {
           "command": "ferroui.columns.reveal",
           "when": "view == ferroui.columns && viewItem =~ /\\bsource\\b/",

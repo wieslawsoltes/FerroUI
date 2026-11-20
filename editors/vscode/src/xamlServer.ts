@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import type { DictionaryMethod } from './dictionaryProtocol';
 import type { HandlerMethod } from './eventHandlerProtocol';
+import type { FileMovePlan } from './fileMoveProtocol';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
@@ -14,6 +15,7 @@ export class XamlServer implements vscode.Disposable {
     private disposed = false;
     private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
     private readonly projects = new Map<string, ProjectMetadata>();
+    private reviewedMove?: { from: string; to: string };
     eventDefinition?: (document: vscode.TextDocument, at: vscode.Position, token: vscode.CancellationToken) => Promise<vscode.Location | undefined>;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly channel: vscode.OutputChannel) {}
@@ -30,6 +32,14 @@ export class XamlServer implements vscode.Disposable {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
                 initializationOptions: { ferrouiHandlerCommands: true, ferrouiExtractionCommands: vscode.workspace.isTrusted },
                 middleware: {
+                    workspace: {
+                        willRenameFiles: (event, next) => {
+                            const [file] = event.files;
+                            const prepared = event.files.length === 1 && this.reviewedMove?.from === file.oldUri.toString()
+                                && this.reviewedMove.to === file.newUri.toString();
+                            return prepared ? Promise.resolve(undefined) : next(event);
+                        },
+                    },
                     provideDefinition: async (document, position, token, next) => {
                         const declaration = await this.eventDefinition?.(document, position, token);
                         return declaration ?? next(document, position, token);
@@ -77,6 +87,22 @@ export class XamlServer implements vscode.Disposable {
             throw new Error('Use a FerroUI XAML language server that supports resource extraction.');
         }
         return client.sendRequest<T>(`ferroui/${method}`, params);
+    }
+
+    async planFileMove(from: vscode.Uri, to: vscode.Uri): Promise<FileMovePlan> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiFileMove !== true) {
+            throw new Error('Use a FerroUI XAML language server that supports reviewed file moves.');
+        }
+        return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString() });
+    }
+
+    async withReviewedFileMove(from: vscode.Uri, to: vscode.Uri, apply: () => Promise<void>): Promise<void> {
+        if (this.reviewedMove) throw new Error('A reviewed XAML file move is already being applied.');
+        this.reviewedMove = { from: from.toString(), to: to.toString() };
+        try { await apply(); }
+        finally { this.reviewedMove = undefined; }
     }
 
     private async publishMetadata(client: LanguageClient, metadata: ProjectMetadata) {

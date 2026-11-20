@@ -32,6 +32,10 @@ export class ProjectView implements vscode.TreeDataProvider<Item>, vscode.Dispos
             vscode.commands.registerCommand('ferroui.project.refresh', () => inventory.refresh()),
             vscode.commands.registerCommand('ferroui.project.findView', () => this.command(() => this.findView())),
             vscode.commands.registerCommand('ferroui.project.openFile', (item: Item) => this.command(() => this.openFile(item))),
+            vscode.commands.registerCommand('ferroui.project.moveXamlFile', (item: Item) => this.command(async () => {
+                if (item?.type !== 'file' || item.file.kind !== 'xaml') return;
+                await vscode.commands.executeCommand('ferroui.moveXamlFile', await inventory.resolve(item.folder, item.file));
+            })),
             vscode.commands.registerCommand('ferroui.project.runTarget', (item: Item) => this.command(() => this.runTarget(item))),
         ];
     }
@@ -88,7 +92,7 @@ export class ProjectView implements vscode.TreeDataProvider<Item>, vscode.Dispos
         row.resourceUri = uri;
         row.id = uri.toString();
         row.description = file.path === label ? undefined : file.path;
-        row.contextValue = 'ferrouiProjectFile';
+        row.contextValue = file.kind === 'xaml' ? 'ferrouiProjectXaml' : 'ferrouiProjectFile';
         row.command = { command: 'ferroui.project.openFile', title: 'Open Project File', arguments: [item] };
         return row;
     }
