@@ -317,6 +317,12 @@
         "icon": "$(file-media)"
       },
       {
+        "command": "ferroui.importAsset",
+        "title": "Import Asset…",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
         "command": "ferroui.showStudio",
         "title": "Show Studio Tools",
         "category": "FerroUI"
@@ -648,6 +654,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "ferroui.importAsset",
+          "when": "view == ferroui.assets",
+          "group": "navigation"
+        },
         {
           "command": "ferroui.showColumns",
           "when": "view == ferroui.properties && ferroui.hasColumnEditor",

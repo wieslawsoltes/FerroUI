@@ -1,21 +1,10 @@
 import { open, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { assetFiles, assetFormat, ignoredAssets } from './assetFormats';
 import { isInside } from './workspacePaths';
 import type { ProjectAsset } from './protocol';
 
-const formats = new Map<string, string>([
-    ['.png', 'image/png'], ['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'],
-    ['.webp', 'image/webp'], ['.gif', 'image/gif'], ['.bmp', 'image/bmp'], ['.ico', 'image/x-icon'],
-]);
-const groups: Record<string, readonly string[]> = {
-    Image: [...formats.keys(), '.svg'],
-    Font: ['.ttf', '.otf', '.woff', '.woff2'],
-    Media: ['.wav', '.mp3', '.ogg', '.mp4', '.webm'],
-    XAML: ['.xaml', '.axaml', '.fxaml'],
-};
-const pattern = `**/*.{${Object.values(groups).flat().flatMap(ext => [ext.slice(1), ext.slice(1).toUpperCase()]).join(',')}}`;
-const excluded = '**/{.git,target,node_modules,.vs,bin,obj,dist,.ferroui}/**';
 const maxThumbnailBytes = 1024 * 1024;
 
 interface IndexEntry {
@@ -34,7 +23,7 @@ export class ProjectAssets implements vscode.Disposable {
 
     constructor() {
         const invalidate = () => { this.index.clear(); this.changed.fire(); };
-        const watcher = vscode.workspace.createFileSystemWatcher(pattern, false, true, false);
+        const watcher = vscode.workspace.createFileSystemWatcher(assetFiles, false, true, false);
         this.subscriptions = [watcher, watcher.onDidCreate(invalidate), watcher.onDidDelete(invalidate),
             vscode.workspace.onDidChangeWorkspaceFolders(invalidate)];
     }
@@ -96,15 +85,14 @@ export class ProjectAssets implements vscode.Disposable {
     private async find(folder: vscode.WorkspaceFolder): Promise<IndexEntry[]> {
         if (folder.uri.scheme !== 'file') return [];
         const root = await realpath(folder.uri.fsPath);
-        const files = await vscode.workspace.findFiles(new vscode.RelativePattern(folder, pattern), excluded);
+        const files = await vscode.workspace.findFiles(new vscode.RelativePattern(folder, assetFiles), ignoredAssets);
         const entries = await Promise.all(files.map(async (uri): Promise<IndexEntry | undefined> => {
             const actual = await realpath(uri.fsPath).catch(() => undefined);
             if (!actual || !isInside(root, actual)) return undefined;
-            const ext = path.extname(uri.fsPath).toLowerCase();
-            const kind = Object.keys(groups).find(group => groups[group].includes(ext));
-            if (!kind) return undefined;
+            const format = assetFormat(uri.fsPath);
+            if (!format) return undefined;
             return { uri, title: path.basename(uri.fsPath), path: path.relative(folder.uri.fsPath, uri.fsPath).split(path.sep).join('/'),
-                kind, mime: formats.get(ext) };
+                kind: format.kind, mime: format.mime };
         }));
         return entries.filter((asset): asset is IndexEntry => asset !== undefined).sort((a, b) => a.path.localeCompare(b.path));
     }

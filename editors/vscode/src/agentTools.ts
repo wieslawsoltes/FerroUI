@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
+import type { AssetImportRequest } from './assetImport';
 import type { CanvasSnapInput, GuideEdit } from './canvasGuidesProtocol';
 import type { CargoSelection } from './cargoTarget';
 import type { TokenRequest } from './designTokenProtocol';
@@ -140,6 +141,10 @@ export class AgentTools {
             return this.renames.resource.agent(input as SourceRenameAgentRequest, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
+        if (tool === 'ferroui_project_plan_asset_import' || tool === 'ferroui_project_import_asset') {
+            const request = input as AssetImportRequest & { review?: string };
+            return this.project.assetImport.agent(request, request.review, signal);
+        }
         const args = input as Arguments;
         if (tool === 'ferroui_designs') {
             const panels = [];

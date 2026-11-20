@@ -6,6 +6,7 @@ const session = { session: integer(1) };
 const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
+const assetImport = { source: workspacePath, destination: workspacePath, folder: workspacePath };
 const lspPosition = { type: 'object', additionalProperties: false, required: ['line', 'character'],
     properties: { line: integer(0), character: integer(0) } };
 const libraryAddress = { type: 'object', additionalProperties: false, required: ['folder', 'path', 'definition'], properties: {
@@ -101,6 +102,10 @@ export const agentCatalog = {
         { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages', 'scenario'), offset: integer(0), limit: integer(1, 200) }),
     ferroui_project_library: tool('Find reusable XAML components, styles, themes, and templates in the project Library. Results reflect unsaved drafts. Choose a folder in a multi-root workspace.',
         { folder: workspacePath, query: { type: 'string', maxLength: 4096 }, offset: integer(0), limit: integer(1, 200) }),
+    ferroui_project_plan_asset_import: tool('Review a copy of an existing workspace image, font, media file, or XAML asset. Provide source and destination paths in the same workspace folder.',
+        assetImport, ['source', 'destination']),
+    ferroui_project_import_asset: tool('Create a reviewed asset copy and retain the original. Pass source, destination, and the review value from ferroui_project_plan_asset_import.',
+        { ...assetImport, review: { type: 'string', maxLength: 64 } }, ['source', 'destination', 'review'], true, false),
     designer_open_project_definition: tool('Open a current project Library entry in its source or scoped native preview. Pass an entry returned by ferroui_project_library.',
         { entry: libraryAddress, destination: choice('preview', 'source') }, ['entry'], true, false),
     ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',

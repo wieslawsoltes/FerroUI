@@ -83,6 +83,12 @@ export function activate(context: vscode.ExtensionContext) {
                 && (server.running || vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage))) void server.start(true);
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
+        vscode.commands.registerCommand('ferroui.importAsset', async () => {
+            try {
+                const uri = designer.activeDesign?.document.uri ?? vscode.window.activeTextEditor?.document.uri;
+                await inventory.assetImport.choose(uri && vscode.workspace.getWorkspaceFolder(uri));
+            } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
         vscode.commands.registerCommand('ferroui.moveXamlFile', async (uri?: vscode.Uri) => {
             try { await fileMoves.open(uri ?? vscode.window.activeTextEditor?.document.uri); }
             catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }

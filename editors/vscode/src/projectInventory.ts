@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { AssetImport } from './assetImport';
 import type { TokenRequest } from './designTokenProtocol';
 import { NativePreview } from './nativePreview';
 import type { ProjectAssets } from './projectAssets';
@@ -12,6 +13,7 @@ export interface ProjectInventorySnapshot { files: ProjectFile[]; truncated: boo
 const ignoredDirectories = new Set(['target', '.git', 'node_modules', '.idea', '.vs']);
 
 export class ProjectInventory implements vscode.Disposable {
+    readonly assetImport = new AssetImport();
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
     private readonly subscriptions: vscode.Disposable[];
