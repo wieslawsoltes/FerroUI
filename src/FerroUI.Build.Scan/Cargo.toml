@@ -17,6 +17,9 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+compiled-index = ["dep:serde"]
+
 # The crate is a build dependency of the framework crates themselves (the base crate, the controls,
 # the XAML runtime library), so it depends on nothing of the framework: the standard library and the
 # three crates the scanner reads Rust source with (docs/porting/xaml.md, 9.5.13).
@@ -26,6 +29,7 @@ path = "lib.rs"
 # the lines the diagnostics of the scanner name; `quote` prints the types of function signatures.
 proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
 quote = { version = "1", default-features = false }
+serde = { version = "1", features = ["derive"], optional = true }
 syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
 
 # The group of the crate in the table of the README (docs/release.md).

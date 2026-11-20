@@ -66,6 +66,9 @@
 #![forbid(unsafe_code)]
 
 pub mod call_forms;
+#[cfg(feature = "compiled-index")]
+pub mod compiled_index;
+pub mod compiled_names;
 pub mod export;
 mod json;
 pub mod model;

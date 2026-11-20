@@ -34,6 +34,8 @@
 //! 2. Compiles each group of documents as upstream compiles the documents of
 //!    an assembly (parse, transform, group transformers, emit) and writes
 //!    `$OUT_DIR/xaml/<module>.rs` with its position map.
+//!    A successful build records the entry points and ordered document keys
+//!    in `$OUT_DIR/xaml-symbols.json` for source refactors.
 //! 3. Lists the assets, leaving out the documents it compiled (upstream
 //!    removes a compiled resource from the assembly).
 //! 4. Writes `$OUT_DIR/<crate>.xamlmeta` (the compiled documents of the
@@ -204,6 +206,7 @@
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
+mod compiled_index;
 mod diagnostics;
 #[cfg(feature = "shader-effects")]
 pub mod shader_effects;
@@ -227,6 +230,8 @@ use std::rc::Rc;
 use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
+use ferroui_build_scan::compiled_index::CompiledXamlIndex;
+use ferroui_build_scan::compiled_names::CompiledGroupKind;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
@@ -931,6 +936,7 @@ impl Build {
             references: MarkupReferencesModel::default(),
         };
         let mut modules: Vec<Module> = Vec::new();
+        let mut symbols = CompiledXamlIndex::new(self.manifest_dir.join("Cargo.toml"));
         let mut compiled_documents: Vec<String> = Vec::new();
         // The option of the emitter for the groups of this build (#603), restored after them.
         use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
@@ -1026,6 +1032,12 @@ impl Build {
                         }
                         write_compiled_file(&path, &file.source, &image, &mut errors);
                         let class_metadata = file.metadata(&[]);
+                        if let Some(members) = &in_group {
+                            symbols.groups.push(compiled_index::group(
+                                group, CompiledGroupKind::Class, &self.xaml_root,
+                                members.iter().map(|(key, _)| key.as_str()), &class_metadata.documents,
+                            ));
+                        }
                         // Whether the class can be constructed from selected units of its markup
                         // (#849): only then are its documents rooted through its unit graph in the
                         // applications that construct it; an ordinary class is constructed whole.
@@ -1129,8 +1141,13 @@ impl Build {
             }
             write_compiled_file(&path, &file.source, &image, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
+            let group_metadata = file.metadata(&self.crate_name, &module_path, &[]);
+            symbols.groups.push(compiled_index::group(
+                group, CompiledGroupKind::Documents, &self.xaml_root,
+                file.documents.iter().map(|(key, _)| key.as_str()), &group_metadata.documents,
+            ));
             if group.exported {
-                metadata.documents.extend(file.metadata(&self.crate_name, &module_path, &[]).documents);
+                metadata.documents.extend(group_metadata.documents);
                 compiled_documents.extend(documents.iter().map(|(name, _)| format!("/{name}")));
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
@@ -1385,6 +1402,12 @@ impl Build {
         if includes || !self.themes.is_empty() || !parts_tables.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets, &parts_tables);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+        }
+        if errors.is_empty() {
+            match serde_json::to_string(&symbols) {
+                Ok(text) => write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &text, &mut errors),
+                Err(error) => errors.push(format!("Cannot encode the compiled XAML symbol index: {error}")),
+            }
         }
         if !errors.is_empty() {
             return Outcome { lines, errors };
