@@ -507,8 +507,9 @@ impl<T: Clone + 'static> EffectiveValue<T> {
 
 /// Calls `f` with `old` and `new`, values of the storage type `T`, as values of the value type
 /// of `property`: as they are where `T` is the value type itself (decided when the function is
-/// compiled), else converted by the property ([`PropertyRoutes::route_with_values`]), one call
-/// that only a change of a value of a shared storage type makes.
+/// compiled), the static members for an enumeration, else converted by the property
+/// ([`PropertyRoutes::route_with_values`]), one call that only a change of a value of another
+/// shared storage type makes.
 ///
 /// [`PropertyRoutes::route_with_values`]: crate::ferro_property::PropertyRoutes::route_with_values
 #[inline]
@@ -519,6 +520,13 @@ pub(crate) fn with_values<T: StyledValue>(
     f: impl FnOnce(Option<&dyn Any>, &dyn Any),
 ) {
     if T::SHARED_STORAGE {
+        // A member of an enumeration: the static member itself, found by its stored value, with
+        // no call to the property.
+        let members = property.members();
+        if let Some(new) = new.member_of(members) {
+            let old = old.map(|old| old.member_of(members).expect("a member of the same enumeration"));
+            return f(old, new);
+        }
         let mut f = Some(f);
         property.routes().route_with_values(old.map(|old| old as &dyn Any), new, &mut |old, new| {
             if let Some(f) = f.take() {

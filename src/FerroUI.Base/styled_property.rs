@@ -46,6 +46,7 @@ impl<T: PropertyValue> StyledProperty<T> {
         validate: Option<Box<dyn Fn(&T) -> bool>>,
         notifying: Option<NotifyingCallback>,
         is_attached: bool,
+        members: &'static [(i64, &'static dyn Any)],
     ) -> Self {
         let default_value = metadata.default_value().clone();
         if let Some(validate) = &validate {
@@ -59,7 +60,8 @@ impl<T: PropertyValue> StyledProperty<T> {
                 owner_type,
                 FerroPropertyInit { inherits, is_attached, is_direct: false, is_read_only: false },
                 notifying,
-            ),
+            )
+            .with_members(members),
             metadata: MetadataTable::new(host_type, metadata),
             single_default_value: RefCell::new(Some(default_value)),
             validate,
@@ -244,7 +246,7 @@ impl<T: StyledValue> StyledProperty<T> {
         is_attached: bool,
     ) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(Self::new(
-            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached,
+            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached, T::MEMBERS,
         )));
         property.base.set_routes(property);
         property
@@ -403,6 +405,16 @@ impl<T: StyledValue> PropertyRoutes for StyledProperty<T> {
         unpack_binding_value::<T>(value)
     }
 
+    fn route_take_value(&'static self, o: &FerroObject, slot: &mut dyn Any) -> bool {
+        match slot.downcast_mut::<Option<T>>().and_then(Option::take) {
+            Some(value) => {
+                o.set_value(self, value);
+                true
+            }
+            None => false,
+        }
+    }
+
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
         if let Some(value) = take_boxed_value::<T>(value) {
             o.values().set_local_value(o, self, value);
@@ -436,7 +448,9 @@ impl<T: StyledValue> AttachedProperty<T> {
         notifying: Option<NotifyingCallback>,
     ) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(Self {
-            base: StyledProperty::new(name, owner_type, host_type, metadata, inherits, validate, notifying, true),
+            base: StyledProperty::new(
+                name, owner_type, host_type, metadata, inherits, validate, notifying, true, T::MEMBERS,
+            ),
         }));
         property.base.base.set_routes(&property.base);
         property

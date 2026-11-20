@@ -4,43 +4,32 @@
 //! The property store (`EffectiveValue`, the typed paths of `ValueStore`, the entries of the
 //! value frames) is compiled once for each type it keeps values as, its storage type, and not
 //! once for each value type of a property: the members of every enumeration are kept as one
-//! [`EnumValue`](crate::EnumValue), every handle to an object as a `Ref<FerroObject>`, and an
-//! `Option` of either as an `Option` of the same form (docs/binary-size.md, section 4.25).
+//! [`EnumValue`](crate::EnumValue), and an optional member as an `Option` of it
+//! (docs/binary-size.md, section 4.25).
 
-use crate::{styled_value, ElementRef, FerroObject, ObjectType, Ref, StyledValue, WeakRef};
-use std::any::Any;
+use crate::{styled_value, ElementRef, ObjectType, Ref, StyledValue, WeakRef};
 
-/// A handle to an object is kept as a handle to a [`FerroObject`]: an upcast in, and on the way
-/// out the checked downcast of [`Ref::downcast`], which the store only ever asks of a handle a
-/// value of the property's type was made from.
+/// A handle to an object is its own storage type. Kept as a handle to a [`FerroObject`], a read
+/// would check the class of the object again (the downcast of a handle, +45 % instructions for
+/// the read of a handle in the gate of #986) and a change notification would convert both values
+/// back through the routes of the property.
 impl<T: ObjectType> StyledValue for Ref<T> {
-    type Storage = Ref<FerroObject>;
-    const SHARED_STORAGE: bool = true;
+    type Storage = Self;
 
-    #[inline]
-    fn into_storage(self) -> Ref<FerroObject> {
-        self.upcast()
+    #[inline(always)]
+    fn into_storage(self) -> Self {
+        self
     }
 
-    #[inline]
-    fn from_storage(storage: Ref<FerroObject>) -> Self {
-        // A property of handles to any object: the stored handle is the value, with no check.
-        let mut slot = Some(storage);
-        if let Some(same) = (&mut slot as &mut dyn Any).downcast_mut::<Option<Ref<T>>>() {
-            return same.take().expect("the stored handle");
-        }
-        match slot.expect("the stored handle").downcast::<T>() {
-            Ok(handle) => handle,
-            Err(_) => foreign_handle(),
-        }
+    #[inline(always)]
+    fn from_storage(storage: Self) -> Self {
+        storage
     }
-}
 
-#[cold]
-#[inline(never)]
-#[track_caller]
-fn foreign_handle<T>() -> T {
-    panic!("a stored handle is read as a handle to a class its object is not")
+    #[inline(always)]
+    fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
+        read(storage)
+    }
 }
 
 /// The small plain structures of numbers are kept as their numbers: two for a point, a size and
@@ -142,12 +131,9 @@ mod tests {
     use crate::layout::HorizontalAlignment;
 
     #[test]
-    fn a_handle_is_kept_as_a_handle_to_an_object_and_read_back() {
-        assert!(<Ref<FerroObject> as StyledValue>::SHARED_STORAGE);
-        assert!(<Option<Ref<crate::Visual>> as StyledValue>::SHARED_STORAGE);
-        let object = FerroObject::new();
-        let stored = object.clone().into_storage();
-        assert!(Ref::<FerroObject>::from_storage(stored).ptr_eq(&object));
+    fn a_handle_is_its_own_storage_type() {
+        assert!(!<Ref<crate::FerroObject> as StyledValue>::SHARED_STORAGE);
+        assert!(!<Option<Ref<crate::Visual>> as StyledValue>::SHARED_STORAGE);
     }
 
     #[test]
@@ -155,5 +141,7 @@ mod tests {
         let stored = HorizontalAlignment::Right.into_storage();
         assert_eq!(HorizontalAlignment::Right as i64, stored.value());
         assert_eq!(HorizontalAlignment::Right, HorizontalAlignment::from_storage(stored));
+        let member = stored.member_of(HorizontalAlignment::MEMBERS).expect("a member");
+        assert_eq!(Some(&HorizontalAlignment::Right), member.downcast_ref::<HorizontalAlignment>());
     }
 }

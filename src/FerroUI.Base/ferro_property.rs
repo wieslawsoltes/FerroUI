@@ -337,6 +337,14 @@ pub(crate) trait PropertyRoutes {
     fn route_set_local_value(&'static self, _o: &FerroObject, _value: BoxedValue) {
         panic!("not supported for direct properties");
     }
+    /// Sets the local value of a styled property from `slot`, an `&mut Option<T>` of the
+    /// property's value type `T`, taking the value out of it: the typed setter of
+    /// [`FerroObject::try_set_value_typed`](crate::FerroObject::try_set_value_typed). False,
+    /// with the slot as it was, when the slot has another type. Only supported by styled
+    /// properties.
+    fn route_take_value(&'static self, _o: &FerroObject, _slot: &mut dyn Any) -> bool {
+        false
+    }
     /// Sets a direct property from an untyped binding value whose value, if
     /// any, holds exactly the property's value type: the typed
     /// `set_direct_value_unchecked` of an untyped direct binding. Only
@@ -667,6 +675,10 @@ pub struct FerroProperty {
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
     routes: OnceCell<&'static dyn PropertyRoutes>,
+    /// The members of the value type when it is an enumeration the store keeps as an
+    /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
+    /// hands out for a stored member. Empty otherwise.
+    members: &'static [(i64, &'static dyn Any)],
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -715,7 +727,21 @@ impl FerroProperty {
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
+            members: &[],
         }
+    }
+
+    /// The property with the members of its value type ([`StyledValue::MEMBERS`]).
+    pub(crate) fn with_members(mut self, members: &'static [(i64, &'static dyn Any)]) -> Self {
+        self.members = members;
+        self
+    }
+
+    /// The members of the value type, when it is an enumeration kept as an
+    /// [`EnumValue`](crate::EnumValue).
+    #[inline]
+    pub(crate) fn members(&self) -> &'static [(i64, &'static dyn Any)] {
+        self.members
     }
 
     /// Creates the base of a property that shares its identity with `source`
@@ -738,6 +764,7 @@ impl FerroProperty {
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
             routes: OnceCell::new(),
+            members: source.members,
         }
     }
 

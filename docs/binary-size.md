@@ -1191,8 +1191,8 @@ Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
 
 The property store was compiled once for every value type of a styled property:
 `EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of
-`ValueStore`, the immediate value entries, about 6 kB for each of the 157 value types of the builders hello world
-(section 5.6).
+`ValueStore`, the immediate value entries, about 6 kB for each of the 157 value types of the
+builders hello world (section 5.6).
 
 **The change.** `StyledValue` (declared in `ferroui-system`, re-exported by `ferroui-base`) names
 the type the store keeps a value type as, its storage type, and the two conversions:
@@ -1200,21 +1200,25 @@ the type the store keeps a value type as, its storage type, and the two conversi
 - every enumeration declared with `ferro_markup_enum!` (or `styled_enum!`) is kept as one
   `EnumValue`, its numeric value; the macro lists the members, and the conversions are a `match`
   each way, which does not compile when a variant is missing;
-- every handle `Ref<T>` is kept as `Ref<FerroObject>`: an upcast in, the checked `Ref::downcast`
-  out;
 - an `Option<T>` is kept as an `Option` of the storage type of `T`;
 - points, sizes and vectors are kept as `[f64; 2]`, thicknesses, rectangles and corner radii as
   `[f64; 4]`;
-- every other type (sets of flags, `ElementRef<T>`, `Rc<dyn ..>`, the other structures) is its own
-  storage type (`styled_value!(Type)` where the type is declared).
+- every other type (handles `Ref<T>`, sets of flags, `ElementRef<T>`, `Rc<dyn ..>`, the other
+  structures) is its own storage type (`styled_value!(Type)` where the type is declared).
+
+Handles were kept as `Ref<FerroObject>` in the first measurement below: the gate found the
+checked downcast of every read of a handle (+45 % instructions for the read of a handle) and the
+conversion of a change notification, and handles are their own storage type again.
 
 The store is compiled per storage type: a read is `T::from_storage` of the stored value, a write
 `T::into_storage` and the store's write. What a property hands out still holds its value type: a
-boxed value, a binding value, a setter value and a change notification (a storage type that other
-types share converts the two values back through the routes of the property, one call where a
-value changed). The metadata the store reads is the typed metadata itself for a type that is its
-own storage type; for the others a copy made once, with the default converted and a coercion
-callback wrapped. The typed API of `StyledProperty<T>` and its routes stay per value type.
+boxed value, a binding value, a setter value and a change notification (a storage type that
+other types share converts the two values back through the routes of the property, one call
+where a value changed; a member of an enumeration is handed out as the static member the macro
+lists, `StyledValue::MEMBERS`, with no call). The metadata the store reads is the typed metadata
+itself for a type that is its own storage type; for the others a copy made once, with the
+default converted and a coercion callback wrapped. The typed API of `StyledProperty<T>` and its
+routes stay per value type.
 
 | `hello-world-builders`, release, macOS ARM64 | Before | Shared enumerations and handles | And the structures of numbers |
 |---|---:|---:|---:|

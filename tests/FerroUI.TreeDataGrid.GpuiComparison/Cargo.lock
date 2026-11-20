@@ -1415,6 +1415,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
@@ -1576,7 +1577,9 @@ dependencies = [
 name = "ferroui-system"
 version = "0.6.0-preview.1"
 dependencies = [
+ "icu_locale_core",
  "smallvec",
+ "url",
 ]
 
 [[package]]

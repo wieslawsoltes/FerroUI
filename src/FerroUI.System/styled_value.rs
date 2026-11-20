@@ -2,8 +2,8 @@
 //!
 //! The property store of FerroUI (`ferroui_base`) is compiled once for each type it keeps values
 //! as, the storage type of a value type, and not once for each value type of a property: the
-//! members of every enumeration are kept as one [`EnumValue`], every handle to an object as a
-//! handle to the root class, and an `Option` of either as an `Option` of the same form. Every
+//! members of every enumeration are kept as one [`EnumValue`], an optional member as an
+//! `Option<EnumValue>`, and the small structures of numbers as their numbers. Every
 //! other type is its own storage type. The trait is here, beside the other items without a user
 //! interface, so that a library that has no user interface (a model of the application) states
 //! it for its own types; `ferroui_base` re-exports it with the impls of its own types.
@@ -39,7 +39,7 @@ pub trait StyledValue: Clone + PartialEq + 'static {
     type Storage: StyledValue;
 
     /// Whether values of other types are kept as values of this type: `true` for the shared
-    /// storage types ([`EnumValue`], a handle to the root class and an `Option` of either), whose values
+    /// storage types ([`EnumValue`], `Option<EnumValue>`, the arrays of numbers), whose values
     /// the store converts back to the value type of the property before it hands them to a
     /// change notification. A type that is only its own storage type keeps `false`.
     #[doc(hidden)]
@@ -51,6 +51,22 @@ pub trait StyledValue: Clone + PartialEq + 'static {
     /// The value a stored value stands for. `storage` was made by
     /// [`into_storage`](Self::into_storage) of a value of this type.
     fn from_storage(storage: Self::Storage) -> Self;
+
+    /// The members of an enumeration kept as an [`EnumValue`]: the numeric value of each and
+    /// the member itself, a static value. A change notification of such a property hands the
+    /// member out as it is, without converting the stored value back. Empty for other types.
+    #[doc(hidden)]
+    const MEMBERS: &'static [(i64, &'static dyn Any)] = &[];
+
+    /// The static value a stored value of a storage type stands for, found in `members` (the
+    /// [`MEMBERS`](Self::MEMBERS) of the value type): the member of an enumeration. `None` for
+    /// every other storage type.
+    #[doc(hidden)]
+    #[inline(always)]
+    fn member_of(&self, members: &'static [(i64, &'static dyn Any)]) -> Option<&'static dyn Any> {
+        let _ = members;
+        None
+    }
 
     /// Calls `read` with the value a stored value stands for: borrowed where the type is its
     /// own storage type, a converted copy otherwise.
@@ -143,7 +159,14 @@ macro_rules! __styled_enum {
         impl $crate::StyledValue for $type_ {
             type Storage = $crate::EnumValue;
 
-            #[inline]
+            const MEMBERS: &'static [(i64, &'static dyn ::core::any::Any)] = &[
+                $((
+                    $crate::__styled_enum_variant!($type_, $member $(, $variant)?) as i64,
+                    &$crate::__styled_enum_variant!($type_, $member $(, $variant)?) as &dyn ::core::any::Any,
+                ),)*
+            ];
+
+            #[inline(always)]
             #[allow(unreachable_patterns)]
             fn into_storage(self) -> $crate::EnumValue {
                 // The match names every variant: an enumeration with one more does not compile
@@ -157,7 +180,7 @@ macro_rules! __styled_enum {
                 })
             }
 
-            #[inline]
+            #[inline(always)]
             fn from_storage(storage: $crate::EnumValue) -> Self {
                 let value = storage.value();
                 $(
@@ -217,6 +240,15 @@ impl StyledValue for EnumValue {
     const SHARED_STORAGE: bool = true;
 
     #[inline(always)]
+    fn member_of(&self, members: &'static [(i64, &'static dyn Any)]) -> Option<&'static dyn Any> {
+        // The members are usually numbered from zero in order: the place of the value first.
+        match members.get(self.0 as usize) {
+            Some((value, member)) if *value == self.0 => Some(*member),
+            _ => members.iter().find(|(value, _)| *value == self.0).map(|(_, member)| *member),
+        }
+    }
+
+    #[inline(always)]
     fn into_storage(self) -> Self {
         self
     }
@@ -232,9 +264,8 @@ impl StyledValue for EnumValue {
     }
 }
 
-/// An `Option` is kept as an `Option` of the storage type of its value: `Option<Ref<T>>` as
-/// `Option<Ref<FerroObject>>`, an optional member of an enumeration as `Option<EnumValue>`, and
-/// an optional value of any other type as it is.
+/// An `Option` is kept as an `Option` of the storage type of its value: an optional member of an
+/// enumeration as `Option<EnumValue>`, and an optional value of any other type as it is.
 impl<T: StyledValue> StyledValue for Option<T> {
     type Storage = Option<T::Storage>;
     const SHARED_STORAGE: bool = T::SHARED_STORAGE;
@@ -373,6 +404,16 @@ mod tests {
         assert_eq!(Some(EnumValue::new(7)), Some(Side::Right).into_storage());
         assert_eq!(None, Option::<Side>::from_storage(None));
         assert_eq!(Renamed::Self_, Renamed::from_storage(Renamed::Self_.into_storage()));
+    }
+
+    #[test]
+    fn the_members_of_an_enumeration_are_found_by_their_stored_value() {
+        for side in [Side::Left, Side::Right, Side::Top] {
+            let member = side.into_storage().member_of(Side::MEMBERS).expect("a member");
+            assert_eq!(Some(&side), member.downcast_ref::<Side>());
+        }
+        assert!(EnumValue::new(1).member_of(Side::MEMBERS).is_none());
+        assert!(f64::MEMBERS.is_empty());
     }
 
     #[test]

@@ -890,21 +890,21 @@ impl FerroObject {
     }
 
     /// Sets a property whose value type is `T` with local value priority, from the value
-    /// itself: a direct property takes it as [`set_direct_value`](Self::set_direct_value)
-    /// does, with no untyped value and no copy of it; a styled (or attached) property as
-    /// [`set_value_untyped`](Self::set_value_untyped) does, through its routes, with one copy
-    /// (its typed setter needs [`StyledValue`](crate::StyledValue), which `T` need not have).
+    /// itself: a styled (or attached) property takes it as [`set_value`](Self::set_value)
+    /// does (through its routes, which know the type it keeps values as), a direct property as
+    /// [`set_direct_value`](Self::set_direct_value), with no untyped value and no copy of it.
     /// The value is given back when `T` is not the value type of the property;
     /// [`set_value_untyped`](Self::set_value_untyped) converts it then.
     pub fn try_set_value_typed<T: PropertyValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
         if let Some(direct) = property.as_direct::<T>() {
             self.set_direct_value(direct, value);
-            Ok(())
-        } else if !property.is_direct() && property.property_type() == std::any::TypeId::of::<T>() {
-            property.routes().route_set_value(self, &value, BindingPriority::LocalValue);
+            return Ok(());
+        }
+        let mut slot = Some(value);
+        if !property.is_direct() && property.routes().route_take_value(self, &mut slot) {
             Ok(())
         } else {
-            Err(value)
+            Err(slot.expect("a value the property did not take"))
         }
     }
 
