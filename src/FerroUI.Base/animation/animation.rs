@@ -310,6 +310,10 @@ impl Animation {
     /// `on_complete` runs when the animation ends by itself.
     /// `is_manually_started` tells an animation started by code from one
     /// started by a style. Disposing the result removes the animation.
+    ///
+    /// A program an animator rejects ([`IAnimator::apply`]) goes to
+    /// [`Dispatcher::raise_unhandled_exception`] and applies nothing (#567);
+    /// [`try_apply`](Self::try_apply) returns it.
     pub fn apply(
         &self,
         control: &Animatable,
@@ -318,7 +322,34 @@ impl Animation {
         on_complete: Option<Rc<dyn Fn()>>,
         is_manually_started: bool,
     ) -> Rc<dyn IDisposable> {
+        match self.try_apply(control, clock, match_, on_complete, is_manually_started) {
+            Ok(applied) => applied,
+            Err(error) => {
+                Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+                Disposable::empty()
+            }
+        }
+    }
+
+    /// [`apply`](Self::apply) that returns the rejection of an animator (the
+    /// type of its property, its target, the timing of an instance) before
+    /// anything is left applied (#567).
+    pub fn try_apply(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        match_: Rc<dyn IObservable<bool>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+        is_manually_started: bool,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
         let (animators, mut subscriptions, animates_visibility) = self.interpret_keyframes(control);
+        // The steps applied before a rejection are removed with it.
+        let reject = |subscriptions: Vec<Rc<dyn IDisposable>>, error: AnimationError| {
+            for subscription in subscriptions {
+                subscription.dispose();
+            }
+            Err(error)
+        };
 
         let should_pause_on_invisible = match self.playback_behavior.get() {
             PlaybackBehavior::Auto => !(animates_visibility || is_manually_started),
@@ -327,14 +358,17 @@ impl Animation {
         };
 
         if animators.len() == 1 {
-            let subscription = animators[0].clone().apply(
+            let subscription = match animators[0].clone().apply(
                 self,
                 control,
                 clock,
                 match_,
                 on_complete,
                 should_pause_on_invisible,
-            );
+            ) {
+                Ok(subscription) => subscription,
+                Err(error) => return reject(subscriptions, error),
+            };
 
             if let Some(subscription) = subscription {
                 self.retain_preview_subscription(&subscription);
@@ -370,14 +404,17 @@ impl Animation {
                         action
                     });
 
-                let subscription = animator.clone().apply(
+                let subscription = match animator.clone().apply(
                     self,
                     control,
                     clock.clone(),
                     match_.clone(),
                     animator_on_complete,
                     should_pause_on_invisible,
-                );
+                ) {
+                    Ok(subscription) => subscription,
+                    Err(error) => return reject(subscriptions, error),
+                };
 
                 if let Some(subscription) = subscription {
                     self.retain_preview_subscription(&subscription);
@@ -392,7 +429,7 @@ impl Animation {
             }
         }
 
-        Rc::new(CompositeDisposable::from_disposables(subscriptions))
+        Ok(Rc::new(CompositeDisposable::from_disposables(subscriptions)))
     }
 
     /// Applies an isolated snapshot using the framework animators, retaining final fill
@@ -406,6 +443,18 @@ impl Animation {
         clock: Option<Rc<dyn IClock>>,
         on_complete: Option<Rc<dyn Fn()>>,
     ) -> Rc<dyn IDisposable> {
+        match self.apply_for_preview_core(control, clock, on_complete) {
+            Ok(applied) => applied,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    fn apply_for_preview_core(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
         let preview = Animation::new();
         preview.set_duration(self.duration());
         preview.set_iteration_count(self.iteration_count());
@@ -447,7 +496,7 @@ impl Animation {
                     }
                 }
             }
-            preview.apply(
+            preview.try_apply(
                 control,
                 clock,
                 Observable::single_value(true),
@@ -456,7 +505,12 @@ impl Animation {
             )
         }));
         let applied = match applied {
-            Ok(applied) => applied,
+            Ok(Ok(applied)) => applied,
+            Ok(Err(error)) => {
+                // An animator rejected the program: what was set up before it goes.
+                values.dispose();
+                return Err(error);
+            }
             Err(error) => {
                 // A redirected transform can be created before a later animator validates
                 // its timing or target. Remove every completed setup step on failure.
@@ -464,13 +518,13 @@ impl Animation {
                 std::panic::resume_unwind(error);
             }
         };
-        Disposable::create(move || {
+        Ok(Disposable::create(move || {
             // Mark the scope disposed before unsubscribing: ordinary forward-fill teardown
             // must not author a final value while a preview is being removed.
             values.dispose();
             applied.dispose();
             drop(preview);
-        })
+        }))
     }
 
     /// [`apply_for_preview`](Self::apply_for_preview), with the programs the framework rejects
@@ -480,8 +534,9 @@ impl Animation {
     /// delay, duration or delay between iterations (or an iteration count above `i64::MAX`).
     /// The error has the message `apply_for_preview` panics with; nothing is applied then.
     ///
-    /// What an animator checks itself (an animator given explicitly for a property of another
-    /// value type, the checks of an application's animator) still panics.
+    /// What an animator checks itself as it is applied ([`IAnimator::apply`]: an animator
+    /// given explicitly for a property of another value type, the checks of an application's
+    /// animator) is `Err` too, and what was set up before it is removed.
     pub fn try_apply_for_preview(
         &self,
         control: &Animatable,
@@ -489,7 +544,7 @@ impl Animation {
         on_complete: Option<Rc<dyn Fn()>>,
     ) -> Result<Rc<dyn IDisposable>, AnimationError> {
         self.validate_for_preview(control)?;
-        Ok(self.apply_for_preview(control, clock, on_complete))
+        self.apply_for_preview_core(control, clock, on_complete)
     }
 
     /// The first rejection of [`try_apply_for_preview`](Self::try_apply_for_preview), in the

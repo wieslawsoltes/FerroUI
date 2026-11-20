@@ -32,7 +32,7 @@ use ferroui_base::data::{
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
 use ferroui_base::styling::{Setter, SetterBase, StyleBase};
-use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, TypeInfo, UnsetValueType};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, ObjectType, Ref, StyledElement, TypeInfo, UnsetValueType};
 
 use super::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
@@ -53,6 +53,11 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
+// Packed row tables of the deferred shapes (#855, `packed_resource_rows.rs`).
+pub use super::theme_resources::{
+    add_packed_dynamic_brushes, add_packed_literal_brushes, add_packed_resource_aliases, add_packed_static_brushes,
+    PackedRows,
+};
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.
 pub use super::theme_styles::{
@@ -64,9 +69,9 @@ pub use super::theme_styles::{
 // builds of the dictionaries apply them with.
 pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
-    active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    register_wider_theme_parts, registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys,
-    wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
+    active_theme_units, apply_theme_region, apply_theme_unit, find_theme_unit, register_theme_parts,
+    register_theme_parts_if_absent, register_wider_theme_parts, registered_theme_parts, report_trimmed_theme,
+    set_active_theme_units, trimmed_type_keys, wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
 
 /// Materialize an independently linkable constant from the build-time image.
@@ -463,6 +468,33 @@ pub fn bind_dynamic_resource(
     }
 }
 
+/// `{DynamicResource key}` as the value of the registered property `property` of an object, at
+/// `line`, `position` ([`bind_dynamic_resource`]): a row of a run that
+/// [`bind_dynamic_resources`] binds.
+#[derive(Clone, Copy)]
+pub struct DynamicResourceRow {
+    pub property: PropertyFn,
+    pub key: &'static str,
+    pub line: i32,
+    pub position: i32,
+}
+
+/// Binds the dynamic resources `rows` on `target`, in order ([`bind_dynamic_resource`] of each,
+/// its property read before it is bound); the first failure is the error. A run of
+/// `{DynamicResource}` values on one object, which generated code wrote as one call of
+/// [`bind_dynamic_resource`] each.
+#[inline(never)]
+pub fn bind_dynamic_resources(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    rows: &[DynamicResourceRow],
+) -> Result<(), XamlLoadError> {
+    for row in rows {
+        bind_dynamic_resource(context, target, (row.property)(), row.key, row.line, row.position)?;
+    }
+    Ok(())
+}
+
 /// `{TemplateBinding source}` as the value of the registered property `property` of `target`
 /// (in a control template): what the statements of generated code do, which create the binding
 /// for the property `source` of the templated parent (`TemplateBinding::__markup_new_1`), call
@@ -517,6 +549,34 @@ pub fn static_resource_content(
     StaticResourceExtension::__markup_set_ResourceKey(&extension, string_object(key));
     let provided =
         invoked(StaticResourceExtension::__markup_ProvideValue_0(&extension, self::service_provider(&context)), line, position)?;
+    Ok(to_value(provided))
+}
+
+/// The value of `{StaticResource key}` for the registered property `property` (#568): what the
+/// statements of generated code do, which create the extension with the key
+/// (`StaticResourceExtension::__markup_new_1`), call `ProvideValue` with the property as the
+/// provide-value target property ([`provide_value_invoked`], a failure the error of an invoked
+/// member at `line`, `position`) and hold the provided value as the value of a node
+/// ([`to_value`]). The same calls, in the same order; the caller assigns the value with the
+/// setter it chooses.
+#[inline(never)]
+pub fn static_resource_value(
+    context: &Rc<XamlIlContext>,
+    property: &'static FerroProperty,
+    key: &str,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadError> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let extension = StaticResourceExtension::__markup_new_1(string_object(key));
+    let provided = provide_value_invoked(
+        context,
+        property_value(property),
+        &extension,
+        StaticResourceExtension::__markup_ProvideValue_0,
+        line,
+        position,
+    )?;
     Ok(to_value(provided))
 }
 
@@ -1285,6 +1345,96 @@ pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &Doc
     context.set_root_object(root.clone());
     context.set_intermediate_root_object(root);
     context
+}
+
+// --- the parent stack of a styled element (#568) -------------------------------------------
+//
+// Generated code writes these for the objects of templates and documents that are styled
+// elements: the statements they stand for are the same at every element, so they are one
+// function for each class of element instead of a copy of the clone, the box and the call at
+// each element.
+
+/// `context.push_parent(rt::to_value(object.clone()))`: `object` on the parent stack of the
+/// context, as the value of the node ([`to_value`]).
+#[inline(never)]
+pub fn push_parent<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
+    context.push_parent(to_value(object.clone()));
+}
+
+/// `context.set_intermediate_root_object(rt::to_value(object.clone()))`: `object` as the
+/// intermediate root of the context (the root of deferred content), as the value of the node
+/// ([`to_value`]).
+#[inline(never)]
+pub fn set_intermediate_root<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
+    context.set_intermediate_root_object(to_value(object.clone()));
+}
+
+/// `rt::invoked(element.try_end_init(), line, position)?`: the end of the initialisation of a
+/// styled element, its failure the error of the member at `line`, `position` ([`invoked`]).
+#[inline(never)]
+pub fn end_init(element: &StyledElement, line: i32, position: i32) -> Result<(), XamlLoadError> {
+    invoked(element.try_end_init(), line, position)
+}
+
+/// `context.pop_parent(); rt::invoked(element.try_end_init(), line, position)?`: a styled
+/// element taken off the parent stack of the context, then the end of its initialisation
+/// ([`end_init`]).
+#[inline(never)]
+pub fn pop_parent_end_init(
+    context: &Rc<XamlIlContext>,
+    element: &StyledElement,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    context.pop_parent();
+    invoked(element.try_end_init(), line, position)
+}
+
+/// The name of a styled element (`x:Name` or `Name`): `name` set as its `Name`, then `element`
+/// registered under it in the name scope of the context ([`register_name_value`] of
+/// `Rc::new(element.clone())`, the value in the handle the statements boxed), as the two
+/// statements of generated code did. One function for each class of element; `styled` is the
+/// element as a styled element.
+#[inline(never)]
+pub fn name_element<T: ObjectType>(
+    scope: Option<&Rc<dyn INameScope>>,
+    element: &Ref<T>,
+    styled: &StyledElement,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    set_element_name(styled, name);
+    register_name_value(scope, name, Rc::new(element.clone()), line, position)
+}
+
+/// `{CompiledBinding path}` as the value of the registered property `property` of `target`:
+/// what the statements of generated code do, which create the extension with the path
+/// (`CompiledBindingExtension::__markup_new_1`), set the property as the provide-value target
+/// property of the context, call `ProvideValue` with the context as the service provider, clear
+/// the target property and pass the provided binding to the binding setter of the property
+/// ([`bind`]) at `line`, `position`. The same calls, in the same order.
+#[inline(never)]
+pub fn bind_compiled_binding(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    path: CompiledBindingPath,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use crate::markup_extensions::CompiledBindingExtension;
+    let extension = CompiledBindingExtension::__markup_new_1(path);
+    context.set_target_property(property_value(property));
+    let provided = CompiledBindingExtension::__markup_ProvideValue_0(&extension, Some(service_provider(context)));
+    context.set_target_property(None);
+    bind(target, property, provided, line, position)
+}
+
+/// `element.Name = name`, the setter of the direct property of a styled element.
+#[inline(never)]
+fn set_element_name(element: &StyledElement, name: &str) {
+    element.set_direct_value(StyledElement::name_property(), Some(String::from(name)));
 }
 
 /// `context.FerroNameScope.Register(name, element)`: registers `element`

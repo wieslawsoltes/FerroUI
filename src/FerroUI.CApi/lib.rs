@@ -31,6 +31,9 @@
 //!   (open an element, set scalars, bind events to message tags, close), reconciled into the
 //!   retained tree of a root; events call one dispatcher with their tag
 //!   ([`ferro_frame_dispatcher`]). For Elm-like bindings (docs/bindings-design.md).
+//! - **Event data.** A handler receives scalars; what a routed event carries beyond them (the
+//!   position and button of a pointer event, the key of a key event) is read from inside the
+//!   handler ([`ferro_event_x`], [`ferro_event_button`], [`ferro_event_key`]).
 //! - **Callbacks** are a C function pointer and an `int64_t` token ([`FerroEventFn`]), which
 //!   every language can make (a language without closures dispatches on the token), or a
 //!   function with a `void *` and a release function for it ([`FerroEventDataFn`]).
@@ -43,6 +46,7 @@ mod api_ids;
 // The entries of the classes of the model, generated (tests/types_tests.rs).
 mod api_types;
 mod error;
+mod event_data;
 mod events;
 mod foreign;
 mod frame;
@@ -51,15 +55,15 @@ mod ids;
 mod signals;
 mod strings;
 mod thread;
+mod timer;
 mod tree;
 mod types;
 mod values;
 
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_clear_error, ferro_last_error, ferro_last_error_code};
-pub use events::{
-    ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe,
-};
+pub use event_data::{ferro_event_button, ferro_event_key, ferro_event_x, ferro_event_y, ferro_focus};
+pub use events::{ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe};
 pub use foreign::*;
 pub use frame::{
     ferro_frame_begin, ferro_frame_bind, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
@@ -78,6 +82,7 @@ pub use signals::{
     FERRO_SIGNAL_TEXT,
 };
 pub use thread::{ferro_init, ferro_is_ui_thread, ferro_post, ferro_post_data, ferro_run_jobs};
+pub use timer::{ferro_timer_start, ferro_timer_stop};
 pub use tree::{ferro_add_child, ferro_remove_child};
 pub use api_types::*;
 pub use values::{
@@ -148,6 +153,11 @@ pub type FerroPostFn = Option<unsafe extern "C" fn(token: i64) -> i64>;
 
 /// Work posted to the UI thread with [`ferro_post_data`]: called once with its user data.
 pub type FerroPostDataFn = Option<unsafe extern "C" fn(user_data: *mut c_void)>;
+
+/// The function of a timer ([`ferro_timer_start`]): called on the UI thread with the token of the
+/// timer and the time since its previous tick (or its start) in microseconds. It returns `0` to go
+/// on ticking; any other value stops the timer.
+pub type FerroTimerFn = Option<unsafe extern "C" fn(token: i64, elapsed: i64) -> i64>;
 
 /// The handler of an event ([`ferro_subscribe`]): called on the UI thread with the token of the
 /// subscription, the handle of the object the handler is attached to (borrowed for the call:

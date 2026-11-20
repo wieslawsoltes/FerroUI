@@ -68,7 +68,7 @@ jobs:
 
   # The C hello world on the desktop platform: the library with Skia, the sample compiled and
   # linked against it, and a smoke run of three seconds (FERROUI_SMOKE_EXIT_MS); on macOS also the
-  # Rust and C tests of the ABI.
+  # Rust and C tests of the ABI and the Osprey samples.
   sample-macos:
     name: ABI tests and C hello world (macOS)
     runs-on: macos-15
@@ -91,7 +91,40 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
         run: make -C samples/CApi run
-      # The by-use mode (docs/c-abi.md, section 16): the library without the tables of types knows
+      # The Osprey samples (samples/CApi/osprey) with the pinned release of the Osprey compiler,
+      # downloaded into the temporary directory of the job and checked against its SHA-256: each
+      # is compiled against the library of the steps above (target/debug) and runs the steps of
+      # its scenario (FERROUI_SAMPLE_SCRIPT), which print one line per check.
+      - name: Osprey samples
+        env:
+          OSPREY_VERSION: 0.29.0
+          OSPREY_SHA256: 0d2a58c07989a393e0849a0aac0f69f509a3a49521e994cc3e879ee80f39aff1
+          FERROUI_SAMPLE_SCRIPT: 1
+          FERROUI_SMOKE_EXIT_MS: 4000
+        run: |
+          tools="$RUNNER_TEMP/osprey"
+          mkdir -p "$tools"
+          curl -fsSL -o "$tools/osprey.tar.gz" \
+            "https://github.com/Nimblesite/osprey/releases/download/v$OSPREY_VERSION/osprey-$OSPREY_VERSION-darwin-arm64.tar.gz"
+          echo "$OSPREY_SHA256  $tools/osprey.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$tools/osprey.tar.gz" -C "$tools"
+          osprey="$tools/osprey-$OSPREY_VERSION-darwin-arm64/osprey"
+          mkdir -p target/osprey
+          failed=0
+          for sample in samples/CApi/osprey/*.osp; do
+            name=$(basename "$sample" .osp)
+            echo "::group::$name"
+            "$osprey" "$sample" --compile --memory=arc --quiet -o "target/osprey/$name"
+            DYLD_LIBRARY_PATH=target/debug "target/osprey/$name" | tee "target/osprey/$name.log"
+            if grep -q 'FAILED' "target/osprey/$name.log" || ! grep -q '^script: .*: ok$' "target/osprey/$name.log"; then
+              echo "::error::the scenario of $name failed"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $failed
+      # Last, since it rebuilds the library of the steps above: the by-use mode (docs/c-abi.md,
+      # section 16): the library without the tables of types knows
       # the classes the samples register with their entries, and the theme has their units.
       - name: The samples with the library built by use
         env:

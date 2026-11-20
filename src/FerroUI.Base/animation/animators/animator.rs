@@ -1,5 +1,5 @@
 use crate::animation::{
-    Animatable, Animation, AnimationInstance, AnimatorKeyFrame, Clock,
+    Animatable, Animation, AnimationError, AnimationInstance, AnimatorKeyFrame, Clock,
     DisposeAnimationInstanceSubject, IAnimator, IClock, KeySpline,
 };
 use crate::data::BindingPriority;
@@ -11,6 +11,9 @@ use crate::{AnyValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual}
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+/// The rejection of an animator without a target property.
+pub(crate) const NO_PROPERTY: &str = "Animator has no property specified.";
 
 /// The state every animator has: its key frames and its target property.
 #[derive(Default)]
@@ -55,20 +58,31 @@ impl AnimatorBase {
     }
 
     /// The target property as a styled property of value type `T`. Panics
-    /// when the animator has no property or the property has another type.
+    /// when the animator has no property or the property has another type,
+    /// which [`Animator::apply`] checks first with
+    /// [`try_styled_property`](Self::try_styled_property).
     pub fn styled_property<T: PropertyValue>(&self) -> &'static StyledProperty<T> {
+        match self.try_styled_property::<T>() {
+            Ok(property) => property,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    /// The target property as a styled property of value type `T`; an error
+    /// when the animator has no property or the property has another type
+    /// (#567).
+    pub fn try_styled_property<T: PropertyValue>(&self) -> Result<&'static StyledProperty<T>, AnimationError> {
         let Some(property) = self.property.get() else {
-            panic!("Animator has no property specified.");
+            return Err(AnimationError(NO_PROPERTY.to_owned()));
         };
-        match property.as_styled::<T>() {
-            Some(property) => property,
-            None => panic!(
+        property.as_styled::<T>().ok_or_else(|| {
+            AnimationError(format!(
                 "Unable to animate property '{}' of type {} as {}.",
                 property,
                 property.property_type_name(),
                 std::any::type_name::<T>()
-            ),
-        }
+            ))
+        })
     }
 }
 
@@ -119,6 +133,10 @@ pub trait Animator: Sized + 'static {
     }
 
     /// Applies the animation to `control`: it runs while `match_` is true.
+    ///
+    /// Checks first what the instance of a run would refuse: the type of the
+    /// target property ([`AnimatorBase::try_styled_property`]) and the timing
+    /// of `animation`; an animator that overrides this checks its own target.
     fn apply(
         this: &Rc<Self>,
         animation: &Animation,
@@ -127,9 +145,11 @@ pub trait Animator: Sized + 'static {
         match_: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>> {
+    ) -> Result<Option<Rc<dyn IDisposable>>, AnimationError> {
+        this.base().try_styled_property::<Self::Value>()?;
+        crate::animation::animation_instance::validate_timing(animation)?;
         let visual_target = control.downcast_ref::<Visual>().map(Visual::to_ref);
-        Some(apply_with_visual(
+        Ok(Some(apply_with_visual(
             this,
             animation,
             control,
@@ -138,7 +158,7 @@ pub trait Animator: Sized + 'static {
             on_complete,
             should_pause_on_invisible,
             visual_target,
-        ))
+        )))
     }
 }
 
@@ -427,7 +447,7 @@ impl<A: Animator> IAnimator for A {
         match_: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>> {
+    ) -> Result<Option<Rc<dyn IDisposable>>, AnimationError> {
         <A as Animator>::apply(
             &self,
             animation,

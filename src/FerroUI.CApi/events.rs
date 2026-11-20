@@ -117,7 +117,7 @@ fn subscribe(object: FerroHandle, event: i64, callback: Callback) -> Result<i64>
             let route_handler: ferroui_base::interactivity::RouteHandler =
                 Rc::new(move |sender: &Interactive, args: &dyn IRoutedEventArgs| {
                     let sender: &FerroObject = sender.upcast();
-                    if handler.invoke(sender, 0) != 0 {
+                    if crate::event_data::handling(args, || handler.invoke(sender, 0)) != 0 {
                         args.set_handled(true);
                     }
                 });
