@@ -42,9 +42,26 @@ MODES = {
 }
 
 
+def link_environment():
+    """The environment of the C links: on macOS with `SDKROOT` set (from `xcrun`) when it is not,
+    so that `cc` finds the libraries rustc names (`-lm`, `-liconv`) the way rustc's own link does."""
+    env = dict(os.environ)
+    if sys.platform == "darwin" and not env.get("SDKROOT"):
+        sdk = subprocess.run(["xcrun", "--sdk", "macosx", "--show-sdk-path"], text=True, capture_output=True)
+        if sdk.returncode == 0 and sdk.stdout.strip():
+            env["SDKROOT"] = sdk.stdout.strip()
+    return env
+
+
+LINK_ENV = None
+
+
 def run(command, cwd=None, capture=False):
+    global LINK_ENV
+    if LINK_ENV is None:
+        LINK_ENV = link_environment()
     print("+ " + " ".join(command), flush=True)
-    result = subprocess.run(command, cwd=cwd, text=True, stdout=subprocess.PIPE if capture else None,
+    result = subprocess.run(command, cwd=cwd, env=LINK_ENV, text=True, stdout=subprocess.PIPE if capture else None,
                             stderr=subprocess.STDOUT if capture else None, check=False)
     if result.returncode != 0:
         if capture:
