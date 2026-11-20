@@ -133,6 +133,9 @@ pub use transform::{
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, set_compile_time_declared_properties, UnsupportedNode};
+pub use emitter::theme_styles::{
+    resolves_template_bindings, with_resolved_template_bindings, DEFAULT_RESOLVED_TEMPLATE_BINDINGS,
+};
 pub use emitter::theme_units::{with_theme_unit_plan, ThemeUnitPlan, DEFAULT_THEME_UNIT_PLAN};
 pub use emitter::theme_rows::{packed_theme_rows, with_packed_theme_rows, DEFAULT_PACKED_THEME_ROWS};
 pub use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};

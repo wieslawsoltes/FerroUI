@@ -47,6 +47,19 @@ impl Hasher for AddressHasher {
     }
 }
 
+impl Drop for Table {
+    fn drop(&mut self) {
+        // The UI thread ends with handles that were never released (a binding that has no
+        // finalizer keeps them to the end): the objects are left as they are, since dropping a
+        // control reaches thread-local state of the framework that is already gone.
+        for slot in &mut self.slots {
+            if let Some(object) = slot.object.take() {
+                std::mem::forget(object);
+            }
+        }
+    }
+}
+
 ferroui_base::ferro_thread_local! {
     static TABLE: RefCell<Table> = RefCell::new(Table::default());
 }

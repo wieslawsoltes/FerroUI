@@ -70,7 +70,7 @@ pub(crate) mod theme_rows;
 /// Control themes, selector chains, resource setter choices and template bindings written as
 /// tables (#568, step 5).
 #[path = "theme_styles.rs"]
-mod theme_styles;
+pub(crate) mod theme_styles;
 
 #[path = "selector_visitor.rs"]
 mod selector_visitor;
@@ -3294,10 +3294,14 @@ impl<'a> Emitter<'a> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
         let body_lines = self.apply_row_runs(body_lines, |_, _| {});
-        // Runs of template bindings on one object, as tables (#568, step 5).
+        // Runs of template bindings on one object, as tables (#568, step 5), after the template
+        // bindings whose setter is chosen at run time are resolved (#854, off by default). The
+        // typed backend encodes those choices itself, so the native forms are left to it.
         let body_lines = if self.documents.backend.uses_construction_programs() {
             body_lines
         } else {
+            let template_binding = self.types.framework_path(FrameworkType::TemplateBinding).map(|path| absolute(&path));
+            let body_lines = theme_styles::resolve_template_bindings(body_lines, template_binding.as_deref());
             theme_styles::template_binding_runs(&mut self.theme_styles, body_lines)
         };
 
