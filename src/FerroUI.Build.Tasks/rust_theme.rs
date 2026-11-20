@@ -37,13 +37,14 @@ pub fn documents(
     units: &HashMap<u32, String>,
 ) -> Result<Vec<(String, String)>, String> {
     let models = ModelSet::new(models);
+    let by_module: HashMap<String, String> = documents.iter().map(|document| (module_of(document), document.clone())).collect();
     let mut out = Vec::with_capacity(documents.len());
     let mut errors = Vec::new();
     for document in documents {
         let path = directory.join(format!("{}.rs", module_of(document).replace("::", "/")));
         let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
         let file = syn::parse_file(&text).map_err(|error| format!("{}: {error}", path.display()))?;
-        let mut reader = Reader::new(&models, &file, units, document);
+        let mut reader = Reader::new(&models, &file, units, document, &by_module);
         match reader.document() {
             Ok(xaml) => out.push((document.clone(), xaml)),
             Err(error) => errors.push(format!("{document}: {error}")),
@@ -161,6 +162,15 @@ fn escape_text(text: &str) -> String {
 
 // --- reading a module ------------------------------------------------------------------------
 
+/// A path whose last segment names a member of the type the rest names (`Type::new`).
+struct Owner<'p>(&'p syn::Path);
+
+impl Owner<'_> {
+    fn is_empty(&self) -> bool {
+        self.0.segments.len() < 2
+    }
+}
+
 /// A type of the models, as the document names it.
 #[derive(Clone)]
 struct XamlType {
@@ -174,6 +184,8 @@ struct Reader<'a> {
     imports: HashMap<String, String>,
     units: &'a HashMap<u32, String>,
     document: &'a str,
+    /// The documents of the build by their module.
+    documents: &'a HashMap<String, String>,
     /// The XML namespaces of the CLR namespaces the document names, by prefix.
     prefixes: BTreeMap<String, String>,
     default_namespaces: Vec<String>,
@@ -292,7 +304,13 @@ fn block_statements(expr: &Expr) -> Vec<&Stmt> {
 }
 
 impl<'a> Reader<'a> {
-    fn new(models: &'a ModelSet, file: &'a syn::File, units: &'a HashMap<u32, String>, document: &'a str) -> Self {
+    fn new(
+        models: &'a ModelSet,
+        file: &'a syn::File,
+        units: &'a HashMap<u32, String>,
+        document: &'a str,
+        documents: &'a HashMap<String, String>,
+    ) -> Self {
         let mut functions = HashMap::new();
         let mut imports = HashMap::new();
         for item in &file.items {
@@ -312,7 +330,13 @@ impl<'a> Reader<'a> {
                 }
             }
         }
-        Reader { models, functions, imports, units, document, prefixes: BTreeMap::new(), default_namespaces }
+        Reader { models, functions, imports, units, document, documents, prefixes: BTreeMap::new(), default_namespaces }
+    }
+
+    /// The document of the module `controls::button`, as the converter named it: the documents
+    /// of the theme are found by their module.
+    fn document_of_module(&self, module: &str) -> String {
+        self.documents.get(module).cloned().unwrap_or_else(|| module.replace("::", "/"))
     }
 
     fn function(&self, name: &str) -> R<&'a ItemFn> {
@@ -321,7 +345,22 @@ impl<'a> Reader<'a> {
 
     /// The absolute path of a path of the module: through its imports.
     fn absolute(&self, path: &syn::Path) -> String {
-        let text = path_text(path);
+        let segments: Vec<String> = path.segments.iter().map(|s| s.ident.to_string()).collect();
+        self.absolute_of(path.leading_colon.is_some(), &segments)
+    }
+
+    /// The type a path names without its last segment (`Type` of `Type::new`).
+    fn type_of_owner(&mut self, owner: &Owner) -> R<(XamlType, &'a TypeModel)> {
+        let segments: Vec<String> = owner.0.segments.iter().map(|s| s.ident.to_string()).collect();
+        let segments = &segments[..segments.len().saturating_sub(1)];
+        let absolute = self.absolute_of(owner.0.leading_colon.is_some(), segments);
+        let model = self.type_model(&absolute)?;
+        Ok((self.xaml_type(model), model))
+    }
+
+    fn absolute_of(&self, leading: bool, segments: &[String]) -> String {
+        let text = format!("{}{}", if leading { "::" } else { "" }, segments.join("::"));
+        let path_segments = segments;
         if text.starts_with("::") {
             return text;
         }
@@ -329,10 +368,10 @@ impl<'a> Reader<'a> {
             let crate_name = self.models.models().last().map(|m| m.crate_name.clone()).unwrap_or_default();
             return format!("::{crate_name}::{rest}");
         }
-        let first = path.segments.first().map(|s| s.ident.to_string()).unwrap_or_default();
+        let first = path_segments.first().cloned().unwrap_or_default();
         match self.imports.get(&first) {
             Some(imported) => {
-                let rest: Vec<String> = path.segments.iter().skip(1).map(|s| s.ident.to_string()).collect();
+                let rest: Vec<String> = path_segments.iter().skip(1).cloned().collect();
                 let imported = match imported.strip_prefix("crate::") {
                     Some(inner) => {
                         let crate_name = self.models.models().last().map(|m| m.crate_name.clone()).unwrap_or_default();
@@ -397,6 +436,14 @@ impl<'a> Reader<'a> {
     /// The type of `T` in `f::<T>(..)` or `T::new()`.
     fn type_of_generic(&mut self, segment: &syn::PathSegment, node: &impl Spanned) -> R<(XamlType, &'a TypeModel)> {
         if let syn::PathArguments::AngleBracketed(arguments) = &segment.arguments {
+            return self.type_of_arguments(Some(arguments), node);
+        }
+        Err(at(node, "a type argument was expected"))
+    }
+
+    /// The type of `T` in `::<T>`.
+    fn type_of_arguments(&mut self, arguments: Option<&syn::AngleBracketedGenericArguments>, node: &impl Spanned) -> R<(XamlType, &'a TypeModel)> {
+        if let Some(arguments) = arguments {
             if let Some(syn::GenericArgument::Type(syn::Type::Path(type_path))) = arguments.args.first() {
                 return self.type_of_path(&type_path.path);
             }
@@ -559,7 +606,7 @@ impl<'a> Reader<'a> {
                     let function = path_of_call(inner);
                     if function.ends_with("::build") {
                         let module = function.trim_start_matches("crate::rust_theme::").trim_end_matches("::build");
-                        let document = document_of_module(module);
+                        let document = self.document_of_module(module);
                         let mut include = Node::new("StyleInclude");
                         include.attribute("Source", format!("/{document}"));
                         root.child(include);
@@ -613,7 +660,7 @@ impl<'a> Reader<'a> {
             if let Some(module) = function.strip_prefix("crate::rust_theme::").and_then(|m| m.strip_suffix("::merge")) {
                 self.merged(node).child({
                     let mut include = Node::new("MergeResourceInclude");
-                    include.attribute("Source", format!("ferres://FerroUI.Themes.WinUI/{}", document_of_module(module)));
+                    include.attribute("Source", format!("ferres://FerroUI.Themes.WinUI/{}", self.document_of_module(module)));
                     include
                 });
                 return Ok(());
@@ -693,10 +740,8 @@ impl<'a> Reader<'a> {
             "merge" => {
                 let Expr::Call(constructor) = strip_try(args[0]) else { return Err(at(args[0], "a constructor was expected")) };
                 let Expr::Path(path) = &*constructor.func else { return Err(at(args[0], "a constructor was expected")) };
-                let mut type_path = path.path.clone();
-                type_path.segments.pop();
-                type_path.segments.pop_punct();
-                let (xaml, _) = self.type_of_path(&type_path)?;
+                let type_path = Owner(&path.path);
+                let (xaml, _) = self.type_of_owner(&type_path)?;
                 self.merged(node).child(Node::new(xaml.name));
             }
             other => return Err(at(call, format!("`{other}` of a dictionary"))),
@@ -779,11 +824,9 @@ impl<'a> Reader<'a> {
             let function = path_of_call(call);
             let (type_path, _) = function.rsplit_once("::").unwrap_or(("", ""));
             if let Expr::Path(path) = &*call.func {
-                let mut owner = path.path.clone();
-                owner.segments.pop();
-                owner.segments.pop_punct();
-                if !owner.segments.is_empty() && type_path != "literal" {
-                    let (xaml, _) = self.type_of_path(&owner)?;
+                let owner = Owner(&path.path);
+                if !owner.is_empty() && type_path != "literal" {
+                    let (xaml, _) = self.type_of_owner(&owner)?;
                     let text = self.value_text(value, None)?;
                     return Ok((xaml.name, text));
                 }
@@ -791,20 +834,16 @@ impl<'a> Reader<'a> {
             if function == "literal" {
                 if let Expr::Call(parse) = strip_try(&call.args[0]) {
                     if let Expr::Path(path) = &*parse.func {
-                        let mut owner = path.path.clone();
-                        owner.segments.pop();
-                        owner.segments.pop_punct();
-                        let (xaml, _) = self.type_of_path(&owner)?;
+                        let owner = Owner(&path.path);
+                        let (xaml, _) = self.type_of_owner(&owner)?;
                         return Ok((xaml.name, string_literal(&parse.args[0]).unwrap_or_default()));
                     }
                 }
             }
         }
         if let Expr::Path(path) = value {
-            let mut owner = path.path.clone();
-            owner.segments.pop();
-            owner.segments.pop_punct();
-            let (xaml, _) = self.type_of_path(&owner)?;
+            let owner = Owner(&path.path);
+            let (xaml, _) = self.type_of_owner(&owner)?;
             let text = self.value_text(value, None)?;
             // The named colours are members of `Colors`, values of `Color`.
             let tag = if xaml.name == "Colors" { "Color".to_string() } else { xaml.name };
@@ -821,7 +860,7 @@ impl<'a> Reader<'a> {
             let function = path_of_call(call);
             if let Some(module) = function.strip_prefix("crate::rust_theme::").and_then(|m| m.strip_suffix("::build")) {
                 let mut include = Node::new("ResourceInclude");
-                include.attribute("Source", format!("/{}", document_of_module(module)));
+                include.attribute("Source", format!("/{}", self.document_of_module(module)));
                 return Ok(include);
             }
             if function.ends_with("control_template") {
@@ -866,8 +905,7 @@ impl<'a> Reader<'a> {
             let expr = strip_try(expr);
             if let Expr::MethodCall(call) = expr {
                 if call.method == "target" {
-                    let segment = syn::PathSegment { ident: call.method.clone(), arguments: call.turbofish.clone().map(syn::PathArguments::AngleBracketed).unwrap_or_default() };
-                    let (xaml, model) = self.type_of_generic(&segment, call)?;
+                    let (xaml, model) = self.type_of_arguments(call.turbofish.as_ref(), call)?;
                     node.attribute("TargetType", xaml.name);
                     target = Some(model);
                     continue;
@@ -1010,18 +1048,18 @@ impl<'a> Reader<'a> {
         let (root, calls) = chain(expr);
         let mut text = String::new();
         let mut target: Option<&'a TypeModel> = None;
-        let mut steps: Vec<(String, Vec<&Expr>, Option<syn::AngleBracketedGenericArguments>)> = Vec::new();
+        let mut steps: Vec<(String, Vec<&Expr>, Option<&syn::AngleBracketedGenericArguments>)> = Vec::new();
         if let Expr::Call(call) = root {
             let Expr::Path(path) = &*call.func else { return Err(at(root, "a selector")) };
             let segment = path.path.segments.last().ok_or_else(|| at(root, "a selector"))?;
             let arguments = match &segment.arguments {
-                syn::PathArguments::AngleBracketed(arguments) => Some(arguments.clone()),
+                syn::PathArguments::AngleBracketed(arguments) => Some(arguments),
                 _ => None,
             };
             steps.push((segment.ident.to_string(), call.args.iter().collect(), arguments));
         }
         for call in calls {
-            steps.push((call.method.to_string(), call.args.iter().collect(), call.turbofish.clone()));
+            steps.push((call.method.to_string(), call.args.iter().collect(), call.turbofish.as_ref()));
         }
         for (name, args, generics) in steps {
             match name.as_str() {
@@ -1030,11 +1068,7 @@ impl<'a> Reader<'a> {
                     target = parent;
                 }
                 "of" | "is" => {
-                    let segment = syn::PathSegment {
-                        ident: syn::Ident::new("of", proc_macro2::Span::call_site()),
-                        arguments: generics.map(syn::PathArguments::AngleBracketed).unwrap_or_default(),
-                    };
-                    let (xaml, model) = self.type_of_generic(&segment, expr)?;
+                    let (xaml, model) = self.type_of_arguments(generics, expr)?;
                     let written = xaml.name.replace(':', "|");
                     if name == "is" {
                         let _ = write!(text, ":is({written})");
@@ -1155,28 +1189,6 @@ fn color_text(argb: u32) -> String {
     format!("#{argb:08X}")
 }
 
-/// The document of the module `controls::button`, as the converter named it: the documents of
-/// the theme are found by their module.
-fn document_of_module(module: &str) -> String {
-    DOCUMENTS.with(|documents| documents.borrow().get(module).cloned().unwrap_or_else(|| module.replace("::", "/")))
-}
-
-thread_local! {
-    /// The documents of the build by their module, set by [`documents_of`].
-    static DOCUMENTS: std::cell::RefCell<HashMap<String, String>> = std::cell::RefCell::new(HashMap::new());
-}
-
-/// Records the documents of the build by their module, for the includes the modules name.
-pub fn set_documents(documents: &[String]) {
-    DOCUMENTS.with(|known| {
-        let mut known = known.borrow_mut();
-        known.clear();
-        for document in documents {
-            known.insert(module_of(document), document.clone());
-        }
-    });
-}
-
 enum BindingValue {
     Text(String),
     Node(Node),
@@ -1224,16 +1236,11 @@ impl<'a> Reader<'a> {
     /// The type of the data context of the bindings of a template: the type of the first
     /// `.member::<T>(..)` of its paths, else `x:Object`.
     fn data_type_of(&mut self, block: &syn::Block) -> R<String> {
-        struct Finder(Option<syn::PathSegment>);
-        impl<'ast> syn::visit::Visit<'ast> for Finder {
+        struct Finder<'ast>(Option<&'ast syn::AngleBracketedGenericArguments>);
+        impl<'ast> syn::visit::Visit<'ast> for Finder<'ast> {
             fn visit_expr_method_call(&mut self, call: &'ast ExprMethodCall) {
                 if self.0.is_none() && call.method == "member" {
-                    if let Some(turbofish) = &call.turbofish {
-                        self.0 = Some(syn::PathSegment {
-                            ident: call.method.clone(),
-                            arguments: syn::PathArguments::AngleBracketed(turbofish.clone()),
-                        });
-                    }
+                    self.0 = call.turbofish.as_ref();
                 }
                 syn::visit::visit_expr_method_call(self, call);
             }
@@ -1241,7 +1248,7 @@ impl<'a> Reader<'a> {
         let mut finder = Finder(None);
         syn::visit::Visit::visit_block(&mut finder, block);
         match finder.0 {
-            Some(segment) => Ok(self.type_of_generic(&segment, block)?.0.name),
+            Some(arguments) => Ok(self.type_of_arguments(Some(arguments), block)?.0.name),
             None => Ok("x:Object".to_string()),
         }
     }
@@ -1307,10 +1314,8 @@ impl<'a> Reader<'a> {
         }
         let Expr::Call(constructor) = strip_try(&make.args[0]) else { return Err(at(make, "a constructor was expected")) };
         let Expr::Path(path) = &*constructor.func else { return Err(at(make, "a constructor was expected")) };
-        let mut type_path = path.path.clone();
-        type_path.segments.pop();
-        type_path.segments.pop_punct();
-        let (xaml, model) = self.type_of_path(&type_path)?;
+        let type_path = Owner(&path.path);
+        let (xaml, model) = self.type_of_owner(&type_path)?;
         let mut node = Node::new(xaml.name.clone());
         let content = self.content_property(model);
         let mut classes: Vec<String> = Vec::new();
@@ -1548,10 +1553,8 @@ impl<'a> Reader<'a> {
                 }
                 if last == "new" && call.args.is_empty() {
                     if let Expr::Path(path) = &*call.func {
-                        let mut type_path = path.path.clone();
-                        type_path.segments.pop();
-                        type_path.segments.pop_punct();
-                        if let Ok((xaml, model)) = self.type_of_path(&type_path) {
+                        let type_path = Owner(&path.path);
+                        if let Ok((xaml, model)) = self.type_of_owner(&type_path) {
                             if !model.object_model {
                                 return Ok(Some(Node::new(xaml.name)));
                             }
@@ -1601,10 +1604,8 @@ impl<'a> Reader<'a> {
                     "new" if function.ends_with("Rc::new") => self.object_node(&call.args[0], template_parent),
                     "new" => {
                         let Expr::Path(path) = &*call.func else { return Err(at(call, "a constructor")) };
-                        let mut type_path = path.path.clone();
-                        type_path.segments.pop();
-                        type_path.segments.pop_punct();
-                        let (xaml, _) = self.type_of_path(&type_path)?;
+                        let type_path = Owner(&path.path);
+                        let (xaml, _) = self.type_of_owner(&type_path)?;
                         Ok(Node::new(xaml.name))
                     }
                     "literal" => {
@@ -1634,10 +1635,8 @@ impl<'a> Reader<'a> {
                             let (root, calls) = chain(constructor);
                             let Expr::Call(call) = root else { return Err(at(constructor, "a constructor")) };
                             let Expr::Path(path) = &*call.func else { return Err(at(constructor, "a constructor")) };
-                            let mut type_path = path.path.clone();
-                            type_path.segments.pop();
-                            type_path.segments.pop_punct();
-                            let (found_xaml, found) = self.type_of_path(&type_path)?;
+                            let type_path = Owner(&path.path);
+                            let (found_xaml, found) = self.type_of_owner(&type_path)?;
                             let mut created = Node::new(found_xaml.name.clone());
                             for option in calls {
                                 self.binding_option(&mut created, option, template_parent)?;
@@ -1764,13 +1763,11 @@ impl<'a> Reader<'a> {
                 return Ok((self.type_of_path(&type_path.path).ok(), function));
             }
         }
-        let mut owner = path.path.clone();
-        owner.segments.pop();
-        owner.segments.pop_punct();
-        if owner.segments.is_empty() {
+        let owner = Owner(&path.path);
+        if owner.is_empty() {
             return Ok((None, function));
         }
-        Ok((self.type_of_path(&owner).ok(), function))
+        Ok((self.type_of_owner(&owner).ok(), function))
     }
 
     /// A binding as the value of a property: the text of a markup extension, or an element
@@ -1852,11 +1849,7 @@ impl<'a> Reader<'a> {
             match method.as_str() {
                 "binding" => after_binding = true,
                 "ancestor_of" => {
-                    let segment = syn::PathSegment {
-                        ident: call.method.clone(),
-                        arguments: call.turbofish.clone().map(syn::PathArguments::AngleBracketed).unwrap_or_default(),
-                    };
-                    let (xaml, _) = self.type_of_generic(&segment, call)?;
+                    let (xaml, _) = self.type_of_arguments(call.turbofish.as_ref(), call)?;
                     let level = number_text(args[0]).unwrap_or_default();
                     let name = xaml.name.replace(':', "|");
                     if level == "0" {
@@ -1940,16 +1933,12 @@ impl<'a> Reader<'a> {
                 }
                 let last = path.path.segments.last().map(|s| s.ident.to_string()).unwrap_or_default();
                 if last == "TYPE" {
-                    let mut owner = path.path.clone();
-                    owner.segments.pop();
-                    owner.segments.pop_punct();
-                    let (xaml, _) = self.type_of_path(&owner)?;
+                    let owner = Owner(&path.path);
+                    let (xaml, _) = self.type_of_owner(&owner)?;
                     return Ok(format!("{{x:Type {}}}", xaml.name));
                 }
-                let mut owner = path.path.clone();
-                owner.segments.pop();
-                owner.segments.pop_punct();
-                if let Ok((_, model)) = self.type_of_path(&owner) {
+                let owner = Owner(&path.path);
+                if let Ok((_, model)) = self.type_of_owner(&owner) {
                     for member in &model.enum_members {
                         let variant = member
                             .rust_variant
