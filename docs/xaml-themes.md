@@ -800,7 +800,7 @@ fn default_button_style_template(t: &Template<Button>) -> Result<Ref<Control>> {
 | Theme dictionaries | `resources.theme(ThemeVariant::light(), function)` |
 | `MergeResourceInclude` of a document | `resources.include(unit)`: the unit of the document, which an application that trims the theme leaves out |
 | `<Setter>` | `set`, `dynamic`, `static_resource`, `template_bind`, `bind`, `set_null`, `set_value` of `StyleBuilder` |
-| A nested `<Style>` | `style(selector, \|style\| ..)`, the selector built with the selectors API by class identity |
+| A nested `<Style>` | `style(selector, \|style\| ..)`, the selector built with the selectors API by class identity; the closure captures nothing and is passed as a function |
 | A template | a function `fn ..(t: &Template<T>) -> Result<Ref<Control>>` of builder chains `t.make(X::new()).set(..)..` |
 | `{TemplateBinding}`, `{DynamicResource}`, `{StaticResource}`, `{Binding}` in a template | `template_bind`, `dynamic`, `static_resource`, `bind(.., path()..binding())` |
 
@@ -811,6 +811,12 @@ resource of a setter is the same extension, and a styled element is initialised 
 `make` and `end` as compiled markup initialises it. The few things the converter cannot write
 with public functions use the typed functions of the markup metadata (`__markup_parse` of a
 type whose parser is not public).
+
+The steps a theme calls many times (`StyleBuilder::style`, `Resources::deferred`) take
+functions, not generic closures, and are not inlined: a step is compiled once, and its call
+site is a call with a selector or a key and a function. Generic steps would compile once per
+call site, and thin generic wrappers over non-generic steps would grow every call site
+instead (measured in #992).
 
 ### 10.2 The three forms of a theme
 

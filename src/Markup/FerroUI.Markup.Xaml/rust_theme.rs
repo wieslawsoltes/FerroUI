@@ -506,9 +506,10 @@ impl Resources {
     }
 
     /// Adds what `build` makes under `key`, made when the resource is first looked up, with the
-    /// scope of the entry. `build` is a function, not a closure, so that the step is compiled
-    /// once for every resource of a theme.
-    pub fn deferred(&self, key: impl Into<ResourceKey>, build: fn(&Scope) -> Result<MarkupValue>) {
+    /// scope of the entry. `build` is a function, not a closure, and the step is not inlined, so
+    /// that a resource of a theme costs a call with a key and a function at its call site.
+    #[inline(never)]
+    pub fn deferred(&self, key: &str, build: fn(&Scope) -> Result<MarkupValue>) {
         self.deferred_with(key.into(), Rc::new(build));
     }
 
@@ -752,16 +753,11 @@ impl StyleBuilder {
         self
     }
 
-    /// A nested style of `selector`, with the setters and styles `populate` adds.
-    #[inline]
-    pub fn style(&self, selector: Selector, populate: impl FnOnce(&StyleBuilder) -> Result) -> Result<&Self> {
-        let mut populate = Some(populate);
-        self.nested_style(selector, &mut |builder| (populate.take().expect("populated once"))(builder))
-    }
-
-    /// [`style`](Self::style), compiled once: the closure of each style is called through it.
+    /// A nested style of `selector`, with the setters and styles `populate` adds. `populate` is a
+    /// function (a closure that captures nothing), so that the step is compiled once and a nested
+    /// style costs a call at its call site.
     #[inline(never)]
-    fn nested_style(&self, selector: Selector, populate: &mut dyn FnMut(&StyleBuilder) -> Result) -> Result<&Self> {
+    pub fn style(&self, selector: Selector, populate: fn(&StyleBuilder) -> Result) -> Result<&Self> {
         let nested = Style::new();
         nested.set_selector(Some(selector));
         nested.enable_selector_index();
