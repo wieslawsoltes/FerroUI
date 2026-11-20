@@ -113,22 +113,30 @@ export async function run(): Promise<void> {
         assert.ok(selection && xaml.lineAt(selection.start.line).text.includes('<TextBlock'));
         await undoXaml(xamlInput.source);
 
-        const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'views.rs'));
-        assert.equal(rust.languageId, 'rust');
-        await vscode.commands.executeCommand('ferroui.openDesigner', rust.uri);
-        const rsxDesigner = designer.designs().find(panel => panel.document === rust);
+        const rustUri = vscode.Uri.joinPath(workspace, 'views.rs');
+        const rustForDrag = await vscode.workspace.openTextDocument(rustUri);
+        assert.equal(rustForDrag.languageId, 'rust');
+        await vscode.commands.executeCommand('ferroui.openDesigner', rustUri);
+        const rsxDesigner = designer.designs().find(panel => panel.document === rustForDrag);
         assert.ok(rsxDesigner);
         await verifyRsxImageDrag(rsxDesigner);
 
-        // The MCP audit opens other editors and views. Complete the source-only undo checks first.
+        // The MCP audit switches editors and may close a clean text document.
         await vscode.commands.executeCommand('ferroui.openDesigner', xaml.uri);
         await verifyMcp(xaml);
-        const draft = frame.counterpart.source?.replace('Save changes', 'Apply settings');
-        assert.ok(frame.counterpart.editable && draft);
-        const { edits: rsxEdits } = await preview.edit(xamlInput, { type: 'applyCounterpart', source: draft });
-        await applyTextEdits(xaml, xaml.version, rsxEdits);
-        assert.ok(xaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
+        const liveXaml = await vscode.workspace.openTextDocument(xaml.uri);
+        const xamlVersion = liveXaml.version;
+        const liveInput = sourceOf(liveXaml, 'xaml', editorPosition());
+        const liveFrame = await preview.render(liveInput, viewport);
+        const draft = liveFrame.counterpart.source?.replace('Save changes', 'Apply settings');
+        assert.ok(liveFrame.counterpart.editable && draft);
+        const { edits: rsxEdits } = await preview.edit(liveInput, { type: 'applyCounterpart', source: draft });
+        await applyTextEdits(liveXaml, xamlVersion, rsxEdits);
+        assert.ok(liveXaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
 
+        const rust = await vscode.workspace.openTextDocument(rustUri);
+        await vscode.window.showTextDocument(rust, { preview: false });
+        const rustVersion = rust.version;
         const rustInput = sourceOf(rust, 'rust', editorPosition());
         const rsxField = rust.positionAt(rust.getText().indexOf('padding: 36.0') + 3);
         const rsxCompletion = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust.uri, rsxField);
@@ -141,16 +149,17 @@ export async function run(): Promise<void> {
         assert.ok(rustFrame.counterpart.editable && rustFrame.counterpart.source);
         const xamlDraft = rustFrame.counterpart.source.replace('Workspace settings', 'Project settings');
         const { edits: rustEdits } = await preview.edit(rustInput, { type: 'applyCounterpart', source: xamlDraft });
-        await applyTextEdits(rust, rust.version, rustEdits);
+        await applyTextEdits(rust, rustVersion, rustEdits);
         assert.equal(rust.getText(), rustInput.source.replace('Workspace settings', 'Project settings'));
         const rustPanel = rustFrame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(rustPanel?.canInsert);
+        const latestVersion = rust.version;
         const latestRust = sourceOf(rust, 'rust', editorPosition());
         await preview.render(latestRust, viewport, 2);
         const { edits: rustInsert, selection: insertedRust } = await preview.edit(latestRust, { type: 'place', frame: 2, placement: {
             origin: { type: 'asset', control: 'TextBlock' }, target: { type: 'outline', node: rustPanel.id, position: 'inside' },
         } });
-        await applyTextEdits(rust, rust.version, rustInsert);
+        await applyTextEdits(rust, latestVersion, rustInsert);
         assert.ok(rust.getText().includes('text: "Text"'));
         assert.ok(insertedRust && rust.lineAt(insertedRust.start.line).text.includes('TextBlock'));
         assert.ok(rust.getText().endsWith(latestRust.source.slice(latestRust.source.indexOf('pub fn counter'))));
