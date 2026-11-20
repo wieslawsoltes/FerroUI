@@ -2,8 +2,7 @@
 use super::{replacement, review_type_id, RegisteredTypePlan, RegisteredTypeTarget};
 use crate::service::{
     file_moves::{move_drafts, rust_files},
-    handlers::read_rust,
-    source_review::reviewed_document,
+    source_review::RustSnapshot as Snapshot,
 };
 use crate::{
     require, FileMoveDraft, LanguageError, LanguageService, LineIndex, RegisteredPropertyRequest,
@@ -15,7 +14,6 @@ use ferroui_designer_project::{
     canonical_file_uri, check_rust_rename_tokens, MarkupSource, RustXamlReferences,
 };
 use std::{
-    borrow::Cow,
     collections::BTreeMap,
     hash::{DefaultHasher, Hash, Hasher},
 };
@@ -150,63 +148,15 @@ impl LanguageService {
             verified,
             "rust-analyzer did not rename the authored type declaration",
         )?;
-        for (uri, mut patches) in merged {
+        for (uri, patches) in merged {
             let source = Snapshot::read(&uri, &drafts)?;
-            if let Some(index) = plan
-                .documents
-                .iter()
-                .position(|entry| entry.edit.uri == uri)
-            {
-                let base = plan.documents.remove(index);
-                require(
-                    base.before == source.text && base.edit.version == source.version,
-                    "The Rust registration changed during the type review",
-                )?;
-                let index = LineIndex::new(&source.text);
-                for edit in base.edit.edits {
-                    patches.push(replacement(index.span(edit.range)?, &edit.new_text));
-                }
-            }
-            patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
-            patches.dedup();
             check_rust_rename_tokens(&source.text, &patches)?;
-            let document = source.document(&uri, patches)?;
+            let document = source.merge(&uri, patches, &mut plan.documents)?;
             RustXamlReferences::parse(&document.after, false)?;
             plan.documents.push(document);
         }
         plan.rust_rename = None;
         plan.review = review_type_id(plan.review, &mut plan.documents, &plan.unmapped, None);
         Ok(plan)
-    }
-}
-
-struct Snapshot<'a> {
-    text: Cow<'a, str>,
-    version: i64,
-}
-
-impl<'a> Snapshot<'a> {
-    fn read(uri: &str, drafts: &BTreeMap<String, &'a FileMoveDraft>) -> Result<Self> {
-        if let Some(draft) = drafts.get(uri) {
-            return Ok(Self {
-                text: Cow::Borrowed(&draft.source),
-                version: draft.version,
-            });
-        }
-        Ok(Self {
-            text: Cow::Owned(read_rust(uri)?),
-            version: -1,
-        })
-    }
-
-    fn shared(&self) -> Snapshot<'_> {
-        Snapshot {
-            text: Cow::Borrowed(self.text.as_ref()),
-            version: self.version,
-        }
-    }
-
-    fn document(&self, uri: &str, patches: Vec<TextPatch>) -> Result<ReviewedDocument> {
-        reviewed_document(uri, self.version, &LineIndex::new(&self.text), patches)
     }
 }

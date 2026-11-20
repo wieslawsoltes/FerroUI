@@ -1,10 +1,10 @@
 use super::{
-    reviewed_sources::{check_saved, patched, sync},
+    reviewed_sources::{check_saved, patched},
     DesignerWorkspace,
 };
 use ferroui_designer_core::Edit;
 use ferroui_designer_language::{
-    HandlerDraft, RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget,
+    RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget,
     ReviewedDocument,
 };
 use std::rc::Rc;
@@ -75,23 +75,9 @@ impl DesignerWorkspace {
         new_name: &str,
     ) -> Result<RegisteredPropertyPlan, String> {
         self.require_rename_anchor(anchor)?;
-        let project = self.project.borrow();
-        let mut language = self.try_language_service()?;
-        for (uri, tab) in &project.tabs {
-            if uri != &anchor.uri && uri.starts_with("file://") && tab.rust.is_none() {
-                sync(&mut language, uri, tab.source())?;
-            }
-        }
-        let target = language
-            .registered_property_target(&anchor.uri, &anchor.request)
-            .map_err(|e| e.to_string())?;
-        let draft = project.tabs.get(&target.rust_uri).map(|tab| HandlerDraft {
-            uri: target.rust_uri,
-            version: tab.document.revision() as i64,
-            source: tab.source().to_owned(),
-        });
-        language
-            .plan_registered_property_rename(&anchor.uri, &anchor.request, new_name, draft.as_ref())
+        let drafts = self.refresh_move_drafts(&anchor.uri)?;
+        self.try_language_service()?
+            .plan_registered_property_rename_with_drafts(&anchor.uri, &anchor.request, new_name, &drafts)
             .map_err(|error| error.to_string())
     }
 

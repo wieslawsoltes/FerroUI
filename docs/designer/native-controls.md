@@ -77,7 +77,7 @@ Build the owning Cargo package from Studio. In **Split** or **Code**, place the 
 
 Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name, a typed binding member, or a property inside a style selector. Choose the **Rename registered property** icon, enter its new public name, and choose **Review property rename**.
 
-Choose a file and compare **Original source** and **Proposed source**. If Studio shows **Potential references**, choose a location and select the source icon to inspect that usage. Open a new review when ready to apply. Use the check icon to commit the displayed Rust and XAML patches. Undo or Redo from any participating tab moves all the edits together. Save the files and rebuild the package to publish the new schema. [Supported source forms](vscode/authoring.md#rename-a-registered-xaml-property) · [MCP workflow](vscode/reference.md#review-a-registered-property-rename-with-mcp)
+Choose a file and compare **Original source** and **Proposed source**. Review any separate Rust assembly file that contains an explicit RSX builder mapping for the property. If Studio shows **Potential references**, choose a location and select the source icon to inspect that usage. Open a new review when ready to apply. Use the check icon to commit the displayed Rust and XAML patches. Undo or Redo from any participating tab moves all the edits together. Save the files and rebuild the package to publish the new schema. [Supported source forms](vscode/authoring.md#rename-a-registered-xaml-property) · [MCP workflow](vscode/reference.md#review-a-registered-property-rename-with-mcp)
 
 ### Review a registered type rename
 
@@ -85,7 +85,7 @@ Build the owning Cargo package to index its XAML types and Rust declarations. In
 
 When the XAML name comes from its Rust declaration, Studio resolves Rust references in the background using `rust-analyzer` on `PATH`. Set `FERROUI_RUST_ANALYZER` to an executable path to select a specific copy. For a literal XAML alias, the review opens as soon as the source planner finishes.
 
-Compare **Original source** and **Proposed source** for every file and inspect any potential references listed below the comparison. Use the check icon to edit the buffers together. Undo or Redo from a participating document restores the grouped source changes. Save and rebuild the schema to publish the new name. [VS Code workflow](vscode/authoring.md#rename-a-registered-xaml-type) · [MCP workflow](vscode/reference.md#review-a-registered-type-rename-with-mcp)
+Compare **Original source** and **Proposed source** for every file, including any RSX builder metadata. Inspect potential references listed below the comparison. Use the check icon to edit the buffers together. Undo or Redo from a participating document restores the grouped source changes. Save and rebuild the schema to publish the new name. [VS Code workflow](vscode/authoring.md#rename-a-registered-xaml-type) · [MCP workflow](vscode/reference.md#review-a-registered-type-rename-with-mcp)
 
 ### Extract an XAML resource dictionary
 

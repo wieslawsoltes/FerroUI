@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { RegisteredRename } from '../src/registeredRename';
 import { until } from './wait';
 
-export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, rustUri: vscode.Uri) {
+export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri) {
     const extension = vscode.extensions.getExtension<{ propertyRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { propertyRename } = await extension.activate();
     const original = xaml.getText();
@@ -20,11 +20,15 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     ].join('\r\n');
     await vscode.workspace.fs.writeFile(sibling, Buffer.from(consumer));
     const rust = await vscode.workspace.openTextDocument(rustUri);
+    const registry = await vscode.workspace.openTextDocument(registryUri);
     const rustOriginal = rust.getText();
+    const registryOriginal = registry.getText();
     const rustDraft = new vscode.WorkspaceEdit();
     rustDraft.insert(rust.uri, new vscode.Position(0, 0), '// Unsaved source 🪴\n');
+    rustDraft.insert(registry.uri, new vscode.Position(0, 0), '// The Caption label is still being reviewed. 🧭\n');
     assert.ok(await vscode.workspace.applyEdit(rustDraft));
     const draft = rust.getText();
+    const registryDraft = registry.getText();
     const caret = xaml.positionAt(original.indexOf('Caption') + 1);
     const position = { line: caret.line, character: caret.character };
     const request = {
@@ -34,9 +38,10 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     };
     const signal = AbortSignal.timeout(30_000);
     const plan = await propertyRename.agent(request, signal);
-    assert.equal(plan.documents.length, 3);
+    assert.equal(plan.documents.length, 4);
     assert.deepEqual(plan.unmapped, []);
     assert.equal(plan.documents.find(document => document.edit.uri === rust.uri.toString())?.before, draft);
+    assert.equal(plan.documents.find(document => document.edit.uri === registry.uri.toString())?.before, registryDraft);
     const nextConsumer = consumer.replace('More details', 'Full details');
     await vscode.workspace.fs.writeFile(sibling, Buffer.from(nextConsumer));
     await assert.rejects(propertyRename.agent({ ...request, review: plan.review }, signal), /changed/);
@@ -54,9 +59,11 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
         .replace('Property="Caption"', 'Property="Heading"')
         .replace('AuditCard Caption=', 'AuditCard Heading='));
     assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
+    assert.equal(registry.getText(), registryDraft.replace('"Caption":"heading"', '"Heading":"heading"'));
     await vscode.window.showTextDocument(xaml);
     await vscode.commands.executeCommand('undo');
-    await until(() => xaml.getText() === original && opened.getText() === nextConsumer && rust.getText() === draft);
+    await until(() => xaml.getText() === original && opened.getText() === nextConsumer
+        && rust.getText() === draft && registry.getText() === registryDraft);
     const selector = opened.positionAt(nextConsumer.indexOf('[Caption=') + 2);
     await until(async () => {
         const [definition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, selector) ?? [];
@@ -64,6 +71,6 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     });
     await vscode.window.showTextDocument(rust);
     await vscode.commands.executeCommand('undo');
-    await until(() => rust.getText() === rustOriginal);
-    console.log('VS Code navigated and reviewed a registered property across XAML selectors and Rust, rejected a stale plan, and undid the group');
+    await until(() => rust.getText() === rustOriginal && registry.getText() === registryOriginal);
+    console.log('VS Code reviewed a property across XAML selectors, Rust, and an unsaved RSX mapping, then undid all four files');
 }

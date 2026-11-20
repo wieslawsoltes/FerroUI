@@ -3,10 +3,12 @@ mod schema;
 mod sites;
 
 use super::{
-    handlers::read_rust, source_review::reviewed_document, HandlerDraft, LanguageService, Location,
-    ReviewedDocument, State,
+    file_moves::move_drafts,
+    registered_rsx::{MappingRename, RenameKind},
+    source_review::{reviewed_document, RustSnapshot},
+    FileMoveDraft, HandlerDraft, LanguageService, Location, ReviewedDocument, State,
 };
-use crate::{require, LanguageError, LineIndex, Position, Range, Result};
+use crate::{require, LanguageError, Position, Range, Result};
 use ferroui_designer_core::{Document, SourceSpan, TextPatch};
 use ferroui_designer_project::{canonical_file_uri, file_path, file_uri, MarkupSource};
 use serde::{Deserialize, Serialize};
@@ -48,6 +50,27 @@ impl LanguageService {
         new_name: &str,
         draft: Option<&HandlerDraft>,
     ) -> Result<RegisteredPropertyPlan> {
+        if let Some(draft) = draft {
+            let target = self.registered_property_target(uri, request)?;
+            require(
+                canonical_file_uri(&draft.uri)? == target.rust_uri
+                    && draft.version >= 0
+                    && draft.source.len() <= super::handlers::MAX_RUST_BYTES,
+                "The open Rust draft does not match the property registration",
+            )?;
+        }
+        self.plan_registered_property_rename_with_drafts(
+            uri, request, new_name, draft.map(std::slice::from_ref).unwrap_or_default(),
+        )
+    }
+
+    pub fn plan_registered_property_rename_with_drafts(
+        &mut self,
+        uri: &str,
+        request: &RegisteredPropertyRequest,
+        new_name: &str,
+        drafts: &[FileMoveDraft],
+    ) -> Result<RegisteredPropertyPlan> {
         require(
             crate::is_xaml_identifier(new_name) && !new_name.contains('-'),
             "Enter a property identifier made of letters, digits, or underscores",
@@ -56,7 +79,9 @@ impl LanguageService {
         self.refresh_project_index()?;
         let (target, registration) = self.property_rename_target(&uri, request)?;
         require(target.name != new_name, "Enter a different property name")?;
-        let mut documents = vec![rust_document(&target, &registration, new_name, draft)?];
+        let drafts = move_drafts(drafts)?;
+        let source = RustSnapshot::read(&target.rust_uri, &drafts)?;
+        let mut documents = vec![rust_document(&target, &registration, new_name, &source)?];
         let mut unmapped = Vec::new();
         let mut proposed = BTreeMap::new();
         for (root, project) in &self.package_schemas {
@@ -66,6 +91,11 @@ impl LanguageService {
                 proposed.insert(root.as_path(), schema);
             }
         }
+        self.review_rsx_mappings(
+            MappingRename { registration: &registration, old: &target.name, new: new_name, kind: RenameKind::Property },
+            &drafts,
+            &mut documents,
+        )?;
         let origin_schema = self.schema_for(&uri);
         for (source_uri, state) in &self.documents {
             if self.workspace_root(source_uri).is_none() {
@@ -193,29 +223,13 @@ fn rust_document(
     target: &RegisteredPropertyTarget,
     registration: &MarkupSource,
     new_name: &str,
-    draft: Option<&HandlerDraft>,
+    source: &RustSnapshot<'_>,
 ) -> Result<ReviewedDocument> {
-    let (source, version) = if let Some(draft) = draft {
-        require(
-            canonical_file_uri(&draft.uri)? == target.rust_uri
-                && draft.version >= 0
-                && draft.source.len() <= super::handlers::MAX_RUST_BYTES,
-            "The open Rust draft does not match the property registration",
-        )?;
-        (
-            std::borrow::Cow::Borrowed(draft.source.as_str()),
-            draft.version,
-        )
-    } else {
-        (std::borrow::Cow::Owned(read_rust(&target.rust_uri)?), -1)
-    };
-    let span = registration.property_name_range(&source, new_name).ok_or_else(|| LanguageError(
+    let span = registration.property_name_range(&source.text, new_name).ok_or_else(|| LanguageError(
         "The current Rust source needs a unique direct registration and a valid name. Rebuild the schema if the declaration changed".into()
     ))?;
-    reviewed_document(
+    source.document(
         &target.rust_uri,
-        version,
-        &LineIndex::new(source.as_ref()),
         vec![TextPatch {
             span: SourceSpan::new(span.start, span.end),
             replacement: new_name.into(),

@@ -111,6 +111,8 @@ Export `MarkupAssembly` with `ferroui-build-scan` and add a metadata entry whose
 
 `properties` maps writable XAML properties to the corresponding Rust builder method names. Set `inherit` to `true` for an `El<T>` builder that uses the mapped base control's FerroUI properties, events, and content slot. Open the view with **Open App-Hosted Design** to render its registered native implementation. [Todo Workbench mapping](../../samples/TodoWorkbench/app_preview.rs)
 
+After **Build Project XAML Schema**, the registered rename commands include affected mappings in the source review. Use literal keys and JSON values or literal text constants declared in the assembly's module. For a shared constant, the review updates its use in the mapping tuple. For an imported key or a computed value that needs an edit, supply a local text constant or a literal and rebuild the schema before reviewing. [Review a property rename](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-property) · [Review a type rename](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-type)
+
 To map a project animation getter, export `FerroUI.Designer.RsxAnimation.v1:<Rust getter path>` with the fully qualified registered styled-property accessor as its value. The designer reads the property type from the Cargo schema. Typed literals and supported geometry constructors can be edited in Timeline and App Preview. The warning icon opens a source picker for computed clips. [Project animation authoring](../../docs/designer/README.md#project-animation-accessors)
 
 ## App-hosted design and Live App

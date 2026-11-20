@@ -33,25 +33,25 @@ export async function planRegisteredType(
         if (!uri) throw new Error('Open the workspace containing the Rust type declaration.');
         await vscode.workspace.openTextDocument(uri);
     }
-    const sourceDrafts = await drafts();
+    const sourceDrafts = await registeredRustDrafts();
     const params = { textDocument: { uri: document.uri.toString() }, request, newName, sourceDrafts };
     const base = await server.registeredTypeRequest<RegisteredRenamePlan>('planRegisteredTypeRename', params);
     signal?.throwIfAborted();
     if (!base.rustRename) return base;
     const resolution = await semanticRename(base.rustRename, signal);
     return server.registeredTypeRequest('completeRegisteredTypeRename', {
-        ...params, sourceDrafts: await drafts(), review: base.review, resolution,
+        ...params, sourceDrafts: await registeredRustDrafts(), review: base.review, resolution,
     });
 }
 
-async function drafts(): Promise<FileMoveDraft[]> {
+export async function registeredRustDrafts(): Promise<FileMoveDraft[]> {
     const rust = vscode.workspace.textDocuments.filter(document =>
         document.uri.scheme === 'file' && document.uri.path.toLowerCase().endsWith('.rs') && !isCompiledXamlRust(document));
     const inside = await Promise.all(rust.map(document => isWorkspaceFile(document.uri)));
     const snapshots = rust.filter((document, index) => inside[index] && !document.isClosed).map(document => ({
         uri: document.uri.toString(), version: document.version, source: document.getText(),
     }));
-    if (Buffer.byteLength(JSON.stringify(snapshots)) > 12 * 1024 * 1024) throw new Error('Save and close larger Rust buffers before reviewing a type name.');
+    if (Buffer.byteLength(JSON.stringify(snapshots)) > 12 * 1024 * 1024) throw new Error('Save and close larger Rust buffers before reviewing a registered name.');
     return snapshots;
 }
 

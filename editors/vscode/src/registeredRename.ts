@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import type { Position } from './protocol';
-import { planRegisteredType, type RegisteredRenamePlan, type RenameLocation, type RenamePosition, type RenameTarget } from './registeredTypePlan';
+import { planRegisteredType, registeredRustDrafts, type RegisteredRenamePlan, type RenameLocation, type RenamePosition, type RenameTarget } from './registeredTypePlan';
 import { checkedSources, reviewedSourceUri } from './reviewedSources';
 import { SourceChangeReview } from './sourceChangeReview';
 import { asRange, exactRange } from './textDocument';
@@ -81,7 +81,7 @@ export class RegisteredRename implements vscode.Disposable {
         const version = rust?.version;
         const plan = await this.server.registeredPropertyRequest<RegisteredRenamePlan>('planRegisteredPropertyRename', {
             textDocument: { uri: document.uri.toString() }, request, newName,
-            rust: rust ? { uri: rust.uri.toString(), version, source: rust.getText() } : null,
+            sourceDrafts: await registeredRustDrafts(),
         });
         if (document.isClosed || document.version !== request.version || (rust && (rust.isClosed || rust.version !== version))) {
             throw new Error('The source changed. Prepare the property review again.');

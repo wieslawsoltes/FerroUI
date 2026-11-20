@@ -3,12 +3,14 @@ import * as vscode from 'vscode';
 import type { RegisteredRename } from '../src/registeredRename';
 import { until } from './wait';
 
-export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rustUri: vscode.Uri) {
+export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri) {
     const extension = vscode.extensions.getExtension<{ typeRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { typeRename } = await extension.activate();
     const xamlConsumer = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredTypeConsumer.xaml');
     const styled = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredPropertyConsumer.xaml'));
     const originalStyle = styled.getText();
+    const registry = await vscode.workspace.openTextDocument(registryUri);
+    const originalRegistry = registry.getText();
     const codeConsumer = vscode.Uri.joinPath(rustUri, '..', 'registered_type_consumer.rs');
     const markup = '<ContentControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="using:Audit.Controls" Content="{x:Type ui:AuditCard}"/>';
     const code = 'use crate::AuditCard;\nfn inspect(_: &AuditCard) {}\n';
@@ -51,10 +53,14 @@ export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rust
         assert.equal(editedRust.getText(), code.replaceAll(symbol, replacement));
         assert.equal(rust.getText(), originalRust.replaceAll(symbol, replacement));
         assert.equal(styled.getText(), originalStyle.replaceAll(symbol, replacement));
+        assert.equal(registry.getText(), originalRegistry
+            .replace('Audit.Controls.AuditCard', 'Audit.Controls.OverviewCard')
+            .replace('crate::AuditCard', 'crate::OverviewCard'));
         await vscode.window.showTextDocument(xaml);
         await vscode.commands.executeCommand('undo');
         await until(() => xaml.getText() === originalXaml && editedXaml.getText() === markup
-            && editedRust.getText() === code && rust.getText() === originalRust && styled.getText() === originalStyle);
-        console.log('VS Code reviewed a control rename with a Rust provider and undid all five files, including the style selector');
+            && editedRust.getText() === code && rust.getText() === originalRust && styled.getText() === originalStyle
+            && registry.getText() === originalRegistry);
+        console.log('VS Code reviewed an RSX mapping key and builder path with the Rust rename and undid all six files');
     } finally { provider.dispose(); }
 }

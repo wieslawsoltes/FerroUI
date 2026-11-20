@@ -1,7 +1,18 @@
-use super::{DocumentEdits, LanguageService, LineIndex, Location, Result, TextEdit};
+use super::{
+    handlers::read_rust, DocumentEdits, LanguageService, LineIndex, Location, Result, TextEdit,
+};
+use crate::require;
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_project::file_path;
 use serde::{Deserialize, Serialize};
+use std::{borrow::Cow, collections::BTreeMap};
+
+#[derive(Debug, Deserialize)]
+pub struct SourceDraft {
+    pub uri: String,
+    pub version: i64,
+    pub source: String,
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -64,6 +75,62 @@ pub(super) fn reviewed_document(
         before: before.to_owned(),
         after,
     })
+}
+
+pub(super) struct RustSnapshot<'a> {
+    pub text: Cow<'a, str>,
+    pub version: i64,
+}
+
+impl<'a> RustSnapshot<'a> {
+    pub fn read(uri: &str, drafts: &BTreeMap<String, &'a SourceDraft>) -> Result<Self> {
+        if let Some(draft) = drafts.get(uri) {
+            return Ok(Self {
+                text: Cow::Borrowed(&draft.source),
+                version: draft.version,
+            });
+        }
+        Ok(Self {
+            text: Cow::Owned(read_rust(uri)?),
+            version: -1,
+        })
+    }
+
+    pub fn shared(&self) -> RustSnapshot<'_> {
+        RustSnapshot {
+            text: Cow::Borrowed(self.text.as_ref()),
+            version: self.version,
+        }
+    }
+
+    pub fn document(&self, uri: &str, patches: Vec<TextPatch>) -> Result<ReviewedDocument> {
+        reviewed_document(uri, self.version, &LineIndex::new(&self.text), patches)
+    }
+
+    pub fn merge(
+        &self,
+        uri: &str,
+        mut patches: Vec<TextPatch>,
+        documents: &mut Vec<ReviewedDocument>,
+    ) -> Result<ReviewedDocument> {
+        let index = LineIndex::new(&self.text);
+        if let Some(position) = documents.iter().position(|entry| entry.edit.uri == uri) {
+            let base = documents.remove(position);
+            require(
+                base.before == self.text && base.edit.version == self.version,
+                "The Rust source changed while preparing the review",
+            )?;
+            for edit in base.edit.edits {
+                patches.push(TextPatch {
+                    span: index.span(edit.range)?,
+                    replacement: edit.new_text,
+                });
+            }
+        }
+        patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
+        patches.dedup();
+        reviewed_document(uri, self.version, &index, patches)
+    }
 }
 
 impl LanguageService {

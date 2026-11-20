@@ -106,7 +106,7 @@ impl CatalogFixture {
         }
     }
 
-    fn export(&self, folder: &str, name: &str, dependencies: Vec<AssemblyModel>) -> AssemblyModel {
+    pub(super) fn export(&self, folder: &str, name: &str, dependencies: Vec<AssemblyModel>) -> AssemblyModel {
         let options = ScanOptions::new(name, self.0.join(folder).join("lib.rs"))
             .with_dependencies(dependencies)
             .with_authored_symbols();

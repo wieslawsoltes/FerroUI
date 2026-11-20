@@ -221,6 +221,12 @@ impl LspServer {
                 if method == "ferroui/registeredPropertyTarget" {
                     return Ok(json!(self.service.registered_property_target(uri, &request)?));
                 }
+                if let Some(drafts) = params.get("sourceDrafts") {
+                    let drafts: Vec<crate::FileMoveDraft> = decode(drafts)?;
+                    return Ok(json!(self.service.plan_registered_property_rename_with_drafts(
+                        uri, &request, text(params, "newName")?, &drafts,
+                    )?));
+                }
                 let draft: Option<crate::HandlerDraft> = decode(&params["rust"])?;
                 Ok(json!(self.service.plan_registered_property_rename(
                     uri, &request, text(params, "newName")?, draft.as_ref(),

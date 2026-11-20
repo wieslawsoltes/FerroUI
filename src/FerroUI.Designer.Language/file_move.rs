@@ -27,12 +27,7 @@ pub use symbol_edits::FileMoveRustResolution;
 
 const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
 
-#[derive(Debug, Deserialize)]
-pub struct FileMoveDraft {
-    pub uri: String,
-    pub version: i64,
-    pub source: String,
-}
+pub use super::source_review::SourceDraft as FileMoveDraft;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct FileMovePlan {
@@ -218,13 +213,13 @@ impl LanguageService {
 }
 
 pub(super) fn move_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDraft>> {
-    require(drafts.len() <= 256, "Too many open drafts for a file move")?;
+    require(drafts.len() <= 256, "Too many open source drafts for review")?;
     let mut snapshots = BTreeMap::new();
     let mut remaining = MAX_DRAFT_BYTES;
     for draft in drafts {
         require(
             draft.version >= 0 && draft.source.len() <= remaining,
-            "Open drafts for a file move exceed the source limit",
+            "Open source drafts exceed the review source limit",
         )?;
         remaining -= draft.source.len();
         let uri = canonical_file_uri(&draft.uri)?;

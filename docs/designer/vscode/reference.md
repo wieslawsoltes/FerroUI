@@ -121,7 +121,7 @@ After building the owning Cargo schema, call `ferroui_workspace_language` with `
 
 ### Review a registered property rename with MCP
 
-Use the registered property's position in XAML, a typed binding, or a resolved style selector predicate.
+Use the registered property's position in XAML, a typed binding, or a resolved style selector predicate. An affected RSX builder mapping appears as a Rust document in the same review, with current editor text and a version when its buffer is open.
 
 In VS Code, call `ferroui_workspace_plan_property_rename` with the XAML file in `path`, an optional workspace `folder`, a zero-based UTF-16 `position`, and `new_name`. Inspect each file's `before`, `after`, and `edit` fields, then check any locations listed in `unmapped`. Pass the same arguments and the returned `review` to `ferroui_workspace_rename_property`.
 
@@ -129,7 +129,7 @@ In Studio, use `designer_plan_property_rename` with the active XAML byte `offset
 
 ### Review a registered type rename with MCP
 
-Use the registered type's position in XAML, including a resolved type operand in a style selector.
+Use the registered type's position in XAML, including a resolved type operand in a style selector. The reviewed documents include any mapped RSX type keys and Rust builder paths.
 
 In VS Code, call `ferroui_workspace_plan_type_rename` with `path`, optional `folder`, a zero-based UTF-16 `position`, and `new_name`. The extension resolves any Rust symbol edits through its active rust-analyzer provider. Review the documents and `unmapped` locations before passing the same inputs and `review` to `ferroui_workspace_rename_type`.
 

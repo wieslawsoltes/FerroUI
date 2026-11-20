@@ -11,6 +11,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 mod definitions;
 mod registered_rename;
+mod registered_rsx;
 mod registered_types;
 mod style_selectors;
 mod refactoring;

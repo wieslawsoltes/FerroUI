@@ -32,12 +32,7 @@ pub struct HandlerTarget {
     pub parameter_types: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct HandlerDraft {
-    pub uri: String,
-    pub version: i64,
-    pub source: String,
-}
+pub use super::source_review::SourceDraft as HandlerDraft;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct HandlerPlan {

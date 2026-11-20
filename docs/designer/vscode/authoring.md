@@ -36,7 +36,7 @@ The Changes editor shows the Rust registration and every mapped XAML edit, inclu
 
 Review both sides of each diff, then choose the check icon **Apply Property Rename**. If the review found possible references with dynamic targets, choose **Show Locations** to inspect them. **Apply Mapped Rename** commits the resolved patches. Undo reverts the Rust and XAML edits together. Repair an incomplete file that may use the name before reviewing. A collision or a changed file requires a fresh review.
 
-Save the changed buffers and rebuild the owning Cargo schema to use the new name for completion and preview. When an explicit RSX builder mapping uses the property, update its public property key before the build. Open the workspace folders that contain the registration and its consumers before reviewing. [Studio workflow](../native-controls.md#review-a-registered-property-rename) · [MCP workflow](reference.md#review-a-registered-property-rename-with-mcp) · [RSX builder mappings](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
+If the property appears in an explicit RSX builder mapping, the review edits its public key in the assembly metadata. This applies to inherited properties on mapped builders too. Existing RSX fields continue to use the builder method shown in the mapping. Open the workspace folders that contain the registration and its consumers, then save the reviewed buffers and rebuild the schema. [Studio workflow](../native-controls.md#review-a-registered-property-rename) · [MCP workflow](reference.md#review-a-registered-property-rename-with-mcp) · [RSX builder mappings](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
 ### Rename a registered XAML type
 
@@ -46,7 +46,7 @@ For an explicit `as "Name"` registration, the review edits the public alias. Whe
 
 The Changes editor includes mapped start and end tags, qualified property owners, `x:Class`, type arguments, and explicit type values such as `{x:Type local:Customer}`. It also includes resolved type names in `Selector` attributes and single-text `Style.Selector` elements, including `:is`, `:not`, and attached property owners. Class names, control names, and comparison values keep their original spelling. Use **Show Locations** to inspect uncertain references, then apply with the check icon. Undo restores the group.
 
-Save the changed files and rebuild the Cargo schema for the new name. Update explicit RSX builder metadata that uses the old public type name before rebuilding. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
+The review also renames the public type key in explicit RSX builder metadata. For a Rust-backed name, builder paths that resolve to the renamed declaration follow the Rust rename. A named re-export retains its alias. Open the assembly source as part of the workspace, and rebuild the Cargo schema after saving the review. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
 
 ### Rename an RSX control
 

@@ -49,7 +49,7 @@ Clients can discover the requests through `experimental.ferrouiEventHandlers`. `
 
 ## Registered property rename
 
-Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and a `rust` draft with `uri`, `version`, and `source`, or `null`, to `ferroui/planRegisteredPropertyRename`.
+Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and the relevant open Rust `sourceDrafts` to `ferroui/planRegisteredPropertyRename`. Each draft supplies `uri`, `version`, and `source`. The single `rust` draft argument remains supported for clients that supply only the registration source.
 
 The service resolves the property through the consuming package's build schema, refreshes unopened XAML, and validates each patch against the proposed name. The review contains each affected document's original text, versioned patches, proposed text, and any potential XAML references with unmapped targets. Hosts recompute the plan and compare its review identifier before staging a single undoable transaction. Studio calls the same planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-property)
 
@@ -60,6 +60,8 @@ Selector operands come from `ferroui-markup-syntax`, the grammar used by the XAM
 The `ferrouiRegisteredTypeRename` capability advertises `ferroui/registeredTypeTarget`, `ferroui/planRegisteredTypeRename`, and `ferroui/completeRegisteredTypeRename`. Use `textDocument.uri` and a versioned UTF-16 `request` to identify the build-registered type. The plan also takes `newName` and the relevant open Rust `sourceDrafts`. A literal alias returns a complete review.
 
 Some type registrations inherit their public name from a Rust item. The build index records that item's physical module and source file. A plan with `rustRename` needs semantic Rust edits for that declaration. The host resolves the request through rust-analyzer and submits the `review` identifier and `resolution` to the completion request. The engine checks editable paths, versions, the Rust identifier tokens and the new XAML resolution before returning a complete review. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-type)
+
+An optional `assembly_source` in the Cargo source index identifies the selected `MarkupAssembly`. A review resolves explicit RSX entries through the same descriptor parser as the designer, then checks the current literal or local text constant in the indexed module. It merges metadata patches and semantic identifier edits per file. [Authoring the mapping](../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
 ## Resource dictionary extraction
 

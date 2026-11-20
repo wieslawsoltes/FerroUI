@@ -5,7 +5,8 @@ mod sites;
 
 pub use super::source_review::RegisteredRenamePlan as RegisteredTypePlan;
 use super::{
-    file_moves::move_drafts, registered_rename::check_incomplete, source_review::reviewed_document,
+    file_moves::move_drafts, registered_rename::check_incomplete,
+    registered_rsx::{MappingRename, RenameKind}, source_review::reviewed_document,
     FileMoveDraft, LanguageService, Location, RegisteredPropertyRequest, ReviewedDocument,
     RustSymbolRename,
 };
@@ -62,6 +63,16 @@ impl LanguageService {
                 proposed.insert(root.as_path(), schema);
             }
         }
+        self.review_rsx_mappings(
+            MappingRename {
+                registration: &registration,
+                old: &target.name,
+                new: new_name,
+                kind: RenameKind::Type { rename_rust: rust_rename.is_some() },
+            },
+            &drafts,
+            &mut documents,
+        )?;
         for (source_uri, state) in &self.documents {
             if self.workspace_root(source_uri).is_none() {
                 continue;

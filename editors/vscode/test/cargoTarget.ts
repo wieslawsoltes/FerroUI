@@ -18,10 +18,20 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     };
     await write('Cargo.toml', '[package]\nname = "audit-app"\nversion = "0.1.0"\nedition = "2024"\n[features]\nhot-reload = []\n[dependencies]\naudit-widgets = { path = "widgets" }\n');
     await write('.cargo/config.toml', '[build]\ntarget-dir = "audit-output"\n');
+    const mappingKey = 'FerroUI.Designer.Rsx.v1:Audit.Controls.AuditCard';
+    const mapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Caption: 'heading' } });
+    const registry = await write('src/registry.rs', [
+        'pub struct MarkupAssembly { pub metadata: &\'static [(&\'static str, &\'static str)] }',
+        'pub static DESIGN: MarkupAssembly = MarkupAssembly {',
+        '    metadata: &[',
+        `        ("${mappingKey}", r#"${mapping}"#),`,
+        '    ],',
+        '};',
+        '',
+    ].join('\n'));
     const metadata = JSON.stringify({
         format: 2, name: 'Audit Application', crate_name: 'audit_app',
-        metadata: [['FerroUI.Designer.Rsx.v1:Audit.Controls.AuditCard',
-            JSON.stringify({ path: 'crate::cards::AuditCard', properties: { Caption: 'heading' } })]],
+        metadata: [[mappingKey, mapping]],
         types: [{ name: 'AuditCard', namespace: 'Audit.Controls', kind: 'class', rust_path: '::audit_app::AuditCard',
             object_model: true, base: '::audit_widgets::Meter', default_constructor: {},
             properties: [{ name: 'Caption', value_type: 'String', setter: {} }] }],
@@ -29,6 +39,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     const appSite = { rust_type: '::audit_app::AuditCard', type: 'AuditCard', file: 'src/main.rs', owner: 'AuditCard' };
     await write('build.rs', exportMetadata(metadata, {
         manifest: vscode.Uri.joinPath(project, 'Cargo.toml').fsPath, assembly: 'Audit Application', crate_name: 'audit_app',
+        assembly_source: { file: 'src/registry.rs', item: 'DESIGN' },
         definitions: [
             { ...appSite, kind: 'class', type_declaration: { file: 'src/main.rs', name: 'AuditCard' } },
             { ...appSite, kind: 'class_info', member: 'Caption' },
@@ -47,6 +58,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
             kind: 'class', owner: 'Meter' }],
     }));
     const source = await write('src/main.rs', [
+        'pub mod registry;',
         'macro_rules! ferro_class { ($($t:tt)*) => {} }',
         'macro_rules! ferro_class_info { ($($t:tt)*) => {} }',
         'pub struct AuditCard;',
@@ -94,8 +106,8 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     assert.ok(ready, `The built project schema did not provide the type of AuditCard.Caption in ${xaml.uri}. ` +
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
     await verifyDefinitions(xaml, source, dependencySource);
-    await verifyRegisteredPropertyRename(xaml, source);
-    await verifyRegisteredTypeRename(xaml, source);
+    await verifyRegisteredPropertyRename(xaml, source, registry);
+    await verifyRegisteredTypeRename(xaml, source, registry);
 
     const view = await write('View.xaml', '<StackPanel xmlns="https://github.com/ferroui" />');
     const panel = await designer.openDocument(view);
@@ -112,7 +124,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     });
     assert.match(panel.document.getText(), /<ui:Meter xmlns:ui="clr-namespace:Audit.Widgets;assembly=Audit Widgets"\s*\/>/);
 
-    const rustDraft = 'fn view() { let _ = rsx! { crate::cards::AuditCard { heading: "🦀 First" } }; }\n';
+    const rustDraft = 'fn view() { let _ = rsx! { crate::AuditCard { heading: "🦀 First" } }; }\n';
     const rust = await write('src/view.rs', rustDraft);
     const rustPanel = await designer.openDocument(rust);
     const rustSnapshot = await rustPanel.waitForSnapshot(AbortSignal.timeout(15_000));
