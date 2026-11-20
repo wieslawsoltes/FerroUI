@@ -1,22 +1,27 @@
 //! Resolve Rust reference sites against the indexed Cargo packages and draft snapshots.
-use super::{move_document, new_reference, FileMoveDocument, FileMoveDraft, LanguageService};
+use super::{FileMoveDocument, FileMoveDraft, LanguageService, move_document, new_reference};
 use crate::{LanguageError, LineIndex, Result};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_designer_project::{
-    canonical_file_uri, file_path, file_uri, relative_asset_uri, relative_file_path, resolve_uri,
     DocumentEntry, DocumentKind, ProjectDescriptor, ProjectWorkspace, RustPathAnchor, RustXamlPath,
-    RustXamlReferences, Solution, XamlFileMove,
+    RustXamlReferences, Solution, XamlFileMove, canonical_file_uri, file_path, file_uri,
+    relative_asset_uri, relative_file_path, resolve_uri,
 };
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
 };
 
+#[path = "file_move_compiled.rs"]
+mod compiled;
+pub(super) use compiled::CompiledAddresses;
+
 impl LanguageService {
     pub(super) fn move_rust_paths(
         &self,
         movement: &XamlFileMove,
         drafts: &BTreeMap<String, &FileMoveDraft>,
+        addresses: &CompiledAddresses,
     ) -> Result<Vec<FileMoveDocument>> {
         let files = rust_files(self);
         let from = file_path(&movement.from)?;
@@ -25,34 +30,48 @@ impl LanguageService {
         let mut documents = Vec::new();
         for (entry, project, workspace) in files.values() {
             let version = drafts.get(&entry.uri).map_or(-1, |draft| draft.version);
+            let cached_build = addresses.build_for(&entry.uri);
             let saved;
-            let source = if let Some(draft) = drafts.get(&entry.uri) {
+            let source = if let Some(snapshot) = cached_build {
+                snapshot.source.as_str()
+            } else if let Some(draft) = drafts.get(&entry.uri) {
                 draft.source.as_str()
             } else {
                 saved = workspace.read_source(&entry.uri)?;
                 saved.as_str()
             };
-            let package = project.authored_package_root(&entry.path);
-            let build = is_cargo_build(entry, project, package, source, &mut builds)?;
+            let package = if cached_build.is_some() {
+                movement.package_root.as_path()
+            } else {
+                project.authored_package_root(&entry.path)
+            };
+            let build = cached_build.is_some()
+                || is_cargo_build(entry, project, package, source, &mut builds)?;
             if !RustXamlReferences::may_contain_paths(source, build) {
                 continue;
             }
-            let references = match RustXamlReferences::parse(source, build) {
-                Ok(references) => references,
-                Err(_)
-                    if from
-                        .file_name()
-                        .and_then(|name| name.to_str())
-                        .is_some_and(|name| source.contains(name)) =>
-                {
-                    return Err(LanguageError(format!(
-                        "Repair the Rust draft that may reference this XAML file: {}",
-                        entry.uri
-                    )));
-                }
-                Err(_) => continue,
+            let parsed;
+            let references = if let Some(snapshot) = cached_build {
+                &snapshot.references
+            } else {
+                parsed = match RustXamlReferences::parse(source, build) {
+                    Ok(references) => references,
+                    Err(_)
+                        if from
+                            .file_name()
+                            .and_then(|name| name.to_str())
+                            .is_some_and(|name| source.contains(name)) =>
+                    {
+                        return Err(LanguageError(format!(
+                            "Repair the Rust draft that may reference this XAML file: {}",
+                            entry.uri
+                        )));
+                    }
+                    Err(_) => continue,
+                };
+                &parsed
             };
-            let roots = xaml_roots(package, &references);
+            let roots = xaml_roots(package, references);
             if references.discovers_xaml
                 && roots
                     .iter()
@@ -66,6 +85,7 @@ impl LanguageService {
             let context = RustMove {
                 service: self,
                 movement,
+                addresses,
                 source_file: entry,
                 package,
                 roots: &roots,
@@ -164,6 +184,7 @@ fn xaml_roots(package: &Path, references: &RustXamlReferences) -> Vec<PathBuf> {
 struct RustMove<'a> {
     service: &'a LanguageService,
     movement: &'a XamlFileMove,
+    addresses: &'a CompiledAddresses,
     source_file: &'a DocumentEntry,
     package: &'a Path,
     roots: &'a [PathBuf],
@@ -200,31 +221,13 @@ impl RustMove<'_> {
                 return Ok(None);
             }
         }
-        for root in self.roots {
-            let base = format!("{}/", file_uri(root)?);
-            let resolved = resolve_uri(&base, site.path.trim_start_matches('/'))
-                .and_then(|uri| canonical_file_uri(&uri));
-            if resolved.ok().as_deref() != Some(self.movement.from.as_str()) {
-                continue;
-            }
-            let relative = self.destination.strip_prefix(root).map_err(|_| {
-                LanguageError(format!(
-                    "The destination leaves the compiled XAML root: {}",
-                    self.source_file.uri
-                ))
-            })?;
-            let relative = native_spelling(relative)?;
-            // The compiled loader compares the requested URI with the registered key.
-            let relative = relative_asset_uri(&relative).ok_or_else(|| {
-                LanguageError("The new compiled XAML key cannot be encoded".into())
-            })?;
-            return Ok(Some(if site.path.starts_with('/') {
-                format!("/{relative}")
-            } else {
-                retain_dot_prefix(&site.path, relative)
-            }));
-        }
-        Ok(None)
+        compiled_key(
+            self.movement,
+            self.destination,
+            self.roots,
+            &self.source_file.uri,
+            &site.path,
+        )
     }
 
     fn resource(&self, value: &str) -> Result<Option<String>> {
@@ -235,6 +238,9 @@ impl RustMove<'_> {
         };
         let (uri, suffix) = value.split_at(delimiter.unwrap_or(value.len()));
         let owner = &self.source_file.uri;
+        if let Some(next) = self.addresses.replacement(self.service, owner, uri) {
+            return Ok((next != uri).then(|| format!("{next}{suffix}")));
+        }
         if self.service.resource_uri(owner, uri).ok().as_deref()
             != Some(self.movement.from.as_str())
         {
@@ -245,21 +251,61 @@ impl RustMove<'_> {
     }
 
     fn base(&self, anchor: RustPathAnchor) -> Option<&Path> {
-        match anchor {
-            RustPathAnchor::SourceFile => self.source_file.path.parent(),
-            RustPathAnchor::Package => Some(self.package),
-            _ => None,
-        }
+        input_base(self.package, &self.source_file.path, anchor)
     }
 
     fn refers_to_move(&self, base: &Path, path: &str) -> bool {
-        base.join(path)
-            .canonicalize()
-            .ok()
-            .and_then(|path| file_uri(path).ok())
-            .as_deref()
-            == Some(self.movement.from.as_str())
+        refers_to(base, path, &self.movement.from)
     }
+}
+
+fn compiled_key(
+    movement: &XamlFileMove,
+    destination: &Path,
+    roots: &[PathBuf],
+    script: &str,
+    key: &str,
+) -> Result<Option<String>> {
+    for root in roots {
+        let base = format!("{}/", file_uri(root)?);
+        let resolved = resolve_uri(&base, key.trim_start_matches('/'))
+            .and_then(|uri| canonical_file_uri(&uri));
+        if resolved.ok().as_deref() != Some(movement.from.as_str()) {
+            continue;
+        }
+        let relative = destination.strip_prefix(root).map_err(|_| {
+            LanguageError(format!(
+                "The destination leaves the compiled XAML root: {script}"
+            ))
+        })?;
+        let relative = native_spelling(relative)?;
+        // The compiled loader compares the requested URI with the registered key.
+        let relative = relative_asset_uri(&relative)
+            .ok_or_else(|| LanguageError("The new compiled XAML key cannot be encoded".into()))?;
+        return Ok(Some(if key.starts_with('/') {
+            format!("/{relative}")
+        } else {
+            retain_dot_prefix(key, relative)
+        }));
+    }
+    Ok(None)
+}
+
+fn input_base<'a>(package: &'a Path, script: &'a Path, anchor: RustPathAnchor) -> Option<&'a Path> {
+    match anchor {
+        RustPathAnchor::SourceFile => script.parent(),
+        RustPathAnchor::Package => Some(package),
+        _ => None,
+    }
+}
+
+fn refers_to(base: &Path, path: &str, uri: &str) -> bool {
+    base.join(path)
+        .canonicalize()
+        .ok()
+        .and_then(|path| file_uri(path).ok())
+        .as_deref()
+        == Some(uri)
 }
 
 fn native_spelling(path: &Path) -> Result<String> {

@@ -9,6 +9,8 @@ use std::{
 
 #[path = "file_move_saved_tests.rs"]
 mod saved;
+#[path = "file_move_compiled_tests.rs"]
+mod compiled;
 
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";

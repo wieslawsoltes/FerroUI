@@ -3,7 +3,7 @@ use crate::handler_project::HandlerSource;
 use crate::{LanguageError, Result, event_handler_name, event_object_span, require};
 use ferroui_build_scan::model::TypeModel;
 use ferroui_designer_core::{Document, Node};
-use ferroui_designer_project::{CargoTarget, MarkupCatalog, MarkupEventSignature, Solution};
+use ferroui_designer_project::{CargoTarget, MarkupCatalog, MarkupEventSignature};
 use std::path::Path;
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -73,7 +73,9 @@ impl LanguageService {
             .ok_or_else(|| {
                 LanguageError("This XAML view needs an x:Class with a registered Rust owner".into())
             })?;
-        let (package, targets) = self.cargo_handler_targets(root)?;
+        let (package, targets) = self
+            .cargo_package_targets(root)?
+            .ok_or_else(|| LanguageError("The code-behind package has no Cargo targets".into()))?;
         let catalog = &project.catalog;
         let crate_names = targets
             .iter()
@@ -151,25 +153,6 @@ impl LanguageService {
             signature,
             existing,
         })
-    }
-
-    fn cargo_handler_targets(&self, root: &Path) -> Result<(String, Vec<CargoTarget>)> {
-        let targets = self
-            .workspaces
-            .values()
-            .flat_map(|workspace| &workspace.solution.projects)
-            .find(|project| project.root == root)
-            .map(|project| (project.name.clone(), project.targets.clone()));
-        if let Some(targets) = targets.filter(|(_, targets)| !targets.is_empty()) {
-            return Ok(targets);
-        }
-        // A VS Code workspace folder can contain an independent nested Cargo package.
-        Solution::discover(root)?
-            .projects
-            .into_iter()
-            .find(|project| project.root == root)
-            .map(|project| (project.name, project.targets))
-            .ok_or_else(|| LanguageError("The code-behind package has no Cargo targets".into()))
     }
 }
 

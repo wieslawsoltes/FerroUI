@@ -83,6 +83,8 @@ Open an XAML file from the owning project. In **Split** or **Code**, choose the 
 
 An open **Preview Stages** card follows its source through the move, Undo, and Redo. The board keeps its card configuration and prototype links. A paused card holds its image until you refresh it or turn updates on.
 
+For explicit Cargo registrations, the review keeps authored URI aliases and rebases file-derived keys along with their literal XAML and Rust consumers. Build the owning package to load metadata for custom assembly names. [How the planner handles compiled addresses](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

@@ -1,5 +1,5 @@
 use crate::project_schema::ProjectSchema;
-use ferroui_designer_project::BuildMetadata;
+use ferroui_designer_project::{BuildMetadata, CargoTarget, Solution};
 use crate::{
     FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
     TypeInfo, require,
@@ -233,6 +233,25 @@ impl LanguageService {
             self.package_schemas.contains_key(*root) || root.join("Cargo.toml").is_file()
         })?;
         self.package_schemas.get_key_value(root).map(|(root, schema)| (root.as_path(), schema))
+    }
+    fn cargo_package_targets(
+        &self,
+        root: &std::path::Path,
+    ) -> Result<Option<(String, Vec<CargoTarget>)>> {
+        if let Some(project) = self
+            .workspaces
+            .values()
+            .flat_map(|workspace| &workspace.solution.projects)
+            .find(|project| project.root == root && !project.targets.is_empty())
+        {
+            return Ok(Some((project.name.clone(), project.targets.clone())));
+        }
+        // An editor workspace can contain a nested Cargo package that has its own targets.
+        Ok(Solution::discover(root)?
+            .projects
+            .into_iter()
+            .find(|project| project.root == root)
+            .map(|project| (project.name, project.targets)))
     }
     pub fn set_type_overrides(&mut self, overrides: Vec<TypeInfo>) {
         self.overrides = overrides;

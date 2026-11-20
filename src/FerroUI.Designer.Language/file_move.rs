@@ -1,9 +1,9 @@
 //! Plan a workspace file move against the same source snapshots used for navigation.
-use super::{file_move_literals, LanguageService, State};
-use crate::{require, DocumentEdits, LanguageError, LineIndex, Result, TextEdit};
+use super::{LanguageService, State, file_move_literals};
+use crate::{DocumentEdits, LanguageError, LineIndex, Result, TextEdit, require};
 use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_project::{
-    canonical_file_uri, file_path, relative_asset_uri, relative_file_reference, XamlFileMove,
+    XamlFileMove, canonical_file_uri, file_path, relative_asset_uri, relative_file_reference,
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -16,6 +16,7 @@ use std::{
 mod rust;
 #[path = "file_move_saved.rs"]
 mod saved;
+use rust::CompiledAddresses;
 
 const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
 
@@ -109,6 +110,8 @@ impl LanguageService {
                 .is_none_or(|state| !state.opened),
             "The move destination already has an open buffer",
         )?;
+        let drafts = move_drafts(drafts)?;
+        let addresses = CompiledAddresses::prepare(self, &movement, &drafts)?;
         let mut documents = Vec::new();
         for (uri, state) in &self.documents {
             if self.workspace_root(uri).is_none() {
@@ -118,15 +121,14 @@ impl LanguageService {
                 check_incomplete_source(uri, state, &movement)?;
                 continue;
             }
-            let patches = self.move_patches(uri, state, &movement)?;
+            let patches = self.move_patches(uri, state, &movement, &addresses)?;
             if !patches.is_empty() || uri == &movement.from {
                 let document = move_document(uri, state.version, &state.index, patches)?;
                 Document::new(&document.after)?;
                 documents.push(document);
             }
         }
-        let drafts = move_drafts(drafts)?;
-        documents.extend(self.move_rust_paths(&movement, &drafts)?);
+        documents.extend(self.move_rust_paths(&movement, &drafts, &addresses)?);
         documents.extend(saved::plan(self, &movement, &drafts)?);
         documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
         let disk = std::fs::read(file_path(&movement.from)?)
@@ -155,6 +157,7 @@ impl LanguageService {
         owner: &str,
         state: &State,
         movement: &XamlFileMove,
+        addresses: &CompiledAddresses,
     ) -> Result<Vec<TextPatch>> {
         let after_owner = if owner == movement.from {
             &movement.to
@@ -171,6 +174,13 @@ impl LanguageService {
             let delimiter = site.value.find(suffix).unwrap_or(site.value.len());
             let (path, suffix) = site.value.split_at(delimiter);
             if path.is_empty() {
+                continue;
+            }
+            if let Some(next) = addresses.replacement(self, owner, path) {
+                if next != path {
+                    let replacement = format!("{next}{suffix}");
+                    patches.extend(site.patches(&replacement));
+                }
                 continue;
             }
             let Ok(target) = self.resource_uri(owner, path) else {
