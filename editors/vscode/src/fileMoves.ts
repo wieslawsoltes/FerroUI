@@ -1,18 +1,20 @@
-import { lstat, readFile, realpath } from 'node:fs/promises';
+import { lstat, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import type { FileMoveDocument, FileMovePlan } from './fileMoveProtocol';
+import type { FileMovePlan } from './fileMoveProtocol';
 import { recoverFileMove } from './fileMoveRecovery';
-import { FileMoveReview } from './fileMoveReview';
 import { isCompiledXamlRust, resolveFileMoveRust } from './fileMoveRust';
-import { asRange } from './textDocument';
-import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
+import { checkedSources } from './reviewedSources';
+import { SourceChangeReview } from './sourceChangeReview';
+import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
 import type { XamlServer } from './xamlServer';
 
 export interface FileMoveRequest { path: string; folder?: string; destination: string }
 
 export class FileMoves implements vscode.Disposable {
-    private readonly review = new FileMoveReview();
+    private readonly review = new SourceChangeReview({
+        scheme: 'ferroui-file-move-review', context: 'ferroui.reviewingFileMove', command: 'ferroui.fileMoveReview',
+    });
 
     constructor(private readonly server: XamlServer, private readonly moveFailed: (from: vscode.Uri) => void) {}
 
@@ -32,7 +34,10 @@ export class FileMoves implements vscode.Disposable {
         const folder = await requireXaml(uri);
         const to = await newWorkspaceFile(destination, folder.uri.toString());
         const plan = await this.plan(uri, to);
-        await this.review.open(plan, validate => this.apply(uri, to, plan.review, undefined, validate).then(() => to));
+        const relative = (file: vscode.Uri) => vscode.workspace.asRelativePath(file, false);
+        const documents = [...plan.documents].sort((left, right) => Number(right.edit.uri === plan.from) - Number(left.edit.uri === plan.from));
+        await this.review.open(`Move ${relative(uri)} → ${relative(to)}`, documents,
+            validate => this.apply(uri, to, plan.review, undefined, validate).then(() => to), { from: plan.from, to });
     }
 
     async agent(request: FileMoveRequest, signal: AbortSignal, review?: string): Promise<FileMovePlan> {
@@ -76,7 +81,7 @@ export class FileMoves implements vscode.Disposable {
             || !samePath(path.join(parent, path.basename(to.fsPath)), vscode.Uri.parse(plan.to, true).fsPath)) {
             throw new Error('The file or destination moved. Prepare the review again.');
         }
-        const sources = await Promise.all(plan.documents.map(document => checkedSource(document, document.edit.uri === plan.from ? from : undefined)));
+        const sources = await checkedSources(plan.documents, { from: plan.from, source: from });
         for (const source of sources) source.validate();
         validate?.();
         signal?.throwIfAborted();
@@ -113,32 +118,6 @@ async function requireXaml(uri: vscode.Uri): Promise<vscode.WorkspaceFolder> {
         throw new Error('Choose an authored XAML file in a trusted workspace.');
     }
     return folder;
-}
-
-async function checkedSource(plan: FileMoveDocument, preferred?: vscode.Uri) {
-    const physical = vscode.Uri.parse(plan.edit.uri, true);
-    const uri = preferred ?? await workspaceSourceUri(physical);
-    if (!uri) throw new Error('A file in the review is no longer in the workspace.');
-    const find = () => vscode.workspace.textDocuments.find(document => document.uri.toString() === uri.toString());
-    const live = find();
-    const source = live?.getText() ?? (await readFile(uri.fsPath, 'utf8'));
-    const stripBom = plan.edit.version < 0 && plan.before.startsWith('\uFEFF');
-    const withoutBom = (text: string) => stripBom && text.startsWith('\uFEFF') ? text.slice(1) : text;
-    const expected = live ? withoutBom(plan.before) : plan.before;
-    if (source !== expected || (plan.edit.version >= 0 && live?.version !== plan.edit.version)) {
-        throw new Error(`The source changed. Review ${path.basename(uri.fsPath)} again.`);
-    }
-    const edits = plan.edit.edits.map(patch => {
-        const range = asRange(patch.range);
-        const normalize = (point: vscode.Position) => stripBom && point.line === 0 ? point.translate(0, -1) : point;
-        return new vscode.TextEdit(new vscode.Range(normalize(range.start), normalize(range.end)), patch.newText);
-    });
-    const version = live?.version;
-    return { uri, edits, before: withoutBom(plan.before), after: withoutBom(plan.after), validate: () => {
-        if (find() !== live || live?.version !== version) {
-            throw new Error(`The source changed. Review ${path.basename(uri.fsPath)} again.`);
-        }
-    } };
 }
 
 function samePath(first: string, second: string): boolean { return path.relative(first, second) === ''; }

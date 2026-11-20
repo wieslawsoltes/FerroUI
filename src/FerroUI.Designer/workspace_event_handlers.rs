@@ -252,7 +252,7 @@ impl DesignerWorkspace {
         project.linked_history.take_closed(&uri);
         project.tabs.insert(uri.clone(), context.rust);
         if !markup.edits.is_empty() {
-            project.linked_history.link(label, context.uri, uri);
+            project.linked_history.link(label, vec![context.uri, uri]);
         }
         drop(project);
         self.rebuild_document_tabs();

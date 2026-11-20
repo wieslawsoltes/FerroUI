@@ -293,6 +293,7 @@ impl DesignerWorkspace {
         self.connect_event_handlers();
         self.connect_dictionary_extraction();
         self.connect_file_move();
+        self.connect_registered_rename();
         self.connect_rust_source();
         self.connect_authoring();
         self.connect_timeline_curves();
@@ -981,6 +982,10 @@ mod event_handlers;
 mod dictionary_extraction;
 #[path = "workspace_file_move.rs"]
 mod file_move;
+#[path = "workspace_reviewed_sources.rs"]
+mod reviewed_sources;
+#[path = "workspace_registered_rename.rs"]
+mod registered_rename;
 #[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;

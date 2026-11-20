@@ -1,4 +1,5 @@
-import type { Position, TextEdit } from './protocol';
+import type { Position } from './protocol';
+import type { ReviewedDocument } from './reviewedSources';
 
 export interface FileMoveDraft {
     uri: string;
@@ -6,11 +7,7 @@ export interface FileMoveDraft {
     source: string;
 }
 
-export interface FileMoveDocument {
-    edit: { uri: string; version: number; edits: TextEdit[] };
-    before: string;
-    after: string;
-}
+export type FileMoveDocument = ReviewedDocument;
 
 export interface FileMovePlan {
     from: string;

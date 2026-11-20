@@ -1,6 +1,6 @@
 use super::*;
 use ferroui_designer_core::SourceSpan;
-use ferroui_designer_language::{DocumentEdits, FileMoveRustResolution, TextEdit};
+use ferroui_designer_language::{DocumentEdits, FileMoveRustResolution, LineIndex, TextEdit};
 use ferroui_designer_project::BuildMetadata;
 
 #[test]

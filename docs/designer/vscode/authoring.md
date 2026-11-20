@@ -28,6 +28,16 @@ Run **Build Project XAML Schema** for the owning Cargo target. In XAML, put the 
 
 The result opens the authored Rust registration for that type or property. Each step in a path such as `Address.Street` follows the build's type information, including dependency types exposed under a XAML alias. With `{CompiledBinding Street, DataType={x:Type data:PostalAddress}}`, place the caret on `Street` for the registered property or on `data:PostalAddress` for its type. Navigation resolves the current file or open Rust draft, so adding lines above a declaration keeps the selection on its name. Rebuild the schema after moving declarations between files, changing a registration, or using build output without the source index. [Studio workflow](../native-controls.md#follow-a-rust-declaration-from-xaml) · [MCP workflow](reference.md#find-registered-rust-definitions-with-mcp)
 
+### Rename a registered XAML property
+
+Run **Build Project XAML Schema**, then put the caret on a property name or on a member of a typed binding path. Choose **FerroUI: Rename Registered Property…** from the Command Palette or the editor context menu. Enter the new public XAML property name.
+
+The Changes editor shows the Rust registration and every mapped XAML edit, including unopened files. It covers direct attributes, owner-qualified property elements, inherited properties, typed binding paths, qualified setters, and setters inside a typed ControlTheme. The Rust patch edits the property name in its metadata declaration or registration string. Open drafts contribute their current text.
+
+Review both sides of each diff, then choose the check icon **Apply Property Rename**. If the review found possible references with dynamic targets, choose **Show Locations** to inspect them. **Apply Mapped Rename** commits the resolved patches. Undo reverts the Rust and XAML edits together. A collision or a changed file requires a fresh review.
+
+Save the changed buffers and rebuild the owning Cargo schema to use the new name for completion and preview. When an explicit RSX builder mapping uses the property, update its public property key before the build. Open the workspace folders that contain the registration and its consumers before reviewing. [Studio workflow](../native-controls.md#review-a-registered-property-rename) · [MCP workflow](reference.md#review-a-registered-property-rename-with-mcp) · [RSX builder mappings](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
+
 ### Rename an RSX control
 
 Select the named control in Design or Outline, then run **FerroUI: Rename RSX Control** from the Command Palette. You can also edit **Name** in Properties. The edit changes the naming literal and applicable references within the active `rsx!` invocation in one Undo step.

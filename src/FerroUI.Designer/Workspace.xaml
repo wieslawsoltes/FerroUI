@@ -295,6 +295,9 @@
             <Button Name="MoveXamlFile" Classes="icon" AutomationProperties.Name="Move XAML file" ToolTip.Tip="Review a file move and its XAML references">
               <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 1H7L10 4V7H8.5V4.6L6.4 2.5H2.5V13.5H8.5V11H10V15H1Z M8 8H12.7L11 6.3L12 5.3L15.6 8.8L12 12.3L11 11.3L12.7 9.5H8Z" />
             </Button>
+            <Button Name="RenameRegisteredProperty" Classes="icon" AutomationProperties.Name="Rename registered property" ToolTip.Tip="Review a registered property rename at the caret">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 2H6V3.5H3.5V12.5H6V14H2Z M10 2H14V14H10V12.5H12.5V3.5H10Z M6 5H10V6.5H8.75V9.5H10V11H6V9.5H7.25V6.5H6Z" />
+            </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
             <Button Name="FormatSource" Classes="nav" Content="Format" />

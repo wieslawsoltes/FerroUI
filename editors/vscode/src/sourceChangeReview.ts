@@ -1,63 +1,63 @@
 import * as vscode from 'vscode';
-import type { FileMovePlan } from './fileMoveProtocol';
+import type { ReviewedDocument } from './reviewedSources';
 import { errorMessage } from './protocol';
-
-const scheme = 'ferroui-file-move-review';
-const context = 'ferroui.reviewingFileMove';
 
 interface Review {
     id: string;
     title: string;
     contents: Map<string, string>;
-    apply: (validate: () => void) => Promise<vscode.Uri>;
+    apply: (validate: () => void) => Promise<vscode.Uri | undefined>;
     origin?: { uri: vscode.Uri; column: vscode.ViewColumn; selection: vscode.Selection };
 }
 
-export class FileMoveReview implements vscode.Disposable {
+interface ReviewActions { scheme: string; context: string; command: string }
+
+export class SourceChangeReview implements vscode.Disposable {
     private current?: Review;
     private serial = 0;
     private applying = false;
-    private readonly subscriptions = [
-        vscode.workspace.registerTextDocumentContentProvider(scheme, {
-            provideTextDocumentContent: uri => this.current?.contents.get(uri.toString()),
-        }),
-        vscode.window.tabGroups.onDidChangeTabs(() => this.setContext()),
-        vscode.window.tabGroups.onDidChangeTabGroups(() => this.setContext()),
-        vscode.commands.registerCommand('ferroui.fileMoveReview.cancel', () => this.run(review => this.cancel(review))),
-        vscode.commands.registerCommand('ferroui.fileMoveReview.apply', () => this.run(async review => {
-            this.applying = true;
-            try {
-                const column = vscode.window.tabGroups.activeTabGroup.viewColumn;
-                const destination = await review.apply(() => {
-                    if (this.current !== review) throw new Error('Open the current file move review before applying it.');
-                });
-                try {
-                    await vscode.window.showTextDocument(destination, { viewColumn: column, preview: false });
-                } finally { await this.close(review); }
-            } finally { this.applying = false; }
-        })),
-    ];
+    private readonly subscriptions: vscode.Disposable[];
 
-    async open(plan: FileMovePlan, apply: Review['apply']): Promise<void> {
-        if (this.applying) throw new Error('A file move is being applied.');
+    constructor(private readonly actions: ReviewActions) {
+        this.subscriptions = [
+            vscode.workspace.registerTextDocumentContentProvider(actions.scheme, {
+                provideTextDocumentContent: uri => this.current?.contents.get(uri.toString()),
+            }),
+            vscode.window.tabGroups.onDidChangeTabs(() => this.setContext()),
+            vscode.window.tabGroups.onDidChangeTabGroups(() => this.setContext()),
+            vscode.commands.registerCommand(`${actions.command}.cancel`, () => this.run(review => this.cancel(review))),
+            vscode.commands.registerCommand(`${actions.command}.apply`, () => this.run(async review => {
+                this.applying = true;
+                try {
+                    const column = vscode.window.tabGroups.activeTabGroup.viewColumn;
+                    const destination = await review.apply(() => {
+                        if (this.current !== review) throw new Error('Open the current source review before applying it.');
+                    });
+                    if (!destination) return;
+                    try {
+                        await vscode.window.showTextDocument(destination, { viewColumn: column, preview: false });
+                    } finally { await this.close(review); }
+                } finally { this.applying = false; }
+            })),
+        ];
+    }
+
+    async open(title: string, documents: readonly ReviewedDocument[], apply: Review['apply'],
+        retarget?: { from: string; to: vscode.Uri }): Promise<void> {
+        if (this.applying) throw new Error('A source review is being applied.');
         const serial = ++this.serial;
         if (this.current) await this.cancel(this.current);
         if (serial !== this.serial) return;
-        const from = vscode.Uri.parse(plan.from, true);
-        const to = vscode.Uri.parse(plan.to, true);
-        const relative = (uri: vscode.Uri) => vscode.workspace.asRelativePath(uri, false);
-        const title = `Move ${relative(from)} → ${relative(to)}`;
         const active = vscode.window.activeTextEditor;
         const origin = active?.viewColumn && vscode.window.tabGroups.activeTabGroup.activeTab?.isPreview
             ? { uri: active.document.uri, column: active.viewColumn, selection: active.selection } : undefined;
         const review = { id: String(serial), title, contents: new Map<string, string>(), apply, origin };
-        const documents = [...plan.documents].sort((left, right) => Number(right.edit.uri === plan.from) - Number(left.edit.uri === plan.from));
         const resources = documents.map((document, index) => {
             const source = vscode.Uri.parse(document.edit.uri, true);
-            const destination = document.edit.uri === plan.from ? to : source;
+            const destination = retarget && document.edit.uri === retarget.from ? retarget.to : source;
             const store = (part: string, uri: vscode.Uri, text: string) => {
                 const name = vscode.workspace.asRelativePath(uri).replaceAll('\\', '/');
-                const version = vscode.Uri.from({ scheme, path: `/${name.replace(/^\/+/, '')}`, query: `${review.id}/${index}/${part}` });
+                const version = vscode.Uri.from({ scheme: this.actions.scheme, path: `/${name.replace(/^\/+/, '')}`, query: `${review.id}/${index}/${part}` });
                 review.contents.set(version.toString(), text);
                 return version;
             };
@@ -82,13 +82,13 @@ export class FileMoveReview implements vscode.Disposable {
     }
 
     private setContext(): void {
-        void vscode.commands.executeCommand('setContext', context, !!this.current && this.isActive(this.current));
+        void vscode.commands.executeCommand('setContext', this.actions.context, !!this.current && this.isActive(this.current));
     }
 
     private isReviewSource(tab: vscode.Tab, review: Review): boolean {
         const input = tab.input;
         const uri = input instanceof vscode.TabInputTextDiff ? input.modified : input instanceof vscode.TabInputText ? input.uri : undefined;
-        return uri?.scheme === scheme && uri.query.startsWith(`${review.id}/`);
+        return uri?.scheme === this.actions.scheme && uri.query.startsWith(`${review.id}/`);
     }
 
     private async close(review: Review): Promise<void> {

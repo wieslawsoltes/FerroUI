@@ -1,21 +1,19 @@
 use super::{DesignerWorkspace, resolution::MoveTarget};
+use super::super::reviewed_sources::ui::{panel, relative, source_diffs, toolbar};
 use crate::{
     icons,
     workspace::inspector_actions::{SOURCE, add_button, text},
 };
 use ferroui_base::{
     Ref,
-    layout::Orientation,
-    media::FontFamily,
     threading::{DispatcherPriority, DispatcherTimer},
 };
 use ferroui_controls::{
-    Button, ComboBox, Control, Flyout, PlacementMode, StackPanel, TabControl, TabItem, TextBlock,
+    Button, Control, Flyout, PlacementMode, TextBlock,
     TextBox,
     automation::{AutomationLiveSetting, AutomationProperties},
 };
 use ferroui_designer_language::FileMovePlan;
-use ferroui_designer_project::file_path;
 use std::{cell::Cell, rc::Rc, time::Duration};
 
 impl DesignerWorkspace {
@@ -84,7 +82,7 @@ fn choose_destination(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
                 .map(|plan| (target, plan))
         });
         match result {
-            Ok((_, Some(plan))) => show_review(&workspace, &popup, destination, Rc::new(plan)),
+            Ok((_, Some(plan))) => show_review(&workspace, &popup, destination, plan),
             Ok((target, None)) => {
                 if let Some(message) = message.upgrade() {
                     message.set_text(Some("Resolving Rust references…"));
@@ -141,7 +139,7 @@ fn wait_for_review(
                 match workspace.plan_project_file_move(&destination, false) {
                     Ok(None) => return true,
                     Ok(Some(plan)) => {
-                        show_review(&workspace, &flyout, destination.clone(), Rc::new(plan))
+                        show_review(&workspace, &flyout, destination.clone(), plan)
                     }
                     Err(error) => message.set_text(Some(&error)),
                 }
@@ -164,7 +162,7 @@ fn show_review(
     workspace: &Rc<DesignerWorkspace>,
     flyout: &Ref<Flyout>,
     destination: String,
-    plan: Rc<FileMovePlan>,
+    plan: FileMovePlan,
 ) {
     let target = workspace.move_target(&destination).ok();
     let body = panel(workspace);
@@ -174,40 +172,8 @@ fn show_review(
         relative(workspace, &plan.to)
     );
     body.children().add(text(&title).upcast::<Control>());
-    let file = ComboBox::new();
-    AutomationProperties::set_name(&file, Some("File to review"));
-    for document in &plan.documents {
-        file.items()
-            .add(Some(Rc::new(relative(workspace, &document.edit.uri))));
-    }
-    let tabs = TabControl::new();
-    let before = source_tab(&tabs, "Original source");
-    let after = source_tab(&tabs, "Proposed source");
-    let choose = plan
-        .documents
-        .iter()
-        .position(|doc| doc.edit.uri == plan.from)
-        .unwrap_or_default();
-    file.set_selected_index(choose as i32);
-    let show = {
-        let plan = plan.clone();
-        let (file, before, after) = (file.downgrade(), before.downgrade(), after.downgrade());
-        move || {
-            let (Some(file), Some(before), Some(after)) =
-                (file.upgrade(), before.upgrade(), after.upgrade())
-            else {
-                return;
-            };
-            if let Some(document) = plan.documents.get(file.selected_index().max(0) as usize) {
-                before.set_text(Some(&document.before));
-                after.set_text(Some(&document.after));
-            }
-        }
-    };
-    show();
-    file.selection_changed(move |_, _| show());
-    body.children().add(file.upcast::<Control>());
-    body.children().add(tabs.upcast::<Control>());
+    source_diffs(workspace, &body, &plan.from, Rc::new(plan.documents));
+    let review = plan.review;
     let actions = toolbar();
     let status = text("");
     status.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
@@ -218,7 +184,7 @@ fn show_review(
         let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) else {
             return;
         };
-        match workspace.apply_project_file_move(&destination, &plan.review) {
+        match workspace.apply_project_file_move(&destination, &review) {
             Ok(_) => popup.hide(),
             Err(error) => {
                 if let Some(message) = message.upgrade() {
@@ -240,45 +206,4 @@ fn show_review(
     body.children().add(actions.upcast::<Control>());
     body.children().add(status.upcast::<Control>());
     flyout.set_content(Some(Control::boxed(body)));
-}
-
-fn source_tab(tabs: &Ref<TabControl>, label: &str) -> Ref<TextBox> {
-    let editor = TextBox::new();
-    editor.set_is_read_only(true);
-    editor.set_accepts_return(true);
-    editor.set_height(244.0);
-    editor.set_font_family(FontFamily::from("monospace"));
-    editor.set_font_size(11.0);
-    AutomationProperties::set_name(&editor, Some(label));
-    let tab = TabItem::new();
-    tab.set_header(Some(Rc::new(label.to_owned())));
-    tab.set_content(Some(Control::boxed(editor.clone())));
-    tabs.items().add(Some(Control::boxed(tab)));
-    editor
-}
-
-fn panel(workspace: &DesignerWorkspace) -> Ref<StackPanel> {
-    let panel = StackPanel::new();
-    panel.set_spacing(8.0);
-    panel.set_width((workspace.root.bounds().width - 40.0).clamp(300.0, 760.0));
-    panel
-}
-
-fn toolbar() -> Ref<StackPanel> {
-    let row = StackPanel::new();
-    row.set_orientation(Orientation::Horizontal);
-    row.set_spacing(6.0);
-    row
-}
-
-fn relative(workspace: &DesignerWorkspace, uri: &str) -> String {
-    let file = file_path(uri);
-    let solution = workspace.solution();
-    file.as_ref()
-        .ok()
-        .and_then(|file| file.strip_prefix(&solution.as_ref()?.root).ok())
-        .map_or_else(
-            || uri.into(),
-            |path| path.to_string_lossy().replace('\\', "/"),
-        )
 }

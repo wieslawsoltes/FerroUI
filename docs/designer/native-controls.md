@@ -73,6 +73,12 @@ Open the owning Cargo project and build it from **Project** to load the exported
 
 Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, or typed binding member and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
 
+### Review a registered property rename
+
+Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name or a typed binding member and choose the **Rename registered property** icon in the source toolbar. Enter its new public name and choose **Review property rename**.
+
+Choose a file and compare **Original source** and **Proposed source**. If Studio shows **Potential references**, choose a location and select the source icon to inspect that usage. Open a new review when ready to apply. Use the check icon to commit the displayed Rust and XAML patches. Undo or Redo from any participating tab moves all the edits together. Save the files and rebuild the package to publish the new schema. [Supported source forms](vscode/authoring.md#rename-a-registered-xaml-property) · [MCP workflow](vscode/reference.md#review-a-registered-property-rename-with-mcp)
+
 ### Extract an XAML resource dictionary
 
 Open the owning project. In **Split** or **Code**, put the caret on the resource, its inline dictionary, or the control that owns the `Resources` property. Choose the file icon **Extract resource dictionary** in the source toolbar. Enter the sibling filename and choose **Review extraction**. Compare **Original source** and **Source replacement**, then read the new file in its named tab.

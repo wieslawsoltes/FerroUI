@@ -2,15 +2,16 @@ use super::DesignerWorkspace;
 use super::dictionary_extraction::CreatedDictionary;
 use super::file_move::MovedXaml;
 use super::project::{Tab, document_identity};
+use super::reviewed_sources::check_saved;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
 /// Link simultaneous authored edits between existing per-tab history stacks.
-/// A newer edit in either participating tab must be undone before the pair.
+/// A newer edit in a participating tab must be undone before the group.
 #[derive(Default)]
 pub(super) struct WorkspaceHistory {
     serial: u64,
-    pairs: BTreeMap<String, [String; 2]>,
+    groups: BTreeMap<String, Vec<String>>,
     created: BTreeMap<String, CreatedDictionary>,
     pub(super) moves: BTreeMap<String, MovedXaml>,
     closed: BTreeMap<String, Tab>,
@@ -25,28 +26,24 @@ impl WorkspaceHistory {
         Ok(format!("{title} ({})", self.serial))
     }
 
-    pub(super) fn link(&mut self, label: String, first: String, second: String) {
-        self.pairs.insert(label, [first, second]);
+    pub(super) fn link(&mut self, label: String, participants: Vec<String>) {
+        self.groups.insert(label, participants);
     }
 
     pub(super) fn link_created(&mut self, label: String, created: CreatedDictionary) {
         self.created.insert(label, created);
     }
 
-    fn partner(&self, label: &str, active: &str) -> Option<&str> {
-        let pair = self.pairs.get(label)?;
-        if pair[0] == active {
-            Some(&pair[1])
-        } else if pair[1] == active {
-            Some(&pair[0])
-        } else {
-            None
-        }
+    fn companions(&self, label: &str, active: &str) -> Option<Vec<String>> {
+        let group = self.groups.get(label)?;
+        group.iter().any(|uri| uri == active).then(|| {
+            group.iter().filter(|uri| *uri != active).cloned().collect()
+        })
     }
 
     pub(super) fn retain_closed(&mut self, uri: &str, tab: Tab) {
         if tab.source() == tab.saved
-            && (self.pairs.values().any(|pair| pair.iter().any(|file| file == uri))
+            && (self.groups.values().any(|group| group.iter().any(|file| file == uri))
                 || self.moves.values().any(|movement| movement.participates(uri)))
         {
             self.closed.insert(uri.into(), tab);
@@ -117,50 +114,31 @@ impl DesignerWorkspace {
         if let Some((label, movement)) = moved {
             return self.step_file_move(label, movement, redo);
         }
-        let companion = {
-            let state = self.project.borrow();
-            if let Some((label, uri)) = label.as_deref().and_then(|label| {
-                state
-                    .linked_history
-                    .partner(label, &active)
-                    .map(|uri| (label, uri))
-            }) {
-                let mut tab = state
-                    .tabs
-                    .get(uri)
-                    .or_else(|| state.linked_history.closed(uri))
-                    .cloned()
-                    .ok_or("The other tab's source history is unavailable")?;
+        let companions = label.as_deref().and_then(|label| {
+            self.project.borrow().linked_history.companions(label, &active).map(|uris| (label, uris))
+        });
+        if let Some((label, companions)) = companions {
+            let mut staged = self.stage_reviewed_sources()?;
+            for uri in &companions {
+                let mut tab = staged.tab(self, uri)?;
                 if tab.history_label(redo) != Some(label) {
-                    return Err("Finish newer history changes in the other tab first".into());
+                    return Err("Finish newer history changes in the other participating tabs first".into());
                 }
-                let workspace = state
-                    .workspace
-                    .as_ref()
-                    .ok_or("Open the owning project first")?;
-                if workspace
-                    .read_source(uri)
-                    .map_err(|error| error.to_string())?
-                    != tab.saved
-                {
-                    return Err("The other file changed on disk. Reopen its current source before editing it".into());
-                }
+                check_saved(&staged.workspace, uri, &tab)?;
                 tab.step_history(redo)?;
-                Some((uri.to_owned(), tab))
-            } else {
-                None
+                staged.tabs.insert(uri.clone(), tab);
             }
-        };
-        let mut session = self.session.borrow_mut();
-        if redo { session.redo() } else { session.undo() }.map_err(|e| e.to_string())?;
-        drop(session);
-        if let Some((uri, tab)) = companion {
-            let mut state = self.project.borrow_mut();
-            state.linked_history.take_closed(&uri);
-            state.tabs.insert(uri, tab);
-            drop(state);
-            self.rebuild_document_tabs();
+            staged.prepare_edits(&companions)?;
+            self.step_active_history(redo)?;
+            self.publish_reviewed_sources(staged, &companions)?;
+        } else {
+            self.step_active_history(redo)?;
         }
         Ok(())
+    }
+
+    fn step_active_history(&self, redo: bool) -> Result<(), String> {
+        let mut session = self.session.borrow_mut();
+        if redo { session.redo() } else { session.undo() }.map(|_| ()).map_err(|e| e.to_string())
     }
 }

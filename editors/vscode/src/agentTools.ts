@@ -8,6 +8,7 @@ import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { FileMoveRequest, FileMoves } from './fileMoves';
+import type { RegisteredPropertyAgentRequest, RegisteredPropertyRename } from './registeredPropertyRename';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
@@ -98,7 +99,8 @@ export class AgentTools {
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
-        private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves) {}
+        private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
+        private readonly propertyRename: RegisteredPropertyRename) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -119,6 +121,9 @@ export class AgentTools {
         if (tool === 'ferroui_workspace_move_xaml') {
             const request = input as FileMoveRequest & { review: string };
             return this.fileMoves.agent(request, signal, request.review);
+        }
+        if (tool === 'ferroui_workspace_plan_property_rename' || tool === 'ferroui_workspace_rename_property') {
+            return this.propertyRename.agent(input as RegisteredPropertyAgentRequest, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
         const args = input as Arguments;

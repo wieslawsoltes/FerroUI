@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { describeCargoTarget, discoverCargoTargets, selectCargoTarget } from '../src/cargoTarget';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import { buildCargo } from '../src/reloadProcess';
+import { verifyRegisteredPropertyRename } from './registeredPropertyRename';
 import { until } from './wait';
 
 export async function verifyCargoTarget(workspace: vscode.Uri, designer: DesignerWorkbench): Promise<void> {
@@ -92,6 +93,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     assert.ok(ready, `The built project schema did not provide the type of AuditCard.Caption in ${xaml.uri}. ` +
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
     await verifyDefinitions(xaml, source, dependencySource);
+    await verifyRegisteredPropertyRename(xaml, source);
 
     const view = await write('View.xaml', '<StackPanel xmlns="https://github.com/ferroui" />');
     const panel = await designer.openDocument(view);

@@ -119,6 +119,12 @@ Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `f
 
 After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)
 
+### Review a registered property rename with MCP
+
+In VS Code, call `ferroui_workspace_plan_property_rename` with the XAML file in `path`, an optional workspace `folder`, a zero-based UTF-16 `position`, and `new_name`. Inspect each file's `before`, `after`, and `edit` fields, then check any locations listed in `unmapped`. Pass the same arguments and the returned `review` to `ferroui_workspace_rename_property`.
+
+In Studio, use `designer_plan_property_rename` with the active XAML byte `offset`, `new_name`, and `expected_revision`. Pass the same inputs and `review` to `designer_rename_property`. Apply requires the host's existing MCP write permission and rechecks the current source. One Undo rolls back the full transaction. [VS Code workflow](authoring.md#rename-a-registered-xaml-property) · [Studio workflow](../native-controls.md#review-a-registered-property-rename)
+
 ### Rename an RSX control with MCP
 
 In VS Code, read `designer_outline` for the current control ID and frame. Call `designer_rename_rsx_control` with `session`, `node`, `expected_revision`, and the new name in `value`. The editor also exposes the same change as a `designer_property` action through `designer_studio_edit`.
