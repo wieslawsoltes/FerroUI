@@ -221,6 +221,60 @@ fn studio_moves_a_view_and_undoes_its_rust_reference_from_the_code_tab() {
 }
 
 #[test]
+fn studio_move_persists_saved_design_references_and_replays_them_from_source_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!("<Border {NS}/>");
+    let (files, workspace) = Files::open("Customer.xaml", &source);
+    let old = files.uri("Customer.xaml");
+    let destination = "Archive/Customer & notes.xaml";
+    let next = files.uri(destination);
+    let stage_path = files.0.join("Review.ferrostages");
+    let scenario_path = files.0.join("Review.ferroui-scenario.json");
+    let stage = serde_json::to_string_pretty(&json!({
+        "version":3, "active":0, "stages":[json!(crate::PreviewStageConfiguration::new(
+            "Customer review", &old, crate::PreviewEnvironment::default()
+        ))], "prototype":{"flows":[{"name":"Review","start":0}],"links":[]}
+    })).unwrap();
+    let scenario = serde_json::to_string_pretty(&json!({
+        "version":1,"name":"Review customer", "document":"./Customer.xaml",
+        "prototype":{"stageSet":"Review.ferrostages","flow":"Review","sources":{(&old):{"path":"Customer.xaml"}}},
+        "steps":[{"action":"expectStage","name":"Customer review"}]
+    })).unwrap();
+    fs::write(&stage_path, &stage).unwrap();
+    fs::write(&scenario_path, &scenario).unwrap();
+    let plan = workspace.plan_project_file_move(destination).unwrap();
+    assert_eq!(plan.documents.len(), 3);
+    workspace.apply_project_file_move(destination, &plan.review).unwrap();
+    let changed_stage = stage.replace(&old, &next);
+    let changed_scenario = scenario.replace(&old, &next).replace("Customer.xaml", destination);
+    assert_eq!(fs::read_to_string(&stage_path).unwrap(), changed_stage);
+    assert_eq!(fs::read_to_string(&scenario_path).unwrap(), changed_scenario);
+    assert!(files.0.join(destination).is_file());
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let history = |action| provider.call(
+        action,
+        &json!({"expected_revision":workspace.session().borrow().document().revision()}),
+        Permissions { allow_property_writes: true, ..Default::default() },
+    );
+    let retained = files.0.join("external-hold.json");
+    fs::rename(&scenario_path, &retained).unwrap();
+    fs::write(&scenario_path, "External scenario replacement").unwrap();
+    assert!(history("designer_undo").is_err());
+    assert!(files.0.join(destination).is_file());
+    assert_eq!(fs::read_to_string(&stage_path).unwrap(), changed_stage);
+    assert_eq!(fs::read_to_string(&scenario_path).unwrap(), "External scenario replacement");
+    fs::remove_file(&scenario_path).unwrap();
+    fs::rename(&retained, &scenario_path).unwrap();
+    history("designer_undo").unwrap();
+    assert!(files.0.join("Customer.xaml").is_file());
+    assert_eq!(fs::read_to_string(&stage_path).unwrap(), stage);
+    assert_eq!(fs::read_to_string(&scenario_path).unwrap(), scenario);
+    history("designer_redo").unwrap();
+    assert!(files.0.join(destination).is_file());
+    assert_eq!(fs::read_to_string(&scenario_path).unwrap(), changed_scenario);
+}
+
+#[test]
 fn studio_toolbar_reviews_and_records_history_for_a_move_with_no_source_edits() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = format!("<Border {NS}><TextBlock Text='Customer accounts'/></Border>");

@@ -1,6 +1,9 @@
 //! A file move owned by a Studio history transaction.
-use super::{created_file::same_file, file_path, read_source, require, ProjectWorkspace};
-use crate::{Result, XamlFileMove};
+use super::{
+    created_file::same_file, file_path, move_references::SavedReference, read_source, require,
+    ProjectWorkspace, SavedReferenceEdit,
+};
+use crate::{ProjectError, Result, XamlFileMove};
 use std::{fs, path::Path, sync::Arc};
 
 #[derive(Clone)]
@@ -9,6 +12,7 @@ pub struct MovedSourceFile {
     pub to: String,
     bytes: Arc<str>,
     identity: fs::Metadata,
+    references: Vec<SavedReference>,
 }
 
 impl ProjectWorkspace {
@@ -18,16 +22,29 @@ impl ProjectWorkspace {
         to: &str,
         expected_source: &str,
     ) -> Result<MovedSourceFile> {
+        self.move_source_file_with_references(from, to, expected_source, Vec::new())
+    }
+
+    /// Move authored source and update the reviewed saved stage and scenario files.
+    pub fn move_source_file_with_references(
+        &mut self,
+        from: &str,
+        to: &str,
+        expected_source: &str,
+        edits: Vec<SavedReferenceEdit>,
+    ) -> Result<MovedSourceFile> {
         let movement = self.plan_xaml_move(from, to)?;
         let source = file_path(&movement.from)?;
         let identity = fs::symlink_metadata(&source)?;
         check_source(&source, &identity, expected_source)?;
-        self.transfer_source(&movement, &identity, expected_source)?;
+        let mut references = SavedReference::capture(self, edits)?;
+        self.transfer_source(&movement, &identity, expected_source, &mut references, true)?;
         Ok(MovedSourceFile {
             from: movement.from,
             to: movement.to,
             bytes: Arc::from(expected_source),
             identity,
+            references,
         })
     }
 
@@ -54,7 +71,7 @@ impl ProjectWorkspace {
             // The workspace host can attest to its own newer saved snapshot.
             fs::symlink_metadata(file_path(from)?)?
         };
-        self.transfer_source(&movement, &identity, saved)?;
+        self.transfer_source(&movement, &identity, saved, &mut file.references, redo)?;
         file.bytes = Arc::from(saved);
         file.identity = identity;
         Ok(())
@@ -65,6 +82,8 @@ impl ProjectWorkspace {
         movement: &XamlFileMove,
         identity: &fs::Metadata,
         expected_source: &str,
+        references: &mut [SavedReference],
+        forward: bool,
     ) -> Result<()> {
         let source = file_path(&movement.from)?;
         let destination = file_path(&movement.to)?;
@@ -79,23 +98,54 @@ impl ProjectWorkspace {
                 *path = destination.clone();
             }
         }
+        let mut prepared = references
+            .iter()
+            .map(|file| file.prepare(self, forward))
+            .collect::<Result<Vec<_>>>()?;
         check_source(&source, identity, expected_source)?;
         fs::hard_link(&source, &destination)?;
-        let remove_origin = check_source(&source, identity, expected_source)
-            .and_then(|()| check_identity(&destination, identity))
-            .and_then(|()| fs::remove_file(&source).map_err(Into::into));
+        let remove_origin = (|| {
+            // Both paths resolve while the references are being replaced.
+            for file in &mut prepared {
+                file.install()?;
+            }
+            for file in &prepared {
+                file.verify()?;
+            }
+            check_source(&source, identity, expected_source)?;
+            check_identity(&destination, identity)?;
+            Ok(fs::remove_file(&source)?)
+        })();
         if let Err(error) = remove_origin {
+            let restoration = prepared
+                .iter_mut()
+                .rev()
+                .filter_map(|file| file.restore().err())
+                .map(|error| error.to_string())
+                .collect::<Vec<_>>();
+            if !restoration.is_empty() {
+                return Err(ProjectError(format!("{error}. {}", restoration.join(" "))));
+            }
             if check_identity(&destination, identity).is_ok() {
+                if check_identity(&source, identity).is_err() {
+                    return Err(ProjectError(format!(
+                        "{error}. The original file is held at {}",
+                        destination.display()
+                    )));
+                }
                 fs::remove_file(&destination)?;
             }
             return Err(error);
+        }
+        for (file, prepared) in references.iter_mut().zip(&prepared) {
+            file.accept(prepared);
         }
         *self = staged;
         Ok(())
     }
 }
 
-fn check_source(path: &Path, identity: &fs::Metadata, expected: &str) -> Result<()> {
+pub(super) fn check_source(path: &Path, identity: &fs::Metadata, expected: &str) -> Result<()> {
     check_identity(path, identity)?;
     require(
         read_source(path)? == expected,

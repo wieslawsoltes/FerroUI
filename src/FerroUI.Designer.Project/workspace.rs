@@ -8,9 +8,11 @@ use std::path::{Path, PathBuf};
 
 mod created_file;
 mod moved_file;
+mod move_references;
 mod storage;
 pub use created_file::CreatedSourceFile;
 pub use moved_file::MovedSourceFile;
+pub use move_references::SavedReferenceEdit;
 use storage::atomic_create;
 pub(crate) use storage::atomic_write;
 

@@ -89,13 +89,13 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<T>(`ferroui/${method}`, params);
     }
 
-    async planFileMove(from: vscode.Uri, to: vscode.Uri, rustDrafts: readonly FileMoveDraft[]): Promise<FileMovePlan> {
+    async planFileMove(from: vscode.Uri, to: vscode.Uri, sourceDrafts: readonly FileMoveDraft[]): Promise<FileMovePlan> {
         await this.start();
         const client = this.client;
-        if (client?.initializeResult?.capabilities.experimental?.ferrouiFileMoveRust !== true) {
-            throw new Error('Use a FerroUI XAML language server that supports Rust references in reviewed file moves.');
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiFileMoveSaved !== true) {
+            throw new Error('Update the FerroUI XAML language server to review Rust, stage set, and scenario references.');
         }
-        return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString(), rustDrafts });
+        return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString(), sourceDrafts });
     }
 
     async withReviewedFileMove<T>(from: vscode.Uri, to: vscode.Uri, apply: () => PromiseLike<T>): Promise<T> {

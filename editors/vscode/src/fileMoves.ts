@@ -46,12 +46,15 @@ export class FileMoves implements vscode.Disposable {
 
     private async plan(from: vscode.Uri, to: vscode.Uri): Promise<FileMovePlan> {
         await requireXaml(from);
-        const open = vscode.workspace.textDocuments.filter(document => document.uri.path.toLowerCase().endsWith('.rs'));
+        const open = vscode.workspace.textDocuments.filter(document => {
+            const extension = path.extname(document.uri.path).toLowerCase();
+            return extension === '.rs' || (document.isDirty && (extension === '.json' || extension === '.ferrostages'));
+        });
         const projectFiles = await Promise.all(open.map(document => isWorkspaceFile(document.uri)));
         const drafts = open.filter((document, index) => projectFiles[index] && !document.isClosed).map(document => ({
             uri: document.uri.toString(), version: document.version, source: document.getText(),
         }));
-        if (Buffer.byteLength(JSON.stringify(drafts)) > 12 * 1024 * 1024) throw new Error('Close unused Rust buffers before reviewing this move.');
+        if (Buffer.byteLength(JSON.stringify(drafts)) > 12 * 1024 * 1024) throw new Error('Save larger drafts before reviewing this move.');
         return this.server.planFileMove(from, to, drafts);
     }
 
@@ -111,18 +114,20 @@ async function checkedSource(plan: FileMoveDocument, preferred?: vscode.Uri) {
     const find = () => vscode.workspace.textDocuments.find(document => document.uri.toString() === uri.toString());
     const live = find();
     const source = live?.getText() ?? (await readFile(uri.fsPath, 'utf8'));
-    if (source !== plan.before || (live && live.version !== plan.edit.version) || (!live && plan.edit.version >= 0)) {
+    const stripBom = plan.edit.version < 0 && plan.before.startsWith('\uFEFF');
+    const withoutBom = (text: string) => stripBom && text.startsWith('\uFEFF') ? text.slice(1) : text;
+    const expected = live ? withoutBom(plan.before) : plan.before;
+    if (source !== expected || (plan.edit.version >= 0 && live?.version !== plan.edit.version)) {
         throw new Error(`The source changed. Review ${path.basename(uri.fsPath)} again.`);
     }
-    const stripBom = !live && source.startsWith('\uFEFF');
     const edits = plan.edit.edits.map(patch => {
         const range = asRange(patch.range);
         const normalize = (point: vscode.Position) => stripBom && point.line === 0 ? point.translate(0, -1) : point;
         return new vscode.TextEdit(new vscode.Range(normalize(range.start), normalize(range.end)), patch.newText);
     });
-    const withoutBom = (text: string) => stripBom ? text.slice(1) : text;
+    const version = live?.version;
     return { uri, edits, before: withoutBom(plan.before), after: withoutBom(plan.after), validate: () => {
-        if (find() !== live || (live && live.version !== plan.edit.version)) {
+        if (find() !== live || live?.version !== version) {
             throw new Error(`The source changed. Review ${path.basename(uri.fsPath)} again.`);
         }
     } };

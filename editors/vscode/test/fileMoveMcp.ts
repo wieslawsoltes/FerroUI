@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import type { FileMovePlan } from '../src/fileMoveProtocol';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
+import { verifySavedFileMove } from './fileMoveSavedMcp';
 
 export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promise<void> {
     const workspace = vscode.workspace.workspaceFolders![0].uri;
@@ -116,6 +117,7 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
     await until(async () => await missing(renamedView) && titled('Customers.xaml'));
     console.log('Reviewed XAML file move updated closed and open consumers, retained the native preview, and undid the move with its patches');
     await verifyRustReferences({ invoke, content });
+    await verifySavedFileMove({ invoke, content });
 }
 
 async function verifyRustReferences({ invoke, content }: McpFixture): Promise<void> {

@@ -7,6 +7,9 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
+#[path = "file_move_saved_tests.rs"]
+mod saved;
+
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
 static NEXT: AtomicUsize = AtomicUsize::new(0);

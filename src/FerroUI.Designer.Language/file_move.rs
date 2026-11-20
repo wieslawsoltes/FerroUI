@@ -3,16 +3,21 @@ use super::{file_move_literals, LanguageService, State};
 use crate::{require, DocumentEdits, LanguageError, LineIndex, Result, TextEdit};
 use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_project::{
-    file_path, relative_asset_uri, relative_file_reference, XamlFileMove,
+    canonical_file_uri, file_path, relative_asset_uri, relative_file_reference, XamlFileMove,
 };
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::BTreeMap,
     hash::{DefaultHasher, Hash, Hasher},
     path::Path,
 };
 
 #[path = "file_move_rust.rs"]
 mod rust;
+#[path = "file_move_saved.rs"]
+mod saved;
+
+const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
 
 #[derive(Debug, Deserialize)]
 pub struct FileMoveDraft {
@@ -120,7 +125,9 @@ impl LanguageService {
                 documents.push(document);
             }
         }
-        documents.extend(self.move_rust_paths(&movement, drafts)?);
+        let drafts = move_drafts(drafts)?;
+        documents.extend(self.move_rust_paths(&movement, &drafts)?);
+        documents.extend(saved::plan(self, &movement, &drafts)?);
         documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
         let disk = std::fs::read(file_path(&movement.from)?)
             .map_err(|error| LanguageError(error.to_string()))?;
@@ -189,6 +196,25 @@ impl LanguageService {
         }
         Ok(patches)
     }
+}
+
+fn move_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDraft>> {
+    require(drafts.len() <= 256, "Too many open drafts for a file move")?;
+    let mut snapshots = BTreeMap::new();
+    let mut remaining = MAX_DRAFT_BYTES;
+    for draft in drafts {
+        require(
+            draft.version >= 0 && draft.source.len() <= remaining,
+            "Open drafts for a file move exceed the source limit",
+        )?;
+        remaining -= draft.source.len();
+        let uri = canonical_file_uri(&draft.uri)?;
+        require(
+            snapshots.insert(uri, draft).is_none(),
+            "Multiple open buffers name the same file",
+        )?;
+    }
+    Ok(snapshots)
 }
 
 fn move_document(

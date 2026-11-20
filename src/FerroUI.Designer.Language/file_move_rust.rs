@@ -1,6 +1,6 @@
 //! Resolve Rust reference sites against the indexed Cargo packages and draft snapshots.
 use super::{move_document, new_reference, FileMoveDocument, FileMoveDraft, LanguageService};
-use crate::{require, LanguageError, LineIndex, Result};
+use crate::{LanguageError, LineIndex, Result};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_designer_project::{
     canonical_file_uri, file_path, file_uri, relative_asset_uri, relative_file_path, resolve_uri,
@@ -12,15 +12,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
-
 impl LanguageService {
     pub(super) fn move_rust_paths(
         &self,
         movement: &XamlFileMove,
-        drafts: &[FileMoveDraft],
+        drafts: &BTreeMap<String, &FileMoveDraft>,
     ) -> Result<Vec<FileMoveDocument>> {
-        let drafts = rust_drafts(drafts)?;
         let files = rust_files(self);
         let from = file_path(&movement.from)?;
         let to = file_path(&movement.to)?;
@@ -95,25 +92,6 @@ impl LanguageService {
         }
         Ok(documents)
     }
-}
-
-fn rust_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDraft>> {
-    require(drafts.len() <= 256, "Too many Rust drafts for a file move")?;
-    let mut snapshots = BTreeMap::new();
-    let mut remaining = MAX_DRAFT_BYTES;
-    for draft in drafts {
-        require(
-            draft.version >= 0 && draft.source.len() <= remaining,
-            "Rust drafts for a file move exceed the source limit",
-        )?;
-        remaining -= draft.source.len();
-        let uri = canonical_file_uri(&draft.uri)?;
-        require(
-            snapshots.insert(uri, draft).is_none(),
-            "Multiple open buffers name the same Rust file",
-        )?;
-    }
-    Ok(snapshots)
 }
 
 fn rust_files(

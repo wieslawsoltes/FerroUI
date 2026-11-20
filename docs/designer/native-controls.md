@@ -77,9 +77,9 @@ Choose **Apply extraction** to create the file and update the view. The original
 
 ### Move an XAML file
 
-Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Choose each affected XAML, Rust, or Cargo build source and compare **Original source** and **Proposed source** before applying.
+Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Compare **Original source** and **Proposed source** for affected markup, Rust, Cargo build files, saved stage sets, and scenarios.
 
-**Apply file move** transfers the file and updates the participating buffers. Save the buffers to persist the new references. Undo or Redo from a participating XAML or Rust tab restores the matching file location and source changes as one operation. When a later edit or an external file change conflicts with the move, resolve that change before using its history. [Supported paths and VS Code workflow](vscode/authoring.md#move-an-xaml-file-and-its-references)
+**Apply file move** transfers the file, writes the reviewed stage sets and scenarios, and updates the participating source buffers. Save the buffers to persist their new references. Undo or Redo from a participating XAML or Rust tab restores the matching location, source edits, and saved reference files as one operation. Studio checks the saved files for external changes when replaying history. [Supported paths and VS Code workflow](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
 ### Solid color editor
 

@@ -162,13 +162,15 @@ The action moves the whole inline dictionary, including comments, namespace alia
 
 1. Right-click the XAML file in **Explorer** or **FerroUI → Project → Views** and choose **Move XAML File…**. You can also run the command from an open XAML editor.
 2. Enter the destination path relative to the workspace folder. Choose an existing directory in the same Cargo package or loose-file project and an available `.xaml` filename.
-3. Expand each file in the Changes editor. It shows the destination and changes in the moved file, its XAML consumers, and matching Rust and Cargo build sources. Choose **Apply File Move** or **Cancel File Move** in the editor toolbar.
+3. Expand each affected file in the Changes editor. Review the move and its references in XAML, Rust, Cargo builds, stage sets, and scenarios. Choose **Apply File Move** or **Cancel File Move** in the editor toolbar.
 
-Apply moves the file and changes its editor buffers together. An open **Design** tab follows the file and keeps its last frame visible while rendering the new source location. Undo or Redo from an affected source editor steps through the whole operation. Use **Save All** to persist the updated reference text before building the app. If the destination becomes occupied or a file changes during the review, prepare a new review.
+Apply moves the file and updates the participating buffers together. An open **Design** tab follows the file and keeps its last frame visible while rendering the new source location. Undo or Redo from an affected editor steps through the whole operation. Use **Save All** before building the app or running a saved scenario. If the destination becomes occupied or a file changes during the review, prepare a new review.
 
 The planner follows literal XAML includes, typed URI and image properties, and complete `ferres://` or `resm:` addresses it can resolve. In Rust, it updates the literal paths in `include_str!` and `include_bytes!`, including paths anchored with `concat!(env!("CARGO_MANIFEST_DIR"), "/…")`. Open Rust and XAML buffers contribute their unsaved text to the review.
 
-In the selected Cargo build target, the review can update `Build::input`, Cargo rerun directives, and the registration keys in `XamlGroup::documents` and `class_document` that directly identify the moved file. Rust includes keep the filesystem spelling. Compiled registration keys follow their XAML root and use URI escapes such as `%20` for a space. Check computed paths, custom logical aliases, references to generated build functions, and saved stage or scenario files when they refer to the moved view. [Studio workflow](../native-controls.md#move-an-xaml-file) · [MCP workflow](reference.md#move-an-xaml-file-with-mcp)
+In the selected Cargo build target, the review can update `Build::input`, Cargo rerun directives, and the registration keys in `XamlGroup::documents` and `class_document` that directly identify the moved file. Rust includes keep the filesystem spelling. Compiled registration keys follow their XAML root and use URI escapes such as `%20` for a space. Review computed paths, custom logical aliases, and references to generated build functions in source.
+
+The review includes saved stage sets and native scenario JSON, including unsaved edits to their open buffers. Stage sets use file URIs. Scenarios use paths relative to their own directory or absolute file paths. When a stage URI changes, its prototype scenario remap key follows it. A remap's path changes when it points to the moved file. The planner edits those values in their original JSON positions. Resolve conflicting source remap keys in the scenario before applying the move. [Studio workflow](../native-controls.md#move-an-xaml-file) · [MCP workflow](reference.md#move-an-xaml-file-with-mcp)
 
 ![The Changes editor shows the new dictionary location and each affected reference beside the preview](../images/vscode-xaml-file-move-review.jpg)
 
@@ -177,6 +179,8 @@ In the selected Cargo build target, the review can update `Build::input`, Cargo 
 ![The Changes editor previews the XAML consumer, Rust URI, and Cargo build registration with the canvas visible](../images/vscode-xaml-move-rust-cargo-review.jpg)
 
 ![The applied build script uses an encoded registration key and a literal file path beside the unchanged native preview](../images/vscode-xaml-move-rust-cargo-applied.jpg)
+
+![The Changes editor previews the moved XAML file, its saved stage address, and the updated source remap in an unsaved scenario](../images/vscode-saved-file-move.jpg)
 
 ## Trace an effective property value
 

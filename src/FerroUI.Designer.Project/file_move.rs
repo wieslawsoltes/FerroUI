@@ -13,6 +13,29 @@ pub struct XamlFileMove {
     pub package_root: PathBuf,
 }
 
+/// Project JSON that may refer to an authored view in a reviewed move.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SavedDesignFile {
+    Stages,
+    Scenario,
+    Json,
+}
+
+impl SavedDesignFile {
+    pub fn for_path(path: &Path) -> Option<Self> {
+        let name = path.file_name()?.to_str()?.to_ascii_lowercase();
+        if name.ends_with(".ferrostages") {
+            Some(Self::Stages)
+        } else if name.ends_with(".ferroui-scenario.json") {
+            Some(Self::Scenario)
+        } else if name.ends_with(".json") {
+            Some(Self::Json)
+        } else {
+            None
+        }
+    }
+}
+
 impl ProjectWorkspace {
     /// Plan a physical move within one authored package. Open buffers can still
     /// use aliases to the workspace directory.

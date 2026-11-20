@@ -7,7 +7,9 @@ use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::{
     FileMoveDocument, FileMoveDraft, FileMovePlan, LanguageService, LineIndex,
 };
-use ferroui_designer_project::{file_uri, MovedSourceFile, ProjectWorkspace};
+use ferroui_designer_project::{
+    file_path, file_uri, MovedSourceFile, ProjectWorkspace, SavedDesignFile, SavedReferenceEdit,
+};
 use std::{collections::BTreeMap, path::Path, rc::Rc};
 
 #[path = "workspace_file_move_review.rs"]
@@ -97,23 +99,30 @@ impl DesignerWorkspace {
             .borrow_mut()
             .linked_history
             .label("Move XAML file")?;
+        let mut participants = Vec::new();
+        let mut references = Vec::new();
         for change in &plan.documents {
+            let path = file_path(&change.edit.uri).map_err(|error| error.to_string())?;
+            if SavedDesignFile::for_path(&path).is_some() {
+                references.push(SavedReferenceEdit {
+                    uri: change.edit.uri.clone(),
+                    before: change.before.clone(),
+                    after: change.after.clone(),
+                });
+                continue;
+            }
             let tab = staged.tab(self, &change.edit.uri)?;
             check_saved(&staged.workspace, &change.edit.uri, &tab)?;
             staged
                 .tabs
                 .insert(change.edit.uri.clone(), patched(tab, change, &label)?);
+            participants.push(change.edit.uri.clone());
         }
-        let participants = plan
-            .documents
-            .iter()
-            .map(|item| item.edit.uri.clone())
-            .collect::<Vec<_>>();
         let source = staged.tabs[&plan.from].saved.clone();
         staged.prepare(&plan.from, &plan.to, &participants)?;
         let file = staged
             .workspace
-            .move_source_file(&plan.from, &plan.to, &source)
+            .move_source_file_with_references(&plan.from, &plan.to, &source, references)
             .map_err(|error| error.to_string())?;
         self.project
             .borrow_mut()

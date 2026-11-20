@@ -29,7 +29,7 @@ export const workspaceCatalog = {
 };
 
 export const fileMoveCatalog = {
-    ferroui_workspace_plan_xaml_move: tool('Review an XAML file move within its project. Returns the destination and exact before and after source for matching XAML, Rust, and Cargo build references.',
+    ferroui_workspace_plan_xaml_move: tool('Review an XAML file move within its project. Returns the destination and exact edits for XAML, Rust, Cargo builds, saved stage sets, and native scenarios.',
         { ...location, destination: path }, ['path', 'destination']),
     ferroui_workspace_move_xaml: tool('Apply a reviewed XAML file move and its source changes in one VS Code Undo step. Copy review from ferroui_workspace_plan_xaml_move.',
         { ...location, destination: path, review: revision }, ['path', 'destination', 'review'], true),
