@@ -1,6 +1,7 @@
 /* Tests of the C ABI of FerroUI, from C (docs/c-abi.md, section 9): status codes, the UI thread
- * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, frames,
- * and signals shared through memory (section 14). No
+ * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, getters
+ * with a fallback, timers, the data of the event being handled and the focus, frames, and signals
+ * shared through memory (section 14). No
  * window is opened: the thread is made the UI thread with ferro_init and driven with
  * ferro_run_jobs, so the tests run without a display and without the desktop platform.
  *
@@ -8,11 +9,13 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include <math.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "ferroui.h"
 
@@ -206,6 +209,97 @@ static void test_threads(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(shared_handle));
 }
 
+/* Getters that return the value, for languages that cannot pass a pointer to a result. */
+static void test_getters_with_a_fallback(void) {
+    FerroHandle text = create("TextBlock");
+    CHECK_STATUS(FERRO_OK, ferro_set_f64(text, prop("FontSize"), 17));
+    CHECK(ferro_get_f64_or(text, prop("FontSize"), -1) == 17);
+    CHECK(ferro_get_f64_or(text, prop("NoSuchProperty"), -1) == -1);
+    CHECK(ferro_last_error_code() == FERRO_NOT_FOUND);
+    CHECK_STATUS(FERRO_OK, ferro_set_i64(text, prop("Grid.Row"), 4));
+    CHECK(ferro_get_i64_or(text, prop("Grid.Row"), -1) == 4);
+    CHECK(ferro_get_i64_or(0, prop("Grid.Row"), -1) == -1);
+    CHECK(ferro_last_error_code() == FERRO_BAD_HANDLE);
+    CHECK_STATUS(FERRO_OK, ferro_set_bool(text, prop("IsEnabled"), false));
+    CHECK(!ferro_get_bool_or(text, prop("IsEnabled"), true));
+    CHECK(ferro_get_bool_or(text, prop("Text"), true));
+    CHECK(ferro_last_error_code() == FERRO_TYPE_MISMATCH);
+    ferro_release(text);
+}
+
+static int64_t ticks;
+static int64_t elapsed;
+
+static int64_t on_tick(int64_t token, int64_t microseconds) {
+    CHECK(ferro_is_ui_thread());
+    ticks++;
+    elapsed += microseconds;
+    /* The token is the number of ticks after which the timer stops itself. */
+    return ticks >= token ? 1 : 0;
+}
+
+static int64_t nothing(int64_t token) {
+    (void)token;
+    return 0;
+}
+
+/* Waits for `ms` milliseconds and runs the work of the UI thread, the timers that are due
+ * included. */
+static void run_for(long ms) {
+    struct timespec wait = {ms / 1000, (ms % 1000) * 1000000L};
+    nanosleep(&wait, NULL);
+    CHECK_STATUS(FERRO_OK, ferro_post(nothing, 0));
+    CHECK_STATUS(FERRO_OK, ferro_run_jobs());
+}
+
+static void test_timers(void) {
+    int64_t timer = ferro_timer_start(2, on_tick, 3);
+    CHECK(timer > 0);
+    for (int i = 0; i < 50 && ticks < 3; i++) {
+        run_for(10);
+    }
+    CHECK(ticks == 3);
+    CHECK(elapsed >= 3 * 2000);
+    run_for(20);
+    CHECK(ticks == 3);
+    CHECK_STATUS(FERRO_NOT_FOUND, ferro_timer_stop(timer));
+    timer = ferro_timer_start(1000, on_tick, 100);
+    CHECK(timer > 0);
+    CHECK_STATUS(FERRO_OK, ferro_timer_stop(timer));
+    CHECK(ferro_timer_start(0, on_tick, 0) == FERRO_INVALID_ARGUMENT);
+    CHECK(ferro_timer_start(10, NULL, 0) == FERRO_NULL_POINTER);
+}
+
+static int64_t event_data_in_click;
+
+static int64_t on_click_reads_event_data(int64_t token, FerroHandle sender, int64_t arg) {
+    (void)token;
+    (void)sender;
+    (void)arg;
+    /* A click carries no pointer position, no button and no key. */
+    if (isnan(ferro_event_x(0)) && ferro_last_error_code() == FERRO_NOT_SUPPORTED &&
+        ferro_event_button() == FERRO_NOT_SUPPORTED && ferro_event_key() == NULL) {
+        event_data_in_click++;
+    }
+    return 0;
+}
+
+static void test_event_data_and_focus(void) {
+    CHECK(isnan(ferro_event_y(0)));
+    CHECK(ferro_last_error_code() == FERRO_INVALID_STATE);
+    CHECK(ferro_event_button() == FERRO_INVALID_STATE);
+    CHECK(ferro_event_key() == NULL);
+    FerroHandle button = create("Button");
+    int64_t click = ferro_event_id("Click", -1);
+    CHECK(ferro_subscribe(button, click, on_click_reads_event_data, 0) > 0);
+    CHECK_STATUS(FERRO_OK, ferro_raise(button, click));
+    CHECK(event_data_in_click == 1);
+    /* Not in a window: no focus. */
+    CHECK_STATUS(FERRO_INVALID_STATE, ferro_focus(button));
+    CHECK_STATUS(FERRO_BAD_HANDLE, ferro_focus(0));
+    ferro_release(button);
+}
+
 static int64_t frame_tags;
 
 static int64_t on_frame_event(int64_t tag, FerroHandle sender, int64_t arg) {
@@ -340,6 +434,9 @@ int main(void) {
     test_values();
     test_tree_and_events();
     test_threads();
+    test_getters_with_a_fallback();
+    test_timers();
+    test_event_data_and_focus();
     test_frames();
     test_signals();
 

@@ -419,3 +419,95 @@ fn sync_context_exception_can_be_handled_with_post() {
     assert!(handled.get());
     assert!(executed.get());
 }
+
+/// The error of a job that fails without a panic (#567).
+#[derive(Debug, PartialEq)]
+struct JobFailed(&'static str);
+
+impl std::fmt::Display for JobFailed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "job failed: {}", self.0)
+    }
+}
+
+impl std::error::Error for JobFailed {}
+
+#[test]
+fn an_error_a_posted_job_returns_reaches_the_unhandled_exception_events_without_a_panic() {
+    let t = DispatcherTests::new();
+    let filtered = Rc::new(Cell::new(None::<String>));
+    let received = Rc::new(Cell::new(None::<String>));
+    let seen = filtered.clone();
+    t.ui_thread.unhandled_exception_filter(move |args| seen.set(args.exception_message().map(str::to_owned)));
+    let seen = received.clone();
+    t.ui_thread.unhandled_exception(move |args| {
+        let error = args.error().and_then(|error| error.downcast_ref::<JobFailed>());
+        assert_eq!(error, Some(&JobFailed("post")));
+        seen.set(args.exception_message().map(str::to_owned));
+        args.set_handled(true);
+    });
+
+    t.ui_thread.post_fallible(|| Err(JobFailed("post")), DispatcherPriority::NORMAL);
+    t.ui_thread.post_local_fallible(|| Ok::<(), JobFailed>(()), DispatcherPriority::NORMAL);
+    // Nothing unwinds: the handler handled the error.
+    t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+
+    assert_eq!(filtered.take().as_deref(), Some("job failed: post"));
+    assert_eq!(received.take().as_deref(), Some("job failed: post"));
+}
+
+#[test]
+fn an_error_no_handler_handles_unwinds_with_its_message_once() {
+    let t = DispatcherTests::new();
+    let calls = t.number_of_handler_on_unhandled_event_invoked.clone();
+    t.ui_thread.unhandled_exception(move |_| calls.set(calls.get() + 1));
+
+    let ui_thread = t.ui_thread.clone();
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        ui_thread.post_local_fallible(|| Err(JobFailed("local")), DispatcherPriority::NORMAL);
+        ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+    }));
+
+    // Under unwinding the message of the error leaves the dispatcher as the payload, without
+    // being filtered again on the way out; with `panic = "abort"` it ends the process.
+    let payload = result.expect_err("an unhandled error is fatal");
+    assert_eq!(message_of(&*payload), Some("job failed: local"));
+    assert_eq!(t.number_of_handler_on_unhandled_event_invoked.get(), 1);
+}
+
+#[test]
+fn an_error_raised_off_the_dispatcher_thread_is_posted_to_it() {
+    let t = DispatcherTests::new();
+    let received = Rc::new(Cell::new(None::<String>));
+    let seen = received.clone();
+    t.ui_thread.unhandled_exception(move |args| {
+        seen.set(args.exception_message().map(str::to_owned));
+        args.set_handled(true);
+    });
+
+    let ui_thread = t.ui_thread.clone();
+    thread::spawn(move || ui_thread.raise_unhandled_exception("raised on a worker")).join().unwrap();
+    assert_eq!(received.take(), None);
+    t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
+
+    assert_eq!(received.take().as_deref(), Some("raised on a worker"));
+}
+
+#[test]
+fn a_capture_returns_the_first_error_raised_while_it_runs_and_only_the_innermost_records_it() {
+    let t = DispatcherTests::new();
+    let outer = t.ui_thread.capture_unhandled_exceptions(|| {
+        let inner = t.ui_thread.capture_unhandled_exceptions(|| {
+            t.ui_thread.raise_unhandled_exception("first");
+            t.ui_thread.raise_unhandled_exception("second");
+            7
+        });
+        assert_eq!(inner, Err("first".to_owned()));
+        5
+    });
+    assert_eq!(outer, Ok(5));
+
+    // An exception another handler handled is not the error of the capture.
+    t.ui_thread.unhandled_exception(|args| args.set_handled(true));
+    assert_eq!(t.ui_thread.capture_unhandled_exceptions(|| t.ui_thread.raise_unhandled_exception("handled")), Ok(()));
+}

@@ -171,6 +171,37 @@ FerroStatus ferro_unsubscribe(int64_t subscription);
 - Nothing is allocated per event: the subscription remembers the handle of its sender, and a
   dispatch is a check of that handle and one indirect call.
 
+**Timers.** `ferro_timer_start(interval, function, token)` calls `function(token, elapsed)` on
+the UI thread every `interval` milliseconds, with the microseconds since the previous tick (or
+the start) as `elapsed`, through the `DispatcherTimer` of the framework; the function returns `0`
+to go on and any other value to stop. It returns a positive timer ID, and `ferro_timer_stop(id)`
+stops the timer (also from inside its own tick). A timer that stopped itself is gone after its
+last tick (`FERRO_NOT_FOUND`).
+
+```c
+typedef int64_t (*FerroTimerFn)(int64_t token, int64_t elapsed);
+int64_t ferro_timer_start(int64_t interval, FerroTimerFn function, int64_t token);
+FerroStatus ferro_timer_stop(int64_t timer);
+```
+
+**The data of the event being handled.** A handler receives scalars only. What a routed event
+carries beyond the routing state is read from inside its handler, while it runs:
+
+| Function | Returns | For |
+| --- | --- | --- |
+| `ferro_event_x(relative_to)`, `ferro_event_y(relative_to)` | the position of the pointer relative to a visual (`0`: the top level), NaN on a failure | pointer events, `Tapped`, `DoubleTapped` |
+| `ferro_event_button()` | the button a press or a release is about: `1` left, `2` right, `3` middle, `4`, `5` the extra buttons, `0` for a move | pointer events |
+| `ferro_event_key()` | the name of the member of `Key` (`Return`, which is also named `Enter`; `Escape`), owned by the library until the next call | `KeyDown`, `KeyUp` |
+
+Outside a handler they fail with `FERRO_INVALID_STATE`, and for an event without the data with
+`FERRO_NOT_SUPPORTED`. An event raised inside a handler is the current one while its own
+handlers run. `ferro_focus(object)` moves the keyboard focus to an input element
+(`FERRO_INVALID_STATE` when it cannot take it now, for instance before it is in a shown window:
+posting the call with `ferro_post` focuses it once it is).
+
+These are the calls the Osprey samples (section 6) needed beyond the core: each is general,
+none is specific to a language.
+
 **Application.** `ferro_app_run(options, on_start, token)` makes the thread the UI thread,
 sets up the platform of the operating system with the Fluent theme, calls `on_start(token)`,
 and runs the main loop until the last window shown with `ferro_show` closes or `ferro_quit`
@@ -224,6 +255,12 @@ int main(void) {
 
 The sample checks every status; the workflow `capi.yml` builds it and runs it for three
 seconds on macOS and under Xvfb on Linux.
+
+`samples/CApi/osprey` has the same hello world in Osprey, and the seven tasks of 7GUIs (Counter,
+Temperature Converter, Flight Booker, Timer, CRUD, Circle Drawer, Cells) as Osprey programs over
+the raw ABI: `extern fn` declarations, integer handles, named functions with tokens as
+callbacks, state in file-scope cells that effect handlers assign. Its README says how to build
+and run them and what each one does through the ABI.
 
 The functions the hello world needs are the subset #950 proposed for milestone 1 (with
 `ferro_init` and `ferro_last_error_code` beside them), and they are the core every other
@@ -281,6 +318,9 @@ machine: the numbers say how large the overhead is, not its exact value.
   thread for every kind of UI call, posted work, every setter and getter, the buffer of
   `ferro_get_str`, read-only and invalid values, children, events with tokens and with user
   data, bubbling and handled events, calls into the ABI from a handler, and the header.
+- The tests of the getters with a fallback, the timers, the data of the event being handled
+  (a pointer press and a key press raised with their arguments, a click without them) and the
+  focus are in `tests/osprey_tests.rs`.
 - `samples/CApi/abi_test.c` tests the same rules from C, with a POSIX thread for the thread
   rule, without a window or a display.
 

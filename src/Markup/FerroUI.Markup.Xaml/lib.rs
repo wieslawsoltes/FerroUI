@@ -81,31 +81,19 @@ macro_rules! identity_eq {
 pub(crate) use identity_eq;
 
 /// The equivalent of an exception thrown out of a member without an error
-/// channel and without a value to go on with: the error surfaces as a panic
-/// that carries its message, inside a scope of
-/// [`xaml_error_scope::with_xaml_errors`] too. Members that a load reaches
-/// use [`throw_or`] instead.
-pub(crate) fn throw<T>(result: Result<T, XamlLoadError>) -> T {
-    match result {
-        Ok(value) => value,
-        Err(error) => xaml_error_scope::throw(error),
-    }
-}
-
-/// The equivalent of an exception thrown out of a member without an error
 /// channel (a contract the framework calls, such as the build of a deferred
 /// resource or a template): inside a scope of
-/// [`xaml_error_scope::with_xaml_errors`] the error goes to the scope and the
-/// member returns `fallback()`, what it produces when there is nothing (no
-/// resource, no content); outside a scope it panics with the message of the
-/// error, as before (#567).
+/// [`xaml_error_scope::with_xaml_errors`] the error goes to the scope; outside
+/// one it goes to the dispatcher of the thread
+/// ([`xaml_error_scope::report_or_raise`]). The member returns `fallback()`,
+/// what it produces when there is nothing (no resource, no content) (#567).
 pub(crate) fn throw_or<T>(result: Result<T, XamlLoadError>, fallback: impl FnOnce() -> T) -> T {
     match result {
         Ok(value) => value,
-        Err(error) => match xaml_error_scope::report(error) {
-            Ok(()) => fallback(),
-            Err(error) => xaml_error_scope::throw(error),
-        },
+        Err(error) => {
+            xaml_error_scope::report_or_raise(error);
+            fallback()
+        }
     }
 }
 
