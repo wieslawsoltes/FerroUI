@@ -178,6 +178,14 @@ For a move that changes a generated Rust `build_…` name, build the owning pack
 
 The review includes saved stage sets and native scenario JSON, including unsaved edits to their open buffers. Stage sets use file URIs. Scenarios use paths relative to their own directory or absolute file paths. When a stage URI changes, its prototype scenario remap key follows it. A remap's path changes when it points to the moved file. The planner edits those values in their original JSON positions. Repair an incomplete draft that still has a relevant saved reference, or resolve a conflicting remap key, before reviewing the move again. [Studio workflow](../native-controls.md#move-an-xaml-file) · [MCP workflow](reference.md#move-an-xaml-file-with-mcp)
 
+### Existing Cargo groups that read files
+
+For a group that passes `std::fs::read_to_string` results to `XamlGroup::documents`, the review can follow a literal file path through immutable Rust bindings. It recognizes standard library imports, package-relative paths, and paths joined to `CARGO_MANIFEST_DIR`. Document tuples, arrays, and the group builder can have their own bindings. [SampleControls build script](../../../samples/SampleControls/build.rs) · [Class example](../../../src/FerroUI.Dialogs/build.rs)
+
+Review the physical input in **Changes**. Separately authored keys stay stable, including keys passed to `class_document`. When the key and path share one binding, a rename such as `New Card.xaml` keeps the space in the filesystem path and uses `New%20Card.xaml` at the compiled key and class selector. Run **Build Project XAML Schema** to also review any affected generated Rust names.
+
+If the selected build reports a key whose input cannot be traced, declare that input with the file-backed API below and rebuild the schema. A published alias can give a relative include a different base from its source file. If the review reports an unmapped compiled target, use an explicit resource URI or a registration with a compiler source mapping.
+
 ### Computed Cargo groups with file-backed registrations
 
 Declare the logical key and physical path separately with `xaml_document_file!`. Relative input paths start at the Cargo package directory. Pass the records selected by your build script to `XamlGroup::document_files`. Use the key in `class_document` when a group compiles an `x:Class`. The build watches the physical files and records the Rust declaration that supplied each one.

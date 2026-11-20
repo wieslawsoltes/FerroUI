@@ -262,13 +262,22 @@ impl RustMove<'_> {
         {
             return Ok(None);
         }
-        compiled_key(
+        let next = compiled_key(
             self.movement,
             self.destination,
             self.roots,
             &self.source_file.uri,
             &site.path,
-        )
+            site.shares_input_path,
+        )?;
+        if site.shares_input_path && next.is_some() {
+            let path =
+                retain_dot_prefix(input, relative_file_path(self.package, self.destination)?);
+            if next.as_ref() == Some(&path) {
+                return Ok(None);
+            }
+        }
+        Ok(next)
     }
 
     fn resource(&self, value: &str) -> Result<Option<String>> {
@@ -306,7 +315,14 @@ fn compiled_key(
     roots: &[PathBuf],
     script: &str,
     key: &str,
+    shares_input_path: bool,
 ) -> Result<Option<String>> {
+    if shares_input_path {
+        let relative = relative_file_path(&movement.package_root, destination)?;
+        return relative_asset_uri(&relative)
+            .map(Some)
+            .ok_or_else(|| LanguageError("The new compiled XAML key cannot be encoded".into()));
+    }
     for root in roots {
         let base = format!("{}/", file_uri(root)?);
         let resolved = resolve_uri(&base, key.trim_start_matches('/'))

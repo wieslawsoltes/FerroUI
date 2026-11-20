@@ -4,7 +4,7 @@ mod macros;
 mod tokens;
 pub use tokens::check_rust_rename_tokens;
 
-use self::build_script::{BuildScript, Site};
+use self::build_script::{BuildScript, DocumentInput, DocumentKey, Site};
 use self::macros::MacroSyntax;
 use crate::{ProjectError, Result};
 use proc_macro2::Span;
@@ -30,6 +30,9 @@ pub struct RustXamlPath {
     pub anchor: RustPathAnchor,
     /// A registration key can be checked against the actual file passed to `documents`.
     pub input: Option<(String, RustPathAnchor)>,
+    /// This key use and the file input share a Rust binding. Split them only when
+    /// their filesystem and URI spellings differ.
+    pub shares_input_path: bool,
     prefix: String,
 }
 
@@ -74,6 +77,7 @@ pub struct RustXamlRegistration {
     pub input: String,
     pub anchor: RustPathAnchor,
     pub exported: bool,
+    pub shares_input_path: bool,
 }
 
 impl RustXamlReferences {
@@ -132,10 +136,31 @@ struct Collector<'source> {
 }
 
 impl Collector<'_> {
-    fn included_file(&self, input: &Macro) -> Option<(String, RustPathAnchor)> {
-        let (value, anchor, prefix) = self.macros.include_path(input)?;
-        let value = value.value();
-        Some((value.strip_prefix(prefix)?.to_owned(), anchor))
+    fn input_file(&self, input: DocumentInput<'_>) -> Option<(String, RustPathAnchor)> {
+        match input {
+            DocumentInput::Include(input) => {
+                let (value, anchor, prefix) = self.macros.include_path(input)?;
+                Some((value.value().strip_prefix(prefix)?.to_owned(), anchor))
+            }
+            DocumentInput::Read(literal) => Some((literal.value(), RustPathAnchor::Package)),
+        }
+    }
+
+    fn record_key(&mut self, key: DocumentKey<'_>) {
+        let Some(input) = self.input_file(key.input) else {
+            return;
+        };
+        if let DocumentInput::Read(path) = key.input {
+            self.record(path, RustPathAnchor::Package, "", None);
+        }
+        if let Some(mut site) = self.path(key.literal, RustPathAnchor::XamlRoot, "", Some(input)) {
+            if key.shares_path {
+                let span = key.expression.span().byte_range();
+                site.range = self.offset + span.start..self.offset + span.end;
+                site.shares_input_path = true;
+            }
+            self.references.paths.push(site);
+        }
     }
 
     fn record(
@@ -173,6 +198,7 @@ impl Collector<'_> {
             path: path.to_owned(),
             anchor,
             input,
+            shares_input_path: false,
             prefix: prefix.to_owned(),
         })
     }
@@ -233,26 +259,23 @@ impl<'source> Visit<'source> for Collector<'source> {
 
     fn visit_expr_method_call(&mut self, call: &'source syn::ExprMethodCall) {
         if let Some(build) = &self.build {
-            let entries = build.paths(call);
+            let entries = build.paths(call, &self.macros);
             for entry in entries {
                 match entry {
                     Site::Path(literal, anchor) => self.record(literal, anchor, "", None),
                     Site::Root(literal) => self.references.xaml_roots.push(literal.value()),
                     Site::Discovery => self.references.discovers_xaml = true,
                     Site::FileDocuments => self.references.uses_file_documents = true,
-                    Site::Key(literal, input) => {
-                        if let Some(input) = self.included_file(input) {
-                            self.record(literal, RustPathAnchor::XamlRoot, "", Some(input));
-                        }
-                    }
-                    Site::Registration(module, key, input, exported) => {
-                        if let Some((input, anchor)) = self.included_file(input) {
+                    Site::Key(key) => self.record_key(key),
+                    Site::Registration(module, key, exported) => {
+                        if let Some((input, anchor)) = self.input_file(key.input) {
                             self.references.registrations.push(RustXamlRegistration {
                                 module: module.value(),
-                                key: key.value(),
+                                key: key.literal.value(),
                                 input,
                                 anchor,
                                 exported,
+                                shares_input_path: key.shares_path,
                             });
                         }
                     }
@@ -269,7 +292,7 @@ impl<'source> Visit<'source> for Collector<'source> {
         for statement in &block.stmts {
             self.visit_stmt(statement);
             if let (Some(build), Stmt::Local(local)) = (&mut self.build, statement) {
-                build.bind(local);
+                build.bind(local, &self.macros);
             }
         }
         if let Some(build) = &mut self.build {
@@ -356,6 +379,7 @@ mod tests {
                 input: "Xaml/Views/Card.xaml".into(),
                 anchor: RustPathAnchor::SourceFile,
                 exported: true,
+                shares_input_path: false,
             }]
         );
         let paths = references.paths;
@@ -399,6 +423,7 @@ mod tests {
                     input: "Physical.xaml".into(),
                     anchor: RustPathAnchor::SourceFile,
                     exported: false,
+                    shares_input_path: false,
                 },
                 RustXamlRegistration {
                     module: "customer_views".into(),
@@ -406,9 +431,79 @@ mod tests {
                     input: "Physical.xaml".into(),
                     anchor: RustPathAnchor::Package,
                     exported: true,
+                    shares_input_path: false,
                 },
             ]
         );
+    }
+
+    #[test]
+    fn cargo_reads_keep_paths_and_group_settings_at_their_declarations() {
+        let source = r##"
+        use ferroui_build::{Build, XamlGroup};
+        const DOCUMENT: &str = r#"Themes/Theme.xaml"#;
+        fn main() {
+            // 🧭 Check that the byte spans still address the original Rust.
+            let root = std::path::PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("manifest"));
+            let path = root.join(DOCUMENT);
+            let text = std::fs::read_to_string(&path).unwrap_or_else(|error| panic!("{error}"));
+            let entry = (DOCUMENT, text.as_str());
+            let documents = [entry];
+            let module = "themes";
+            let group = XamlGroup::new(module).documents(&documents).class_document(DOCUMENT);
+            let module = "other";
+            let documents = [("Unrelated.xaml", include_str!("Unrelated.xaml"))];
+            let DOCUMENT = "Shadowed.xaml";
+            Build::from_env().compile_group(group).run();
+        }
+        "##.replace('\n', "\r\n");
+        let references = RustXamlReferences::parse(&source, true).unwrap();
+        let [registration] = references.registrations.as_slice() else {
+            panic!("expected the captured registration");
+        };
+        assert_eq!(registration.module, "themes");
+        assert_eq!(registration.key, "Themes/Theme.xaml");
+        assert_eq!(registration.input, registration.key);
+        assert_eq!(registration.anchor, RustPathAnchor::Package);
+        assert!(registration.shares_input_path && registration.exported);
+        let exact_spans: Vec<_> = references
+            .paths
+            .iter()
+            .filter(|site| site.path == registration.input)
+            .map(|site| &source[site.range.clone()])
+            .collect();
+        assert_eq!(
+            exact_spans,
+            [r##"r#"Themes/Theme.xaml"#"##, "DOCUMENT", "DOCUMENT"]
+        );
+    }
+
+    #[test]
+    fn unverified_reads_do_not_supply_compiler_registrations() {
+        let source = r#"
+        use ferroui_build::{Build, XamlGroup};
+        mod std {}
+        fn main() {
+            ::std::env::set_current_dir("Themes").unwrap();
+            let shadowed = std::fs::read_to_string("Fake.xaml").unwrap();
+            let relative = ::std::fs::read_to_string("WrongRoot.xaml").unwrap();
+            let root = ::std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+            let fallback = ::std::fs::read_to_string(root.join("Other.xaml")).unwrap_or_else(|_| fallback_markup());
+            let known = ::std::fs::read_to_string(root.join("Themes/Real.xaml")).unwrap();
+            let documents = [
+                ("Fake.xaml", &shadowed),
+                ("WrongRoot.xaml", &relative),
+                ("Other.xaml", &fallback),
+                ("Real.xaml", &known),
+            ];
+            Build::from_env().compile_group(XamlGroup::new("views").documents(&documents)).run();
+        }
+        "#;
+        let references = RustXamlReferences::parse(source, true).unwrap();
+        let [registration] = references.registrations.as_slice() else {
+            panic!("expected the manifest-rooted read only");
+        };
+        assert_eq!(registration.input, "Themes/Real.xaml");
     }
 
     #[test]

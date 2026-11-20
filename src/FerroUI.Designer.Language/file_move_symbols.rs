@@ -1,13 +1,13 @@
 //! Calculate the next Rust entry points from an actual XAML compiler output.
 use super::{compiled_key, input_base, refers_to};
-use crate::{LanguageError, Position, Result, require};
+use crate::{require, LanguageError, Position, Result};
 use ferroui_build_scan::{
     compiled_index::CompiledXamlGroup,
-    compiled_names::{CompiledGroupKind, same_document_uri},
+    compiled_names::{same_document_uri, CompiledGroupKind},
 };
 use ferroui_designer_project::{
-    CompiledXamlOutput, RustXamlReferences, XamlFileMove, file_path, file_uri, relative_asset_path,
-    relative_asset_uri, relative_file_path,
+    file_path, file_uri, relative_asset_path, relative_asset_uri, relative_file_path,
+    CompiledXamlOutput, RustXamlReferences, XamlFileMove,
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -48,23 +48,48 @@ pub(super) fn plan(
                 keys.insert(from, to);
             }
         } else {
+            let mut mapped = BTreeSet::new();
             for entry in references
                 .registrations
                 .iter()
                 .filter(|entry| entry.module == group.module)
             {
-                if !input_base(&movement.package_root, script_path, entry.anchor)
-                    .is_some_and(|base| refers_to(base, &entry.input, &movement.from))
-                {
+                let Some(base) = input_base(&movement.package_root, script_path, entry.anchor)
+                else {
+                    continue;
+                };
+                let key = group_key(group.kind, &entry.key)?;
+                if !base.join(&entry.input).is_file() {
                     continue;
                 }
-                if let Some(next) = compiled_key(movement, &destination, roots, script, &entry.key)?
-                {
-                    keys.insert(
-                        group_key(group.kind, &entry.key)?,
-                        group_key(group.kind, &next)?,
-                    );
+                mapped.insert(key.clone());
+                if !refers_to(base, &entry.input, &movement.from) {
+                    continue;
                 }
+                if let Some(next) = compiled_key(
+                    movement,
+                    &destination,
+                    roots,
+                    script,
+                    &entry.key,
+                    entry.shares_input_path,
+                )? {
+                    keys.insert(key, group_key(group.kind, &next)?);
+                }
+            }
+            for member in group
+                .members
+                .iter()
+                .filter(|member| !mapped.contains(&member.key))
+            {
+                require(
+                    compiled_key(movement, &destination, roots, script, &member.key, false)?
+                        .is_none(),
+                    format!(
+                        "Cannot trace XAML key {} in Cargo group {} to a file input. Review the build's inputs or use a file-backed registration.",
+                        member.key, group.module
+                    ),
+                )?;
             }
         }
         let names = plan_group(group, &keys)?;

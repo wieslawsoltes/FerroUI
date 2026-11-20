@@ -85,6 +85,8 @@ An open **Preview Stages** card follows its source through the move, Undo, and R
 
 For explicit Cargo registrations, the review keeps authored URI aliases and rebases file-derived keys along with their literal XAML and Rust consumers. Build the owning package to load metadata for custom assembly names. [How the planner handles compiled addresses](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
+For an existing group built from `std::fs::read_to_string`, the review can follow a literal file path and immutable Rust bindings into `XamlGroup::documents`. Check the physical path and any changed registration key or class selector in **Proposed source**. [Supported Cargo file reads](vscode/authoring.md#existing-cargo-groups-that-read-files)
+
 For computed groups that use `XamlGroup::document_files`, Studio uses the selected build's input index to find the path declared in Rust. Review that path change in **Proposed source**. The published key and generated Rust names stay stable. Build the owning package again if Studio reports that a declaration shifted. [Declare file-backed Cargo inputs](vscode/authoring.md#computed-cargo-groups-with-file-backed-registrations)
 
 The canvas, Preview Stages, and prototype player use the compiled group's base for relative XAML includes with a recorded source. Apply, Undo, and Redo keep those references attached to the file. Studio reports conflicting targets when a source belongs to several groups that resolve the same include differently. [Relative include workflow](vscode/authoring.md#computed-cargo-groups-with-file-backed-registrations)

@@ -27,6 +27,7 @@ pub(crate) struct CompiledAddresses {
     generated_directory: Option<PathBuf>,
     pub(super) file_inputs: BTreeMap<String, Vec<CompiledXamlInput>>,
     pub(super) has_compiler_index: bool,
+    legacy_fixed_base: bool,
     file_class_keys: BTreeSet<String>,
     discovered_class_keys: BTreeSet<String>,
 }
@@ -96,7 +97,6 @@ impl CompiledAddresses {
         for registration in references
             .iter()
             .flat_map(|references| &references.registrations)
-            .filter(|item| item.exported)
         {
             let Some(base) = input_base(package, &script_path, registration.anchor) else {
                 continue;
@@ -108,16 +108,23 @@ impl CompiledAddresses {
             let Some(key) = address_key(&previous) else {
                 continue;
             };
-            if known_private(&catalog, registration, &key) {
-                continue;
-            }
             let next = if refers_to(base, &registration.input, &movement.from) {
-                compiled_key(movement, &destination, &roots, &script, &registration.key)?
-                    .map(|key| absolute(assembly, &key))
+                let next = compiled_key(
+                    movement,
+                    &destination,
+                    &roots,
+                    &script,
+                    &registration.key,
+                    registration.shares_input_path,
+                )?;
+                addresses.legacy_fixed_base |= next.is_none();
+                next.map(|key| absolute(assembly, &key))
             } else {
                 None
             };
-            addresses.insert_route(key, &previous, next)?;
+            if registration.exported && !known_private(&catalog, registration, &key) {
+                addresses.insert_route(key, &previous, next)?;
+            }
         }
         if let Some((_, project)) = schema {
             let manifest = package
@@ -194,8 +201,8 @@ impl CompiledAddresses {
         Ok(addresses)
     }
 
-    pub(crate) fn moves_file_input(&self) -> bool {
-        !self.file_inputs.is_empty()
+    pub(crate) fn preserves_compiled_base(&self) -> bool {
+        !self.file_inputs.is_empty() || self.legacy_fixed_base
     }
 
     pub(super) fn preserves_class_key(&self, key: &str) -> Result<bool> {

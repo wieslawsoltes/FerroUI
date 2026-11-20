@@ -37,6 +37,7 @@ fn compiled_project(
     let root = if discovery { "Themes" } else { "." };
     project.write("build.rs", &format!("use ferroui_build::{{Build, XamlGroup}};\nfn main() {{ Build::from_env().xaml_root({root:?}).compile_group({group}).run(); }}\n"));
     for key in keys {
+        fs::create_dir_all(project.0.join(key).parent().unwrap()).unwrap();
         project.write(key, &format!("<ResourceDictionary {NS} />"));
     }
     let directory = project.0.join("target/schema");
@@ -241,4 +242,169 @@ fn a_class_move_keeps_populate_and_reviews_internal_compilation_members() {
         plan.generated_rust[0].new_name,
         "build_themes_archive_a_xaml"
     );
+}
+
+#[test]
+fn cargo_file_read_moves_the_raw_path_and_the_escaped_compiler_key() {
+    let prior = "Themes/Card.xaml";
+    let (project, mut service, names) =
+        compiled_project(&[prior], CompiledGroupKind::Documents, false);
+    let source = r##"use ferroui_build::{Build, XamlGroup};
+const DOCUMENT: &str = r#"Themes/Card.xaml"#;
+fn main() {
+    // Preserve 🧭 diagnostics and Cargo's physical file watch.
+    let root = std::path::PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("manifest"));
+    let path = root.join(DOCUMENT);
+    println!("cargo::rerun-if-changed={}", path.display());
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|error| panic!("{error}"));
+    let views = [(DOCUMENT, text.as_str())];
+    Build::from_env().compile_group(XamlGroup::new("views").documents(&views)).run();
+}
+"##
+    .replace('\n', "\r\n");
+    project.write("build.rs", &source);
+    let uri = format!("ferres://customer_views/{prior}");
+    let xaml =
+        format!("<ResourceDictionary {NS}><ResourceInclude Source='{uri}'/></ResourceDictionary>");
+    project.write("Page.xaml", &xaml);
+    let rust = format!("const RESOURCE: &str = {uri:?};\r\n");
+    project.write("lib.rs", &rust);
+    project.index(&mut service);
+    for (path, key) in [
+        ("Themes/Archive/Client.xaml", "Themes/Archive/Client.xaml"),
+        (
+            "Themes/Archive/New Card.xaml",
+            "Themes/Archive/New%20Card.xaml",
+        ),
+    ] {
+        let review = service
+            .plan_file_move(&project.uri(prior), &project.uri(path))
+            .unwrap();
+        let after = |file| {
+            let uri = project.uri(file);
+            &review
+                .documents
+                .iter()
+                .find(|entry| entry.edit.uri == uri)
+                .unwrap()
+                .after
+        };
+        let mut expected = source.replace(prior, path);
+        if path != key {
+            expected = expected.replace("(DOCUMENT,", &format!("({key:?},"));
+        }
+        assert_eq!(after("build.rs"), &expected);
+        assert_eq!(after("Page.xaml"), &xaml.replace(prior, key));
+        assert_eq!(after("lib.rs"), &rust.replace(prior, key));
+        let [rename] = review.generated_rust.as_slice() else {
+            panic!("expected an exact generated declaration");
+        };
+        assert_eq!(rename.old_name, names[0]);
+        assert_eq!(
+            rename.new_name,
+            CompiledGroupKind::Documents.function_names([key])[0]
+        );
+    }
+}
+
+#[test]
+fn cargo_file_read_preserves_a_class_alias_and_checks_its_base() {
+    let alias = "Published/Card.xaml";
+    let (project, mut service, _) = compiled_project(&[alias], CompiledGroupKind::Class, false);
+    fs::remove_file(project.0.join(alias)).unwrap();
+    let source = r#"use std::{env, fs::read_to_string as read, path::PathBuf};
+use ferroui_build::{Build, XamlGroup};
+const KEY: &str = "Published/Card.xaml";
+const SOURCE: &str = "Themes/Card.xaml";
+fn main() {
+    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest"));
+    let text = read(root.join(SOURCE)).expect("valid XAML");
+    let group = XamlGroup::new("views").documents(&[(KEY, &text)]).class_document(KEY);
+    Build::from_env().compile_group(group).run();
+}
+"#;
+    project.write("build.rs", source);
+    project.write("Themes/Card.xaml", &format!("<ResourceDictionary {NS}/>"));
+    let from = project.uri("Themes/Card.xaml");
+    let to = project.uri("Themes/Archive/Card.xaml");
+    let review = service.plan_file_move(&from, &to).unwrap();
+    assert!(review.generated_rust.is_empty());
+    let [source_entry, script] = review.documents.as_slice() else {
+        panic!("expected exactly the moved file and the Cargo build");
+    };
+    assert_eq!(source_entry.edit.uri, from);
+    assert!(source_entry.edit.edits.is_empty());
+    assert_eq!(script.edit.uri, project.uri("build.rs"));
+    assert_eq!(
+        script.after,
+        source.replace("Themes/Card.xaml", "Themes/Archive/Card.xaml")
+    );
+
+    project.write("Themes/Colors.xaml", &format!("<ResourceDictionary {NS}/>"));
+    project.write(
+        "Themes/Card.xaml",
+        &format!(
+            "<ResourceDictionary {NS}><ResourceInclude Source='Colors.xaml'/></ResourceDictionary>"
+        ),
+    );
+    let error = service.plan_file_move(&from, &to).unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("does not map the compiled target"));
+}
+
+#[test]
+fn a_cargo_read_used_as_the_class_key_escapes_both_key_uses() {
+    let name = "Themes/Card.xaml";
+    let (project, mut service, _) = compiled_project(&[name], CompiledGroupKind::Class, false);
+    let source = r#"use ferroui_build::{Build, XamlGroup};
+const FILE: &str = "Themes/Card.xaml";
+fn main() {
+    let text = std::fs::read_to_string(FILE).unwrap();
+    Build::from_env()
+        .compile_group(XamlGroup::new("views").documents(&[(FILE, &text)]).class_document(FILE))
+        .run();
+}
+"#;
+    project.write("build.rs", source);
+    let review = service
+        .plan_file_move(&project.uri(name), &project.uri("Themes/New Card.xaml"))
+        .unwrap();
+    assert!(review.generated_rust.is_empty());
+    let script = review
+        .documents
+        .iter()
+        .find(|entry| entry.edit.uri == project.uri("build.rs"))
+        .unwrap();
+    assert_eq!(script.edit.edits.len(), 3);
+    assert_eq!(
+        script.after,
+        source
+            .replace(name, "Themes/New Card.xaml")
+            .replace("[(FILE,", "[(\"Themes/New%20Card.xaml\",")
+            .replace(
+                ".class_document(FILE)",
+                ".class_document(\"Themes/New%20Card.xaml\")"
+            )
+    );
+}
+
+#[test]
+fn an_indexed_key_with_an_opaque_cargo_input_requires_a_source_mapping() {
+    let key = "Themes/Card.xaml";
+    let (project, mut service, _) = compiled_project(&[key], CompiledGroupKind::Documents, false);
+    project.write(
+        "build.rs",
+        r#"use ferroui_build::{Build, XamlGroup};
+fn main() {
+    Build::from_env().compile_group(XamlGroup::new("views").documents(&files_from_helper())).run();
+}
+"#,
+    );
+    let error = service
+        .plan_file_move(&project.uri(key), &project.uri("Themes/Archive/Card.xaml"))
+        .unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("Cannot trace XAML key Themes/Card.xaml"));
 }

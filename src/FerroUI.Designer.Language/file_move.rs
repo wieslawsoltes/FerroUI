@@ -221,7 +221,7 @@ impl LanguageService {
             {
                 continue;
             }
-            if addresses.moves_file_input()
+            if addresses.preserves_compiled_base()
                 && !(path.starts_with('/') || path.contains(':'))
                 && file_path(owner).is_ok_and(|path| {
                     path.ancestors().skip(1).find(|parent| parent.join("Cargo.toml").is_file())

@@ -1,15 +1,34 @@
 //! Identify the authored FerroUI builders without inspecting generated Rust.
-use super::{string_literal, RustPathAnchor};
+mod groups;
+mod reads;
+
+use self::groups::{GroupInputs, GroupSpec};
+use self::reads::ReadPath;
+use super::{macros::MacroSyntax, string_literal, RustPathAnchor};
 use std::collections::BTreeMap;
 use syn::{Expr, ExprMethodCall, Item, LitStr, Local, Macro, Pat, UseTree};
 
 pub(super) enum Site<'source> {
     Path(&'source LitStr, RustPathAnchor),
-    Key(&'source LitStr, &'source Macro),
-    Registration(&'source LitStr, &'source LitStr, &'source Macro, bool),
+    Key(DocumentKey<'source>),
+    Registration(&'source LitStr, DocumentKey<'source>, bool),
     FileDocuments,
     Root(&'source LitStr),
     Discovery,
+}
+
+#[derive(Clone, Copy)]
+pub(super) enum DocumentInput<'source> {
+    Include(&'source Macro),
+    Read(&'source LitStr),
+}
+
+#[derive(Clone, Copy)]
+pub(super) struct DocumentKey<'source> {
+    pub literal: &'source LitStr,
+    pub expression: &'source Expr,
+    pub input: DocumentInput<'source>,
+    pub shares_path: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -18,10 +37,14 @@ enum Builder {
     Group,
 }
 
-#[derive(Clone, Copy)]
 struct Binding<'source> {
     value: Option<&'source Expr>,
     builder: Option<Builder>,
+    path: Option<ReadPath<'source>>,
+    read: Option<&'source LitStr>,
+    document: Option<DocumentKey<'source>>,
+    documents: Option<Vec<DocumentKey<'source>>>,
+    group: Option<GroupSpec<'source>>,
 }
 
 pub(super) struct BuildScript<'source> {
@@ -50,6 +73,11 @@ impl<'source> BuildScript<'source> {
                         Binding {
                             value: Some(&item.expr),
                             builder: None,
+                            path: string_literal(&item.expr).map(ReadPath::Literal),
+                            read: None,
+                            document: None,
+                            documents: None,
+                            group: None,
                         },
                     );
                 }
@@ -66,20 +94,22 @@ impl<'source> BuildScript<'source> {
         self.scopes.pop();
     }
 
-    pub(super) fn bind(&mut self, local: &'source Local) {
+    pub(super) fn bind(&mut self, local: &'source Local, macros: &MacroSyntax) {
         let mut pattern = &local.pat;
         if let Pat::Type(typed) = pattern {
             pattern = &typed.pat;
         }
         let Pat::Ident(name) = pattern else { return };
         let initial = local.init.as_ref().map(|init| transparent(&init.expr));
+        let fixed = initial.filter(|_| name.mutability.is_none());
         let binding = Binding {
-            value: if name.mutability.is_none() {
-                initial.map(|expr| self.value(expr))
-            } else {
-                None
-            },
+            value: fixed.map(|expr| self.value(expr)),
             builder: initial.and_then(|expr| self.builder(expr)),
+            path: fixed.and_then(|expr| self.read_path(expr, macros)),
+            read: fixed.and_then(|expr| self.read_source(expr, macros)),
+            document: fixed.and_then(|expr| self.document_key(expr, macros)),
+            documents: fixed.and_then(|expr| self.keys(expr, macros)),
+            group: fixed.and_then(|expr| self.group(expr, macros)),
         };
         self.scopes
             .last_mut()
@@ -87,7 +117,11 @@ impl<'source> BuildScript<'source> {
             .insert(name.ident.to_string(), binding);
     }
 
-    pub(super) fn paths(&self, call: &'source ExprMethodCall) -> Vec<Site<'source>> {
+    pub(super) fn paths(
+        &self,
+        call: &'source ExprMethodCall,
+        macros: &MacroSyntax,
+    ) -> Vec<Site<'source>> {
         let builder = self.builder(&call.receiver);
         if builder == Some(Builder::Build) && call.method == "compile_xaml" && call.args.is_empty()
         {
@@ -99,9 +133,9 @@ impl<'source> BuildScript<'source> {
         let value = self.value(argument);
         match (builder, call.method.to_string().as_str()) {
             (Some(Builder::Build), "compile_group")
-                if self.builder(value) == Some(Builder::Group) =>
+                if self.builder(argument) == Some(Builder::Group) =>
             {
-                self.compile_group(value)
+                self.compile_group(argument, macros)
             }
             (Some(Builder::Build), "input") => string_literal(value)
                 .map(|literal| Site::Path(literal, RustPathAnchor::Package))
@@ -111,27 +145,33 @@ impl<'source> BuildScript<'source> {
                 string_literal(value).map(Site::Root).into_iter().collect()
             }
             (Some(Builder::Group), "documents") => self
-                .keys(value)
+                .keys(argument, macros)
                 .into_iter()
-                .map(|(key, input)| Site::Key(key, input))
+                .flatten()
+                .map(Site::Key)
                 .collect(),
             (Some(Builder::Group), "document_files") => vec![Site::FileDocuments],
             (Some(Builder::Group), "class_document") => {
                 let Some(literal) = string_literal(value) else {
                     return Vec::new();
                 };
-                if let Some(documents) = self.documents(&call.receiver) {
-                    if documents.method == "document_files" {
-                        return Vec::new();
-                    }
-                    return self
-                        .keys(&documents.args[0])
+                match self.group(&call.receiver, macros).map(|group| group.inputs) {
+                    Some(GroupInputs::Inline(documents)) => documents
                         .into_iter()
-                        .filter(|(key, _)| key.value() == literal.value())
-                        .map(|(_, input)| Site::Key(literal, input))
-                        .collect();
+                        .filter(|key| key.literal.value() == literal.value())
+                        .map(|key| {
+                            Site::Key(DocumentKey {
+                                literal,
+                                expression: transparent(argument),
+                                ..key
+                            })
+                        })
+                        .collect(),
+                    Some(GroupInputs::Discovery) => {
+                        vec![Site::Path(literal, RustPathAnchor::XamlRoot)]
+                    }
+                    _ => Vec::new(),
                 }
-                vec![Site::Path(literal, RustPathAnchor::XamlRoot)]
             }
             _ => Vec::new(),
         }
@@ -172,78 +212,58 @@ impl<'source> BuildScript<'source> {
         }
     }
 
-    fn compile_group(&self, expression: &'source Expr) -> Vec<Site<'source>> {
-        let Some(documents) = self.documents(expression) else {
-            return vec![Site::Discovery];
-        };
-        if documents.method == "document_files" {
-            // The selected Cargo build records the inputs and logical aliases.
-            return Vec::new();
-        }
-        let mut exported = true;
-        for member in self.builder_chain(expression) {
-            match member {
-                Expr::MethodCall(call) if call.method == "internal" => exported = false,
-                Expr::Call(constructor) => {
-                    let module = constructor
-                        .args
-                        .first()
-                        .and_then(|arg| string_literal(self.value(arg)));
-                    return module.map_or_else(Vec::new, |module| {
-                        self.keys(&documents.args[0])
-                            .into_iter()
-                            .map(|(key, input)| Site::Registration(module, key, input, exported))
-                            .collect()
-                    });
-                }
-                _ => {}
+    fn keys(
+        &self,
+        value: &'source Expr,
+        macros: &MacroSyntax,
+    ) -> Option<Vec<DocumentKey<'source>>> {
+        if let Expr::Path(path) = transparent(value) {
+            if let Some(documents) = self.binding(path)?.documents.as_ref() {
+                return Some(documents.clone());
             }
         }
-        Vec::new()
-    }
-
-    fn documents(&self, expression: &'source Expr) -> Option<&'source ExprMethodCall> {
-        self.builder_chain(expression)
-            .find_map(|member| match member {
-                Expr::MethodCall(call)
-                    if (call.method == "documents" || call.method == "document_files")
-                        && call.args.len() == 1 =>
-                {
-                    Some(call)
-                }
-                _ => None,
-            })
-    }
-
-    fn builder_chain(&self, expression: &'source Expr) -> impl Iterator<Item = &'source Expr> + '_ {
-        std::iter::successors(Some(self.value(expression)), |member| match member {
-            Expr::MethodCall(call) => Some(self.value(&call.receiver)),
-            _ => None,
-        })
-        .take(128)
-    }
-
-    fn keys(&self, value: &'source Expr) -> Vec<(&'source LitStr, &'source Macro)> {
         let Expr::Array(array) = self.value(value) else {
-            return Vec::new();
+            return None;
         };
-        array
-            .elems
-            .iter()
-            .filter_map(|entry| {
-                let Expr::Tuple(pair) = self.value(entry) else {
-                    return None;
-                };
-                if pair.elems.len() != 2 {
-                    return None;
-                }
-                let key = string_literal(self.value(pair.elems.first()?))?;
-                let Expr::Macro(input) = self.value(pair.elems.last()?) else {
-                    return None;
-                };
-                Some((key, &input.mac))
-            })
-            .collect()
+        Some(
+            array
+                .elems
+                .iter()
+                .filter_map(|entry| self.document_key(entry, macros))
+                .collect(),
+        )
+    }
+
+    fn document_key(
+        &self,
+        value: &'source Expr,
+        macros: &MacroSyntax,
+    ) -> Option<DocumentKey<'source>> {
+        if let Expr::Path(path) = transparent(value) {
+            if let Some(document) = self.binding(path)?.document {
+                return Some(document);
+            }
+        }
+        let Expr::Tuple(pair) = self.value(value) else {
+            return None;
+        };
+        if pair.elems.len() != 2 {
+            return None;
+        }
+        let expression = transparent(pair.elems.first()?);
+        let literal = string_literal(self.value(expression))?;
+        let contents = pair.elems.last()?;
+        let input = match self.value(contents) {
+            Expr::Macro(input) => DocumentInput::Include(&input.mac),
+            _ => DocumentInput::Read(self.read_source(contents, macros)?),
+        };
+        let shares_path = matches!(input, DocumentInput::Read(path) if literal.span().byte_range() == path.span().byte_range());
+        Some(DocumentKey {
+            literal,
+            expression,
+            input,
+            shares_path,
+        })
     }
 
     fn value(&self, expression: &'source Expr) -> &'source Expr {
@@ -258,12 +278,9 @@ impl<'source> BuildScript<'source> {
         expression
     }
 
-    fn binding(&self, path: &syn::ExprPath) -> Option<Binding<'source>> {
+    fn binding(&self, path: &syn::ExprPath) -> Option<&Binding<'source>> {
         let name = path.path.get_ident()?.to_string();
-        self.scopes
-            .iter()
-            .rev()
-            .find_map(|scope| scope.get(&name).copied())
+        self.scopes.iter().rev().find_map(|scope| scope.get(&name))
     }
 }
 
