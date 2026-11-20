@@ -610,7 +610,8 @@ fn class_markup_is_reached_from_the_runtime_type() {
 #[test]
 fn class_info_parts_combine_in_any_order() {
     // The constructor of `new` is in the runtime type with the tables of types only.
-    assert_eq!(MetaPanel::TYPE.default_constructor().is_some(), cfg!(feature = "type-tables"));
+    let tables = cfg!(all(feature = "type-tables", not(ferroui_bounded_reflection)));
+    assert_eq!(MetaPanel::TYPE.default_constructor().is_some(), tables);
     assert!(<MetaPanel as crate::DefaultConstructible>::new_instance().is::<MetaPanel>());
     assert_eq!(MetaPanel::TYPE.interfaces().len(), 1);
     assert_eq!((MetaPanel::TYPE.interfaces()[0])(), ValueType::of::<Rc<dyn IMetaNamed>>());
