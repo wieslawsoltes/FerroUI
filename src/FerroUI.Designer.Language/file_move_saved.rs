@@ -39,27 +39,27 @@ pub(super) fn plan(
         let Some(source) = source else { continue };
         let manifest = match serde_json::from_str::<StageSet<'_>>(json_source(&source)) {
             Ok(manifest) => manifest,
-            Err(error) if file.kind == SavedDesignFile::Stages => {
-                if context.may_reference(&source) {
-                    return Err(invalid(uri, error));
-                }
-                continue;
-            }
             Err(error) => {
-                if is_scenario(&source) {
+                if file.kind == SavedDesignFile::Json && is_scenario(&source) {
                     scenarios.push((uri, file));
-                } else if version >= 0 && context.may_reference(&source) {
-                    // A generic .json filename can still identify a real stage
-                    // set or scenario when its open draft is incomplete.
-                    if snapshot(uri, file, &BTreeMap::new())?
-                        .1
-                        .is_some_and(|saved| {
-                            serde_json::from_str::<StageSet<'_>>(json_source(&saved)).is_ok()
-                                || is_scenario(&saved)
-                        })
-                    {
+                    continue;
+                }
+                let saved = saved_for_draft(uri, file, version)?;
+                let saved_stage = saved.as_deref().and_then(|text| {
+                    serde_json::from_str::<StageSet<'_>>(json_source(text))
+                        .ok()
+                        .map(|stage| (text, stage))
+                });
+                if file.kind == SavedDesignFile::Stages || saved_stage.is_some() {
+                    let references_move = match saved_stage {
+                        Some((text, stage)) => !context.stage_patches(text, stage)?.0.is_empty(),
+                        None => false,
+                    };
+                    if references_move || context.may_reference(&source) {
                         return Err(invalid(uri, error));
                     }
+                } else if saved.as_deref().is_some_and(is_scenario) {
+                    scenarios.push((uri, file));
                 }
                 continue;
             }
@@ -80,12 +80,28 @@ pub(super) fn plan(
     for (uri, file) in scenarios {
         let (version, source) = snapshot(uri, file, drafts)?;
         let Some(source) = source else { continue };
+        let base = file.path.parent().expect("an indexed file has a directory");
         let scenario = match serde_json::from_str::<Scenario<'_>>(json_source(&source)) {
             Ok(scenario) => scenario,
-            Err(error) if context.may_reference(&source) => return Err(invalid(uri, error)),
-            Err(_) => continue,
+            Err(error) => {
+                if context.may_reference(&source)
+                    || saved_for_draft(uri, file, version)?.is_some_and(|saved| {
+                        let Ok(case) = serde_json::from_str::<Scenario<'_>>(json_source(&saved))
+                        else {
+                            return false;
+                        };
+                        let keys = case.moved_stage_keys(base, &stage_keys);
+                        match context.scenario_patches(uri, base, &saved, case, keys) {
+                            Ok(patches) => !patches.is_empty(),
+                            Err(_) => keys.is_some() || context.may_reference(&saved),
+                        }
+                    })
+                {
+                    return Err(invalid(uri, error));
+                }
+                continue;
+            }
         };
-        let base = file.path.parent().expect("an indexed file has a directory");
         let keys = scenario.moved_stage_keys(base, &stage_keys);
         let patches = match context.scenario_patches(uri, base, &source, scenario, keys) {
             Ok(patches) => patches,
@@ -143,6 +159,18 @@ fn snapshot<'a>(
         }
         return Ok((draft.version, Some(Cow::Borrowed(&draft.source))));
     }
+    Ok((-1, saved_text(uri, file)?.map(Cow::Owned)))
+}
+
+fn saved_for_draft(uri: &str, file: &Candidate<'_>, version: i64) -> Result<Option<String>> {
+    if version >= 0 {
+        saved_text(uri, file)
+    } else {
+        Ok(None)
+    }
+}
+
+fn saved_text(uri: &str, file: &Candidate<'_>) -> Result<Option<String>> {
     let path = file.workspace.resolve_path(uri)?;
     let mut text = String::new();
     let open = File::open(path).map_err(|error| LanguageError(error.to_string()))?;
@@ -152,17 +180,17 @@ fn snapshot<'a>(
         .len()
         > SAVED_FILE_LIMIT as u64
     {
-        return Ok((-1, None));
+        return Ok(None);
     }
     match open
         .take((SAVED_FILE_LIMIT + 1) as u64)
         .read_to_string(&mut text)
     {
-        Ok(size) if size <= SAVED_FILE_LIMIT => Ok((-1, Some(Cow::Owned(text)))),
-        Ok(_) => Ok((-1, None)),
+        Ok(size) if size <= SAVED_FILE_LIMIT => Ok(Some(text)),
+        Ok(_) => Ok(None),
         Err(error) if file.kind == SavedDesignFile::Json => {
             if error.kind() == std::io::ErrorKind::InvalidData {
-                return Ok((-1, None));
+                return Ok(None);
             }
             Err(LanguageError(error.to_string()))
         }

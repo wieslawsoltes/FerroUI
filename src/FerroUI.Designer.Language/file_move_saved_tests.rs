@@ -111,18 +111,46 @@ fn rejects_remap_collisions_and_incomplete_saved_design_drafts() {
     project.write(label, &format!("<Border {NS}/>"));
     let board = stage_set(&from);
     project.write("review.json", &board);
+    let scenario = json!({
+        "version":1, "name":"Review","document":"Fallback.xaml",
+        "prototype":{"stageSet":"review.json","flow":"Review","sources":{
+            (&from):{"path":"Fallback.xaml"}
+        }},
+        "steps":[{"action":"expectStage", "name":"Review"}]
+    })
+    .to_string();
+    for file in ["Scenario.ferroui-scenario.json", "Scenario.json"] {
+        project.write(file, &scenario);
+    }
+    project.write("Settings.json", r#"{"unrelated":true}"#);
     let mut service = LanguageService::default();
     project.index(&mut service);
-    let broken = FileMoveDraft {
-        uri: project.uri("review.json"),
-        version: 3,
-        source: format!("{board}\n{{"),
+    for file in [
+        "review.json",
+        "Scenario.ferroui-scenario.json",
+        "Scenario.json",
+    ] {
+        let broken = FileMoveDraft {
+            uri: project.uri(file),
+            version: 3,
+            source: "{\"version\": 1,\n".into(),
+        };
+        let error = service
+            .plan_file_move_with_drafts(&from, &to, &[broken])
+            .unwrap_err();
+        assert!(
+            error.0.contains("Repair") && error.0.contains(file),
+            "{error}"
+        );
+    }
+    let unrelated = FileMoveDraft {
+        uri: project.uri("Settings.json"),
+        version: 4,
+        source: format!(r#"{{"note":"{label}","#),
     };
     assert!(service
-        .plan_file_move_with_drafts(&from, &to, &[broken])
-        .unwrap_err()
-        .0
-        .contains("Repair"));
+        .plan_file_move_with_drafts(&from, &to, &[unrelated])
+        .is_ok());
 
     project.write(
         "Conflict.ferroui-scenario.json",
