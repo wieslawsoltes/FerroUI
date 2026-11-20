@@ -281,12 +281,16 @@ jobs:
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-  # The HelloWorld samples (docs/binary-size.md, section 3.6), hello_window, the WinUI theme gallery
-  # and the catalog on macOS, each built by itself as an application is, with the release and the
-  # dist profile: the size of the executable as cargo writes it and stripped, and for the release
-  # profile the breakdown by crate of the symbol table (`scripts/symsize.py`).
+  # The HelloWorld samples (docs/binary-size.md, section 3.6), hello_window, the declarative TodoMVC,
+  # the WinUI theme gallery and the catalog on macOS, each built by itself as an application is, with
+  # the release and the dist profile: the size of the executable as cargo writes it, stripped, and
+  # its machine code (`__TEXT,__text`), and for the release profile the breakdown by crate of the
+  # symbol table (`scripts/symsize.py`) and the unstripped executables of the hello worlds and of
+  # TodoMVC as an artifact (for `scripts/symsize.py` and `nm` on another machine). With a
+  # baseline, the baseline is measured the same way in a job of its own: sizes do not depend on
+  # the machine.
   macos-samples:
-    name: Executable sizes (macOS, ${{ matrix.profile }})
+    name: Executable sizes (macOS, ${{ matrix.profile }}, ${{ matrix.side }})
     if: inputs.samples
     runs-on: macos-15
     timeout-minutes: 240
@@ -294,24 +298,31 @@ jobs:
       fail-fast: false
       matrix:
         profile: [release, dist]
+        side: [ref, baseline]
+    env:
+      MEASURE: ${{ matrix.side == 'ref' || inputs.baseline != '' }}
+      SIDE_REF: ${{ matrix.side == 'ref' && inputs.ref || inputs.baseline }}
     steps:
       - name: Check out the ref
+        if: env.MEASURE == 'true'
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ env.SIDE_REF }}
       - uses: dtolnay/rust-toolchain@stable
+        if: env.MEASURE == 'true'
       - name: Build and measure
+        if: env.MEASURE == 'true'
         env:
           PROFILE: ${{ matrix.profile }}
-          REF: ${{ inputs.ref }}
+          SIDE: ${{ matrix.side }}
         run: |
           {
-            echo "## macOS: \`$REF\` at \`$(git rev-parse HEAD)\`, profile \`$PROFILE\` (MB: as written, stripped)"
+            echo "## macOS, $SIDE: \`$SIDE_REF\` at \`$(git rev-parse HEAD)\`, profile \`$PROFILE\` (MB: as written, stripped, \`__TEXT,__text\`)"
             echo
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           mkdir -p measured
-          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks winui-theme-gallery control-catalog-desktop; do
+          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks todo-mvc winui-theme-gallery control-catalog-desktop; do
             case "$app" in
               hello_window) cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window; file="target/$PROFILE/examples/hello_window" ;;
               *) cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"; file="target/$PROFILE/$app" ;;
@@ -319,13 +330,15 @@ jobs:
             cp "$file" "measured/$app"
             strip -o "measured/$app.stripped" "measured/$app"
             raw=$(stat -f %z "measured/$app"); stripped=$(stat -f %z "measured/$app.stripped")
-            printf '%-28s %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+            text=$(size -m "measured/$app" | awk '/Section __text:/ { print $3; exit }')
+            printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
+              "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Breakdown by crate
-        if: matrix.profile == 'release'
+        if: env.MEASURE == 'true' && matrix.profile == 'release'
         run: |
-          for app in hello_window hello-world hello-world-builders control-catalog-desktop; do
+          for app in hello_window hello-world hello-world-builders todo-mvc control-catalog-desktop; do
             {
               echo "### $app, release, by crate"
               echo
@@ -334,4 +347,15 @@ jobs:
               echo '```'
             } | tee -a "$GITHUB_STEP_SUMMARY"
           done
+      - name: Keep the executables
+        if: env.MEASURE == 'true' && matrix.profile == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: executables-release-${{ matrix.side }}
+          path: |
+            measured/hello-world
+            measured/hello-world-builders
+            measured/todo-mvc
+          retention-days: 7
+          if-no-files-found: ignore
 

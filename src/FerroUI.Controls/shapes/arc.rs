@@ -31,58 +31,43 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Arc: FerroObjectImpl);
 
+/// What the geometry of an arc is, by its angles and its size.
+enum ArcFigure {
+    /// A complete ring: an ellipse in the rectangle.
+    Ring(Rect),
+    /// No sweep: an empty stream geometry.
+    Empty,
+    /// A partial arc: one figure of an elliptic arc.
+    Partial { start_point: Point, end_point: Point, radius: Size, is_large_arc: bool },
+}
+
 impl ShapeImpl for Arc {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
-        let angle1 = MathUtilities::deg2rad(this.start_angle());
-        let angle2 = angle1 + MathUtilities::deg2rad(this.sweep_angle());
-
-        let start_angle = f64::min(angle1, angle2);
-        let sweep_angle = f64::max(angle1, angle2);
-
-        let norm_start = Self::rad_to_norm_rad(start_angle);
-        let norm_end = Self::rad_to_norm_rad(sweep_angle);
-
-        let rect = Rect::from_size(this.bounds().size());
-
-        if norm_start == norm_end && start_angle != sweep_angle {
-            // Complete ring.
-            Some(EllipseGeometry::with_rect(rect.deflate(this.stroke_thickness() / 2.0)).upcast())
-        } else if this.sweep_angle() == 0.0 {
-            Some(StreamGeometry::new().upcast())
-        } else {
-            // Partial arc.
-            let deflated_rect = rect.deflate(this.stroke_thickness() / 2.0);
-
-            let center_x = rect.center().x;
-            let center_y = rect.center().y;
-
-            let radius_x = deflated_rect.width / 2.0;
-            let radius_y = deflated_rect.height / 2.0;
-
-            let angle_gap = Self::rad_to_norm_rad(sweep_angle - start_angle);
-
-            let start_point = Self::get_ring_point(radius_x, radius_y, center_x, center_y, start_angle);
-            let end_point = Self::get_ring_point(radius_x, radius_y, center_x, center_y, sweep_angle);
-
-            let arc_geometry = StreamGeometry::new();
-
-            {
-                let mut context = arc_geometry.open();
-                context.begin_figure(start_point, false);
-                context.arc_to(
-                    end_point,
-                    Size::new(radius_x, radius_y),
-                    0.0,
-                    angle_gap >= PI,
-                    SweepDirection::Clockwise,
-                    true,
-                );
-                context.end_figure(false);
-                context.dispose();
+        Some(match this.figure() {
+            ArcFigure::Ring(rect) => EllipseGeometry::with_rect(rect).upcast(),
+            figure => {
+                let geometry = StreamGeometry::new();
+                Self::write(&geometry, figure);
+                geometry.upcast()
             }
+        })
+    }
 
-            Some(arc_geometry.upcast())
+    /// The ellipse of a ring takes the rectangle, and the stream geometry of a partial or an
+    /// empty arc is written again (#805); a ring that becomes an arc, or the other way, makes
+    /// another geometry.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        match this.figure() {
+            ArcFigure::Ring(rect) => {
+                let Some(ellipse) = geometry.cast::<EllipseGeometry>() else { return false };
+                ellipse.set_rect(rect);
+            }
+            figure => {
+                let Some(stream) = geometry.cast::<StreamGeometry>() else { return false };
+                Self::write(&stream, figure);
+            }
         }
+        true
     }
 }
 
@@ -144,6 +129,58 @@ impl Arc {
     /// counter-clockwise.
     pub fn set_sweep_angle(&self, value: f64) {
         self.set_value(Self::sweep_angle_property(), value)
+    }
+
+    /// What the geometry of the arc is now.
+    fn figure(&self) -> ArcFigure {
+        let angle1 = MathUtilities::deg2rad(self.start_angle());
+        let angle2 = angle1 + MathUtilities::deg2rad(self.sweep_angle());
+
+        let start_angle = f64::min(angle1, angle2);
+        let sweep_angle = f64::max(angle1, angle2);
+
+        let norm_start = Self::rad_to_norm_rad(start_angle);
+        let norm_end = Self::rad_to_norm_rad(sweep_angle);
+
+        let rect = Rect::from_size(self.bounds().size());
+
+        if norm_start == norm_end && start_angle != sweep_angle {
+            // Complete ring.
+            return ArcFigure::Ring(rect.deflate(self.stroke_thickness() / 2.0));
+        }
+        if self.sweep_angle() == 0.0 {
+            return ArcFigure::Empty;
+        }
+
+        // Partial arc.
+        let deflated_rect = rect.deflate(self.stroke_thickness() / 2.0);
+
+        let center_x = rect.center().x;
+        let center_y = rect.center().y;
+
+        let radius_x = deflated_rect.width / 2.0;
+        let radius_y = deflated_rect.height / 2.0;
+
+        let angle_gap = Self::rad_to_norm_rad(sweep_angle - start_angle);
+
+        ArcFigure::Partial {
+            start_point: Self::get_ring_point(radius_x, radius_y, center_x, center_y, start_angle),
+            end_point: Self::get_ring_point(radius_x, radius_y, center_x, center_y, sweep_angle),
+            radius: Size::new(radius_x, radius_y),
+            is_large_arc: angle_gap >= PI,
+        }
+    }
+
+    /// Writes the figures of a partial or an empty arc into `geometry`, in place of the ones it
+    /// has.
+    fn write(geometry: &StreamGeometry, figure: ArcFigure) {
+        let mut context = geometry.reopen();
+        if let ArcFigure::Partial { start_point, end_point, radius, is_large_arc } = figure {
+            context.begin_figure(start_point, false);
+            context.arc_to(end_point, radius, 0.0, is_large_arc, SweepDirection::Clockwise, true);
+            context.end_figure(false);
+        }
+        context.dispose();
     }
 
     fn rad_to_norm_rad(in_angle: f64) -> f64 {
