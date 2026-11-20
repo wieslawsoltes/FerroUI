@@ -1,0 +1,17 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            Background="#FFF5F8FC" Spacing="14" Margin="20">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Templates/ControlTemplates.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <ControlTemplate x:Key="InputOnly" TargetType="TextBox">
+        <Border Background="#FFE3E9F1"><TextPresenter x:Name="PART_TextPresenter" /></Border>
+      </ControlTemplate>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <TextBlock Text="Actions" FontSize="24" Foreground="#FF1F3043" />
+  <Button Name="SharedAction" Height="52" Template="{StaticResource SharedButton}" Content="Continue" />
+  <Button Name="PlainAction" Height="48" Content="Plain action" />
+</StackPanel>

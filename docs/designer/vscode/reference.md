@@ -86,6 +86,8 @@ Indices start at zero. The move index is the column’s place in the resulting l
 
 On Studio’s server, call `designer_item_templates` and `designer_item_template` directly. For `expected_revision`, pass the Studio document revision. [Authoring guide](authoring.md#edit-item-and-cell-templates)
 
+For a control template, pass `property: "Template"` in the query and in each action. The query returns the control's authored assignment and the compatible resources. Use the same `preview`, assignment, copy, creation, reset, and stale-model checks. [Control template workflow](authoring.md#edit-a-control-template)
+
 ### Edit styles and palettes with MCP
 
 Use these tools directly in Designer Studio. In VS Code, pass the tool name and arguments through `designer_studio_query` for reads or `designer_studio_edit` for writes. Pass the current editor revision to VS Code and the current document revision to a direct Studio write.

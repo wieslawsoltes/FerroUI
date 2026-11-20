@@ -5,7 +5,7 @@ use crate::{
 use ferroui_designer_core::{Edit, NodeKind};
 use ferroui_designer_language::relocate_xaml_fragment;
 use ferroui_designer_tools::{
-    IncludedResourceDocument, ItemTemplateChange, ItemTemplateSlot, ItemTemplateValue,
+    IncludedResourceDocument, ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot, ItemTemplateValue,
     ResourceCopySources, ToolError,
 };
 
@@ -23,6 +23,16 @@ impl DesignerSession {
         slot: &ItemTemplateSlot,
     ) -> Result<Vec<Edit>, String> {
         let document = self.document();
+        if slot.property == ItemTemplateMember::Template {
+            let source = if let Some(definition) = slot.value.definition() {
+                document.ast().node(definition).map(|node| (document, node))
+            } else if let ItemTemplateValue::Resource { key, .. } = &slot.value {
+                self.included_template_node(slot.owner, key, slot.property, None)?.map(|(include, node)| (&include.document, node))
+            } else { None };
+            if !source.is_some_and(|(document, template)| self.control_template_matches(slot.owner, document, template)) {
+                return Err("Choose a compatible control template before making an inline copy".into());
+            }
+        }
         if slot.can_copy_inline(document) {
             return slot
                 .plan(document, ItemTemplateChange::CopyInline)

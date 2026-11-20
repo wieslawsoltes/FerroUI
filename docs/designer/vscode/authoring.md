@@ -349,6 +349,16 @@ The contextual editor covers authored XAML item, selection box, menu item, cell,
 
 ![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
 
+## Edit a control template
+
+1. Select a control that exposes a writable `Template` property. Choose **Edit control template** beside its name in **Properties**, or run **FerroUI: Edit Control Template**.
+2. Use **Edit Template on Canvas** to open its authored inline or shared XAML `ControlTemplate`. The canvas previews the template for the selected control. An included template opens in the dictionary that owns it. Use the back arrow to return to the consumer.
+3. Choose **Assign Template Resource…** to use a visible control template with a compatible `TargetType`. **Make Inline Copy** gives this instance a private template and carries across the dependencies its scope needs. **Create Inline Template** uses the selected control's `TargetType` and scaffolds its registered required parts. **Reset Template** returns to the control's default template.
+
+Use Undo in the owning XAML buffer to revert an edit. If the control assigns a template with an authored expression, **Reveal Template Assignment** opens the expression in source. [Designer Studio workflow](../native-controls.md#edit-control-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+
+Try **SharedAction** and **PlainAction** in [ControlTemplateWorkbench.xaml](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml). The shared button opens its dictionary's template. The plain button can start an inline template.
+
 The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
 
 ## Reuse snippets and design tokens

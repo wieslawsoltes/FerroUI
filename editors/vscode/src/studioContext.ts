@@ -61,8 +61,9 @@ export class StudioContext {
         const document = await vscode.workspace.openTextDocument(uri);
         this.ensure();
         const selection = exactRange(document, source.range);
-        if (!['DataTemplate', 'TreeDataTemplate'].includes(document.getText(selection).split(':').at(-1) ?? '')) {
-            throw new Error('The template declaration changed. Reopen Item Templates.');
+        const kinds = source.property === 'Template' ? ['ControlTemplate'] : ['DataTemplate', 'TreeDataTemplate'];
+        if (!kinds.includes(document.getText(selection).split(':').at(-1) ?? '')) {
+            throw new Error('The template declaration changed. Reopen the template editor.');
         }
         await vscode.window.showTextDocument(document, { selection, preview: false });
     }

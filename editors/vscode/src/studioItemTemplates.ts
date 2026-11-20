@@ -36,14 +36,17 @@ const templateLabels = {
     MenuItemTemplate: 'Menu item template',
     CellTemplate: 'Cell template',
     CellEditingTemplate: 'Cell editing template',
+    Template: 'Control template',
 };
 const tool = 'designer_item_template';
 
-export async function editItemTemplates(context: StudioContext, node: number): Promise<void> {
+export async function editItemTemplates(context: StudioContext, node: number, member?: 'Template'): Promise<void> {
     if (!context.writable) throw new Error('Open the template closure in its Rust source.');
-    if (!context.panel.supportsItemTemplates) throw new Error('Use a FerroUI preview helper with item template authoring support.');
-    const model = await context.read<TemplateModel>('designer_item_templates', { node });
-    if (!model.slots.length) throw new Error('Select a control or column with an item template.');
+    if (member ? !context.panel.supportsControlTemplate : !context.panel.supportsItemTemplates) {
+        throw new Error('Update the FerroUI preview helper to edit this template.');
+    }
+    const model = await context.read<TemplateModel>('designer_item_templates', member ? { node, property: member } : { node });
+    if (!model.slots.length) throw new Error('Select a control or column with a supported template property.');
     const slot = model.slots.length === 1 ? model.slots[0] : (await choose('Choose an Item Template', model.slots.map(slot => ({
         label: `$(symbol-structure) ${templateLabels[slot.property]}`, description: description(slot.value), slot,
     }))))?.slot;
@@ -87,7 +90,7 @@ export async function editItemTemplates(context: StudioContext, node: number): P
             available.push({
                 label: '$(library) Assign Template Resource…',
                 run: async () => {
-                    const picked = await choose('Assign a Visible Data Template', resources);
+                    const picked = await choose(member ? 'Assign a Visible Control Template' : 'Assign a Visible Data Template', resources);
                     if (picked) await context.edit(tool, { ...args, ...picked.arguments });
                 },
             });

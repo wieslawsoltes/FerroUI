@@ -63,6 +63,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.selectionWrapping, 'The installed preview negotiates selection wrapping');
         assert.ok(native.capabilities.columnAuthoring, 'The installed preview negotiates table column editing');
         assert.ok(native.capabilities.itemTemplateAuthoring, 'The installed preview negotiates item template editing');
+        assert.ok(native.capabilities.controlTemplateAuthoring, 'The installed preview negotiates control template editing');
         assert.ok(native.capabilities.propertyTrace, 'The installed preview negotiates property value traces');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');

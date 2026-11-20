@@ -22,6 +22,7 @@ pub(crate) fn initialize() -> Value {
         "selectionWrapping",
         "columnAuthoring",
         "itemTemplateAuthoring",
+        "controlTemplateAuthoring",
         "propertyTrace",
         "styleComposition",
         "projectInventory",

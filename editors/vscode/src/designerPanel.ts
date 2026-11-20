@@ -31,6 +31,7 @@ interface Frame {
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
     itemTemplateAuthoring: boolean;
+    controlTemplateAuthoring: boolean;
     propertyTrace: boolean;
     styleComposition: boolean;
     timelineRecording: boolean;
@@ -227,6 +228,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
+    get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
     get supportsStyleComposition(): boolean { return Boolean(this.frame?.styleComposition); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
@@ -787,6 +789,7 @@ export class DesignerPanel implements vscode.Disposable {
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(client.capabilities.columnAuthoring),
                 itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
+                controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
                 styleComposition: Boolean(client.capabilities.styleComposition),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),

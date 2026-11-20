@@ -150,6 +150,12 @@
         "icon": "$(symbol-structure)"
       },
       {
+        "command": "ferroui.editControlTemplate",
+        "title": "Edit Control Template",
+        "category": "FerroUI",
+        "icon": "$(layout)"
+      },
+      {
         "command": "ferroui.columns.add",
         "title": "Add Column",
         "icon": "$(add)"

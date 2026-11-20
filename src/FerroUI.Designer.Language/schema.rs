@@ -315,6 +315,17 @@ impl Schema {
             .or_else(|| self.type_info(base, None))
     }
 
+    pub fn type_assignable_to(&self, actual: &TypeInfo, expected: &TypeInfo) -> bool {
+        let mut seen = BTreeSet::new();
+        let mut current = Some(actual);
+        while let Some(info) = current {
+            if info.namespace == expected.namespace && info.name == expected.name { return true; }
+            if !seen.insert((&info.namespace, &info.name)) { return false; }
+            current = self.base_type(info);
+        }
+        false
+    }
+
     fn member(&self, owner: &str, namespace: Option<&str>, name: &str) -> Option<&PropertyInfo> {
         let mut next = self.type_info(owner, namespace);
         let mut seen = BTreeSet::new();

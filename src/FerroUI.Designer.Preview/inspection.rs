@@ -31,6 +31,8 @@ pub(crate) struct Inspection {
     pub(crate) events: Vec<EventField>,
     #[serde(rename = "itemTemplates")]
     pub(crate) item_templates: bool,
+    #[serde(rename = "controlTemplate")]
+    pub(crate) control_template: bool,
 }
 
 pub(crate) fn inspect(
@@ -55,6 +57,7 @@ pub(crate) fn inspect(
                 events: event_fields(&design, element)?,
                 item_templates: design.rsx.is_none() && session.as_ref()
                     .is_some_and(|session| !session.item_template_members(node).is_empty()),
+                control_template: design.rsx.is_none() && session.as_ref().is_some_and(|session| session.has_control_template(node)),
             })
         }
         InspectionTarget::Selection { ref nodes } => {
@@ -73,7 +76,7 @@ pub(crate) fn inspect(
             for fields in fields {
                 crate::property_fields::intersect(&mut properties, fields?);
             }
-            Ok(Inspection { properties, events: Vec::new(), item_templates: false })
+            Ok(Inspection { properties, events: Vec::new(), item_templates: false, control_template: false })
         }
         InspectionTarget::Runtime { id } => {
             let properties = stage
@@ -85,6 +88,7 @@ pub(crate) fn inspect(
                 properties: properties.iter().map(runtime_property).collect(),
                 events: Vec::new(),
                 item_templates: false,
+                control_template: false,
             })
         }
     }

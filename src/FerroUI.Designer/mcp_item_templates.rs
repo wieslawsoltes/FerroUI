@@ -2,7 +2,7 @@ use super::selection_workflows::{accepted_report, require_model};
 use super::{decode, node_id, schema as s, state};
 use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember, item_template_resources};
+use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember};
 use serde_json::{Value, json};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
@@ -14,7 +14,7 @@ pub(super) fn handles(name: &str) -> bool {
 }
 
 pub(super) fn tools() -> Vec<Value> {
-    let properties = json!({"enum":ItemTemplateMember::ALL});
+    let properties = json!({"enum":ItemTemplateMember::AUTHORABLE});
     let arguments = json!({"node":s::id(),"property":properties,"expected_model":s::string()});
     let mut assign = arguments.clone();
     assign["resource"] = s::id();
@@ -24,13 +24,13 @@ pub(super) fn tools() -> Vec<Value> {
     vec![
         s::tool(
             QUERY,
-            "Read an authored control or column's template slots, source ranges, local and included definitions, and assignable resources. Use the returned model for item template actions.",
-            s::object(json!({"node":s::id()}), &["node"]),
+            "Read an authored control or column's data template slots. Pass property Template for its control template slot. Use the returned model to open or change the authored template.",
+            s::object(json!({"node":s::id(),"property":{"const":"Template"}}), &["node"]),
             false,
         ),
         s::actions(
             ACTION,
-            "Open a native item template preview or create, assign, copy or reset an authored XAML template. Preview changes no source. Each source edit is one undo step and checks the accepted model and revision.",
+            "Open a native template preview or create, assign, copy or reset an authored XAML template. Use property Template for a control template. Each source edit is one undo step and checks the accepted model and revision.",
             vec![
                 s::action("preview", arguments.clone(), &required, true),
                 s::action("create_inline", arguments.clone(), &required, true),
@@ -55,7 +55,8 @@ pub(super) fn call(
     args: &Value,
 ) -> Result<Value, String> {
     let node = node_id(args, "node")?;
-    let report = report(session, node)?;
+    let control = args["property"] == "Template";
+    let report = report(session, node, control)?;
     if name == QUERY {
         return Ok(report);
     }
@@ -75,13 +76,14 @@ pub(super) fn call(
     Ok(state(session))
 }
 
-fn report(session: &DesignerSession, node: u64) -> Result<Value, String> {
+fn report(session: &DesignerSession, node: u64, control: bool) -> Result<Value, String> {
     let document = session.document();
-    let slots = session.item_template_slots(node)?;
+    let member = if control { ItemTemplateMember::Template } else { ItemTemplateMember::ItemTemplate };
+    let slots = if control { vec![session.item_template_slot(node, member)?] } else { session.item_template_slots(node)? };
     let (resources, included_resources) = if slots.iter().any(|slot| slot.reason.is_none()) {
         (
-            item_template_resources(document, node).map_err(|error| error.to_string())?,
-            session.included_template_resources(node)?,
+            session.local_template_resources(node, member)?,
+            session.included_template_resources(node, member)?,
         )
     } else {
         (Vec::new(), Vec::new())

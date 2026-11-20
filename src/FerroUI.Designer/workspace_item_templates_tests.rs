@@ -10,6 +10,63 @@ use ferroui_markup_xaml::FromXamlObject;
 const SOURCE: &str = include_str!("../../editors/vscode/test/fixtures/ItemTemplatesWorkbench.xaml");
 
 #[test]
+fn studio_control_template_actions_use_the_selected_control_and_compatible_resources() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        <StackPanel.Resources>
+            <ResourceDictionary>
+                <ControlTemplate x:Key="FromBase" TargetType="ContentControl"><Border /></ControlTemplate>
+                <ControlTemplate x:Key="InputOnly" TargetType="TextBox"><Border><TextPresenter x:Name="PART_TextPresenter" /></Border></ControlTemplate>
+            </ResourceDictionary>
+        </StackPanel.Resources>
+        <Button Name="Action" Content="Continue" />
+        <TextBox Name="Input" Text="Customer name" />
+    </StackPanel>"#;
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let window = Window::new();
+    window.set_width(1100.0);
+    window.set_height(750.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let owner = session.borrow().document().ast().find_name("Action").unwrap();
+    let property = ItemTemplateMember::Template;
+    let choices = session.borrow().local_template_resources(owner, property).unwrap();
+    assert_eq!(choices.iter().map(|choice| choice.key.as_str()).collect::<Vec<_>>(), ["FromBase"]);
+    session.borrow_mut().select([owner]);
+    workspace.refresh(true);
+    let slot = session.borrow().item_template_slot(owner, property).unwrap();
+    assert!(slot.reason.is_none(), "{:?}: {:?}", slot.reason, session.borrow().preview_status());
+    let anchor = workspace.control().get_control::<Button>("EditItemTemplates");
+    assert!(anchor.is_visible());
+    let flyout = anchor.flyout().and_then(|value| value.cast::<Flyout>()).unwrap();
+    flyout.show_at(&anchor);
+    let body = Ref::<Control>::from_xaml_object(&flyout.content().unwrap()).unwrap();
+    let create = body.get_logical_descendants().find(|control| {
+        AutomationProperties::get_name(control).as_deref() == Some("Create inline template")
+    }).and_then(|control| control.cast::<Button>()).unwrap();
+    create.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    let mut session = session.borrow_mut();
+    assert!(matches!(session.item_template_slot(owner, property).unwrap().value, ItemTemplateValue::Inline { .. }));
+    session.preview_item_template(owner, property).unwrap();
+    assert_eq!(session.definition_scope().unwrap().options.target_type.as_deref(), Some("Button"));
+    session.exit_definition_scope().unwrap();
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
+    let input = session.document().ast().find_name("Input").unwrap();
+    session.edit_item_template(input, property, ItemTemplateChange::CreateInline).unwrap();
+    let scaffold = session.item_template_slot(input, property).unwrap().value.definition().unwrap();
+    assert!(session.document().ast().subtree(scaffold).any(|node| node.xaml_name() == Some("PART_TextPresenter")));
+    assert!(session.can_manipulate(), "{:?}", session.preview_status());
+    session.preview_item_template(input, property).unwrap();
+    assert_eq!(session.definition_scope().unwrap().options.target_type.as_deref(), Some("TextBox"));
+    drop(session);
+    flyout.hide();
+    window.close();
+}
+
+#[test]
 fn item_template_scope_uses_the_selected_fixture_and_restores_the_list_selection() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let host = ContentControl::new();

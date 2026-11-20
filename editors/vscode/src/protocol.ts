@@ -132,7 +132,7 @@ export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };
 export type InspectionTarget = { type: 'source'; node: number } | { type: 'selection'; nodes: number[] } | { type: 'runtime'; id: number };
 export type PropertyTraceTarget = Exclude<InspectionTarget, { type: 'selection' }>;
-export interface Inspection { properties: PropertyField[]; events: EventField[]; itemTemplates?: boolean }
+export interface Inspection { properties: PropertyField[]; events: EventField[]; itemTemplates?: boolean; controlTemplate?: boolean }
 export interface OutlineNode {
     id: number;
     parent: number | null;
@@ -189,13 +189,15 @@ export interface PropertiesState {
     frame?: FrameTarget;
     fields?: PropertyField[];
     itemTemplates?: boolean;
+    controlTemplate?: boolean;
     propertyTrace?: boolean;
     selectionCount?: number;
     recordingTime?: number;
 }
 export type PropertyAuthoring =
     | { action: 'binding' | 'promoteResource' | 'brush'; property: string }
-    | { action: 'itemTemplate' };
+    | { action: 'itemTemplate' }
+    | { action: 'controlTemplate' };
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }

@@ -19,11 +19,11 @@ pub mod token_handoff;
 pub use canvas_guide_edit::{CanvasGuideDraft, CanvasGuideEdit, CanvasGuideUpdate};
 pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasRuler, CanvasSnapPreferences, ruler_ticks};
 pub use components::{
-    ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
+    ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference, ControlTemplatePart,
     ComponentResourceContext, ComponentResourceLocation, ComponentResourceResolution,
     ComponentResourceSources, IncludedResourceDocument, ItemTemplateChange, ItemTemplateDeclaration,
     ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot, ItemTemplateValue, ResourceCopySources, item_template_resources,
-    keyed_item_template,
+    keyed_item_template, keyed_template, template_resources,
     component_fragment,
     component_property_attribute, component_property_elements, component_property_extractable,
     component_property_object, component_property_resource_owners,

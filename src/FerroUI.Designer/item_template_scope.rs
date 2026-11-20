@@ -51,19 +51,17 @@ impl DesignerSession {
                 let Some(current) = remap(*owner) else {
                     return Ok(false);
                 };
-                if !self.item_template_slots(current)?.into_iter().any(|slot| {
-                    slot.property == *property && slot.value.definition() == Some(definition)
-                }) {
+                if !self.item_template_slot(current, *property).is_ok_and(|slot| slot.value.definition() == Some(definition)) {
                     return Ok(false);
                 }
                 *owner = current;
             }
-            ItemTemplatePreview::Included { key, .. } => {
+            ItemTemplatePreview::Included { key, property, .. } => {
                 if self
                     .document()
                     .ast()
                     .node(definition)
-                    .and_then(ferroui_designer_tools::keyed_item_template)
+                    .and_then(|node| ferroui_designer_tools::keyed_template(node, *property))
                     .as_ref()
                     != Some(key)
                 {

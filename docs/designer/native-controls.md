@@ -178,6 +178,12 @@ The canvas uses the first item from the selected design fixture when the items b
 
 For a template supplied by a workspace dictionary include, the canvas and source icons open its owning document tab. The canvas starts with the consuming view's selected fixture. Edit and undo definition changes in the dictionary tab, then use **Return to document** to inspect the consuming view. The picker includes reliably resolved templates and shows their dictionary's filename. [VS Code workflow](vscode/authoring.md#edit-item-and-cell-templates) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
 
+## Edit control templates
+
+Select an XAML control with a writable `Template` property. Choose **Edit templates** in the property inspector and use the **Control Template** section. Open the assigned template on the canvas, reveal its source, or choose a visible resource that matches the control's type. An included definition opens in its original dictionary and uses its authored resource scope.
+
+**Create inline template** starts a template with the control's type and its registered required parts. **Make inline copy** duplicates the assigned template and carries across the resources needed by the copy. **Reset template** removes the local assignment. Studio records each source change as one Undo step. [VS Code workflow](vscode/authoring.md#edit-a-control-template) · [MCP workflow](vscode/reference.md#edit-item-templates-with-mcp)
+
 ## Contextual panel layout
 
 The property dock's Layout section shows the selected panel, or the common parent panel of

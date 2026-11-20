@@ -99,7 +99,9 @@ export class DesignerWorkbench implements vscode.Disposable {
                     throw new Error('Select one control in the current preview to edit an authored property.');
                 }
                 const context = new StudioContext(panel, target.token, () => this.active === panel);
-                if (authoring.action === 'itemTemplate') await editItemTemplates(context, target.node);
+                if (authoring.action === 'itemTemplate' || authoring.action === 'controlTemplate') {
+                    await editItemTemplates(context, target.node, authoring.action === 'controlTemplate' ? 'Template' : undefined);
+                }
                 else if (authoring.action === 'binding') await editBinding(context, target.node, authoring.property);
                 else if (authoring.action === 'promoteResource') await promoteResource(context, target.node, authoring.property);
                 else await editBrush(context, target.node, authoring.property);
@@ -141,6 +143,16 @@ export class DesignerWorkbench implements vscode.Disposable {
                 if (vscode.workspace.getWorkspaceFolder(panel.document.uri)?.uri.toString() === folder.uri.toString()) panel.configure();
             }
         };
+        const editTemplates = async (member?: 'Template') => {
+            try {
+                const panel = this.active;
+                const token = panel?.currentToken;
+                if (!panel || token === undefined || panel.status || panel.selectedIds.length !== 1) {
+                    throw new Error('Select one control or column in the current FerroUI designer.');
+                }
+                await editItemTemplates(new StudioContext(panel, token, () => this.active === panel), panel.selectedIds[0], member);
+            } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        };
         this.subscriptions = [
             snippets, snippets.onDidCreate(refreshToolbox), snippets.onDidChange(refreshToolbox), snippets.onDidDelete(refreshToolbox),
             xaml, xaml.onDidCreate(refreshResources), xaml.onDidChange(refreshResources), xaml.onDidDelete(refreshResources),
@@ -179,16 +191,8 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showColumns', () => {
                 if (this.columns.available) return this.showDock(COLUMNS_VIEW);
             }),
-            vscode.commands.registerCommand('ferroui.editItemTemplates', async () => {
-                try {
-                    const panel = this.active;
-                    const token = panel?.currentToken;
-                    if (!panel || token === undefined || panel.status || panel.selectedIds.length !== 1) {
-                        throw new Error('Select one control or column in the current FerroUI designer.');
-                    }
-                    await editItemTemplates(new StudioContext(panel, token, () => this.active === panel), panel.selectedIds[0]);
-                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
-            }),
+            vscode.commands.registerCommand('ferroui.editItemTemplates', () => editTemplates()),
+            vscode.commands.registerCommand('ferroui.editControlTemplate', () => editTemplates('Template')),
             vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
                 try {
                     const editor = vscode.window.activeTextEditor;
@@ -505,6 +509,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             frame,
             fields: inspection.data?.properties,
             itemTemplates: inspection.data?.itemTemplates,
+            controlTemplate: inspection.data?.controlTemplate,
             propertyTrace: panel?.supportsPropertyTrace,
             target: panel && node && token !== undefined && !panel.status
                 ? { session: panel.session, token, node: node.id, selection: [...panel.selectedIds] } : undefined,

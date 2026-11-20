@@ -224,6 +224,7 @@ export function propertiesHtml(webview: vscode.Webview, root: vscode.Uri): strin
             ${icon('symbol-field')}
             <div><strong id="control-type"></strong><code id="control-name"></code></div>
             ${tool('edit-item-templates', 'symbol-structure', 'Edit item templates', 'hidden')}
+            ${tool('edit-control-template', 'layout', 'Edit control template', 'hidden')}
         </header>
         <dl id="property-metrics" class="property-metrics" aria-label="Measured artboard bounds" title="Measured bounds in artboard units" hidden>
             <div><dt>X</dt><dd data-metric="x"></dd></div><div><dt>Y</dt><dd data-metric="y"></dd></div>

@@ -1,7 +1,22 @@
 //! Source-preserving edits for a checked item template declaration.
 use super::*;
 
+pub struct ControlTemplatePart<'a> {
+    pub name: &'a str,
+    pub type_name: &'a str,
+    pub namespace: &'a str,
+}
+
 impl ItemTemplateSlot {
+    pub fn plan_control_template(&self, document: &Document, parts: &[ControlTemplatePart<'_>]) -> Result<Vec<Edit>> {
+        self.ensure_editable()?;
+        require(self.property == ItemTemplateMember::Template && matches!(self.value, ItemTemplateValue::Unset),
+            "Reset the current control template or make an inline copy")?;
+        let owner = element(document, self.owner)?;
+        let source = starter(document, owner, self.property, parts);
+        validated(document, vec![insert(owner, self.property.name(), &source)])
+    }
+
     pub fn plan(&self, document: &Document, change: ItemTemplateChange) -> Result<Vec<Edit>> {
         self.ensure_editable()?;
         let owner = element(document, self.owner)?;
@@ -15,17 +30,17 @@ impl ItemTemplateSlot {
                 )?;
             }
             ItemTemplateChange::CreateInline => {
+                require(self.property != ItemTemplateMember::Template, "Create a control template from its registered parts")?;
                 require(
                     matches!(self.value, ItemTemplateValue::Unset),
                     "Reset the current template or make an inline copy",
                 )?;
-                edits.push(insert(owner, property, &starter(document, owner.id)));
+                edits.push(insert(owner, property, &starter(document, owner, self.property, &[])));
             }
             ItemTemplateChange::AssignResource { resource } => {
                 let node = element(document, resource)?;
-                let key = literal_key(node)
-                    .filter(|_| is_template(node))
-                    .ok_or_else(|| ToolError("Select an authored data template resource".into()))?;
+                let key = keyed_template(node, self.property)
+                    .ok_or_else(|| ToolError("Select an authored resource compatible with this template property".into()))?;
                 require(
                     resolve_component_resource(document, owner.id, &key) == Some(resource),
                     "The template resource is hidden or ambiguous in this item's scope",
@@ -88,21 +103,34 @@ impl ItemTemplateSlot {
     }
 }
 
-fn starter(document: &Document, owner: NodeId) -> String {
-    let namespaces = document.ast().namespaces(owner);
-    let Some((prefix, _)) = namespaces.iter().find(|(_, uri)| uri.as_str() == FRAMEWORK) else {
-        return format!(
-            "<DataTemplate xmlns=\"{FRAMEWORK}\"><TextBlock Text=\"{{Binding}}\" /></DataTemplate>"
-        );
+fn starter(document: &Document, owner: &Node, property: ItemTemplateMember, parts: &[ControlTemplatePart<'_>]) -> String {
+    let namespaces = document.ast().namespaces(owner.id);
+    let authored = namespaces.iter().find(|(_, uri)| uri.as_str() == FRAMEWORK);
+    let (prefix, namespace) = match authored {
+        Some((prefix, _)) if prefix.is_empty() => (String::new(), String::new()),
+        Some((prefix, _)) => (format!("{prefix}:"), String::new()),
+        None if property == ItemTemplateMember::Template => {
+            let prefix = (0..).map(|index| format!("fu{index}"))
+                .find(|prefix| !namespaces.contains_key(prefix)).expect("finite authored namespaces");
+            (format!("{prefix}:"), format!(" xmlns:{prefix}=\"{FRAMEWORK}\""))
+        }
+        None => (String::new(), format!(" xmlns=\"{FRAMEWORK}\"")),
     };
-    let prefix = if prefix.is_empty() {
-        String::new()
+    if property == ItemTemplateMember::Template {
+        let body = if parts.is_empty() {
+            format!("<{prefix}Border />")
+        } else {
+            let mut body = format!("<{prefix}Grid xmlns:x=\"{XAML}\">");
+            for part in parts {
+                body.push_str(&format!("<{} xmlns=\"using:{}\" x:Name=\"{}\" />", part.type_name, part.namespace, part.name));
+            }
+            body.push_str(&format!("</{prefix}Grid>"));
+            body
+        };
+        format!("<{prefix}ControlTemplate{namespace} TargetType=\"{}\">{body}</{prefix}ControlTemplate>", owner.name)
     } else {
-        format!("{prefix}:")
-    };
-    format!(
-        "<{prefix}DataTemplate><{prefix}TextBlock Text=\"{{{prefix}Binding}}\" /></{prefix}DataTemplate>"
-    )
+        format!("<{prefix}DataTemplate{namespace}><{prefix}TextBlock Text=\"{{{prefix}Binding}}\" /></{prefix}DataTemplate>")
+    }
 }
 
 fn insert(owner: &Node, property: &str, source: &str) -> Edit {

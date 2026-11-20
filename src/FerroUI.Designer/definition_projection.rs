@@ -529,7 +529,7 @@ fn property_children<'a>(
         })
         .map_err(|error| error.to_string())
 }
-fn target_type(
+pub(crate) fn target_type(
     document: &Document,
     node: &Node,
     explicit: Option<&str>,

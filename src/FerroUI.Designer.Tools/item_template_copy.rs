@@ -43,7 +43,7 @@ impl ItemTemplateSlot {
                 ToolError("Open the accepted template source before copying it.".into())
             })?;
         require(
-            keyed_item_template(element(include.document, root.node)?).as_ref() == Some(key),
+            keyed_template(element(include.document, root.node)?, self.property).as_ref() == Some(key),
             "The assigned source is no longer a template.",
         )?;
 

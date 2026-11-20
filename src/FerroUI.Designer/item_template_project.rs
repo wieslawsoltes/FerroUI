@@ -8,8 +8,8 @@ use ferroui_designer_core::{
 };
 use ferroui_designer_project::PreviewInclude;
 use ferroui_designer_tools::{
-    component_resource_location, keyed_item_template, ComponentResourceContext, ItemTemplateSlot,
-    ItemTemplateValue,
+    component_resource_location, keyed_template, ComponentResourceContext, ItemTemplateMember,
+    ItemTemplateSlot, ItemTemplateValue,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -20,6 +20,8 @@ pub(crate) struct IncludedItemTemplate {
     #[serde(flatten)]
     pub location: IncludedSource,
     pub key: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub property: Option<ItemTemplateMember>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -28,6 +30,8 @@ pub(crate) struct IncludedTemplatePreview {
     pub source: IncludedItemTemplate,
     pub sample: Option<DesignFixture>,
     pub consumer: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_type: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -39,7 +43,7 @@ pub(crate) struct IncludedTemplateChoice {
 impl IncludedItemTemplate {
     pub fn node_in(&self, document: &Document, uri: &str) -> Result<(NodeId, SourceSpan), String> {
         let node = self.location.node_in(document, uri)?;
-        if keyed_item_template(node).as_ref() != Some(&self.key) {
+        if keyed_template(node, self.property.unwrap_or(ItemTemplateMember::ItemTemplate)).as_ref() != Some(&self.key) {
             return Err("The template declaration changed.".into());
         }
         Ok((node.id, node.name_span))
@@ -47,18 +51,20 @@ impl IncludedItemTemplate {
 }
 
 impl DesignerSession {
-    pub(crate) fn included_template(
+    fn included_template(
         &self,
         owner: NodeId,
         key: &str,
+        property: ItemTemplateMember,
         theme: Option<&ComponentResourceContext>,
     ) -> Result<Option<IncludedItemTemplate>, String> {
-        let Some((source, node)) = self.included_template_node(owner, key, theme)? else {
+        let Some((source, node)) = self.included_template_node(owner, key, property, theme)? else {
             return Ok(None);
         };
         Ok(Some(IncludedItemTemplate {
             location: IncludedSourceIndex::new(source).locate(node)?,
             key: key.to_owned(),
+            property: (property == ItemTemplateMember::Template).then_some(property),
         }))
     }
 
@@ -66,6 +72,7 @@ impl DesignerSession {
         &self,
         owner: NodeId,
         key: &str,
+        property: ItemTemplateMember,
         theme: Option<&ComponentResourceContext>,
     ) -> Result<Option<(&PreviewInclude, &ferroui_designer_core::Node)>, String> {
         let document = self.document();
@@ -89,7 +96,8 @@ impl DesignerSession {
             .document
             .ast()
             .node(location.node)
-            .filter(|node| keyed_item_template(node).as_deref() == Some(key))
+            .filter(|node| keyed_template(node, property).as_deref() == Some(key)
+                && (property != ItemTemplateMember::Template || self.control_template_matches(owner, &source.document, node)))
             .map(|node| (source, node)))
     }
 
@@ -103,6 +111,7 @@ impl DesignerSession {
         self.included_template(
             slot.owner,
             key,
+            slot.property,
             self.component_resource_context(slot.owner).as_ref(),
         )
     }
@@ -110,6 +119,7 @@ impl DesignerSession {
     pub(crate) fn included_template_resources(
         &self,
         owner: NodeId,
+        property: ItemTemplateMember,
     ) -> Result<Vec<IncludedTemplateChoice>, String> {
         let Some(includes) = self.accepted_preview_includes() else {
             return Ok(Vec::new());
@@ -121,12 +131,12 @@ impl DesignerSession {
                     .document
                     .ast()
                     .elements()
-                    .filter_map(keyed_item_template)
+                    .filter_map(move |node| keyed_template(node, property))
             })
             .collect::<BTreeSet<_>>();
         keys.into_iter()
             .filter_map(|key| {
-                self.included_template_node(owner, &key, None)
+                self.included_template_node(owner, &key, property, None)
                     .map(|found| {
                         found.map(|(source, _)| IncludedTemplateChoice {
                             uri: source.uri.clone(),
@@ -155,10 +165,16 @@ impl DesignerSession {
         } else {
             None
         };
+        let target_type = if slot.property == ItemTemplateMember::Template {
+            let (included, node) = self.included_template_node(slot.owner, &source.key, slot.property,
+                self.component_resource_context(slot.owner).as_ref())?.ok_or("The control template source changed")?;
+            self.template_preview_options(slot.owner, slot.property, &included.document, node.id)?.target_type
+        } else { None };
         Ok(Some(IncludedTemplatePreview {
             source,
             sample,
             consumer: self.document_uri().to_owned(),
+            target_type,
         }))
     }
 
@@ -185,8 +201,9 @@ impl DesignerSession {
             key: target.source.key,
             sample: target.sample,
             consumer: target.consumer,
+            property: target.source.property.unwrap_or(ItemTemplateMember::ItemTemplate),
         };
-        self.enter_definition(node, DefinitionPreviewOptions::default(), Some(item))
+        self.enter_definition(node, DefinitionPreviewOptions { target_type: target.target_type, ..DefinitionPreviewOptions::default() }, Some(item))
     }
 
     pub(crate) fn included_template_consumer(&self) -> Option<&str> {

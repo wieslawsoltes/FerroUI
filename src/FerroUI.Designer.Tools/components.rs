@@ -31,8 +31,8 @@ pub use resource_graph::{
 };
 pub use resource_copy::ResourceCopySources;
 pub use item_templates::{
-    ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
-    ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template,
+    ControlTemplatePart, ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
+    ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template, keyed_template, template_resources,
 };
 
 /// Build a scope-qualified StaticResource/DynamicResource expression without treating

@@ -380,7 +380,7 @@
             <Button Name="EditColumns" Grid.Column="3" Classes="nav" IsVisible="False" Padding="5,3" ToolTip.Tip="Edit columns" AutomationProperties.Name="Edit columns">
               <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M1 1H15V15H1Z M2.5 5V13.5H5V5Z M6.5 5V13.5H9.5V5Z M11 5V13.5H13.5V5Z" />
             </Button>
-            <Button Name="EditItemTemplates" Grid.Column="4" Classes="nav" IsVisible="False" Padding="5,3" ToolTip.Tip="Edit item templates" AutomationProperties.Name="Edit item templates">
+            <Button Name="EditItemTemplates" Grid.Column="4" Classes="nav" IsVisible="False" Padding="5,3" ToolTip.Tip="Edit templates" AutomationProperties.Name="Edit templates">
               <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M1 2H7V7H1Z M9 2H15V7H9Z M1 9H7V14H1Z M9 9H15V14H9Z M2.5 3.5V5.5H5.5V3.5Z M10.5 3.5V5.5H13.5V3.5Z M2.5 10.5V12.5H5.5V10.5Z M10.5 10.5V12.5H13.5V10.5Z" />
             </Button>
           </Grid>

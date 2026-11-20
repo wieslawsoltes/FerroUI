@@ -47,6 +47,7 @@ mod preview_checks;
 mod column_authoring;
 mod included_source;
 mod item_template_authoring;
+mod control_template_starter;
 mod item_template_copy;
 mod item_template_project;
 mod item_template_samples;

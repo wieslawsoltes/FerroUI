@@ -17,6 +17,7 @@ pub(crate) enum ItemTemplatePreview {
     },
     Included {
         key: String,
+        property: ItemTemplateMember,
         sample: Option<DesignFixture>,
         consumer: String,
     },
@@ -45,6 +46,7 @@ pub(crate) fn assigned_fixture(
     property: ItemTemplateMember,
     selected: Option<&str>,
 ) -> Result<Option<DesignFixture>, String> {
+    if property == ItemTemplateMember::Template { return Ok(None); }
     let Some((owner, property)) = source_owner(document, owner, property) else {
         return Ok(None);
     };

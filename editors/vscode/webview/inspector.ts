@@ -15,6 +15,7 @@ export class Inspector {
     private readonly filter = element<HTMLInputElement>('filter');
     private readonly metrics = element('property-metrics');
     private readonly itemTemplates = element<HTMLButtonElement>('edit-item-templates');
+    private readonly controlTemplate = element<HTMLButtonElement>('edit-control-template');
     private selectedKey?: string;
     private contentKey?: string;
     private recording = false;
@@ -30,6 +31,7 @@ export class Inspector {
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
         this.itemTemplates.addEventListener('click', () => this.author({ action: 'itemTemplate' }));
+        this.controlTemplate.addEventListener('click', () => this.author({ action: 'controlTemplate' }));
     }
 
     show(state: PropertiesState, enabled: boolean): void {
@@ -41,6 +43,8 @@ export class Inspector {
         this.selection.hidden = !label;
         this.itemTemplates.hidden = !state.itemTemplates;
         this.itemTemplates.disabled = !enabled;
+        this.controlTemplate.hidden = !state.controlTemplate;
+        this.controlTemplate.disabled = !enabled;
         // A source range can still be revealed on a read-only row.
         this.target.toggleAttribute('inert', !state.frame || Boolean(node && !enabled));
         if (!label) {

@@ -11,7 +11,7 @@ use ferroui_controls::{
 };
 use ferroui_designer_core::{Edit, NodeId, SourceSpan};
 use ferroui_designer_tools::{
-    item_template_resources, ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot,
+    ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot,
     ItemTemplateValue,
 };
 use std::rc::{Rc, Weak};
@@ -44,7 +44,7 @@ impl DesignerWorkspace {
         self.root
             .get_control::<Button>("EditItemTemplates")
             .set_is_visible(matches!(
-                session.selection(), [node] if !session.item_template_members(*node).is_empty()
+                session.selection(), [node] if session.has_control_template(*node) || !session.item_template_members(*node).is_empty()
             ));
     }
 
@@ -193,18 +193,17 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     body.children().add(status.clone().upcast::<Control>());
     let session = workspace.session.borrow();
     let [owner] = session.selection() else { return };
-    let result = session.item_template_slots(*owner).and_then(|slots| {
-        let resources = template_choices(&session, *owner, &slots)?;
-        let slots = slots
-            .into_iter()
-            .map(|slot| {
-                let included = session.assigned_included_template(&slot)?;
-                Ok((slot, included))
-            })
-            .collect::<Result<Vec<_>, String>>()?;
-        Ok((slots, resources))
+    let result = session.item_template_slots(*owner).and_then(|mut slots| {
+        if session.has_control_template(*owner) {
+            slots.push(session.item_template_slot(*owner, ItemTemplateMember::Template)?);
+        }
+        slots.into_iter().map(|slot| {
+            let included = session.assigned_included_template(&slot)?;
+            let resources = if slot.reason.is_none() { template_choices(&session, *owner, slot.property)? } else { Vec::new() };
+            Ok((slot, included, resources))
+        }).collect::<Result<Vec<_>, String>>()
     });
-    let (slots, resources) = match result {
+    let slots = match result {
         Ok(model) => model,
         Err(error) => {
             status.set_text(Some(&error));
@@ -219,7 +218,7 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
         status: status.downgrade(),
         owner: *owner,
     };
-    for (slot, included) in slots {
+    for (slot, included, resources) in slots {
         let span = slot
             .value
             .definition()
@@ -249,7 +248,7 @@ fn add_slot(
     resources: &[TemplateChoice],
 ) {
     let title = StackPanel::new();
-    let label = text(slot.property.name());
+    let label = text(if slot.property == ItemTemplateMember::Template { "Control Template" } else { slot.property.name() });
     label.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
     title.children().add(label.upcast::<Control>());
     let value = match &slot.value {
@@ -318,7 +317,7 @@ fn add_slot(
     }
     if slot.can_reset {
         let action = actions.clone();
-        add_button(&tools, RESET, "Reset item template", move || {
+        add_button(&tools, RESET, "Reset template", move || {
             action.edit(property, ItemTemplateChange::Reset)
         });
     }
@@ -335,13 +334,9 @@ struct TemplateChoice {
 fn template_choices(
     session: &crate::DesignerSession,
     owner: NodeId,
-    slots: &[ItemTemplateSlot],
+    property: ItemTemplateMember,
 ) -> Result<Vec<TemplateChoice>, String> {
-    if slots.iter().all(|slot| slot.reason.is_some()) {
-        return Ok(Vec::new());
-    }
-    let local =
-        item_template_resources(session.document(), owner).map_err(|error| error.to_string())?;
+    let local = session.local_template_resources(owner, property)?;
     let mut choices = local
         .into_iter()
         .map(|resource| TemplateChoice {
@@ -353,7 +348,7 @@ fn template_choices(
         .collect::<Vec<_>>();
     choices.extend(
         session
-            .included_template_resources(owner)?
+            .included_template_resources(owner, property)?
             .into_iter()
             .map(|resource| {
                 let name = ferroui_designer_project::file_path(&resource.uri)

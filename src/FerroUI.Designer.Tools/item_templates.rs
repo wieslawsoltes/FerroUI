@@ -1,9 +1,10 @@
-//! Read and edit one XAML data-template slot using its resolved source declaration.
+//! Read and edit one typed XAML template slot using its resolved source declaration.
 use super::*;
 use ferroui_designer_core::SourceSpan;
 
 #[path = "item_template_edits.rs"]
 mod edits;
+pub use edits::ControlTemplatePart;
 #[path = "item_template_copy.rs"]
 mod included_copy;
 
@@ -14,6 +15,7 @@ pub enum ItemTemplateMember {
     MenuItemTemplate,
     CellTemplate,
     CellEditingTemplate,
+    Template,
 }
 
 impl ItemTemplateMember {
@@ -24,6 +26,10 @@ impl ItemTemplateMember {
         Self::CellTemplate,
         Self::CellEditingTemplate,
     ];
+    pub const AUTHORABLE: [Self; 6] = [
+        Self::ItemTemplate, Self::SelectionBoxItemTemplate, Self::MenuItemTemplate,
+        Self::CellTemplate, Self::CellEditingTemplate, Self::Template,
+    ];
 
     pub fn name(self) -> &'static str {
         match self {
@@ -32,6 +38,14 @@ impl ItemTemplateMember {
             Self::MenuItemTemplate => "MenuItemTemplate",
             Self::CellTemplate => "CellTemplate",
             Self::CellEditingTemplate => "CellEditingTemplate",
+            Self::Template => "Template",
+        }
+    }
+
+    pub fn accepts(self, node: &Node) -> bool {
+        framework(node) && match self {
+            Self::Template => node.local_name() == "ControlTemplate",
+            _ => matches!(node.local_name(), "DataTemplate" | "TreeDataTemplate"),
         }
     }
 }
@@ -129,7 +143,7 @@ impl ItemTemplateSlot {
                     .filter(|attribute| member(&attribute.name))
                     .ok_or_else(|| ToolError("The template attribute changed".into()))?;
                 let value = attribute_resource(document, owner, attribute)
-                    .map(|(key, dynamic)| resource_value(document, owner, key, dynamic, context))
+                    .map(|(key, dynamic)| resource_value(document, owner, property, key, dynamic, context))
                     .transpose()?
                     .unwrap_or(ItemTemplateValue::Expression);
                 (Some(attribute.value_span), value)
@@ -142,7 +156,7 @@ impl ItemTemplateSlot {
                         && member(&property_node.name),
                     "The template property element changed",
                 )?;
-                let value = object_value(document, owner, property_node, context)?;
+                let value = object_value(document, owner, property, property_node, context)?;
                 (Some(property_node.name_span), value)
             }
         };
@@ -176,9 +190,13 @@ pub fn item_template_resources(
     document: &Document,
     owner: NodeId,
 ) -> Result<Vec<ItemTemplateResource>> {
+    template_resources(document, owner, ItemTemplateMember::ItemTemplate)
+}
+
+pub fn template_resources(document: &Document, owner: NodeId, property: ItemTemplateMember) -> Result<Vec<ItemTemplateResource>> {
     Ok(visible_component_resources(document, owner)?
         .into_iter()
-        .filter(|entry| document.ast().node(entry.node).is_some_and(is_template))
+        .filter(|entry| document.ast().node(entry.node).is_some_and(|node| property.accepts(node)))
         .filter_map(|entry| {
             Some(ItemTemplateResource {
                 node: entry.node,
@@ -190,11 +208,11 @@ pub fn item_template_resources(
 }
 
 pub fn keyed_item_template(node: &Node) -> Option<String> {
-    is_template(node).then(|| literal_key(node)).flatten()
+    keyed_template(node, ItemTemplateMember::ItemTemplate)
 }
 
-fn is_template(node: &Node) -> bool {
-    framework(node) && matches!(node.local_name(), "DataTemplate" | "TreeDataTemplate")
+pub fn keyed_template(node: &Node, property: ItemTemplateMember) -> Option<String> {
+    property.accepts(node).then(|| literal_key(node)).flatten()
 }
 
 fn attribute_resource(
@@ -216,6 +234,7 @@ fn attribute_resource(
 fn object_value(
     document: &Document,
     owner: NodeId,
+    member: ItemTemplateMember,
     property: &Node,
     context: Option<&ComponentResourceContext>,
 ) -> Result<ItemTemplateValue> {
@@ -224,7 +243,7 @@ fn object_value(
         return Ok(ItemTemplateValue::Expression);
     };
     let node = element(document, *child)?;
-    if is_template(node) {
+    if member.accepts(node) {
         return Ok(ItemTemplateValue::Inline {
             definition: node.id,
         });
@@ -235,7 +254,7 @@ fn object_value(
         _ => return Ok(ItemTemplateValue::Expression),
     };
     match references::object_resource_key(document, node)? {
-        Some((_, key)) => resource_value(document, owner, key, dynamic, context),
+        Some((_, key)) => resource_value(document, owner, member, key, dynamic, context),
         None => Ok(ItemTemplateValue::Expression),
     }
 }
@@ -243,13 +262,14 @@ fn object_value(
 fn resource_value(
     document: &Document,
     owner: NodeId,
+    property: ItemTemplateMember,
     key: String,
     dynamic: bool,
     context: Option<&ComponentResourceContext>,
 ) -> Result<ItemTemplateValue> {
     let definition = component_resource_resolution(document, owner, &key, context)?
         .resolved()
-        .filter(|id| document.ast().node(*id).is_some_and(is_template));
+        .filter(|id| document.ast().node(*id).is_some_and(|node| property.accepts(node)));
     Ok(ItemTemplateValue::Resource {
         key,
         dynamic,

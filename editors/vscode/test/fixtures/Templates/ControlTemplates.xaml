@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="ButtonAccent" Color="#FF165A72" />
+  <ControlTemplate x:Key="SharedButton" TargetType="Button">
+    <Border Name="ActionSurface" Background="{StaticResource ButtonAccent}" Padding="16" CornerRadius="6">
+      <ContentPresenter Content="{TemplateBinding Content}" Foreground="White" />
+    </Border>
+  </ControlTemplate>
+</ResourceDictionary>
