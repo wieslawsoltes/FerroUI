@@ -22,6 +22,12 @@ Start with a view you can render, then use the same source buffer for text edits
 
 For a partial Rust preview, edit expressions, handler code, or dynamic child lists in the Rust editor. The designer can still edit supported literals and mapped handler expressions and wrap consecutive mapped children. In XAML with bindings, style objects, or property elements that have no static counterpart, edit the authored XAML. Existing XAML design data survives supported counterpart value edits. [Language service](../../../src/FerroUI.Designer.Language/README.md) · [Mapping project controls to RSX](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
+### Rename an RSX control
+
+Select the named control in Design or Outline, then run **FerroUI: Rename RSX Control** from the Command Palette. You can also edit **Name** in Properties. The edit changes the naming literal and applicable references within the active `rsx!` invocation in one Undo step.
+
+The planner follows name selectors in inline `ferroui_view::style` declarations, including nested styles and selectors used by animation clips. It also updates literal `visual_state(...).set_on(...)` targets below their state owner. It preserves source trivia, computed setter values, and the separate scope reached through `/template/`. Duplicate names and names that would capture an existing reference are rejected. When a related style or state target is computed, edit its expression in Rust before changing the name. [MCP workflow](reference.md#rename-an-rsx-control-with-mcp) · [Studio workflow](../native-controls.md#rename-a-control-in-a-rust-view)
+
 ## Arrange controls on the canvas and in Outline
 
 1. In **Select** mode, click a control and use the resize handles or drag the control. Hold Ctrl or Command to add other controls. **Arrange Selection** offers native alignment, distribution, size matching, and reset for supported layouts. Size matching uses the first selected control as its reference.

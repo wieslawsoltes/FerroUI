@@ -93,6 +93,10 @@ The canvas, Preview Stages, and prototype player use the compiled group's base f
 
 For a move that changes a generated Rust build function, build the owning Cargo package from Studio and make `rust-analyzer` available on Studio’s `PATH`. Set `FERROUI_RUST_ANALYZER` before launching Studio to select a different executable. **Review file move** resolves the Rust imports and calls in the background using the build’s Cargo feature and profile settings. The same review includes edits to open Rust drafts. Close the flyout to cancel an in-progress review. Once the changes appear, apply and save them, then rebuild to regenerate the compiled modules. [Review a move with generated Rust references in VS Code](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
+### Rename a control in a Rust view
+
+Choose the `rsx!` invocation and select the control in the canvas or **Layers**. Edit **Name** in Properties to update the literal and any mapped style selectors or visual-state targets. Undo restores them together. If the name has a mapped reference, rename the control or remove the reference before resetting **Name**. [Supported references](vscode/authoring.md#rename-an-rsx-control)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

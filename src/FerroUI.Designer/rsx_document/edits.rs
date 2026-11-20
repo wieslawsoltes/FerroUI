@@ -4,6 +4,7 @@ use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
 };
 use ferroui_designer_rsx::{RsxAnimation, RsxAnimationEdit, RsxAnimationPlan};
+use std::collections::BTreeSet;
 
 impl RustDocument {
     pub(crate) fn source_span(&self, document: &Document, node: NodeId) -> Option<SourceSpan> {
@@ -129,28 +130,39 @@ impl RustDocument {
                 Edit::SetAttribute { .. } | Edit::RemoveAttribute { .. }
             )
         }) {
-            return edits
-                .into_iter()
-                .map(|edit| {
-                    let (node, name, value) = match edit {
-                        Edit::SetAttribute { node, name, value } => (node, name, Some(value)),
-                        Edit::RemoveAttribute { node, name } => (node, name, None),
-                        _ => unreachable!("attribute edits"),
-                    };
-                    let offset = document
-                        .ast()
-                        .node(node)
-                        .ok_or(DesignerError::UnknownNode(node))?
-                        .span
-                        .start;
-                    let (index, _) = map.control(offset).ok_or_else(|| {
-                        invalid("The selected control has no Rust source mapping")
-                    })?;
-                    projection
-                        .edit_property(index, &name, value.as_deref())
-                        .map_err(invalid)
-                })
-                .collect();
+            let mut patches = Vec::new();
+            let mut assigned_names = BTreeSet::new();
+            for edit in &edits {
+                let (node, name, value) = match edit {
+                    Edit::SetAttribute { node, name, value } => (*node, name, Some(value.as_str())),
+                    Edit::RemoveAttribute { node, name } => (*node, name, None),
+                    _ => unreachable!("attribute edits"),
+                };
+                let offset = document
+                    .ast()
+                    .node(node)
+                    .ok_or(DesignerError::UnknownNode(node))?
+                    .span
+                    .start;
+                let (index, _) = map.control(offset).ok_or_else(|| {
+                    invalid("The selected control has no Rust source mapping")
+                })?;
+                if name == "Name" {
+                    if value.is_some_and(|value| !assigned_names.insert(value)) {
+                        return Err(invalid(
+                            "Select distinct names for controls in this RSX invocation",
+                        ));
+                    }
+                    patches.extend(
+                        projection
+                            .edit_control_names(&[index], value)
+                            .map_err(invalid)?,
+                    );
+                } else {
+                    patches.push(projection.edit_property(index, name, value).map_err(invalid)?);
+                }
+            }
+            return Ok(patches);
         }
         let mut candidate = document.snapshot_without_history();
         candidate.apply(label, edits)?;

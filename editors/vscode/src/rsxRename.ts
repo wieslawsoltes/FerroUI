@@ -24,8 +24,5 @@ export async function renameRsxControl(panel: DesignerPanel, token: number, node
         throw new Error('Select a mapped RSX control with an authored name literal.');
     }
     if (name === selected.name) return;
-    if (snapshot.nodes.some(candidate => candidate.id !== node && candidate.name === name)) {
-        throw new Error('Another authored control in this RSX invocation already uses that name.');
-    }
     await panel.agentEdit(token, { type: 'setProperty', node, name: 'Name', value: name }, signal);
 }

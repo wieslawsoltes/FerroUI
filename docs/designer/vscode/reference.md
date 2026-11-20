@@ -115,6 +115,12 @@ Call `designer_dictionary_extraction` with an authored `node` and the current `e
 
 Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `file_name`, and `review`. The write creates the dictionary and updates the view in one editor transaction. Use `designer_history` in VS Code or `designer_undo` in Studio from the original view. When a source or destination changes, read the target again and review the new plan. [Resources workflow](authoring.md#extract-a-resource-dictionary)
 
+### Rename an RSX control with MCP
+
+In VS Code, read `designer_outline` for the current control ID and frame. Call `designer_rename_rsx_control` with `session`, `node`, `expected_revision`, and the new name in `value`. The editor also exposes the same change as a `designer_property` action through `designer_studio_edit`.
+
+In Studio, call `designer_property` with `action: "set"`, `property: "Name"`, the control ID in `nodes`, the current `expected_revision`, and the new name in `value`. Both paths require authoring permission and apply the declaration and referenced literals in one Undo step. [Rename workflow and supported references](authoring.md#rename-an-rsx-control)
+
 ### Move an XAML file with MCP
 
 In VS Code, call `ferroui_workspace_plan_xaml_move` with `path` and `destination`. Use `folder` to disambiguate the root in a multi-root workspace. Inspect the proposed location and the `before`, `after`, and `edit` for each affected XAML file, Rust file, Cargo build, stage set, or scenario. Call `ferroui_workspace_move_xaml` with the same inputs and the returned `review`. The move requires `ferroui.mcp.allowWrites`.

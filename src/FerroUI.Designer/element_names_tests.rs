@@ -139,6 +139,47 @@ fn name_changes_share_native_undo_roles_and_ignore_animation_recording() {
 }
 
 #[test]
+fn rust_name_changes_keep_studio_animation_and_state_targets_in_one_undo() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r###"fn review() { rsx! {
+        StackPanel {
+            styles: [ferroui_view::style("Border#Card")
+                .animation(ferroui_view::animation(ferroui_view::ms(1000))
+                    .key_frame(0.0, |key| key.set(ferroui_base::Visual::opacity_property(), 0.8))
+                    .key_frame(1.0, |key| key.set(ferroui_base::Visual::opacity_property(), 1.0)))],
+            visual_states: [ferroui_view::visual_state_group("Review")
+                .state(ferroui_view::visual_state("Ready")
+                    .set_on("Card", ferroui_base::layout::Layoutable::width_property(), 260.0))],
+            Border { name: /* anchor */ r#"Card"#, width: 100.0 }
+        }
+    } }"###.replace('\n', "\r\n");
+    let mut session = DesignerSession::with_rust_source(
+        &source,
+        ContentControl::new(),
+        "file:///review.rs".into(),
+    ).unwrap();
+    let card = named(session.document(), "Card");
+    let original_revision = session.document().revision();
+    assert_eq!(session.animation_programs()[0].targets, [card]);
+    session.set_property(&[card], "Name", "ClientCard").unwrap();
+    let renamed = session.authored_source().to_owned();
+    assert_eq!(
+        renamed,
+        source.replace("#Card", "#ClientCard").replace("\"Card\"", "\"ClientCard\"")
+    );
+    let card = named(session.document(), "ClientCard");
+    assert_eq!(session.animation_programs()[0].targets, [card]);
+    assert_eq!(session.state_groups()[0].states[0].setters[0].target, "ClientCard");
+    assert!(session.document().revision() > original_revision);
+    assert!(session.reset_property(&[card], "Name").is_err());
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
+    session.redo().unwrap();
+    assert_eq!(session.authored_source(), renamed);
+}
+
+#[test]
 fn rename_updates_visual_state_metadata_and_removal_protects_it() {
     use ferroui_designer_animation::{StateSetter, VisualState, VisualStateGroup};
     let mut document =

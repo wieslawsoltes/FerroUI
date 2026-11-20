@@ -4,6 +4,7 @@ use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::utilities::character_reader::{is_digit, is_white_space};
 use ferroui_base::utilities::span_helpers::{try_parse_int, NumberStyles};
 use ferroui_base::utilities::CharacterReader;
+use std::ops::Range;
 
 /// A syntax element of a parsed selector.
 #[derive(Clone, Debug, PartialEq)]
@@ -46,11 +47,50 @@ pub enum SelectorSyntax {
 /// Parser of style selectors.
 pub struct SelectorGrammar;
 
+/// The name's byte range in a `#name` test, excluding the hash.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SelectorName {
+    pub range: Range<usize>,
+    /// This name belongs to a template subtree after `/template/`.
+    pub in_template: bool,
+    /// The named control is an ancestor of the selector's subject.
+    pub ancestor: bool,
+}
+
 impl SelectorGrammar {
     /// Parses `s` into a list of syntax elements.
     pub fn parse(s: &str) -> Result<Vec<SelectorSyntax>, ExpressionParseError> {
         let mut r = CharacterReader::new(s);
-        parse(&mut r, None)
+        parse(&mut r, None, false, &mut None)
+    }
+
+    /// Collect name tests using the same grammar as runtime style application.
+    pub fn name_ranges(
+        s: &str,
+    ) -> Result<(Vec<SelectorSyntax>, Vec<SelectorName>), ExpressionParseError> {
+        let mut names = Some(NameRanges {
+            input: s,
+            spans: Vec::new(),
+        });
+        let syntax = parse(&mut CharacterReader::new(s), None, false, &mut names)?;
+        Ok((syntax, names.unwrap().spans))
+    }
+}
+
+struct NameRanges<'a> {
+    input: &'a str,
+    spans: Vec<SelectorName>,
+}
+
+impl NameRanges<'_> {
+    fn record(&mut self, name: &str, in_template: bool) {
+        // The reader returns a slice of the original UTF-8 input.
+        let start = name.as_ptr() as usize - self.input.as_ptr() as usize;
+        self.spans.push(SelectorName {
+            range: start..start + name.len(),
+            in_template,
+            ancestor: false,
+        });
     }
 }
 
@@ -77,26 +117,54 @@ fn peek_text(r: &CharacterReader<'_>) -> String {
     r.peek().map(String::from).unwrap_or_default()
 }
 
-fn parse(r: &mut CharacterReader<'_>, end: Option<char>) -> ParseResult<Vec<SelectorSyntax>> {
+fn parse(
+    r: &mut CharacterReader<'_>,
+    end: Option<char>,
+    starts_in_template: bool,
+    names: &mut Option<NameRanges<'_>>,
+) -> ParseResult<Vec<SelectorSyntax>> {
     let mut state = State::Start;
     let mut selector = Vec::new();
+    let mut in_template = starts_in_template;
+    let mut subject_start = names.as_ref().map_or(0, |names| names.spans.len());
     while !r.end() && state != State::End {
         let syntax;
         (state, syntax) = match state {
             State::Start => parse_start(r),
             State::Middle => parse_middle(r, end),
             State::CanHaveType => (parse_can_have_type(r), None),
-            State::Colon => parse_colon(r)?,
+            State::Colon => parse_colon(r, in_template, names)?,
             State::Class => parse_class(r)?,
             State::Traversal => parse_traversal(r),
             State::TypeName => parse_type_name(r)?,
             State::Property => parse_property(r)?,
             State::Template => parse_template(r)?,
-            State::Name => parse_name(r)?,
+            State::Name => parse_name(r, |name| {
+                if let Some(names) = names {
+                    names.record(name, in_template);
+                }
+            })?,
             State::AttachedProperty => parse_attached_property(r)?,
             State::End => (State::End, None),
         };
         if let Some(syntax) = syntax {
+            let combinator = matches!(
+                syntax,
+                SelectorSyntax::Template | SelectorSyntax::Child | SelectorSyntax::Descendant
+            );
+            if let Some(names) = names {
+                if combinator {
+                    for name in &mut names.spans[subject_start..] {
+                        name.ancestor = true;
+                    }
+                }
+                if combinator || matches!(syntax, SelectorSyntax::Comma) {
+                    subject_start = names.spans.len();
+                }
+                if matches!(syntax, SelectorSyntax::Template | SelectorSyntax::Comma) {
+                    in_template = starts_in_template || matches!(syntax, SelectorSyntax::Template);
+                }
+            }
             selector.push(syntax);
         }
     }
@@ -161,7 +229,11 @@ fn parse_can_have_type(r: &mut CharacterReader<'_>) -> State {
     State::Middle
 }
 
-fn parse_colon(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
+fn parse_colon(
+    r: &mut CharacterReader<'_>,
+    in_template: bool,
+    names: &mut Option<NameRanges<'_>>,
+) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let identifier = r.parse_style_class();
 
     if identifier.is_empty() {
@@ -186,7 +258,7 @@ fn parse_colon(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Select
         ));
     }
     if identifier == NOT_KEYWORD && r.take_if('(') {
-        let argument = parse(r, Some(')'))?;
+        let argument = parse(r, Some(')'), in_template, names)?;
         expect(r, ')')?;
 
         return Ok((State::Middle, Some(SelectorSyntax::Not { argument })));
@@ -261,7 +333,10 @@ fn parse_template(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
     Ok((State::Start, Some(SelectorSyntax::Template)))
 }
 
-fn parse_name(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
+fn parse_name<'a>(
+    r: &mut CharacterReader<'a>,
+    name_range: impl FnOnce(&'a str),
+) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let name = r.parse_identifier();
     if name.is_empty() {
         return Err(ExpressionParseError::new(
@@ -269,6 +344,7 @@ fn parse_name(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Selecto
             "Expected a name after '#'.",
         ));
     }
+    name_range(name);
     Ok((
         State::CanHaveType,
         Some(SelectorSyntax::Name {

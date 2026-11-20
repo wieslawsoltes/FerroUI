@@ -8,6 +8,7 @@ mod image_source;
 mod language;
 mod literal;
 mod markup;
+mod names;
 mod placement;
 mod programs;
 mod project;

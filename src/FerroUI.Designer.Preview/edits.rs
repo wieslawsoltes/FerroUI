@@ -55,7 +55,11 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             }
             if let Some((i, _)) = design.rsx_node(*node) {
                 let rsx = design.rsx.as_ref().unwrap();
-                return rust_edit(&design, rsx.edit_property(i, name, value)?);
+                return if name == "Name" {
+                    rust_name_edit(&design, &[*node], value)
+                } else {
+                    rust_edit(&design, rsx.edit_property(i, name, value)?)
+                };
             }
             let edits = registry()
                 .plan(
@@ -145,6 +149,31 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
     let selection = selected.and_then(|node| crate::edit_selection::authored_range(&design, &candidate, &patches, node));
     let mut result = editor_edits(&design, patches)?;
     result.selection = selection;
+    Ok(result)
+}
+
+pub(crate) fn rust_name_edit(
+    design: &DesignDocument<'_>,
+    nodes: &[NodeId],
+    value: Option<&str>,
+) -> Result<EditResult, String> {
+    let projection = design
+        .rsx
+        .as_ref()
+        .ok_or("Open the current RSX invocation")?;
+    let targets = nodes
+        .iter()
+        .map(|node| {
+            design
+                .rsx_node(*node)
+                .map(|(index, _)| index)
+                .ok_or("Choose a mapped Rust control")
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let patches = projection.edit_control_names(&targets, value)?;
+    let ranges = crate::edit_selection::rsx_control_ranges(design, &patches, nodes)?;
+    let mut result = editor_edits(design, patches)?;
+    result.retained_selection = ranges;
     Ok(result)
 }
 

@@ -1,5 +1,5 @@
 use crate::document::DesignDocument;
-use crate::edits::editor_edits;
+use crate::edits::{editor_edits, rust_name_edit};
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
@@ -170,6 +170,9 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, action);
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
+    let rust_names = design.rsx.is_some()
+        && query.name == "designer_property"
+        && query.arguments["property"] == "Name";
     let spacing = query.name == "designer_spacing_edit";
     let wrapping = query.name == "designer_wrap_selection_edit";
     if design.rsx.is_some()
@@ -177,6 +180,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_program
         && !rust_state
         && !rust_placement
+        && !rust_names
         && !spacing
         && !wrapping
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
@@ -214,6 +218,24 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
+    }
+    if rust_names {
+        let nodes: Vec<NodeId> = serde_json::from_value(arguments["nodes"].clone())
+            .map_err(|error| error.to_string())?;
+        let value = match arguments["action"].as_str() {
+            Some("reset") => None,
+            Some("set") => Some(
+                arguments["value"]
+                    .as_str()
+                    .ok_or("Enter a text control name")?,
+            ),
+            _ => return Err("Choose set or reset for the control name".into()),
+        };
+        let edit = rust_name_edit(&design, &nodes, value)?;
+        if !edit.edits.is_empty() {
+            renderer.stage.take();
+        }
+        return Ok(edit);
     }
     if wrapping {
         let (patches, wrapper) = stage.sources.run(|| stage.studio.wrap_source_plan(&arguments, design.rsx.take()))?;

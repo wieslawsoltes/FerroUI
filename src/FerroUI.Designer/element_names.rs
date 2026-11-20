@@ -230,17 +230,37 @@ impl DesignerSession {
         value: Option<&str>,
     ) -> Result<(), String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
+        let label = if value.is_some() {
+            "Rename element"
+        } else {
+            "Reset element name"
+        };
+        if self.uses_rust_source() {
+            if nodes.is_empty() {
+                return Err("Select an authored element to edit its name".into());
+            }
+            let edits = nodes
+                .iter()
+                .map(|&node| match value {
+                    Some(value) => Edit::SetAttribute {
+                        node,
+                        name: "Name".into(),
+                        value: value.into(),
+                    },
+                    None => Edit::RemoveAttribute {
+                        node,
+                        name: "Name".into(),
+                    },
+                })
+                .collect();
+            return self
+                .apply(label, edits)
+                .map(|_| ())
+                .map_err(|error| error.to_string());
+        }
         let edits = plan_element_names(self.document(), nodes, value)?;
         if !edits.is_empty() {
-            self.apply(
-                if value.is_some() {
-                    "Rename element"
-                } else {
-                    "Reset element name"
-                },
-                edits,
-            )
-            .map_err(|error| error.to_string())?;
+            self.apply(label, edits).map_err(|error| error.to_string())?;
         }
         Ok(())
     }
