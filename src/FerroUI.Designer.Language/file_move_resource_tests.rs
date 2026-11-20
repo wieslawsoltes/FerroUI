@@ -66,10 +66,8 @@ fn moving_a_private_compiled_dictionary_keeps_relative_includes_and_rebases_loos
         graph.accepted[&resolve_uri(&owner, PALETTE).unwrap()],
         draft
     );
-    assert_eq!(
-        graph.dependencies.into_iter().collect::<Vec<_>>(),
-        [to.clone()]
-    );
+    assert_eq!(graph.dependencies.len(), 1);
+    assert!(graph.dependencies.contains(&to));
     assert!(graph.unavailable.is_empty());
 
     let again = service
