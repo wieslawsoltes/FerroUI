@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { verifyEventHandlers } from './eventHandlersMcp';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
@@ -281,6 +282,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyWorkspaceMcp({ invoke, content });
         await verifyProjectMcp({ invoke, content });
         await verifyScenarioMcp({ invoke, content });
+        await verifyEventHandlers({ invoke, content });
         console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);

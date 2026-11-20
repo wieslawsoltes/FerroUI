@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
+import type { HandlerMethod } from './eventHandlerProtocol';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
@@ -12,6 +13,7 @@ export class XamlServer implements vscode.Disposable {
     private disposed = false;
     private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.xaml');
     private readonly projects = new Map<string, ProjectMetadata>();
+    eventDefinition?: (document: vscode.TextDocument, at: vscode.Position, token: vscode.CancellationToken) => Promise<vscode.Location | undefined>;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly channel: vscode.OutputChannel) {}
 
@@ -25,6 +27,13 @@ export class XamlServer implements vscode.Disposable {
                 command, transport: TransportKind.stdio,
             }, {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
+                initializationOptions: { ferrouiHandlerCommands: true },
+                middleware: {
+                    provideDefinition: async (document, position, token, next) => {
+                        const declaration = await this.eventDefinition?.(document, position, token);
+                        return declaration ?? next(document, position, token);
+                    },
+                },
                 synchronize: { configurationSection: 'ferroui', fileEvents: this.watch },
                 outputChannel: this.channel,
             });
@@ -49,6 +58,15 @@ export class XamlServer implements vscode.Disposable {
                 await this.publishMetadata(this.client, metadata);
             }
         });
+    }
+
+    async handlerRequest<T>(method: HandlerMethod, params: object): Promise<T> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiEventHandlers !== true) {
+            throw new Error('Use a FerroUI XAML language server that supports event handlers.');
+        }
+        return client.sendRequest<T>(`ferroui/${method}`, params);
     }
 
     private async publishMetadata(client: LanguageClient, metadata: ProjectMetadata) {

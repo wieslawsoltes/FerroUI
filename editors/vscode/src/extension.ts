@@ -4,6 +4,8 @@ import { BuiltProjects } from './builtProjects';
 import { DesignTokenCommands } from './designTokenCommands';
 import { DesignerWorkbench } from './designerWorkbench';
 import { DiagnosticsView } from './diagnosticsView';
+import { EventHandlers } from './eventHandlers';
+import type { HandlerRequest } from './eventHandlerProtocol';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
 import { FerroMcpProvider } from './mcpProvider';
@@ -12,6 +14,7 @@ import { ProjectInventory } from './projectInventory';
 import { ProjectScaffold } from './projectScaffold';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
 import { ProjectView } from './projectView';
+import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
@@ -40,7 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
     const inventory = new ProjectInventory(context, previewOutput, assets);
     const designTokens = new DesignTokenCommands(inventory);
     const scaffolds = new ProjectScaffold();
-    const designer = new DesignerWorkbench(context, previewOutput, projects, assets);
+    const handlers = new EventHandlers(server);
+    server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
+        ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers);
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
@@ -64,6 +70,16 @@ export function activate(context: vscode.ExtensionContext) {
                 && vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true);
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
+        vscode.commands.registerCommand('ferroui.createEventHandler', async (action?: { uri: string; request: HandlerRequest }) => {
+            try {
+                if (action) {
+                    await handlers.create({ document: await vscode.workspace.openTextDocument(vscode.Uri.parse(action.uri)), request: action.request });
+                } else if (vscode.window.activeTextEditor) {
+                    const { document, selection } = vscode.window.activeTextEditor;
+                    await handlers.create({ document, request: { version: document.version, position: selection.active } });
+                }
+            } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
     );
     vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {

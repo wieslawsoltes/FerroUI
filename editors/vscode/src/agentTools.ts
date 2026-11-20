@@ -31,6 +31,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     session: number;
     expected_revision: number;
     expected_version: number;
+    expected_rust_version: number;
     expected_generation: number;
     expected_sequence: number;
     runtime?: RuntimeTarget;
@@ -328,6 +329,12 @@ export class AgentTools {
                 await panel.agentEdit(args.expected_revision, { type: 'setEvent', node: args.node!, name: args.event,
                     value: args.action === 'set' ? args.handler! : null }, signal);
                 break;
+            case 'designer_event_handler': case 'designer_scaffold_handler': {
+                const site = this.workbench.eventHandlerSite(panel, { session: panel.session, token: args.expected_revision }, args.node!, args.event);
+                return tool === 'designer_event_handler'
+                    ? this.workbench.handlers.inspect(site, args.handler, signal)
+                    : this.workbench.handlers.scaffold(site, args.handler!, args.expected_rust_version, signal);
+            }
             case 'designer_apply_resource':
                 await panel.agentEdit(args.expected_revision, { type: 'applyResource', frame: args.expected_revision,
                     resource: args.resource, node: args.node!, property: args.property, dynamic: args.dynamic ?? false }, signal);

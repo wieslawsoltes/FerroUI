@@ -197,6 +197,12 @@
         "icon": "$(symbol-event)"
       },
       {
+        "command": "ferroui.createEventHandler",
+        "title": "Create Rust Event Handler",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
         "command": "ferroui.showResources",
         "title": "Show Resources",
         "category": "FerroUI",
@@ -336,6 +342,10 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "ferroui.createEventHandler",
+          "when": "editorLangId == ferroui-xaml"
+        },
         {
           "command": "ferroui.openDesigner",
           "when": "editorLangId == ferroui-xaml || editorLangId == rust"

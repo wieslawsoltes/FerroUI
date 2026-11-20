@@ -92,6 +92,12 @@ Use `designer_view` with `view: "styles"` to focus the dock. Set `dark` to chang
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.
 
+### Create an event handler with MCP
+
+Build the package’s XAML schema. Call `designer_event_handler` with the current `expected_revision`, `node`, and authored event name such as `Click`. In VS Code, also pass the `session` from `designer_open`. The result describes the Rust owner file, event signature, suggested name, and `rustVersion`. Pass a `handler` to preview the two versioned source edits. The `declaration` in the preview points to the new handler name after the patch.
+
+Call `designer_scaffold_handler` with the same target, `handler`, and `expected_rust_version` from the read. The request requires write access. It updates the workspace buffers as one edit and returns the declaration location. Use `designer_history` in VS Code or `designer_undo` in Studio to undo the change. Save and rebuild when the handler is ready to run. [Events workflow](authoring.md#create-a-rust-handler-for-an-xaml-event)
+
 On the running app’s MCP connection, call `get_property_trace` with `node_id` and `property`. Contributor locations use the runtime’s one-based source coordinates and revision fingerprint when available. Read the trace again after interacting with the preview or the app. [Authoring guide](authoring.md#trace-an-effective-property-value)
 
 ### Read Preview Checks with MCP
@@ -107,7 +113,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Task | Commands |
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
-| Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Rename RSX Control** |
+| Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
 | Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Show Events**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |

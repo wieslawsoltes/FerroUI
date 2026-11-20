@@ -116,11 +116,13 @@ export interface DetailsState {
     language?: Language;
     label?: string;
     events?: EventField[];
+    codeBehind?: boolean;
     resources?: ResourceRow[];
     message?: string;
 }
 export type FromDetails = { type: 'ready' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
+    | { type: 'handler'; request: number; target: NodeTarget; event: string; action: 'create' | 'reveal'; range?: Range }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };

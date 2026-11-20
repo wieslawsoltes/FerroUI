@@ -120,13 +120,25 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | Tool | What to do |
 | --- | --- |
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
-| **Events** | Assign or clear an XAML handler name or supported RSX handler expression. Use the reveal action to open a handler with a known declaration. Keep code-behind and unmapped Rust logic in the source editor. |
+| **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. In Studio, create a resource or rename it against the resolved scope. **Promote to resource** creates the entry and replaces the literal in one undo step. |
 | **Library** | Filter authored components, templates, themes, styles, and dictionaries by kind. **Find Definition in Designer** searches them and opens a scoped native preview. Use the definition’s actions to reveal its declaration and references. XAML authors can create a data or control template and duplicate or rename applicable resources. |
 | **Assets** | Browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. In **Behaviors**, attach routed-event or data-condition triggers and configure their actions in supported XAML. |
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
+
+## Create a Rust handler for an XAML event
+
+Open the Cargo project containing the XAML view and run **FerroUI: Build Project XAML Schema**. The view’s `x:Class` must resolve to an authored `ferro_class_info!` registration in the package. The build registry supplies the event signature, including inherited routed events and ordinary events declared in a control’s markup metadata.
+
+1. In **Design** or **Outline**, select the control. Open **FerroUI: Show Events** and find an event such as **Click**.
+2. Choose **Create or open Rust handler** beside the event. For an unassigned event, accept the suggested name or enter a Rust identifier. The extension assigns the XAML attribute, adds the typed callback to the class’s `methods` list, and opens the declaration in the Rust editor. A named event uses its existing XAML spelling.
+3. Write the callback body in Rust, then save both buffers and rebuild the application. The new callback must be compiled into the next app process. [Choose a Run or Debug target](runtime.md)
+
+You can also put the cursor on an XAML event attribute and choose **Create Rust event handler** from Quick Fix. On a named event, use **Go to Definition** to open the registration, including one still in the unsaved Rust buffer. The Events source arrow opens the XAML attribute when a Rust declaration is unavailable.
+
+The XAML and Rust updates form one Undo step. Both source buffers stay open for review and save. The action checks revisions and preserves existing event expressions and objects. If the type’s registration has moved, build the Cargo schema again. [Studio source action](../native-controls.md#create-an-xaml-event-handler) · [MCP workflow](reference.md#create-an-event-handler-with-mcp)
 
 ## Trace an effective property value
 

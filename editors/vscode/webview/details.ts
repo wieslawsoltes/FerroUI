@@ -35,7 +35,7 @@ function render(): void {
     title.textContent = state.label ?? '';
     title.hidden = !state.label;
     const fields = view === 'events' ? state.events : state.resources;
-    const key = JSON.stringify([state.frame?.session, state.target?.node, fields]);
+    const key = JSON.stringify([state.frame?.session, state.target?.node, state.codeBehind, fields]);
     if (fields && key !== contentKey) {
         contentKey = key;
         list.replaceChildren(...(view === 'events'
@@ -79,7 +79,10 @@ function eventRow(event: EventField): HTMLElement {
     heading.append(name, type);
     if (event.range) {
         const range = event.range;
-        heading.append(actionButton('go-to-file', `Reveal ${event.name} handler in source`, () => reveal(range)));
+        heading.append(actionButton('go-to-file', `Reveal ${event.name} handler in source`, () => {
+            if (state.codeBehind && event.editable && event.handler) handler('reveal', event.name, range);
+            else reveal(range);
+        }));
     }
     const field = state.language === 'rust' ? create('textarea') : create('input');
     field.setAttribute('aria-label', `${event.name} handler`);
@@ -97,10 +100,10 @@ function eventRow(event: EventField): HTMLElement {
     controls.className = 'detail-controls';
     controls.append(field);
     if (event.editable) {
-        const submit = create('button', event.handler === null ? 'Assign' : 'Set');
+        const submit = actionButton('check', `Assign ${event.name} handler`, () => {});
         submit.type = 'submit';
-        submit.className = 'secondary';
         controls.append(submit);
+        if (state.codeBehind) controls.append(actionButton('new-file', `Create or open Rust handler for ${event.name}`, () => handler('create', event.name)));
         if (event.handler !== null) controls.append(actionButton('close', `Clear ${event.name} handler`, () => editEvent(event.name, null)));
         row.addEventListener('submit', submitEvent => {
             submitEvent.preventDefault();
@@ -167,6 +170,14 @@ function edit(operation: NodeOperation): void {
     pending = ++request;
     error = undefined;
     vscode.postMessage({ type: 'edit', request, target: state.target, operation });
+    applyFilter();
+}
+
+function handler(action: 'create' | 'reveal', event: string, range?: Range): void {
+    if (!state.target || pending !== undefined) return;
+    pending = ++request;
+    error = undefined;
+    vscode.postMessage({ type: 'handler', request: pending, target: state.target, action, event, range });
     applyFilter();
 }
 

@@ -27,13 +27,13 @@ export class DetailsViews {
     }
 
     update(panel: DesignerPanel | undefined, frame: FrameTarget | undefined, file: string,
-        inspection: { data?: Inspection; message?: string }): void {
+        inspection: { data?: Inspection; message?: string }, codeBehind: boolean): void {
         const node = panel?.selectedNode;
         const state: DetailsState = {
             frame, target: frame && node ? { ...frame, node: node.id } : undefined,
             language: panel?.language, label: node?.name || node?.label, message: panel?.status,
         };
-        this.events.show({ ...state, events: inspection.data?.events,
+        this.events.show({ ...state, events: inspection.data?.events, codeBehind,
             message: state.message ?? inspection.message }, file);
         const resources = this.resources.visible ? this.readResources(panel, frame) : {};
         this.resources.show({ ...state, resources: resources.data, message: state.message ?? resources.message }, file);

@@ -9,6 +9,7 @@ import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
+import type { EventHandlers, HandlerEditSite } from './eventHandlers';
 import { LIBRARY_VIEW, LibraryView } from './libraryView';
 import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
@@ -71,7 +72,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     private previewKey?: string;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
-        private readonly projects: BuiltProjects, assets: ProjectAssets) {
+        private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -351,7 +352,9 @@ export class DesignerWorkbench implements vscode.Disposable {
             recordingTime: this.timeline.recordingTime(panel),
             message: panel?.status ?? inspection.message,
         }, file);
-        this.details.update(panel, frame, file, inspection);
+        const codeBehind = Boolean(panel?.language === 'xaml' && this.projects.forDocument(panel.document.uri)
+            && panel.nodes.find(node => node.parent === null)?.properties.some(attribute => attribute.name.endsWith(':Class')));
+        this.details.update(panel, frame, file, inspection, codeBehind);
         this.assets.update(panel, frame, Boolean(panel && this.insertionParent(panel)));
     }
 
@@ -420,8 +423,29 @@ export class DesignerWorkbench implements vscode.Disposable {
             await this.active?.revealSource(message.frame, message.range);
             return;
         }
-        if (message.type !== 'edit') return;
+        if (message.type !== 'edit' && message.type !== 'handler') return;
         try {
+            if (message.type === 'handler') {
+                if (view !== 'events') throw new Error('Use the Events view for code-behind.');
+                const panel = this.panelFor(message.target);
+                const site = this.eventHandlerSite(panel, message.target, message.target.node, message.event);
+                const validate = site.validate;
+                site.validate = () => {
+                    this.panelFor(message.target);
+                    if (panel.selectedNode?.id !== message.target.node) throw new Error('The event selection changed. Choose the handler again.');
+                    validate?.();
+                };
+                if (message.action === 'create') await this.handlers.create(site);
+                else {
+                    const revealed = await this.handlers.revealExisting(site).catch(() => {
+                        site.validate?.();
+                        return false;
+                    });
+                    if (!revealed && message.range) await panel.revealSource(message.target, message.range);
+                }
+                this.details.events.post({ type: 'edit', request: message.request });
+                return;
+            }
             const correctOperation = view === 'events' ? message.operation.type === 'setEvent' : message.operation.type === 'applyResource';
             if (!correctOperation) throw new Error('Use the matching designer view for this edit.');
             await this.edit(message.target, message.operation);
@@ -429,6 +453,18 @@ export class DesignerWorkbench implements vscode.Disposable {
         } catch (error) {
             this.details[view].post({ type: 'edit', request: message.request, error: errorMessage(error) });
         }
+    }
+
+    eventHandlerSite(panel: DesignerPanel, frame: FrameTarget, node: number, event: string): HandlerEditSite {
+        const control = panel.nodes.find(control => control.id === node);
+        if (!control) throw new Error('Select an authored event target.');
+        const validate = () => {
+            if (panel.language !== 'xaml' || !panel.canUse(frame)) {
+                throw new Error('Use the current XAML design and an authored event target.');
+            }
+        };
+        validate();
+        return { document: panel.document, request: { version: panel.document.version, position: control.nameRange.start, event }, validate };
     }
 
     private async assetsMessage(message: FromAssets): Promise<void> {
