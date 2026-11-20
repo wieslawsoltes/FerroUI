@@ -16,6 +16,9 @@ pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskS
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};
 mod file_move;
+mod process;
+pub use process::{spawn_project_process, stop_project_process};
+pub use tasks::CargoBuildConfiguration;
 pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
 mod rust_xaml;
 pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences, RustXamlRegistration, check_rust_rename_tokens};

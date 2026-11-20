@@ -15,6 +15,8 @@ mod line_index;
 pub mod lsp;
 mod project_schema;
 mod references;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod rust_analyzer;
 mod schema;
 mod service;
 pub use formatting::FormattingOptions;

@@ -1,4 +1,4 @@
-use crate::{BuildMetadata, ProjectDescriptor, ProjectError, Result, require};
+use crate::{BuildMetadata, ProjectDescriptor, ProjectError, Result, require, spawn_project_process, stop_project_process};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, VecDeque};
 use std::io::Read;
@@ -23,6 +23,15 @@ pub struct BuildTask {
     pub label: String,
     #[serde(skip)]
     metadata: Option<BuildMetadata>,
+    #[serde(skip)]
+    config: CargoBuildConfiguration,
+}
+
+/// The selected options retained with a completed project build.
+#[derive(Clone, Debug, Default)]
+pub struct CargoBuildConfiguration {
+    pub release: bool,
+    pub features: Vec<String>,
 }
 impl BuildTask {
     pub fn cargo(project: &ProjectDescriptor, kind: TaskKind, release: bool) -> Result<Self> {
@@ -97,6 +106,11 @@ impl BuildTask {
             args,
             cwd: project.root.clone(),
             metadata,
+            config: CargoBuildConfiguration {
+                release,
+                features: features.split(|ch: char| ch == ',' || ch.is_whitespace())
+                    .filter(|feature| !feature.is_empty()).map(str::to_owned).collect(),
+            },
         })
     }
     pub fn program(&self) -> &str {
@@ -118,12 +132,7 @@ impl BuildTask {
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
-        #[cfg(unix)]
-        {
-            use std::os::unix::process::CommandExt;
-            command.process_group(0);
-        }
-        let mut child = command.spawn()?;
+        let mut child = spawn_project_process(&mut command)?;
         let output = Arc::new(Mutex::new(OutputBuffer {
             readers: 2,
             ..Default::default()
@@ -155,6 +164,7 @@ impl BuildTask {
             status: TaskStatus::Running,
             exit_code: None,
             metadata: self.metadata.clone(),
+            config: self.config.clone(),
         })
     }
 }
@@ -189,8 +199,11 @@ pub struct TaskHandle {
     status: TaskStatus,
     exit_code: Option<Option<i32>>,
     metadata: Option<BuildMetadata>,
+    config: CargoBuildConfiguration,
 }
 impl TaskHandle {
+    pub fn cargo_configuration(&self) -> &CargoBuildConfiguration { &self.config }
+
     pub fn poll(&mut self) -> TaskStatus {
         if self.status == TaskStatus::Running {
             match self.child.try_wait() {
@@ -250,31 +263,7 @@ impl TaskHandle {
         if self.poll() != TaskStatus::Running {
             return Ok(());
         }
-        #[cfg(unix)]
-        {
-            // SAFETY: the child's process group was created by this handle. A negative process
-            // ID targets that group, including descendants that keep output pipes open after
-            // the leader exits. A live process group retains its group ID; no inherited group
-            // or unrelated parent process group is targeted.
-            let result = unsafe { libc::kill(-(self.child.id() as i32), libc::SIGKILL) };
-            if result != 0 && self.exit_code.is_none() {
-                self.child.kill()?;
-            }
-        }
-        #[cfg(windows)]
-        {
-            let status = Command::new("taskkill")
-                .args(["/PID", &self.child.id().to_string(), "/T", "/F"])
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .status();
-            if !status.is_ok_and(|s| s.success()) && self.exit_code.is_none() {
-                self.child.kill()?;
-            }
-        }
-        #[cfg(not(any(unix, windows)))]
-        self.child.kill()?;
-        self.child.wait()?;
+        stop_project_process(&mut self.child, self.exit_code.is_some())?;
         self.status = TaskStatus::Cancelled;
         Ok(())
     }
@@ -351,6 +340,7 @@ mod tests {
             cwd: std::env::temp_dir(),
             label: "test".into(),
             metadata: None,
+            config: CargoBuildConfiguration::default(),
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();
@@ -382,6 +372,7 @@ mod tests {
             cwd: std::env::temp_dir(),
             label: "output".into(),
             metadata: None,
+            config: CargoBuildConfiguration::default(),
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();
@@ -417,6 +408,7 @@ mod tests {
             cwd: std::env::temp_dir(),
             label: "descendant".into(),
             metadata: None,
+            config: CargoBuildConfiguration::default(),
         };
         let mut handle = task.start().unwrap();
         let start = std::time::Instant::now();
