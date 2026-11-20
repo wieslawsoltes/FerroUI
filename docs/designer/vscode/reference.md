@@ -108,7 +108,7 @@ Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `f
 
 ### Move an XAML file with MCP
 
-In VS Code, call `ferroui_workspace_plan_xaml_move` with `path` and `destination`. Use `folder` to disambiguate the root in a multi-root workspace. Inspect the proposed location and the `before`, `after`, and `edit` for each affected file. Call `ferroui_workspace_move_xaml` with the same inputs and the returned `review`. The move requires `ferroui.mcp.allowWrites`.
+In VS Code, call `ferroui_workspace_plan_xaml_move` with `path` and `destination`. Use `folder` to disambiguate the root in a multi-root workspace. Inspect the proposed location and the `before`, `after`, and `edit` for each affected XAML or Rust source, including paths in Cargo build scripts. Call `ferroui_workspace_move_xaml` with the same inputs and the returned `review`. The move requires `ferroui.mcp.allowWrites`.
 
 In Studio, open the source file and call `designer_plan_xaml_move` with `destination` and `expected_revision`. Send the same arguments and `review` to `designer_move_xaml` with write permission. Use editor Undo or Redo from a participating file. Save changed buffers to publish the new reference text. [File move workflow](authoring.md#move-an-xaml-file-and-its-references)
 
