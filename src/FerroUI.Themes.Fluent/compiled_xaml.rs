@@ -171,25 +171,25 @@ fn populate_fluenttheme_xaml_unit_0(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(122,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_0)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_0)?;
     // FluentTheme.xaml(123,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_1)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_1)?;
     // FluentTheme.xaml(151,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_2)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_2)?;
     // FluentTheme.xaml(152,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_3)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_3)?;
     // FluentTheme.xaml(164,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_4)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_4)?;
     // FluentTheme.xaml(165,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_5)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_5)?;
     // FluentTheme.xaml(169,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_6)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_6)?;
     // FluentTheme.xaml(194,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_7)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_7)?;
     // FluentTheme.xaml(195,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_8)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_8)?;
     // FluentTheme.xaml(197,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_9)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_9)?;
     // FluentTheme.xaml(207,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightAltListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_61, 207, 8)?;
     // FluentTheme.xaml(209,8) Content (resource)
@@ -197,11 +197,11 @@ fn populate_fluenttheme_xaml_unit_0(
     // FluentTheme.xaml(211,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightAltListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_63, 211, 8)?;
     // FluentTheme.xaml(213,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_10)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_10)?;
     // FluentTheme.xaml(215,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_11)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_11)?;
     // FluentTheme.xaml(216,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_12)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_12)?;
     // FluentTheme.xaml(225,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_73, 225, 8)?;
     // FluentTheme.xaml(227,8) Content (resource)
@@ -209,39 +209,39 @@ fn populate_fluenttheme_xaml_unit_0(
     // FluentTheme.xaml(229,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_75, 229, 8)?;
     // FluentTheme.xaml(231,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_13)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_13)?;
     // FluentTheme.xaml(234,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_14)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_14)?;
     // FluentTheme.xaml(235,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_15)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_15)?;
     // FluentTheme.xaml(236,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_16)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_16)?;
     // FluentTheme.xaml(251,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_17)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_17)?;
     // FluentTheme.xaml(252,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_18)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_18)?;
     // FluentTheme.xaml(257,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlTransientBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_97, 257, 8)?;
     // FluentTheme.xaml(258,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_19)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_19)?;
     // FluentTheme.xaml(262,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_20)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_20)?;
     // FluentTheme.xaml(264,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightAccent3RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_101, 264, 8)?;
     // FluentTheme.xaml(266,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightAccent2RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_102, 266, 8)?;
     // FluentTheme.xaml(268,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_21)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_21)?;
     // FluentTheme.xaml(270,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_22)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_22)?;
     // FluentTheme.xaml(272,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_23)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_23)?;
     // FluentTheme.xaml(274,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_24)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_24)?;
     // FluentTheme.xaml(277,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_25)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_25)?;
     // FluentTheme.xaml(280,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_26)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_26)?;
     ::core::result::Result::Ok(())
 }
 
@@ -253,35 +253,35 @@ fn populate_fluenttheme_xaml_unit_1(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(7,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_27)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_27)?;
     // FluentTheme.xaml(8,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_28)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_28)?;
     // FluentTheme.xaml(10,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_29)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_29)?;
     // FluentTheme.xaml(19,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 53)?, rt::string_object("ButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 19, 53)?;
     // FluentTheme.xaml(20,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_30)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_30)?;
     // FluentTheme.xaml(21,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_124, 21, 8)?;
     // FluentTheme.xaml(22,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_31)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_31)?;
     // FluentTheme.xaml(35,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "RepeatButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_136, 35, 8)?;
     // FluentTheme.xaml(37,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_32)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_32)?;
     // FluentTheme.xaml(49,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 49, 59)?, rt::string_object("ToggleButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 49, 59)?;
     // FluentTheme.xaml(50,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_33)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_33)?;
     // FluentTheme.xaml(51,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ToggleButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_148, 51, 8)?;
     // FluentTheme.xaml(53,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_34)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_34)?;
     // FluentTheme.xaml(56,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_35)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_35)?;
     // FluentTheme.xaml(58,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_36)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_36)?;
     // FluentTheme.xaml(106,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 106, 42)?, rt::string_object("GroupBoxPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 106, 42)?;
     // FluentTheme.xaml(107,48) Content (resource)
@@ -289,28 +289,28 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(108,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_37)?;
     // FluentTheme.xaml(110,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_38)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_38)?;
     // FluentTheme.xaml(111,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_39)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_39)?;
     // FluentTheme.xaml(115,44) Content (resource)
     let value_4 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285013416_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 115, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_4))), 115, 44)?;
     // FluentTheme.xaml(116,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_40)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_40)?;
     // FluentTheme.xaml(117,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_41)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_41)?;
     // FluentTheme.xaml(120,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_42)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_42)?;
     // FluentTheme.xaml(121,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_43)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_43)?;
     // FluentTheme.xaml(123,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "HyperlinkButtonForegroundVisitedPressed", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_193, 123, 8)?;
     // FluentTheme.xaml(124,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_44)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_44)?;
     // FluentTheme.xaml(125,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_45)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_45)?;
     // FluentTheme.xaml(127,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_46)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_46)?;
     // FluentTheme.xaml(134,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 134, 47)?, rt::string_object("ComboBoxThemeMinWidth"), rt::to_object(64.0_f64)), 134, 47)?;
     // FluentTheme.xaml(135,55) Content (resource)
@@ -319,7 +319,7 @@ fn populate_fluenttheme_xaml_unit_1(
     let value_5 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 138, 57)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 138, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_5))), 138, 57)?;
     // FluentTheme.xaml(139,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_48)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_48)?;
     // FluentTheme.xaml(195,56) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_49)?;
     // FluentTheme.xaml(202,51) Content (resource)
@@ -331,11 +331,11 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(208,58) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_51)?;
     // FluentTheme.xaml(211,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_52)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_52)?;
     // FluentTheme.xaml(233,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_53)?;
     // FluentTheme.xaml(235,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_54)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_54)?;
     // FluentTheme.xaml(237,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 237, 66)?, rt::string_object("MenuFlyoutPresenterBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 237, 66)?;
     // FluentTheme.xaml(239,59) Content (resource)
@@ -343,99 +343,99 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(240,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_55)?;
     // FluentTheme.xaml(244,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_56)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_56)?;
     // FluentTheme.xaml(252,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 252, 55)?, rt::string_object("TextControlPlaceholderOpacity"), rt::to_object(0.5_f64)), 252, 55)?;
     // FluentTheme.xaml(253,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_57)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_57)?;
     // FluentTheme.xaml(282,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 282, 55)?, rt::string_object("CheckBoxBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 282, 55)?;
     // FluentTheme.xaml(283,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_58)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_58)?;
     // FluentTheme.xaml(329,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_59)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_59)?;
     // FluentTheme.xaml(331,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_60)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_60)?;
     // FluentTheme.xaml(336,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_61)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_61)?;
     // FluentTheme.xaml(340,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_62)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_62)?;
     // FluentTheme.xaml(349,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_63)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_63)?;
     // FluentTheme.xaml(353,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_64)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_64)?;
     // FluentTheme.xaml(356,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_65)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_65)?;
     // FluentTheme.xaml(360,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_66)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_66)?;
     // FluentTheme.xaml(417,42) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_67)?;
     // FluentTheme.xaml(420,55) Content (resource)
     let value_6 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 420, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 420, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_6))), 420, 55)?;
     // FluentTheme.xaml(424,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_68)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_68)?;
     // FluentTheme.xaml(437,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_69)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_69)?;
     // FluentTheme.xaml(438,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ExpanderChevronBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_400, 438, 8)?;
     // FluentTheme.xaml(440,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_70)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_70)?;
     // FluentTheme.xaml(442,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_71)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_71)?;
     // FluentTheme.xaml(446,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_72)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_72)?;
     // FluentTheme.xaml(452,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_73)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_73)?;
     // FluentTheme.xaml(456,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_74)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_74)?;
     // FluentTheme.xaml(457,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_75)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_75)?;
     // FluentTheme.xaml(458,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_76)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_76)?;
     // FluentTheme.xaml(463,53) Content (resource)
     let value_7 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 6 8 0 #4F000000")), 463, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 463, 53)?, rt::string_object("NotificationCardBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_7))), 463, 53)?;
     // FluentTheme.xaml(466,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 466, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 466, 57)?;
     // FluentTheme.xaml(467,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_77)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_77)?;
     // FluentTheme.xaml(491,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_78)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_78)?;
     // FluentTheme.xaml(495,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_79)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_79)?;
     // FluentTheme.xaml(498,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_80)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_80)?;
     // FluentTheme.xaml(502,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_81)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_81)?;
     // FluentTheme.xaml(515,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_82)?;
     // FluentTheme.xaml(517,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 517, 53)?, rt::string_object("SliderBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 517, 53)?;
     // FluentTheme.xaml(518,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_83)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_83)?;
     // FluentTheme.xaml(523,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_84)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_84)?;
     // FluentTheme.xaml(525,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_85)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_85)?;
     // FluentTheme.xaml(539,56) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_86)?;
     // FluentTheme.xaml(541,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_87)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_87)?;
     // FluentTheme.xaml(556,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_88)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_88)?;
     // FluentTheme.xaml(558,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_89)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_89)?;
     // FluentTheme.xaml(573,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 573, 53)?, rt::string_object("ToolTipContentThemeFontSize"), rt::to_object(12.0_f64)), 573, 53)?;
     // FluentTheme.xaml(574,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 574, 54)?, rt::string_object("ToolTipBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 574, 54)?;
     // FluentTheme.xaml(575,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_90)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_90)?;
     // FluentTheme.xaml(578,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 578, 52)?, rt::string_object("ToolTipBorderThemePadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 5.0_f64, 8.0_f64, 7.0_f64))), 578, 52)?;
     // FluentTheme.xaml(581,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_91)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_91)?;
     // FluentTheme.xaml(643,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 643, 47)?, rt::string_object("TabItemHeaderFontSize"), rt::to_object(24.0_f64)), 643, 47)?;
     // FluentTheme.xaml(644,46) Content (resource)
@@ -444,57 +444,57 @@ fn populate_fluenttheme_xaml_unit_1(
     let value_8 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 646, 56)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 646, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_8))), 646, 56)?;
     // FluentTheme.xaml(647,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_93)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_93)?;
     // FluentTheme.xaml(675,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 675, 60)?, rt::string_object("ScrollBarTrackBorderThemeThickness"), rt::to_object(0.0_f64)), 675, 60)?;
     // FluentTheme.xaml(676,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_94)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_94)?;
     // FluentTheme.xaml(696,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ScrollBarTrackFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_586, 696, 8)?;
     // FluentTheme.xaml(697,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ScrollBarTrackFillPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_587, 697, 8)?;
     // FluentTheme.xaml(699,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_95)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_95)?;
     // FluentTheme.xaml(703,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_96)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_96)?;
     // FluentTheme.xaml(705,39) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_97)?;
     // FluentTheme.xaml(709,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_98)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_98)?;
     // FluentTheme.xaml(746,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 746, 59)?, rt::string_object("TreeViewItemBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 746, 59)?;
     // FluentTheme.xaml(747,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 747, 47)?, rt::string_object("TreeViewItemMinHeight"), rt::to_object(32.0_f64)), 747, 47)?;
     // FluentTheme.xaml(750,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_99)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_99)?;
     // FluentTheme.xaml(751,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SplitButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_618, 751, 8)?;
     // FluentTheme.xaml(753,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_100)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_100)?;
     // FluentTheme.xaml(756,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_101)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_101)?;
     // FluentTheme.xaml(759,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_102)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_102)?;
     // FluentTheme.xaml(781,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 781, 58)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 781, 58)?;
     // FluentTheme.xaml(784,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_103)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_103)?;
     // FluentTheme.xaml(814,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 814, 65)?, rt::string_object("CalendarDatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 814, 65)?;
     // FluentTheme.xaml(817,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_104)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_104)?;
     // FluentTheme.xaml(821,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "ScrollViewerScrollBarsSeparatorBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_661, 821, 8)?;
     // FluentTheme.xaml(825,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_105)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_105)?;
     // FluentTheme.xaml(832,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_106)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_106)?;
     // FluentTheme.xaml(838,55) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "TableViewRowBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_669, 838, 55)?;
     // FluentTheme.xaml(839,63) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "TableViewRowBackgroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_670, 839, 63)?;
     // FluentTheme.xaml(840,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_107)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_107)?;
     ::core::result::Result::Ok(())
 }
 
@@ -506,27 +506,27 @@ fn populate_fluenttheme_xaml_unit_2(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(283,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_108)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_108)?;
     // FluentTheme.xaml(284,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_109)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_109)?;
     // FluentTheme.xaml(312,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_110)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_110)?;
     // FluentTheme.xaml(313,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_111)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_111)?;
     // FluentTheme.xaml(325,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_112)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_112)?;
     // FluentTheme.xaml(326,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_113)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_113)?;
     // FluentTheme.xaml(330,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_114)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_114)?;
     // FluentTheme.xaml(351,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_115)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_115)?;
     // FluentTheme.xaml(352,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_116)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_116)?;
     // FluentTheme.xaml(356,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_117)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_117)?;
     // FluentTheme.xaml(358,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_118)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_118)?;
     // FluentTheme.xaml(368,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_742, 368, 8)?;
     // FluentTheme.xaml(370,8) Content (resource)
@@ -534,11 +534,11 @@ fn populate_fluenttheme_xaml_unit_2(
     // FluentTheme.xaml(372,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_744, 372, 8)?;
     // FluentTheme.xaml(374,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_119)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_119)?;
     // FluentTheme.xaml(376,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_120)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_120)?;
     // FluentTheme.xaml(377,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_121)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_121)?;
     // FluentTheme.xaml(386,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_754, 386, 8)?;
     // FluentTheme.xaml(388,8) Content (resource)
@@ -546,39 +546,39 @@ fn populate_fluenttheme_xaml_unit_2(
     // FluentTheme.xaml(390,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_756, 390, 8)?;
     // FluentTheme.xaml(392,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_122)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_122)?;
     // FluentTheme.xaml(395,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_123)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_123)?;
     // FluentTheme.xaml(396,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_124)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_124)?;
     // FluentTheme.xaml(397,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_125)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_125)?;
     // FluentTheme.xaml(412,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_126)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_126)?;
     // FluentTheme.xaml(413,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_127)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_127)?;
     // FluentTheme.xaml(418,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransientBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_778, 418, 8)?;
     // FluentTheme.xaml(419,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_128)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_128)?;
     // FluentTheme.xaml(423,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_129)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_129)?;
     // FluentTheme.xaml(425,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent3RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_782, 425, 8)?;
     // FluentTheme.xaml(427,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent2RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_783, 427, 8)?;
     // FluentTheme.xaml(429,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_130)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_130)?;
     // FluentTheme.xaml(431,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_131)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_131)?;
     // FluentTheme.xaml(433,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_132)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_132)?;
     // FluentTheme.xaml(435,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_133)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_133)?;
     // FluentTheme.xaml(437,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_134)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_134)?;
     // FluentTheme.xaml(440,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_135)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_135)?;
     ::core::result::Result::Ok(())
 }
 
@@ -590,35 +590,35 @@ fn populate_fluenttheme_xaml_unit_3(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(855,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_136)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_136)?;
     // FluentTheme.xaml(856,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_137)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_137)?;
     // FluentTheme.xaml(858,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_138)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_138)?;
     // FluentTheme.xaml(867,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 867, 53)?, rt::string_object("ButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 867, 53)?;
     // FluentTheme.xaml(868,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_139)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_139)?;
     // FluentTheme.xaml(869,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_805, 869, 8)?;
     // FluentTheme.xaml(870,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_140)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_140)?;
     // FluentTheme.xaml(883,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "RepeatButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_817, 883, 8)?;
     // FluentTheme.xaml(885,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_141)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_141)?;
     // FluentTheme.xaml(897,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 897, 59)?, rt::string_object("ToggleButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 897, 59)?;
     // FluentTheme.xaml(898,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_142)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_142)?;
     // FluentTheme.xaml(899,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ToggleButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_829, 899, 8)?;
     // FluentTheme.xaml(901,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_143)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_143)?;
     // FluentTheme.xaml(904,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_144)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_144)?;
     // FluentTheme.xaml(906,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_145)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_145)?;
     // FluentTheme.xaml(954,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 954, 42)?, rt::string_object("GroupBoxPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 954, 42)?;
     // FluentTheme.xaml(955,48) Content (resource)
@@ -626,28 +626,28 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(956,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_146)?;
     // FluentTheme.xaml(958,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_147)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_147)?;
     // FluentTheme.xaml(959,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_148)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_148)?;
     // FluentTheme.xaml(963,44) Content (resource)
     let value_12 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291136249_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 963, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_12))), 963, 44)?;
     // FluentTheme.xaml(964,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_149)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_149)?;
     // FluentTheme.xaml(965,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_150)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_150)?;
     // FluentTheme.xaml(968,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_151)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_151)?;
     // FluentTheme.xaml(969,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_152)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_152)?;
     // FluentTheme.xaml(971,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "HyperlinkButtonForegroundVisitedPressed", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_874, 971, 8)?;
     // FluentTheme.xaml(972,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_153)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_153)?;
     // FluentTheme.xaml(973,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_154)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_154)?;
     // FluentTheme.xaml(975,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_155)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_155)?;
     // FluentTheme.xaml(982,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 982, 47)?, rt::string_object("ComboBoxThemeMinWidth"), rt::to_object(64.0_f64)), 982, 47)?;
     // FluentTheme.xaml(983,55) Content (resource)
@@ -656,7 +656,7 @@ fn populate_fluenttheme_xaml_unit_3(
     let value_13 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 986, 57)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 986, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_13))), 986, 57)?;
     // FluentTheme.xaml(987,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_157)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_157)?;
     // FluentTheme.xaml(1044,56) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_158)?;
     // FluentTheme.xaml(1051,51) Content (resource)
@@ -668,11 +668,11 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1057,58) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_160)?;
     // FluentTheme.xaml(1060,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_161)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_161)?;
     // FluentTheme.xaml(1082,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_162)?;
     // FluentTheme.xaml(1084,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_163)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_163)?;
     // FluentTheme.xaml(1086,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1086, 66)?, rt::string_object("MenuFlyoutPresenterBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1086, 66)?;
     // FluentTheme.xaml(1088,59) Content (resource)
@@ -680,56 +680,56 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1089,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_164)?;
     // FluentTheme.xaml(1094,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_165)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_165)?;
     // FluentTheme.xaml(1102,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1102, 55)?, rt::string_object("TextControlPlaceholderOpacity"), rt::to_object(0.5_f64)), 1102, 55)?;
     // FluentTheme.xaml(1103,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_166)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_166)?;
     // FluentTheme.xaml(1133,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1133, 55)?, rt::string_object("CheckBoxBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1133, 55)?;
     // FluentTheme.xaml(1134,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_167)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_167)?;
     // FluentTheme.xaml(1180,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_168)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_168)?;
     // FluentTheme.xaml(1184,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_169)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_169)?;
     // FluentTheme.xaml(1187,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_170)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_170)?;
     // FluentTheme.xaml(1191,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_171)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_171)?;
     // FluentTheme.xaml(1200,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_172)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_172)?;
     // FluentTheme.xaml(1204,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_173)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_173)?;
     // FluentTheme.xaml(1207,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_174)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_174)?;
     // FluentTheme.xaml(1211,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_175)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_175)?;
     // FluentTheme.xaml(1268,42) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_176)?;
     // FluentTheme.xaml(1271,55) Content (resource)
     let value_14 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 1271, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1271, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_14))), 1271, 55)?;
     // FluentTheme.xaml(1275,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_177)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_177)?;
     // FluentTheme.xaml(1288,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_178)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_178)?;
     // FluentTheme.xaml(1289,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ExpanderChevronBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1081, 1289, 8)?;
     // FluentTheme.xaml(1291,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_179)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_179)?;
     // FluentTheme.xaml(1293,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_180)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_180)?;
     // FluentTheme.xaml(1297,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_181)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_181)?;
     // FluentTheme.xaml(1303,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_182)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_182)?;
     // FluentTheme.xaml(1307,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_183)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_183)?;
     // FluentTheme.xaml(1308,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_184)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_184)?;
     // FluentTheme.xaml(1309,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_185)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_185)?;
     // FluentTheme.xaml(1310,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "NotificationCardInformationBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1097, 1310, 8)?;
     // FluentTheme.xaml(1311,8) Content (resource)
@@ -744,47 +744,47 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1317,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1317, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 1317, 57)?;
     // FluentTheme.xaml(1318,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_186)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_186)?;
     // FluentTheme.xaml(1342,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_187)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_187)?;
     // FluentTheme.xaml(1346,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_188)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_188)?;
     // FluentTheme.xaml(1349,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_189)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_189)?;
     // FluentTheme.xaml(1353,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_190)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_190)?;
     // FluentTheme.xaml(1366,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_191)?;
     // FluentTheme.xaml(1368,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1368, 53)?, rt::string_object("SliderBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 1368, 53)?;
     // FluentTheme.xaml(1369,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_192)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_192)?;
     // FluentTheme.xaml(1374,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_193)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_193)?;
     // FluentTheme.xaml(1376,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_194)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_194)?;
     // FluentTheme.xaml(1390,56) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_195)?;
     // FluentTheme.xaml(1392,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_196)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_196)?;
     // FluentTheme.xaml(1407,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_197)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_197)?;
     // FluentTheme.xaml(1409,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_198)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_198)?;
     // FluentTheme.xaml(1411,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_199)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_199)?;
     // FluentTheme.xaml(1413,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_200)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_200)?;
     // FluentTheme.xaml(1424,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1424, 53)?, rt::string_object("ToolTipContentThemeFontSize"), rt::to_object(12.0_f64)), 1424, 53)?;
     // FluentTheme.xaml(1425,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1425, 54)?, rt::string_object("ToolTipBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1425, 54)?;
     // FluentTheme.xaml(1426,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_201)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_201)?;
     // FluentTheme.xaml(1429,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1429, 52)?, rt::string_object("ToolTipBorderThemePadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 5.0_f64, 8.0_f64, 7.0_f64))), 1429, 52)?;
     // FluentTheme.xaml(1432,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_202)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_202)?;
     // FluentTheme.xaml(1495,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1495, 47)?, rt::string_object("TabItemHeaderFontSize"), rt::to_object(24.0_f64)), 1495, 47)?;
     // FluentTheme.xaml(1496,46) Content (resource)
@@ -793,57 +793,57 @@ fn populate_fluenttheme_xaml_unit_3(
     let value_16 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 1498, 56)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1498, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_16))), 1498, 56)?;
     // FluentTheme.xaml(1499,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_204)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_204)?;
     // FluentTheme.xaml(1528,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1528, 60)?, rt::string_object("ScrollBarTrackBorderThemeThickness"), rt::to_object(0.0_f64)), 1528, 60)?;
     // FluentTheme.xaml(1529,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_205)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_205)?;
     // FluentTheme.xaml(1549,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ScrollBarTrackFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1267, 1549, 8)?;
     // FluentTheme.xaml(1550,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ScrollBarTrackFillPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1268, 1550, 8)?;
     // FluentTheme.xaml(1552,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_206)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_206)?;
     // FluentTheme.xaml(1556,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_207)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_207)?;
     // FluentTheme.xaml(1558,39) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_208)?;
     // FluentTheme.xaml(1562,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_209)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_209)?;
     // FluentTheme.xaml(1599,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1599, 59)?, rt::string_object("TreeViewItemBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1599, 59)?;
     // FluentTheme.xaml(1600,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1600, 47)?, rt::string_object("TreeViewItemMinHeight"), rt::to_object(32.0_f64)), 1600, 47)?;
     // FluentTheme.xaml(1603,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_210)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_210)?;
     // FluentTheme.xaml(1604,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SplitButtonBackgroundPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1299, 1604, 8)?;
     // FluentTheme.xaml(1606,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_211)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_211)?;
     // FluentTheme.xaml(1609,8) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_212)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_212)?;
     // FluentTheme.xaml(1611,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_213)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_213)?;
     // FluentTheme.xaml(1633,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1633, 58)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1633, 58)?;
     // FluentTheme.xaml(1636,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_214)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_214)?;
     // FluentTheme.xaml(1666,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1666, 65)?, rt::string_object("CalendarDatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 1666, 65)?;
     // FluentTheme.xaml(1669,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_215)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_215)?;
     // FluentTheme.xaml(1673,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "ScrollViewerScrollBarsSeparatorBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1342, 1673, 8)?;
     // FluentTheme.xaml(1677,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_216)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_216)?;
     // FluentTheme.xaml(1684,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_217)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_217)?;
     // FluentTheme.xaml(1690,55) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "TableViewRowBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1350, 1690, 55)?;
     // FluentTheme.xaml(1691,63) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "TableViewRowBackgroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1351, 1691, 63)?;
     // FluentTheme.xaml(1692,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_218)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_218)?;
     ::core::result::Result::Ok(())
 }
 
@@ -859,7 +859,7 @@ fn populate_fluenttheme_xaml_unit_4(
     // FluentTheme.xaml(7,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 51)?, rt::string_object("ControlContentThemeFontSize"), rt::to_object(14.0_f64)), 7, 51)?;
     // FluentTheme.xaml(9,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_219)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_219)?;
     // FluentTheme.xaml(10,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 10, 44)?, rt::string_object("UseSystemFocusVisuals"), rt::to_object(::core::clone::Clone::clone(&true))), 10, 44)?;
     // FluentTheme.xaml(11,54) Content (resource)
@@ -922,323 +922,471 @@ fn populate_fluenttheme_xaml_unit_5(
     ::core::result::Result::Ok(())
 }
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_0: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlBackgroundAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 122, position: 8, value_line: 122, value_position: 67 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_0: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 17, 1, 122, 8, 122, 67,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_1: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 123, position: 8, value_line: 123, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 124, position: 8, value_line: 125, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 126, position: 8, value_line: 126, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumLowBrush", color_key: "SystemAltMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 127, position: 8, value_line: 128, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 129, position: 8, value_line: 129, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 130, position: 8, value_line: 130, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 131, position: 8, value_line: 131, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 132, position: 8, value_line: 133, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 134, position: 8, value_line: 135, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackHighBrush", color_key: "SystemChromeBlackHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 136, position: 8, value_line: 137, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackMediumBrush", color_key: "SystemChromeBlackMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 138, position: 8, value_line: 139, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackLowBrush", color_key: "SystemChromeBlackLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 140, position: 8, value_line: 141, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 142, position: 8, value_line: 143, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeMediumBrush", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 144, position: 8, value_line: 145, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 146, position: 8, value_line: 147, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 148, position: 8, value_line: 148, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 149, position: 8, value_line: 149, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 150, position: 8, value_line: 150, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 18, 1, 123, 8, 123, 68,
+        53, 41, 94, 24, 1, 124, 8, 125, 24,
+        118, 37, 155, 20, 1, 126, 8, 126, 70,
+        175, 40, 215, 23, 1, 127, 8, 128, 24,
+        238, 36, 274, 19, 1, 129, 8, 129, 69,
+        293, 35, 328, 18, 1, 130, 8, 130, 68,
+        346, 38, 384, 21, 1, 131, 8, 131, 71,
+        405, 42, 447, 25, 1, 132, 8, 133, 24,
+        472, 41, 513, 24, 1, 134, 8, 135, 24,
+        537, 43, 580, 26, 1, 136, 8, 137, 24,
+        606, 45, 651, 28, 1, 138, 8, 139, 24,
+        679, 42, 721, 25, 1, 140, 8, 141, 24,
+        746, 48, 794, 31, 1, 142, 8, 143, 24,
+        825, 40, 865, 23, 1, 144, 8, 145, 24,
+        888, 43, 931, 26, 1, 146, 8, 147, 24,
+        957, 39, 996, 22, 1, 148, 8, 148, 72,
+        1018, 35, 1053, 18, 1, 149, 8, 149, 68,
+        1071, 38, 1109, 21, 1, 150, 8, 150, 71,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_2: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlDisabledAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 151, position: 8, value_line: 151, value_position: 65 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 32, 32, 17, 1, 151, 8, 151, 65,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_3: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 152, position: 8, value_line: 152, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 153, position: 8, value_line: 153, value_position: 66 },
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 154, position: 8, value_line: 155, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeDisabledHighBrush", color_key: "SystemChromeDisabledHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 156, position: 8, value_line: 157, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeDisabledLowBrush", color_key: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 158, position: 8, value_line: 159, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 160, position: 8, value_line: 160, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 161, position: 8, value_line: 162, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 163, position: 8, value_line: 163, value_position: 69 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 19, 1, 152, 8, 152, 67,
+        53, 33, 86, 18, 1, 153, 8, 153, 66,
+        104, 39, 143, 24, 1, 154, 8, 155, 24,
+        167, 44, 211, 29, 1, 156, 8, 157, 24,
+        240, 43, 283, 28, 1, 158, 8, 159, 24,
+        311, 36, 347, 21, 1, 160, 8, 160, 69,
+        368, 41, 409, 26, 1, 161, 8, 162, 24,
+        435, 36, 471, 21, 1, 163, 8, 163, 69,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_4: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlDisabledTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 164, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 65535, 255, 1, 164, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_5: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlFocusVisualPrimaryBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 165, position: 8, value_line: 165, value_position: 69 },
-    rt::DynamicBrushRow { key: "SystemControlFocusVisualSecondaryBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 166, position: 8, value_line: 166, value_position: 71 },
-    rt::DynamicBrushRow { key: "SystemControlRevealFocusVisualBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 167, position: 8, value_line: 167, value_position: 68 },
-    rt::DynamicBrushRow { key: "SystemControlForegroundAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 168, position: 8, value_line: 168, value_position: 67 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlFocusVisualPrimaryBrushSystemBaseHighColorSystemControlFocusVisualSecondaryBrushSystemAltMediumColorSystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 36, 36, 19, 1, 165, 8, 165, 69,
+        55, 38, 93, 20, 1, 166, 8, 166, 71,
+        113, 35, 148, 17, 1, 167, 8, 167, 68,
+        165, 34, 148, 17, 1, 168, 8, 168, 67,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_6: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlForegroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 169, position: 8, value_line: 169, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 170, position: 8, value_line: 171, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 172, position: 8, value_line: 172, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 173, position: 8, value_line: 173, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 174, position: 8, value_line: 174, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 175, position: 8, value_line: 176, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 177, position: 8, value_line: 178, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackHighBrush", color_key: "SystemChromeBlackHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 179, position: 8, value_line: 180, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 181, position: 8, value_line: 181, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeMediumBrush", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 182, position: 8, value_line: 183, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeDisabledLowBrush", color_key: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 184, position: 8, value_line: 185, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 186, position: 8, value_line: 186, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackMediumBrush", color_key: "SystemChromeBlackMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 187, position: 8, value_line: 188, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 189, position: 8, value_line: 190, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeGrayBrush", color_key: "SystemChromeGrayColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 191, position: 8, value_line: 191, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 192, position: 8, value_line: 192, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 193, position: 8, value_line: 193, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 18, 1, 169, 8, 169, 68,
+        53, 41, 94, 24, 1, 170, 8, 171, 24,
+        118, 36, 154, 19, 1, 172, 8, 172, 69,
+        173, 35, 208, 18, 1, 173, 8, 173, 68,
+        226, 38, 264, 21, 1, 174, 8, 174, 71,
+        285, 42, 327, 25, 1, 175, 8, 176, 24,
+        352, 41, 393, 24, 1, 177, 8, 178, 24,
+        417, 43, 460, 26, 1, 179, 8, 180, 24,
+        486, 38, 524, 21, 1, 181, 8, 181, 71,
+        545, 40, 585, 23, 1, 182, 8, 183, 24,
+        608, 45, 653, 28, 1, 184, 8, 185, 24,
+        681, 39, 720, 22, 1, 186, 8, 186, 72,
+        742, 45, 787, 28, 1, 187, 8, 188, 24,
+        815, 48, 863, 31, 1, 189, 8, 190, 24,
+        894, 38, 932, 21, 1, 191, 8, 191, 71,
+        953, 35, 988, 18, 1, 192, 8, 192, 68,
+        1006, 38, 1044, 21, 1, 193, 8, 193, 71,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_7: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlForegroundTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 194, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlForegroundTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 39, 65535, 255, 1, 194, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_8: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHighlightAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 195, position: 8, value_line: 195, value_position: 66 },
-    rt::DynamicBrushRow { key: "SystemControlHighlightAltAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 196, position: 8, value_line: 196, value_position: 69 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 33, 33, 17, 1, 195, 8, 195, 66,
+        50, 36, 33, 17, 1, 196, 8, 196, 69,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_9: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightAltAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 197, position: 8, value_line: 197, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 198, position: 8, value_line: 198, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 199, position: 8, value_line: 199, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 200, position: 8, value_line: 200, value_position: 73 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 201, position: 8, value_line: 202, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 203, position: 8, value_line: 204, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 205, position: 8, value_line: 206, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 18, 1, 197, 8, 197, 70,
+        55, 38, 93, 19, 1, 198, 8, 198, 71,
+        112, 37, 149, 18, 1, 199, 8, 199, 70,
+        167, 40, 207, 21, 1, 200, 8, 200, 73,
+        228, 44, 272, 25, 1, 201, 8, 202, 24,
+        297, 43, 340, 24, 1, 203, 8, 204, 24,
+        364, 43, 407, 24, 1, 205, 8, 206, 24,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_10: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightAltChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 213, position: 8, value_line: 214, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 41, 41, 22, 1, 213, 8, 214, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_11: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightAltTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 215, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 41, 65535, 255, 1, 215, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_12: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 216, position: 8, value_line: 216, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 217, position: 8, value_line: 217, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 218, position: 8, value_line: 218, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 219, position: 8, value_line: 220, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 221, position: 8, value_line: 222, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeAltLowBrush", color_key: "SystemChromeAltLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 223, position: 8, value_line: 223, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 224, position: 8, value_line: 224, value_position: 70 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 19, 1, 216, 8, 216, 68,
+        54, 34, 88, 18, 1, 217, 8, 217, 67,
+        106, 37, 143, 21, 1, 218, 8, 218, 70,
+        164, 41, 205, 25, 1, 219, 8, 220, 24,
+        230, 40, 270, 24, 1, 221, 8, 222, 24,
+        294, 39, 333, 23, 1, 223, 8, 223, 72,
+        356, 37, 393, 21, 1, 224, 8, 224, 70,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_13: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 231, position: 8, value_line: 231, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 232, position: 8, value_line: 232, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 233, position: 8, value_line: 233, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 21, 1, 231, 8, 231, 70,
+        58, 34, 92, 18, 1, 232, 8, 232, 67,
+        110, 38, 148, 22, 1, 233, 8, 233, 71,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_14: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 234, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 38, 65535, 255, 1, 234, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_15: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHyperlinkTextBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 235, position: 8, value_line: 235, value_position: 64 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 31, 31, 17, 1, 235, 8, 235, 64,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_16: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 236, position: 8, value_line: 236, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 237, position: 8, value_line: 237, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 238, position: 8, value_line: 239, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 240, position: 8, value_line: 240, value_position: 74 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 241, position: 8, value_line: 241, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundMediumAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 242, position: 8, value_line: 243, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 244, position: 8, value_line: 244, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 245, position: 8, value_line: 246, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 247, position: 8, value_line: 247, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundChromeLowBrush", color_key: "SystemChromeLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 248, position: 8, value_line: 248, value_position: 74 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 249, position: 8, value_line: 250, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 19, 1, 236, 8, 236, 68,
+        54, 37, 91, 21, 1, 237, 8, 237, 70,
+        112, 41, 153, 25, 1, 238, 8, 239, 24,
+        178, 41, 219, 20, 1, 240, 8, 240, 74,
+        239, 39, 278, 18, 1, 241, 8, 241, 72,
+        296, 47, 219, 20, 1, 242, 8, 243, 24,
+        343, 39, 382, 18, 1, 244, 8, 244, 72,
+        400, 42, 91, 21, 1, 245, 8, 246, 24,
+        442, 39, 481, 18, 1, 247, 8, 247, 72,
+        499, 41, 540, 20, 1, 248, 8, 248, 74,
+        560, 47, 607, 26, 1, 249, 8, 250, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_17: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlPageBackgroundTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 251, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlPageBackgroundTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 43, 65535, 255, 1, 251, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_18: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlPageTextBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 252, position: 8, value_line: 252, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlPageTextBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 253, position: 8, value_line: 253, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlPageTextChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 254, position: 8, value_line: 255, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlErrorTextForegroundBrush", color_key: "SystemErrorTextColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 256, position: 8, value_line: 256, value_position: 70 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_18: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 19, 1, 252, 8, 252, 67,
+        53, 36, 89, 21, 1, 253, 8, 253, 69,
+        110, 46, 156, 31, 1, 254, 8, 255, 24,
+        187, 37, 224, 20, 1, 256, 8, 256, 70,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_19: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightListLowRevealBackgroundBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 258, position: 8, value_line: 259, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightListMediumRevealBackgroundBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 260, position: 8, value_line: 261, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightListLowRevealBackgroundBrushSystemListMediumColorSystemControlHighlightListMediumRevealBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 50, 50, 21, 1, 258, 8, 259, 24,
+        71, 53, 50, 21, 1, 260, 8, 261, 24,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_20: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHighlightAccentRevealBackgroundBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 262, position: 8, value_line: 263, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAccentRevealBackgroundBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 49, 49, 17, 1, 262, 8, 263, 24,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_21: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeWhiteRevealBorderBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 268, position: 8, value_line: 269, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundChromeWhiteRevealBorderBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 51, 51, 22, 1, 268, 8, 269, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_22: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightAltTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 270, position: 8 },
-    rt::LiteralBrushRow { key: "SystemControlBackgroundTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 271, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 53, 65535, 255, 1, 270, 8,
+        53, 51, 65535, 255, 1, 271, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_23: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlTransientBackgroundBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 272, position: 8, value_line: 273, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_23: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlTransientBackgroundBrushSystemChromeMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 26, 1, 272, 8, 273, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_24: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SystemControlDescriptionTextForegroundBrush", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 274, position: 8, value_line: 274, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_24: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 43, 43, 36, 1, 274, 8, 274, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_25: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlTransparentRevealBackgroundBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 277, position: 8 },
-    rt::LiteralBrushRow { key: "SystemControlTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 278, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_25: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 45, 65535, 255, 1, 277, 8,
+        45, 41, 65535, 255, 1, 278, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_26: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemRegionBrush", color_key: "SystemRegionColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 280, position: 8, value_line: 280, value_position: 50 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_26: rt::PackedRows = rt::PackedRows {
+    strings: "SystemRegionBrushSystemRegionColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 17, 17, 17, 1, 280, 8, 280, 50,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_27: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "AccentButtonBackground", target: "SystemControlBackgroundAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 7, position: 8, value_line: 7, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundSystemControlBackgroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 34, 1, 7, 8, 7, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_28: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "AccentButtonBackgroundPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 8, position: 8, value_line: 8, value_position: 66 },
-    rt::DynamicBrushRow { key: "AccentButtonBackgroundPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 9, position: 8, value_line: 9, value_position: 62 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 23, 1, 8, 8, 8, 66,
+        56, 29, 85, 22, 1, 9, 8, 9, 62,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_29: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "AccentButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 10, position: 8, value_line: 10, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForeground", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 11, position: 8, value_line: 11, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundPointerOver", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 12, position: 8, value_line: 12, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundPressed", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 13, position: 8, value_line: 13, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 14, position: 8, value_line: 14, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 15, position: 8, value_line: 15, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 16, position: 8, value_line: 16, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 17, position: 8, value_line: 17, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 18, position: 8, value_line: 18, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_29: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 30, 30, 35, 1, 10, 8, 10, 8,
+        65, 22, 87, 39, 1, 11, 8, 11, 8,
+        126, 33, 87, 39, 1, 12, 8, 12, 8,
+        159, 29, 87, 39, 1, 13, 8, 13, 8,
+        188, 30, 218, 39, 1, 14, 8, 14, 8,
+        257, 23, 280, 39, 1, 15, 8, 15, 8,
+        319, 34, 280, 39, 1, 16, 8, 16, 8,
+        353, 30, 383, 38, 1, 17, 8, 17, 8,
+        421, 31, 452, 37, 1, 18, 8, 18, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_30: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 20, position: 8, value_line: 20, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_30: rt::PackedRows = rt::PackedRows {
+    strings: "ButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 16, 16, 35, 1, 20, 8, 20, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_31: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 22, position: 8, value_line: 22, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 23, position: 8, value_line: 23, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 24, position: 8, value_line: 24, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 25, position: 8, value_line: 25, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 26, position: 8, value_line: 26, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 27, position: 8, value_line: 27, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 28, position: 8, value_line: 28, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 29, position: 8, value_line: 29, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 30, position: 8, value_line: 30, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 31, position: 8, value_line: 31, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 34, position: 8, value_line: 34, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_31: rt::PackedRows = rt::PackedRows {
+    strings: "ButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushButtonForegroundSystemControlForegroundBaseHighBrushButtonForegroundPointerOverSystemControlHighlightBaseHighBrushButtonForegroundPressedButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushButtonBorderBrushSystemControlForegroundTransparentBrushButtonBorderBrushPointerOverButtonBorderBrushPressedSystemControlHighlightTransparentBrushButtonBorderBrushDisabledSystemControlDisabledTransparentBrushRepeatButtonBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 23, 23, 41, 1, 22, 8, 22, 8,
+        64, 24, 88, 35, 1, 23, 8, 23, 8,
+        123, 16, 139, 36, 1, 24, 8, 24, 8,
+        175, 27, 202, 35, 1, 25, 8, 25, 8,
+        237, 23, 202, 35, 1, 26, 8, 26, 8,
+        260, 24, 284, 39, 1, 27, 8, 27, 8,
+        323, 17, 340, 39, 1, 28, 8, 28, 8,
+        379, 28, 340, 39, 1, 29, 8, 29, 8,
+        407, 24, 431, 38, 1, 30, 8, 30, 8,
+        469, 25, 494, 37, 1, 31, 8, 31, 8,
+        531, 22, 88, 35, 1, 34, 8, 34, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_32: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RepeatButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 37, position: 8, value_line: 37, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 38, position: 8, value_line: 38, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 39, position: 8, value_line: 39, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 40, position: 8, value_line: 40, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 41, position: 8, value_line: 41, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 42, position: 8, value_line: 42, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 43, position: 8, value_line: 43, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 44, position: 8, value_line: 44, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 45, position: 8, value_line: 45, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 46, position: 8, value_line: 46, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_32: rt::PackedRows = rt::PackedRows {
+    strings: "RepeatButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushRepeatButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushRepeatButtonForegroundSystemControlForegroundBaseHighBrushRepeatButtonForegroundPointerOverSystemControlHighlightBaseHighBrushRepeatButtonForegroundPressedRepeatButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRepeatButtonBorderBrushSystemControlForegroundTransparentBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedSystemControlHighlightTransparentBrushRepeatButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 41, 1, 37, 8, 37, 8,
+        70, 30, 100, 35, 1, 38, 8, 38, 8,
+        135, 22, 157, 36, 1, 39, 8, 39, 8,
+        193, 33, 226, 35, 1, 40, 8, 40, 8,
+        261, 29, 226, 35, 1, 41, 8, 41, 8,
+        290, 30, 320, 39, 1, 42, 8, 42, 8,
+        359, 23, 382, 39, 1, 43, 8, 43, 8,
+        421, 34, 382, 39, 1, 44, 8, 44, 8,
+        455, 30, 485, 38, 1, 45, 8, 45, 8,
+        523, 31, 554, 37, 1, 46, 8, 46, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_33: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 50, position: 8, value_line: 50, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_33: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 35, 1, 50, 8, 50, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_34: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 53, position: 8, value_line: 53, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 54, position: 8, value_line: 54, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 55, position: 8, value_line: 55, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_34: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 41, 1, 53, 8, 53, 8,
+        70, 30, 100, 35, 1, 54, 8, 54, 8,
+        135, 29, 164, 33, 1, 55, 8, 55, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_35: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "ToggleButtonBackgroundCheckedPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 56, position: 8, value_line: 57, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_35: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundCheckedPointerOverSystemAccentColorLight1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 40, 40, 23, 1, 56, 8, 57, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_36: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundCheckedPressed", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 58, position: 8, value_line: 58, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundCheckedDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 60, position: 8, value_line: 60, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminate", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 61, position: 8, value_line: 61, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminatePointerOver", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 62, position: 8, value_line: 62, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminatePressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 64, position: 8, value_line: 64, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminateDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 66, position: 8, value_line: 66, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 68, position: 8, value_line: 68, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 69, position: 8, value_line: 69, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 70, position: 8, value_line: 70, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 71, position: 8, value_line: 71, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 72, position: 8, value_line: 72, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 73, position: 8, value_line: 73, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 75, position: 8, value_line: 75, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 77, position: 8, value_line: 77, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminate", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 79, position: 8, value_line: 79, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminatePointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 80, position: 8, value_line: 80, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminatePressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 82, position: 8, value_line: 82, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminateDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 84, position: 8, value_line: 84, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 86, position: 8, value_line: 86, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 87, position: 8, value_line: 87, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 88, position: 8, value_line: 88, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 89, position: 8, value_line: 89, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushChecked", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 90, position: 8, value_line: 90, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedPointerOver", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 91, position: 8, value_line: 91, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 93, position: 8, value_line: 93, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 94, position: 8, value_line: 94, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminate", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 96, position: 8, value_line: 96, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminatePointerOver", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 98, position: 8, value_line: 98, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminatePressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 100, position: 8, value_line: 100, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminateDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 102, position: 8, value_line: 102, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_36: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundSystemControlForegroundBaseHighBrushToggleButtonForegroundPointerOverSystemControlHighlightBaseHighBrushToggleButtonForegroundPressedToggleButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushSystemControlForegroundTransparentBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedSystemControlHighlightTransparentBrushToggleButtonBorderBrushDisabledSystemControlDisabledTransparentBrushToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 36, 40, 1, 58, 8, 58, 8,
+        76, 37, 113, 35, 1, 60, 8, 60, 8,
+        148, 35, 113, 35, 1, 61, 8, 61, 8,
+        183, 46, 113, 35, 1, 62, 8, 62, 8,
+        229, 42, 271, 41, 1, 64, 8, 64, 8,
+        312, 43, 113, 35, 1, 66, 8, 66, 8,
+        355, 22, 377, 36, 1, 68, 8, 68, 8,
+        413, 33, 446, 35, 1, 69, 8, 69, 8,
+        481, 29, 446, 35, 1, 70, 8, 70, 8,
+        510, 30, 540, 39, 1, 71, 8, 71, 8,
+        579, 29, 608, 41, 1, 72, 8, 72, 8,
+        649, 40, 608, 41, 1, 73, 8, 73, 8,
+        689, 36, 608, 41, 1, 75, 8, 75, 8,
+        725, 37, 540, 39, 1, 77, 8, 77, 8,
+        762, 35, 377, 36, 1, 79, 8, 79, 8,
+        797, 46, 446, 35, 1, 80, 8, 80, 8,
+        843, 42, 446, 35, 1, 82, 8, 82, 8,
+        885, 43, 540, 39, 1, 84, 8, 84, 8,
+        928, 23, 951, 39, 1, 86, 8, 86, 8,
+        990, 34, 951, 39, 1, 87, 8, 87, 8,
+        1024, 30, 1054, 38, 1, 88, 8, 88, 8,
+        1092, 31, 1123, 37, 1, 89, 8, 89, 8,
+        1160, 30, 1190, 41, 1, 90, 8, 90, 8,
+        1231, 41, 1190, 41, 1, 91, 8, 91, 8,
+        1272, 37, 1309, 29, 1, 93, 8, 93, 8,
+        1338, 38, 1123, 37, 1, 94, 8, 94, 8,
+        1376, 36, 951, 39, 1, 96, 8, 96, 8,
+        1412, 47, 36, 40, 1, 98, 8, 98, 8,
+        1459, 43, 1054, 38, 1, 100, 8, 100, 8,
+        1502, 44, 1123, 37, 1, 102, 8, 102, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_37: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1246,59 +1394,95 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_37: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "GroupBoxBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 109, position: 50 },
 ];
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_38: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "GroupBoxBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 110, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_38: rt::PackedRows = rt::PackedRows {
+    strings: "GroupBoxBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 18, 65535, 255, 1, 110, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_39: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "GroupBoxBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 111, position: 8, value_line: 111, value_position: 8 },
-    rt::ResourceAliasRow { key: "GroupBoxHeaderForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 112, position: 8, value_line: 112, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_39: rt::PackedRows = rt::PackedRows {
+    strings: "GroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 19, 19, 38, 1, 111, 8, 111, 8,
+        57, 24, 81, 19, 1, 112, 8, 112, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_40: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 116, position: 8, value_line: 116, value_position: 54 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_40: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkVisitedBrushHyperlinkVisitedColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 21, 1, 116, 8, 116, 54,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_41: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "HyperlinkButtonForeground", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 117, position: 8, value_line: 117, value_position: 58 },
-    rt::DynamicBrushRow { key: "HyperlinkButtonForegroundPointerOver", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 118, position: 8, value_line: 118, value_position: 69 },
-    rt::DynamicBrushRow { key: "HyperlinkButtonForegroundPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 119, position: 8, value_line: 119, value_position: 65 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_41: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundSystemAccentColorHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 17, 1, 117, 8, 117, 58,
+        42, 36, 25, 17, 1, 118, 8, 118, 69,
+        78, 32, 110, 22, 1, 119, 8, 119, 65,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_42: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 120, position: 8, value_line: 120, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_42: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 39, 1, 120, 8, 120, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_43: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "HyperlinkButtonForegroundVisited", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 121, position: 8, value_line: 121, value_position: 65 },
-    rt::StaticBrushRow { key: "HyperlinkButtonForegroundVisitedPointerOver", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 122, position: 8, value_line: 122, value_position: 76 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_43: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundVisitedHyperlinkVisitedColorHyperlinkButtonForegroundVisitedPointerOver",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 21, 1, 121, 8, 121, 65,
+        53, 43, 32, 21, 1, 122, 8, 122, 76,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_44: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 124, position: 8, value_line: 124, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_44: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundSystemControlTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 29, 1, 124, 8, 124, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_45: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "HyperlinkButtonBackgroundPointerOver", color: 150994944_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 125, position: 8 },
-    rt::LiteralBrushRow { key: "HyperlinkButtonBackgroundPressed", color: 100663296_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 126, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_45: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressed",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 0, 2304, 1, 125, 8,
+        36, 32, 0, 1536, 1, 126, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_46: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 127, position: 8, value_line: 127, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 128, position: 8, value_line: 128, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 129, position: 8, value_line: 129, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 130, position: 8, value_line: 130, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 131, position: 8, value_line: 131, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_46: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundDisabledSystemControlTransparentBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 29, 1, 127, 8, 127, 8,
+        62, 26, 33, 29, 1, 128, 8, 128, 8,
+        88, 37, 33, 29, 1, 129, 8, 129, 8,
+        125, 33, 33, 29, 1, 130, 8, 130, 8,
+        158, 34, 33, 29, 1, 131, 8, 131, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_47: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1307,55 +1491,59 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_47: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 137, position: 51 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_48: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ComboBoxItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 139, position: 8, value_line: 139, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 140, position: 8, value_line: 140, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 141, position: 8, value_line: 141, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 142, position: 8, value_line: 142, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 143, position: 8, value_line: 143, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 144, position: 8, value_line: 144, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 146, position: 8, value_line: 146, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 148, position: 8, value_line: 148, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 150, position: 8, value_line: 150, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 151, position: 8, value_line: 151, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 152, position: 8, value_line: 152, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 153, position: 8, value_line: 153, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelected", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 154, position: 8, value_line: 154, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedPressed", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 155, position: 8, value_line: 155, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedPointerOver", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 157, position: 8, value_line: 157, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 159, position: 8, value_line: 159, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 160, position: 8, value_line: 160, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 161, position: 8, value_line: 161, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 162, position: 8, value_line: 162, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 163, position: 8, value_line: 163, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 164, position: 8, value_line: 164, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 165, position: 8, value_line: 165, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 166, position: 8, value_line: 166, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 167, position: 8, value_line: 167, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 168, position: 8, value_line: 168, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundPressed", target: "SystemControlBackgroundListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 169, position: 8, value_line: 169, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 170, position: 8, value_line: 170, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundUnfocused", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 171, position: 8, value_line: 171, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundBorderBrushFocused", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 172, position: 8, value_line: 172, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundBorderBrushUnfocused", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 173, position: 8, value_line: 173, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 175, position: 8, value_line: 175, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 176, position: 8, value_line: 176, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundFocused", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 177, position: 8, value_line: 177, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundFocusedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 178, position: 8, value_line: 178, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxPlaceHolderForeground", target: "SystemControlPageTextBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 179, position: 8, value_line: 179, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxPlaceHolderForegroundFocusedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 180, position: 8, value_line: 180, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 182, position: 8, value_line: 182, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 183, position: 8, value_line: 183, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 184, position: 8, value_line: 184, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 185, position: 8, value_line: 185, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 186, position: 8, value_line: 186, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 187, position: 8, value_line: 187, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundFocused", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 189, position: 8, value_line: 189, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundFocusedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 191, position: 8, value_line: 191, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 193, position: 8, value_line: 193, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 194, position: 8, value_line: 194, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
+    strings: "ComboBoxItemForegroundSystemControlForegroundBaseHighBrushComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSystemControlTransparentBrushComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledSystemControlBackgroundBaseLowBrushComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedSystemControlHighlightTransparentBrushComboBoxBackgroundBorderBrushUnfocusedSystemControlHighlightBaseMediumLowBrushComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushSystemControlForegroundBaseMediumBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 36, 1, 139, 8, 139, 8,
+        58, 29, 87, 38, 1, 140, 8, 140, 8,
+        125, 33, 87, 38, 1, 141, 8, 141, 8,
+        158, 30, 188, 39, 1, 142, 8, 142, 8,
+        227, 30, 87, 38, 1, 143, 8, 143, 8,
+        257, 37, 87, 38, 1, 144, 8, 144, 8,
+        294, 41, 87, 38, 1, 146, 8, 146, 8,
+        335, 38, 188, 39, 1, 148, 8, 148, 8,
+        373, 22, 395, 29, 1, 150, 8, 150, 8,
+        424, 29, 453, 37, 1, 151, 8, 151, 8,
+        490, 33, 523, 34, 1, 152, 8, 152, 8,
+        557, 30, 395, 29, 1, 153, 8, 153, 8,
+        587, 30, 617, 40, 1, 154, 8, 154, 8,
+        657, 37, 694, 41, 1, 155, 8, 155, 8,
+        735, 41, 776, 43, 1, 157, 8, 157, 8,
+        819, 38, 395, 29, 1, 159, 8, 159, 8,
+        857, 30, 395, 29, 1, 160, 8, 160, 8,
+        887, 34, 395, 29, 1, 161, 8, 161, 8,
+        921, 31, 395, 29, 1, 162, 8, 162, 8,
+        952, 31, 395, 29, 1, 163, 8, 163, 8,
+        983, 38, 395, 29, 1, 164, 8, 164, 8,
+        1021, 42, 395, 29, 1, 165, 8, 165, 8,
+        1063, 39, 395, 29, 1, 166, 8, 166, 8,
+        1102, 18, 1120, 40, 1, 167, 8, 167, 8,
+        1160, 29, 1189, 41, 1, 168, 8, 168, 8,
+        1230, 25, 1255, 38, 1, 169, 8, 169, 8,
+        1293, 26, 1319, 35, 1, 170, 8, 170, 8,
+        1354, 27, 617, 40, 1, 171, 8, 171, 8,
+        1381, 36, 1417, 38, 1, 172, 8, 172, 8,
+        1455, 38, 1493, 40, 1, 173, 8, 173, 8,
+        1533, 18, 22, 36, 1, 175, 8, 175, 8,
+        1551, 26, 188, 39, 1, 176, 8, 176, 8,
+        1577, 25, 87, 38, 1, 177, 8, 177, 8,
+        1602, 32, 87, 38, 1, 178, 8, 178, 8,
+        1634, 29, 1663, 34, 1, 179, 8, 179, 8,
+        1697, 43, 87, 38, 1, 180, 8, 180, 8,
+        1740, 19, 1759, 38, 1, 182, 8, 182, 8,
+        1797, 30, 1827, 41, 1, 183, 8, 183, 8,
+        1868, 26, 1894, 37, 1, 184, 8, 184, 8,
+        1931, 27, 1958, 33, 1, 185, 8, 185, 8,
+        1991, 31, 2022, 42, 1, 186, 8, 186, 8,
+        2064, 39, 188, 39, 1, 187, 8, 187, 8,
+        2103, 38, 2141, 44, 1, 189, 8, 189, 8,
+        2185, 45, 2141, 44, 1, 191, 8, 191, 8,
+        2230, 26, 2256, 37, 1, 193, 8, 193, 8,
+        2293, 27, 2320, 33, 1, 194, 8, 194, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_49: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1377,26 +1565,30 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_51: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [12.0_f64, 4.0_f64, 12.0_f64, 4.0_f64], line: 210, position: 58 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_52: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 211, position: 8, value_line: 211, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 212, position: 8, value_line: 212, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 213, position: 8, value_line: 213, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 214, position: 8, value_line: 214, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 215, position: 8, value_line: 215, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 216, position: 8, value_line: 216, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 217, position: 8, value_line: 217, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 218, position: 8, value_line: 218, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevron", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 219, position: 8, value_line: 219, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 220, position: 8, value_line: 220, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 221, position: 8, value_line: 221, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronSubMenuOpened", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 222, position: 8, value_line: 222, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 224, position: 8, value_line: 224, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForeground", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 225, position: 8, value_line: 225, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver", target: "SystemControlHighlightAltBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 227, position: 8, value_line: 227, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed", target: "SystemControlHighlightAltBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 229, position: 8, value_line: 229, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 231, position: 8, value_line: 231, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_52: rt::PackedRows = rt::PackedRows {
+    strings: "MenuFlyoutItemBackgroundSystemControlTransparentBrushMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushMenuFlyoutSubItemChevronSystemControlForegroundBaseMediumHighBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 24, 24, 29, 1, 211, 8, 211, 8,
+        53, 35, 88, 34, 1, 212, 8, 212, 8,
+        122, 31, 153, 37, 1, 213, 8, 213, 8,
+        190, 32, 24, 29, 1, 214, 8, 214, 8,
+        222, 24, 246, 36, 1, 215, 8, 215, 8,
+        282, 35, 317, 38, 1, 216, 8, 216, 8,
+        355, 31, 317, 38, 1, 217, 8, 217, 8,
+        386, 32, 418, 39, 1, 218, 8, 218, 8,
+        457, 24, 481, 42, 1, 219, 8, 219, 8,
+        523, 35, 317, 38, 1, 220, 8, 220, 8,
+        558, 31, 317, 38, 1, 221, 8, 221, 8,
+        589, 37, 317, 38, 1, 222, 8, 222, 8,
+        626, 32, 418, 39, 1, 224, 8, 224, 8,
+        658, 47, 705, 38, 1, 225, 8, 225, 8,
+        743, 58, 801, 40, 1, 227, 8, 227, 8,
+        841, 54, 801, 40, 1, 229, 8, 229, 8,
+        895, 55, 418, 39, 1, 231, 8, 231, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_53: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1404,11 +1596,15 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_53: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutItemThemePaddingNarrow", value: [11.0_f64, 4.0_f64, 11.0_f64, 7.0_f64], line: 234, position: 59 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_54: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "MenuFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 235, position: 8, value_line: 235, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 236, position: 8, value_line: 236, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_54: rt::PackedRows = rt::PackedRows {
+    strings: "MenuFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushMenuFlyoutPresenterBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 37, 1, 235, 8, 235, 8,
+        66, 30, 96, 33, 1, 236, 8, 236, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_55: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1416,169 +1612,213 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_55: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "HorizontalMenuFlyoutItemThemePaddingNarrow", value: [8.0_f64, 4.0_f64, 8.0_f64, 7.0_f64], line: 241, position: 69 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_56: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TextControlForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 244, position: 8, value_line: 244, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 245, position: 8, value_line: 245, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundDisabled", target: "SystemControlDisabledChromeDisabledLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 246, position: 8, value_line: 246, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 247, position: 8, value_line: 247, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundPointerOver", target: "SystemControlBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 248, position: 8, value_line: 248, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 249, position: 8, value_line: 249, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushFocused", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 250, position: 8, value_line: 250, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 251, position: 8, value_line: 251, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_56: rt::PackedRows = rt::PackedRows {
+    strings: "TextControlForegroundSystemControlForegroundBaseHighBrushTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundSystemControlBackgroundAltMediumLowBrushTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledSystemControlBackgroundBaseLowBrushTextControlBorderBrushFocusedSystemControlHighlightAccentBrushTextControlBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 36, 1, 244, 8, 244, 8,
+        57, 32, 21, 36, 1, 245, 8, 245, 8,
+        89, 29, 118, 43, 1, 246, 8, 246, 8,
+        161, 21, 182, 40, 1, 247, 8, 247, 8,
+        222, 32, 254, 37, 1, 248, 8, 248, 8,
+        291, 29, 320, 35, 1, 249, 8, 249, 8,
+        355, 29, 384, 33, 1, 250, 8, 250, 8,
+        417, 30, 447, 33, 1, 251, 8, 251, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_57: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForeground", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 253, position: 8, value_line: 253, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundPointerOver", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 254, position: 8, value_line: 254, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundDisabled", target: "SystemControlDisabledChromeDisabledLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 256, position: 8, value_line: 256, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlSelectionHighlightColor", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 258, position: 8, value_line: 258, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 259, position: 8, value_line: 259, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 260, position: 8, value_line: 260, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackgroundPressed", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 261, position: 8, value_line: 261, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 262, position: 8, value_line: 262, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 263, position: 8, value_line: 263, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 264, position: 8, value_line: 264, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForegroundPointerOver", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 265, position: 8, value_line: 265, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForegroundPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 266, position: 8, value_line: 266, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundFocused", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 268, position: 8, value_line: 268, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 269, position: 8, value_line: 269, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 270, position: 8, value_line: 270, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 271, position: 8, value_line: 271, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundFocused", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 272, position: 8, value_line: 272, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundFocused", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 273, position: 8, value_line: 273, value_position: 8 },
-    rt::ResourceAliasRow { key: "AutoCompleteBoxSuggestionsListBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 277, position: 8, value_line: 277, value_position: 8 },
-    rt::ResourceAliasRow { key: "AutoCompleteBoxSuggestionsListBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 279, position: 8, value_line: 279, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_57: rt::PackedRows = rt::PackedRows {
+    strings: "TextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlSelectionHighlightColorSystemControlHighlightAccentBrushTextControlButtonBackgroundSystemControlTransparentBrushTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedSystemControlHighlightAltChromeWhiteBrushTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushSystemControlForegroundBaseMediumBrushTextControlBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushSystemControlForegroundBaseMediumHighBrushTextControlForegroundFocusedSystemControlForegroundBaseHighBrushTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundSystemControlTransientBackgroundBrushAutoCompleteBoxSuggestionsListBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 36, 1, 253, 8, 253, 8,
+        68, 43, 32, 36, 1, 254, 8, 254, 8,
+        111, 40, 151, 43, 1, 256, 8, 256, 8,
+        194, 34, 228, 33, 1, 258, 8, 258, 8,
+        261, 27, 288, 29, 1, 259, 8, 259, 8,
+        317, 38, 288, 29, 1, 260, 8, 260, 8,
+        355, 34, 228, 33, 1, 261, 8, 261, 8,
+        389, 28, 288, 29, 1, 262, 8, 262, 8,
+        417, 39, 288, 29, 1, 263, 8, 263, 8,
+        456, 35, 288, 29, 1, 264, 8, 264, 8,
+        491, 38, 228, 33, 1, 265, 8, 265, 8,
+        529, 34, 563, 41, 1, 266, 8, 266, 8,
+        604, 28, 632, 35, 1, 268, 8, 268, 8,
+        667, 22, 689, 38, 1, 269, 8, 269, 8,
+        727, 33, 760, 41, 1, 270, 8, 270, 8,
+        491, 27, 801, 42, 1, 271, 8, 271, 8,
+        843, 28, 871, 36, 1, 272, 8, 272, 8,
+        907, 39, 946, 41, 1, 273, 8, 273, 8,
+        987, 40, 1027, 37, 1, 277, 8, 277, 8,
+        1064, 41, 1105, 33, 1, 279, 8, 279, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_58: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUnchecked", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 283, position: 8, value_line: 283, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 284, position: 8, value_line: 284, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 285, position: 8, value_line: 285, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 286, position: 8, value_line: 286, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundChecked", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 287, position: 8, value_line: 287, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 288, position: 8, value_line: 288, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 289, position: 8, value_line: 289, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 290, position: 8, value_line: 290, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminate", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 291, position: 8, value_line: 291, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminatePointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 292, position: 8, value_line: 292, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminatePressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 294, position: 8, value_line: 294, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminateDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 295, position: 8, value_line: 295, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 297, position: 8, value_line: 297, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 298, position: 8, value_line: 298, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 299, position: 8, value_line: 299, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 300, position: 8, value_line: 300, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundChecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 301, position: 8, value_line: 301, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 302, position: 8, value_line: 302, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 303, position: 8, value_line: 303, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 304, position: 8, value_line: 304, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminate", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 305, position: 8, value_line: 305, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminatePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 306, position: 8, value_line: 306, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminatePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 307, position: 8, value_line: 307, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 308, position: 8, value_line: 308, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 309, position: 8, value_line: 309, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 310, position: 8, value_line: 310, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 311, position: 8, value_line: 311, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 312, position: 8, value_line: 312, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushChecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 313, position: 8, value_line: 313, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 314, position: 8, value_line: 314, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 315, position: 8, value_line: 315, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 316, position: 8, value_line: 316, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminate", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 317, position: 8, value_line: 317, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminatePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 318, position: 8, value_line: 318, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminatePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 319, position: 8, value_line: 319, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 320, position: 8, value_line: 320, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUnchecked", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 321, position: 8, value_line: 321, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 323, position: 8, value_line: 323, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 325, position: 8, value_line: 325, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 327, position: 8, value_line: 327, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_58: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxForegroundUncheckedSystemControlForegroundBaseHighBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledSystemControlDisabledBaseMediumLowBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSystemControlTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedSystemControlForegroundBaseMediumBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverSystemControlHighlightBaseMediumHighBrushCheckBoxCheckBackgroundStrokeUncheckedPressedSystemControlHighlightBaseHighBrushCheckBoxCheckBackgroundStrokeUncheckedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 27, 27, 36, 1, 283, 8, 283, 8,
+        63, 38, 27, 36, 1, 284, 8, 284, 8,
+        101, 34, 27, 36, 1, 285, 8, 285, 8,
+        135, 35, 170, 39, 1, 286, 8, 286, 8,
+        209, 25, 27, 36, 1, 287, 8, 287, 8,
+        234, 36, 27, 36, 1, 288, 8, 288, 8,
+        270, 32, 27, 36, 1, 289, 8, 289, 8,
+        302, 33, 170, 39, 1, 290, 8, 290, 8,
+        335, 31, 27, 36, 1, 291, 8, 291, 8,
+        366, 42, 27, 36, 1, 292, 8, 292, 8,
+        408, 38, 27, 36, 1, 294, 8, 294, 8,
+        446, 39, 170, 39, 1, 295, 8, 295, 8,
+        485, 27, 512, 29, 1, 297, 8, 297, 8,
+        541, 38, 512, 29, 1, 298, 8, 298, 8,
+        579, 34, 512, 29, 1, 299, 8, 299, 8,
+        613, 35, 512, 29, 1, 300, 8, 300, 8,
+        648, 25, 512, 29, 1, 301, 8, 301, 8,
+        673, 36, 512, 29, 1, 302, 8, 302, 8,
+        709, 32, 512, 29, 1, 303, 8, 303, 8,
+        741, 33, 512, 29, 1, 304, 8, 304, 8,
+        774, 31, 512, 29, 1, 305, 8, 305, 8,
+        805, 42, 512, 29, 1, 306, 8, 306, 8,
+        847, 38, 512, 29, 1, 307, 8, 307, 8,
+        885, 39, 512, 29, 1, 308, 8, 308, 8,
+        924, 28, 512, 29, 1, 309, 8, 309, 8,
+        952, 39, 512, 29, 1, 310, 8, 310, 8,
+        991, 35, 512, 29, 1, 311, 8, 311, 8,
+        1026, 36, 512, 29, 1, 312, 8, 312, 8,
+        1062, 26, 512, 29, 1, 313, 8, 313, 8,
+        1088, 37, 512, 29, 1, 314, 8, 314, 8,
+        1125, 33, 512, 29, 1, 315, 8, 315, 8,
+        1158, 34, 512, 29, 1, 316, 8, 316, 8,
+        1192, 32, 512, 29, 1, 317, 8, 317, 8,
+        1224, 43, 512, 29, 1, 318, 8, 318, 8,
+        1267, 39, 512, 29, 1, 319, 8, 319, 8,
+        1306, 40, 512, 29, 1, 320, 8, 320, 8,
+        1346, 38, 1384, 38, 1, 321, 8, 321, 8,
+        1422, 49, 1471, 41, 1, 323, 8, 323, 8,
+        1512, 45, 1557, 35, 1, 325, 8, 325, 8,
+        1592, 46, 170, 39, 1, 327, 8, 327, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_59: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeCheckedPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 329, position: 8, value_line: 330, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_59: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeCheckedPointerOverSystemAccentColorLight1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 47, 47, 23, 1, 329, 8, 330, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_60: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeCheckedPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 331, position: 8, value_line: 331, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 333, position: 8, value_line: 333, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeIndeterminate", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 334, position: 8, value_line: 334, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_60: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeCheckedPressedSystemControlHighlightTransparentBrushCheckBoxCheckBackgroundStrokeCheckedDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundStrokeIndeterminateSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 43, 43, 38, 1, 331, 8, 331, 8,
+        81, 44, 125, 29, 1, 333, 8, 333, 8,
+        154, 42, 196, 33, 1, 334, 8, 334, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_61: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 336, position: 8, value_line: 337, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeIndeterminatePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 338, position: 8, value_line: 339, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundStrokeIndeterminatePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 53, 53, 23, 1, 336, 8, 337, 24,
+        76, 49, 125, 22, 1, 338, 8, 339, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_62: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 340, position: 8, value_line: 340, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 342, position: 8, value_line: 342, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 343, position: 8, value_line: 343, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 345, position: 8, value_line: 345, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 347, position: 8, value_line: 347, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 348, position: 8, value_line: 348, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_62: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeIndeterminateDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 50, 50, 29, 1, 340, 8, 340, 8,
+        79, 36, 50, 29, 1, 342, 8, 342, 8,
+        115, 47, 50, 29, 1, 343, 8, 343, 8,
+        162, 43, 205, 41, 1, 345, 8, 345, 8,
+        246, 44, 50, 29, 1, 347, 8, 347, 8,
+        290, 34, 324, 33, 1, 348, 8, 348, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_63: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillCheckedPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 349, position: 8, value_line: 350, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillCheckedPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 351, position: 8, value_line: 352, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_63: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillCheckedPointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillCheckedPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 45, 45, 23, 1, 349, 8, 350, 24,
+        68, 41, 109, 22, 1, 351, 8, 352, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_64: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillCheckedDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 353, position: 8, value_line: 353, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillIndeterminate", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 355, position: 8, value_line: 355, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_64: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillCheckedDisabledSystemControlBackgroundBaseLowBrushCheckBoxCheckBackgroundFillIndeterminateSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 42, 42, 35, 1, 353, 8, 353, 8,
+        77, 40, 117, 33, 1, 355, 8, 355, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_65: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillIndeterminatePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 356, position: 8, value_line: 357, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillIndeterminatePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 358, position: 8, value_line: 359, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_65: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillIndeterminatePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 51, 51, 23, 1, 356, 8, 357, 24,
+        74, 47, 121, 22, 1, 358, 8, 359, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_66: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillIndeterminateDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 360, position: 8, value_line: 360, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUnchecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 362, position: 8, value_line: 362, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 364, position: 8, value_line: 364, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 366, position: 8, value_line: 366, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedDisabled", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 368, position: 8, value_line: 368, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 370, position: 8, value_line: 370, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedPointerOver", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 372, position: 8, value_line: 372, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedPressed", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 374, position: 8, value_line: 374, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedDisabled", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 376, position: 8, value_line: 376, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminate", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 378, position: 8, value_line: 378, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminatePointerOver", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 380, position: 8, value_line: 380, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminatePressed", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 382, position: 8, value_line: 382, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminateDisabled", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 384, position: 8, value_line: 384, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedHoverBorderBrush", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 388, position: 8, value_line: 388, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedPressedBorderBrush", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 390, position: 8, value_line: 390, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedBorderBrush", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 392, position: 8, value_line: 392, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewHoverBorderBrush", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 393, position: 8, value_line: 393, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewPressedBorderBrush", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 394, position: 8, value_line: 394, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewTodayForeground", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 395, position: 8, value_line: 395, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBlackoutForeground", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 396, position: 8, value_line: 396, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewOutOfScopeForeground", target: "SystemControlHyperlinkBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 397, position: 8, value_line: 397, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 398, position: 8, value_line: 398, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewOutOfScopeBackground", target: "SystemControlDisabledChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 399, position: 8, value_line: 399, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewForeground", target: "SystemControlHyperlinkBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 400, position: 8, value_line: 400, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBackground", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 401, position: 8, value_line: 401, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBorderBrush", target: "SystemControlForegroundChromeMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 402, position: 8, value_line: 402, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewWeekDayForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 403, position: 8, value_line: 403, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 405, position: 8, value_line: 405, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 406, position: 8, value_line: 406, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonForegroundPressed", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 408, position: 8, value_line: 408, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemRevealBackground", target: "SystemControlTransparentRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 410, position: 8, value_line: 410, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemRevealBorderBrush", target: "SystemControlTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 412, position: 8, value_line: 412, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBorderBrushPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 414, position: 8, value_line: 414, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 416, position: 8, value_line: 416, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_66: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillIndeterminateDisabledSystemControlBackgroundBaseLowBrushCheckBoxCheckGlyphForegroundUncheckedSystemControlHighlightAltChromeWhiteBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverSystemControlForegroundChromeWhiteBrushCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushSystemControlHighlightListAccentMediumBrushCalendarViewSelectedPressedBorderBrushSystemControlHighlightListAccentHighBrushCalendarViewSelectedBorderBrushSystemControlHighlightAccentBrushCalendarViewHoverBorderBrushSystemControlHighlightBaseMediumLowBrushCalendarViewPressedBorderBrushSystemControlHighlightBaseMediumBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundSystemControlDisabledBaseMediumLowBrushCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundSystemControlForegroundBaseHighBrushCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundSystemControlBackgroundAltHighBrushCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundSystemControlTransparentBrushCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedSystemControlForegroundBaseMediumBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverSystemControlHighlightTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 48, 48, 35, 1, 360, 8, 360, 8,
+        83, 37, 120, 41, 1, 362, 8, 362, 8,
+        161, 48, 120, 41, 1, 364, 8, 364, 8,
+        209, 44, 120, 41, 1, 366, 8, 366, 8,
+        253, 45, 120, 41, 1, 368, 8, 368, 8,
+        298, 35, 120, 41, 1, 370, 8, 370, 8,
+        333, 46, 379, 39, 1, 372, 8, 372, 8,
+        418, 42, 379, 39, 1, 374, 8, 374, 8,
+        460, 43, 379, 39, 1, 376, 8, 376, 8,
+        503, 41, 379, 39, 1, 378, 8, 378, 8,
+        544, 52, 379, 39, 1, 380, 8, 380, 8,
+        596, 48, 379, 39, 1, 382, 8, 382, 8,
+        644, 49, 379, 39, 1, 384, 8, 384, 8,
+        693, 36, 729, 43, 1, 388, 8, 388, 8,
+        772, 38, 810, 41, 1, 390, 8, 390, 8,
+        851, 31, 882, 33, 1, 392, 8, 392, 8,
+        915, 28, 943, 40, 1, 393, 8, 393, 8,
+        983, 30, 1013, 37, 1, 394, 8, 394, 8,
+        1050, 27, 120, 41, 1, 395, 8, 395, 8,
+        1077, 30, 1107, 39, 1, 396, 8, 396, 8,
+        1146, 32, 1178, 35, 1, 397, 8, 397, 8,
+        1213, 34, 1247, 36, 1, 398, 8, 398, 8,
+        1283, 32, 1315, 41, 1, 399, 8, 399, 8,
+        1356, 22, 1378, 41, 1, 400, 8, 400, 8,
+        1419, 22, 1441, 35, 1, 401, 8, 401, 8,
+        1476, 23, 1499, 40, 1, 402, 8, 402, 8,
+        1539, 37, 1107, 39, 1, 403, 8, 403, 8,
+        1576, 38, 1614, 29, 1, 405, 8, 405, 8,
+        1643, 49, 1247, 36, 1, 406, 8, 406, 8,
+        1692, 45, 1737, 38, 1, 408, 8, 408, 8,
+        1775, 40, 1815, 45, 1, 410, 8, 410, 8,
+        1860, 41, 1901, 41, 1, 412, 8, 412, 8,
+        1942, 50, 1992, 38, 1, 414, 8, 414, 8,
+        1942, 39, 1614, 29, 1, 416, 8, 416, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_67: &[rt::ValueRow<f64>] = &[
@@ -1587,129 +1827,185 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_67: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarWeekNumberFontSize", value: 12.0_f64, line: 419, position: 52 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_68: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackground", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 424, position: 8, value_line: 424, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundPointerOver", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 425, position: 8, value_line: 425, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundPressed", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 426, position: 8, value_line: 426, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundDisabled", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 427, position: 8, value_line: 427, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 428, position: 8, value_line: 428, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundPointerOver", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 429, position: 8, value_line: 429, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundPressed", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 430, position: 8, value_line: 430, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 431, position: 8, value_line: 431, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrush", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 432, position: 8, value_line: 432, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushPointerOver", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 433, position: 8, value_line: 433, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushPressed", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 434, position: 8, value_line: 434, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 435, position: 8, value_line: 435, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_68: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundSystemBaseHighColorExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 24, 24, 24, 1, 424, 8, 424, 8,
+        48, 35, 24, 24, 1, 425, 8, 425, 8,
+        83, 31, 24, 24, 1, 426, 8, 426, 8,
+        114, 32, 24, 24, 1, 427, 8, 427, 8,
+        146, 24, 170, 19, 1, 428, 8, 428, 8,
+        189, 35, 170, 19, 1, 429, 8, 429, 8,
+        224, 31, 170, 19, 1, 430, 8, 430, 8,
+        255, 32, 287, 39, 1, 431, 8, 431, 8,
+        326, 25, 351, 18, 1, 432, 8, 432, 8,
+        369, 36, 351, 18, 1, 433, 8, 433, 8,
+        405, 32, 351, 18, 1, 434, 8, 434, 8,
+        437, 33, 470, 33, 1, 435, 8, 435, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_69: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 437, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_69: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 65535, 255, 1, 437, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_70: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 440, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 441, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 65535, 255, 1, 440, 8,
+        32, 33, 65535, 255, 1, 441, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_71: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderChevronForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 442, position: 8, value_line: 442, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundPointerOver", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 443, position: 8, value_line: 443, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundPressed", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 444, position: 8, value_line: 444, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 445, position: 8, value_line: 445, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_71: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronForegroundSystemBaseHighColorExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 19, 1, 442, 8, 442, 8,
+        44, 36, 25, 19, 1, 443, 8, 443, 8,
+        80, 32, 25, 19, 1, 444, 8, 444, 8,
+        112, 33, 145, 39, 1, 445, 8, 445, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_72: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 446, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 447, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 448, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 449, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_72: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 26, 65535, 255, 1, 446, 8,
+        26, 37, 65535, 255, 1, 447, 8,
+        63, 33, 65535, 255, 1, 448, 8,
+        96, 34, 65535, 255, 1, 449, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_73: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderContentBackground", target: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 452, position: 8, value_line: 452, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderContentBorderBrush", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 453, position: 8, value_line: 453, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_73: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushSystemBaseLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 26, 1, 452, 8, 452, 8,
+        51, 26, 77, 18, 1, 453, 8, 453, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_74: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "NotificationCardBackgroundBrush", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 456, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 65535, 65535, 1, 456, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_75: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "NotificationCardForegroundBrush", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 457, position: 8, value_line: 457, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardForegroundBrushSystemControlForegroundBaseHighBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 31, 36, 1, 457, 8, 457, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_76: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "NotificationCardProgressBackgroundBrush", color: 4288322202_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 458, position: 8 },
-    rt::LiteralBrushRow { key: "NotificationCardInformationBackgroundBrush", color: 4278221012_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 459, position: 8 },
-    rt::LiteralBrushRow { key: "NotificationCardSuccessBackgroundBrush", color: 4279405380_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 460, position: 8 },
-    rt::LiteralBrushRow { key: "NotificationCardWarningBackgroundBrush", color: 4294951702_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 461, position: 8 },
-    rt::LiteralBrushRow { key: "NotificationCardErrorBackgroundBrush", color: 4293933334_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 462, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_76: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardProgressBackgroundBrushNotificationCardInformationBackgroundBrushNotificationCardSuccessBackgroundBrushNotificationCardWarningBackgroundBrushNotificationCardErrorBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 39, 39578, 65434, 1, 458, 8,
+        39, 42, 30932, 65280, 1, 459, 8,
+        81, 38, 35652, 65298, 1, 460, 8,
+        119, 38, 49942, 65535, 1, 461, 8,
+        157, 36, 14614, 65520, 1, 462, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_77: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 467, position: 8, value_line: 467, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 468, position: 8, value_line: 468, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 469, position: 8, value_line: 469, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 470, position: 8, value_line: 470, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 471, position: 8, value_line: 471, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 472, position: 8, value_line: 472, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 473, position: 8, value_line: 473, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 474, position: 8, value_line: 474, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 475, position: 8, value_line: 475, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 476, position: 8, value_line: 476, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 477, position: 8, value_line: 477, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 478, position: 8, value_line: 478, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStroke", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 479, position: 8, value_line: 479, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokePointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 480, position: 8, value_line: 480, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokePressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 482, position: 8, value_line: 482, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokeDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 483, position: 8, value_line: 483, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFill", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 485, position: 8, value_line: 485, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 486, position: 8, value_line: 486, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 487, position: 8, value_line: 487, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 489, position: 8, value_line: 489, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedStroke", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 490, position: 8, value_line: 490, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_77: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonForegroundSystemControlForegroundBaseHighBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonBackgroundSystemControlTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeSystemControlForegroundBaseMediumBrushRadioButtonOuterEllipseStrokePointerOverSystemControlHighlightBaseMediumHighBrushRadioButtonOuterEllipseStrokePressedSystemControlHighlightBaseHighBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedSystemControlBackgroundBaseMediumLowBrushRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 36, 1, 467, 8, 467, 8,
+        57, 32, 21, 36, 1, 468, 8, 468, 8,
+        89, 28, 21, 36, 1, 469, 8, 469, 8,
+        117, 29, 146, 39, 1, 470, 8, 470, 8,
+        185, 21, 206, 29, 1, 471, 8, 471, 8,
+        235, 32, 206, 29, 1, 472, 8, 472, 8,
+        267, 28, 206, 29, 1, 473, 8, 473, 8,
+        295, 29, 206, 29, 1, 474, 8, 474, 8,
+        324, 22, 206, 29, 1, 475, 8, 475, 8,
+        346, 33, 206, 29, 1, 476, 8, 476, 8,
+        379, 29, 206, 29, 1, 477, 8, 477, 8,
+        408, 30, 206, 29, 1, 478, 8, 478, 8,
+        438, 29, 467, 38, 1, 479, 8, 479, 8,
+        505, 40, 545, 41, 1, 480, 8, 480, 8,
+        586, 36, 622, 35, 1, 482, 8, 482, 8,
+        657, 37, 146, 39, 1, 483, 8, 483, 8,
+        694, 27, 206, 29, 1, 485, 8, 485, 8,
+        721, 38, 206, 29, 1, 486, 8, 486, 8,
+        759, 34, 793, 41, 1, 487, 8, 487, 8,
+        834, 35, 206, 29, 1, 489, 8, 489, 8,
+        869, 36, 905, 33, 1, 490, 8, 490, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_78: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedStrokePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 491, position: 8, value_line: 492, value_position: 24 },
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedStrokePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 493, position: 8, value_line: 494, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_78: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedStrokePointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedStrokePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 47, 47, 23, 1, 491, 8, 492, 24,
+        70, 43, 113, 22, 1, 493, 8, 494, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_79: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedStrokeDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 495, position: 8, value_line: 495, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedFill", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 497, position: 8, value_line: 497, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_79: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedStrokeDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonOuterEllipseCheckedFillSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 44, 44, 39, 1, 495, 8, 495, 8,
+        83, 34, 117, 33, 1, 497, 8, 497, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_80: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedFillPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 498, position: 8, value_line: 499, value_position: 24 },
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedFillPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 500, position: 8, value_line: 501, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_80: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedFillPointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedFillPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 45, 45, 23, 1, 498, 8, 499, 24,
+        68, 41, 109, 22, 1, 500, 8, 501, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_81: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedFillDisabled", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 502, position: 8, value_line: 502, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFill", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 504, position: 8, value_line: 504, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillPointerOver", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 505, position: 8, value_line: 505, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillPressed", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 507, position: 8, value_line: 507, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillDisabled", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 508, position: 8, value_line: 508, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStroke", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 509, position: 8, value_line: 509, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 510, position: 8, value_line: 510, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 511, position: 8, value_line: 511, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokeDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 512, position: 8, value_line: 512, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_81: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedFillDisabledSystemControlBackgroundBaseMediumLowBrushRadioButtonCheckGlyphFillSystemControlForegroundChromeWhiteBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeSystemControlTransparentBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 42, 42, 41, 1, 502, 8, 502, 8,
+        83, 25, 108, 39, 1, 504, 8, 504, 8,
+        147, 36, 108, 39, 1, 505, 8, 505, 8,
+        183, 32, 108, 39, 1, 507, 8, 507, 8,
+        215, 33, 108, 39, 1, 508, 8, 508, 8,
+        248, 27, 275, 29, 1, 509, 8, 509, 8,
+        304, 38, 275, 29, 1, 510, 8, 510, 8,
+        342, 34, 275, 29, 1, 511, 8, 511, 8,
+        376, 35, 275, 29, 1, 512, 8, 512, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_82: &[rt::ValueRow<f64>] = &[
@@ -1717,36 +2013,48 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_82: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 2.0_f64, line: 516, position: 48 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_83: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SliderContainerBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 518, position: 8, value_line: 518, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 519, position: 8, value_line: 519, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 520, position: 8, value_line: 520, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 521, position: 8, value_line: 521, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderThumbBackground", target: "SystemControlForegroundAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 522, position: 8, value_line: 522, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_83: rt::PackedRows = rt::PackedRows {
+    strings: "SliderContainerBackgroundSystemControlTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 29, 1, 518, 8, 518, 8,
+        54, 36, 25, 29, 1, 519, 8, 519, 8,
+        90, 32, 25, 29, 1, 520, 8, 520, 8,
+        122, 33, 25, 29, 1, 521, 8, 521, 8,
+        155, 21, 176, 34, 1, 522, 8, 522, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_84: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SliderThumbBackgroundPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 523, position: 8, value_line: 523, value_position: 65 },
-    rt::DynamicBrushRow { key: "SliderThumbBackgroundPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 524, position: 8, value_line: 524, value_position: 61 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_84: rt::PackedRows = rt::PackedRows {
+    strings: "SliderThumbBackgroundPointerOverSystemAccentColorLight1SliderThumbBackgroundPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 23, 1, 523, 8, 523, 65,
+        55, 28, 83, 22, 1, 524, 8, 524, 61,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_85: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SliderThumbBackgroundDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 525, position: 8, value_line: 525, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFill", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 526, position: 8, value_line: 526, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillPointerOver", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 527, position: 8, value_line: 527, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillPressed", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 528, position: 8, value_line: 528, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 529, position: 8, value_line: 529, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFill", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 530, position: 8, value_line: 530, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillPointerOver", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 531, position: 8, value_line: 531, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillPressed", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 532, position: 8, value_line: 532, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 533, position: 8, value_line: 533, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTickBarFill", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 534, position: 8, value_line: 534, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTickBarFillDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 535, position: 8, value_line: 535, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderInlineTickBarFill", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 536, position: 8, value_line: 536, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_85: rt::PackedRows = rt::PackedRows {
+    strings: "SliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSystemControlForegroundBaseMediumLowBrushSliderTrackFillPointerOverSystemControlForegroundBaseMediumBrushSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSystemControlHighlightAccentBrushSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSystemControlDisabledBaseMediumLowBrushSliderInlineTickBarFillSystemControlBackgroundAltHighBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 44, 1, 525, 8, 525, 8,
+        73, 15, 88, 41, 1, 526, 8, 526, 8,
+        129, 26, 155, 38, 1, 527, 8, 527, 8,
+        193, 22, 88, 41, 1, 528, 8, 528, 8,
+        215, 23, 29, 44, 1, 529, 8, 529, 8,
+        238, 20, 258, 33, 1, 530, 8, 530, 8,
+        291, 31, 258, 33, 1, 531, 8, 531, 8,
+        322, 27, 258, 33, 1, 532, 8, 532, 8,
+        349, 28, 29, 44, 1, 533, 8, 533, 8,
+        377, 17, 88, 41, 1, 534, 8, 534, 8,
+        394, 25, 419, 39, 1, 535, 8, 535, 8,
+        458, 23, 481, 35, 1, 536, 8, 536, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_86: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1754,101 +2062,121 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_86: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 540, position: 65 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_87: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleSwitchContentForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 541, position: 8, value_line: 541, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 542, position: 8, value_line: 542, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 544, position: 8, value_line: 544, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 545, position: 8, value_line: 545, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 546, position: 8, value_line: 546, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOff", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 547, position: 8, value_line: 547, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 548, position: 8, value_line: 548, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffPressed", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 549, position: 8, value_line: 549, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 550, position: 8, value_line: 550, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOff", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 551, position: 8, value_line: 551, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 552, position: 8, value_line: 552, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 553, position: 8, value_line: 553, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 554, position: 8, value_line: 554, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOn", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 555, position: 8, value_line: 555, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_87: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchContentForegroundSystemControlForegroundBaseHighBrushToggleSwitchHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchContainerBackgroundSystemControlTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedSystemControlHighlightBaseMediumLowBrushToggleSwitchFillOffDisabledToggleSwitchStrokeOffSystemControlForegroundBaseMediumBrushToggleSwitchStrokeOffPointerOverSystemControlHighlightBaseMediumHighBrushToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 36, 1, 541, 8, 541, 8,
+        65, 36, 101, 39, 1, 542, 8, 542, 8,
+        140, 31, 171, 29, 1, 544, 8, 544, 8,
+        200, 42, 171, 29, 1, 545, 8, 545, 8,
+        242, 38, 171, 29, 1, 546, 8, 546, 8,
+        280, 19, 171, 29, 1, 547, 8, 547, 8,
+        299, 30, 171, 29, 1, 548, 8, 548, 8,
+        329, 26, 355, 40, 1, 549, 8, 549, 8,
+        395, 27, 171, 29, 1, 550, 8, 550, 8,
+        422, 21, 443, 38, 1, 551, 8, 551, 8,
+        481, 32, 513, 41, 1, 552, 8, 552, 8,
+        554, 28, 29, 36, 1, 553, 8, 553, 8,
+        582, 29, 101, 39, 1, 554, 8, 554, 8,
+        611, 18, 629, 33, 1, 555, 8, 555, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_88: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "ToggleSwitchFillOnPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 556, position: 8, value_line: 556, value_position: 62 },
-    rt::DynamicBrushRow { key: "ToggleSwitchFillOnPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 557, position: 8, value_line: 557, value_position: 58 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_88: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchFillOnPointerOverSystemAccentColorLight1ToggleSwitchFillOnPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 23, 1, 556, 8, 556, 62,
+        52, 25, 77, 22, 1, 557, 8, 557, 58,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_89: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOnDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 558, position: 8, value_line: 558, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOn", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 559, position: 8, value_line: 559, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOnPointerOver", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 560, position: 8, value_line: 560, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOnPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 561, position: 8, value_line: 561, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOnDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 562, position: 8, value_line: 562, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOff", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 563, position: 8, value_line: 563, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 564, position: 8, value_line: 564, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 565, position: 8, value_line: 565, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 566, position: 8, value_line: 566, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOn", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 567, position: 8, value_line: 567, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnPointerOver", target: "SystemControlHighlightChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 568, position: 8, value_line: 568, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 569, position: 8, value_line: 569, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnDisabled", target: "SystemControlPageBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 570, position: 8, value_line: 570, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_89: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchFillOnDisabledSystemControlDisabledBaseLowBrushToggleSwitchStrokeOnSystemControlHighlightBaseHighBrushToggleSwitchStrokeOnPointerOverSystemControlHighlightListAccentHighBrushToggleSwitchStrokeOnPressedSystemControlHighlightBaseMediumBrushToggleSwitchStrokeOnDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchKnobFillOffSystemControlForegroundBaseHighBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnSystemControlHighlightAltChromeWhiteBrushToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 26, 26, 33, 1, 558, 8, 558, 8,
+        59, 20, 79, 35, 1, 559, 8, 559, 8,
+        114, 31, 145, 41, 1, 560, 8, 560, 8,
+        186, 27, 213, 37, 1, 561, 8, 561, 8,
+        250, 28, 278, 39, 1, 562, 8, 562, 8,
+        317, 23, 340, 36, 1, 563, 8, 563, 8,
+        376, 34, 79, 35, 1, 564, 8, 564, 8,
+        410, 30, 79, 35, 1, 565, 8, 565, 8,
+        440, 31, 278, 39, 1, 566, 8, 566, 8,
+        471, 22, 493, 41, 1, 567, 8, 567, 8,
+        534, 33, 567, 38, 1, 568, 8, 568, 8,
+        605, 29, 493, 41, 1, 569, 8, 569, 8,
+        634, 30, 664, 39, 1, 570, 8, 570, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_90: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToolTipForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 575, position: 8, value_line: 575, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToolTipBackground", target: "SystemControlBackgroundChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 576, position: 8, value_line: 576, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToolTipBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 577, position: 8, value_line: 577, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_90: rt::PackedRows = rt::PackedRows {
+    strings: "ToolTipForegroundSystemControlForegroundBaseHighBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 17, 17, 36, 1, 575, 8, 575, 8,
+        53, 17, 70, 43, 1, 576, 8, 576, 8,
+        113, 18, 131, 33, 1, 577, 8, 577, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_91: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "DatePickerSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 581, position: 8, value_line: 581, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerSpacerFillDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 582, position: 8, value_line: 582, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 583, position: 8, value_line: 583, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 584, position: 8, value_line: 584, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 586, position: 8, value_line: 586, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 587, position: 8, value_line: 587, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 588, position: 8, value_line: 588, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 589, position: 8, value_line: 589, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 591, position: 8, value_line: 591, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 592, position: 8, value_line: 592, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 593, position: 8, value_line: 593, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 594, position: 8, value_line: 594, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 595, position: 8, value_line: 595, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 596, position: 8, value_line: 596, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 597, position: 8, value_line: 597, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 598, position: 8, value_line: 598, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 599, position: 8, value_line: 599, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterHighlightFill", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 600, position: 8, value_line: 600, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 603, position: 8, value_line: 603, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 604, position: 8, value_line: 604, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 606, position: 8, value_line: 606, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 608, position: 8, value_line: 608, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrushPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 610, position: 8, value_line: 610, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 612, position: 8, value_line: 612, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 614, position: 8, value_line: 614, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 616, position: 8, value_line: 616, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 620, position: 8, value_line: 620, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerSpacerFillDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 621, position: 8, value_line: 621, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 622, position: 8, value_line: 622, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 623, position: 8, value_line: 623, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 625, position: 8, value_line: 625, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 626, position: 8, value_line: 626, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 627, position: 8, value_line: 627, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 628, position: 8, value_line: 628, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 630, position: 8, value_line: 630, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 631, position: 8, value_line: 631, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 632, position: 8, value_line: 632, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 633, position: 8, value_line: 633, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 634, position: 8, value_line: 634, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 635, position: 8, value_line: 635, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 636, position: 8, value_line: 636, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 637, position: 8, value_line: 637, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 638, position: 8, value_line: 638, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterHighlightFill", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 639, position: 8, value_line: 639, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_91: rt::PackedRows = rt::PackedRows {
+    strings: "DatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledSystemControlDisabledBaseLowBrushDatePickerButtonBorderBrushSystemControlForegroundBaseMediumBrushDatePickerButtonBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushDatePickerButtonBorderBrushPressedSystemControlHighlightBaseMediumBrushDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundSystemControlBackgroundAltMediumLowBrushDatePickerButtonBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushDatePickerButtonBackgroundPressedSystemControlBackgroundBaseLowBrushDatePickerButtonBackgroundDisabledDatePickerButtonForegroundSystemControlForegroundBaseHighBrushDatePickerButtonForegroundPointerOverSystemControlHighlightBaseHighBrushDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushDatePickerFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushDatePickerFlyoutPresenterBorderBrushSystemControlTransientBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillSystemControlHighlightListAccentLowBrushDateTimePickerFlyoutButtonBackgroundSystemControlTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSystemControlHighlightListLowBrushDateTimePickerFlyoutButtonBackgroundPressedSystemControlHighlightListMediumBrushDateTimePickerFlyoutButtonBorderBrushSystemControlForegroundTransparentBrushDateTimePickerFlyoutButtonBorderBrushPointerOverSystemControlHighlightTransparentBrushDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFill",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 35, 1, 581, 8, 581, 8,
+        55, 28, 83, 33, 1, 582, 8, 582, 8,
+        116, 27, 143, 38, 1, 583, 8, 583, 8,
+        181, 38, 219, 41, 1, 584, 8, 584, 8,
+        260, 34, 294, 37, 1, 586, 8, 586, 8,
+        331, 35, 83, 33, 1, 587, 8, 587, 8,
+        366, 26, 392, 40, 1, 588, 8, 588, 8,
+        432, 37, 469, 41, 1, 589, 8, 589, 8,
+        510, 33, 543, 35, 1, 591, 8, 591, 8,
+        578, 34, 543, 35, 1, 592, 8, 592, 8,
+        612, 26, 638, 36, 1, 593, 8, 593, 8,
+        674, 37, 711, 35, 1, 594, 8, 594, 8,
+        746, 33, 711, 35, 1, 595, 8, 595, 8,
+        779, 34, 813, 39, 1, 596, 8, 596, 8,
+        852, 35, 887, 37, 1, 597, 8, 597, 8,
+        924, 36, 960, 33, 1, 598, 8, 598, 8,
+        993, 35, 20, 35, 1, 599, 8, 599, 8,
+        1028, 38, 1066, 40, 1, 600, 8, 600, 8,
+        1106, 36, 1142, 29, 1, 603, 8, 603, 8,
+        1171, 47, 1218, 34, 1, 604, 8, 604, 8,
+        1252, 43, 1295, 37, 1, 606, 8, 606, 8,
+        1332, 37, 1369, 39, 1, 608, 8, 608, 8,
+        1408, 48, 1456, 38, 1, 610, 8, 610, 8,
+        1494, 44, 1456, 38, 1, 612, 8, 612, 8,
+        1538, 47, 1585, 38, 1, 614, 8, 614, 8,
+        1623, 43, 1585, 38, 1, 616, 8, 616, 8,
+        1666, 20, 20, 35, 1, 620, 8, 620, 8,
+        1686, 28, 83, 33, 1, 621, 8, 621, 8,
+        1714, 27, 143, 38, 1, 622, 8, 622, 8,
+        1741, 38, 219, 41, 1, 623, 8, 623, 8,
+        1779, 34, 294, 37, 1, 625, 8, 625, 8,
+        1813, 35, 83, 33, 1, 626, 8, 626, 8,
+        1848, 26, 392, 40, 1, 627, 8, 627, 8,
+        1874, 37, 469, 41, 1, 628, 8, 628, 8,
+        1911, 33, 543, 35, 1, 630, 8, 630, 8,
+        1944, 34, 543, 35, 1, 631, 8, 631, 8,
+        1978, 26, 638, 36, 1, 632, 8, 632, 8,
+        2004, 37, 711, 35, 1, 633, 8, 633, 8,
+        2041, 33, 711, 35, 1, 634, 8, 634, 8,
+        2074, 34, 813, 39, 1, 635, 8, 635, 8,
+        2108, 35, 887, 37, 1, 636, 8, 636, 8,
+        2143, 36, 960, 33, 1, 637, 8, 637, 8,
+        2179, 35, 20, 35, 1, 638, 8, 638, 8,
+        2214, 38, 1066, 40, 1, 639, 8, 639, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_92: &[rt::ValueRow<[f64; 4]>] = &[
@@ -1856,61 +2184,77 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_92: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 645, position: 40 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_93: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TabControlBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 647, position: 8, value_line: 647, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 650, position: 8, value_line: 650, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselectedPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 651, position: 8, value_line: 651, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselectedPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 653, position: 8, value_line: 653, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelected", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 655, position: 8, value_line: 655, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelectedPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 656, position: 8, value_line: 656, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelectedPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 658, position: 8, value_line: 658, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 660, position: 8, value_line: 660, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselected", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 661, position: 8, value_line: 661, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselectedPointerOver", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 662, position: 8, value_line: 662, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselectedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 664, position: 8, value_line: 664, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 666, position: 8, value_line: 666, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 667, position: 8, value_line: 667, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelectedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 669, position: 8, value_line: 669, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 671, position: 8, value_line: 671, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderSelectedPipeFill", target: "SystemControlHighlightAltAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 672, position: 8, value_line: 672, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_93: rt::PackedRows = rt::PackedRows {
+    strings: "TabControlBackgroundSystemControlTransparentBrushTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedSystemControlForegroundBaseMediumBrushTabItemHeaderForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedSystemControlHighlightAltBaseHighBrushTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 29, 1, 647, 8, 647, 8,
+        49, 33, 20, 29, 1, 650, 8, 650, 8,
+        82, 44, 126, 38, 1, 651, 8, 651, 8,
+        164, 40, 126, 38, 1, 653, 8, 653, 8,
+        204, 31, 126, 38, 1, 655, 8, 655, 8,
+        235, 42, 126, 38, 1, 656, 8, 656, 8,
+        277, 38, 126, 38, 1, 658, 8, 658, 8,
+        315, 31, 20, 29, 1, 660, 8, 660, 8,
+        346, 33, 379, 38, 1, 661, 8, 661, 8,
+        417, 44, 461, 44, 1, 662, 8, 662, 8,
+        505, 40, 461, 44, 1, 664, 8, 664, 8,
+        545, 31, 576, 38, 1, 666, 8, 666, 8,
+        614, 42, 461, 44, 1, 667, 8, 667, 8,
+        656, 38, 461, 44, 1, 669, 8, 669, 8,
+        694, 31, 725, 39, 1, 671, 8, 671, 8,
+        764, 29, 793, 36, 1, 672, 8, 672, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_94: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ScrollBarBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 676, position: 8, value_line: 676, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 677, position: 8, value_line: 677, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarForeground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 678, position: 8, value_line: 678, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 679, position: 8, value_line: 679, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 680, position: 8, value_line: 680, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundPointerOver", target: "SystemControlBackgroundListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 681, position: 8, value_line: 681, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 682, position: 8, value_line: 682, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 683, position: 8, value_line: 683, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 684, position: 8, value_line: 684, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 685, position: 8, value_line: 685, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 686, position: 8, value_line: 686, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 687, position: 8, value_line: 687, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 688, position: 8, value_line: 688, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 689, position: 8, value_line: 689, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundPressed", target: "SystemControlForegroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 691, position: 8, value_line: 691, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundDisabled", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 692, position: 8, value_line: 692, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillPointerOver", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 693, position: 8, value_line: 693, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillPressed", target: "SystemControlBackgroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 694, position: 8, value_line: 694, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 695, position: 8, value_line: 695, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_94: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarBackgroundSystemControlTransparentBrushScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundSystemControlForegroundBaseHighBrushScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledSystemControlForegroundBaseLowBrushScrollBarThumbFillPointerOverSystemControlBackgroundBaseMediumLowBrushScrollBarThumbFillPressedScrollBarThumbFillDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 19, 19, 29, 1, 676, 8, 676, 8,
+        48, 30, 19, 29, 1, 677, 8, 677, 8,
+        78, 19, 19, 29, 1, 678, 8, 678, 8,
+        97, 20, 19, 29, 1, 679, 8, 679, 8,
+        117, 25, 19, 29, 1, 680, 8, 680, 8,
+        142, 36, 178, 35, 1, 681, 8, 681, 8,
+        213, 32, 245, 38, 1, 682, 8, 682, 8,
+        283, 33, 19, 29, 1, 683, 8, 683, 8,
+        316, 26, 19, 29, 1, 684, 8, 684, 8,
+        342, 37, 19, 29, 1, 685, 8, 685, 8,
+        379, 33, 19, 29, 1, 686, 8, 686, 8,
+        412, 34, 19, 29, 1, 687, 8, 687, 8,
+        446, 30, 476, 36, 1, 688, 8, 688, 8,
+        512, 41, 476, 36, 1, 689, 8, 689, 8,
+        553, 37, 590, 35, 1, 691, 8, 691, 8,
+        625, 38, 663, 35, 1, 692, 8, 692, 8,
+        698, 29, 727, 41, 1, 693, 8, 693, 8,
+        768, 25, 245, 38, 1, 694, 8, 694, 8,
+        793, 26, 819, 37, 1, 695, 8, 695, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_95: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ScrollBarTrackStroke", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 699, position: 8, value_line: 699, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarTrackStrokePointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 700, position: 8, value_line: 700, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbBackgroundColor", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 701, position: 8, value_line: 701, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarPanningThumbBackgroundColor", target: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 702, position: 8, value_line: 702, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarTrackStrokeSystemControlForegroundTransparentBrushScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorSystemBaseLowColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 39, 1, 699, 8, 699, 8,
+        59, 31, 20, 39, 1, 700, 8, 700, 8,
+        90, 29, 119, 18, 1, 701, 8, 701, 8,
+        137, 36, 173, 28, 1, 702, 8, 702, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_96: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "ScrollBarPanningThumbBackground", color_key: "ScrollBarPanningThumbBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 703, position: 8, value_line: 704, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_96: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 31, 36, 1, 703, 8, 704, 24,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_97: &[rt::ValueRow<f64>] = &[
@@ -1918,452 +2262,644 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_97: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ScrollBarButtonArrowIconFontSize", value: 8.0_f64, line: 706, position: 58 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_98: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TreeViewItemBackground", target: "SystemControlTransparentRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 709, position: 8, value_line: 709, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundPointerOver", target: "SystemControlHighlightListLowRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 710, position: 8, value_line: 710, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundPressed", target: "SystemControlHighlightListMediumRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 712, position: 8, value_line: 712, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 714, position: 8, value_line: 714, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelected", target: "SystemControlHighlightAccent3RevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 715, position: 8, value_line: 715, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedPointerOver", target: "SystemControlHighlightAccent2RevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 717, position: 8, value_line: 717, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedPressed", target: "SystemControlHighlightListMediumRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 719, position: 8, value_line: 719, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 721, position: 8, value_line: 721, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 723, position: 8, value_line: 723, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 724, position: 8, value_line: 724, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 725, position: 8, value_line: 725, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 726, position: 8, value_line: 726, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 727, position: 8, value_line: 727, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 728, position: 8, value_line: 728, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 730, position: 8, value_line: 730, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 732, position: 8, value_line: 732, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 734, position: 8, value_line: 734, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushPointerOver", target: "SystemControlHighlightAltTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 735, position: 8, value_line: 735, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushPressed", target: "SystemControlHighlightAltTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 737, position: 8, value_line: 737, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 739, position: 8, value_line: 739, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 740, position: 8, value_line: 740, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedPointerOver", target: "SystemControlBackgroundTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 741, position: 8, value_line: 741, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedPressed", target: "SystemControlBackgroundTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 743, position: 8, value_line: 743, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 745, position: 8, value_line: 745, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_98: rt::PackedRows = rt::PackedRows {
+    strings: "TreeViewItemBackgroundSystemControlTransparentRevealBackgroundBrushTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledSystemControlTransparentBrushTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledSystemControlDisabledBaseMediumLowBrushTreeViewItemForegroundSystemControlForegroundBaseHighBrushTreeViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 45, 1, 709, 8, 709, 8,
+        67, 33, 100, 50, 1, 710, 8, 710, 8,
+        150, 29, 179, 53, 1, 712, 8, 712, 8,
+        232, 30, 262, 29, 1, 714, 8, 714, 8,
+        291, 30, 321, 50, 1, 715, 8, 715, 8,
+        371, 41, 412, 50, 1, 717, 8, 717, 8,
+        462, 37, 179, 53, 1, 719, 8, 719, 8,
+        499, 38, 537, 39, 1, 721, 8, 721, 8,
+        576, 22, 598, 36, 1, 723, 8, 723, 8,
+        634, 33, 667, 38, 1, 724, 8, 724, 8,
+        705, 29, 667, 38, 1, 725, 8, 725, 8,
+        734, 30, 537, 39, 1, 726, 8, 726, 8,
+        764, 30, 667, 38, 1, 727, 8, 727, 8,
+        794, 41, 667, 38, 1, 728, 8, 728, 8,
+        835, 37, 667, 38, 1, 730, 8, 730, 8,
+        872, 38, 537, 39, 1, 732, 8, 732, 8,
+        910, 23, 262, 29, 1, 734, 8, 734, 8,
+        933, 34, 967, 53, 1, 735, 8, 735, 8,
+        1020, 30, 967, 53, 1, 737, 8, 737, 8,
+        1050, 31, 262, 29, 1, 739, 8, 739, 8,
+        1081, 31, 262, 29, 1, 740, 8, 740, 8,
+        1112, 42, 1154, 51, 1, 741, 8, 741, 8,
+        1205, 38, 1154, 51, 1, 743, 8, 743, 8,
+        1243, 39, 262, 29, 1, 745, 8, 745, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_99: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 750, position: 8, value_line: 750, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_99: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 35, 1, 750, 8, 750, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_100: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 753, position: 8, value_line: 753, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 754, position: 8, value_line: 754, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 755, position: 8, value_line: 755, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_100: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushSplitButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushSplitButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 28, 28, 41, 1, 753, 8, 753, 8,
+        69, 29, 98, 35, 1, 754, 8, 754, 8,
+        133, 28, 161, 33, 1, 755, 8, 755, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_101: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SplitButtonBackgroundCheckedPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 756, position: 8, value_line: 757, value_position: 24 },
-    rt::DynamicBrushRow { key: "SplitButtonBackgroundCheckedPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 758, position: 8, value_line: 758, value_position: 68 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_101: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundCheckedPointerOverSystemAccentColorLight1SplitButtonBackgroundCheckedPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 39, 39, 23, 1, 756, 8, 757, 24,
+        62, 35, 97, 22, 1, 758, 8, 758, 68,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_102: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundCheckedDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 759, position: 8, value_line: 759, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 760, position: 8, value_line: 760, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 761, position: 8, value_line: 761, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 762, position: 8, value_line: 762, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 763, position: 8, value_line: 763, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 764, position: 8, value_line: 764, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 765, position: 8, value_line: 765, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 767, position: 8, value_line: 767, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 769, position: 8, value_line: 769, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 771, position: 8, value_line: 771, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 772, position: 8, value_line: 772, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 773, position: 8, value_line: 773, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 774, position: 8, value_line: 774, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushChecked", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 775, position: 8, value_line: 775, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedPointerOver", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 776, position: 8, value_line: 776, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedPressed", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 778, position: 8, value_line: 778, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 780, position: 8, value_line: 780, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_102: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushSplitButtonForegroundSystemControlForegroundBaseHighBrushSplitButtonForegroundPointerOverSystemControlHighlightBaseHighBrushSplitButtonForegroundPressedSplitButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushSplitButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSystemControlForegroundTransparentBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSystemControlHighlightTransparentBrushSplitButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSplitButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 36, 35, 1, 759, 8, 759, 8,
+        71, 21, 92, 36, 1, 760, 8, 760, 8,
+        128, 32, 160, 35, 1, 761, 8, 761, 8,
+        195, 28, 160, 35, 1, 762, 8, 762, 8,
+        223, 29, 252, 39, 1, 763, 8, 763, 8,
+        291, 28, 319, 41, 1, 764, 8, 764, 8,
+        360, 39, 319, 41, 1, 765, 8, 765, 8,
+        399, 35, 319, 41, 1, 767, 8, 767, 8,
+        434, 36, 252, 39, 1, 769, 8, 769, 8,
+        470, 22, 492, 39, 1, 771, 8, 771, 8,
+        531, 33, 492, 39, 1, 772, 8, 772, 8,
+        564, 29, 593, 38, 1, 773, 8, 773, 8,
+        631, 30, 661, 37, 1, 774, 8, 774, 8,
+        698, 29, 727, 41, 1, 775, 8, 775, 8,
+        768, 40, 727, 41, 1, 776, 8, 776, 8,
+        808, 36, 727, 41, 1, 778, 8, 778, 8,
+        844, 37, 661, 37, 1, 780, 8, 780, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_103: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitViewLightDismissOverlayBackground", target: "SystemControlPageBackgroundMediumAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 784, position: 8, value_line: 784, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 788, position: 8, value_line: 788, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 789, position: 8, value_line: 789, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerCalendarGlyphForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 791, position: 8, value_line: 791, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerCalendarGlyphForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 793, position: 8, value_line: 793, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForeground", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 795, position: 8, value_line: 795, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 796, position: 8, value_line: 796, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForegroundSelected", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 798, position: 8, value_line: 798, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 800, position: 8, value_line: 800, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 801, position: 8, value_line: 801, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 803, position: 8, value_line: 803, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 804, position: 8, value_line: 804, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundFocused", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 805, position: 8, value_line: 805, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 807, position: 8, value_line: 807, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 808, position: 8, value_line: 808, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 810, position: 8, value_line: 810, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 811, position: 8, value_line: 811, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerLightDismissOverlayBackground", target: "SystemControlPageBackgroundMediumAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 812, position: 8, value_line: 812, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_103: rt::PackedRows = rt::PackedRows {
+    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundSystemControlForegroundBaseHighBrushCalendarDatePickerForegroundDisabledSystemControlDisabledBaseMediumLowBrushCalendarDatePickerCalendarGlyphForegroundSystemControlForegroundBaseMediumHighBrushCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundSystemControlForegroundBaseMediumBrushCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundSystemControlBackgroundAltMediumLowBrushCalendarDatePickerBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushCalendarDatePickerBackgroundPressedSystemControlBackgroundBaseLowBrushCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedSystemControlHighlightListAccentLowBrushCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushCalendarDatePickerBorderBrushPressedSystemControlHighlightBaseMediumBrushCalendarDatePickerBorderBrushDisabledSystemControlDisabledBaseLowBrushCalendarDatePickerLightDismissOverlayBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 38, 38, 47, 1, 784, 8, 784, 8,
+        85, 28, 113, 36, 1, 788, 8, 788, 8,
+        149, 36, 185, 39, 1, 789, 8, 789, 8,
+        224, 41, 265, 42, 1, 791, 8, 791, 8,
+        307, 49, 185, 39, 1, 793, 8, 793, 8,
+        356, 32, 388, 38, 1, 795, 8, 795, 8,
+        426, 40, 185, 39, 1, 796, 8, 796, 8,
+        466, 40, 113, 36, 1, 798, 8, 798, 8,
+        506, 28, 534, 40, 1, 800, 8, 800, 8,
+        574, 39, 613, 41, 1, 801, 8, 801, 8,
+        654, 35, 689, 35, 1, 803, 8, 803, 8,
+        724, 36, 689, 35, 1, 804, 8, 804, 8,
+        760, 35, 795, 40, 1, 805, 8, 805, 8,
+        835, 29, 388, 38, 1, 807, 8, 807, 8,
+        864, 40, 904, 41, 1, 808, 8, 808, 8,
+        945, 36, 981, 37, 1, 810, 8, 810, 8,
+        1018, 37, 1055, 33, 1, 811, 8, 811, 8,
+        1088, 47, 38, 47, 1, 812, 8, 812, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_104: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "FlyoutPresenterBackground", target: "SystemControlBackgroundChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 817, position: 8, value_line: 817, value_position: 8 },
-    rt::ResourceAliasRow { key: "FlyoutBorderThemeBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 818, position: 8, value_line: 818, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_104: rt::PackedRows = rt::PackedRows {
+    strings: "FlyoutPresenterBackgroundSystemControlBackgroundChromeMediumLowBrushFlyoutBorderThemeBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 43, 1, 817, 8, 817, 8,
+        68, 22, 90, 33, 1, 818, 8, 818, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_105: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 825, position: 8 },
-    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 826, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 829, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4293256677_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 830, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 831, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_105: rt::PackedRows = rt::PackedRows {
+    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 27, 0, 65280, 1, 825, 8,
+        27, 27, 65535, 255, 1, 826, 8,
+        54, 23, 0, 65280, 1, 829, 8,
+        77, 23, 58853, 65509, 1, 830, 8,
+        100, 24, 51914, 65482, 1, 831, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_106: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 832, position: 8, value_line: 832, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewColumnHeaderSeparatorBackground", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 835, position: 8, value_line: 835, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
+    strings: "TitleBarBackgroundBrushSystemControlBackgroundAltHighBrushTableViewColumnHeaderSeparatorBackgroundSystemBaseLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 23, 23, 35, 1, 832, 8, 832, 8,
+        58, 40, 98, 18, 1, 835, 8, 835, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_107: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TableViewRowForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 840, position: 8, value_line: 840, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 841, position: 8, value_line: 841, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 842, position: 8, value_line: 842, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 843, position: 8, value_line: 843, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 844, position: 8, value_line: 844, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelected", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 845, position: 8, value_line: 845, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 846, position: 8, value_line: 846, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelectedPointerOver", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 847, position: 8, value_line: 847, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 848, position: 8, value_line: 848, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelectedPressed", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 849, position: 8, value_line: 849, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 850, position: 8, value_line: 850, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_107: rt::PackedRows = rt::PackedRows {
+    strings: "TableViewRowForegroundDisabledSystemControlDisabledBaseMediumLowBrushTableViewRowBackgroundPointerOverSystemControlHighlightListLowBrushTableViewRowForegroundPointerOverSystemControlHighlightAltBaseHighBrushTableViewRowBackgroundPressedSystemControlHighlightListMediumBrushTableViewRowForegroundPressedTableViewRowBackgroundSelectedSystemControlHighlightListAccentLowBrushTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushTableViewRowForegroundSelectedPressed",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 30, 30, 39, 1, 840, 8, 840, 8,
+        69, 33, 102, 34, 1, 841, 8, 841, 8,
+        136, 33, 169, 38, 1, 842, 8, 842, 8,
+        207, 29, 236, 37, 1, 843, 8, 843, 8,
+        273, 29, 169, 38, 1, 844, 8, 844, 8,
+        302, 30, 332, 40, 1, 845, 8, 845, 8,
+        372, 30, 169, 38, 1, 846, 8, 846, 8,
+        402, 41, 443, 43, 1, 847, 8, 847, 8,
+        486, 41, 169, 38, 1, 848, 8, 848, 8,
+        527, 37, 564, 41, 1, 849, 8, 849, 8,
+        605, 37, 169, 38, 1, 850, 8, 850, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_108: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlBackgroundAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 283, position: 8, value_line: 283, value_position: 67 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_108: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 17, 1, 283, 8, 283, 67,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_109: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 284, position: 8, value_line: 284, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 285, position: 8, value_line: 286, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 287, position: 8, value_line: 287, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundAltMediumLowBrush", color_key: "SystemAltMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 288, position: 8, value_line: 289, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 290, position: 8, value_line: 290, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 291, position: 8, value_line: 291, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 292, position: 8, value_line: 292, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 293, position: 8, value_line: 294, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 295, position: 8, value_line: 296, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackHighBrush", color_key: "SystemChromeBlackHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 297, position: 8, value_line: 298, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackMediumBrush", color_key: "SystemChromeBlackMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 299, position: 8, value_line: 300, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackLowBrush", color_key: "SystemChromeBlackLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 301, position: 8, value_line: 302, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 303, position: 8, value_line: 304, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeMediumBrush", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 305, position: 8, value_line: 306, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 307, position: 8, value_line: 308, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 309, position: 8, value_line: 309, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 310, position: 8, value_line: 310, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlBackgroundListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 311, position: 8, value_line: 311, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_109: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 18, 1, 284, 8, 284, 68,
+        53, 41, 94, 24, 1, 285, 8, 286, 24,
+        118, 37, 155, 20, 1, 287, 8, 287, 70,
+        175, 40, 215, 23, 1, 288, 8, 289, 24,
+        238, 36, 274, 19, 1, 290, 8, 290, 69,
+        293, 35, 328, 18, 1, 291, 8, 291, 68,
+        346, 38, 384, 21, 1, 292, 8, 292, 71,
+        405, 42, 447, 25, 1, 293, 8, 294, 24,
+        472, 41, 513, 24, 1, 295, 8, 296, 24,
+        537, 43, 580, 26, 1, 297, 8, 298, 24,
+        606, 45, 651, 28, 1, 299, 8, 300, 24,
+        679, 42, 721, 25, 1, 301, 8, 302, 24,
+        746, 48, 794, 31, 1, 303, 8, 304, 24,
+        825, 40, 865, 23, 1, 305, 8, 306, 24,
+        888, 43, 931, 26, 1, 307, 8, 308, 24,
+        957, 39, 996, 22, 1, 309, 8, 309, 72,
+        1018, 35, 1053, 18, 1, 310, 8, 310, 68,
+        1071, 38, 1109, 21, 1, 311, 8, 311, 71,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_110: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlDisabledAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 312, position: 8, value_line: 312, value_position: 65 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_110: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 32, 32, 17, 1, 312, 8, 312, 65,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_111: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 313, position: 8, value_line: 313, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 314, position: 8, value_line: 314, value_position: 66 },
-    rt::StaticBrushRow { key: "SystemControlDisabledBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 315, position: 8, value_line: 316, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeDisabledHighBrush", color_key: "SystemChromeDisabledHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 317, position: 8, value_line: 318, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeDisabledLowBrush", color_key: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 319, position: 8, value_line: 320, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 321, position: 8, value_line: 321, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlDisabledChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 322, position: 8, value_line: 323, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlDisabledListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 324, position: 8, value_line: 324, value_position: 69 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_111: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 19, 1, 313, 8, 313, 67,
+        53, 33, 86, 18, 1, 314, 8, 314, 66,
+        104, 39, 143, 24, 1, 315, 8, 316, 24,
+        167, 44, 211, 29, 1, 317, 8, 318, 24,
+        240, 43, 283, 28, 1, 319, 8, 320, 24,
+        311, 36, 347, 21, 1, 321, 8, 321, 69,
+        368, 41, 409, 26, 1, 322, 8, 323, 24,
+        435, 36, 471, 21, 1, 324, 8, 324, 69,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_112: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlDisabledTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 325, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_112: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 65535, 255, 1, 325, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_113: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlFocusVisualPrimaryBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 326, position: 8, value_line: 326, value_position: 69 },
-    rt::DynamicBrushRow { key: "SystemControlFocusVisualSecondaryBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 327, position: 8, value_line: 327, value_position: 71 },
-    rt::DynamicBrushRow { key: "SystemControlRevealFocusVisualBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 328, position: 8, value_line: 328, value_position: 68 },
-    rt::DynamicBrushRow { key: "SystemControlForegroundAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 329, position: 8, value_line: 329, value_position: 67 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_113: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlFocusVisualPrimaryBrushSystemBaseHighColorSystemControlFocusVisualSecondaryBrushSystemAltMediumColorSystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 36, 36, 19, 1, 326, 8, 326, 69,
+        55, 38, 93, 20, 1, 327, 8, 327, 71,
+        113, 35, 148, 17, 1, 328, 8, 328, 68,
+        165, 34, 148, 17, 1, 329, 8, 329, 67,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_114: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlForegroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 330, position: 8, value_line: 330, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 331, position: 8, value_line: 332, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 333, position: 8, value_line: 333, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 334, position: 8, value_line: 334, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 335, position: 8, value_line: 335, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 336, position: 8, value_line: 337, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 338, position: 8, value_line: 339, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackHighBrush", color_key: "SystemChromeBlackHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 340, position: 8, value_line: 341, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 342, position: 8, value_line: 342, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeMediumBrush", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 343, position: 8, value_line: 344, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 345, position: 8, value_line: 345, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeDisabledLowBrush", color_key: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 346, position: 8, value_line: 347, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeGrayBrush", color_key: "SystemChromeGrayColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 348, position: 8, value_line: 348, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlForegroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 349, position: 8, value_line: 349, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlForegroundListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 350, position: 8, value_line: 350, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_114: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 18, 1, 330, 8, 330, 68,
+        53, 41, 94, 24, 1, 331, 8, 332, 24,
+        118, 36, 154, 19, 1, 333, 8, 333, 69,
+        173, 35, 208, 18, 1, 334, 8, 334, 68,
+        226, 38, 264, 21, 1, 335, 8, 335, 71,
+        285, 42, 327, 25, 1, 336, 8, 337, 24,
+        352, 41, 393, 24, 1, 338, 8, 339, 24,
+        417, 43, 460, 26, 1, 340, 8, 341, 24,
+        486, 38, 524, 21, 1, 342, 8, 342, 71,
+        545, 40, 585, 23, 1, 343, 8, 344, 24,
+        608, 39, 647, 22, 1, 345, 8, 345, 72,
+        669, 45, 714, 28, 1, 346, 8, 347, 24,
+        742, 38, 780, 21, 1, 348, 8, 348, 71,
+        801, 35, 836, 18, 1, 349, 8, 349, 68,
+        854, 38, 892, 21, 1, 350, 8, 350, 71,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_115: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlForegroundTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 351, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_115: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlForegroundTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 39, 65535, 255, 1, 351, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_116: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackMediumBrush", color_key: "SystemChromeBlackMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 352, position: 8, value_line: 353, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlForegroundChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 354, position: 8, value_line: 355, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_116: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 45, 45, 28, 1, 352, 8, 353, 24,
+        73, 48, 121, 31, 1, 354, 8, 355, 24,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_117: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHighlightAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 356, position: 8, value_line: 356, value_position: 66 },
-    rt::DynamicBrushRow { key: "SystemControlHighlightAltAccentBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 357, position: 8, value_line: 357, value_position: 69 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_117: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 33, 33, 17, 1, 356, 8, 356, 66,
+        50, 36, 33, 17, 1, 357, 8, 357, 69,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_118: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightAltAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 358, position: 8, value_line: 358, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 359, position: 8, value_line: 359, value_position: 71 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 360, position: 8, value_line: 360, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 361, position: 8, value_line: 361, value_position: 73 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 362, position: 8, value_line: 363, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltAltMediumHighBrush", color_key: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 364, position: 8, value_line: 365, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightAltBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 366, position: 8, value_line: 367, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_118: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 18, 1, 358, 8, 358, 70,
+        55, 38, 93, 19, 1, 359, 8, 359, 71,
+        112, 37, 149, 18, 1, 360, 8, 360, 70,
+        167, 40, 207, 21, 1, 361, 8, 361, 73,
+        228, 44, 272, 25, 1, 362, 8, 363, 24,
+        297, 43, 340, 24, 1, 364, 8, 365, 24,
+        364, 43, 407, 24, 1, 366, 8, 367, 24,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_119: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightAltChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 374, position: 8, value_line: 375, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_119: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 41, 41, 22, 1, 374, 8, 375, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_120: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightAltTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 376, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_120: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 41, 65535, 255, 1, 376, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_121: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 377, position: 8, value_line: 377, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 378, position: 8, value_line: 378, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 379, position: 8, value_line: 379, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 380, position: 8, value_line: 381, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightBaseMediumLowBrush", color_key: "SystemBaseMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 382, position: 8, value_line: 383, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeAltLowBrush", color_key: "SystemChromeAltLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 384, position: 8, value_line: 384, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeHighBrush", color_key: "SystemChromeHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 385, position: 8, value_line: 385, value_position: 70 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_121: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 19, 1, 377, 8, 377, 68,
+        54, 34, 88, 18, 1, 378, 8, 378, 67,
+        106, 37, 143, 21, 1, 379, 8, 379, 70,
+        164, 41, 205, 25, 1, 380, 8, 381, 24,
+        230, 40, 270, 24, 1, 382, 8, 383, 24,
+        294, 39, 333, 23, 1, 384, 8, 384, 72,
+        356, 37, 393, 21, 1, 385, 8, 385, 70,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_122: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightListMediumBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 392, position: 8, value_line: 392, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHighlightListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 393, position: 8, value_line: 393, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlHighlightChromeWhiteBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 394, position: 8, value_line: 394, value_position: 71 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_122: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 21, 1, 392, 8, 392, 70,
+        58, 34, 92, 18, 1, 393, 8, 393, 67,
+        110, 38, 148, 22, 1, 394, 8, 394, 71,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_123: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 395, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_123: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 38, 65535, 255, 1, 395, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_124: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHyperlinkTextBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 396, position: 8, value_line: 396, value_position: 64 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_124: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 31, 31, 17, 1, 396, 8, 396, 64,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_125: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 397, position: 8, value_line: 397, value_position: 68 },
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 398, position: 8, value_line: 398, value_position: 70 },
-    rt::StaticBrushRow { key: "SystemControlHyperlinkBaseMediumHighBrush", color_key: "SystemBaseMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 399, position: 8, value_line: 400, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 401, position: 8, value_line: 401, value_position: 74 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundAltHighBrush", color_key: "SystemAltHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 402, position: 8, value_line: 402, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundMediumAltMediumBrush", color_key: "SystemAltMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 403, position: 8, value_line: 404, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundBaseLowBrush", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 405, position: 8, value_line: 405, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 406, position: 8, value_line: 407, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundListLowBrush", color_key: "SystemListLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 408, position: 8, value_line: 408, value_position: 72 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundChromeLowBrush", color_key: "SystemChromeLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 409, position: 8, value_line: 409, value_position: 74 },
-    rt::StaticBrushRow { key: "SystemControlPageBackgroundChromeMediumLowBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 410, position: 8, value_line: 411, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_125: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 35, 35, 19, 1, 397, 8, 397, 68,
+        54, 37, 91, 21, 1, 398, 8, 398, 70,
+        112, 41, 153, 25, 1, 399, 8, 400, 24,
+        178, 41, 219, 20, 1, 401, 8, 401, 74,
+        239, 39, 278, 18, 1, 402, 8, 402, 72,
+        296, 47, 219, 20, 1, 403, 8, 404, 24,
+        343, 39, 382, 18, 1, 405, 8, 405, 72,
+        400, 42, 91, 21, 1, 406, 8, 407, 24,
+        442, 39, 481, 18, 1, 408, 8, 408, 72,
+        499, 41, 540, 20, 1, 409, 8, 409, 74,
+        560, 47, 607, 26, 1, 410, 8, 411, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_126: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlPageBackgroundTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 412, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_126: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlPageBackgroundTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 43, 65535, 255, 1, 412, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_127: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlPageTextBaseHighBrush", color_key: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 413, position: 8, value_line: 413, value_position: 67 },
-    rt::StaticBrushRow { key: "SystemControlPageTextBaseMediumBrush", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 414, position: 8, value_line: 414, value_position: 69 },
-    rt::StaticBrushRow { key: "SystemControlPageTextChromeBlackMediumLowBrush", color_key: "SystemChromeBlackMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 415, position: 8, value_line: 416, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlErrorTextForegroundBrush", color_key: "SystemErrorTextColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 417, position: 8, value_line: 417, value_position: 70 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_127: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 34, 34, 19, 1, 413, 8, 413, 67,
+        53, 36, 89, 21, 1, 414, 8, 414, 69,
+        110, 46, 156, 31, 1, 415, 8, 416, 24,
+        187, 37, 224, 20, 1, 417, 8, 417, 70,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_128: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlHighlightListLowRevealBackgroundBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 419, position: 8, value_line: 420, value_position: 24 },
-    rt::StaticBrushRow { key: "SystemControlHighlightListMediumRevealBackgroundBrush", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 421, position: 8, value_line: 422, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_128: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightListLowRevealBackgroundBrushSystemListMediumColorSystemControlHighlightListMediumRevealBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 50, 50, 21, 1, 419, 8, 420, 24,
+        71, 53, 50, 21, 1, 421, 8, 422, 24,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_129: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SystemControlHighlightAccentRevealBackgroundBrush", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 423, position: 8, value_line: 424, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_129: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAccentRevealBackgroundBrushSystemAccentColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 49, 49, 17, 1, 423, 8, 424, 24,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_130: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlBackgroundChromeWhiteRevealBorderBrush", color_key: "SystemChromeWhiteColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 429, position: 8, value_line: 430, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_130: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlBackgroundChromeWhiteRevealBorderBrushSystemChromeWhiteColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 51, 51, 22, 1, 429, 8, 430, 24,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_131: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlHighlightAltTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 431, position: 8 },
-    rt::LiteralBrushRow { key: "SystemControlBackgroundTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 432, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_131: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 53, 65535, 255, 1, 431, 8,
+        53, 51, 65535, 255, 1, 432, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_132: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemControlTransientBackgroundBrush", color_key: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 433, position: 8, value_line: 434, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_132: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlTransientBackgroundBrushSystemChromeMediumLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 37, 37, 26, 1, 433, 8, 434, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_133: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SystemControlDescriptionTextForegroundBrush", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 435, position: 8, value_line: 435, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_133: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 43, 43, 36, 1, 435, 8, 435, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_134: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlTransparentRevealBackgroundBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 437, position: 8 },
-    rt::LiteralBrushRow { key: "SystemControlTransparentRevealBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 438, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_134: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 45, 65535, 255, 1, 437, 8,
+        45, 41, 65535, 255, 1, 438, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_135: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "SystemRegionBrush", color_key: "SystemRegionColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 440, position: 8, value_line: 440, value_position: 50 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_135: rt::PackedRows = rt::PackedRows {
+    strings: "SystemRegionBrushSystemRegionColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 17, 17, 17, 1, 440, 8, 440, 50,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_136: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "AccentButtonBackground", target: "SystemControlBackgroundAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 855, position: 8, value_line: 855, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_136: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundSystemControlBackgroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 34, 1, 855, 8, 855, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_137: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "AccentButtonBackgroundPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 856, position: 8, value_line: 856, value_position: 66 },
-    rt::DynamicBrushRow { key: "AccentButtonBackgroundPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 857, position: 8, value_line: 857, value_position: 62 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_137: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 23, 1, 856, 8, 856, 66,
+        56, 29, 85, 22, 1, 857, 8, 857, 62,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_138: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "AccentButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 858, position: 8, value_line: 858, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForeground", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 859, position: 8, value_line: 859, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundPointerOver", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 860, position: 8, value_line: 860, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundPressed", target: "SystemControlBackgroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 861, position: 8, value_line: 861, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 862, position: 8, value_line: 862, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 863, position: 8, value_line: 863, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 864, position: 8, value_line: 864, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 865, position: 8, value_line: 865, value_position: 8 },
-    rt::ResourceAliasRow { key: "AccentButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 866, position: 8, value_line: 866, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_138: rt::PackedRows = rt::PackedRows {
+    strings: "AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 30, 30, 35, 1, 858, 8, 858, 8,
+        65, 22, 87, 39, 1, 859, 8, 859, 8,
+        126, 33, 87, 39, 1, 860, 8, 860, 8,
+        159, 29, 87, 39, 1, 861, 8, 861, 8,
+        188, 30, 218, 39, 1, 862, 8, 862, 8,
+        257, 23, 280, 39, 1, 863, 8, 863, 8,
+        319, 34, 280, 39, 1, 864, 8, 864, 8,
+        353, 30, 383, 38, 1, 865, 8, 865, 8,
+        421, 31, 452, 37, 1, 866, 8, 866, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_139: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 868, position: 8, value_line: 868, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_139: rt::PackedRows = rt::PackedRows {
+    strings: "ButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 16, 16, 35, 1, 868, 8, 868, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_140: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 870, position: 8, value_line: 870, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 871, position: 8, value_line: 871, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 872, position: 8, value_line: 872, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 873, position: 8, value_line: 873, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 874, position: 8, value_line: 874, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 875, position: 8, value_line: 875, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 876, position: 8, value_line: 876, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 877, position: 8, value_line: 877, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 878, position: 8, value_line: 878, value_position: 8 },
-    rt::ResourceAliasRow { key: "ButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 879, position: 8, value_line: 879, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 882, position: 8, value_line: 882, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_140: rt::PackedRows = rt::PackedRows {
+    strings: "ButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushButtonForegroundSystemControlForegroundBaseHighBrushButtonForegroundPointerOverSystemControlHighlightBaseHighBrushButtonForegroundPressedButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushButtonBorderBrushSystemControlForegroundTransparentBrushButtonBorderBrushPointerOverButtonBorderBrushPressedSystemControlHighlightTransparentBrushButtonBorderBrushDisabledSystemControlDisabledTransparentBrushRepeatButtonBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 23, 23, 41, 1, 870, 8, 870, 8,
+        64, 24, 88, 35, 1, 871, 8, 871, 8,
+        123, 16, 139, 36, 1, 872, 8, 872, 8,
+        175, 27, 202, 35, 1, 873, 8, 873, 8,
+        237, 23, 202, 35, 1, 874, 8, 874, 8,
+        260, 24, 284, 39, 1, 875, 8, 875, 8,
+        323, 17, 340, 39, 1, 876, 8, 876, 8,
+        379, 28, 340, 39, 1, 877, 8, 877, 8,
+        407, 24, 431, 38, 1, 878, 8, 878, 8,
+        469, 25, 494, 37, 1, 879, 8, 879, 8,
+        531, 22, 88, 35, 1, 882, 8, 882, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_141: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RepeatButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 885, position: 8, value_line: 885, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 886, position: 8, value_line: 886, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 887, position: 8, value_line: 887, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 888, position: 8, value_line: 888, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 889, position: 8, value_line: 889, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 890, position: 8, value_line: 890, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 891, position: 8, value_line: 891, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 892, position: 8, value_line: 892, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 893, position: 8, value_line: 893, value_position: 8 },
-    rt::ResourceAliasRow { key: "RepeatButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 894, position: 8, value_line: 894, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_141: rt::PackedRows = rt::PackedRows {
+    strings: "RepeatButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushRepeatButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushRepeatButtonForegroundSystemControlForegroundBaseHighBrushRepeatButtonForegroundPointerOverSystemControlHighlightBaseHighBrushRepeatButtonForegroundPressedRepeatButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRepeatButtonBorderBrushSystemControlForegroundTransparentBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedSystemControlHighlightTransparentBrushRepeatButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 41, 1, 885, 8, 885, 8,
+        70, 30, 100, 35, 1, 886, 8, 886, 8,
+        135, 22, 157, 36, 1, 887, 8, 887, 8,
+        193, 33, 226, 35, 1, 888, 8, 888, 8,
+        261, 29, 226, 35, 1, 889, 8, 889, 8,
+        290, 30, 320, 39, 1, 890, 8, 890, 8,
+        359, 23, 382, 39, 1, 891, 8, 891, 8,
+        421, 34, 382, 39, 1, 892, 8, 892, 8,
+        455, 30, 485, 38, 1, 893, 8, 893, 8,
+        523, 31, 554, 37, 1, 894, 8, 894, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_142: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 898, position: 8, value_line: 898, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_142: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 35, 1, 898, 8, 898, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_143: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 901, position: 8, value_line: 901, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 902, position: 8, value_line: 902, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 903, position: 8, value_line: 903, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_143: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 41, 1, 901, 8, 901, 8,
+        70, 30, 100, 35, 1, 902, 8, 902, 8,
+        135, 29, 164, 33, 1, 903, 8, 903, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_144: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "ToggleButtonBackgroundCheckedPointerOver", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 904, position: 8, value_line: 905, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundCheckedPointerOverSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 40, 40, 22, 1, 904, 8, 905, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_145: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundCheckedPressed", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 906, position: 8, value_line: 906, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundCheckedDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 908, position: 8, value_line: 908, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminate", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 909, position: 8, value_line: 909, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminatePointerOver", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 910, position: 8, value_line: 910, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminatePressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 912, position: 8, value_line: 912, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBackgroundIndeterminateDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 914, position: 8, value_line: 914, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 916, position: 8, value_line: 916, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 917, position: 8, value_line: 917, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 918, position: 8, value_line: 918, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 919, position: 8, value_line: 919, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 920, position: 8, value_line: 920, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 921, position: 8, value_line: 921, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 923, position: 8, value_line: 923, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 925, position: 8, value_line: 925, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminate", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 927, position: 8, value_line: 927, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminatePointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 928, position: 8, value_line: 928, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminatePressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 930, position: 8, value_line: 930, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonForegroundIndeterminateDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 932, position: 8, value_line: 932, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 934, position: 8, value_line: 934, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 935, position: 8, value_line: 935, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 936, position: 8, value_line: 936, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 937, position: 8, value_line: 937, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushChecked", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 938, position: 8, value_line: 938, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedPointerOver", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 939, position: 8, value_line: 939, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 941, position: 8, value_line: 941, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushCheckedDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 942, position: 8, value_line: 942, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminate", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 944, position: 8, value_line: 944, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminatePointerOver", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 946, position: 8, value_line: 946, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminatePressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 948, position: 8, value_line: 948, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleButtonBorderBrushIndeterminateDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 950, position: 8, value_line: 950, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_145: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundSystemControlForegroundBaseHighBrushToggleButtonForegroundPointerOverSystemControlHighlightBaseHighBrushToggleButtonForegroundPressedToggleButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushSystemControlForegroundTransparentBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedSystemControlHighlightTransparentBrushToggleButtonBorderBrushDisabledSystemControlDisabledTransparentBrushToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 36, 40, 1, 906, 8, 906, 8,
+        76, 37, 113, 35, 1, 908, 8, 908, 8,
+        148, 35, 113, 35, 1, 909, 8, 909, 8,
+        183, 46, 113, 35, 1, 910, 8, 910, 8,
+        229, 42, 271, 41, 1, 912, 8, 912, 8,
+        312, 43, 113, 35, 1, 914, 8, 914, 8,
+        355, 22, 377, 36, 1, 916, 8, 916, 8,
+        413, 33, 446, 35, 1, 917, 8, 917, 8,
+        481, 29, 446, 35, 1, 918, 8, 918, 8,
+        510, 30, 540, 39, 1, 919, 8, 919, 8,
+        579, 29, 608, 41, 1, 920, 8, 920, 8,
+        649, 40, 608, 41, 1, 921, 8, 921, 8,
+        689, 36, 608, 41, 1, 923, 8, 923, 8,
+        725, 37, 540, 39, 1, 925, 8, 925, 8,
+        762, 35, 377, 36, 1, 927, 8, 927, 8,
+        797, 46, 446, 35, 1, 928, 8, 928, 8,
+        843, 42, 446, 35, 1, 930, 8, 930, 8,
+        885, 43, 540, 39, 1, 932, 8, 932, 8,
+        928, 23, 951, 39, 1, 934, 8, 934, 8,
+        990, 34, 951, 39, 1, 935, 8, 935, 8,
+        1024, 30, 1054, 38, 1, 936, 8, 936, 8,
+        1092, 31, 1123, 37, 1, 937, 8, 937, 8,
+        1160, 30, 1190, 41, 1, 938, 8, 938, 8,
+        1231, 41, 1190, 41, 1, 939, 8, 939, 8,
+        1272, 37, 1309, 29, 1, 941, 8, 941, 8,
+        1338, 38, 1123, 37, 1, 942, 8, 942, 8,
+        1376, 36, 951, 39, 1, 944, 8, 944, 8,
+        1412, 47, 36, 40, 1, 946, 8, 946, 8,
+        1459, 43, 1054, 38, 1, 948, 8, 948, 8,
+        1502, 44, 1123, 37, 1, 950, 8, 950, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_146: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2371,59 +2907,95 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_146: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "GroupBoxBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 957, position: 50 },
 ];
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_147: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "GroupBoxBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 958, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_147: rt::PackedRows = rt::PackedRows {
+    strings: "GroupBoxBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 18, 65535, 255, 1, 958, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_148: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "GroupBoxBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 959, position: 8, value_line: 959, value_position: 8 },
-    rt::ResourceAliasRow { key: "GroupBoxHeaderForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 960, position: 8, value_line: 960, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_148: rt::PackedRows = rt::PackedRows {
+    strings: "GroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 19, 19, 38, 1, 959, 8, 959, 8,
+        57, 24, 81, 19, 1, 960, 8, 960, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_149: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 964, position: 8, value_line: 964, value_position: 54 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_149: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkVisitedBrushHyperlinkVisitedColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 21, 1, 964, 8, 964, 54,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_150: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "HyperlinkButtonForeground", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 965, position: 8, value_line: 965, value_position: 58 },
-    rt::DynamicBrushRow { key: "HyperlinkButtonForegroundPointerOver", color_key: "SystemAccentColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 966, position: 8, value_line: 966, value_position: 69 },
-    rt::DynamicBrushRow { key: "HyperlinkButtonForegroundPressed", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 967, position: 8, value_line: 967, value_position: 65 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundSystemAccentColorHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedSystemAccentColorLight1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 17, 1, 965, 8, 965, 58,
+        42, 36, 25, 17, 1, 966, 8, 966, 69,
+        78, 32, 110, 23, 1, 967, 8, 967, 65,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_151: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 968, position: 8, value_line: 968, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_151: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 39, 1, 968, 8, 968, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_152: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "HyperlinkButtonForegroundVisited", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 969, position: 8, value_line: 969, value_position: 65 },
-    rt::StaticBrushRow { key: "HyperlinkButtonForegroundVisitedPointerOver", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 970, position: 8, value_line: 970, value_position: 76 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_152: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonForegroundVisitedHyperlinkVisitedColorHyperlinkButtonForegroundVisitedPointerOver",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 21, 1, 969, 8, 969, 65,
+        53, 43, 32, 21, 1, 970, 8, 970, 76,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_153: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 972, position: 8, value_line: 972, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_153: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundSystemControlTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 29, 1, 972, 8, 972, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_154: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "HyperlinkButtonBackgroundPointerOver", color: 268435455_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 973, position: 8 },
-    rt::LiteralBrushRow { key: "HyperlinkButtonBackgroundPressed", color: 184549375_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 974, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_154: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressed",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 65535, 4095, 1, 973, 8,
+        36, 32, 65535, 2815, 1, 974, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_155: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "HyperlinkButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 975, position: 8, value_line: 975, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 976, position: 8, value_line: 976, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 977, position: 8, value_line: 977, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 978, position: 8, value_line: 978, value_position: 8 },
-    rt::ResourceAliasRow { key: "HyperlinkButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 979, position: 8, value_line: 979, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_155: rt::PackedRows = rt::PackedRows {
+    strings: "HyperlinkButtonBackgroundDisabledSystemControlTransparentBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 33, 33, 29, 1, 975, 8, 975, 8,
+        62, 26, 33, 29, 1, 976, 8, 976, 8,
+        88, 37, 33, 29, 1, 977, 8, 977, 8,
+        125, 33, 33, 29, 1, 978, 8, 978, 8,
+        158, 34, 33, 29, 1, 979, 8, 979, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_156: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2432,55 +3004,59 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_156: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 985, position: 51 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_157: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ComboBoxItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 987, position: 8, value_line: 987, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 988, position: 8, value_line: 988, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 989, position: 8, value_line: 989, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 990, position: 8, value_line: 990, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 991, position: 8, value_line: 991, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 992, position: 8, value_line: 992, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 994, position: 8, value_line: 994, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemForegroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 996, position: 8, value_line: 996, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 998, position: 8, value_line: 998, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 999, position: 8, value_line: 999, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1000, position: 8, value_line: 1000, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1001, position: 8, value_line: 1001, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelected", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1002, position: 8, value_line: 1002, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedPressed", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1003, position: 8, value_line: 1003, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedPointerOver", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1005, position: 8, value_line: 1005, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBackgroundSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1007, position: 8, value_line: 1007, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1008, position: 8, value_line: 1008, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1009, position: 8, value_line: 1009, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1010, position: 8, value_line: 1010, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1011, position: 8, value_line: 1011, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1012, position: 8, value_line: 1012, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1013, position: 8, value_line: 1013, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxItemBorderBrushSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1014, position: 8, value_line: 1014, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1016, position: 8, value_line: 1016, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1017, position: 8, value_line: 1017, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundPressed", target: "SystemControlBackgroundListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1018, position: 8, value_line: 1018, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1019, position: 8, value_line: 1019, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundUnfocused", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1020, position: 8, value_line: 1020, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundBorderBrushFocused", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1021, position: 8, value_line: 1021, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBackgroundBorderBrushUnfocused", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1022, position: 8, value_line: 1022, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1024, position: 8, value_line: 1024, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1025, position: 8, value_line: 1025, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundFocused", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1026, position: 8, value_line: 1026, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxForegroundFocusedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1027, position: 8, value_line: 1027, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxPlaceHolderForeground", target: "SystemControlPageTextBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1028, position: 8, value_line: 1028, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxPlaceHolderForegroundFocusedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1029, position: 8, value_line: 1029, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1031, position: 8, value_line: 1031, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1032, position: 8, value_line: 1032, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1033, position: 8, value_line: 1033, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1034, position: 8, value_line: 1034, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1035, position: 8, value_line: 1035, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1036, position: 8, value_line: 1036, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundFocused", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1038, position: 8, value_line: 1038, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownGlyphForegroundFocusedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1040, position: 8, value_line: 1040, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1042, position: 8, value_line: 1042, value_position: 8 },
-    rt::ResourceAliasRow { key: "ComboBoxDropDownBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1043, position: 8, value_line: 1043, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_157: rt::PackedRows = rt::PackedRows {
+    strings: "ComboBoxItemForegroundSystemControlForegroundBaseHighBrushComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSystemControlTransparentBrushComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledSystemControlBackgroundBaseLowBrushComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedSystemControlHighlightTransparentBrushComboBoxBackgroundBorderBrushUnfocusedSystemControlHighlightBaseMediumLowBrushComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushSystemControlForegroundBaseMediumBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 36, 1, 987, 8, 987, 8,
+        58, 29, 87, 38, 1, 988, 8, 988, 8,
+        125, 33, 87, 38, 1, 989, 8, 989, 8,
+        158, 30, 188, 39, 1, 990, 8, 990, 8,
+        227, 30, 87, 38, 1, 991, 8, 991, 8,
+        257, 37, 87, 38, 1, 992, 8, 992, 8,
+        294, 41, 87, 38, 1, 994, 8, 994, 8,
+        335, 38, 188, 39, 1, 996, 8, 996, 8,
+        373, 22, 395, 29, 1, 998, 8, 998, 8,
+        424, 29, 453, 37, 1, 999, 8, 999, 8,
+        490, 33, 523, 34, 1, 1000, 8, 1000, 8,
+        557, 30, 395, 29, 1, 1001, 8, 1001, 8,
+        587, 30, 617, 40, 1, 1002, 8, 1002, 8,
+        657, 37, 694, 41, 1, 1003, 8, 1003, 8,
+        735, 41, 776, 43, 1, 1005, 8, 1005, 8,
+        819, 38, 395, 29, 1, 1007, 8, 1007, 8,
+        857, 30, 395, 29, 1, 1008, 8, 1008, 8,
+        887, 34, 395, 29, 1, 1009, 8, 1009, 8,
+        921, 31, 395, 29, 1, 1010, 8, 1010, 8,
+        952, 31, 395, 29, 1, 1011, 8, 1011, 8,
+        983, 38, 395, 29, 1, 1012, 8, 1012, 8,
+        1021, 42, 395, 29, 1, 1013, 8, 1013, 8,
+        1063, 39, 395, 29, 1, 1014, 8, 1014, 8,
+        1102, 18, 1120, 40, 1, 1016, 8, 1016, 8,
+        1160, 29, 1189, 41, 1, 1017, 8, 1017, 8,
+        1230, 25, 1255, 38, 1, 1018, 8, 1018, 8,
+        1293, 26, 1319, 35, 1, 1019, 8, 1019, 8,
+        1354, 27, 617, 40, 1, 1020, 8, 1020, 8,
+        1381, 36, 1417, 38, 1, 1021, 8, 1021, 8,
+        1455, 38, 1493, 40, 1, 1022, 8, 1022, 8,
+        1533, 18, 22, 36, 1, 1024, 8, 1024, 8,
+        1551, 26, 188, 39, 1, 1025, 8, 1025, 8,
+        1577, 25, 87, 38, 1, 1026, 8, 1026, 8,
+        1602, 32, 87, 38, 1, 1027, 8, 1027, 8,
+        1634, 29, 1663, 34, 1, 1028, 8, 1028, 8,
+        1697, 43, 87, 38, 1, 1029, 8, 1029, 8,
+        1740, 19, 1759, 38, 1, 1031, 8, 1031, 8,
+        1797, 30, 1827, 41, 1, 1032, 8, 1032, 8,
+        1868, 26, 1894, 37, 1, 1033, 8, 1033, 8,
+        1931, 27, 1958, 33, 1, 1034, 8, 1034, 8,
+        1991, 31, 2022, 42, 1, 1035, 8, 1035, 8,
+        2064, 39, 188, 39, 1, 1036, 8, 1036, 8,
+        2103, 38, 2141, 44, 1, 1038, 8, 1038, 8,
+        2185, 45, 2141, 44, 1, 1040, 8, 1040, 8,
+        2230, 26, 2256, 37, 1, 1042, 8, 1042, 8,
+        2293, 27, 2320, 33, 1, 1043, 8, 1043, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_158: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2502,26 +3078,30 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_160: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [12.0_f64, 4.0_f64, 12.0_f64, 4.0_f64], line: 1059, position: 58 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_161: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1060, position: 8, value_line: 1060, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1061, position: 8, value_line: 1061, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1062, position: 8, value_line: 1062, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1063, position: 8, value_line: 1063, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1064, position: 8, value_line: 1064, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1065, position: 8, value_line: 1065, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1066, position: 8, value_line: 1066, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1067, position: 8, value_line: 1067, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevron", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1068, position: 8, value_line: 1068, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1069, position: 8, value_line: 1069, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1070, position: 8, value_line: 1070, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronSubMenuOpened", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1071, position: 8, value_line: 1071, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutSubItemChevronDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1073, position: 8, value_line: 1073, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForeground", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1074, position: 8, value_line: 1074, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver", target: "SystemControlHighlightAltBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1076, position: 8, value_line: 1076, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed", target: "SystemControlHighlightAltBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1078, position: 8, value_line: 1078, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1080, position: 8, value_line: 1080, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
+    strings: "MenuFlyoutItemBackgroundSystemControlTransparentBrushMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushMenuFlyoutSubItemChevronSystemControlForegroundBaseMediumHighBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 24, 24, 29, 1, 1060, 8, 1060, 8,
+        53, 35, 88, 34, 1, 1061, 8, 1061, 8,
+        122, 31, 153, 37, 1, 1062, 8, 1062, 8,
+        190, 32, 24, 29, 1, 1063, 8, 1063, 8,
+        222, 24, 246, 36, 1, 1064, 8, 1064, 8,
+        282, 35, 317, 38, 1, 1065, 8, 1065, 8,
+        355, 31, 317, 38, 1, 1066, 8, 1066, 8,
+        386, 32, 418, 39, 1, 1067, 8, 1067, 8,
+        457, 24, 481, 42, 1, 1068, 8, 1068, 8,
+        523, 35, 317, 38, 1, 1069, 8, 1069, 8,
+        558, 31, 317, 38, 1, 1070, 8, 1070, 8,
+        589, 37, 317, 38, 1, 1071, 8, 1071, 8,
+        626, 32, 418, 39, 1, 1073, 8, 1073, 8,
+        658, 47, 705, 38, 1, 1074, 8, 1074, 8,
+        743, 58, 801, 40, 1, 1076, 8, 1076, 8,
+        841, 54, 801, 40, 1, 1078, 8, 1078, 8,
+        895, 55, 418, 39, 1, 1080, 8, 1080, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_162: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2529,11 +3109,15 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_162: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutItemThemePaddingNarrow", value: [11.0_f64, 4.0_f64, 11.0_f64, 7.0_f64], line: 1083, position: 59 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_163: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "MenuFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1084, position: 8, value_line: 1084, value_position: 8 },
-    rt::ResourceAliasRow { key: "MenuFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1085, position: 8, value_line: 1085, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
+    strings: "MenuFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushMenuFlyoutPresenterBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 37, 1, 1084, 8, 1084, 8,
+        66, 30, 96, 33, 1, 1085, 8, 1085, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_164: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2541,169 +3125,213 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_164: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "HorizontalMenuFlyoutItemThemePaddingNarrow", value: [8.0_f64, 4.0_f64, 8.0_f64, 7.0_f64], line: 1090, position: 69 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_165: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TextControlForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1094, position: 8, value_line: 1094, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1095, position: 8, value_line: 1095, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundDisabled", target: "SystemControlDisabledChromeDisabledLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1096, position: 8, value_line: 1096, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1097, position: 8, value_line: 1097, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundPointerOver", target: "SystemControlBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1098, position: 8, value_line: 1098, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1099, position: 8, value_line: 1099, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushFocused", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1100, position: 8, value_line: 1100, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1101, position: 8, value_line: 1101, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_165: rt::PackedRows = rt::PackedRows {
+    strings: "TextControlForegroundSystemControlForegroundBaseHighBrushTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundSystemControlBackgroundAltMediumLowBrushTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledSystemControlBackgroundBaseLowBrushTextControlBorderBrushFocusedSystemControlHighlightAccentBrushTextControlBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 36, 1, 1094, 8, 1094, 8,
+        57, 32, 21, 36, 1, 1095, 8, 1095, 8,
+        89, 29, 118, 43, 1, 1096, 8, 1096, 8,
+        161, 21, 182, 40, 1, 1097, 8, 1097, 8,
+        222, 32, 254, 37, 1, 1098, 8, 1098, 8,
+        291, 29, 320, 35, 1, 1099, 8, 1099, 8,
+        355, 29, 384, 33, 1, 1100, 8, 1100, 8,
+        417, 30, 447, 33, 1, 1101, 8, 1101, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_166: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForeground", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1103, position: 8, value_line: 1103, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundPointerOver", target: "SystemControlPageTextBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1104, position: 8, value_line: 1104, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundDisabled", target: "SystemControlDisabledChromeDisabledLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1106, position: 8, value_line: 1106, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlSelectionHighlightColor", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1108, position: 8, value_line: 1108, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1109, position: 8, value_line: 1109, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1110, position: 8, value_line: 1110, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBackgroundPressed", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1111, position: 8, value_line: 1111, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1112, position: 8, value_line: 1112, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1113, position: 8, value_line: 1113, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1114, position: 8, value_line: 1114, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForegroundPointerOver", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1115, position: 8, value_line: 1115, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForegroundPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1116, position: 8, value_line: 1116, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBackgroundFocused", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1118, position: 8, value_line: 1118, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1119, position: 8, value_line: 1119, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1120, position: 8, value_line: 1120, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlButtonForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1121, position: 8, value_line: 1121, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlForegroundFocused", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1122, position: 8, value_line: 1122, value_position: 8 },
-    rt::ResourceAliasRow { key: "TextControlPlaceholderForegroundFocused", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1123, position: 8, value_line: 1123, value_position: 8 },
-    rt::ResourceAliasRow { key: "AutoCompleteBoxSuggestionsListBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1128, position: 8, value_line: 1128, value_position: 8 },
-    rt::ResourceAliasRow { key: "AutoCompleteBoxSuggestionsListBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1130, position: 8, value_line: 1130, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_166: rt::PackedRows = rt::PackedRows {
+    strings: "TextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlSelectionHighlightColorSystemControlHighlightAccentBrushTextControlButtonBackgroundSystemControlTransparentBrushTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedSystemControlHighlightAltChromeWhiteBrushTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushSystemControlForegroundBaseMediumBrushTextControlBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushSystemControlForegroundBaseMediumHighBrushTextControlForegroundFocusedSystemControlForegroundBaseHighBrushTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundSystemControlTransientBackgroundBrushAutoCompleteBoxSuggestionsListBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 36, 1, 1103, 8, 1103, 8,
+        68, 43, 32, 36, 1, 1104, 8, 1104, 8,
+        111, 40, 151, 43, 1, 1106, 8, 1106, 8,
+        194, 34, 228, 33, 1, 1108, 8, 1108, 8,
+        261, 27, 288, 29, 1, 1109, 8, 1109, 8,
+        317, 38, 288, 29, 1, 1110, 8, 1110, 8,
+        355, 34, 228, 33, 1, 1111, 8, 1111, 8,
+        389, 28, 288, 29, 1, 1112, 8, 1112, 8,
+        417, 39, 288, 29, 1, 1113, 8, 1113, 8,
+        456, 35, 288, 29, 1, 1114, 8, 1114, 8,
+        491, 38, 228, 33, 1, 1115, 8, 1115, 8,
+        529, 34, 563, 41, 1, 1116, 8, 1116, 8,
+        604, 28, 632, 35, 1, 1118, 8, 1118, 8,
+        667, 22, 689, 38, 1, 1119, 8, 1119, 8,
+        727, 33, 760, 41, 1, 1120, 8, 1120, 8,
+        491, 27, 801, 42, 1, 1121, 8, 1121, 8,
+        843, 28, 871, 36, 1, 1122, 8, 1122, 8,
+        907, 39, 946, 41, 1, 1123, 8, 1123, 8,
+        987, 40, 1027, 37, 1, 1128, 8, 1128, 8,
+        1064, 41, 1105, 33, 1, 1130, 8, 1130, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_167: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUnchecked", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1134, position: 8, value_line: 1134, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1135, position: 8, value_line: 1135, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1136, position: 8, value_line: 1136, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundUncheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1137, position: 8, value_line: 1137, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundChecked", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1138, position: 8, value_line: 1138, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1139, position: 8, value_line: 1139, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1140, position: 8, value_line: 1140, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1141, position: 8, value_line: 1141, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminate", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1142, position: 8, value_line: 1142, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminatePointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1143, position: 8, value_line: 1143, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminatePressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1145, position: 8, value_line: 1145, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxForegroundIndeterminateDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1146, position: 8, value_line: 1146, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1148, position: 8, value_line: 1148, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1149, position: 8, value_line: 1149, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1150, position: 8, value_line: 1150, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1151, position: 8, value_line: 1151, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundChecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1152, position: 8, value_line: 1152, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1153, position: 8, value_line: 1153, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1154, position: 8, value_line: 1154, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1155, position: 8, value_line: 1155, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminate", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1156, position: 8, value_line: 1156, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminatePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1157, position: 8, value_line: 1157, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminatePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1158, position: 8, value_line: 1158, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBackgroundIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1159, position: 8, value_line: 1159, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1160, position: 8, value_line: 1160, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1161, position: 8, value_line: 1161, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1162, position: 8, value_line: 1162, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1163, position: 8, value_line: 1163, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushChecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1164, position: 8, value_line: 1164, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1165, position: 8, value_line: 1165, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1166, position: 8, value_line: 1166, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1167, position: 8, value_line: 1167, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminate", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1168, position: 8, value_line: 1168, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminatePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1169, position: 8, value_line: 1169, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminatePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1170, position: 8, value_line: 1170, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxBorderBrushIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1171, position: 8, value_line: 1171, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUnchecked", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1172, position: 8, value_line: 1172, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1174, position: 8, value_line: 1174, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1176, position: 8, value_line: 1176, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeUncheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1178, position: 8, value_line: 1178, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_167: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxForegroundUncheckedSystemControlForegroundBaseHighBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledSystemControlDisabledBaseMediumLowBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSystemControlTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedSystemControlForegroundBaseMediumBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverSystemControlHighlightBaseMediumHighBrushCheckBoxCheckBackgroundStrokeUncheckedPressedSystemControlHighlightBaseHighBrushCheckBoxCheckBackgroundStrokeUncheckedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 27, 27, 36, 1, 1134, 8, 1134, 8,
+        63, 38, 27, 36, 1, 1135, 8, 1135, 8,
+        101, 34, 27, 36, 1, 1136, 8, 1136, 8,
+        135, 35, 170, 39, 1, 1137, 8, 1137, 8,
+        209, 25, 27, 36, 1, 1138, 8, 1138, 8,
+        234, 36, 27, 36, 1, 1139, 8, 1139, 8,
+        270, 32, 27, 36, 1, 1140, 8, 1140, 8,
+        302, 33, 170, 39, 1, 1141, 8, 1141, 8,
+        335, 31, 27, 36, 1, 1142, 8, 1142, 8,
+        366, 42, 27, 36, 1, 1143, 8, 1143, 8,
+        408, 38, 27, 36, 1, 1145, 8, 1145, 8,
+        446, 39, 170, 39, 1, 1146, 8, 1146, 8,
+        485, 27, 512, 29, 1, 1148, 8, 1148, 8,
+        541, 38, 512, 29, 1, 1149, 8, 1149, 8,
+        579, 34, 512, 29, 1, 1150, 8, 1150, 8,
+        613, 35, 512, 29, 1, 1151, 8, 1151, 8,
+        648, 25, 512, 29, 1, 1152, 8, 1152, 8,
+        673, 36, 512, 29, 1, 1153, 8, 1153, 8,
+        709, 32, 512, 29, 1, 1154, 8, 1154, 8,
+        741, 33, 512, 29, 1, 1155, 8, 1155, 8,
+        774, 31, 512, 29, 1, 1156, 8, 1156, 8,
+        805, 42, 512, 29, 1, 1157, 8, 1157, 8,
+        847, 38, 512, 29, 1, 1158, 8, 1158, 8,
+        885, 39, 512, 29, 1, 1159, 8, 1159, 8,
+        924, 28, 512, 29, 1, 1160, 8, 1160, 8,
+        952, 39, 512, 29, 1, 1161, 8, 1161, 8,
+        991, 35, 512, 29, 1, 1162, 8, 1162, 8,
+        1026, 36, 512, 29, 1, 1163, 8, 1163, 8,
+        1062, 26, 512, 29, 1, 1164, 8, 1164, 8,
+        1088, 37, 512, 29, 1, 1165, 8, 1165, 8,
+        1125, 33, 512, 29, 1, 1166, 8, 1166, 8,
+        1158, 34, 512, 29, 1, 1167, 8, 1167, 8,
+        1192, 32, 512, 29, 1, 1168, 8, 1168, 8,
+        1224, 43, 512, 29, 1, 1169, 8, 1169, 8,
+        1267, 39, 512, 29, 1, 1170, 8, 1170, 8,
+        1306, 40, 512, 29, 1, 1171, 8, 1171, 8,
+        1346, 38, 1384, 38, 1, 1172, 8, 1172, 8,
+        1422, 49, 1471, 41, 1, 1174, 8, 1174, 8,
+        1512, 45, 1557, 35, 1, 1176, 8, 1176, 8,
+        1592, 46, 170, 39, 1, 1178, 8, 1178, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_168: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeCheckedPointerOver", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1180, position: 8, value_line: 1181, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeCheckedPressed", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1182, position: 8, value_line: 1183, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeCheckedPointerOverSystemAccentColorDark1CheckBoxCheckBackgroundStrokeCheckedPressedSystemAccentColorLight1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 47, 47, 22, 1, 1180, 8, 1181, 24,
+        69, 43, 112, 23, 1, 1182, 8, 1183, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_169: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeCheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1184, position: 8, value_line: 1184, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeIndeterminate", target: "SystemControlForegroundAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1185, position: 8, value_line: 1185, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_169: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeCheckedDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundStrokeIndeterminateSystemControlForegroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 44, 44, 29, 1, 1184, 8, 1184, 8,
+        73, 42, 115, 34, 1, 1185, 8, 1185, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_170: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1187, position: 8, value_line: 1188, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundStrokeIndeterminatePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1189, position: 8, value_line: 1190, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_170: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundStrokeIndeterminatePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 53, 53, 23, 1, 1187, 8, 1188, 24,
+        76, 49, 125, 22, 1, 1189, 8, 1190, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_171: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundStrokeIndeterminateDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1191, position: 8, value_line: 1191, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUnchecked", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1193, position: 8, value_line: 1193, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1194, position: 8, value_line: 1194, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1196, position: 8, value_line: 1196, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillUncheckedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1198, position: 8, value_line: 1198, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1199, position: 8, value_line: 1199, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_171: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundStrokeIndeterminateDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 50, 50, 29, 1, 1191, 8, 1191, 8,
+        79, 36, 50, 29, 1, 1193, 8, 1193, 8,
+        115, 47, 50, 29, 1, 1194, 8, 1194, 8,
+        162, 43, 205, 41, 1, 1196, 8, 1196, 8,
+        246, 44, 50, 29, 1, 1198, 8, 1198, 8,
+        290, 34, 324, 33, 1, 1199, 8, 1199, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_172: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillCheckedPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1200, position: 8, value_line: 1201, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillCheckedPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1202, position: 8, value_line: 1203, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_172: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillCheckedPointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillCheckedPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 45, 45, 23, 1, 1200, 8, 1201, 24,
+        68, 41, 109, 22, 1, 1202, 8, 1203, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_173: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillCheckedDisabled", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1204, position: 8, value_line: 1204, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillIndeterminate", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1206, position: 8, value_line: 1206, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_173: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillCheckedDisabledSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillIndeterminateSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 42, 42, 41, 1, 1204, 8, 1204, 8,
+        83, 40, 123, 33, 1, 1206, 8, 1206, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_174: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillIndeterminatePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1207, position: 8, value_line: 1208, value_position: 24 },
-    rt::DynamicBrushRow { key: "CheckBoxCheckBackgroundFillIndeterminatePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1209, position: 8, value_line: 1210, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_174: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillIndeterminatePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 51, 51, 23, 1, 1207, 8, 1208, 24,
+        74, 47, 121, 22, 1, 1209, 8, 1210, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_175: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "CheckBoxCheckBackgroundFillIndeterminateDisabled", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1211, position: 8, value_line: 1211, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUnchecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1213, position: 8, value_line: 1213, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1215, position: 8, value_line: 1215, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1217, position: 8, value_line: 1217, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundUncheckedDisabled", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1219, position: 8, value_line: 1219, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1221, position: 8, value_line: 1221, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1223, position: 8, value_line: 1223, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1225, position: 8, value_line: 1225, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundCheckedDisabled", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1227, position: 8, value_line: 1227, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminate", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1229, position: 8, value_line: 1229, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminatePointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1231, position: 8, value_line: 1231, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminatePressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1233, position: 8, value_line: 1233, value_position: 8 },
-    rt::ResourceAliasRow { key: "CheckBoxCheckGlyphForegroundIndeterminateDisabled", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1235, position: 8, value_line: 1235, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedHoverBorderBrush", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1239, position: 8, value_line: 1239, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedPressedBorderBrush", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1241, position: 8, value_line: 1241, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewSelectedBorderBrush", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1243, position: 8, value_line: 1243, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewHoverBorderBrush", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1244, position: 8, value_line: 1244, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewPressedBorderBrush", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1245, position: 8, value_line: 1245, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewTodayForeground", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1246, position: 8, value_line: 1246, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBlackoutForeground", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1247, position: 8, value_line: 1247, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewOutOfScopeForeground", target: "SystemControlHyperlinkBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1248, position: 8, value_line: 1248, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1249, position: 8, value_line: 1249, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewOutOfScopeBackground", target: "SystemControlDisabledChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1250, position: 8, value_line: 1250, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewForeground", target: "SystemControlHyperlinkBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1251, position: 8, value_line: 1251, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBackground", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1252, position: 8, value_line: 1252, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewBorderBrush", target: "SystemControlForegroundChromeMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1253, position: 8, value_line: 1253, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewWeekDayForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1254, position: 8, value_line: 1254, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1256, position: 8, value_line: 1256, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1257, position: 8, value_line: 1257, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonForegroundPressed", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1259, position: 8, value_line: 1259, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemRevealBackground", target: "SystemControlTransparentRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1261, position: 8, value_line: 1261, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewCalendarItemRevealBorderBrush", target: "SystemControlTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1263, position: 8, value_line: 1263, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBorderBrushPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1265, position: 8, value_line: 1265, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarViewNavigationButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1267, position: 8, value_line: 1267, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_175: rt::PackedRows = rt::PackedRows {
+    strings: "CheckBoxCheckBackgroundFillIndeterminateDisabledSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckGlyphForegroundUncheckedSystemControlHighlightAltChromeWhiteBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushSystemControlHighlightListAccentMediumBrushCalendarViewSelectedPressedBorderBrushSystemControlHighlightListAccentHighBrushCalendarViewSelectedBorderBrushSystemControlHighlightAccentBrushCalendarViewHoverBorderBrushSystemControlHighlightBaseMediumLowBrushCalendarViewPressedBorderBrushSystemControlHighlightBaseMediumBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundSystemControlDisabledBaseMediumLowBrushCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundSystemControlForegroundBaseHighBrushCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundSystemControlBackgroundAltHighBrushCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundSystemControlTransparentBrushCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedSystemControlForegroundBaseMediumBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverSystemControlHighlightTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 48, 48, 41, 1, 1211, 8, 1211, 8,
+        89, 37, 126, 41, 1, 1213, 8, 1213, 8,
+        167, 48, 126, 41, 1, 1215, 8, 1215, 8,
+        215, 44, 126, 41, 1, 1217, 8, 1217, 8,
+        259, 45, 126, 41, 1, 1219, 8, 1219, 8,
+        304, 35, 126, 41, 1, 1221, 8, 1221, 8,
+        339, 46, 126, 41, 1, 1223, 8, 1223, 8,
+        385, 42, 126, 41, 1, 1225, 8, 1225, 8,
+        427, 43, 126, 41, 1, 1227, 8, 1227, 8,
+        470, 41, 126, 41, 1, 1229, 8, 1229, 8,
+        511, 52, 126, 41, 1, 1231, 8, 1231, 8,
+        563, 48, 126, 41, 1, 1233, 8, 1233, 8,
+        611, 49, 126, 41, 1, 1235, 8, 1235, 8,
+        660, 36, 696, 43, 1, 1239, 8, 1239, 8,
+        739, 38, 777, 41, 1, 1241, 8, 1241, 8,
+        818, 31, 849, 33, 1, 1243, 8, 1243, 8,
+        882, 28, 910, 40, 1, 1244, 8, 1244, 8,
+        950, 30, 980, 37, 1, 1245, 8, 1245, 8,
+        1017, 27, 126, 41, 1, 1246, 8, 1246, 8,
+        1044, 30, 1074, 39, 1, 1247, 8, 1247, 8,
+        1113, 32, 1145, 35, 1, 1248, 8, 1248, 8,
+        1180, 34, 1214, 36, 1, 1249, 8, 1249, 8,
+        1250, 32, 1282, 41, 1, 1250, 8, 1250, 8,
+        1323, 22, 1345, 41, 1, 1251, 8, 1251, 8,
+        1386, 22, 1408, 35, 1, 1252, 8, 1252, 8,
+        1443, 23, 1466, 40, 1, 1253, 8, 1253, 8,
+        1506, 37, 1074, 39, 1, 1254, 8, 1254, 8,
+        1543, 38, 1581, 29, 1, 1256, 8, 1256, 8,
+        1610, 49, 1214, 36, 1, 1257, 8, 1257, 8,
+        1659, 45, 1704, 38, 1, 1259, 8, 1259, 8,
+        1742, 40, 1782, 45, 1, 1261, 8, 1261, 8,
+        1827, 41, 1868, 41, 1, 1263, 8, 1263, 8,
+        1909, 50, 1959, 38, 1, 1265, 8, 1265, 8,
+        1909, 39, 1581, 29, 1, 1267, 8, 1267, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_176: &[rt::ValueRow<f64>] = &[
@@ -2712,125 +3340,181 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_176: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarWeekNumberFontSize", value: 12.0_f64, line: 1270, position: 52 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_177: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackground", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1275, position: 8, value_line: 1275, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundPointerOver", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1276, position: 8, value_line: 1276, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundPressed", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1277, position: 8, value_line: 1277, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBackgroundDisabled", target: "SystemAltMediumHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1278, position: 8, value_line: 1278, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1279, position: 8, value_line: 1279, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundPointerOver", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1280, position: 8, value_line: 1280, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundPressed", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1281, position: 8, value_line: 1281, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1282, position: 8, value_line: 1282, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrush", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1283, position: 8, value_line: 1283, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushPointerOver", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1284, position: 8, value_line: 1284, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushPressed", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1285, position: 8, value_line: 1285, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderHeaderBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1286, position: 8, value_line: 1286, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_177: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundSystemBaseHighColorExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 24, 24, 24, 1, 1275, 8, 1275, 8,
+        48, 35, 24, 24, 1, 1276, 8, 1276, 8,
+        83, 31, 24, 24, 1, 1277, 8, 1277, 8,
+        114, 32, 24, 24, 1, 1278, 8, 1278, 8,
+        146, 24, 170, 19, 1, 1279, 8, 1279, 8,
+        189, 35, 170, 19, 1, 1280, 8, 1280, 8,
+        224, 31, 170, 19, 1, 1281, 8, 1281, 8,
+        255, 32, 287, 39, 1, 1282, 8, 1282, 8,
+        326, 25, 351, 18, 1, 1283, 8, 1283, 8,
+        369, 36, 351, 18, 1, 1284, 8, 1284, 8,
+        405, 32, 351, 18, 1, 1285, 8, 1285, 8,
+        437, 33, 470, 33, 1, 1286, 8, 1286, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_178: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1288, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_178: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 65535, 255, 1, 1288, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_179: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1291, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1292, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_179: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 65535, 255, 1, 1291, 8,
+        32, 33, 65535, 255, 1, 1292, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_180: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderChevronForeground", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1293, position: 8, value_line: 1293, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundPointerOver", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1294, position: 8, value_line: 1294, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundPressed", target: "SystemBaseHighColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1295, position: 8, value_line: 1295, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderChevronForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1296, position: 8, value_line: 1296, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_180: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronForegroundSystemBaseHighColorExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 19, 1, 1293, 8, 1293, 8,
+        44, 36, 25, 19, 1, 1294, 8, 1294, 8,
+        80, 32, 25, 19, 1, 1295, 8, 1295, 8,
+        112, 33, 145, 39, 1, 1296, 8, 1296, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_181: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1297, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1298, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1299, position: 8 },
-    rt::LiteralBrushRow { key: "ExpanderChevronBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1300, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_181: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 26, 65535, 255, 1, 1297, 8,
+        26, 37, 65535, 255, 1, 1298, 8,
+        63, 33, 65535, 255, 1, 1299, 8,
+        96, 34, 65535, 255, 1, 1300, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_182: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ExpanderContentBackground", target: "SystemChromeMediumLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1303, position: 8, value_line: 1303, value_position: 8 },
-    rt::ResourceAliasRow { key: "ExpanderContentBorderBrush", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1304, position: 8, value_line: 1304, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_182: rt::PackedRows = rt::PackedRows {
+    strings: "ExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushSystemBaseLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 26, 1, 1303, 8, 1303, 8,
+        51, 26, 77, 18, 1, 1304, 8, 1304, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_183: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "NotificationCardBackgroundBrush", color: 4282664004_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1307, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 17476, 65348, 1, 1307, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_184: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "NotificationCardForegroundBrush", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1308, position: 8, value_line: 1308, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardForegroundBrushSystemControlForegroundBaseHighBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 31, 36, 1, 1308, 8, 1308, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_185: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "NotificationCardProgressBackgroundBrush", color: 4288322202_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1309, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardProgressBackgroundBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 39, 39578, 65434, 1, 1309, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_186: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1318, position: 8, value_line: 1318, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1319, position: 8, value_line: 1319, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1320, position: 8, value_line: 1320, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1321, position: 8, value_line: 1321, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1322, position: 8, value_line: 1322, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1323, position: 8, value_line: 1323, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1324, position: 8, value_line: 1324, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1325, position: 8, value_line: 1325, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1326, position: 8, value_line: 1326, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1327, position: 8, value_line: 1327, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1328, position: 8, value_line: 1328, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1329, position: 8, value_line: 1329, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStroke", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1330, position: 8, value_line: 1330, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokePointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1331, position: 8, value_line: 1331, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokePressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1333, position: 8, value_line: 1333, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseStrokeDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1334, position: 8, value_line: 1334, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFill", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1336, position: 8, value_line: 1336, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1337, position: 8, value_line: 1337, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1338, position: 8, value_line: 1338, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseFillDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1340, position: 8, value_line: 1340, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedStroke", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1341, position: 8, value_line: 1341, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonForegroundSystemControlForegroundBaseHighBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonBackgroundSystemControlTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeSystemControlForegroundBaseMediumBrushRadioButtonOuterEllipseStrokePointerOverSystemControlHighlightBaseMediumHighBrushRadioButtonOuterEllipseStrokePressedSystemControlHighlightBaseHighBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedSystemControlBackgroundBaseMediumLowBrushRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 36, 1, 1318, 8, 1318, 8,
+        57, 32, 21, 36, 1, 1319, 8, 1319, 8,
+        89, 28, 21, 36, 1, 1320, 8, 1320, 8,
+        117, 29, 146, 39, 1, 1321, 8, 1321, 8,
+        185, 21, 206, 29, 1, 1322, 8, 1322, 8,
+        235, 32, 206, 29, 1, 1323, 8, 1323, 8,
+        267, 28, 206, 29, 1, 1324, 8, 1324, 8,
+        295, 29, 206, 29, 1, 1325, 8, 1325, 8,
+        324, 22, 206, 29, 1, 1326, 8, 1326, 8,
+        346, 33, 206, 29, 1, 1327, 8, 1327, 8,
+        379, 29, 206, 29, 1, 1328, 8, 1328, 8,
+        408, 30, 206, 29, 1, 1329, 8, 1329, 8,
+        438, 29, 467, 38, 1, 1330, 8, 1330, 8,
+        505, 40, 545, 41, 1, 1331, 8, 1331, 8,
+        586, 36, 622, 35, 1, 1333, 8, 1333, 8,
+        657, 37, 146, 39, 1, 1334, 8, 1334, 8,
+        694, 27, 206, 29, 1, 1336, 8, 1336, 8,
+        721, 38, 206, 29, 1, 1337, 8, 1337, 8,
+        759, 34, 793, 41, 1, 1338, 8, 1338, 8,
+        834, 35, 206, 29, 1, 1340, 8, 1340, 8,
+        869, 36, 905, 33, 1, 1341, 8, 1341, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_187: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedStrokePointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1342, position: 8, value_line: 1343, value_position: 24 },
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedStrokePressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1344, position: 8, value_line: 1345, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedStrokePointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedStrokePressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 47, 47, 23, 1, 1342, 8, 1343, 24,
+        70, 43, 113, 22, 1, 1344, 8, 1345, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_188: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedStrokeDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1346, position: 8, value_line: 1346, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedFill", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1348, position: 8, value_line: 1348, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedStrokeDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonOuterEllipseCheckedFillSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 44, 44, 39, 1, 1346, 8, 1346, 8,
+        83, 34, 117, 33, 1, 1348, 8, 1348, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_189: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedFillPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1349, position: 8, value_line: 1350, value_position: 24 },
-    rt::DynamicBrushRow { key: "RadioButtonOuterEllipseCheckedFillPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1351, position: 8, value_line: 1352, value_position: 24 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedFillPointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedFillPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 45, 45, 23, 1, 1349, 8, 1350, 24,
+        68, 41, 109, 22, 1, 1351, 8, 1352, 24,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_190: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "RadioButtonOuterEllipseCheckedFillDisabled", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1353, position: 8, value_line: 1353, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFill", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1355, position: 8, value_line: 1355, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillPointerOver", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1356, position: 8, value_line: 1356, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillPressed", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1358, position: 8, value_line: 1358, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphFillDisabled", target: "SystemControlForegroundChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1359, position: 8, value_line: 1359, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStroke", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1360, position: 8, value_line: 1360, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokePointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1361, position: 8, value_line: 1361, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokePressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1362, position: 8, value_line: 1362, value_position: 8 },
-    rt::ResourceAliasRow { key: "RadioButtonCheckGlyphStrokeDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1363, position: 8, value_line: 1363, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
+    strings: "RadioButtonOuterEllipseCheckedFillDisabledSystemControlBackgroundBaseMediumLowBrushRadioButtonCheckGlyphFillSystemControlForegroundChromeWhiteBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeSystemControlTransparentBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 42, 42, 41, 1, 1353, 8, 1353, 8,
+        83, 25, 108, 39, 1, 1355, 8, 1355, 8,
+        147, 36, 108, 39, 1, 1356, 8, 1356, 8,
+        183, 32, 108, 39, 1, 1358, 8, 1358, 8,
+        215, 33, 108, 39, 1, 1359, 8, 1359, 8,
+        248, 27, 275, 29, 1, 1360, 8, 1360, 8,
+        304, 38, 275, 29, 1, 1361, 8, 1361, 8,
+        342, 34, 275, 29, 1, 1362, 8, 1362, 8,
+        376, 35, 275, 29, 1, 1363, 8, 1363, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_191: &[rt::ValueRow<f64>] = &[
@@ -2838,36 +3522,48 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_191: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 2.0_f64, line: 1367, position: 48 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_192: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SliderContainerBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1369, position: 8, value_line: 1369, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1370, position: 8, value_line: 1370, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1371, position: 8, value_line: 1371, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderContainerBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1372, position: 8, value_line: 1372, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderThumbBackground", target: "SystemControlForegroundAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1373, position: 8, value_line: 1373, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
+    strings: "SliderContainerBackgroundSystemControlTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 29, 1, 1369, 8, 1369, 8,
+        54, 36, 25, 29, 1, 1370, 8, 1370, 8,
+        90, 32, 25, 29, 1, 1371, 8, 1371, 8,
+        122, 33, 25, 29, 1, 1372, 8, 1372, 8,
+        155, 21, 176, 34, 1, 1373, 8, 1373, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_193: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SliderThumbBackgroundPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1374, position: 8, value_line: 1374, value_position: 65 },
-    rt::DynamicBrushRow { key: "SliderThumbBackgroundPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1375, position: 8, value_line: 1375, value_position: 61 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
+    strings: "SliderThumbBackgroundPointerOverSystemAccentColorLight1SliderThumbBackgroundPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 32, 32, 23, 1, 1374, 8, 1374, 65,
+        55, 28, 83, 22, 1, 1375, 8, 1375, 61,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_194: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SliderThumbBackgroundDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1376, position: 8, value_line: 1376, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFill", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1377, position: 8, value_line: 1377, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillPointerOver", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1378, position: 8, value_line: 1378, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillPressed", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1379, position: 8, value_line: 1379, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackFillDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1380, position: 8, value_line: 1380, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFill", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1381, position: 8, value_line: 1381, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillPointerOver", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1382, position: 8, value_line: 1382, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillPressed", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1383, position: 8, value_line: 1383, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTrackValueFillDisabled", target: "SystemControlDisabledChromeDisabledHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1384, position: 8, value_line: 1384, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTickBarFill", target: "SystemControlForegroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1385, position: 8, value_line: 1385, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderTickBarFillDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1386, position: 8, value_line: 1386, value_position: 8 },
-    rt::ResourceAliasRow { key: "SliderInlineTickBarFill", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1387, position: 8, value_line: 1387, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
+    strings: "SliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSystemControlForegroundBaseMediumLowBrushSliderTrackFillPointerOverSystemControlForegroundBaseMediumBrushSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSystemControlHighlightAccentBrushSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSystemControlDisabledBaseMediumLowBrushSliderInlineTickBarFillSystemControlBackgroundAltHighBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 44, 1, 1376, 8, 1376, 8,
+        73, 15, 88, 41, 1, 1377, 8, 1377, 8,
+        129, 26, 155, 38, 1, 1378, 8, 1378, 8,
+        193, 22, 88, 41, 1, 1379, 8, 1379, 8,
+        215, 23, 29, 44, 1, 1380, 8, 1380, 8,
+        238, 20, 258, 33, 1, 1381, 8, 1381, 8,
+        291, 31, 258, 33, 1, 1382, 8, 1382, 8,
+        322, 27, 258, 33, 1, 1383, 8, 1383, 8,
+        349, 28, 29, 44, 1, 1384, 8, 1384, 8,
+        377, 17, 88, 41, 1, 1385, 8, 1385, 8,
+        394, 25, 419, 39, 1, 1386, 8, 1386, 8,
+        458, 23, 481, 35, 1, 1387, 8, 1387, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2875,109 +3571,137 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 1391, position: 65 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_196: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleSwitchContentForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1392, position: 8, value_line: 1392, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1393, position: 8, value_line: 1393, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1395, position: 8, value_line: 1395, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1396, position: 8, value_line: 1396, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchContainerBackgroundPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1397, position: 8, value_line: 1397, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOff", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1398, position: 8, value_line: 1398, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1399, position: 8, value_line: 1399, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffPressed", target: "SystemControlHighlightBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1400, position: 8, value_line: 1400, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOffDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1401, position: 8, value_line: 1401, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOff", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1402, position: 8, value_line: 1402, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1403, position: 8, value_line: 1403, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffPressed", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1404, position: 8, value_line: 1404, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOffDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1405, position: 8, value_line: 1405, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOn", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1406, position: 8, value_line: 1406, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchContentForegroundSystemControlForegroundBaseHighBrushToggleSwitchHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchContainerBackgroundSystemControlTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedSystemControlHighlightBaseMediumLowBrushToggleSwitchFillOffDisabledToggleSwitchStrokeOffSystemControlForegroundBaseMediumBrushToggleSwitchStrokeOffPointerOverSystemControlHighlightBaseMediumHighBrushToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 36, 1, 1392, 8, 1392, 8,
+        65, 36, 101, 39, 1, 1393, 8, 1393, 8,
+        140, 31, 171, 29, 1, 1395, 8, 1395, 8,
+        200, 42, 171, 29, 1, 1396, 8, 1396, 8,
+        242, 38, 171, 29, 1, 1397, 8, 1397, 8,
+        280, 19, 171, 29, 1, 1398, 8, 1398, 8,
+        299, 30, 171, 29, 1, 1399, 8, 1399, 8,
+        329, 26, 355, 40, 1, 1400, 8, 1400, 8,
+        395, 27, 171, 29, 1, 1401, 8, 1401, 8,
+        422, 21, 443, 38, 1, 1402, 8, 1402, 8,
+        481, 32, 513, 41, 1, 1403, 8, 1403, 8,
+        554, 28, 29, 36, 1, 1404, 8, 1404, 8,
+        582, 29, 101, 39, 1, 1405, 8, 1405, 8,
+        611, 18, 629, 33, 1, 1406, 8, 1406, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_197: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "ToggleSwitchFillOnPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1407, position: 8, value_line: 1407, value_position: 62 },
-    rt::DynamicBrushRow { key: "ToggleSwitchFillOnPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1408, position: 8, value_line: 1408, value_position: 58 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchFillOnPointerOverSystemAccentColorLight1ToggleSwitchFillOnPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 29, 29, 23, 1, 1407, 8, 1407, 62,
+        52, 25, 77, 22, 1, 1408, 8, 1408, 58,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_198: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleSwitchFillOnDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1409, position: 8, value_line: 1409, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOn", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1410, position: 8, value_line: 1410, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchFillOnDisabledSystemControlDisabledBaseLowBrushToggleSwitchStrokeOnSystemControlHighlightBaseHighBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 26, 26, 33, 1, 1409, 8, 1409, 8,
+        59, 20, 79, 35, 1, 1410, 8, 1410, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_199: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "ToggleSwitchStrokeOnPointerOver", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1411, position: 8, value_line: 1411, value_position: 64 },
-    rt::DynamicBrushRow { key: "ToggleSwitchStrokeOnPressed", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1412, position: 8, value_line: 1412, value_position: 60 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchStrokeOnPointerOverSystemAccentColorLight1ToggleSwitchStrokeOnPressedSystemAccentColorDark1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 31, 23, 1, 1411, 8, 1411, 64,
+        54, 27, 81, 22, 1, 1412, 8, 1412, 60,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_200: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToggleSwitchStrokeOnDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1413, position: 8, value_line: 1413, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOff", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1414, position: 8, value_line: 1414, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1415, position: 8, value_line: 1415, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1416, position: 8, value_line: 1416, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOffDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1417, position: 8, value_line: 1417, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOn", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1418, position: 8, value_line: 1418, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnPointerOver", target: "SystemControlHighlightChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1419, position: 8, value_line: 1419, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1420, position: 8, value_line: 1420, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToggleSwitchKnobFillOnDisabled", target: "SystemControlPageBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1421, position: 8, value_line: 1421, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
+    strings: "ToggleSwitchStrokeOnDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchKnobFillOffSystemControlHighlightBaseHighBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnSystemControlHighlightAltChromeWhiteBrushToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 28, 28, 39, 1, 1413, 8, 1413, 8,
+        67, 23, 90, 35, 1, 1414, 8, 1414, 8,
+        125, 34, 90, 35, 1, 1415, 8, 1415, 8,
+        159, 30, 90, 35, 1, 1416, 8, 1416, 8,
+        189, 31, 28, 39, 1, 1417, 8, 1417, 8,
+        220, 22, 242, 41, 1, 1418, 8, 1418, 8,
+        283, 33, 316, 38, 1, 1419, 8, 1419, 8,
+        354, 29, 242, 41, 1, 1420, 8, 1420, 8,
+        383, 30, 413, 39, 1, 1421, 8, 1421, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_201: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ToolTipForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1426, position: 8, value_line: 1426, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToolTipBackground", target: "SystemControlBackgroundChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1427, position: 8, value_line: 1427, value_position: 8 },
-    rt::ResourceAliasRow { key: "ToolTipBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1428, position: 8, value_line: 1428, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_201: rt::PackedRows = rt::PackedRows {
+    strings: "ToolTipForegroundSystemControlForegroundBaseHighBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 17, 17, 36, 1, 1426, 8, 1426, 8,
+        53, 17, 70, 43, 1, 1427, 8, 1427, 8,
+        113, 18, 131, 33, 1, 1428, 8, 1428, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_202: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "DatePickerSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1432, position: 8, value_line: 1432, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerSpacerFillDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1433, position: 8, value_line: 1433, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1434, position: 8, value_line: 1434, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1435, position: 8, value_line: 1435, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1437, position: 8, value_line: 1437, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1438, position: 8, value_line: 1438, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1439, position: 8, value_line: 1439, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1440, position: 8, value_line: 1440, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1442, position: 8, value_line: 1442, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1443, position: 8, value_line: 1443, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1444, position: 8, value_line: 1444, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1445, position: 8, value_line: 1445, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1446, position: 8, value_line: 1446, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1447, position: 8, value_line: 1447, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1448, position: 8, value_line: 1448, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1449, position: 8, value_line: 1449, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1450, position: 8, value_line: 1450, value_position: 8 },
-    rt::ResourceAliasRow { key: "DatePickerFlyoutPresenterHighlightFill", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1451, position: 8, value_line: 1451, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1454, position: 8, value_line: 1454, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1455, position: 8, value_line: 1455, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1457, position: 8, value_line: 1457, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1459, position: 8, value_line: 1459, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrushPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1461, position: 8, value_line: 1461, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1463, position: 8, value_line: 1463, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1465, position: 8, value_line: 1465, value_position: 8 },
-    rt::ResourceAliasRow { key: "DateTimePickerFlyoutButtonForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1467, position: 8, value_line: 1467, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1472, position: 8, value_line: 1472, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerSpacerFillDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1473, position: 8, value_line: 1473, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1474, position: 8, value_line: 1474, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1475, position: 8, value_line: 1475, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1477, position: 8, value_line: 1477, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1478, position: 8, value_line: 1478, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1479, position: 8, value_line: 1479, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1480, position: 8, value_line: 1480, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1482, position: 8, value_line: 1482, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1483, position: 8, value_line: 1483, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1484, position: 8, value_line: 1484, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1485, position: 8, value_line: 1485, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1486, position: 8, value_line: 1486, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1487, position: 8, value_line: 1487, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterBackground", target: "SystemControlTransientBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1488, position: 8, value_line: 1488, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterBorderBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1489, position: 8, value_line: 1489, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterSpacerFill", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1490, position: 8, value_line: 1490, value_position: 8 },
-    rt::ResourceAliasRow { key: "TimePickerFlyoutPresenterHighlightFill", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1491, position: 8, value_line: 1491, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_202: rt::PackedRows = rt::PackedRows {
+    strings: "DatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledSystemControlDisabledBaseLowBrushDatePickerButtonBorderBrushSystemControlForegroundBaseMediumBrushDatePickerButtonBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushDatePickerButtonBorderBrushPressedSystemControlHighlightBaseMediumBrushDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundSystemControlBackgroundAltMediumLowBrushDatePickerButtonBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushDatePickerButtonBackgroundPressedSystemControlBackgroundBaseLowBrushDatePickerButtonBackgroundDisabledDatePickerButtonForegroundSystemControlForegroundBaseHighBrushDatePickerButtonForegroundPointerOverSystemControlHighlightBaseHighBrushDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushDatePickerFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushDatePickerFlyoutPresenterBorderBrushSystemControlTransientBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillSystemControlHighlightListAccentLowBrushDateTimePickerFlyoutButtonBackgroundSystemControlTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSystemControlHighlightListLowBrushDateTimePickerFlyoutButtonBackgroundPressedSystemControlHighlightListMediumBrushDateTimePickerFlyoutButtonBorderBrushSystemControlForegroundTransparentBrushDateTimePickerFlyoutButtonBorderBrushPointerOverSystemControlHighlightTransparentBrushDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFill",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 35, 1, 1432, 8, 1432, 8,
+        55, 28, 83, 33, 1, 1433, 8, 1433, 8,
+        116, 27, 143, 38, 1, 1434, 8, 1434, 8,
+        181, 38, 219, 41, 1, 1435, 8, 1435, 8,
+        260, 34, 294, 37, 1, 1437, 8, 1437, 8,
+        331, 35, 83, 33, 1, 1438, 8, 1438, 8,
+        366, 26, 392, 40, 1, 1439, 8, 1439, 8,
+        432, 37, 469, 41, 1, 1440, 8, 1440, 8,
+        510, 33, 543, 35, 1, 1442, 8, 1442, 8,
+        578, 34, 543, 35, 1, 1443, 8, 1443, 8,
+        612, 26, 638, 36, 1, 1444, 8, 1444, 8,
+        674, 37, 711, 35, 1, 1445, 8, 1445, 8,
+        746, 33, 711, 35, 1, 1446, 8, 1446, 8,
+        779, 34, 813, 39, 1, 1447, 8, 1447, 8,
+        852, 35, 887, 37, 1, 1448, 8, 1448, 8,
+        924, 36, 960, 33, 1, 1449, 8, 1449, 8,
+        993, 35, 20, 35, 1, 1450, 8, 1450, 8,
+        1028, 38, 1066, 40, 1, 1451, 8, 1451, 8,
+        1106, 36, 1142, 29, 1, 1454, 8, 1454, 8,
+        1171, 47, 1218, 34, 1, 1455, 8, 1455, 8,
+        1252, 43, 1295, 37, 1, 1457, 8, 1457, 8,
+        1332, 37, 1369, 39, 1, 1459, 8, 1459, 8,
+        1408, 48, 1456, 38, 1, 1461, 8, 1461, 8,
+        1494, 44, 1456, 38, 1, 1463, 8, 1463, 8,
+        1538, 47, 1585, 38, 1, 1465, 8, 1465, 8,
+        1623, 43, 1585, 38, 1, 1467, 8, 1467, 8,
+        1666, 20, 20, 35, 1, 1472, 8, 1472, 8,
+        1686, 28, 83, 33, 1, 1473, 8, 1473, 8,
+        1714, 27, 143, 38, 1, 1474, 8, 1474, 8,
+        1741, 38, 219, 41, 1, 1475, 8, 1475, 8,
+        1779, 34, 294, 37, 1, 1477, 8, 1477, 8,
+        1813, 35, 83, 33, 1, 1478, 8, 1478, 8,
+        1848, 26, 392, 40, 1, 1479, 8, 1479, 8,
+        1874, 37, 469, 41, 1, 1480, 8, 1480, 8,
+        1911, 33, 543, 35, 1, 1482, 8, 1482, 8,
+        1944, 34, 543, 35, 1, 1483, 8, 1483, 8,
+        1978, 26, 638, 36, 1, 1484, 8, 1484, 8,
+        2004, 37, 711, 35, 1, 1485, 8, 1485, 8,
+        2041, 33, 711, 35, 1, 1486, 8, 1486, 8,
+        2074, 34, 813, 39, 1, 1487, 8, 1487, 8,
+        2108, 35, 887, 37, 1, 1488, 8, 1488, 8,
+        2143, 36, 960, 33, 1, 1489, 8, 1489, 8,
+        2179, 35, 20, 35, 1, 1490, 8, 1490, 8,
+        2214, 38, 1066, 40, 1, 1491, 8, 1491, 8,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_203: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2985,61 +3709,77 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_203: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 1497, position: 40 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_204: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TabControlBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1499, position: 8, value_line: 1499, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1502, position: 8, value_line: 1502, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselectedPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1503, position: 8, value_line: 1503, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundUnselectedPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1505, position: 8, value_line: 1505, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelected", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1507, position: 8, value_line: 1507, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelectedPointerOver", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1508, position: 8, value_line: 1508, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundSelectedPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1510, position: 8, value_line: 1510, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1512, position: 8, value_line: 1512, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselected", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1513, position: 8, value_line: 1513, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselectedPointerOver", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1514, position: 8, value_line: 1514, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundUnselectedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1516, position: 8, value_line: 1516, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1518, position: 8, value_line: 1518, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1519, position: 8, value_line: 1519, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundSelectedPressed", target: "SystemControlHighlightAltBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1521, position: 8, value_line: 1521, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1523, position: 8, value_line: 1523, value_position: 8 },
-    rt::ResourceAliasRow { key: "TabItemHeaderSelectedPipeFill", target: "SystemControlHighlightAltAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1524, position: 8, value_line: 1524, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_204: rt::PackedRows = rt::PackedRows {
+    strings: "TabControlBackgroundSystemControlTransparentBrushTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedSystemControlForegroundBaseMediumBrushTabItemHeaderForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedSystemControlHighlightAltBaseHighBrushTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 29, 1, 1499, 8, 1499, 8,
+        49, 33, 20, 29, 1, 1502, 8, 1502, 8,
+        82, 44, 126, 38, 1, 1503, 8, 1503, 8,
+        164, 40, 126, 38, 1, 1505, 8, 1505, 8,
+        204, 31, 126, 38, 1, 1507, 8, 1507, 8,
+        235, 42, 126, 38, 1, 1508, 8, 1508, 8,
+        277, 38, 126, 38, 1, 1510, 8, 1510, 8,
+        315, 31, 20, 29, 1, 1512, 8, 1512, 8,
+        346, 33, 379, 38, 1, 1513, 8, 1513, 8,
+        417, 44, 461, 44, 1, 1514, 8, 1514, 8,
+        505, 40, 461, 44, 1, 1516, 8, 1516, 8,
+        545, 31, 576, 38, 1, 1518, 8, 1518, 8,
+        614, 42, 461, 44, 1, 1519, 8, 1519, 8,
+        656, 38, 461, 44, 1, 1521, 8, 1521, 8,
+        694, 31, 725, 39, 1, 1523, 8, 1523, 8,
+        764, 29, 793, 36, 1, 1524, 8, 1524, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_205: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ScrollBarBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1529, position: 8, value_line: 1529, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarBackgroundPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1530, position: 8, value_line: 1530, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarForeground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1531, position: 8, value_line: 1531, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1532, position: 8, value_line: 1532, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackground", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1533, position: 8, value_line: 1533, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundPointerOver", target: "SystemControlBackgroundListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1534, position: 8, value_line: 1534, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1535, position: 8, value_line: 1535, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1536, position: 8, value_line: 1536, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1537, position: 8, value_line: 1537, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushPointerOver", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1538, position: 8, value_line: 1538, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushPressed", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1539, position: 8, value_line: 1539, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1540, position: 8, value_line: 1540, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1541, position: 8, value_line: 1541, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundPointerOver", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1542, position: 8, value_line: 1542, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundPressed", target: "SystemControlForegroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1544, position: 8, value_line: 1544, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarButtonArrowForegroundDisabled", target: "SystemControlForegroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1545, position: 8, value_line: 1545, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillPointerOver", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1546, position: 8, value_line: 1546, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillPressed", target: "SystemControlBackgroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1547, position: 8, value_line: 1547, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbFillDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1548, position: 8, value_line: 1548, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarBackgroundSystemControlTransparentBrushScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundSystemControlForegroundBaseHighBrushScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledSystemControlForegroundBaseLowBrushScrollBarThumbFillPointerOverSystemControlBackgroundBaseMediumLowBrushScrollBarThumbFillPressedScrollBarThumbFillDisabledSystemControlDisabledTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 19, 19, 29, 1, 1529, 8, 1529, 8,
+        48, 30, 19, 29, 1, 1530, 8, 1530, 8,
+        78, 19, 19, 29, 1, 1531, 8, 1531, 8,
+        97, 20, 19, 29, 1, 1532, 8, 1532, 8,
+        117, 25, 19, 29, 1, 1533, 8, 1533, 8,
+        142, 36, 178, 35, 1, 1534, 8, 1534, 8,
+        213, 32, 245, 38, 1, 1535, 8, 1535, 8,
+        283, 33, 19, 29, 1, 1536, 8, 1536, 8,
+        316, 26, 19, 29, 1, 1537, 8, 1537, 8,
+        342, 37, 19, 29, 1, 1538, 8, 1538, 8,
+        379, 33, 19, 29, 1, 1539, 8, 1539, 8,
+        412, 34, 19, 29, 1, 1540, 8, 1540, 8,
+        446, 30, 476, 36, 1, 1541, 8, 1541, 8,
+        512, 41, 476, 36, 1, 1542, 8, 1542, 8,
+        553, 37, 590, 35, 1, 1544, 8, 1544, 8,
+        625, 38, 663, 35, 1, 1545, 8, 1545, 8,
+        698, 29, 727, 41, 1, 1546, 8, 1546, 8,
+        768, 25, 245, 38, 1, 1547, 8, 1547, 8,
+        793, 26, 819, 37, 1, 1548, 8, 1548, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_206: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "ScrollBarTrackStroke", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1552, position: 8, value_line: 1552, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarTrackStrokePointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1553, position: 8, value_line: 1553, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarThumbBackgroundColor", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1554, position: 8, value_line: 1554, value_position: 8 },
-    rt::ResourceAliasRow { key: "ScrollBarPanningThumbBackgroundColor", target: "SystemChromeDisabledLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1555, position: 8, value_line: 1555, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_206: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarTrackStrokeSystemControlForegroundTransparentBrushScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorSystemBaseLowColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 20, 20, 39, 1, 1552, 8, 1552, 8,
+        59, 31, 20, 39, 1, 1553, 8, 1553, 8,
+        90, 29, 119, 18, 1, 1554, 8, 1554, 8,
+        137, 36, 173, 28, 1, 1555, 8, 1555, 8,
+    ],
+};
 
-/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_207: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "ScrollBarPanningThumbBackground", color_key: "ScrollBarPanningThumbBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1556, position: 8, value_line: 1557, value_position: 24 },
-];
+/// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_207: rt::PackedRows = rt::PackedRows {
+    strings: "ScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 31, 31, 36, 1, 1556, 8, 1557, 24,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_208: &[rt::ValueRow<f64>] = &[
@@ -3047,135 +3787,179 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_208: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ScrollBarButtonArrowIconFontSize", value: 8.0_f64, line: 1559, position: 58 },
 ];
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_209: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TreeViewItemBackground", target: "SystemControlTransparentRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1562, position: 8, value_line: 1562, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundPointerOver", target: "SystemControlHighlightListLowRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1563, position: 8, value_line: 1563, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundPressed", target: "SystemControlHighlightListMediumRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1565, position: 8, value_line: 1565, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1567, position: 8, value_line: 1567, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelected", target: "SystemControlHighlightAccent3RevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1568, position: 8, value_line: 1568, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedPointerOver", target: "SystemControlHighlightAccent2RevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1570, position: 8, value_line: 1570, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedPressed", target: "SystemControlHighlightListMediumRevealBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1572, position: 8, value_line: 1572, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBackgroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1574, position: 8, value_line: 1574, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1576, position: 8, value_line: 1576, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1577, position: 8, value_line: 1577, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1578, position: 8, value_line: 1578, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1579, position: 8, value_line: 1579, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1580, position: 8, value_line: 1580, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1581, position: 8, value_line: 1581, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1583, position: 8, value_line: 1583, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemForegroundSelectedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1585, position: 8, value_line: 1585, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrush", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1587, position: 8, value_line: 1587, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushPointerOver", target: "SystemControlHighlightAltTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1588, position: 8, value_line: 1588, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushPressed", target: "SystemControlHighlightAltTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1590, position: 8, value_line: 1590, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1592, position: 8, value_line: 1592, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelected", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1593, position: 8, value_line: 1593, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedPointerOver", target: "SystemControlBackgroundTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1594, position: 8, value_line: 1594, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedPressed", target: "SystemControlBackgroundTransparentRevealBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1596, position: 8, value_line: 1596, value_position: 8 },
-    rt::ResourceAliasRow { key: "TreeViewItemBorderBrushSelectedDisabled", target: "SystemControlTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1598, position: 8, value_line: 1598, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
+    strings: "TreeViewItemBackgroundSystemControlTransparentRevealBackgroundBrushTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledSystemControlTransparentBrushTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledSystemControlDisabledBaseMediumLowBrushTreeViewItemForegroundSystemControlForegroundBaseHighBrushTreeViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 22, 22, 45, 1, 1562, 8, 1562, 8,
+        67, 33, 100, 50, 1, 1563, 8, 1563, 8,
+        150, 29, 179, 53, 1, 1565, 8, 1565, 8,
+        232, 30, 262, 29, 1, 1567, 8, 1567, 8,
+        291, 30, 321, 50, 1, 1568, 8, 1568, 8,
+        371, 41, 412, 50, 1, 1570, 8, 1570, 8,
+        462, 37, 179, 53, 1, 1572, 8, 1572, 8,
+        499, 38, 537, 39, 1, 1574, 8, 1574, 8,
+        576, 22, 598, 36, 1, 1576, 8, 1576, 8,
+        634, 33, 667, 38, 1, 1577, 8, 1577, 8,
+        705, 29, 667, 38, 1, 1578, 8, 1578, 8,
+        734, 30, 537, 39, 1, 1579, 8, 1579, 8,
+        764, 30, 667, 38, 1, 1580, 8, 1580, 8,
+        794, 41, 667, 38, 1, 1581, 8, 1581, 8,
+        835, 37, 667, 38, 1, 1583, 8, 1583, 8,
+        872, 38, 537, 39, 1, 1585, 8, 1585, 8,
+        910, 23, 262, 29, 1, 1587, 8, 1587, 8,
+        933, 34, 967, 53, 1, 1588, 8, 1588, 8,
+        1020, 30, 967, 53, 1, 1590, 8, 1590, 8,
+        1050, 31, 262, 29, 1, 1592, 8, 1592, 8,
+        1081, 31, 262, 29, 1, 1593, 8, 1593, 8,
+        1112, 42, 1154, 51, 1, 1594, 8, 1594, 8,
+        1205, 38, 1154, 51, 1, 1596, 8, 1596, 8,
+        1243, 39, 262, 29, 1, 1598, 8, 1598, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_210: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackground", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1603, position: 8, value_line: 1603, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 21, 21, 35, 1, 1603, 8, 1603, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_211: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundPressed", target: "SystemControlBackgroundBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1606, position: 8, value_line: 1606, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1607, position: 8, value_line: 1607, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundChecked", target: "SystemControlHighlightAccentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1608, position: 8, value_line: 1608, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushSplitButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushSplitButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 28, 28, 41, 1, 1606, 8, 1606, 8,
+        69, 29, 98, 35, 1, 1607, 8, 1607, 8,
+        133, 28, 161, 33, 1, 1608, 8, 1608, 8,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_212: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "SplitButtonBackgroundCheckedPointerOver", color_key: "SystemAccentColorDark1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1609, position: 8, value_line: 1609, value_position: 72 },
-    rt::DynamicBrushRow { key: "SplitButtonBackgroundCheckedPressed", color_key: "SystemAccentColorLight1", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1610, position: 8, value_line: 1610, value_position: 68 },
-];
+/// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundCheckedPointerOverSystemAccentColorDark1SplitButtonBackgroundCheckedPressedSystemAccentColorLight1",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 39, 39, 22, 1, 1609, 8, 1609, 72,
+        61, 35, 96, 23, 1, 1610, 8, 1610, 68,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_213: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitButtonBackgroundCheckedDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1611, position: 8, value_line: 1611, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1612, position: 8, value_line: 1612, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundPointerOver", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1613, position: 8, value_line: 1613, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundPressed", target: "SystemControlHighlightBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1614, position: 8, value_line: 1614, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1615, position: 8, value_line: 1615, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundChecked", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1616, position: 8, value_line: 1616, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedPointerOver", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1617, position: 8, value_line: 1617, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedPressed", target: "SystemControlHighlightAltChromeWhiteBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1619, position: 8, value_line: 1619, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonForegroundCheckedDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1621, position: 8, value_line: 1621, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrush", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1623, position: 8, value_line: 1623, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushPointerOver", target: "SystemControlForegroundTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1624, position: 8, value_line: 1624, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushPressed", target: "SystemControlHighlightTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1625, position: 8, value_line: 1625, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1626, position: 8, value_line: 1626, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushChecked", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1627, position: 8, value_line: 1627, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedPointerOver", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1628, position: 8, value_line: 1628, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedPressed", target: "SystemControlHighlightAltTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1630, position: 8, value_line: 1630, value_position: 8 },
-    rt::ResourceAliasRow { key: "SplitButtonBorderBrushCheckedDisabled", target: "SystemControlDisabledTransparentBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1632, position: 8, value_line: 1632, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
+    strings: "SplitButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushSplitButtonForegroundSystemControlForegroundBaseHighBrushSplitButtonForegroundPointerOverSystemControlHighlightBaseHighBrushSplitButtonForegroundPressedSplitButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushSplitButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSystemControlForegroundTransparentBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSystemControlHighlightTransparentBrushSplitButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSplitButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabled",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 36, 36, 35, 1, 1611, 8, 1611, 8,
+        71, 21, 92, 36, 1, 1612, 8, 1612, 8,
+        128, 32, 160, 35, 1, 1613, 8, 1613, 8,
+        195, 28, 160, 35, 1, 1614, 8, 1614, 8,
+        223, 29, 252, 39, 1, 1615, 8, 1615, 8,
+        291, 28, 319, 41, 1, 1616, 8, 1616, 8,
+        360, 39, 319, 41, 1, 1617, 8, 1617, 8,
+        399, 35, 319, 41, 1, 1619, 8, 1619, 8,
+        434, 36, 252, 39, 1, 1621, 8, 1621, 8,
+        470, 22, 492, 39, 1, 1623, 8, 1623, 8,
+        531, 33, 492, 39, 1, 1624, 8, 1624, 8,
+        564, 29, 593, 38, 1, 1625, 8, 1625, 8,
+        631, 30, 661, 37, 1, 1626, 8, 1626, 8,
+        698, 29, 727, 41, 1, 1627, 8, 1627, 8,
+        768, 40, 727, 41, 1, 1628, 8, 1628, 8,
+        808, 36, 727, 41, 1, 1630, 8, 1630, 8,
+        844, 37, 661, 37, 1, 1632, 8, 1632, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_214: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "SplitViewLightDismissOverlayBackground", target: "SystemControlPageBackgroundMediumAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1636, position: 8, value_line: 1636, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerForeground", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1640, position: 8, value_line: 1640, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1641, position: 8, value_line: 1641, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerCalendarGlyphForeground", target: "SystemControlForegroundBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1643, position: 8, value_line: 1643, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerCalendarGlyphForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1645, position: 8, value_line: 1645, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForeground", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1647, position: 8, value_line: 1647, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1648, position: 8, value_line: 1648, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerTextForegroundSelected", target: "SystemControlForegroundBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1650, position: 8, value_line: 1650, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackground", target: "SystemControlBackgroundAltMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1652, position: 8, value_line: 1652, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundPointerOver", target: "SystemControlPageBackgroundAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1653, position: 8, value_line: 1653, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundPressed", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1655, position: 8, value_line: 1655, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundDisabled", target: "SystemControlBackgroundBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1656, position: 8, value_line: 1656, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBackgroundFocused", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1657, position: 8, value_line: 1657, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrush", target: "SystemControlForegroundBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1659, position: 8, value_line: 1659, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushPointerOver", target: "SystemControlHighlightBaseMediumHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1660, position: 8, value_line: 1660, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushPressed", target: "SystemControlHighlightBaseMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1662, position: 8, value_line: 1662, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerBorderBrushDisabled", target: "SystemControlDisabledBaseLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1663, position: 8, value_line: 1663, value_position: 8 },
-    rt::ResourceAliasRow { key: "CalendarDatePickerLightDismissOverlayBackground", target: "SystemControlPageBackgroundMediumAltMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1664, position: 8, value_line: 1664, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
+    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundSystemControlForegroundBaseHighBrushCalendarDatePickerForegroundDisabledSystemControlDisabledBaseMediumLowBrushCalendarDatePickerCalendarGlyphForegroundSystemControlForegroundBaseMediumHighBrushCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundSystemControlForegroundBaseMediumBrushCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundSystemControlBackgroundAltMediumLowBrushCalendarDatePickerBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushCalendarDatePickerBackgroundPressedSystemControlBackgroundBaseLowBrushCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedSystemControlHighlightListAccentLowBrushCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushCalendarDatePickerBorderBrushPressedSystemControlHighlightBaseMediumBrushCalendarDatePickerBorderBrushDisabledSystemControlDisabledBaseLowBrushCalendarDatePickerLightDismissOverlayBackground",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 38, 38, 47, 1, 1636, 8, 1636, 8,
+        85, 28, 113, 36, 1, 1640, 8, 1640, 8,
+        149, 36, 185, 39, 1, 1641, 8, 1641, 8,
+        224, 41, 265, 42, 1, 1643, 8, 1643, 8,
+        307, 49, 185, 39, 1, 1645, 8, 1645, 8,
+        356, 32, 388, 38, 1, 1647, 8, 1647, 8,
+        426, 40, 185, 39, 1, 1648, 8, 1648, 8,
+        466, 40, 113, 36, 1, 1650, 8, 1650, 8,
+        506, 28, 534, 40, 1, 1652, 8, 1652, 8,
+        574, 39, 613, 41, 1, 1653, 8, 1653, 8,
+        654, 35, 689, 35, 1, 1655, 8, 1655, 8,
+        724, 36, 689, 35, 1, 1656, 8, 1656, 8,
+        760, 35, 795, 40, 1, 1657, 8, 1657, 8,
+        835, 29, 388, 38, 1, 1659, 8, 1659, 8,
+        864, 40, 904, 41, 1, 1660, 8, 1660, 8,
+        945, 36, 981, 37, 1, 1662, 8, 1662, 8,
+        1018, 37, 1055, 33, 1, 1663, 8, 1663, 8,
+        1088, 47, 38, 47, 1, 1664, 8, 1664, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_215: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "FlyoutPresenterBackground", target: "SystemControlBackgroundChromeMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1669, position: 8, value_line: 1669, value_position: 8 },
-    rt::ResourceAliasRow { key: "FlyoutBorderThemeBrush", target: "SystemControlTransientBorderBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1670, position: 8, value_line: 1670, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
+    strings: "FlyoutPresenterBackgroundSystemControlBackgroundChromeMediumLowBrushFlyoutBorderThemeBrushSystemControlTransientBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 25, 25, 43, 1, 1669, 8, 1669, 8,
+        68, 22, 90, 33, 1, 1670, 8, 1670, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_216: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1677, position: 8 },
-    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1678, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1681, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4280096527_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1682, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1683, position: 8 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
+    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 27, 65535, 65535, 1, 1677, 8,
+        27, 27, 65535, 255, 1, 1678, 8,
+        54, 23, 65535, 65535, 1, 1681, 8,
+        77, 23, 5903, 65309, 1, 1682, 8,
+        100, 24, 51914, 65482, 1, 1683, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_217: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "SystemControlBackgroundAltHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1684, position: 8, value_line: 1684, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewColumnHeaderSeparatorBackground", target: "SystemBaseLowColor", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1687, position: 8, value_line: 1687, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
+    strings: "TitleBarBackgroundBrushSystemControlBackgroundAltHighBrushTableViewColumnHeaderSeparatorBackgroundSystemBaseLowColor",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 23, 23, 35, 1, 1684, 8, 1684, 8,
+        58, 40, 98, 18, 1, 1687, 8, 1687, 8,
+    ],
+};
 
-/// The resource aliases of a run of `FluentTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_218: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TableViewRowForegroundDisabled", target: "SystemControlDisabledBaseMediumLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1692, position: 8, value_line: 1692, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundPointerOver", target: "SystemControlHighlightListLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1693, position: 8, value_line: 1693, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1694, position: 8, value_line: 1694, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundPressed", target: "SystemControlHighlightListMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1695, position: 8, value_line: 1695, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1696, position: 8, value_line: 1696, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelected", target: "SystemControlHighlightListAccentLowBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1697, position: 8, value_line: 1697, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelected", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1698, position: 8, value_line: 1698, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelectedPointerOver", target: "SystemControlHighlightListAccentMediumBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1699, position: 8, value_line: 1699, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelectedPointerOver", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1700, position: 8, value_line: 1700, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowBackgroundSelectedPressed", target: "SystemControlHighlightListAccentHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1701, position: 8, value_line: 1701, value_position: 8 },
-    rt::ResourceAliasRow { key: "TableViewRowForegroundSelectedPressed", target: "SystemControlHighlightAltBaseHighBrush", namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1), line: 1702, position: 8, value_line: 1702, value_position: 8 },
-];
+/// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
+    strings: "TableViewRowForegroundDisabledSystemControlDisabledBaseMediumLowBrushTableViewRowBackgroundPointerOverSystemControlHighlightListLowBrushTableViewRowForegroundPointerOverSystemControlHighlightAltBaseHighBrushTableViewRowBackgroundPressedSystemControlHighlightListMediumBrushTableViewRowForegroundPressedTableViewRowBackgroundSelectedSystemControlHighlightListAccentLowBrushTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushTableViewRowForegroundSelectedPressed",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        0, 30, 30, 39, 1, 1692, 8, 1692, 8,
+        69, 33, 102, 34, 1, 1693, 8, 1693, 8,
+        136, 33, 169, 38, 1, 1694, 8, 1694, 8,
+        207, 29, 236, 37, 1, 1695, 8, 1695, 8,
+        273, 29, 169, 38, 1, 1696, 8, 1696, 8,
+        302, 30, 332, 40, 1, 1697, 8, 1697, 8,
+        372, 30, 169, 38, 1, 1698, 8, 1698, 8,
+        402, 41, 443, 43, 1, 1699, 8, 1699, 8,
+        486, 41, 169, 38, 1, 1700, 8, 1700, 8,
+        527, 37, 564, 41, 1, 1701, 8, 1701, 8,
+        605, 37, 169, 38, 1, 1702, 8, 1702, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `FluentTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_219: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "SystemControlTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0), line: 9, position: 4 },
-];
+/// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
+    strings: "SystemControlTransparentBrush",
+    namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 29, 65535, 255, 1, 9, 4,
+    ],
+};
 
 /// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_220: &[rt::ValueRow<[f64; 4]>] = &[
@@ -4813,7 +5597,7 @@ fn build_controls_fluentcontrols_xaml_unit_33(
     // Controls/FluentControls.xaml(16,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 51)?, rt::string_object("NavigationControlNavBarHeight"), rt::to_object(48.0_f64)), 16, 51)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1)?;
     // Controls/FluentControls.xaml(19,4) Content (resource)
     let deferred_40 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_84, 19, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_40) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
@@ -4832,7 +5616,7 @@ fn build_controls_fluentcontrols_xaml_unit_34(
     // Controls/FluentControls.xaml(12,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_87, 12, 50)?;
     // Controls/FluentControls.xaml(14,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_90, 17, 4)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
@@ -4849,17 +5633,17 @@ fn build_controls_fluentcontrols_xaml_unit_35(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(21,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3)?;
     // Controls/FluentControls.xaml(23,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_4)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_4)?;
     // Controls/FluentControls.xaml(24,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_5)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_5)?;
     // Controls/FluentControls.xaml(25,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_6)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_6)?;
     // Controls/FluentControls.xaml(26,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_7)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_7)?;
     // Controls/FluentControls.xaml(30,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_8)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_8)?;
     // Controls/FluentControls.xaml(33,58) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_9)?;
     // Controls/FluentControls.xaml(36,70) Content (resource)
@@ -4875,13 +5659,13 @@ fn build_controls_fluentcontrols_xaml_unit_35(
     // Controls/FluentControls.xaml(46,53) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_11)?;
     // Controls/FluentControls.xaml(51,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12)?;
     // Controls/FluentControls.xaml(52,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 56)?, rt::string_object("TabbedPageTabStripCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 52, 56)?;
     // Controls/FluentControls.xaml(53,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 56)?, rt::string_object("TabbedPageTabStripBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 53, 56)?;
     // Controls/FluentControls.xaml(54,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13)?;
     // Controls/FluentControls.xaml(55,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14)?;
     // Controls/FluentControls.xaml(59,4) Content (resource)
@@ -5156,7 +5940,7 @@ fn build_controls_fluentcontrols_xaml_unit_50(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(265,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5168,7 +5952,7 @@ fn build_controls_fluentcontrols_xaml_unit_51(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(294,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5180,7 +5964,7 @@ fn build_controls_fluentcontrols_xaml_unit_52(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(323,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_3, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5492,7 +6276,7 @@ fn build_controls_fluentcontrols_xaml_unit_68(
     let value_8 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_8))), 7, 67)?;
     // Controls/FluentControls.xaml(8,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_28)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_28)?;
     // Controls/FluentControls.xaml(11,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_335, 11, 4)?;
     // Controls/FluentControls.xaml(36,4) Content (resource)
@@ -5732,50 +6516,82 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SystemControlFocusVisualSecondaryThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 6, position: 65 },
 ];
 
-/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "NavigationControlNavBarBackground", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::None, line: 17, position: 4, value_line: 17, value_position: 62 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
+    strings: "NavigationControlNavBarBackgroundSystemChromeMediumColor",
+    namespaces: &[],
+    records: &[
+        0, 33, 33, 23, 0, 17, 4, 17, 62,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "NavigationBarBackground", color_key: "SystemChromeMediumColor", namespaces: ::core::option::Option::None, line: 14, position: 4, value_line: 14, value_position: 52 },
-    rt::DynamicBrushRow { key: "NavigationBarForeground", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::None, line: 15, position: 4, value_line: 15, value_position: 52 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
+    strings: "NavigationBarBackgroundSystemChromeMediumColorNavigationBarForegroundSystemBaseMediumColor",
+    namespaces: &[],
+    records: &[
+        0, 23, 23, 23, 0, 14, 4, 14, 52,
+        46, 23, 69, 21, 0, 15, 4, 15, 52,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 21, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 22, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelected",
+    namespaces: &[],
+    records: &[
+        0, 43, 65535, 255, 0, 21, 4,
+        43, 41, 65535, 255, 0, 22, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_4: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", color_key: "SystemListLowColor", namespaces: ::core::option::Option::None, line: 23, position: 4, value_line: 23, value_position: 83 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOverSystemListLowColor",
+    namespaces: &[],
+    records: &[
+        0, 54, 54, 18, 0, 23, 4, 23, 83,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_5: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 24, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver",
+    namespaces: &[],
+    records: &[
+        0, 52, 65535, 255, 0, 24, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_6: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPressed", color_key: "SystemListMediumColor", namespaces: ::core::option::Option::None, line: 25, position: 4, value_line: 25, value_position: 79 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPressedSystemListMediumColor",
+    namespaces: &[],
+    records: &[
+        0, 50, 50, 21, 0, 25, 4, 25, 79,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_7: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 26, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 27, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabled",
+    namespaces: &[],
+    records: &[
+        0, 48, 65535, 255, 0, 26, 4,
+        48, 41, 65535, 255, 0, 27, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_8: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundUnselected", color_key: "SystemBaseMediumColor", namespaces: ::core::option::Option::None, line: 30, position: 4, value_line: 30, value_position: 72 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundSelected", color_key: "SystemAccentColor", namespaces: ::core::option::Option::None, line: 31, position: 4, value_line: 31, value_position: 70 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundDisabled", color_key: "SystemBaseLowColor", namespaces: ::core::option::Option::None, line: 32, position: 4, value_line: 32, value_position: 70 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderForegroundUnselectedSystemBaseMediumColorTabbedPageTabItemHeaderForegroundSelectedSystemAccentColorTabbedPageTabItemHeaderForegroundDisabledSystemBaseLowColor",
+    namespaces: &[],
+    records: &[
+        0, 43, 43, 21, 0, 30, 4, 30, 72,
+        64, 41, 105, 17, 0, 31, 4, 31, 70,
+        122, 41, 163, 18, 0, 32, 4, 32, 70,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
@@ -5796,15 +6612,23 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_11: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabbedPageTabItemHeaderSpacing", value: 4.0_f64, line: 48, position: 52 },
 ];
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 51, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabStripBackground",
+    namespaces: &[],
+    records: &[
+        0, 28, 65535, 255, 0, 51, 4,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 54, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabStripBorderBrush",
+    namespaces: &[],
+    records: &[
+        0, 29, 65535, 255, 0, 54, 4,
+    ],
+};
 
 /// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14: &[rt::ValueRow<[f64; 4]>] = &[
@@ -5841,98 +6665,110 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18: &[rt::ValueRow<[f64; 4]>] = &
     rt::ValueRow { key: "MenuInputGestureTextMargin", value: [24.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 49 },
 ];
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 265, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 266, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 267, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 268, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 269, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 270, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 271, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 272, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 273, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 274, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForeground", color: 1912602624_u32, namespaces: ::core::option::Option::None, line: 275, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPointerOver", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 276, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPressed", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 277, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundSelected", color: 4278190080_u32, namespaces: ::core::option::Option::None, line: 278, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundDisabled", color: 1358954496_u32, namespaces: ::core::option::Option::None, line: 279, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 280, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 281, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 282, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 283, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 284, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 285, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 286, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 287, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForeground", color: 1912602624_u32, namespaces: ::core::option::Option::None, line: 288, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPointerOver", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 289, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPressed", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 290, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundDisabled", color: 1358954496_u32, namespaces: ::core::option::Option::None, line: 291, position: 8 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
+    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    namespaces: &[],
+    records: &[
+        0, 37, 65535, 255, 0, 265, 8,
+        37, 48, 65535, 255, 0, 266, 8,
+        85, 44, 65535, 255, 0, 267, 8,
+        129, 45, 65535, 255, 0, 268, 8,
+        174, 45, 65535, 255, 0, 269, 8,
+        219, 38, 65535, 255, 0, 270, 8,
+        257, 49, 65535, 255, 0, 271, 8,
+        306, 45, 65535, 255, 0, 272, 8,
+        351, 46, 65535, 255, 0, 273, 8,
+        397, 46, 65535, 255, 0, 274, 8,
+        443, 37, 0, 29184, 0, 275, 8,
+        480, 48, 0, 40448, 0, 276, 8,
+        528, 44, 0, 40448, 0, 277, 8,
+        572, 45, 0, 65280, 0, 278, 8,
+        617, 45, 0, 20736, 0, 279, 8,
+        662, 35, 65535, 255, 0, 280, 8,
+        697, 46, 65535, 255, 0, 281, 8,
+        743, 42, 65535, 255, 0, 282, 8,
+        785, 43, 65535, 255, 0, 283, 8,
+        828, 36, 65535, 255, 0, 284, 8,
+        864, 47, 65535, 255, 0, 285, 8,
+        911, 43, 65535, 255, 0, 286, 8,
+        954, 44, 65535, 255, 0, 287, 8,
+        998, 35, 0, 29184, 0, 288, 8,
+        1033, 46, 0, 40448, 0, 289, 8,
+        1079, 42, 0, 40448, 0, 290, 8,
+        1121, 43, 0, 20736, 0, 291, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 294, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 295, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 296, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 297, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 298, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 299, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 300, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 301, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 302, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 303, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForeground", color: 1912602624_u32, namespaces: ::core::option::Option::None, line: 304, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPointerOver", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 305, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPressed", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 306, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundSelected", color: 4278190080_u32, namespaces: ::core::option::Option::None, line: 307, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundDisabled", color: 1358954496_u32, namespaces: ::core::option::Option::None, line: 308, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 309, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 310, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 311, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 312, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 313, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 314, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 315, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 316, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForeground", color: 1912602624_u32, namespaces: ::core::option::Option::None, line: 317, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPointerOver", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 318, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPressed", color: 2650800128_u32, namespaces: ::core::option::Option::None, line: 319, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundDisabled", color: 1358954496_u32, namespaces: ::core::option::Option::None, line: 320, position: 8 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
+    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    namespaces: &[],
+    records: &[
+        0, 37, 65535, 255, 0, 294, 8,
+        37, 48, 65535, 255, 0, 295, 8,
+        85, 44, 65535, 255, 0, 296, 8,
+        129, 45, 65535, 255, 0, 297, 8,
+        174, 45, 65535, 255, 0, 298, 8,
+        219, 38, 65535, 255, 0, 299, 8,
+        257, 49, 65535, 255, 0, 300, 8,
+        306, 45, 65535, 255, 0, 301, 8,
+        351, 46, 65535, 255, 0, 302, 8,
+        397, 46, 65535, 255, 0, 303, 8,
+        443, 37, 0, 29184, 0, 304, 8,
+        480, 48, 0, 40448, 0, 305, 8,
+        528, 44, 0, 40448, 0, 306, 8,
+        572, 45, 0, 65280, 0, 307, 8,
+        617, 45, 0, 20736, 0, 308, 8,
+        662, 35, 65535, 255, 0, 309, 8,
+        697, 46, 65535, 255, 0, 310, 8,
+        743, 42, 65535, 255, 0, 311, 8,
+        785, 43, 65535, 255, 0, 312, 8,
+        828, 36, 65535, 255, 0, 313, 8,
+        864, 47, 65535, 255, 0, 314, 8,
+        911, 43, 65535, 255, 0, 315, 8,
+        954, 44, 65535, 255, 0, 316, 8,
+        998, 35, 0, 29184, 0, 317, 8,
+        1033, 46, 0, 40448, 0, 318, 8,
+        1079, 42, 0, 40448, 0, 319, 8,
+        1121, 43, 0, 20736, 0, 320, 8,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 323, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 324, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 325, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 326, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 327, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 328, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 329, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 330, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 331, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 332, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForeground", color: 2348810239_u32, namespaces: ::core::option::Option::None, line: 333, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPointerOver", color: 3321888767_u32, namespaces: ::core::option::Option::None, line: 334, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundPressed", color: 3321888767_u32, namespaces: ::core::option::Option::None, line: 335, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundSelected", color: 4294967295_u32, namespaces: ::core::option::Option::None, line: 336, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerSelectionIndicatorForegroundDisabled", color: 1073741823_u32, namespaces: ::core::option::Option::None, line: 337, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 338, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 339, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 340, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 341, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 342, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 343, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 344, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonBorderBrushDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 345, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForeground", color: 2348810239_u32, namespaces: ::core::option::Option::None, line: 346, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPointerOver", color: 3321888767_u32, namespaces: ::core::option::Option::None, line: 347, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundPressed", color: 3321888767_u32, namespaces: ::core::option::Option::None, line: 348, position: 8 },
-    rt::LiteralBrushRow { key: "PipsPagerNavigationButtonForegroundDisabled", color: 1073741823_u32, namespaces: ::core::option::Option::None, line: 349, position: 8 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
+    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    namespaces: &[],
+    records: &[
+        0, 37, 65535, 255, 0, 323, 8,
+        37, 48, 65535, 255, 0, 324, 8,
+        85, 44, 65535, 255, 0, 325, 8,
+        129, 45, 65535, 255, 0, 326, 8,
+        174, 45, 65535, 255, 0, 327, 8,
+        219, 38, 65535, 255, 0, 328, 8,
+        257, 49, 65535, 255, 0, 329, 8,
+        306, 45, 65535, 255, 0, 330, 8,
+        351, 46, 65535, 255, 0, 331, 8,
+        397, 46, 65535, 255, 0, 332, 8,
+        443, 37, 65535, 35839, 0, 333, 8,
+        480, 48, 65535, 50687, 0, 334, 8,
+        528, 44, 65535, 50687, 0, 335, 8,
+        572, 45, 65535, 65535, 0, 336, 8,
+        617, 45, 65535, 16383, 0, 337, 8,
+        662, 35, 65535, 255, 0, 338, 8,
+        697, 46, 65535, 255, 0, 339, 8,
+        743, 42, 65535, 255, 0, 340, 8,
+        785, 43, 65535, 255, 0, 341, 8,
+        828, 36, 65535, 255, 0, 342, 8,
+        864, 47, 65535, 255, 0, 343, 8,
+        911, 43, 65535, 255, 0, 344, 8,
+        954, 44, 65535, 255, 0, 345, 8,
+        998, 35, 65535, 35839, 0, 346, 8,
+        1033, 46, 65535, 50687, 0, 347, 8,
+        1079, 42, 65535, 50687, 0, 348, 8,
+        1121, 43, 65535, 16383, 0, 349, 8,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22: &[rt::ValueRow<f64>] = &[
@@ -5973,11 +6809,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_27: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CaptionButtonHeight", value: 30.0_f64, line: 6, position: 41 },
 ];
 
-/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_28: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBackground", color: 4293398819_u32, namespaces: ::core::option::Option::None, line: 8, position: 4 },
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBorderBrush", color: 4294013050_u32, namespaces: ::core::option::Option::None, line: 9, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
+    strings: "CaptionButtonCloseBackgroundCaptionButtonCloseBorderBrush",
+    namespaces: &[],
+    records: &[
+        0, 28, 4387, 65512, 0, 8, 4,
+        28, 29, 28794, 65521, 0, 9, 4,
+    ],
+};
 
 /// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_29: &[rt::ValueRow<[f64; 4]>] = &[

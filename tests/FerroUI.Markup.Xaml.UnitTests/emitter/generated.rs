@@ -3212,17 +3212,21 @@ pub fn build_resource_dictionary_root_xaml(
     // resource_dictionary_root.xaml(1,131) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 131)?, rt::string_object("A"), rt::to_object(1.0_f64)), 1, 131)?;
     // resource_dictionary_root.xaml(1,144) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT, BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0)?;
     // resource_dictionary_root.xaml(1,205) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 205)?, rt::string_object("C"), rt::string_object("text")), 1, 205)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
-/// The brushes with a literal colour of a run of `resource_dictionary_root.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "B", color: 4278222848_u32, namespaces: ::core::option::Option::None, line: 1, position: 144 },
-];
+/// The brushes with a literal colour of a run of `resource_dictionary_root.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0: rt::PackedRows = rt::PackedRows {
+    strings: "B",
+    namespaces: &[],
+    records: &[
+        0, 1, 32768, 65280, 0, 1, 144,
+    ],
+};
 
 fn build_resource_dictionary_root_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,

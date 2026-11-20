@@ -118,6 +118,27 @@ runs as a step of its own.
 A group is an implementation detail of the markup runtime. Application code adds lazy resources
 with `ResourceDictionary::add_deferred` or `add_deferred_fn`.
 
+**Packed tables (#855, on by default).** A row of the four deferred shapes is a struct of
+sized strings, an optional namespace slice and 32-bit positions: 64 bytes for an alias and for
+the brushes bound to a resource, 48 for a literal brush, each string a pointer the loader
+relocates. With `DEFAULT_PACKED_THEME_ROWS` (`rust_emitter/theme_rows.rs`, on;
+`with_packed_theme_rows(false, ..)` turns it off for the emission of a closure) a run of one of
+these shapes is written as an `rt::PackedRows` instead: one pool of the strings of the table, each written once (a
+string inside one already in the pool is found there), the namespace tables the rows name, and
+one record of 16-bit fields for each row (key offset and length, target or colour key offset and
+length or the two halves of the colour, the namespace table as its index plus one, the
+positions). `rt::add_packed_resource_aliases`, `add_packed_literal_brushes`,
+`add_packed_dynamic_brushes` and `add_packed_static_brushes` decode a record when its row is
+added or built and do what the builders of the slices do, in the same order, with the same
+errors at the same positions. A run with an offset, a length or a position beyond 16 bits, a
+negative position or a key in a form the emitter does not write keeps its slice of rows. A
+record that does not decode is the error of its table, not a panic. The pool is the table's, so
+a trimmed unit takes its strings with it. The helpers of the slices stay for the plain values.
+It is on because the measurement kept it: on macOS the stripped executables were smaller in
+every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
+34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
+typed backend encodes the same runs as its programs; with it no packed table is written.
+
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
 An element changes its styles in a batch (`ValueStore::begin_styling`, `end_styling`): applying
@@ -627,4 +648,5 @@ section 9).
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
+| Packed tables of the deferred rows (section 2.2, `DEFAULT_PACKED_THEME_ROWS`, on by default) | #855 | Kept by its measurement, on by default |
 | Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |

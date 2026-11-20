@@ -127,11 +127,11 @@ fn populate_simpletheme_xaml_unit_0(
     // SimpleTheme.xaml(7,43) Content (resource)
     rt::add_color_resources(&resource_dictionary_1, POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
     // SimpleTheme.xaml(24,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
     // SimpleTheme.xaml(41,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_2)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_2)?;
     // SimpleTheme.xaml(49,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_3)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_3)?;
     ::core::result::Result::Ok(())
 }
 
@@ -145,11 +145,11 @@ fn populate_simpletheme_xaml_unit_1(
     // SimpleTheme.xaml(53,43) Content (resource)
     rt::add_color_resources(&resource_dictionary_2, POPULATE_SIMPLETHEME_XAML_ROWS_4)?;
     // SimpleTheme.xaml(70,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_5)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_5)?;
     // SimpleTheme.xaml(87,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_6)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_6)?;
     // SimpleTheme.xaml(95,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_7)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_7)?;
     ::core::result::Result::Ok(())
 }
 
@@ -165,11 +165,11 @@ fn populate_simpletheme_xaml_unit_2(
     // SimpleTheme.xaml(99,35) Content (resource)
     rt::add_color_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_8)?;
     // SimpleTheme.xaml(107,4) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_9)?;
+    rt::add_packed_static_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_9)?;
     // SimpleTheme.xaml(115,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_53, 115, 4)?;
     // SimpleTheme.xaml(119,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_10)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_10)?;
     // SimpleTheme.xaml(122,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardInformationBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_55, 122, 4)?;
     // SimpleTheme.xaml(126,4) Content (resource)
@@ -179,7 +179,7 @@ fn populate_simpletheme_xaml_unit_2(
     // SimpleTheme.xaml(134,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardErrorBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_58, 134, 4)?;
     // SimpleTheme.xaml(138,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_11)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_11)?;
     // SimpleTheme.xaml(139,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DatePickerFlyoutPresenterHighlightFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_60, 139, 4)?;
     // SimpleTheme.xaml(143,4) Content (resource)
@@ -222,39 +222,51 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "HyperlinkVisitedColor", value: 4285013416_u32, line: 22, position: 44 },
 ];
 
-/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_1: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "ThemeBackgroundBrush", color_key: "ThemeBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 24, position: 8, value_line: 24, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeBorderLowBrush", color_key: "ThemeBorderLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 25, position: 8, value_line: 25, value_position: 52 },
-    rt::StaticBrushRow { key: "ThemeBorderMidBrush", color_key: "ThemeBorderMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 26, position: 8, value_line: 26, value_position: 52 },
-    rt::StaticBrushRow { key: "ThemeBorderHighBrush", color_key: "ThemeBorderHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 27, position: 8, value_line: 27, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlLowBrush", color_key: "ThemeControlLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 28, position: 8, value_line: 28, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlMidBrush", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 29, position: 8, value_line: 29, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlMidHighBrush", color_key: "ThemeControlMidHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 30, position: 8, value_line: 30, value_position: 57 },
-    rt::StaticBrushRow { key: "ThemeControlHighBrush", color_key: "ThemeControlHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 31, position: 8, value_line: 31, value_position: 54 },
-    rt::StaticBrushRow { key: "ThemeControlVeryHighBrush", color_key: "ThemeControlVeryHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 32, position: 8, value_line: 32, value_position: 58 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightLowBrush", color_key: "ThemeControlHighlightLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 33, position: 8, value_line: 33, value_position: 62 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightMidBrush", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 34, position: 8, value_line: 34, value_position: 62 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightHighBrush", color_key: "ThemeControlHighlightHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 35, position: 8, value_line: 35, value_position: 63 },
-    rt::StaticBrushRow { key: "ThemeForegroundBrush", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 36, position: 8, value_line: 36, value_position: 53 },
-    rt::StaticBrushRow { key: "HighlightBrush", color_key: "HighlightColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 37, position: 8, value_line: 37, value_position: 47 },
-    rt::StaticBrushRow { key: "HighlightBrush2", color_key: "HighlightColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 38, position: 8, value_line: 38, value_position: 48 },
-    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 39, position: 8, value_line: 39, value_position: 54 },
-];
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
+    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 20, 20, 20, 1, 24, 8, 24, 53,
+        40, 19, 59, 19, 1, 25, 8, 25, 52,
+        78, 19, 97, 19, 1, 26, 8, 26, 52,
+        116, 20, 136, 20, 1, 27, 8, 27, 53,
+        156, 20, 176, 20, 1, 28, 8, 28, 53,
+        196, 20, 216, 20, 1, 29, 8, 29, 53,
+        236, 24, 260, 24, 1, 30, 8, 30, 57,
+        284, 21, 305, 21, 1, 31, 8, 31, 54,
+        326, 25, 351, 25, 1, 32, 8, 32, 58,
+        376, 29, 405, 29, 1, 33, 8, 33, 62,
+        434, 29, 463, 29, 1, 34, 8, 34, 62,
+        492, 30, 522, 30, 1, 35, 8, 35, 63,
+        552, 20, 572, 20, 1, 36, 8, 36, 53,
+        592, 14, 606, 14, 1, 37, 8, 37, 47,
+        620, 15, 635, 15, 1, 38, 8, 38, 48,
+        650, 21, 671, 21, 1, 39, 8, 39, 54,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_2: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 41, position: 8 },
-    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 42, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 46, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4293256677_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 47, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 48, position: 8 },
-];
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
+    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 27, 0, 65280, 1, 41, 8,
+        27, 27, 65535, 255, 1, 42, 8,
+        54, 23, 0, 65280, 1, 46, 8,
+        77, 23, 58853, 65509, 1, 47, 8,
+        100, 24, 51914, 65482, 1, 48, 8,
+    ],
+};
 
-/// The resource aliases of a run of `SimpleTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_3: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "ThemeBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 49, position: 8, value_line: 49, value_position: 8 },
-];
+/// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
+    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 23, 23, 20, 1, 49, 8, 49, 8,
+    ],
+};
 
 /// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
 static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
@@ -276,39 +288,51 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "HyperlinkVisitedColor", value: 4291136249_u32, line: 68, position: 44 },
 ];
 
-/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_5: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "ThemeBackgroundBrush", color_key: "ThemeBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 70, position: 8, value_line: 70, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeBorderLowBrush", color_key: "ThemeBorderLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 71, position: 8, value_line: 71, value_position: 52 },
-    rt::StaticBrushRow { key: "ThemeBorderMidBrush", color_key: "ThemeBorderMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 72, position: 8, value_line: 72, value_position: 52 },
-    rt::StaticBrushRow { key: "ThemeBorderHighBrush", color_key: "ThemeBorderHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 73, position: 8, value_line: 73, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlLowBrush", color_key: "ThemeControlLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 74, position: 8, value_line: 74, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlMidBrush", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 75, position: 8, value_line: 75, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeControlMidHighBrush", color_key: "ThemeControlMidHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 76, position: 8, value_line: 76, value_position: 57 },
-    rt::StaticBrushRow { key: "ThemeControlHighBrush", color_key: "ThemeControlHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 77, position: 8, value_line: 77, value_position: 54 },
-    rt::StaticBrushRow { key: "ThemeControlVeryHighBrush", color_key: "ThemeControlVeryHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 78, position: 8, value_line: 78, value_position: 58 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightLowBrush", color_key: "ThemeControlHighlightLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 79, position: 8, value_line: 79, value_position: 62 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightMidBrush", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 80, position: 8, value_line: 80, value_position: 62 },
-    rt::StaticBrushRow { key: "ThemeControlHighlightHighBrush", color_key: "ThemeControlHighlightHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 81, position: 8, value_line: 81, value_position: 63 },
-    rt::StaticBrushRow { key: "ThemeForegroundBrush", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 82, position: 8, value_line: 82, value_position: 53 },
-    rt::StaticBrushRow { key: "HighlightBrush", color_key: "HighlightColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 83, position: 8, value_line: 83, value_position: 47 },
-    rt::StaticBrushRow { key: "HighlightBrush2", color_key: "HighlightColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 84, position: 8, value_line: 84, value_position: 48 },
-    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 85, position: 8, value_line: 85, value_position: 54 },
-];
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
+    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 20, 20, 20, 1, 70, 8, 70, 53,
+        40, 19, 59, 19, 1, 71, 8, 71, 52,
+        78, 19, 97, 19, 1, 72, 8, 72, 52,
+        116, 20, 136, 20, 1, 73, 8, 73, 53,
+        156, 20, 176, 20, 1, 74, 8, 74, 53,
+        196, 20, 216, 20, 1, 75, 8, 75, 53,
+        236, 24, 260, 24, 1, 76, 8, 76, 57,
+        284, 21, 305, 21, 1, 77, 8, 77, 54,
+        326, 25, 351, 25, 1, 78, 8, 78, 58,
+        376, 29, 405, 29, 1, 79, 8, 79, 62,
+        434, 29, 463, 29, 1, 80, 8, 80, 62,
+        492, 30, 522, 30, 1, 81, 8, 81, 63,
+        552, 20, 572, 20, 1, 82, 8, 82, 53,
+        592, 14, 606, 14, 1, 83, 8, 83, 47,
+        620, 15, 635, 15, 1, 84, 8, 84, 48,
+        650, 21, 671, 21, 1, 85, 8, 85, 54,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_6: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 87, position: 8 },
-    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 88, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 92, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4280096527_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 93, position: 8 },
-    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 94, position: 8 },
-];
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
+    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 27, 65535, 65535, 1, 87, 8,
+        27, 27, 65535, 255, 1, 88, 8,
+        54, 23, 65535, 65535, 1, 92, 8,
+        77, 23, 5903, 65309, 1, 93, 8,
+        100, 24, 51914, 65482, 1, 94, 8,
+    ],
+};
 
-/// The resource aliases of a run of `SimpleTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_7: &[rt::ResourceAliasRow] = &[
-    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "ThemeBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 95, position: 8, value_line: 95, value_position: 8 },
-];
+/// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
+    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 23, 23, 20, 1, 95, 8, 95, 8,
+    ],
+};
 
 /// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
 static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
@@ -322,27 +346,39 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "ErrorLowColor", value: 285147136_u32, line: 106, position: 32 },
 ];
 
-/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_9: &[rt::StaticBrushRow] = &[
-    rt::StaticBrushRow { key: "HighlightForegroundBrush", color_key: "HighlightForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 107, position: 4, value_line: 107, value_position: 53 },
-    rt::StaticBrushRow { key: "ThemeForegroundLowBrush", color_key: "ThemeForegroundLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 108, position: 4, value_line: 108, value_position: 52 },
-    rt::StaticBrushRow { key: "ThemeAccentBrush2", color_key: "ThemeAccentColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 109, position: 4, value_line: 109, value_position: 46 },
-    rt::StaticBrushRow { key: "ThemeAccentBrush3", color_key: "ThemeAccentColor3", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 110, position: 4, value_line: 110, value_position: 46 },
-    rt::StaticBrushRow { key: "ThemeAccentBrush4", color_key: "ThemeAccentColor4", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 111, position: 4, value_line: 111, value_position: 46 },
-    rt::StaticBrushRow { key: "ThemeAccentBrush", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 112, position: 4, value_line: 112, value_position: 45 },
-    rt::StaticBrushRow { key: "ErrorBrush", color_key: "ErrorColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 113, position: 4, value_line: 113, value_position: 39 },
-    rt::StaticBrushRow { key: "ErrorLowBrush", color_key: "ErrorLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 114, position: 4, value_line: 114, value_position: 42 },
-];
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
+    strings: "HighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColor",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 24, 24, 24, 1, 107, 4, 107, 53,
+        48, 23, 71, 23, 1, 108, 4, 108, 52,
+        94, 17, 111, 17, 1, 109, 4, 109, 46,
+        128, 17, 145, 17, 1, 110, 4, 110, 46,
+        162, 17, 179, 17, 1, 111, 4, 111, 46,
+        94, 16, 111, 16, 1, 112, 4, 112, 45,
+        196, 10, 206, 10, 1, 113, 4, 113, 39,
+        216, 13, 229, 13, 1, 114, 4, 114, 42,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_10: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "NotificationCardForegroundBrush", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 119, position: 4 },
-];
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
+    strings: "NotificationCardForegroundBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 31, 65535, 65535, 1, 119, 4,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_11: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "ThemeControlTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 138, position: 4 },
-];
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
+    strings: "ThemeControlTransparentBrush",
+    namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
+    records: &[
+        0, 28, 65535, 255, 1, 138, 4,
+    ],
+};
 
 /// The numbers of a run of `SimpleTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_SIMPLETHEME_XAML_ROWS_12: &[rt::ValueRow<f64>] = &[
@@ -1407,7 +1443,7 @@ fn build_controls_simplecontrols_xaml_unit_50(
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
     // Controls/SimpleControls.xaml(8,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
     // Controls/SimpleControls.xaml(11,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_127, 11, 4)?;
     // Controls/SimpleControls.xaml(36,4) Content (resource)
@@ -1800,7 +1836,7 @@ fn build_controls_simplecontrols_xaml_unit_70(
     // Controls/SimpleControls.xaml(12,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_249, 12, 50)?;
     // Controls/SimpleControls.xaml(14,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11)?;
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_252, 17, 4)?;
     // Controls/SimpleControls.xaml(22,4) Content (resource)
@@ -1817,17 +1853,17 @@ fn build_controls_simplecontrols_xaml_unit_71(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
     // Controls/SimpleControls.xaml(19,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13)?;
     // Controls/SimpleControls.xaml(20,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14)?;
     // Controls/SimpleControls.xaml(21,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15)?;
     // Controls/SimpleControls.xaml(22,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16)?;
     // Controls/SimpleControls.xaml(26,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17)?;
     // Controls/SimpleControls.xaml(30,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18)?;
     // Controls/SimpleControls.xaml(34,70) Content (resource)
@@ -1841,13 +1877,13 @@ fn build_controls_simplecontrols_xaml_unit_71(
     // Controls/SimpleControls.xaml(43,53) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20)?;
     // Controls/SimpleControls.xaml(48,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21)?;
     // Controls/SimpleControls.xaml(49,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 49, 56)?, rt::string_object("TabbedPageTabStripCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 49, 56)?;
     // Controls/SimpleControls.xaml(50,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 50, 56)?, rt::string_object("TabbedPageTabStripBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 50, 56)?;
     // Controls/SimpleControls.xaml(51,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22)?;
     // Controls/SimpleControls.xaml(52,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23)?;
     // Controls/SimpleControls.xaml(56,4) Content (resource)
@@ -1936,11 +1972,15 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CaptionButtonHeight", value: 30.0_f64, line: 6, position: 41 },
 ];
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBackground", color: 4293398819_u32, namespaces: ::core::option::Option::None, line: 8, position: 4 },
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBorderBrush", color: 4294013050_u32, namespaces: ::core::option::Option::None, line: 9, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
+    strings: "CaptionButtonCloseBackgroundCaptionButtonCloseBorderBrush",
+    namespaces: &[],
+    records: &[
+        0, 28, 4387, 65512, 0, 8, 4,
+        28, 29, 28794, 65521, 0, 9, 4,
+    ],
+};
 
 /// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: &[rt::ValueRow<[f64; 4]>] = &[
@@ -2000,45 +2040,73 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitButtonMinHeight", value: 24.0_f64, line: 17, position: 42 },
 ];
 
-/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "NavigationBarBackground", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 14, position: 4, value_line: 14, value_position: 52 },
-    rt::DynamicBrushRow { key: "NavigationBarForeground", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::None, line: 15, position: 4, value_line: 15, value_position: 52 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
+    strings: "NavigationBarBackgroundThemeControlMidColorNavigationBarForegroundThemeForegroundColor",
+    namespaces: &[],
+    records: &[
+        0, 23, 23, 20, 0, 14, 4, 14, 52,
+        43, 23, 66, 20, 0, 15, 4, 15, 52,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 17, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 18, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelected",
+    namespaces: &[],
+    records: &[
+        0, 43, 65535, 255, 0, 17, 4,
+        43, 41, 65535, 255, 0, 18, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 19, position: 4, value_line: 19, value_position: 83 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColor",
+    namespaces: &[],
+    records: &[
+        0, 54, 54, 20, 0, 19, 4, 19, 83,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 20, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver",
+    namespaces: &[],
+    records: &[
+        0, 52, 65535, 255, 0, 20, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPressed", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::None, line: 21, position: 4, value_line: 21, value_position: 79 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColor",
+    namespaces: &[],
+    records: &[
+        0, 50, 50, 29, 0, 21, 4, 21, 79,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 22, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 23, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabled",
+    namespaces: &[],
+    records: &[
+        0, 48, 65535, 255, 0, 22, 4,
+        48, 41, 65535, 255, 0, 23, 4,
+    ],
+};
 
-/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundUnselected", color_key: "ThemeForegroundMidColor", namespaces: ::core::option::Option::None, line: 26, position: 4, value_line: 26, value_position: 72 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundSelected", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::None, line: 27, position: 4, value_line: 27, value_position: 70 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundDisabled", color_key: "ThemeDisabledColor", namespaces: ::core::option::Option::None, line: 28, position: 4, value_line: 28, value_position: 70 },
-];
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColor",
+    namespaces: &[],
+    records: &[
+        0, 43, 43, 23, 0, 26, 4, 26, 72,
+        66, 41, 107, 16, 0, 27, 4, 27, 70,
+        123, 41, 164, 18, 0, 28, 4, 28, 70,
+    ],
+};
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18: &[rt::ValueRow<f64>] = &[
@@ -2060,15 +2128,23 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabbedPageTabItemHeaderSpacing", value: 4.0_f64, line: 45, position: 52 },
 ];
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 48, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabStripBackground",
+    namespaces: &[],
+    records: &[
+        0, 28, 65535, 255, 0, 48, 4,
+    ],
+};
 
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 51, position: 4 },
-];
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
+    strings: "TabbedPageTabStripBorderBrush",
+    namespaces: &[],
+    records: &[
+        0, 29, 65535, 255, 0, 51, 4,
+    ],
+};
 
 /// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23: &[rt::ValueRow<[f64; 4]>] = &[
