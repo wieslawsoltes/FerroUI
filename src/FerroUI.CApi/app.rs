@@ -133,7 +133,6 @@ pub extern "C" fn ferro_app_run(options: *const c_void, on_start: FerroStartFn, 
 
 #[cfg(feature = "desktop")]
 fn run(on_start: unsafe extern "C" fn(i64) -> i64, token: i64) -> Result<()> {
-    use ferroui_base::styling::IStyle;
     use ferroui_controls::{AppBuilder, Application};
     use ferroui_desktop::AppBuilderDesktopExtensions;
 

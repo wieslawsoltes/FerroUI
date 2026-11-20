@@ -172,6 +172,11 @@ typedef int64_t (*FerroPostFn)(int64_t token);
 // Work posted to the UI thread with [`ferro_post_data`]: called once with its user data.
 typedef void (*FerroPostDataFn)(void *user_data);
 
+// The function of a timer ([`ferro_timer_start`]): called on the UI thread with the token of the
+// timer and the time since its previous tick (or its start) in microseconds. It returns `0` to go
+// on ticking; any other value stops the timer.
+typedef int64_t (*FerroTimerFn)(int64_t token, int64_t elapsed);
+
 // The call succeeded.
 #define FERRO_OK 0
 
@@ -279,6 +284,34 @@ FerroStatus ferro_last_error_code(void);
 // values (Osprey's `Result`) clears it before a call whose result does not tell a failure apart
 // (a getter with a fallback) and reads the code after it. Any thread.
 void ferro_clear_error(void);
+
+// The horizontal position of the pointer of the routed event being handled (a pointer event, or
+// a tap: `Tapped`, `DoubleTapped`), relative to the visual `relative_to`, or to the top level
+// the event happened in for `0`. NaN on a failure (recorded: [`FERRO_INVALID_STATE`] outside a
+// handler, [`FERRO_NOT_SUPPORTED`] for an event without a position). UI thread only.
+double ferro_event_x(FerroHandle relative_to);
+
+// The vertical position of the pointer of the routed event being handled; see
+// [`ferro_event_x`]. UI thread only.
+double ferro_event_y(FerroHandle relative_to);
+
+// The button a pointer event being handled is about: `1` left, `2` right, `3` middle, `4` and
+// `5` the first and second extra buttons (the values of `MouseButton`), for a press or a release;
+// `0` for a pointer event that is not about a button (a move). A negative status for an event
+// that is not a pointer event, or outside a handler. UI thread only.
+int64_t ferro_event_button(void);
+
+// The key of the key event being handled (`KeyDown`, `KeyUp`), as the name of the member of
+// `Key` (`Return`, which is also named `Enter`; `Escape`; `A`), NUL-terminated and owned by the
+// library until the next call of `ferro_event_key` on the thread. `NULL` on a failure (recorded:
+// an event that is not a key event, or outside a handler). UI thread only.
+const char *ferro_event_key(void);
+
+// Moves the keyboard focus to `object` (an input element: a text box, a button), as a click on it
+// does. [`FERRO_INVALID_STATE`] when it cannot take the focus now (it is not focusable, not
+// enabled, or not in a shown window yet: posting the call with [`ferro_post`](crate::ferro_post)
+// focuses it once it is). UI thread only.
+FerroStatus ferro_focus(FerroHandle object);
 
 // Attaches `function` to the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of
 // `object`: it is called with `token` on every raise of the event, on the UI thread (see
@@ -767,6 +800,19 @@ FerroStatus ferro_post_data(FerroPostDataFn function, void *user_data);
 // jobs of the dispatcher) and returns once the queue is empty: for a host that drives the UI
 // thread itself instead of [`ferro_app_run`](crate::ferro_app_run). UI thread only.
 FerroStatus ferro_run_jobs(void);
+
+// Starts a timer on the UI thread: `function(token, elapsed)` is called every `interval`
+// milliseconds (at least 1), on the UI thread, with the time since the previous tick (or since
+// the start, for the first) in microseconds as `elapsed`. It returns `0` to go on ticking; any
+// other result stops the timer. Returns a positive timer ID for [`ferro_timer_stop`], or a
+// negative status. Timers tick while the main loop of [`ferro_app_run`](crate::ferro_app_run)
+// runs, or in [`ferro_run_jobs`](crate::ferro_run_jobs) once they are due. UI thread only.
+int64_t ferro_timer_start(int64_t interval, FerroTimerFn function, int64_t token);
+
+// Stops the timer `timer` ([`ferro_timer_start`]): its function is not called again.
+// [`FERRO_NOT_FOUND`] for an ID that is not a running timer (one that stopped itself is gone
+// after its last tick). It may be called from the function of the timer itself. UI thread only.
+FerroStatus ferro_timer_stop(int64_t timer);
 
 // Adds the control `child` to the children of `parent`: at the end of the `Children` of a panel
 // or of the `Items` of an items control; as the one `Content` of a content control (a window)

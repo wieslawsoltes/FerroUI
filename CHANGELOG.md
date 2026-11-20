@@ -122,7 +122,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **`ferroui-view` no longer turns the tables of types on** ([docs/binary-size.md](docs/binary-size.md), section 4.23): `style("Button.accent")` and `parse_selector` look a class up among the classes that are known and match one that is not known yet by its name (`Selectors::of_type_name`, `Selectors::is_type_name`, `SelectorParser::unknown_types_by_name`), so a style in text keeps no control in an application that does not make it: the framework comparison's FerroUI application goes from 30.5 MB to 23.0 MB. A type name no class has matches nothing, where the selector did not parse before. The feature `xaml` of `ferroui-view` turns `ferroui-base/type-tables` on, as loading markup at run time needs; an application that looks types up by name itself turns it on.
 
-- **The workspace at 0.5.1-preview.1**: 0.5.0 is published, and `main` carries the previews of 0.5.1 (owner decision, 2026-11-14). Unlike the previews of a minor version, they keep the public API of 0.5: the API gate compares every pull request with `v0.5.0` (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1), and a change that breaks it waits for 0.6.0.
+- **The workspace at 0.6.0-preview.1**: no 0.5.x release follows 0.5.0; the work of the 0.5.1 milestone is released in 0.6.0 (owner decision, 2026-11-19). `main` carries the previews of 0.6.0, which may change any part of the public API: the API gate compares nothing until 0.6.0 is released (`scripts/api-gate/semver_checks.py`, docs/release.md, section 3.1). Earlier: `main` carried the previews of 0.5.1, which kept the public API of 0.5 (2026-11-14).
 
 ### Fixed
 

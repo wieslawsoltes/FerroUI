@@ -320,21 +320,24 @@ impl NativeAnimations {
             let clock = Rc::new(NativeClock::default());
             let complete = Rc::new(Cell::new(false));
             let completed = complete.clone();
-            // The programs the framework rejects are `Err` (#567). Boundary (#567): what is
-            // caught is a panic of an animator's own checks (an application's animator, an
-            // animator given for a property of another type) or of the application's property
-            // changed handlers, which needs a build that unwinds (`dev`, `fast-release`,
-            // `release-unwind` or `dist-unwind` profile).
+            // The programs the framework and the animators reject are `Err`, and so are the
+            // errors the application's property changed handlers raise on the dispatcher
+            // (#567). Boundary (#567): what is caught is a panic of an animator or a handler,
+            // a bug, which only a build that unwinds (`dev`, `fast-release`, `release-unwind`
+            // or `dist-unwind` profile) survives.
+            let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
             let applied = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                animation.try_apply_for_preview(
-                    &target,
-                    Some(clock.clone()),
-                    Some(Rc::new(move || completed.set(true))),
-                )
+                dispatcher.capture_unhandled_exceptions(|| {
+                    animation.try_apply_for_preview(
+                        &target,
+                        Some(clock.clone()),
+                        Some(Rc::new(move || completed.set(true))),
+                    )
+                })
             }));
             let subscription = applied
                 .map_err(panic_message)
-                .and_then(|applied| applied.map_err(|error| error.to_string()))
+                .and_then(|captured| captured.and_then(|applied| applied.map_err(|error| error.to_string())))
                 .map_err(|message| format!("Native animation rejected the program: {message}"))?;
             runs.push(NativeRun {
                 clock,
