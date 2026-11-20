@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { HandlerDraft, HandlerLocation, HandlerPlan, HandlerRequest, HandlerTarget } from './eventHandlerProtocol';
 import { exactRange } from './textDocument';
+import { workspaceSourceUri } from './workspacePaths';
 import { xamlLanguage, type XamlServer } from './xamlServer';
 
 export interface HandlerEditSite {
@@ -83,13 +84,13 @@ export class EventHandlers {
         }
         this.checkXaml(site);
         const target = await this.server.handlerRequest<HandlerTarget>('eventHandlerTarget', { uri: document.uri.toString(), request });
-        const rustUri = vscode.Uri.parse(target.rustUri, true);
-        if (rustUri.scheme !== 'file' || vscode.workspace.getWorkspaceFolder(rustUri)?.uri.toString() !== folder.uri.toString()) {
+        const rustUri = await workspaceSourceUri(vscode.Uri.parse(target.rustUri, true));
+        if (!rustUri || vscode.workspace.getWorkspaceFolder(rustUri)?.uri.toString() !== folder.uri.toString()) {
             throw new Error('The Rust registration is outside this workspace folder.');
         }
         const rust = await vscode.workspace.openTextDocument(rustUri);
         this.checkXaml(site);
-        return { site, target, rust, rustVersion: rust.version };
+        return { site, target: { ...target, rustUri: rust.uri.toString() }, rust, rustVersion: rust.version };
     }
 
     private async definition(context: HandlerEditTarget): Promise<HandlerLocation | null> {

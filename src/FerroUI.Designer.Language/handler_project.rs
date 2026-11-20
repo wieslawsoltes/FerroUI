@@ -61,7 +61,7 @@ impl HandlerSource {
             let Ok(path) = file.path.canonicalize() else {
                 continue;
             };
-            if !path.starts_with(root) || !path.extension().is_some_and(|ext| ext == "rs") {
+            if !path.starts_with(root) || path.extension().is_none_or(|ext| ext != "rs") {
                 continue;
             }
             let candidate = Self {
