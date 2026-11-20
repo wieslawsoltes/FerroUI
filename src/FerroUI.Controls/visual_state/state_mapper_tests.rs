@@ -2,7 +2,7 @@
 //! `ChangeVisualState` of the button family and the list item, and the `UpdateVisualState` of the
 //! text box.
 
-use super::state_mappers::is_installed;
+use super::state_mappers::{has_mapper, is_installed};
 use crate::primitives::{TemplatedControl, ToggleButton};
 use crate::presenters::TextPresenter;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
@@ -207,4 +207,34 @@ fn a_text_box_shows_focus_and_its_delete_button() {
     assert_eq!(states(&groups)[0], "PointerOver");
     // The opacity of the control is not touched by any of it.
     assert_eq!(text_box.get_base_value(Visual::opacity_property()), None);
+}
+
+#[test]
+fn a_class_with_no_mapper_of_its_own_takes_the_one_of_its_family() {
+    let _scope = test_scope();
+    // A toggle button of the command bar states no mapper: the toggle button's applies.
+    let toggle = crate::CommandBarToggleButton::new();
+    let groups = templated(&toggle, &[("CommonStates", &["Normal", "Checked", "CheckedPointerOver"])]);
+    assert!(is_installed(&toggle));
+    toggle.set_is_checked(Some(true));
+    assert_eq!(states(&groups), ["Checked"]);
+    // A templated control of no family has none.
+    let other = crate::ContentControl::new();
+    templated(&other, &[COMMON]);
+    assert!(!is_installed(&other));
+}
+
+#[test]
+fn a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread() {
+    std::thread::spawn(|| {
+        let _scope = test_scope();
+        assert!(!has_mapper(ListBoxItem::TYPE));
+        let item = ListBoxItem::new();
+        assert!(has_mapper(ListBoxItem::TYPE));
+        // A class registers the mapper of its own family only.
+        assert!(!has_mapper(TextBox::TYPE));
+        drop(item);
+    })
+    .join()
+    .unwrap();
 }
