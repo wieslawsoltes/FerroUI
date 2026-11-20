@@ -518,3 +518,53 @@ pub unsafe extern "C" fn ferro_get_handle(object: FerroHandle, property: i64, re
         Ok(())
     })
 }
+
+// ---- getters that return the value ----------------------------------------------------------
+//
+// For languages that cannot pass a pointer to a local (Osprey, WebAssembly hosts): the value is
+// the result, and a fallback the caller chooses is the result of a failure, which is recorded as
+// for every failure (`ferro_last_error`, `ferro_last_error_code`).
+
+/// The result of a getter with a fallback: the value, or `fallback` when the read failed (the
+/// failure is recorded).
+fn value_or<T: Copy>(fallback: T, read: impl FnOnce(*mut T) -> FerroStatus) -> T {
+    let mut value = fallback;
+    if read(&mut value) == crate::FERRO_OK {
+        value
+    } else {
+        fallback
+    }
+}
+
+/// Reads a number from `property` of `object`, as [`ferro_get_f64`] does, and returns it; returns
+/// `fallback` when the read fails (the failure is recorded: [`ferro_last_error`]). For a
+/// language that cannot pass a pointer to a result. UI thread only.
+///
+/// [`ferro_last_error`]: crate::ferro_last_error
+#[no_mangle]
+pub extern "C" fn ferro_get_f64_or(object: FerroHandle, property: i64, fallback: f64) -> f64 {
+    // SAFETY: a pointer to a local.
+    value_or(fallback, |result| unsafe {
+        ferro_get_f64(object, property, result)
+    })
+}
+
+/// Reads an integer from `property` of `object`, as [`ferro_get_i64`] does, and returns it;
+/// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_get_i64_or(object: FerroHandle, property: i64, fallback: i64) -> i64 {
+    // SAFETY: a pointer to a local.
+    value_or(fallback, |result| unsafe {
+        ferro_get_i64(object, property, result)
+    })
+}
+
+/// Reads a boolean from `property` of `object`, as [`ferro_get_bool`] does, and returns it;
+/// returns `fallback` when the read fails (the failure is recorded). UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_get_bool_or(object: FerroHandle, property: i64, fallback: bool) -> bool {
+    // SAFETY: a pointer to a local.
+    value_or(fallback, |result| unsafe {
+        ferro_get_bool(object, property, result)
+    })
+}
