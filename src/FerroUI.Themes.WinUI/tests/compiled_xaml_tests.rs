@@ -26,6 +26,7 @@ use crate::WinUITheme;
 const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.rs");
 const METADATA_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta");
 
+#[cfg(not(feature = "rust-theme"))]
 fn generate() -> ClassFile {
     let _app = start_application();
     crate::register_types();
@@ -43,6 +44,8 @@ fn generate() -> ClassFile {
     .unwrap_or_else(|reasons| panic!("the documents of the theme are not eligible:\n{reasons}"))
 }
 
+// The comparisons with the compiled markup: not with the theme in Rust (#988).
+#[cfg(not(feature = "rust-theme"))]
 #[test]
 fn compiled_xaml_is_up_to_date() {
     let file = generate();
@@ -70,6 +73,8 @@ fn compiled_xaml_is_up_to_date() {
 /// The build script, which compiles against the type models, wrote the checked-in text:
 /// every document of the theme is compiled the same by both hosts, and none is refused (a
 /// refused document fails the build of the crate).
+// The comparisons with the compiled markup: not with the theme in Rust (#988).
+#[cfg(not(feature = "rust-theme"))]
 #[test]
 fn build_script_output_is_the_checked_in_reference() {
     let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
@@ -161,6 +166,8 @@ fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
     assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
+// The comparisons with the compiled markup: not with the theme in Rust (#988).
+#[cfg(not(feature = "rust-theme"))]
 #[test]
 #[ignore = "writes compiled_xaml.rs and compiled_xaml.xamlmeta; run it to regenerate the checked-in output"]
 fn regenerate_compiled_xaml() {

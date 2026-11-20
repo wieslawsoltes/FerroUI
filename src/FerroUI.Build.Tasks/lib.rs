@@ -213,6 +213,8 @@ pub mod shader_effects;
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
 pub use ferroui_build_scan::{call_forms, export, model, model_set, scanner};
+#[cfg(feature = "rust-theme")]
+pub mod rust_theme;
 pub mod theme_roots;
 pub mod type_system;
 pub mod xaml_compiler_diagnostics_filter;
@@ -278,6 +280,9 @@ pub struct XamlGroup {
     exported: bool,
     class_document: Option<String>,
     constructor: Option<ClassConstructor>,
+    /// The documents read from a theme written in Rust (#988): the directory of its modules,
+    /// the names of the documents and the document of each unit index.
+    rust_theme: Option<(PathBuf, Vec<String>, PathBuf)>,
 }
 
 /// The type system the documents of a build are compiled against ([`Build::type_system`]).
@@ -303,7 +308,15 @@ impl XamlGroup {
     /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
     /// below the XAML root of the build.
     pub fn new(module: &str) -> Self {
-        Self { module: module.to_string(), documents: None, create_source_info: None, exported: true, class_document: None, constructor: None }
+        Self {
+            module: module.to_string(),
+            documents: None,
+            create_source_info: None,
+            exported: true,
+            class_document: None,
+            constructor: None,
+            rust_theme: None,
+        }
     }
 
     /// Makes the group the group of a class of the crate: `name` (its path below the root
@@ -334,6 +347,17 @@ impl XamlGroup {
     /// files they come from with [`Build::input`].
     pub fn documents(mut self, documents: &[(&str, &str)]) -> Self {
         self.documents = Some(documents.iter().map(|(name, xaml)| (name.to_string(), xaml.to_string())).collect());
+        self
+    }
+
+    /// The documents of the group read from a theme written in Rust (#988, a prototype): the
+    /// modules below `directory` (relative to the crate directory) that
+    /// `scripts/themes/xaml_to_rust.py` wrote for the documents `names`, read by the front end of
+    /// [`rust_theme`]; `units` is the `.xamlmeta` (relative to the crate directory) whose unit
+    /// graph names the document of each unit index the modules include.
+    pub fn rust_theme(mut self, directory: &str, names: &[&str], units: &str) -> Self {
+        self.rust_theme =
+            Some((PathBuf::from(directory), names.iter().map(|name| name.to_string()).collect(), PathBuf::from(units)));
         self
     }
 
@@ -820,6 +844,11 @@ impl Build {
         let mut scanned_functions: Vec<InherentFunction> = Vec::new();
 
         // The type model of the crate, from its sources.
+        // The models the front end of a theme in Rust resolves its types and properties with
+        // (#988): taken before the scan takes them.
+        #[cfg(feature = "rust-theme")]
+        let front_end_models: Option<Vec<AssemblyModel>> =
+            self.groups.iter().any(|group| group.rust_theme.is_some()).then(|| models.clone());
         let scanned = self.export_metadata || on_models;
         let mut model: Option<AssemblyModel> = None;
         // The models the documents are compiled against: the ones of the dependencies, then
@@ -965,9 +994,61 @@ impl Build {
                 errors.push(format!("two groups have the module `{}`", group.module));
                 continue;
             }
-            let documents = match &group.documents {
-                Some(documents) => documents.clone(),
-                None => {
+            let documents = match (&group.documents, &group.rust_theme) {
+                #[cfg(not(feature = "rust-theme"))]
+                (_, Some(_)) => {
+                    errors.push(format!(
+                        "the group `{}` reads a theme in Rust: enable the feature `rust-theme` of ferroui-build",
+                        group.module
+                    ));
+                    continue;
+                }
+                #[cfg(feature = "rust-theme")]
+                (_, Some((directory, names, units))) => {
+                    let directory = self.manifest_dir.join(directory);
+                    rerun(&mut lines, &directory);
+                    let units_path = self.manifest_dir.join(units);
+                    rerun(&mut lines, &units_path);
+                    let units: std::collections::HashMap<u32, String> = match fs::read_to_string(&units_path)
+                        .map_err(|error| error.to_string())
+                        .and_then(|text| XamlMetadata::parse(&text))
+                    {
+                        Ok(metadata) => metadata
+                            .theme_units
+                            .iter()
+                            .flat_map(|graph| graph.units.iter())
+                            .filter_map(|unit| unit.documents.first().map(|document| (unit.index, document.clone())))
+                            .collect(),
+                        Err(error) => {
+                            errors.push(format!("{}: {error}", units_path.display()));
+                            continue;
+                        }
+                    };
+                    let units = &units;
+                    let mut all = front_end_models.clone().unwrap_or_default();
+                    all.extend(model.clone());
+                    match rust_theme::documents(&directory, names, all, units) {
+                        Ok(documents) => {
+                            if env::var_os("FERROUI_RUST_THEME_DUMP").is_some() {
+                                let dump = self.out_dir.join("rust_theme_xaml");
+                                for (name, xaml) in &documents {
+                                    let path = dump.join(name);
+                                    if let Some(parent) = path.parent() {
+                                        let _ = fs::create_dir_all(parent);
+                                    }
+                                    let _ = fs::write(path, xaml);
+                                }
+                            }
+                            documents
+                        }
+                        Err(error) => {
+                            errors.push(format!("the theme in Rust: {error}"));
+                            continue;
+                        }
+                    }
+                }
+                (Some(documents), None) => documents.clone(),
+                (None, None) => {
                     let root = self.manifest_dir.join(&self.xaml_root);
                     rerun(&mut lines, &root);
                     let mut files = Vec::new();

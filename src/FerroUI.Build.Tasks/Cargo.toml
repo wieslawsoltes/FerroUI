@@ -27,6 +27,9 @@ runtime-host = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml-loader/emitter"]
 # (`shader_effects`): off by default, so that a build script that compiles markup does not build the
 # shader translator; a crate that ships shader effects for WebGL2 enables it.
 shader-effects = ["dep:naga"]
+# The front end of themes written in Rust (`rust_theme`, `XamlGroup::rust_theme`, #988, a prototype):
+# off by default; a theme crate that builds from its Rust form through the compiler enables it.
+rust-theme = ["dep:syn", "dep:quote"]
 
 [dependencies]
 serde_json = "1"
@@ -53,6 +56,12 @@ naga = { workspace = true, features = ["wgsl-in", "glsl-out"], optional = true }
 # 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
 # crate under the names they had here.
 ferroui-build-scan = { workspace = true }
+# The front end of themes written in Rust (`rust_theme`, #988): the parser the compiler already
+# builds with (`ferroui-markup-xaml-loader/compiler`), with `visit`. Optional (the feature
+# `rust-theme`), so that a build that reads no theme in Rust compiles neither the front end nor
+# syn with more features than the compiler uses.
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"], optional = true }
+quote = { version = "1", default-features = false, optional = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

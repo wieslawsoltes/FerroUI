@@ -1755,8 +1755,10 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "naga",
+ "quote",
  "roxmltree 0.20.0",
  "serde_json",
+ "syn 2.0.119",
  "toml 1.1.6+spec-1.1.0",
  "xamlx",
 ]

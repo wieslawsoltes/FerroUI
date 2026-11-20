@@ -729,3 +729,116 @@ section 9).
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
 | Packed tables of the deferred rows (section 2.2, `DEFAULT_PACKED_THEME_ROWS`, on by default) | #855 | Kept by its measurement, on by default |
 | Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |
+| Themes written in Rust: the converter, the WinUI theme in Rust, the front end of the compiler for it (section 10) | #988 | Prototype, not for merging |
+
+## 10. Themes written in Rust (#988, a prototype)
+
+A prototype, not on `main`: the measurements of the PR of #988 decide which form the themes
+use. Nothing changes by default.
+
+A theme can be written as Rust instead of XAML. `scripts/themes/xaml_to_rust.py` converts the
+documents of a theme into one Rust module per document, over a small API of
+`ferroui-markup-xaml` (`ferroui_markup_xaml::rust_theme`). The prototype converts the WinUI
+theme into `src/FerroUI.Themes.WinUI/rust_theme/`.
+
+```bash
+python3 scripts/themes/xaml_to_rust.py --crate src/FerroUI.Themes.WinUI --target-dir "$CARGO_TARGET_DIR"
+python3 scripts/themes/xaml_to_rust.py --crate src/FerroUI.Themes.WinUI --target-dir "$CARGO_TARGET_DIR" --check
+```
+
+The converter reads the documents and the type models of the build (the `.xamlmeta` files that
+the build scripts of the crates write below the target directory, so the theme crate must have
+been built once). Its output is deterministic: the same documents and models give the same
+files, byte for byte, formatted with rustfmt. `--check` compares the files instead of writing
+them, for CI, and `--report` lists what is not converted (nothing, for the WinUI theme).
+
+### 10.1 What the Rust looks like
+
+Each document is a module whose structure follows the document. Comments are kept where they
+were, and the header of the document becomes the module documentation.
+
+```rust
+/// Adds the resources of the document to `resources`.
+pub(crate) fn merge(resources: &Resources) -> Result {
+    resources.control_theme("DefaultButtonStyle", default_button_style);
+    resources.control_theme(type_key::<Button>(), button_theme);
+    Ok(())
+}
+
+/// `DefaultButtonStyle`: a control theme of `Button`.
+fn default_button_style(theme: &StyleBuilder) -> Result {
+    theme.target::<Button>();
+    theme.set(ContentControl::horizontal_content_alignment_property(), HorizontalAlignment::Center);
+    theme.dynamic(TemplatedControl::background_property(), "ButtonBackground");
+    theme.static_resource(TemplatedControl::padding_property(), "ButtonPadding")?;
+    theme.template(default_button_style_template);
+    // PointerOver
+    theme.style(nesting().class(":pointerover").template().of::<ContentPresenter>().name("PART_ContentPresenter"), |style| {
+        style.dynamic(ContentPresenter::background_property(), "ButtonBackgroundPointerOver");
+        Ok(())
+    })?;
+    Ok(())
+}
+
+/// The template of `Button` of `default_button_style`.
+fn default_button_style_template(t: &Template<Button>) -> Result<Ref<Control>> {
+    Ok(t.make(ContentPresenter::new())
+        .name("PART_ContentPresenter")?
+        .template_bind(ContentPresenter::background_property(), TemplatedControl::background_property())
+        .set(ContentPresenter::recognizes_access_key_property(), true)
+        .control())
+}
+```
+
+| XAML | Rust |
+|---|---|
+| `<x:Double x:Key="K">8</x:Double>`, `Thickness`, `CornerRadius`, `Color`, `x:String` | `resources.add("K", 8.0)`, `resources.text(..)`: values added at once |
+| `<SolidColorBrush x:Key="K" Color="#.."/>`, with `{StaticResource}` or `{DynamicResource}` | `resources.color_brush(..)`, `static_color_brush(..)`, `dynamic_color_brush(..)`: built when first looked up |
+| `<StaticResource x:Key="K" ResourceKey="T"/>` | `resources.alias("K", "T")` |
+| Any other object | `resources.deferred("K", \|scope\| Ok(value(..)))` |
+| `<ControlTheme>` | `resources.control_theme(key, function)`, built when first looked up |
+| Theme dictionaries | `resources.theme(ThemeVariant::light(), function)` |
+| `MergeResourceInclude` of a document | `resources.include(unit)`: the unit of the document, which an application that trims the theme leaves out |
+| `<Setter>` | `set`, `dynamic`, `static_resource`, `template_bind`, `bind`, `set_null`, `set_value` of `StyleBuilder` |
+| A nested `<Style>` | `style(selector, \|style\| ..)`, the selector built with the selectors API by class identity; the closure captures nothing and is passed as a function |
+| A template | a function `fn ..(t: &Template<T>) -> Result<Ref<Control>>` of builder chains `t.make(X::new()).set(..)..` |
+| `{TemplateBinding}`, `{DynamicResource}`, `{StaticResource}`, `{Binding}` in a template | `template_bind`, `dynamic`, `static_resource`, `bind(.., path()..binding())` |
+
+The API does what the compiled markup of the same document does, in the same order and with
+the same lookups: values set in a template have the template priority, a `{StaticResource}`
+is looked up in the dictionaries and styles the place is declared in (the `Scope`), a dynamic
+resource of a setter is the same extension, and a styled element is initialised between
+`make` and `end` as compiled markup initialises it. The few things the converter cannot write
+with public functions use the typed functions of the markup metadata (`__markup_parse` of a
+type whose parser is not public).
+
+The steps a theme calls many times (`StyleBuilder::style`, `Resources::deferred`) take
+functions, not generic closures, and are not inlined: a step is compiled once, and its call
+site is a call with a selector or a key and a function. Generic steps would compile once per
+call site, and thin generic wrappers over non-generic steps would grow every call site
+instead (measured in #992).
+
+### 10.2 The three forms of a theme
+
+| Form | Feature of the theme crate | What is compiled |
+|---|---|---|
+| 1. XAML through the XAML compiler | none (the default) | The documents, by the build script, into `compiled_xaml.rs` (sections 2 and 3) |
+| 2. Rust, compiled directly | `rust-theme` | The modules of `rust_theme/` as code of the crate. The build script compiles no markup and exports the checked-in `compiled_xaml.xamlmeta`, whose unit graph the applications that trim the theme read. `rust_theme/units.rs` has the units with the same names and paths (`compiled_xaml::THEME_UNIT_<n>`) |
+| 3. Rust through the XAML compiler | `rust-theme-compiled` | The modules of `rust_theme/`, read back by the front end of the compiler (`ferroui_build::rust_theme`, `XamlGroup::rust_theme`), which gives the documents they describe to the compiler, so units, trimming by roots, packed rows, shared helpers and compiled bindings apply as in form 1. The front end is the feature `rust-theme` of ferroui-build, which this feature turns on; other builds compile neither it nor `syn` with `visit` |
+
+The front end of form 3 parses the Rust with `syn`, resolves the types and properties through
+the type models of the build, and writes the XAML document of each module. It reads the API of
+themes, not any Rust: a statement outside the forms of the API is an error that names the module
+and the line. `FERROUI_RUST_THEME_DUMP=1` writes the documents to `$OUT_DIR/rust_theme_xaml/`.
+Comments are not part of the documents it writes (they do not change the compiled code).
+
+Why the Rust and not an intermediate file written beside it: the Rust is the one source a person
+edits. An intermediate (the XAML itself, or a JSON form of the document model) would have to be
+regenerated from the Rust after every hand edit, which is this front end again, or it would go
+stale. Building the nodes of the document model directly instead of writing the XAML text would
+repeat the parser's handling of namespaces, directives, markup extensions and content
+properties; writing the text keeps one path into the compiler.
+
+### 10.3 Measurements
+
+See the PR of #988.
