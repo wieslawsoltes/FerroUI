@@ -115,12 +115,11 @@ def build(selection, out, options):
     if result.returncode != 0:
         print(result.stdout[-6000:])
         raise SystemExit("the build of the library failed")
-    found = re.findall(r"native-static-libs: (.*)", result.stdout)
+    # Without the colours of a terminal, whose escape sequences would end the last library.
+    found = re.findall(r"native-static-libs: (.*)", re.sub(r"\x1b\[[0-9;]*m", "", result.stdout))
     if not found:
         raise SystemExit("rustc printed no native-static-libs line")
-    # clang links libSystem by default, and libc and libm are part of it (an SDK need not have
-    # their stubs; size_report.py does the same).
-    native = [item for item in found[-1].split() if item not in ("-lSystem", "-lc", "-lm")]
+    native = found[-1].split()
     target = os.environ.get("CARGO_TARGET_DIR") or os.path.join(ROOT, "target")
     archive = os.path.join(out, "libferroui_capi.a")
     shutil.copy(os.path.join(target, options.profile, "libferroui_capi.a"), archive)
