@@ -117,16 +117,13 @@ pub fn populate_fluenttheme_xaml(
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 121, 6)?, rt::cast(::core::clone::Clone::clone(&value_2), 121, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_1)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
-    // FluentTheme.xaml(5,6) Key
-    let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 5, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 5, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 0, &context, &resource_dictionary_1)?;
     ::core::mem::drop(namespace_scope_1);
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_1), rt::cast(resource_dictionary_1.clone(), 121, 6)?), 121, 6)?;
     // FluentTheme.xaml(282,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    let value_8 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
     // FluentTheme.xaml(282,6) ResourceDictionary
     let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_2.clone()));
@@ -136,17 +133,14 @@ pub fn populate_fluenttheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 282, 6)?, count_2.wrapping_add(736_i32));
     }
     // FluentTheme.xaml(282,6) Key
-    let value_10 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 282, 6)?, rt::cast(::core::clone::Clone::clone(&value_10), 282, 6)?);
+    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 282, 6)?, rt::cast(::core::clone::Clone::clone(&value_9), 282, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 1, &context, &resource_dictionary_2)?;
     let namespace_scope_2 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
-    // FluentTheme.xaml(853,6) Key
-    let value_11 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 853, 6)?, rt::cast(::core::clone::Clone::clone(&value_11), 853, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_2)?;
     ::core::mem::drop(namespace_scope_2);
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_9), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_8), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
     rt::apply_theme_unit(active_theme_units(), 1, 2, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
     let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
@@ -156,8 +150,8 @@ pub fn populate_fluenttheme_xaml(
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 7, 6)?), 7, 6)?;
     // FluentTheme.xaml(26,4) Content
     let service_provider_1 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_17 = build_controls_fluentcontrols_xaml(rt::cast(service_provider_1.clone(), 26, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_17.clone(), 26, 4)?), 26, 4)?;
+    let value_15 = build_controls_fluentcontrols_xaml(rt::cast(service_provider_1.clone(), 26, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_15.clone(), 26, 4)?), 26, 4)?;
     context.pop_parent();
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(())
@@ -293,8 +287,8 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(111,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_39)?;
     // FluentTheme.xaml(115,44) Content (resource)
-    let value_4 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285013416_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 115, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_4))), 115, 44)?;
+    let value_3 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285013416_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 115, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_3))), 115, 44)?;
     // FluentTheme.xaml(116,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_40)?;
     // FluentTheme.xaml(117,8) Content (resource)
@@ -316,8 +310,8 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(135,55) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_47)?;
     // FluentTheme.xaml(138,57) Content (resource)
-    let value_5 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 138, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 138, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_5))), 138, 57)?;
+    let value_4 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 138, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 138, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_4))), 138, 57)?;
     // FluentTheme.xaml(139,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_48)?;
     // FluentTheme.xaml(195,56) Content (resource)
@@ -371,8 +365,8 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(417,42) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_67)?;
     // FluentTheme.xaml(420,55) Content (resource)
-    let value_6 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 420, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 420, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_6))), 420, 55)?;
+    let value_5 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 420, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 420, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_5))), 420, 55)?;
     // FluentTheme.xaml(424,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_68)?;
     // FluentTheme.xaml(437,8) Content (resource)
@@ -394,8 +388,8 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(458,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_76)?;
     // FluentTheme.xaml(463,53) Content (resource)
-    let value_7 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 6 8 0 #4F000000")), 463, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 463, 53)?, rt::string_object("NotificationCardBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_7))), 463, 53)?;
+    let value_6 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 6 8 0 #4F000000")), 463, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 463, 53)?, rt::string_object("NotificationCardBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_6))), 463, 53)?;
     // FluentTheme.xaml(466,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 466, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 466, 57)?;
     // FluentTheme.xaml(467,8) Content (resource)
@@ -441,8 +435,8 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(644,46) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_92)?;
     // FluentTheme.xaml(646,56) Content (resource)
-    let value_8 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 646, 56)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 646, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_8))), 646, 56)?;
+    let value_7 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 646, 56)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 646, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_7))), 646, 56)?;
     // FluentTheme.xaml(647,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_93)?;
     // FluentTheme.xaml(675,60) Content (resource)
@@ -630,8 +624,8 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(959,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_148)?;
     // FluentTheme.xaml(963,44) Content (resource)
-    let value_12 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291136249_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 963, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_12))), 963, 44)?;
+    let value_10 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291136249_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 963, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_10))), 963, 44)?;
     // FluentTheme.xaml(964,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_149)?;
     // FluentTheme.xaml(965,8) Content (resource)
@@ -653,8 +647,8 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(983,55) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_156)?;
     // FluentTheme.xaml(986,57) Content (resource)
-    let value_13 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 986, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 986, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_13))), 986, 57)?;
+    let value_11 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 986, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 986, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_11))), 986, 57)?;
     // FluentTheme.xaml(987,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_157)?;
     // FluentTheme.xaml(1044,56) Content (resource)
@@ -708,8 +702,8 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1268,42) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_176)?;
     // FluentTheme.xaml(1271,55) Content (resource)
-    let value_14 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 1271, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1271, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_14))), 1271, 55)?;
+    let value_12 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 1271, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1271, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_12))), 1271, 55)?;
     // FluentTheme.xaml(1275,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_177)?;
     // FluentTheme.xaml(1288,8) Content (resource)
@@ -739,8 +733,8 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1313,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "NotificationCardErrorBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1100, 1313, 8)?;
     // FluentTheme.xaml(1314,53) Content (resource)
-    let value_15 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 6 8 0 #4F000000")), 1314, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1314, 53)?, rt::string_object("NotificationCardBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_15))), 1314, 53)?;
+    let value_13 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 6 8 0 #4F000000")), 1314, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1314, 53)?, rt::string_object("NotificationCardBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_13))), 1314, 53)?;
     // FluentTheme.xaml(1317,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1317, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 1317, 57)?;
     // FluentTheme.xaml(1318,8) Content (resource)
@@ -790,8 +784,8 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1496,46) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_203)?;
     // FluentTheme.xaml(1498,56) Content (resource)
-    let value_16 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 1498, 56)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1498, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_16))), 1498, 56)?;
+    let value_14 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 1498, 56)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1498, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_14))), 1498, 56)?;
     // FluentTheme.xaml(1499,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_204)?;
     // FluentTheme.xaml(1528,60) Content (resource)

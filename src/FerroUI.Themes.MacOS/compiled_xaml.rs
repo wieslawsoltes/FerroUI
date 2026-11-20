@@ -136,295 +136,85 @@ pub fn populate_macostheme_xaml(
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_10 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_10), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_37 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_37), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 3, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_39 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_39), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 4, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_123 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_123), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 5, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_134 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_134), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 7, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_136 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_136), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_137 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_137), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 9, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_141 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_141), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 10, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_142 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_142), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 11, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_144 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_144), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 12, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_145 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_145), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 13, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_146 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_146), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 14, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_147 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_147), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 15, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_148 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_148), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 16, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_149 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_149), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 17, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_150 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_150), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 18, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_151 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_151), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 19, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_152 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_152), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 20, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_153 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_153), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 21, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_154 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_154), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 24, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_155 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_155), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 25, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_156 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_156), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 26, 0, &context, &resource_dictionary_1)?;
     let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_2);
-    // MacOSTheme.xaml(16,6) Key
-    let value_157 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_157), 16, 6)?);
     rt::apply_theme_unit(active_theme_units(), 27, 0, &context, &resource_dictionary_1)?;
     ::core::mem::drop(namespace_scope_3);
-    // MacOSTheme.xaml(14,6) Key
-    let value_158 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_158), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 28, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_159 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_159), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 29, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_160 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_160), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 30, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_164 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_164), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 31, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_165 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_165), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 32, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_166 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_166), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 33, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_168 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_168), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 34, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_169 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_169), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 35, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_170 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_170), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 36, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_171 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_171), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 37, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_172 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_172), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_173 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_173), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_175 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_175), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_177 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_177), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 41, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_178 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_178), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_179 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_179), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_180 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_180), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_181 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_181), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_182 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_182), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_183 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_183), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_184 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_184), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_185 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_185), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_186 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_186), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_187 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_187), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_188 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_188), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 52, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_189 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_189), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_190 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_190), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_191 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_191), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_192 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_192), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_193 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_193), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_194 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_194), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_195 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_195), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_196 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_196), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(15,6) Key
-    let value_197 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_197), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(15,6) Key
-    let value_198 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_198), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(15,6) Key
-    let value_200 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_200), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(42,6) Key
-    let value_201 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 42, 6)?, rt::cast(::core::clone::Clone::clone(&value_201), 42, 6)?);
     rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_1)?;
     let namespace_scope_4 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_3);
-    // MacOSTheme.xaml(15,6) Key
-    let value_205 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_205), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_1)?;
     ::core::mem::drop(namespace_scope_4);
-    // MacOSTheme.xaml(14,6) Key
-    let value_206 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_206), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_207 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_207), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 68, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_208 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_208), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_209 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_209), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_210 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_210), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(14,6) Key
-    let value_211 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_211), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 72, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(16,6) Key
-    let value_212 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_212), 16, 6)?);
     rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(16,6) Key
-    let value_213 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_213), 16, 6)?);
     rt::apply_theme_unit(active_theme_units(), 75, 1, &context, &resource_dictionary_1)?;
-    // MacOSTheme.xaml(16,6) Key
-    let value_216 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_216), 16, 6)?);
     rt::apply_theme_unit(active_theme_units(), 76, 0, &context, &resource_dictionary_1)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 17, 6)?), 17, 6)?;
     // MacOSTheme.xaml(27,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_217 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    let value_147 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     // MacOSTheme.xaml(27,6) ResourceDictionary
     let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_2.clone()));
@@ -434,298 +224,88 @@ pub fn populate_macostheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 27, 6)?, count_2.wrapping_add(2316_i32));
     }
     // MacOSTheme.xaml(27,6) Key
-    let value_218 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_218), 27, 6)?);
+    let value_148 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_148), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(311,6) Key
-    let value_227 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 311, 6)?, rt::cast(::core::clone::Clone::clone(&value_227), 311, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(27,6) Key
-    let value_254 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_254), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 3, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(218,6) Key
-    let value_256 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 218, 6)?, rt::cast(::core::clone::Clone::clone(&value_256), 218, 6)?);
     rt::apply_theme_unit(active_theme_units(), 4, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(40,6) Key
-    let value_340 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_340), 40, 6)?);
     rt::apply_theme_unit(active_theme_units(), 5, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(77,6) Key
-    let value_351 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 77, 6)?, rt::cast(::core::clone::Clone::clone(&value_351), 77, 6)?);
     rt::apply_theme_unit(active_theme_units(), 7, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(96,6) Key
-    let value_353 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 96, 6)?, rt::cast(::core::clone::Clone::clone(&value_353), 96, 6)?);
     rt::apply_theme_unit(active_theme_units(), 8, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(65,6) Key
-    let value_354 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 65, 6)?, rt::cast(::core::clone::Clone::clone(&value_354), 65, 6)?);
     rt::apply_theme_unit(active_theme_units(), 9, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(23,6) Key
-    let value_358 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_358), 23, 6)?);
     rt::apply_theme_unit(active_theme_units(), 10, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(59,6) Key
-    let value_359 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 59, 6)?, rt::cast(::core::clone::Clone::clone(&value_359), 59, 6)?);
     rt::apply_theme_unit(active_theme_units(), 11, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(19,6) Key
-    let value_361 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_361), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 12, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(29,6) Key
-    let value_362 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 29, 6)?, rt::cast(::core::clone::Clone::clone(&value_362), 29, 6)?);
     rt::apply_theme_unit(active_theme_units(), 13, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(72,6) Key
-    let value_363 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_363), 72, 6)?);
     rt::apply_theme_unit(active_theme_units(), 14, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(50,6) Key
-    let value_364 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_364), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 15, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(17,6) Key
-    let value_365 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_365), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 16, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(79,6) Key
-    let value_366 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 79, 6)?, rt::cast(::core::clone::Clone::clone(&value_366), 79, 6)?);
     rt::apply_theme_unit(active_theme_units(), 17, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(42,6) Key
-    let value_367 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 42, 6)?, rt::cast(::core::clone::Clone::clone(&value_367), 42, 6)?);
     rt::apply_theme_unit(active_theme_units(), 18, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(74,6) Key
-    let value_368 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 74, 6)?, rt::cast(::core::clone::Clone::clone(&value_368), 74, 6)?);
     rt::apply_theme_unit(active_theme_units(), 19, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(36,6) Key
-    let value_369 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_369), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 20, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(87,6) Key
-    let value_370 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 87, 6)?, rt::cast(::core::clone::Clone::clone(&value_370), 87, 6)?);
     rt::apply_theme_unit(active_theme_units(), 21, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(19,6) Key
-    let value_371 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_371), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 24, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(63,6) Key
-    let value_372 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 63, 6)?, rt::cast(::core::clone::Clone::clone(&value_372), 63, 6)?);
     rt::apply_theme_unit(active_theme_units(), 25, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(72,6) Key
-    let value_373 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_373), 72, 6)?);
     rt::apply_theme_unit(active_theme_units(), 26, 1, &context, &resource_dictionary_2)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_2);
-    // MacOSTheme.xaml(20,6) Key
-    let value_374 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_374), 20, 6)?);
     rt::apply_theme_unit(active_theme_units(), 27, 1, &context, &resource_dictionary_2)?;
     ::core::mem::drop(namespace_scope_5);
-    // MacOSTheme.xaml(38,6) Key
-    let value_375 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_375), 38, 6)?);
     rt::apply_theme_unit(active_theme_units(), 28, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(40,6) Key
-    let value_376 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_376), 40, 6)?);
     rt::apply_theme_unit(active_theme_units(), 29, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(92,6) Key
-    let value_377 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_377), 92, 6)?);
     rt::apply_theme_unit(active_theme_units(), 30, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(102,6) Key
-    let value_381 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 102, 6)?, rt::cast(::core::clone::Clone::clone(&value_381), 102, 6)?);
     rt::apply_theme_unit(active_theme_units(), 31, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(31,6) Key
-    let value_382 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 31, 6)?, rt::cast(::core::clone::Clone::clone(&value_382), 31, 6)?);
     rt::apply_theme_unit(active_theme_units(), 32, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(50,6) Key
-    let value_383 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_383), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 33, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(37,6) Key
-    let value_385 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 37, 6)?, rt::cast(::core::clone::Clone::clone(&value_385), 37, 6)?);
     rt::apply_theme_unit(active_theme_units(), 34, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(36,6) Key
-    let value_386 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_386), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 35, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(17,6) Key
-    let value_387 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_387), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 36, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(70,6) Key
-    let value_388 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 70, 6)?, rt::cast(::core::clone::Clone::clone(&value_388), 70, 6)?);
     rt::apply_theme_unit(active_theme_units(), 37, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(17,6) Key
-    let value_389 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_389), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 38, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(65,6) Key
-    let value_390 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 65, 6)?, rt::cast(::core::clone::Clone::clone(&value_390), 65, 6)?);
     rt::apply_theme_unit(active_theme_units(), 39, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(50,6) Key
-    let value_392 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_392), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 40, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(26,6) Key
-    let value_394 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 26, 6)?, rt::cast(::core::clone::Clone::clone(&value_394), 26, 6)?);
     rt::apply_theme_unit(active_theme_units(), 41, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(80,6) Key
-    let value_395 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 80, 6)?, rt::cast(::core::clone::Clone::clone(&value_395), 80, 6)?);
     rt::apply_theme_unit(active_theme_units(), 42, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(17,6) Key
-    let value_396 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_396), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 43, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(18,6) Key
-    let value_397 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_397), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 44, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(18,6) Key
-    let value_398 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_398), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 45, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(27,6) Key
-    let value_399 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_399), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 46, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(55,6) Key
-    let value_400 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 55, 6)?, rt::cast(::core::clone::Clone::clone(&value_400), 55, 6)?);
     rt::apply_theme_unit(active_theme_units(), 47, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(46,6) Key
-    let value_401 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_401), 46, 6)?);
     rt::apply_theme_unit(active_theme_units(), 48, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(19,6) Key
-    let value_402 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_402), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 49, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(92,6) Key
-    let value_403 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_403), 92, 6)?);
     rt::apply_theme_unit(active_theme_units(), 50, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(20,6) Key
-    let value_404 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_404), 20, 6)?);
     rt::apply_theme_unit(active_theme_units(), 51, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(119,6) Key
-    let value_405 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 119, 6)?, rt::cast(::core::clone::Clone::clone(&value_405), 119, 6)?);
     rt::apply_theme_unit(active_theme_units(), 52, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(25,6) Key
-    let value_406 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 25, 6)?, rt::cast(::core::clone::Clone::clone(&value_406), 25, 6)?);
     rt::apply_theme_unit(active_theme_units(), 53, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(22,6) Key
-    let value_407 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_407), 22, 6)?);
     rt::apply_theme_unit(active_theme_units(), 54, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(22,6) Key
-    let value_408 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_408), 22, 6)?);
     rt::apply_theme_unit(active_theme_units(), 55, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(38,6) Key
-    let value_409 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_409), 38, 6)?);
     rt::apply_theme_unit(active_theme_units(), 56, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(33,6) Key
-    let value_410 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 33, 6)?, rt::cast(::core::clone::Clone::clone(&value_410), 33, 6)?);
     rt::apply_theme_unit(active_theme_units(), 57, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(43,6) Key
-    let value_411 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_411), 43, 6)?);
     rt::apply_theme_unit(active_theme_units(), 58, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(43,6) Key
-    let value_412 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_412), 43, 6)?);
     rt::apply_theme_unit(active_theme_units(), 59, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(36,6) Key
-    let value_413 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_413), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 60, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(46,6) Key
-    let value_414 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_414), 46, 6)?);
     rt::apply_theme_unit(active_theme_units(), 61, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(30,6) Key
-    let value_415 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 30, 6)?, rt::cast(::core::clone::Clone::clone(&value_415), 30, 6)?);
     rt::apply_theme_unit(active_theme_units(), 62, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(18,6) Key
-    let value_417 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_417), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 63, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(47,6) Key
-    let value_418 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 47, 6)?, rt::cast(::core::clone::Clone::clone(&value_418), 47, 6)?);
     rt::apply_theme_unit(active_theme_units(), 64, 1, &context, &resource_dictionary_2)?;
     let namespace_scope_6 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_3);
-    // MacOSTheme.xaml(25,6) Key
-    let value_422 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 25, 6)?, rt::cast(::core::clone::Clone::clone(&value_422), 25, 6)?);
     rt::apply_theme_unit(active_theme_units(), 66, 1, &context, &resource_dictionary_2)?;
     ::core::mem::drop(namespace_scope_6);
-    // MacOSTheme.xaml(28,6) Key
-    let value_423 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 28, 6)?, rt::cast(::core::clone::Clone::clone(&value_423), 28, 6)?);
     rt::apply_theme_unit(active_theme_units(), 67, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(18,6) Key
-    let value_424 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_424), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 68, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(18,6) Key
-    let value_425 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_425), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 69, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(24,6) Key
-    let value_426 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 24, 6)?, rt::cast(::core::clone::Clone::clone(&value_426), 24, 6)?);
     rt::apply_theme_unit(active_theme_units(), 70, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(27,6) Key
-    let value_427 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_427), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 71, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(23,6) Key
-    let value_428 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_428), 23, 6)?);
     rt::apply_theme_unit(active_theme_units(), 72, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(59,6) Key
-    let value_429 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 59, 6)?, rt::cast(::core::clone::Clone::clone(&value_429), 59, 6)?);
     rt::apply_theme_unit(active_theme_units(), 74, 1, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(83,6) Key
-    let value_430 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 83, 6)?, rt::cast(::core::clone::Clone::clone(&value_430), 83, 6)?);
     rt::apply_theme_unit(active_theme_units(), 75, 2, &context, &resource_dictionary_2)?;
-    // MacOSTheme.xaml(25,6) Key
-    let value_433 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 25, 6)?, rt::cast(::core::clone::Clone::clone(&value_433), 25, 6)?);
     rt::apply_theme_unit(active_theme_units(), 76, 1, &context, &resource_dictionary_2)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_217), rt::cast(resource_dictionary_2.clone(), 27, 6)?), 27, 6)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_147), rt::cast(resource_dictionary_2.clone(), 27, 6)?), 27, 6)?;
     // MacOSTheme.xaml(37,6) ThemeDictionaries
     let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_434 = crate::MacOSTheme::__markup_field_HighContrast();
+    let value_294 = crate::MacOSTheme::__markup_field_HighContrast();
     // MacOSTheme.xaml(37,6) ResourceDictionary
     let resource_dictionary_3 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_3.clone()));
@@ -735,295 +315,85 @@ pub fn populate_macostheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 37, 6)?, count_3.wrapping_add(2316_i32));
     }
     // MacOSTheme.xaml(37,25) Key
-    let value_435 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 37, 25)?, rt::cast(::core::clone::Clone::clone(&value_435), 37, 25)?);
+    let value_295 = crate::MacOSTheme::__markup_field_HighContrast();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 37, 25)?, rt::cast(::core::clone::Clone::clone(&value_295), 37, 25)?);
     rt::apply_theme_unit(active_theme_units(), 1, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(607,25) Key
-    let value_444 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 607, 25)?, rt::cast(::core::clone::Clone::clone(&value_444), 607, 25)?);
     rt::apply_theme_unit(active_theme_units(), 2, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(40,25) Key
-    let value_471 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_471), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 3, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(425,25) Key
-    let value_473 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 425, 25)?, rt::cast(::core::clone::Clone::clone(&value_473), 425, 25)?);
     rt::apply_theme_unit(active_theme_units(), 4, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(66,25) Key
-    let value_557 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_557), 66, 25)?);
     rt::apply_theme_unit(active_theme_units(), 5, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(140,25) Key
-    let value_568 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 140, 25)?, rt::cast(::core::clone::Clone::clone(&value_568), 140, 25)?);
     rt::apply_theme_unit(active_theme_units(), 7, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(178,25) Key
-    let value_570 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 178, 25)?, rt::cast(::core::clone::Clone::clone(&value_570), 178, 25)?);
     rt::apply_theme_unit(active_theme_units(), 8, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(116,25) Key
-    let value_571 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 116, 25)?, rt::cast(::core::clone::Clone::clone(&value_571), 116, 25)?);
     rt::apply_theme_unit(active_theme_units(), 9, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(32,25) Key
-    let value_575 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 32, 25)?, rt::cast(::core::clone::Clone::clone(&value_575), 32, 25)?);
     rt::apply_theme_unit(active_theme_units(), 10, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(104,25) Key
-    let value_576 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 104, 25)?, rt::cast(::core::clone::Clone::clone(&value_576), 104, 25)?);
     rt::apply_theme_unit(active_theme_units(), 11, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(24,25) Key
-    let value_578 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_578), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 12, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(44,25) Key
-    let value_579 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 44, 25)?, rt::cast(::core::clone::Clone::clone(&value_579), 44, 25)?);
     rt::apply_theme_unit(active_theme_units(), 13, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(130,25) Key
-    let value_580 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_580), 130, 25)?);
     rt::apply_theme_unit(active_theme_units(), 14, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(86,25) Key
-    let value_581 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_581), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 15, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(20,25) Key
-    let value_582 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_582), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 16, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(144,25) Key
-    let value_583 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 144, 25)?, rt::cast(::core::clone::Clone::clone(&value_583), 144, 25)?);
     rt::apply_theme_unit(active_theme_units(), 17, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(70,25) Key
-    let value_584 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 70, 25)?, rt::cast(::core::clone::Clone::clone(&value_584), 70, 25)?);
     rt::apply_theme_unit(active_theme_units(), 18, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(134,25) Key
-    let value_585 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 134, 25)?, rt::cast(::core::clone::Clone::clone(&value_585), 134, 25)?);
     rt::apply_theme_unit(active_theme_units(), 19, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(58,25) Key
-    let value_586 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_586), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 20, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(160,25) Key
-    let value_587 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 160, 25)?, rt::cast(::core::clone::Clone::clone(&value_587), 160, 25)?);
     rt::apply_theme_unit(active_theme_units(), 21, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(24,25) Key
-    let value_588 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_588), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 24, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(112,25) Key
-    let value_589 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 112, 25)?, rt::cast(::core::clone::Clone::clone(&value_589), 112, 25)?);
     rt::apply_theme_unit(active_theme_units(), 25, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(130,25) Key
-    let value_590 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_590), 130, 25)?);
     rt::apply_theme_unit(active_theme_units(), 26, 2, &context, &resource_dictionary_3)?;
     let namespace_scope_7 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_2);
-    // MacOSTheme.xaml(24,25) Key
-    let value_591 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_591), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 27, 2, &context, &resource_dictionary_3)?;
     ::core::mem::drop(namespace_scope_7);
-    // MacOSTheme.xaml(62,25) Key
-    let value_592 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_592), 62, 25)?);
     rt::apply_theme_unit(active_theme_units(), 28, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(66,25) Key
-    let value_593 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_593), 66, 25)?);
     rt::apply_theme_unit(active_theme_units(), 29, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(170,25) Key
-    let value_594 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_594), 170, 25)?);
     rt::apply_theme_unit(active_theme_units(), 30, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(190,25) Key
-    let value_598 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 190, 25)?, rt::cast(::core::clone::Clone::clone(&value_598), 190, 25)?);
     rt::apply_theme_unit(active_theme_units(), 31, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(48,25) Key
-    let value_599 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 48, 25)?, rt::cast(::core::clone::Clone::clone(&value_599), 48, 25)?);
     rt::apply_theme_unit(active_theme_units(), 32, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(86,25) Key
-    let value_600 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_600), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 33, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(60,25) Key
-    let value_602 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 60, 25)?, rt::cast(::core::clone::Clone::clone(&value_602), 60, 25)?);
     rt::apply_theme_unit(active_theme_units(), 34, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(58,25) Key
-    let value_603 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_603), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 35, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(20,25) Key
-    let value_604 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_604), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 36, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(126,25) Key
-    let value_605 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 126, 25)?, rt::cast(::core::clone::Clone::clone(&value_605), 126, 25)?);
     rt::apply_theme_unit(active_theme_units(), 37, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(20,25) Key
-    let value_606 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_606), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 38, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(117,25) Key
-    let value_607 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 117, 25)?, rt::cast(::core::clone::Clone::clone(&value_607), 117, 25)?);
     rt::apply_theme_unit(active_theme_units(), 39, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(86,25) Key
-    let value_609 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_609), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 40, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(38,25) Key
-    let value_611 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 38, 25)?, rt::cast(::core::clone::Clone::clone(&value_611), 38, 25)?);
     rt::apply_theme_unit(active_theme_units(), 41, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(146,25) Key
-    let value_612 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 146, 25)?, rt::cast(::core::clone::Clone::clone(&value_612), 146, 25)?);
     rt::apply_theme_unit(active_theme_units(), 42, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(20,25) Key
-    let value_613 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_613), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 43, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(22,25) Key
-    let value_614 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_614), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 44, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(22,25) Key
-    let value_615 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_615), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 45, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(40,25) Key
-    let value_616 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_616), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 46, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(96,25) Key
-    let value_617 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 96, 25)?, rt::cast(::core::clone::Clone::clone(&value_617), 96, 25)?);
     rt::apply_theme_unit(active_theme_units(), 47, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(78,25) Key
-    let value_618 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 78, 25)?, rt::cast(::core::clone::Clone::clone(&value_618), 78, 25)?);
     rt::apply_theme_unit(active_theme_units(), 48, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(24,25) Key
-    let value_619 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_619), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 49, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(170,25) Key
-    let value_620 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_620), 170, 25)?);
     rt::apply_theme_unit(active_theme_units(), 50, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(26,25) Key
-    let value_621 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 26, 25)?, rt::cast(::core::clone::Clone::clone(&value_621), 26, 25)?);
     rt::apply_theme_unit(active_theme_units(), 51, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(224,25) Key
-    let value_622 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 224, 25)?, rt::cast(::core::clone::Clone::clone(&value_622), 224, 25)?);
     rt::apply_theme_unit(active_theme_units(), 52, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(36,25) Key
-    let value_623 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 36, 25)?, rt::cast(::core::clone::Clone::clone(&value_623), 36, 25)?);
     rt::apply_theme_unit(active_theme_units(), 53, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(30,25) Key
-    let value_624 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_624), 30, 25)?);
     rt::apply_theme_unit(active_theme_units(), 54, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(30,25) Key
-    let value_625 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_625), 30, 25)?);
     rt::apply_theme_unit(active_theme_units(), 55, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(62,25) Key
-    let value_626 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_626), 62, 25)?);
     rt::apply_theme_unit(active_theme_units(), 56, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(52,25) Key
-    let value_627 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 52, 25)?, rt::cast(::core::clone::Clone::clone(&value_627), 52, 25)?);
     rt::apply_theme_unit(active_theme_units(), 57, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(72,25) Key
-    let value_628 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_628), 72, 25)?);
     rt::apply_theme_unit(active_theme_units(), 58, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(72,25) Key
-    let value_629 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_629), 72, 25)?);
     rt::apply_theme_unit(active_theme_units(), 59, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(58,25) Key
-    let value_630 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_630), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 60, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(77,25) Key
-    let value_631 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 77, 25)?, rt::cast(::core::clone::Clone::clone(&value_631), 77, 25)?);
     rt::apply_theme_unit(active_theme_units(), 61, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(45,25) Key
-    let value_632 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 45, 25)?, rt::cast(::core::clone::Clone::clone(&value_632), 45, 25)?);
     rt::apply_theme_unit(active_theme_units(), 62, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(21,25) Key
-    let value_634 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 21, 25)?, rt::cast(::core::clone::Clone::clone(&value_634), 21, 25)?);
     rt::apply_theme_unit(active_theme_units(), 63, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(52,25) Key
-    let value_635 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 52, 25)?, rt::cast(::core::clone::Clone::clone(&value_635), 52, 25)?);
     rt::apply_theme_unit(active_theme_units(), 64, 2, &context, &resource_dictionary_3)?;
     let namespace_scope_8 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_3);
-    // MacOSTheme.xaml(35,25) Key
-    let value_639 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 35, 25)?, rt::cast(::core::clone::Clone::clone(&value_639), 35, 25)?);
     rt::apply_theme_unit(active_theme_units(), 66, 2, &context, &resource_dictionary_3)?;
     ::core::mem::drop(namespace_scope_8);
-    // MacOSTheme.xaml(42,25) Key
-    let value_640 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 42, 25)?, rt::cast(::core::clone::Clone::clone(&value_640), 42, 25)?);
     rt::apply_theme_unit(active_theme_units(), 67, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(22,25) Key
-    let value_641 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_641), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 68, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(22,25) Key
-    let value_642 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_642), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 69, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(34,25) Key
-    let value_643 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 34, 25)?, rt::cast(::core::clone::Clone::clone(&value_643), 34, 25)?);
     rt::apply_theme_unit(active_theme_units(), 70, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(40,25) Key
-    let value_644 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_644), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 71, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(32,25) Key
-    let value_645 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 32, 25)?, rt::cast(::core::clone::Clone::clone(&value_645), 32, 25)?);
     rt::apply_theme_unit(active_theme_units(), 72, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(102,25) Key
-    let value_646 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 102, 25)?, rt::cast(::core::clone::Clone::clone(&value_646), 102, 25)?);
     rt::apply_theme_unit(active_theme_units(), 74, 2, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(150,25) Key
-    let value_647 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 150, 25)?, rt::cast(::core::clone::Clone::clone(&value_647), 150, 25)?);
     rt::apply_theme_unit(active_theme_units(), 75, 3, &context, &resource_dictionary_3)?;
-    // MacOSTheme.xaml(34,25) Key
-    let value_650 = crate::MacOSTheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 34, 25)?, rt::cast(::core::clone::Clone::clone(&value_650), 34, 25)?);
     rt::apply_theme_unit(active_theme_units(), 76, 2, &context, &resource_dictionary_3)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_434), rt::cast(resource_dictionary_3.clone(), 37, 6)?), 37, 6)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_294), rt::cast(resource_dictionary_3.clone(), 37, 6)?), 37, 6)?;
     rt::apply_theme_unit(active_theme_units(), 2, 3, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 4, 3, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
@@ -1093,8 +463,8 @@ pub fn populate_macostheme_xaml(
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 17, 6)?), 17, 6)?;
     // MacOSTheme.xaml(110,4) Content
     let service_provider_0 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_663 = build_controls_macoscontrols_xaml(rt::cast(service_provider_0.clone(), 110, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_663.clone(), 110, 4)?), 110, 4)?;
+    let value_453 = build_controls_macoscontrols_xaml(rt::cast(service_provider_0.clone(), 110, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_453.clone(), 110, 4)?), 110, 4)?;
     context.pop_parent();
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 12, 2)?;
     ::core::result::Result::Ok(())
@@ -1326,8 +696,8 @@ fn populate_macostheme_xaml_unit_13(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,52) Content (resource)
-    let value_38 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_38))), 15, 52)?;
+    let value_36 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_36))), 15, 52)?;
     // MacOSTheme.xaml(16,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_28)?;
     // MacOSTheme.xaml(17,8) Content (resource)
@@ -1397,8 +767,8 @@ fn populate_macostheme_xaml_unit_16(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_39)?;
     // MacOSTheme.xaml(32,53) Content (resource)
-    let value_135 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 32, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_135))), 32, 53)?;
+    let value_130 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 32, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_130))), 32, 53)?;
     // MacOSTheme.xaml(33,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_40)?;
     // MacOSTheme.xaml(58,8) Content (resource)
@@ -1500,8 +870,8 @@ fn populate_macostheme_xaml_unit_20(
     // MacOSTheme.xaml(43,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_63)?;
     // MacOSTheme.xaml(45,56) Content (resource)
-    let value_143 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_143))), 45, 56)?;
+    let value_134 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_134))), 45, 56)?;
     // MacOSTheme.xaml(46,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_64)?;
     // MacOSTheme.xaml(57,50) Content (resource)
@@ -1788,14 +1158,14 @@ fn populate_macostheme_xaml_unit_37(
     // MacOSTheme.xaml(76,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_108)?;
     // MacOSTheme.xaml(88,66) Content (resource)
-    let value_161 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 88, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 88, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_161))), 88, 66)?;
+    let value_135 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 88, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 88, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_135))), 88, 66)?;
     // MacOSTheme.xaml(89,57) Content (resource)
-    let value_162 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 89, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 89, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_162))), 89, 57)?;
+    let value_136 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 89, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 89, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_136))), 89, 57)?;
     // MacOSTheme.xaml(90,55) Content (resource)
-    let value_163 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 90, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 90, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_163))), 90, 55)?;
+    let value_137 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 90, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 90, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_137))), 90, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1845,8 +1215,8 @@ fn populate_macostheme_xaml_unit_40(
     // MacOSTheme.xaml(19,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 19, 54)?;
     // MacOSTheme.xaml(20,59) Content (resource)
-    let value_167 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 20, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_167))), 20, 59)?;
+    let value_138 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 20, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_138))), 20, 59)?;
     // MacOSTheme.xaml(21,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_115)?;
     // MacOSTheme.xaml(46,8) Content (resource)
@@ -1940,8 +1310,8 @@ fn populate_macostheme_xaml_unit_46(
     // MacOSTheme.xaml(17,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_126)?;
     // MacOSTheme.xaml(19,55) Content (resource)
-    let value_174 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 19, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_174))), 19, 55)?;
+    let value_139 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 19, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_139))), 19, 55)?;
     // MacOSTheme.xaml(20,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_127)?;
     // MacOSTheme.xaml(23,8) Content (resource)
@@ -1969,8 +1339,8 @@ fn populate_macostheme_xaml_unit_47(
     // MacOSTheme.xaml(44,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_134)?;
     // MacOSTheme.xaml(48,59) Content (resource)
-    let value_176 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 48, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 48, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_176))), 48, 59)?;
+    let value_140 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 48, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 48, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_140))), 48, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2307,8 +1677,8 @@ fn populate_macostheme_xaml_unit_69(
     // MacOSTheme.xaml(16,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_176)?;
     // MacOSTheme.xaml(18,53) Content (resource)
-    let value_199 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 18, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_199))), 18, 53)?;
+    let value_141 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 18, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_141))), 18, 53)?;
     // MacOSTheme.xaml(19,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_177)?;
     // MacOSTheme.xaml(21,53) Content (resource)
@@ -2339,14 +1709,14 @@ fn populate_macostheme_xaml_unit_71(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(43,54) Content (resource)
-    let value_202 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #42000000")), 43, 54)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 43, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_202))), 43, 54)?;
+    let value_142 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #42000000")), 43, 54)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 43, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_142))), 43, 54)?;
     // MacOSTheme.xaml(44,55) Content (resource)
-    let value_203 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000")), 44, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 44, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_203))), 44, 55)?;
+    let value_143 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000")), 44, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 44, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_143))), 44, 55)?;
     // MacOSTheme.xaml(45,55) Content (resource)
-    let value_204 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #42000000")), 45, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_204))), 45, 55)?;
+    let value_144 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #42000000")), 45, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_144))), 45, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2484,11 +1854,11 @@ fn populate_macostheme_xaml_unit_80(
     // MacOSTheme.xaml(23,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_198)?;
     // MacOSTheme.xaml(29,58) Content (resource)
-    let value_214 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 29, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 29, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_214))), 29, 58)?;
+    let value_145 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 29, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 29, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_145))), 29, 58)?;
     // MacOSTheme.xaml(30,53) Content (resource)
-    let value_215 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 30, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 30, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_215))), 30, 53)?;
+    let value_146 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 30, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 30, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_146))), 30, 53)?;
     // MacOSTheme.xaml(31,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_199)?;
     // MacOSTheme.xaml(68,8) Content (resource)
@@ -2613,8 +1983,8 @@ fn populate_macostheme_xaml_unit_84(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(28,52) Content (resource)
-    let value_255 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_255))), 28, 52)?;
+    let value_183 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_183))), 28, 52)?;
     // MacOSTheme.xaml(29,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_230)?;
     // MacOSTheme.xaml(30,8) Content (resource)
@@ -2684,8 +2054,8 @@ fn populate_macostheme_xaml_unit_87(
     // MacOSTheme.xaml(78,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_241)?;
     // MacOSTheme.xaml(95,53) Content (resource)
-    let value_352 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_352))), 95, 53)?;
+    let value_277 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_277))), 95, 53)?;
     // MacOSTheme.xaml(96,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_242)?;
     // MacOSTheme.xaml(121,8) Content (resource)
@@ -2789,8 +2159,8 @@ fn populate_macostheme_xaml_unit_91(
     // MacOSTheme.xaml(88,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_266)?;
     // MacOSTheme.xaml(90,56) Content (resource)
-    let value_360 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 90, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_360))), 90, 56)?;
+    let value_281 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 90, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_281))), 90, 56)?;
     // MacOSTheme.xaml(91,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_267)?;
     // MacOSTheme.xaml(102,50) Content (resource)
@@ -3077,14 +2447,14 @@ fn populate_macostheme_xaml_unit_108(
     // MacOSTheme.xaml(154,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_311)?;
     // MacOSTheme.xaml(166,66) Content (resource)
-    let value_378 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_378))), 166, 66)?;
+    let value_282 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_282))), 166, 66)?;
     // MacOSTheme.xaml(167,57) Content (resource)
-    let value_379 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 167, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 167, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_379))), 167, 57)?;
+    let value_283 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 167, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 167, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_283))), 167, 57)?;
     // MacOSTheme.xaml(168,55) Content (resource)
-    let value_380 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 168, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 168, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_380))), 168, 55)?;
+    let value_284 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 168, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 168, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_284))), 168, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3134,8 +2504,8 @@ fn populate_macostheme_xaml_unit_111(
     // MacOSTheme.xaml(55,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 55, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 55, 54)?;
     // MacOSTheme.xaml(56,59) Content (resource)
-    let value_384 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 56, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_384))), 56, 59)?;
+    let value_285 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 56, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_285))), 56, 59)?;
     // MacOSTheme.xaml(57,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_318)?;
     // MacOSTheme.xaml(80,8) Content (resource)
@@ -3231,8 +2601,8 @@ fn populate_macostheme_xaml_unit_117(
     // MacOSTheme.xaml(68,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_330)?;
     // MacOSTheme.xaml(70,55) Content (resource)
-    let value_391 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_391))), 70, 55)?;
+    let value_286 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_286))), 70, 55)?;
     // MacOSTheme.xaml(71,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_331)?;
     // MacOSTheme.xaml(75,8) Content (resource)
@@ -3260,8 +2630,8 @@ fn populate_macostheme_xaml_unit_118(
     // MacOSTheme.xaml(80,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_338)?;
     // MacOSTheme.xaml(84,59) Content (resource)
-    let value_393 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_393))), 84, 59)?;
+    let value_287 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_287))), 84, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3598,8 +2968,8 @@ fn populate_macostheme_xaml_unit_140(
     // MacOSTheme.xaml(31,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_380)?;
     // MacOSTheme.xaml(33,53) Content (resource)
-    let value_416 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 33, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 33, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_416))), 33, 53)?;
+    let value_288 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 33, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 33, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_288))), 33, 53)?;
     // MacOSTheme.xaml(34,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_381)?;
     // MacOSTheme.xaml(36,53) Content (resource)
@@ -3630,14 +3000,14 @@ fn populate_macostheme_xaml_unit_142(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(48,54) Content (resource)
-    let value_419 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #23000000")), 48, 54)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 48, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_419))), 48, 54)?;
+    let value_289 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #23000000")), 48, 54)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 48, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_289))), 48, 54)?;
     // MacOSTheme.xaml(49,55) Content (resource)
-    let value_420 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #26000000, 0 10 20 0 #30000000")), 49, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 49, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_420))), 49, 55)?;
+    let value_290 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #26000000, 0 10 20 0 #30000000")), 49, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 49, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_290))), 49, 55)?;
     // MacOSTheme.xaml(50,55) Content (resource)
-    let value_421 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #23000000")), 50, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 50, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_421))), 50, 55)?;
+    let value_291 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #23000000")), 50, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 50, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_291))), 50, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3775,11 +3145,11 @@ fn populate_macostheme_xaml_unit_151(
     // MacOSTheme.xaml(90,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_402)?;
     // MacOSTheme.xaml(96,58) Content (resource)
-    let value_431 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 96, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 96, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_431))), 96, 58)?;
+    let value_292 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 96, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 96, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_292))), 96, 58)?;
     // MacOSTheme.xaml(97,53) Content (resource)
-    let value_432 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 97, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 97, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_432))), 97, 53)?;
+    let value_293 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 97, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 97, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_293))), 97, 53)?;
     // MacOSTheme.xaml(98,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_403)?;
     // MacOSTheme.xaml(135,8) Content (resource)
@@ -3904,8 +3274,8 @@ fn populate_macostheme_xaml_unit_155(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(41,52) Content (resource)
-    let value_472 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 41, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_472))), 41, 52)?;
+    let value_330 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 41, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_330))), 41, 52)?;
     // MacOSTheme.xaml(42,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_434)?;
     // MacOSTheme.xaml(43,8) Content (resource)
@@ -3975,8 +3345,8 @@ fn populate_macostheme_xaml_unit_158(
     // MacOSTheme.xaml(141,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_445)?;
     // MacOSTheme.xaml(158,53) Content (resource)
-    let value_569 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 158, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_569))), 158, 53)?;
+    let value_424 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 158, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_424))), 158, 53)?;
     // MacOSTheme.xaml(159,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_446)?;
     // MacOSTheme.xaml(184,8) Content (resource)
@@ -4078,8 +3448,8 @@ fn populate_macostheme_xaml_unit_162(
     // MacOSTheme.xaml(133,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_469)?;
     // MacOSTheme.xaml(135,56) Content (resource)
-    let value_577 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 135, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_577))), 135, 56)?;
+    let value_428 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 135, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_428))), 135, 56)?;
     // MacOSTheme.xaml(136,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_470)?;
     // MacOSTheme.xaml(147,50) Content (resource)
@@ -4366,14 +3736,14 @@ fn populate_macostheme_xaml_unit_179(
     // MacOSTheme.xaml(232,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_514)?;
     // MacOSTheme.xaml(244,66) Content (resource)
-    let value_595 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_595))), 244, 66)?;
+    let value_429 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_429))), 244, 66)?;
     // MacOSTheme.xaml(245,57) Content (resource)
-    let value_596 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 245, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 245, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_596))), 245, 57)?;
+    let value_430 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 245, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 245, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_430))), 245, 57)?;
     // MacOSTheme.xaml(246,55) Content (resource)
-    let value_597 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 246, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 246, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_597))), 246, 55)?;
+    let value_431 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 246, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 246, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_431))), 246, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4423,8 +3793,8 @@ fn populate_macostheme_xaml_unit_182(
     // MacOSTheme.xaml(91,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 91, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 91, 54)?;
     // MacOSTheme.xaml(92,59) Content (resource)
-    let value_601 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 92, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 92, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_601))), 92, 59)?;
+    let value_432 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 92, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 92, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_432))), 92, 59)?;
     // MacOSTheme.xaml(93,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_521)?;
     // MacOSTheme.xaml(118,8) Content (resource)
@@ -4518,8 +3888,8 @@ fn populate_macostheme_xaml_unit_188(
     // MacOSTheme.xaml(120,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_532)?;
     // MacOSTheme.xaml(122,55) Content (resource)
-    let value_608 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 122, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 122, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_608))), 122, 55)?;
+    let value_433 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 122, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 122, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_433))), 122, 55)?;
     // MacOSTheme.xaml(123,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_533)?;
     // MacOSTheme.xaml(126,8) Content (resource)
@@ -4547,8 +3917,8 @@ fn populate_macostheme_xaml_unit_189(
     // MacOSTheme.xaml(116,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_540)?;
     // MacOSTheme.xaml(120,59) Content (resource)
-    let value_610 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_610))), 120, 59)?;
+    let value_434 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_434))), 120, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4885,8 +4255,8 @@ fn populate_macostheme_xaml_unit_211(
     // MacOSTheme.xaml(46,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_582)?;
     // MacOSTheme.xaml(48,53) Content (resource)
-    let value_633 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 48, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 48, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_633))), 48, 53)?;
+    let value_435 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 48, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 48, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_435))), 48, 53)?;
     // MacOSTheme.xaml(49,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_583)?;
     // MacOSTheme.xaml(51,53) Content (resource)
@@ -4917,14 +4287,14 @@ fn populate_macostheme_xaml_unit_213(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(53,54) Content (resource)
-    let value_636 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #42000000")), 53, 54)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 53, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_636))), 53, 54)?;
+    let value_436 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 16 0 #42000000")), 53, 54)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 53, 54)?, rt::string_object("ThemeShadowFlyoutBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_436))), 53, 54)?;
     // MacOSTheme.xaml(54,55) Content (resource)
-    let value_637 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000")), 54, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 54, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_637))), 54, 55)?;
+    let value_437 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000")), 54, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 54, 55)?, rt::string_object("ThemeShadowSubMenuBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_437))), 54, 55)?;
     // MacOSTheme.xaml(55,55) Content (resource)
-    let value_638 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #42000000")), 55, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 55, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_638))), 55, 55)?;
+    let value_438 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #42000000")), 55, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 55, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_438))), 55, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5068,11 +4438,11 @@ fn populate_macostheme_xaml_unit_222(
     // MacOSTheme.xaml(194,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_607)?;
     // MacOSTheme.xaml(200,58) Content (resource)
-    let value_648 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 200, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 200, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_648))), 200, 58)?;
+    let value_439 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 200, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 200, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_439))), 200, 58)?;
     // MacOSTheme.xaml(201,53) Content (resource)
-    let value_649 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 201, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 201, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_649))), 201, 53)?;
+    let value_440 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 201, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 201, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_440))), 201, 53)?;
     // MacOSTheme.xaml(202,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_608)?;
     ::core::result::Result::Ok(())
@@ -5605,11 +4975,11 @@ fn populate_macostheme_xaml_unit_255(
     // MacOSTheme.xaml(353,60) Content (resource)
     rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_667)?;
     // MacOSTheme.xaml(357,53) Content (resource)
-    let value_651 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_651))), 357, 53)?;
+    let value_441 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_441))), 357, 53)?;
     // MacOSTheme.xaml(358,62) Content (resource)
-    let value_652 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 358, 62)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 358, 62)?, rt::string_object("ComboBoxPlaceholderTextThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_652))), 358, 62)?;
+    let value_442 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 358, 62)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 358, 62)?, rt::string_object("ComboBoxPlaceholderTextThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_442))), 358, 62)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5673,13 +5043,13 @@ fn populate_macostheme_xaml_unit_259(
     // MacOSTheme.xaml(72,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 72, 42)?, rt::string_object("InfoBarTitleFontSize"), rt::to_object(14.0_f64)), 72, 42)?;
     // MacOSTheme.xaml(73,46) Content (resource)
-    let value_653 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 73, 46)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 73, 46)?, rt::string_object("InfoBarTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_653))), 73, 46)?;
+    let value_443 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 73, 46)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 73, 46)?, rt::string_object("InfoBarTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_443))), 73, 46)?;
     // MacOSTheme.xaml(74,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 74, 44)?, rt::string_object("InfoBarMessageFontSize"), rt::to_object(14.0_f64)), 74, 44)?;
     // MacOSTheme.xaml(75,48) Content (resource)
-    let value_654 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 75, 48)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 75, 48)?, rt::string_object("InfoBarMessageFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_654))), 75, 48)?;
+    let value_444 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 75, 48)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 75, 48)?, rt::string_object("InfoBarMessageFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_444))), 75, 48)?;
     // MacOSTheme.xaml(76,38) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_676)?;
     // MacOSTheme.xaml(79,51) Content (resource)
@@ -5888,8 +5258,8 @@ fn populate_macostheme_xaml_unit_266(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(12,52) Content (resource)
-    let value_655 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(12000000_i64);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 12, 52)?, rt::string_object("MacOSProgressPulseDuration"), rt::to_object(::core::clone::Clone::clone(&value_655))), 12, 52)?;
+    let value_445 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(12000000_i64);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 12, 52)?, rt::string_object("MacOSProgressPulseDuration"), rt::to_object(::core::clone::Clone::clone(&value_445))), 12, 52)?;
     // MacOSTheme.xaml(47,4) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_691)?;
     // MacOSTheme.xaml(49,49) Content (resource)
@@ -5897,26 +5267,26 @@ fn populate_macostheme_xaml_unit_266(
     // MacOSTheme.xaml(50,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_692)?;
     // MacOSTheme.xaml(52,50) Content (resource)
-    let value_656 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 52, 50)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 50)?, rt::string_object("MacOSWindowTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_656))), 52, 50)?;
+    let value_446 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 52, 50)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 50)?, rt::string_object("MacOSWindowTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_446))), 52, 50)?;
     // MacOSTheme.xaml(53,41) Content (resource)
-    let value_657 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 12 36 0 #40000000, 0 1 4 0 #33000000")), 53, 41)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 41)?, rt::string_object("MacOSWindowShadow"), rt::to_object(::core::clone::Clone::clone(&value_657))), 53, 41)?;
+    let value_447 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 12 36 0 #40000000, 0 1 4 0 #33000000")), 53, 41)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 41)?, rt::string_object("MacOSWindowShadow"), rt::to_object(::core::clone::Clone::clone(&value_447))), 53, 41)?;
     // MacOSTheme.xaml(54,42) Content (resource)
-    let value_658 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 3 0 #26000000")), 54, 42)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 54, 42)?, rt::string_object("MacOSSegmentShadow"), rt::to_object(::core::clone::Clone::clone(&value_658))), 54, 42)?;
+    let value_448 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 3 0 #26000000")), 54, 42)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 54, 42)?, rt::string_object("MacOSSegmentShadow"), rt::to_object(::core::clone::Clone::clone(&value_448))), 54, 42)?;
     // MacOSTheme.xaml(55,39) Content (resource)
-    let value_659 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 24 0 #33000000, 0 1 3 0 #26000000")), 55, 39)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 55, 39)?, rt::string_object("MacOSMenuShadow"), rt::to_object(::core::clone::Clone::clone(&value_659))), 55, 39)?;
+    let value_449 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 24 0 #33000000, 0 1 3 0 #26000000")), 55, 39)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 55, 39)?, rt::string_object("MacOSMenuShadow"), rt::to_object(::core::clone::Clone::clone(&value_449))), 55, 39)?;
     // MacOSTheme.xaml(56,42) Content (resource)
-    let value_660 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #26000000")), 56, 42)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 56, 42)?, rt::string_object("MacOSControlShadow"), rt::to_object(::core::clone::Clone::clone(&value_660))), 56, 42)?;
+    let value_450 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #26000000")), 56, 42)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 56, 42)?, rt::string_object("MacOSControlShadow"), rt::to_object(::core::clone::Clone::clone(&value_450))), 56, 42)?;
     // MacOSTheme.xaml(57,45) Content (resource)
-    let value_661 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #30000000")), 57, 45)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 57, 45)?, rt::string_object("MacOSSwitchKnobShadow"), rt::to_object(::core::clone::Clone::clone(&value_661))), 57, 45)?;
+    let value_451 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #30000000")), 57, 45)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 57, 45)?, rt::string_object("MacOSSwitchKnobShadow"), rt::to_object(::core::clone::Clone::clone(&value_451))), 57, 45)?;
     // MacOSTheme.xaml(58,42) Content (resource)
-    let value_662 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6 0 #26000000")), 58, 42)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 42)?, rt::string_object("MacOSToolTipShadow"), rt::to_object(::core::clone::Clone::clone(&value_662))), 58, 42)?;
+    let value_452 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6 0 #26000000")), 58, 42)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 42)?, rt::string_object("MacOSToolTipShadow"), rt::to_object(::core::clone::Clone::clone(&value_452))), 58, 42)?;
     // MacOSTheme.xaml(61,44) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_693)?;
     // MacOSTheme.xaml(66,45) Content (resource)
