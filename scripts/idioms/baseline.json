@@ -48,7 +48,7 @@
       "Disposable": 1,
       "Encoding": 1,
       "EventHandler": 1,
-      "ExpressionParseException": 2,
+      "ExpressionParseException": 1,
       "FerroInternalException": 1,
       "GregorianCalendar": 1,
       "IServiceProvider": 1,
@@ -60,7 +60,7 @@
       "Monitor": 1,
       "Nullable": 1,
       "NumberFormatInfo": 1,
-      "NumberStyles": 2,
+      "NumberStyles": 1,
       "PlatformGraphicsContextLostException": 1,
       "Quaternion": 1,
       "ReadOnlyMemory": 1,
@@ -134,6 +134,10 @@
     },
     "ferroui-markup": {
       "Version": 1
+    },
+    "ferroui-markup-syntax": {
+      "ExpressionParseException": 1,
+      "NumberStyles": 1
     },
     "ferroui-markup-xaml": {
       "XamlLoadException": 1
