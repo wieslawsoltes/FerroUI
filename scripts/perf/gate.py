@@ -1496,6 +1496,13 @@ def main() -> int:
     )
     parser.add_argument("--frames", type=int, help="GATE_FRAMES of the frame gate (its default: 240)")
     parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="a reduced gate of a narrow change: 2 rounds (a third only for a metric within the spread of "
+        "its rounds), 120 frames a scene; with --frames-filter and --framework-filter naming what the change "
+        "can move. Instructions decide; the full gate runs on the top of the stack",
+    )
+    parser.add_argument(
         "--frames-filter",
         help="comma-separated scenes of the frame gate to measure (a name, or a prefix ending in *: "
         "startup*,cards); default: every scene. For a narrow change; a full gate runs every scene",
@@ -1507,6 +1514,14 @@ def main() -> int:
     parser.add_argument("--verbose", action="store_true", help="echo the whole output of cargo and the benchmarks")
     parser.add_argument("--dry-run", action="store_true", help="print the plan and the commands, run nothing")
     options = parser.parse_args()
+    if options.quick:
+        given = set(sys.argv[1:])
+        if "--rounds" not in given:
+            options.rounds = 2
+        if "--max-rounds" not in given:
+            options.max_rounds = 3
+        if options.frames is None:
+            options.frames = 120
     if options.rounds < 1:
         parser.error("--rounds must be at least 1")
     if options.max_rounds < options.rounds:
