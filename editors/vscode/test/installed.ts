@@ -59,6 +59,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.spacingHelpers, 'The installed preview negotiates measured spacing');
         assert.ok(native.capabilities.selectionWrapping, 'The installed preview negotiates selection wrapping');
         assert.ok(native.capabilities.columnAuthoring, 'The installed preview negotiates table column editing');
+        assert.ok(native.capabilities.itemTemplateAuthoring, 'The installed preview negotiates item template editing');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
@@ -127,6 +128,29 @@ export async function run(): Promise<void> {
             assert.equal(model.reason, null);
             assert.deepEqual(model.columns.map(column => column.label), expected);
         }
+        const templatesDocument = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'ItemTemplatesWorkbench.xaml'));
+        const templatesSource = sourceOf(templatesDocument, 'xaml', new vscode.Position(0, 0));
+        const templateViewport = { width: 660, height: 440, dark: false };
+        const templates = await native.render(templatesSource, templateViewport, 21);
+        assert.ok(templates.image, templates.renderError ?? undefined);
+        const directory = templates.nodes.find(node => node.name === 'Directory');
+        assert.ok(directory?.bounds);
+        const { model } = await native.studioQuery(21, 'designer_item_templates', { node: directory.id }, [directory.id]) as { model: string };
+        const item = await native.studioPresent(21, 22, 'designer_item_template', {
+            action: 'preview', node: directory.id, property: 'ItemTemplate', expected_model: model,
+        }, [directory.id]);
+        assert.ok(item.image && item.definitionScope !== null);
+        const title = templates.nodes.find(node => node.name === 'CustomerName');
+        assert.ok(title);
+        const { properties } = await native.inspect(templatesSource, 22, { type: 'source', node: title.id });
+        assert.equal(properties.find(property => property.name === 'Text')?.effective, 'Alpine & Co.');
+        await assert.rejects(native.render(
+            { ...templatesSource, source: templatesSource.source.replace('</UserControl>', '</StackPanel>') }, templateViewport, 23));
+        await assert.rejects(native.studioEdit(templatesSource, 22, 'designer_item_template', {
+            action: 'copy_inline', node: directory.id, property: 'ItemTemplate', expected_model: model,
+        }, [directory.id]), /layout changed/i);
+        const repaired = await native.render(templatesSource, templateViewport, 24);
+        assert.ok(repaired.image && repaired.definitionScope === item.definitionScope);
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);

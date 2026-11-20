@@ -31,8 +31,8 @@ function edit(operation: NodeOperation): void {
     if (operation.node === state.target?.node) submit({ type: 'edit', operation });
 }
 
-function author(property: string, action: PropertyAuthoring): void {
-    submit({ type: 'author', action, property });
+function author(authoring: PropertyAuthoring): void {
+    submit({ type: 'author', authoring });
 }
 
 function reveal(range: Range): void {

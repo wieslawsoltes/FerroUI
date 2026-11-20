@@ -142,6 +142,25 @@ Each action updates the unsaved XAML and native preview through one Undo step. M
 
 [Keyboard ordering](../images/vscode-column-ordering.jpg) · [Add a column](../images/vscode-add-column.jpg) · [Edit an exact width](../images/vscode-column-width.jpg) · [Inspect a hierarchy column](../images/vscode-hierarchy-column.jpg)
 
+## Edit item and cell templates
+
+1. Open [ItemTemplatesWorkbench.xaml](../../../editors/vscode/test/fixtures/ItemTemplatesWorkbench.xaml) and choose **FerroUI: Open Designer**. Select **Directory** from **Outline** to work on its shared template, or select **ReviewQueue** to start with the default item presentation.
+2. Choose **Edit item templates** beside the selected control in **Properties**, or run **FerroUI: Edit Item Templates**. When the control has several template slots, choose the one to edit. For a table cell, select the authored column in **Outline**.
+3. Use the actions for the selected slot.
+
+| Action | Result |
+|---|---|
+| **Edit Template on Canvas** | Open the assigned local definition. Use the canvas, Outline, and Properties to edit the original XAML. |
+| **Create Inline Template** | Add a data template with a bound text control to a slot that uses the default. Open it on the canvas to change its contents. |
+| **Assign Template Resource** | Choose a visible `DataTemplate` or `TreeDataTemplate`. The editor writes a checked resource reference. |
+| **Make Inline Copy** | Give this control its own copy of a local resource template. The shared definition and its other uses stay intact. The resource dependencies must resolve the same way inside the copy. |
+| **Reset Template** | Remove the local assignment from an optional slot. A `TreeDataGridTemplateColumn` requires a cell template. |
+| **Reveal Template Source** or **Reveal Template Assignment** | Open the authored definition or its assignment in XAML. |
+
+When **Design Data** supplies an array through a simple `ItemsSource` binding, the template canvas shows the first item from the selected fixture. Try the **Trial** fixture to see a different customer. Use the back arrow in the designer toolbar to return to the original view. Preview navigation leaves the buffer intact. Each source edit takes one Undo step.
+
+The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Open Rust template closures and application-supplied XAML expressions at their source. For a resource defined in another document, use its assignment to locate the definition. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+
 ## Reuse snippets and design tokens
 
 Save a reusable, single-root XAML fragment under `.ferroui/toolbox` in the workspace or Cargo package. Select the package view to see its snippets and registered **Project controls** and **Dependency controls**. A package snippet takes precedence over a workspace snippet with the same filename. RSX offers entries with a supported source mapping.

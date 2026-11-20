@@ -30,6 +30,7 @@ interface Frame {
     guideCatalog?: GuideCatalog;
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
+    itemTemplateAuthoring: boolean;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -176,6 +177,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineRecording(): boolean { return Boolean(this.language === 'xaml' && this.frame?.timelineRecording); }
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
+    get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -593,7 +595,9 @@ export class DesignerPanel implements vscode.Disposable {
                     canInsert: change?.canInsert ?? false, selectable: change?.selectable };
             });
             accepted?.(presentation);
-            const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices, timelinePose: this.timelinePose };
+            const snapshot = { ...frame.snapshot, nodes, image: presentation.image, notices: presentation.notices,
+                timelinePose: this.timelinePose, definitionScope: presentation.definitionScope ?? undefined,
+                definitionSelection: presentation.definitionScope == null ? undefined : presentation.selection };
             const canvasNodes = nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             const guideAnchor = this.guideAnchor(snapshot, presentation.definitionScope);
             this.frame = { ...frame, token: next, snapshot, guideAnchor, canvas: { ...frame.canvas, ...snapshot, nodes: canvasNodes } };
@@ -720,8 +724,9 @@ export class DesignerPanel implements vscode.Disposable {
             const nodes = snapshot.nodes.map(({ id, label, name, bounds, canMove, selectable }) => ({ id, label, name, bounds, canMove, selectable }));
             if (snapshot.image) this.timelinePose = snapshot.timelinePose;
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
-                guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot),
+                guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(client.capabilities.columnAuthoring),
+                itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
@@ -749,6 +754,9 @@ export class DesignerPanel implements vscode.Disposable {
             if (retained.length) {
                 this.selection = retained;
                 this.selected = retained.at(-1);
+            } else if (snapshot.definitionSelection?.length) {
+                this.selection = snapshot.definitionSelection;
+                this.selected = this.selection.at(-1);
             } else {
                 this.selected = (sameView ? this.selected : undefined) ?? selectionAt(snapshot, this.caret) ?? snapshot.nodes[0]?.id;
                 this.selection = sameView && this.selection.length ? this.selection.filter(id => snapshot.nodes.some(node => node.id === id))
@@ -811,6 +819,14 @@ export class DesignerPanel implements vscode.Disposable {
         }
         if (message.type === 'refresh') {
             this.schedule(0);
+            return;
+        }
+        if (message.type === 'leaveDefinition') {
+            if (this.currentToken === message.token && this.frame?.snapshot.definitionScope !== undefined) {
+                try {
+                    await this.studioPresent(message.token, 'designer_definition', { action: 'exit' }, undefined, AbortSignal.timeout(15_000));
+                } catch (error) { this.post({ type: 'edit', error: errorMessage(error) }); }
+            }
             return;
         }
         if (message.type === 'dock') {

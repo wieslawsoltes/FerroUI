@@ -8,6 +8,7 @@ body { background: var(--vscode-sideBar-background, var(--vscode-editor-backgrou
 .element-heading div { display: flex; align-items: baseline; gap: 6px; min-inline-size: 0; flex-wrap: wrap; }
 .element-heading .codicon, .element-heading code { color: var(--muted); }
 .element-heading code { overflow-wrap: anywhere; }
+.element-heading .tool { margin-inline-start: auto; }
 .property-metrics {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -17,7 +17,7 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
         private readonly edit: (target: NodeTarget, operation: NodeOperation) => Promise<void>,
         private readonly openToolbox: () => void,
         private readonly reveal: (frame: FrameTarget, range: Range) => Promise<void>,
-        private readonly author: (target: NodeTarget, property: string, action: PropertyAuthoring) => Promise<void>,
+        private readonly author: (target: NodeTarget, authoring: PropertyAuthoring) => Promise<void>,
     ) {}
 
     get visible(): boolean { return this.view?.visible ?? false; }
@@ -53,7 +53,7 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
         } else if (message.type === 'edit' || message.type === 'author') {
             let error: string | undefined;
             try {
-                if (message.type === 'author') await this.author(message.target, message.property, message.action);
+                if (message.type === 'author') await this.author(message.target, message.authoring);
                 else await this.edit(message.target, message.operation);
             } catch (failure) {
                 error = errorMessage(failure);

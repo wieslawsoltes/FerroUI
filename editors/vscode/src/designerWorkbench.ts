@@ -23,6 +23,7 @@ import { chooseLayout } from './studioLayout';
 import { chooseWrapper } from './studioWrap';
 import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
+import { editItemTemplates } from './studioItemTemplates';
 import { StudioView } from './studioView';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
@@ -77,15 +78,16 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.properties = new PropertiesView(context.extensionUri, changed, (target, operation) => this.edit(target, operation),
             () => { void this.showDock(TOOLBOX_VIEW); },
             async (frame, range) => { await this.active?.revealSource(frame, range); },
-            async (target, property, action) => {
+            async (target, authoring) => {
                 const panel = this.active;
                 if (!panel?.canUse(target) || panel.selectedIds.length !== 1 || panel.selectedIds[0] !== target.node) {
                     throw new Error('Select one control in the current preview to edit an authored property.');
                 }
                 const context = new StudioContext(panel, target.token, () => this.active === panel);
-                if (action === 'binding') await editBinding(context, target.node, property);
-                else if (action === 'promoteResource') await promoteResource(context, target.node, property);
-                else if (action === 'brush') await editBrush(context, target.node, property);
+                if (authoring.action === 'itemTemplate') await editItemTemplates(context, target.node);
+                else if (authoring.action === 'binding') await editBinding(context, target.node, authoring.property);
+                else if (authoring.action === 'promoteResource') await promoteResource(context, target.node, authoring.property);
+                else await editBrush(context, target.node, authoring.property);
             });
         this.timeline = new TimelineView(context.extensionUri, changed);
         this.studio = new StudioView(changed, (context, route) => this.timeline.openTransition(context, route));
@@ -133,6 +135,16 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.showLibrary', (session?: number) => this.showDock(LIBRARY_VIEW, session)),
             vscode.commands.registerCommand('ferroui.showColumns', () => {
                 if (this.columns.available) return this.showDock(COLUMNS_VIEW);
+            }),
+            vscode.commands.registerCommand('ferroui.editItemTemplates', async () => {
+                try {
+                    const panel = this.active;
+                    const token = panel?.currentToken;
+                    if (!panel || token === undefined || panel.status || panel.selectedIds.length !== 1) {
+                        throw new Error('Select one control or column in the current FerroUI designer.');
+                    }
+                    await editItemTemplates(new StudioContext(panel, token, () => this.active === panel), panel.selectedIds[0]);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
             }),
             vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
                 try {
@@ -311,6 +323,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             runtime: panel?.runtimeSelection,
             frame,
             fields: inspection.data?.properties,
+            itemTemplates: inspection.data?.itemTemplates,
             target: panel && node && token !== undefined && !panel.status
                 ? { session: panel.session, token, node: node.id, selection: [...panel.selectedIds] } : undefined,
             selectionCount: panel?.selectedIds.length,

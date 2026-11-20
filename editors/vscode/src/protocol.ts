@@ -124,7 +124,7 @@ export type FromDetails = { type: 'ready' }
 export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };
 export type InspectionTarget = { type: 'source'; node: number } | { type: 'selection'; nodes: number[] } | { type: 'runtime'; id: number };
-export interface Inspection { properties: PropertyField[]; events: EventField[] }
+export interface Inspection { properties: PropertyField[]; events: EventField[]; itemTemplates?: boolean }
 export interface OutlineNode {
     id: number;
     parent: number | null;
@@ -153,6 +153,8 @@ export interface Snapshot {
     mappedRustAnimations?: boolean;
     rustAnimationOwners?: number[];
     timelinePose?: TimelinePreviewPose;
+    definitionScope?: number;
+    definitionSelection?: number[];
 }
 export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
@@ -177,14 +179,17 @@ export interface PropertiesState {
     runtime?: RuntimeRow;
     frame?: FrameTarget;
     fields?: PropertyField[];
+    itemTemplates?: boolean;
     selectionCount?: number;
     recordingTime?: number;
 }
-export type PropertyAuthoring = 'binding' | 'promoteResource' | 'brush';
+export type PropertyAuthoring =
+    | { action: 'binding' | 'promoteResource' | 'brush'; property: string }
+    | { action: 'itemTemplate' };
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
-    | { type: 'author'; action: PropertyAuthoring; request: number; target: NodeTarget; property: string }
+    | { type: 'author'; authoring: PropertyAuthoring; request: number; target: NodeTarget }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToProperties = { type: 'state'; state: PropertiesState }
     | { type: 'edit'; request: number; error?: string };
@@ -306,6 +311,7 @@ export type FromDesigner = DragMessage | SpacingRequest
     | { type: 'canvasResult'; request: number; state?: CanvasState; error?: string }
     | { type: 'focusOrder'; token: number }
     | { type: 'wrapSelection'; token: number }
+    | { type: 'leaveDefinition'; token: number }
     | { type: 'guideEdit'; frame: FrameTarget; epoch: number; edit: GuideEdit; request: number }
     | { type: 'block'; token: number; index: number }
     | { type: 'select'; token: number; id: number; openSource: boolean; extend?: boolean }

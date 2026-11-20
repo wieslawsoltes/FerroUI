@@ -29,6 +29,7 @@ const fitSelection = element<HTMLButtonElement>('fit-selection');
 const selectionLabel = element<HTMLButtonElement>('selection-label');
 const actionsMenu = element('actions-menu');
 const wrapSelection = element<HTMLButtonElement>('menu-wrap-selection');
+const returnDocument = element<HTMLButtonElement>('return-document');
 const selectedControl = element('selected-control');
 const recording = element('canvas-recording');
 const recordingValue = recording.querySelector('span:last-child')!;
@@ -98,6 +99,9 @@ anchorPopover(element('actions-button'), actionsMenu);
 wrapSelection.addEventListener('click', () => {
     actionsMenu.hidePopover();
     vscode.postMessage({ type: 'wrapSelection', token });
+});
+returnDocument.addEventListener('click', () => {
+    if (current && snapshot?.definitionScope !== undefined) vscode.postMessage({ type: 'leaveDefinition', token });
 });
 focusOverlay.toggle.addEventListener('click', () => {
     focusOverlay.setEnabled(!focusOverlay.enabled);
@@ -209,6 +213,8 @@ function updateSelection(): void {
     const selecting = interaction.mode === 'select';
     const image = artboard.isCurrent ? snapshot?.image : undefined;
     wrapSelection.hidden = !snapshot?.wrapAvailable;
+    returnDocument.hidden = snapshot?.definitionScope === undefined;
+    returnDocument.disabled = !enabled;
     wrapSelection.disabled = !enabled || !image || !selecting || !selection.length || Boolean(runtime);
     guides.setAvailable(Boolean(enabled && image), selecting);
     focusOverlay.update(Boolean(snapshot?.focusOrderAvailable), selecting, enabled && image

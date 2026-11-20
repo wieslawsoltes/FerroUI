@@ -41,6 +41,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
         <output id="canvas-recording" class="canvas-recording" role="status" hidden>${icon('circle-filled')}<span></span></output>
     </div>
     <div class="dock-tools" role="group" aria-label="Workbench views">
+        ${tool('return-document', 'arrow-left', 'Return to document preview', 'hidden')}
         ${tool('toolbox-button', 'extensions', 'Show Toolbox')}
         ${tool('outline-button', 'list-tree', 'Show Outline')}
         ${tool('properties-button', 'settings-gear', 'Show Properties')}
@@ -221,6 +222,7 @@ export function propertiesHtml(webview: vscode.Webview, root: vscode.Uri): strin
         <header class="element-heading">
             ${icon('symbol-field')}
             <div><strong id="control-type"></strong><code id="control-name"></code></div>
+            ${tool('edit-item-templates', 'symbol-structure', 'Edit item templates', 'hidden')}
         </header>
         <dl id="property-metrics" class="property-metrics" aria-label="Measured artboard bounds" title="Measured bounds in artboard units" hidden>
             <div><dt>X</dt><dd data-metric="x"></dd></div><div><dt>Y</dt><dd data-metric="y"></dd></div>

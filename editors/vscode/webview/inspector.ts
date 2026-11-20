@@ -14,6 +14,7 @@ export class Inspector {
     private readonly selection = element('element-properties');
     private readonly filter = element<HTMLInputElement>('filter');
     private readonly metrics = element('property-metrics');
+    private readonly itemTemplates = element<HTMLButtonElement>('edit-item-templates');
     private selectedKey?: string;
     private contentKey?: string;
     private recording = false;
@@ -23,9 +24,10 @@ export class Inspector {
         private readonly edit: (operation: NodeOperation) => void,
         private readonly openToolbox: () => void,
         private readonly reveal: (range: Range) => void,
-        private readonly author: (property: string, action: PropertyAuthoring) => void,
+        private readonly author: (authoring: PropertyAuthoring) => void,
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
+        this.itemTemplates.addEventListener('click', () => this.author({ action: 'itemTemplate' }));
     }
 
     show(state: PropertiesState, enabled: boolean): void {
@@ -34,6 +36,8 @@ export class Inspector {
         const group = (state.selectionCount ?? 0) > 1;
         const label = group ? `${state.selectionCount} controls` : runtime?.type ?? node?.label;
         this.selection.hidden = !label;
+        this.itemTemplates.hidden = !state.itemTemplates;
+        this.itemTemplates.disabled = !enabled;
         // A source range can still be revealed on a read-only row.
         this.target.toggleAttribute('inert', !state.frame || Boolean(node && !enabled));
         if (!label) {
@@ -146,9 +150,9 @@ export class Inspector {
             set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
             reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },
             reveal: this.reveal,
-            binding: node !== undefined && field.canBind ? () => this.author(field.name, 'binding') : undefined,
-            promote: node !== undefined && field.canPromote ? () => this.author(field.name, 'promoteResource') : undefined,
-            brush: node !== undefined && field.canEditBrush ? () => this.author(field.name, 'brush') : undefined,
+            binding: node !== undefined && field.canBind ? () => this.author({ action: 'binding', property: field.name }) : undefined,
+            promote: node !== undefined && field.canPromote ? () => this.author({ action: 'promoteResource', property: field.name }) : undefined,
+            brush: node !== undefined && field.canEditBrush ? () => this.author({ action: 'brush', property: field.name }) : undefined,
         });
     }
 

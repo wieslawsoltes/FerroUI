@@ -144,6 +144,12 @@
         "icon": "$(table)"
       },
       {
+        "command": "ferroui.editItemTemplates",
+        "title": "Edit Item Templates",
+        "category": "FerroUI",
+        "icon": "$(symbol-structure)"
+      },
+      {
         "command": "ferroui.columns.add",
         "title": "Add Column",
         "icon": "$(add)"
