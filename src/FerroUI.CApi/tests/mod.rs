@@ -6,6 +6,7 @@ mod abi_tests;
 mod events_tests;
 mod frame_tests;
 mod header_tests;
+mod osprey_tests;
 mod support;
 mod tree_tests;
 mod values_tests;

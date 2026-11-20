@@ -53,6 +53,11 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
+// Packed row tables of the deferred shapes (#855, `packed_resource_rows.rs`).
+pub use super::theme_resources::{
+    add_packed_dynamic_brushes, add_packed_literal_brushes, add_packed_resource_aliases, add_packed_static_brushes,
+    PackedRows,
+};
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.
 pub use super::theme_styles::{
@@ -64,9 +69,9 @@ pub use super::theme_styles::{
 // builds of the dictionaries apply them with.
 pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
-    active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    register_wider_theme_parts, registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys,
-    wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
+    active_theme_units, apply_theme_region, apply_theme_unit, find_theme_unit, register_theme_parts,
+    register_theme_parts_if_absent, register_wider_theme_parts, registered_theme_parts, report_trimmed_theme,
+    set_active_theme_units, trimmed_type_keys, wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
 
 /// Materialize an independently linkable constant from the build-time image.

@@ -75,6 +75,40 @@ pub fn apply_theme_unit(
     }
 }
 
+/// Applies the runs of a region of a build (#853) to `dictionary`, in the order of `region`:
+/// each pair is the canonical index of a unit and the index of one of its runs, and a pair whose
+/// unit the table `units` does not have adds nothing. The first failure is the error and the
+/// runs after it are not applied, as the calls of [`apply_theme_unit`] the region stands for.
+/// `units` is in canonical order (ascending indices); a region whose units ascend, which is what
+/// the emitter writes for the documents a theme merges in order, is applied in one pass over
+/// both, and any other order is applied too.
+#[inline(never)]
+pub fn apply_theme_region(
+    units: &[&ThemeUnit],
+    region: &[(u16, u16)],
+    context: &Rc<XamlIlContext>,
+    dictionary: &Ref<ResourceDictionary>,
+) -> Result<(), XamlLoadError> {
+    // The position in `units` of the first unit not below the unit of the last pair.
+    let mut position = 0;
+    let mut last = 0;
+    for &(unit, run) in region {
+        let unit = u32::from(unit);
+        if unit < last {
+            position = 0;
+        }
+        last = unit;
+        position += units[position..].partition_point(|known| known.index < unit);
+        let Some(found) = units.get(position).filter(|found| found.index == unit) else {
+            continue;
+        };
+        if let Some(apply) = found.runs.get(usize::from(run)) {
+            apply(context, dictionary)?;
+        }
+    }
+    Ok(())
+}
+
 /// The unit named `name` of the table `units`.
 pub fn find_theme_unit<'u>(units: &[&'u ThemeUnit], name: &str) -> Option<&'u ThemeUnit> {
     units.iter().copied().find(|unit| unit.name == name)
