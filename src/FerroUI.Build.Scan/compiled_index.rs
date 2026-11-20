@@ -13,6 +13,8 @@ pub struct CompiledXamlIndex {
     pub version: u32,
     pub manifest: PathBuf,
     pub groups: Vec<CompiledXamlGroup>,
+    /// File inputs actually read by the build, including unused candidates of class groups.
+    pub file_inputs: Vec<CompiledXamlInput>,
 }
 
 impl CompiledXamlIndex {
@@ -23,6 +25,7 @@ impl CompiledXamlIndex {
             version: VERSION,
             manifest,
             groups: Vec::new(),
+            file_inputs: Vec::new(),
         }
     }
 
@@ -45,6 +48,14 @@ impl CompiledXamlIndex {
                 .iter()
                 .map(CompiledXamlGroup::parse)
                 .collect::<Result<_, _>>()?,
+            file_inputs: match root.iter().find(|(key, _)| key == "file_inputs") {
+                Some((_, value)) => value
+                    .array("file_inputs")?
+                    .iter()
+                    .map(CompiledXamlInput::parse)
+                    .collect::<Result<_, _>>()?,
+                None => Vec::new(),
+            },
         })
     }
 
@@ -55,10 +66,52 @@ impl CompiledXamlIndex {
             .map(CompiledXamlGroup::to_json)
             .collect::<Vec<_>>()
             .join(",");
-        format!(
-            "{{\"version\":{},\"manifest\":{},\"groups\":[{groups}]}}",
+        let mut json = format!(
+            "{{\"version\":{},\"manifest\":{},\"groups\":[{groups}]",
             self.version,
             json_string(&self.manifest.to_string_lossy())
+        );
+        if !self.file_inputs.is_empty() {
+            let inputs = self
+                .file_inputs
+                .iter()
+                .map(CompiledXamlInput::to_json)
+                .collect::<Vec<_>>();
+            json.push_str(&format!(",\"file_inputs\":[{}]", inputs.join(",")));
+        }
+        json.push('}');
+        json
+    }
+}
+
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct CompiledXamlInput {
+    /// Authored physical path, relative to the Cargo manifest unless absolute.
+    pub path: String,
+    /// Rust's file name and one-based character coordinates at registration.
+    pub rust_file: PathBuf,
+    pub line: u32,
+    pub column: u32,
+}
+
+impl CompiledXamlInput {
+    fn parse(json: &JsonValue) -> Result<Self, String> {
+        let input = json.object("a compiled XAML file input")?;
+        Ok(Self {
+            path: field(input, "path")?.string("path")?.into(),
+            rust_file: field(input, "rust_file")?.string("rust_file")?.into(),
+            line: field(input, "line")?.integer("line")?,
+            column: field(input, "column")?.integer("column")?,
+        })
+    }
+
+    fn to_json(&self) -> String {
+        format!(
+            "{{\"path\":{},\"rust_file\":{},\"line\":{},\"column\":{}}}",
+            json_string(&self.path),
+            json_string(&self.rust_file.to_string_lossy()),
+            self.line,
+            self.column,
         )
     }
 }
@@ -71,6 +124,8 @@ pub struct CompiledXamlGroup {
     /// The directory scanned for an automatic group. An explicit group supplies
     /// its key and bytes from the build script and has no implicit physical path.
     pub discovery_root: Option<PathBuf>,
+    /// File-backed registrations have stable logical names independent of their paths.
+    pub file_backed: bool,
     /// Compiler order includes every input to name allocation, even if a member
     /// is merged into the class and has no callable Rust entry point.
     pub members: Vec<CompiledXamlMember>,
@@ -90,6 +145,12 @@ impl CompiledXamlGroup {
             discovery_root: field(group, "discovery_root")?
                 .optional_string("discovery_root")?
                 .map(PathBuf::from),
+            file_backed: group
+                .iter()
+                .find(|(key, _)| key == "file_backed")
+                .map(|(_, value)| value.boolean("file_backed"))
+                .transpose()?
+                .unwrap_or_default(),
             members: field(group, "members")?
                 .array("members")?
                 .iter()
@@ -113,8 +174,13 @@ impl CompiledXamlGroup {
             .map(CompiledXamlMember::to_json)
             .collect::<Vec<_>>()
             .join(",");
+        let file_backed = if self.file_backed {
+            ",\"file_backed\":true"
+        } else {
+            ""
+        };
         format!(
-            "{{\"module\":{},\"kind\":\"{kind}\",\"discovery_root\":{},\"members\":[{members}]}}",
+            "{{\"module\":{},\"kind\":\"{kind}\",\"discovery_root\":{},\"members\":[{members}]{file_backed}}}",
             json_string(&self.module),
             json_optional(&discovery)
         )

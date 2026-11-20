@@ -207,7 +207,10 @@
 
 pub mod deterministic_id_generator;
 mod compiled_index;
+mod document_files;
 mod export_plan;
+pub use document_files::XamlDocumentFile;
+use document_files::{DocumentFiles, GroupDocuments};
 pub use export_plan::ExportPlan;
 mod diagnostics;
 #[cfg(feature = "shader-effects")]
@@ -278,7 +281,7 @@ pub const FULL_THEMES_CFG: &str = "ferroui_full_themes";
 /// upstream compiles the documents of an assembly.
 pub struct XamlGroup {
     module: String,
-    documents: Option<Vec<(String, String)>>,
+    documents: Option<GroupDocuments>,
     create_source_info: Option<bool>,
     exported: bool,
     class_document: Option<String>,
@@ -305,8 +308,9 @@ pub enum TypeSystem {
 
 impl XamlGroup {
     /// A group whose generated file is the body of the module `module` of the crate
-    /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
-    /// below the XAML root of the build.
+    /// root. With no explicit [`documents`](Self::documents) or
+    /// [`document_files`](Self::document_files), it discovers `.xaml` files below
+    /// the XAML root of the build.
     pub fn new(module: &str) -> Self {
         Self { module: module.to_string(), documents: None, create_source_info: None, exported: true, class_document: None, constructor: None }
     }
@@ -338,7 +342,14 @@ impl XamlGroup {
     /// (`Views/Main.xaml`), in the order they are compiled. The build script states the
     /// files they come from with [`Build::input`].
     pub fn documents(mut self, documents: &[(&str, &str)]) -> Self {
-        self.documents = Some(documents.iter().map(|(name, xaml)| (name.to_string(), xaml.to_string())).collect());
+        self.documents = Some(GroupDocuments::Inline(documents.iter().map(|(name, xaml)| (name.to_string(), xaml.to_string())).collect()));
+        self
+    }
+
+    /// Compile this ordered set of files and register their paths as Cargo inputs.
+    /// The compiler records their authoring locations for IDE file-move reviews.
+    pub fn document_files(mut self, files: &[XamlDocumentFile<'_>]) -> Self {
+        self.documents = Some(GroupDocuments::from_files(files));
         self
     }
 
@@ -959,6 +970,7 @@ impl Build {
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut symbols = CompiledXamlIndex::new(self.manifest_dir.join("Cargo.toml"));
+        let mut document_files = DocumentFiles::default();
         let mut compiled_documents: Vec<String> = Vec::new();
         // The option of the emitter for the groups of this build (#603), restored after them.
         use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
@@ -972,7 +984,14 @@ impl Build {
                 continue;
             }
             let documents = match &group.documents {
-                Some(documents) => documents.clone(),
+                Some(GroupDocuments::Inline(documents)) => documents.clone(),
+                Some(GroupDocuments::Files(files)) => {
+                    let Some(documents) = document_files.read(&self.manifest_dir, files, &mut lines, &mut errors) else {
+                        continue;
+                    };
+                    symbols.file_inputs.extend(files.iter().map(|(_, input)| input.clone()));
+                    documents
+                }
                 None => {
                     let root = self.manifest_dir.join(&self.xaml_root);
                     rerun(&mut lines, &root);
@@ -1438,6 +1457,8 @@ impl Build {
             }
         }
         if errors.is_empty() {
+            symbols.file_inputs.sort();
+            symbols.file_inputs.dedup();
             write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
         }
         if !errors.is_empty() {

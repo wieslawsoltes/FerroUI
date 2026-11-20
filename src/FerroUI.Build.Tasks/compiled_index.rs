@@ -1,5 +1,5 @@
 //! Retain the actual group membership and exported entry points for file refactors.
-use crate::XamlGroup;
+use crate::{GroupDocuments, XamlGroup};
 use ferroui_build_scan::{
     compiled_index::{CompiledXamlGroup, CompiledXamlMember},
     compiled_names::CompiledGroupKind,
@@ -30,6 +30,7 @@ pub(super) fn group<'a>(
         module: group.module.clone(),
         kind,
         discovery_root: group.documents.is_none().then(|| xaml_root.to_owned()),
+        file_backed: matches!(group.documents, Some(GroupDocuments::Files(_))),
         members: keys
             .into_iter()
             .map(|key| {
@@ -49,7 +50,7 @@ pub(super) fn group<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Build, TypeSystem};
+    use crate::{xaml_document_file, Build, TypeSystem};
     use ferroui_build_scan::compiled_index::CompiledXamlIndex;
     use ferroui_build_scan::export::Export;
     use std::{env, fs};
@@ -83,16 +84,92 @@ mod tests {
         let group = XamlGroup::new("views")
             .documents(&[("A-B.xaml", document), ("A_B.xaml", document)])
             .internal();
+        let old_path = out.join("Original.xaml");
+        let new_path = out.join("Renamed Card.xaml");
+        fs::write(&old_path, document).unwrap();
+        let key = "Published/Accent.xaml";
+        let compile = |file| {
+            let mut build = Build::new(
+                fixtures.clone(),
+                out.clone(),
+                "fixture",
+                dependencies.clone(),
+            )
+            .source_root("lib.rs")
+            .type_system(TypeSystem::Model);
+            for module in ["styles", "internal_styles"] {
+                let group = XamlGroup::new(module).document_files(&[file]);
+                build = build.compile_group(if module == "styles" {
+                    group
+                } else {
+                    group.internal()
+                });
+            }
+            build.execute()
+        };
+        let input_line = line!() + 1;
+        let file = /* 🎨 */ xaml_document_file!(key, old_path.to_str().unwrap());
+        let backed = compile(file);
+        assert!(backed.errors.is_empty(), "{:?}", backed.errors);
+        let read_index = || {
+            CompiledXamlIndex::parse(
+                &fs::read_to_string(out.join(CompiledXamlIndex::FILE_NAME)).unwrap(),
+            )
+            .unwrap()
+        };
+        let before = read_index();
+        let [input] = before.file_inputs.as_slice() else {
+            panic!("shared input should be recorded once");
+        };
+        assert_eq!(input.path, old_path.to_str().unwrap());
+        assert_eq!(input.rust_file, Path::new(file!()));
+        assert_eq!(input.line, input_line);
+        let line = include_str!("compiled_index.rs")
+            .lines()
+            .nth(input_line as usize - 1)
+            .unwrap();
+        assert!(line
+            .chars()
+            .skip(input.column as usize - 1)
+            .collect::<String>()
+            .starts_with("xaml_document_file!"));
+        assert!(before
+            .groups
+            .iter()
+            .all(|group| group.file_backed && group.members[0].key == key));
+        let old_input = format!("cargo::rerun-if-changed={}", old_path.display());
+        assert_eq!(
+            backed
+                .lines
+                .iter()
+                .filter(|line| **line == old_input)
+                .count(),
+            1
+        );
+        let generated = fs::read(out.join("xaml/styles.rs")).unwrap();
+        let metadata_path = out.join("fixture.xamlmeta");
+        let metadata = fs::read_to_string(&metadata_path).unwrap();
+        let assembly = ferroui_build_scan::xaml_metadata::XamlMetadata::parse(&metadata).unwrap();
+        assert_eq!(
+            assembly.documents[0].uri,
+            format!("ferres://{}/{key}", assembly.name)
+        );
+
+        fs::rename(&old_path, &new_path).unwrap();
+        let rebuilt = compile(xaml_document_file!(key, new_path.to_str().unwrap()));
+        assert!(rebuilt.errors.is_empty(), "{:?}", rebuilt.errors);
+        assert_eq!(read_index().file_inputs[0].path, new_path.to_str().unwrap());
+        assert!(!rebuilt.lines.contains(&old_input));
+        assert_eq!(fs::read(out.join("xaml/styles.rs")).unwrap(), generated);
+        assert_eq!(fs::read_to_string(&metadata_path).unwrap(), metadata);
+
         let build = Build::new(fixtures.clone(), out.clone(), "fixture", dependencies)
             .source_root("lib.rs")
             .type_system(TypeSystem::Model)
             .compile_group(group)
             .execute();
         assert!(build.errors.is_empty(), "{:?}", build.errors);
-        let index = CompiledXamlIndex::parse(
-            &fs::read_to_string(out.join(CompiledXamlIndex::FILE_NAME)).unwrap(),
-        )
-        .unwrap();
+        let index = read_index();
         assert!(index.is_supported());
         assert_eq!(index.manifest, fixtures.join("Cargo.toml"));
         let [group] = index.groups.as_slice() else {
