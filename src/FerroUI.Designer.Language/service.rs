@@ -11,6 +11,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 mod definitions;
 mod registered_rename;
+mod registered_types;
 mod refactoring;
 mod source_review;
 #[path = "handler_service.rs"]
@@ -25,7 +26,8 @@ pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, Dict
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
-pub use source_review::ReviewedDocument;
+pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
+pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {

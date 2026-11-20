@@ -1,23 +1,18 @@
 //! Merge semantic Rust rename patches into the original source transaction.
 use super::{
-    FileMoveDraft, FileMovePlan, GeneratedRustRename, move_document, move_drafts, rust::rust_files,
+    FileMoveDraft, FileMovePlan, move_document, move_drafts, rust::rust_files,
 };
-use crate::{DocumentEdits, LanguageError, LanguageService, LineIndex, Result, require};
+use crate::{LanguageError, LanguageService, LineIndex, Result, require};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_project::{
     RustXamlReferences, canonical_file_uri, check_rust_rename_tokens, file_path,
 };
-use serde::Deserialize;
 use std::{
     collections::{BTreeMap, BTreeSet},
     hash::{DefaultHasher, Hash, Hasher},
 };
 
-#[derive(Debug, Deserialize)]
-pub struct FileMoveRustResolution {
-    pub rename: GeneratedRustRename,
-    pub documents: Vec<DocumentEdits>,
-}
+pub use crate::RustRenameResolution as FileMoveRustResolution;
 
 impl LanguageService {
     /// Replan against current buffers after the host requests semantic Rust

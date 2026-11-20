@@ -53,6 +53,12 @@ Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two revie
 
 The service resolves the property through the consuming package's build schema, refreshes unopened XAML, and validates each patch against the proposed name. The review contains each affected document's original text, versioned patches, proposed text, and any potential XAML references with unmapped targets. Hosts recompute the plan and compare its review identifier before staging a single undoable transaction. Studio calls the same planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-property)
 
+## Registered type rename
+
+The `ferrouiRegisteredTypeRename` capability advertises `ferroui/registeredTypeTarget`, `ferroui/planRegisteredTypeRename`, and `ferroui/completeRegisteredTypeRename`. Use `textDocument.uri` and a versioned UTF-16 `request` to identify the build-registered type. The plan also takes `newName` and the relevant open Rust `sourceDrafts`. A literal alias returns a complete review.
+
+Some type registrations inherit their public name from a Rust item. The build index records that item's physical module and source file. A plan with `rustRename` needs semantic Rust edits for that declaration. The host resolves the request through rust-analyzer and submits the `review` identifier and `resolution` to the completion request. The engine checks editable paths, versions, the Rust identifier tokens and the new XAML resolution before returning a complete review. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-type)
+
 ## Resource dictionary extraction
 
 Clients that set `initializationOptions.ferrouiExtractionCommands` receive the `refactor.extract` action for an authored dictionary. `ferroui/dictionaryExtractionTarget` resolves the caret and version to an inline scope. `ferroui/planDictionaryExtraction` adds a sibling `fileName` and returns the replacement, the proposed file, and a review identifier. The host asks for a fresh plan and matches the identifier before committing the edits. Studio uses the same service directly. [User guide](../../docs/designer/vscode/authoring.md#extract-a-resource-dictionary)

@@ -16,6 +16,8 @@ pub mod lsp;
 mod project_schema;
 #[cfg(test)]
 mod project_navigation_tests;
+#[cfg(test)]
+mod registered_type_rename_tests;
 mod references;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod rust_analyzer;

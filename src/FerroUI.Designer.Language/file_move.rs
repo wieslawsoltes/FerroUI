@@ -21,6 +21,7 @@ mod symbol_edits;
 #[path = "file_move_saved.rs"]
 mod saved;
 use rust::CompiledAddresses;
+pub(super) use rust::rust_files;
 pub use rust::GeneratedRustRename;
 pub use symbol_edits::FileMoveRustResolution;
 
@@ -216,7 +217,7 @@ impl LanguageService {
     }
 }
 
-fn move_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDraft>> {
+pub(super) fn move_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDraft>> {
     require(drafts.len() <= 256, "Too many open drafts for a file move")?;
     let mut snapshots = BTreeMap::new();
     let mut remaining = MAX_DRAFT_BYTES;

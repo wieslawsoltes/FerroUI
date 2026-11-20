@@ -25,6 +25,21 @@ pub struct AuthoredDefinition {
     pub member: Option<String>,
     /// Literal public name in a direct property registration, when available.
     pub registered_name: Option<String>,
+    /// The declaration of the Rust item behind an implicitly named XAML type.
+    pub type_declaration: Option<RustTypeDeclaration>,
+}
+
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct RustTypeDeclaration {
+    pub file: PathBuf,
+    pub modules: Vec<String>,
+    pub name: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum TypeNameEdit {
+    Alias(std::ops::Range<usize>),
+    Symbol(std::ops::Range<usize>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -116,6 +131,7 @@ impl AuthoredDefinition {
             owner: entry.text("owner")?,
             member: entry.optional_text("member")?,
             registered_name: entry.optional_text("registered_name")?,
+            type_declaration: entry.optional("type_declaration", RustTypeDeclaration::parse)?,
         })
     }
 
@@ -129,7 +145,33 @@ impl AuthoredDefinition {
                 .text("kind", self.kind.spelling())
                 .text("owner", &self.owner)
                 .optional_text("member", &self.member)
-                .optional_text("registered_name", &self.registered_name),
+                .optional_text("registered_name", &self.registered_name)
+                .optional(
+                    "type_declaration",
+                    self.type_declaration
+                        .as_ref()
+                        .map(RustTypeDeclaration::to_json),
+                ),
+        )
+    }
+}
+
+impl RustTypeDeclaration {
+    fn parse(value: &Json) -> Result<Self, String> {
+        let entry = Fields::of(value, "authored Rust type")?;
+        Ok(Self {
+            file: entry.text("file")?.into(),
+            modules: entry.list("modules", |value| text_of(value, "inline module"))?,
+            name: entry.text("name")?,
+        })
+    }
+
+    fn to_json(&self) -> Json {
+        Json::object(
+            Members::new()
+                .text("file", &self.file.to_string_lossy())
+                .list("modules", &self.modules, |name| Json::string(name))
+                .text("name", &self.name),
         )
     }
 }

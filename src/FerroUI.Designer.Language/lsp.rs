@@ -226,6 +226,22 @@ impl LspServer {
                     uri, &request, text(params, "newName")?, draft.as_ref(),
                 )?))
             }
+            "ferroui/registeredTypeTarget" | "ferroui/planRegisteredTypeRename" | "ferroui/completeRegisteredTypeRename" => {
+                let uri = uri(params)?;
+                let request = decode(&params["request"])?;
+                if method == "ferroui/registeredTypeTarget" {
+                    return Ok(json!(self.service.registered_type_target(uri, &request)?));
+                }
+                let drafts: Vec<crate::FileMoveDraft> = decode(&params["sourceDrafts"])?;
+                let name = text(params, "newName")?;
+                if method == "ferroui/completeRegisteredTypeRename" {
+                    let resolution = decode(&params["resolution"])?;
+                    return Ok(json!(self.service.complete_registered_type_rename(
+                        uri, &request, name, &drafts, text(params, "review")?, &resolution,
+                    )?));
+                }
+                Ok(json!(self.service.plan_registered_type_rename(uri, &request, name, &drafts)?))
+            }
             "textDocument/references" => {
                 let (uri, offset) = self.position(params)?;
                 let include = params["context"]["includeDeclaration"]
@@ -491,7 +507,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiRegisteredPropertyRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

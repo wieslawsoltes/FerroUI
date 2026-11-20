@@ -16,8 +16,9 @@ use std::{
     path::Path,
     sync::Arc,
 };
+pub use super::source_review::RegisteredRenamePlan as RegisteredPropertyPlan;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct RegisteredPropertyRequest {
     pub version: i64,
     pub position: Position,
@@ -29,16 +30,6 @@ pub struct RegisteredPropertyTarget {
     pub name: String,
     pub range: Range,
     pub rust_uri: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RegisteredPropertyPlan {
-    pub name: String,
-    pub new_name: String,
-    pub review: String,
-    pub documents: Vec<ReviewedDocument>,
-    pub unmapped: Vec<Location>,
 }
 
 impl LanguageService {
@@ -137,6 +128,7 @@ impl LanguageService {
             review,
             documents,
             unmapped,
+            rust_rename: None,
         })
     }
 
@@ -231,14 +223,14 @@ fn rust_document(
     )
 }
 
-fn check_incomplete(uri: &str, state: &State, old: &str, new: &str) -> Result<()> {
+pub(super) fn check_incomplete(uri: &str, state: &State, old: &str, new: &str) -> Result<()> {
     let relevant = |source: &str| sites::mentions(source, old) || sites::mentions(source, new);
     let path = file_path(uri)?;
     let disk_mentions =
         state.opened && path.is_file() && read_xaml(&path).map(|source| relevant(&source))?;
     require(
         !relevant(state.document.source()) && !disk_mentions,
-        format!("Repair the incomplete XAML that may use the property before reviewing: {uri}"),
+        format!("Repair the incomplete XAML that may use the name before reviewing: {uri}"),
     )
 }
 

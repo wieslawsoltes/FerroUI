@@ -1,10 +1,10 @@
 //! Resolve build-identified declarations against a current Rust file.
 use super::{
-    Builder, Scan, Site,
     declarations::{
-        Accessor, Declaration, MarkupBody, read_declaration, read_property, read_registration,
+        read_declaration, read_property, read_registration, Accessor, Declaration, MarkupBody,
     },
-    tokens::{Cursor, text_of, tokens_of},
+    tokens::{text_of, tokens_of, Cursor},
+    Builder, Scan, Site,
 };
 use crate::authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind};
 use std::{
@@ -13,6 +13,9 @@ use std::{
 };
 use syn::spanned::Spanned;
 use syn::{ImplItem, Item, Macro, Type};
+
+#[path = "authored_types.rs"]
+mod type_names;
 
 impl Builder {
     pub(super) fn record_definition(
@@ -46,6 +49,7 @@ impl Builder {
             owner: owner.to_owned(),
             member: member.map(str::to_owned),
             registered_name: registered_name.map(str::to_owned),
+            type_declaration: None,
         });
     }
 }
@@ -53,6 +57,7 @@ impl Builder {
 impl Scan {
     pub fn authored_symbols(&self, manifest: &Path) -> AuthoredSymbols {
         let package = manifest.parent();
+        let modules = self.type_source_modules();
         let mut definitions = self
             .authored_definitions
             .iter()
@@ -66,6 +71,11 @@ impl Scan {
                 }
                 Some(AuthoredDefinition {
                     file: file.to_owned(),
+                    type_declaration: definition
+                        .member
+                        .is_none()
+                        .then(|| self.type_declaration(package?, &definition.rust_type, &modules))
+                        .flatten(),
                     ..definition.clone()
                 })
             })
@@ -105,18 +115,7 @@ impl AuthoredDefinition {
         let body = rust_body(source);
         let offset = source.len() - body.len();
         let parsed = syn::parse_str::<syn::File>(body).ok()?;
-        let mut items = parsed.items.as_slice();
-        for expected in &self.modules {
-            let mut modules = items.iter().filter_map(|item| match item {
-                Item::Mod(module) if module.ident == expected => module.content.as_ref(),
-                _ => None,
-            });
-            let (_, body) = modules.next()?;
-            if modules.next().is_some() {
-                return None;
-            }
-            items = body;
-        }
+        let items = module_items(&parsed, &self.modules)?;
         let mut matches = Vec::new();
         for item in items {
             match item {
@@ -277,4 +276,20 @@ fn rust_body(source: &str) -> &str {
         }
         _ => body,
     }
+}
+
+fn module_items<'a>(file: &'a syn::File, modules: &[String]) -> Option<&'a [Item]> {
+    let mut items = file.items.as_slice();
+    for expected in modules {
+        let mut matches = items.iter().filter_map(|item| match item {
+            Item::Mod(module) if module.ident == expected => module.content.as_ref(),
+            _ => None,
+        });
+        let (_, body) = matches.next()?;
+        if matches.next().is_some() {
+            return None;
+        }
+        items = body;
+    }
+    Some(items)
 }

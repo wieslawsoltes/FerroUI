@@ -146,7 +146,7 @@ impl LanguageService {
     }
 }
 
-pub(super) fn rust_files(
+pub(in crate::service) fn rust_files(
     service: &LanguageService,
 ) -> BTreeMap<&str, (&DocumentEntry, &ProjectDescriptor, &ProjectWorkspace)> {
     let mut files = BTreeMap::new();

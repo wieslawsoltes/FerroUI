@@ -1,4 +1,4 @@
-//! A scoped rust-analyzer session for resolving compiler-generated XAML symbols.
+//! A scoped rust-analyzer session for resolving Rust references in source reviews.
 //! Source transactions are still planned and validated by the language service.
 mod session;
 #[cfg(test)]
@@ -6,10 +6,11 @@ mod tests;
 mod workspace_edit;
 
 use crate::{
-    FileMoveDraft, FileMoveRustResolution, GeneratedRustRename, LanguageError, Result, require,
+    require, FileMoveDraft, FileMoveRustResolution, GeneratedRustRename, LanguageError, Result,
+    RustRenameResolution, RustSymbolRename,
 };
 use ferroui_designer_project::{canonical_file_uri, file_path, file_uri};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use session::Session;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -39,6 +40,63 @@ pub fn resolve_file_move(
     if renames.is_empty() {
         return Ok(Vec::new());
     }
+    let generated = renames
+        .iter()
+        .map(|rename| {
+            file_path(&rename.uri).map(|path| path.parent().unwrap_or(&path).to_path_buf())
+        })
+        .collect::<std::result::Result<BTreeSet<_>, _>>()?;
+    with_session(project, drafts, cancelled, |server, versions| {
+        renames
+            .iter()
+            .map(|rename| {
+                workspace_edit::resolve(
+                    rename,
+                    rename_symbol(server, rename)?,
+                    &generated,
+                    versions,
+                )
+            })
+            .collect()
+    })
+}
+
+/// Resolve a real Rust declaration after the XAML service has identified it.
+pub fn resolve_registered_type(
+    project: &RustAnalyzerProject,
+    rename: &RustSymbolRename,
+    drafts: &[FileMoveDraft],
+    cancelled: &AtomicBool,
+) -> Result<RustRenameResolution> {
+    with_session(project, drafts, cancelled, |server, versions| {
+        workspace_edit::resolve_authored(rename, rename_symbol(server, rename)?, versions)
+    })
+}
+
+fn rename_symbol(server: &mut Session, rename: &RustSymbolRename) -> Result<Value> {
+    server
+        .request(
+            "textDocument/rename",
+            json!({
+                "textDocument": {"uri": rename.uri},
+                "position": rename.position,
+                "newName": rename.new_name,
+            }),
+        )
+        .map_err(|error| {
+            LanguageError(format!(
+                "Resolve {} in the selected Cargo build. {error}",
+                rename.old_name
+            ))
+        })
+}
+
+fn with_session<T>(
+    project: &RustAnalyzerProject,
+    drafts: &[FileMoveDraft],
+    cancelled: &AtomicBool,
+    work: impl FnOnce(&mut Session, &BTreeMap<String, i64>) -> Result<T>,
+) -> Result<T> {
     let root = file_uri(&project.root)?;
     let package = project
         .manifest
@@ -89,35 +147,9 @@ pub fn resolve_file_move(
         }
     }
     server.wait_until_ready()?;
-    let generated = renames
-        .iter()
-        .map(|rename| {
-            file_path(&rename.uri).map(|path| path.parent().unwrap_or(&path).to_path_buf())
-        })
-        .collect::<std::result::Result<BTreeSet<_>, _>>()?;
-    let mut result = Vec::with_capacity(renames.len());
-    for rename in renames {
-        let response = server
-            .request(
-                "textDocument/rename",
-                json!({
-                    "textDocument": {"uri": rename.uri},
-                    "position": rename.position,
-                    "newName": rename.new_name
-                }),
-            )
-            .map_err(|error| {
-                LanguageError(format!(
-                    "Resolve {} in the selected Cargo build. {error}",
-                    rename.old_name
-                ))
-            })?;
-        result.push(workspace_edit::resolve(
-            rename, response, &generated, &versions,
-        )?);
-    }
+    let result = work(&mut server, &versions);
     server.finish();
-    Ok(result)
+    result
 }
 
 impl RustAnalyzerProject {

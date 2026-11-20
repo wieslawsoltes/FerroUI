@@ -1,7 +1,7 @@
 //! Build-scoped Rust definitions and their validated physical source files.
 use super::MarkupCatalog;
 use ferroui_build_scan::{
-    authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind},
+    authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind, TypeNameEdit},
     model::{AssemblyModel, TypeModel},
 };
 use std::{
@@ -25,11 +25,14 @@ impl MarkupSource {
     /// Resolve the source each time so a moved file or a replacement symlink
     /// cannot supply the range for a different declaration.
     pub fn file(&self) -> Option<PathBuf> {
-        let file = self
-            .package
-            .join(&self.definition.file)
-            .canonicalize()
-            .ok()?;
+        self.resolve_file(&self.definition.file)
+    }
+
+    fn resolve_file(&self, relative: &Path) -> Option<PathBuf> {
+        if !relative_rust_path(relative) {
+            return None;
+        }
+        let file = self.package.join(relative).canonicalize().ok()?;
         (file.starts_with(&self.package)
             && file.extension().is_some_and(|extension| extension == "rs")
             && file.is_file())
@@ -42,6 +45,40 @@ impl MarkupSource {
 
     pub fn property_name_range(&self, text: &str, new_name: &str) -> Option<Range<usize>> {
         self.definition.property_name_range(text, new_name)
+    }
+
+    pub fn type_name_edit(&self, text: &str, new_name: &str) -> Option<TypeNameEdit> {
+        self.definition.type_name_edit(text, new_name)
+    }
+
+    pub fn type_file(&self) -> Option<PathBuf> {
+        self.resolve_file(&self.definition.type_declaration.as_ref()?.file)
+    }
+
+    pub fn type_range_in(&self, source: &str) -> Option<Range<usize>> {
+        self.definition.type_declaration.as_ref()?.range_in(source)
+    }
+
+    pub fn package(&self) -> &Path {
+        &self.package
+    }
+
+    pub fn is_class(&self) -> bool {
+        self.definition.kind == DeclarationKind::Class
+    }
+
+    /// Compare registrations across build receipts independently of optional source hints.
+    pub fn same_registration(&self, other: &Self) -> bool {
+        let (left, right) = (&self.definition, &other.definition);
+        self.package == other.package
+            && left.rust_type == right.rust_type
+            && left.type_name == right.type_name
+            && left.file == right.file
+            && left.modules == right.modules
+            && left.kind == right.kind
+            && left.owner == right.owner
+            && left.member == right.member
+            && left.registered_name == right.registered_name
     }
 }
 
@@ -87,8 +124,23 @@ impl MarkupSources {
                     entry.insert(Some(Arc::new(source)));
                 }
                 Entry::Occupied(mut entry) => {
-                    if entry.get().as_deref() != Some(&source) {
-                        entry.insert(None);
+                    if let Some(prior) = entry.get() {
+                        if prior.same_registration(&source) {
+                            match (
+                                &prior.definition.type_declaration,
+                                &source.definition.type_declaration,
+                            ) {
+                                (None, Some(_)) => {
+                                    entry.insert(Some(Arc::new(source)));
+                                }
+                                (Some(a), Some(b)) if a != b => {
+                                    entry.insert(None);
+                                }
+                                _ => {}
+                            }
+                        } else {
+                            entry.insert(None);
+                        }
                     }
                 }
             }

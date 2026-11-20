@@ -241,30 +241,46 @@ pub(crate) struct Argument {
     pub quote: Option<char>,
 }
 pub(crate) fn markup_arguments(source: &str) -> Vec<Argument> {
-    collect_markup_arguments(source, false)
+    collect_markup_tokens(source, false, false).arguments
 }
 
 /// Include direct extension-valued arguments such as `DataType={x:Type local:Model}`.
 pub(crate) fn markup_arguments_with_extensions(source: &str) -> Vec<Argument> {
-    collect_markup_arguments(source, true)
+    collect_markup_tokens(source, true, false).arguments
 }
 
-fn collect_markup_arguments(source: &str, include_extensions: bool) -> Vec<Argument> {
-    let decoded = Decoded::new(source);
-    if !decoded.text.starts_with('{') || decoded.text.starts_with("{}") {
-        return Vec::new();
-    }
-    let mut arguments = Vec::new();
-    parse_extension(&decoded, 0, 0, include_extensions, &mut arguments);
-    arguments.sort_by_key(|argument| argument.span.start);
-    arguments
+pub(crate) struct MarkupTokens {
+    pub arguments: Vec<Argument>,
+    pub names: Vec<(String, SourceSpan)>,
+    include_names: bool,
+    include_extensions: bool,
 }
+
+/// Lex names and their value arguments together, preserving nesting and escaped text.
+pub(crate) fn markup_tokens(source: &str) -> MarkupTokens {
+    collect_markup_tokens(source, false, true)
+}
+
+fn collect_markup_tokens(source: &str, include_extensions: bool, include_names: bool) -> MarkupTokens {
+    let decoded = Decoded::new(source);
+    let mut tokens = MarkupTokens {
+        arguments: Vec::new(),
+        names: Vec::new(),
+        include_names,
+        include_extensions,
+    };
+    if decoded.text.starts_with('{') && !decoded.text.starts_with("{}") {
+        parse_extension(&decoded, 0, 0, &mut tokens);
+    }
+    tokens.arguments.sort_by_key(|argument| argument.span.start);
+    tokens
+}
+
 fn parse_extension(
     source: &Decoded,
     open: usize,
     depth: usize,
-    include_extensions: bool,
-    out: &mut Vec<Argument>,
+    out: &mut MarkupTokens,
 ) -> usize {
     if depth >= 128 {
         return source.text.len();
@@ -275,6 +291,9 @@ fn parse_extension(
         .find(|c: char| c.is_whitespace() || matches!(c, ',' | '}' | '{'))
         .map_or(text.len(), |i| start + i);
     let extension = &text[start..end];
+    if out.include_names && start < end {
+        out.names.push((extension.into(), SourceSpan::new(source.boundaries[start], source.boundaries[end])));
+    }
     let mut at = skip_space(text, end);
     let mut segment = at;
     let mut equal = None;
@@ -305,7 +324,7 @@ fn parse_extension(
         match ch {
             '\'' | '"' => quote = Some(ch),
             '{' => {
-                at = parse_extension(source, at, depth + 1, include_extensions, out);
+                at = parse_extension(source, at, depth + 1, out);
                 continue;
             }
             '=' => {
@@ -314,7 +333,7 @@ fn parse_extension(
                 }
             }
             ',' | '}' => {
-                push_argument(source, extension, depth, segment..at, equal, include_extensions, out);
+                push_argument(source, extension, depth, segment..at, equal, out.include_extensions, &mut out.arguments);
                 if ch == '}' {
                     return next;
                 }
@@ -325,7 +344,7 @@ fn parse_extension(
         }
         at = next;
     }
-    push_argument(source, extension, depth, segment..at, equal, include_extensions, out);
+    push_argument(source, extension, depth, segment..at, equal, out.include_extensions, &mut out.arguments);
     at
 }
 fn push_argument(

@@ -43,7 +43,7 @@ mod cards {
     }
 }"#;
 
-const PLACE: &str = r#"pub struct Place;
+pub(super) const PLACE: &str = r#"pub struct Place;
 ferro_markup_type!(struct Place as "PostalAddress" {
     namespace: "Customer.Data",
     properties: [Street: String { get: address_street }],
@@ -58,10 +58,10 @@ const VIEW: &str = r#"<StackPanel xmlns="https://github.com/ferroui"
 
 static NEXT: AtomicUsize = AtomicUsize::new(0);
 
-struct CatalogFixture(PathBuf);
+pub(super) struct CatalogFixture(pub(super) PathBuf);
 
 impl CatalogFixture {
-    fn create() -> Self {
+    pub(super) fn create() -> Self {
         let root = std::env::temp_dir().join(format!(
             "ferroui-project-navigation-{}-{}",
             std::process::id(),
@@ -73,11 +73,11 @@ impl CatalogFixture {
         Self(root.canonicalize().unwrap())
     }
 
-    fn write(&self, path: &str, text: &str) {
+    pub(super) fn write(&self, path: &str, text: &str) {
         fs::write(self.0.join(path), text).unwrap();
     }
 
-    fn build(&self) -> BuildMetadata {
+    pub(super) fn build(&self) -> BuildMetadata {
         self.write(
             "app/Cargo.toml",
             "[package]\nname='customer-app'\nversion='0.1.0'\n[lib]\npath='lib.rs'\n",
