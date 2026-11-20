@@ -87,19 +87,13 @@ def build(source, profile, mode, options):
         command += ["--config", value]
     command += ["--", "--print", "native-static-libs"]
     output = run(command, cwd=source, capture=True)
+    # Without the colours of a terminal (`CARGO_TERM_COLOR=always` on CI), whose escape sequences
+    # would end the last library of the line (`-lm` followed by a reset).
+    output = re.sub(r"\x1b\[[0-9;]*m", "", output)
     found = re.findall(r"native-static-libs: (.*)", output)
     if not found:
         raise SystemExit("rustc printed no native-static-libs line")
-    return system_libraries_dropped(found[-1].split())
-
-
-def system_libraries_dropped(native):
-    """The native libraries without `-lSystem`, `-lc` and `-lm` on macOS: clang links libSystem by
-    default, and libc and libm are part of it (an SDK need not have their stubs: the macOS runner
-    failed with `library 'm' not found`)."""
-    if sys.platform != "darwin":
-        return native
-    return [item for item in native if item not in ("-lSystem", "-lc", "-lm")]
+    return found[-1].split()
 
 
 def text_sizes(path):
