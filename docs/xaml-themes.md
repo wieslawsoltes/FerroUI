@@ -703,6 +703,7 @@ section 9).
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, control documents as units | #568 | In review |
+| Material: the packed installer of the compatibility palette (`PACKED_INSTALLER`, off); the embedded font assets as the feature `embedded-font-assets` (on) | #856 | In review, to be measured |
 | `MergeResourceInclude` inside an inline dictionary; the Material theme's inherited resource documents as units | #633 | In review |
 | Compiled bindings in all themes | #603 | In review |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |
