@@ -131,6 +131,24 @@ pub extern "C" fn ferro_app_run(options: *const c_void, on_start: FerroStartFn, 
     })
 }
 
+/// The Fluent theme: the whole theme with the tables of types (the full mode), else the units the
+/// entries called so far need with the ambient ones (the by-use mode, docs/c-abi.md, section 16).
+#[cfg(feature = "desktop")]
+fn theme() -> Ref<ferroui_themes_fluent::FluentTheme> {
+    #[cfg(feature = "type-tables")]
+    {
+        ferroui_themes_fluent::FluentTheme::new()
+    }
+    #[cfg(not(feature = "type-tables"))]
+    {
+        use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
+        let parts = crate::types::theme_parts(crate::api_types::AMBIENT_UNITS);
+        // A later load of the theme by URI gets the same units.
+        rt::register_theme_parts_if_absent(ferroui_themes_fluent::compiled_xaml::THEME_CLASS, parts);
+        ferroui_themes_fluent::FluentTheme::with_parts(None, parts)
+    }
+}
+
 #[cfg(feature = "desktop")]
 fn run(on_start: unsafe extern "C" fn(i64) -> i64, token: i64) -> Result<()> {
     use ferroui_controls::{AppBuilder, Application};
@@ -140,7 +158,7 @@ fn run(on_start: unsafe extern "C" fn(i64) -> i64, token: i64) -> Result<()> {
     let mut result = Ok(());
     AppBuilder::configure::<Application>().use_platform_detect().start(
         |app, _| {
-            app.styles().add(ferroui_themes_fluent::FluentTheme::new().as_style());
+            app.styles().add(theme().as_style());
             let stop = CancellationToken::new();
             APP.with(|state| *state.stop.borrow_mut() = Some(stop.clone()));
             // SAFETY: the caller gave a function of the `FerroStartFn` signature.
