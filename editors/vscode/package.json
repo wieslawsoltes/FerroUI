@@ -490,12 +490,12 @@
         },
         {
           "command": "ferroui.fileMoveReview.apply",
-          "when": "ferroui.reviewingFileMove",
+          "when": "ferroui.reviewingFileMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-file-move-review)",
           "group": "navigation@1"
         },
         {
           "command": "ferroui.fileMoveReview.cancel",
-          "when": "ferroui.reviewingFileMove",
+          "when": "ferroui.reviewingFileMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-file-move-review)",
           "group": "navigation@2"
         }
       ],

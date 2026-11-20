@@ -45,11 +45,13 @@ export class FileMoveReview implements vscode.Disposable {
         const relative = (uri: vscode.Uri) => vscode.workspace.asRelativePath(uri, false);
         const title = `Move ${relative(from)} → ${relative(to)}`;
         const review = { id: String(serial), title, contents: new Map<string, string>(), apply };
-        const resources = plan.documents.map(document => {
+        const documents = [...plan.documents].sort((left, right) => Number(right.edit.uri === plan.from) - Number(left.edit.uri === plan.from));
+        const resources = documents.map((document, index) => {
             const source = vscode.Uri.parse(document.edit.uri, true);
             const destination = document.edit.uri === plan.from ? to : source;
             const store = (part: string, uri: vscode.Uri, text: string) => {
-                const version = vscode.Uri.from({ scheme, path: `/${part}${uri.path}`, query: review.id });
+                const name = vscode.workspace.asRelativePath(uri).replaceAll('\\', '/');
+                const version = vscode.Uri.from({ scheme, path: `/${name.replace(/^\/+/, '')}`, query: `${review.id}/${index}/${part}` });
                 review.contents.set(version.toString(), text);
                 return version;
             };
@@ -70,7 +72,7 @@ export class FileMoveReview implements vscode.Disposable {
 
     private isActive(review: Review): boolean {
         const tab = vscode.window.tabGroups.activeTabGroup.activeTab;
-        return !!tab && (tab.label === review.title || this.isReviewSource(tab, review));
+        return !!tab && (isReviewTab(tab, review) || this.isReviewSource(tab, review));
     }
 
     private setContext(): void {
@@ -80,12 +82,12 @@ export class FileMoveReview implements vscode.Disposable {
     private isReviewSource(tab: vscode.Tab, review: Review): boolean {
         const input = tab.input;
         const uri = input instanceof vscode.TabInputTextDiff ? input.modified : input instanceof vscode.TabInputText ? input.uri : undefined;
-        return uri?.scheme === scheme && uri.query === review.id;
+        return uri?.scheme === scheme && uri.query.startsWith(`${review.id}/`);
     }
 
     private async close(review: Review): Promise<void> {
         if (this.current === review) this.current = undefined;
-        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs.filter(tab => tab.label === review.title || this.isReviewSource(tab, review)));
+        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs.filter(tab => isReviewTab(tab, review) || this.isReviewSource(tab, review)));
         if (tabs.length) await vscode.window.tabGroups.close(tabs);
         this.setContext();
     }
@@ -94,4 +96,9 @@ export class FileMoveReview implements vscode.Disposable {
         this.current = undefined;
         this.subscriptions.forEach(subscription => subscription.dispose());
     }
+}
+
+function isReviewTab(tab: vscode.Tab, review: Review): boolean {
+    // The native Changes editor appends its localized file count to the label.
+    return tab.label === review.title || tab.label.startsWith(`${review.title} (`);
 }

@@ -54,8 +54,8 @@ type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetPropert
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
     private readonly dependencies = new DesignerDependencies();
-    private readonly layers: LayerViews;
-    private readonly guides: GuideViews;
+    private layers: LayerViews;
+    private guides: GuideViews;
     private readonly snapping = new DesignerSnapping(() => this.canvasGuides, frame => this.canUse(frame), () => this.getClient());
     private readonly subscriptions: vscode.Disposable[] = [];
     private readonly changed = new vscode.EventEmitter<void>();
@@ -65,8 +65,10 @@ export class DesignerPanel implements vscode.Disposable {
     private disposed = false;
     private ready = false;
     private timer?: ReturnType<typeof setTimeout>;
+    private sourceCloseTimer?: ReturnType<typeof setTimeout>;
     private generation = 0;
     private pending = true;
+    private relocating = false;
     private rendering = false;
     private editing = false;
     private viewport: Viewport;
@@ -91,9 +93,9 @@ export class DesignerPanel implements vscode.Disposable {
     constructor(
         private readonly context: vscode.ExtensionContext,
         private readonly output: vscode.OutputChannel,
-        projects: BuiltProjects,
+        private readonly projects: BuiltProjects,
         readonly panel: vscode.WebviewPanel,
-        readonly document: vscode.TextDocument,
+        private sourceDocument: vscode.TextDocument,
         readonly session: number,
         readonly language: Language,
         caret: vscode.Position,
@@ -101,6 +103,7 @@ export class DesignerPanel implements vscode.Disposable {
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
         restored?: DesignerCanvasState,
     ) {
+        const document = this.document;
         this.caret = caret;
         this.viewport = restored?.viewport ?? DEFAULT_VIEWPORT;
         this.designData = restored?.designData;
@@ -120,14 +123,14 @@ export class DesignerPanel implements vscode.Disposable {
             }),
             panel.webview.onDidReceiveMessage((message: FromDesigner) => { void this.message(message); }),
             projects.onDidChange(() => {
-                const project = projects.forDocument(document.uri);
+                const project = projects.forDocument(this.document.uri);
                 if (project === this.project) return;
                 this.project = project;
                 this.schedule(0);
             }),
             vscode.workspace.onDidChangeTextDocument(event => {
                 if (!event.contentChanges.length) return;
-                if (event.document !== document) { this.dependencyChanged(event.document.uri); return; }
+                if (event.document !== this.document) { this.dependencyChanged(event.document.uri); return; }
                 if (this.blockOffset !== undefined) {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
@@ -136,11 +139,11 @@ export class DesignerPanel implements vscode.Disposable {
                 this.schedule();
             }),
             vscode.workspace.onDidCloseTextDocument(closed => {
-                if (closed === document) panel.dispose();
+                if (closed === this.document) void this.sourceClosed(closed);
                 else if (closed.isDirty) this.dependencyChanged(closed.uri);
             }),
             vscode.window.onDidChangeTextEditorSelection(event => {
-                if (event.textEditor.document === document && event.selections[0]) this.updateCaret(event.selections[0].active);
+                if (event.textEditor.document === this.document && event.selections[0]) this.updateCaret(event.selections[0].active);
             }),
             vscode.workspace.onDidChangeConfiguration(event => {
                 if (event.affectsConfiguration('ferroui.preview.path')) { this.stopClient(); this.schedule(0); }
@@ -148,6 +151,47 @@ export class DesignerPanel implements vscode.Disposable {
         );
         panel.webview.options = webviewOptions(context.extensionUri);
         panel.webview.html = designerHtml(panel.webview, context.extensionUri, language);
+    }
+
+    get document(): vscode.TextDocument { return this.sourceDocument; }
+
+    startFileMove(): void {
+        clearTimeout(this.sourceCloseTimer);
+        this.relocating = true;
+        this.schedule(0);
+    }
+
+    finishFileMove(document?: vscode.TextDocument): void {
+        if (this.disposed) return;
+        this.relocating = false;
+        if (document) {
+            this.layers = new LayerViews(document, this.language, this.layers.saved);
+            this.guides = new GuideViews(document, this.guides.saved);
+            this.sourceDocument = document;
+            this.caret = document.validatePosition(this.caret);
+            this.project = this.projects.forDocument(document.uri);
+            this.panel.title = `Design · ${document.uri.path.split('/').at(-1)}`;
+        } else if (this.document.isClosed) {
+            this.panel.dispose();
+            return;
+        }
+        this.schedule(0);
+    }
+
+    private async sourceClosed(closed: vscode.TextDocument): Promise<void> {
+        if (this.relocating) return;
+        if (this.language !== 'xaml' || closed.uri.scheme !== 'file') {
+            this.panel.dispose();
+            return;
+        }
+        this.schedule(0);
+        const missing = await vscode.workspace.fs.stat(closed.uri).then(
+            () => false, (error: vscode.FileSystemError) => error.code === 'FileNotFound');
+        if (this.disposed || this.document !== closed || this.relocating) return;
+        if (missing) {
+            // Undo can close the source before reporting the inverse rename.
+            this.sourceCloseTimer = setTimeout(() => this.panel.dispose(), 1500);
+        } else this.panel.dispose();
     }
 
     show(caret: vscode.Position): void {
@@ -161,7 +205,8 @@ export class DesignerPanel implements vscode.Disposable {
 
     get currentToken(): number | undefined {
         const frame = this.frame;
-        if (frame && !this.disposed && frame.token === this.generation && frame.version === this.document.version) return frame.token;
+        if (frame && !this.disposed && !this.document.isClosed
+            && frame.token === this.generation && frame.version === this.document.version) return frame.token;
         return undefined;
     }
 
@@ -696,7 +741,8 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     private async render(): Promise<void> {
-        if (this.disposed || !(this.inspected || this.readers || this.canvasReady) || !this.pending || this.rendering || this.timer) return;
+        if (this.disposed || this.relocating || this.document.isClosed || !(this.inspected || this.readers || this.canvasReady)
+            || !this.pending || this.rendering || this.timer) return;
         this.rendering = true;
         this.pending = false;
         const token = this.generation;
@@ -1039,6 +1085,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.disposed = true;
         this.changed.fire();
         clearTimeout(this.timer);
+        clearTimeout(this.sourceCloseTimer);
         this.stopClient();
         this.canvasRequests.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());

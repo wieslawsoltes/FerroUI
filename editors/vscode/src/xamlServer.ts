@@ -98,10 +98,10 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString() });
     }
 
-    async withReviewedFileMove(from: vscode.Uri, to: vscode.Uri, apply: () => Promise<void>): Promise<void> {
+    async withReviewedFileMove<T>(from: vscode.Uri, to: vscode.Uri, apply: () => PromiseLike<T>): Promise<T> {
         if (this.reviewedMove) throw new Error('A reviewed XAML file move is already being applied.');
         this.reviewedMove = { from: from.toString(), to: to.toString() };
-        try { await apply(); }
+        try { return await apply(); }
         finally { this.reviewedMove = undefined; }
     }
 

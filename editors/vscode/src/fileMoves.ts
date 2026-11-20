@@ -1,7 +1,8 @@
-import { readFile, realpath } from 'node:fs/promises';
+import { lstat, readFile, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { FileMoveDocument, FileMovePlan } from './fileMoveProtocol';
+import { recoverFileMove } from './fileMoveRecovery';
 import { FileMoveReview } from './fileMoveReview';
 import { asRange } from './textDocument';
 import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
@@ -12,7 +13,7 @@ export interface FileMoveRequest { path: string; folder?: string; destination: s
 export class FileMoves implements vscode.Disposable {
     private readonly review = new FileMoveReview();
 
-    constructor(private readonly server: XamlServer) {}
+    constructor(private readonly server: XamlServer, private readonly moveFailed: (from: vscode.Uri) => void) {}
 
     async open(uri: vscode.Uri | undefined): Promise<void> {
         if (!uri) throw new Error('Choose a project XAML file to move.');
@@ -23,7 +24,12 @@ export class FileMoves implements vscode.Disposable {
             validateInput: value => value.trim().toLowerCase().endsWith('.xaml') ? undefined : 'Enter a destination .xaml file.',
         });
         if (destination === undefined) return;
-        const to = await newWorkspaceFile(destination.trim(), folder.uri.toString());
+        await this.reviewMove(uri, destination.trim());
+    }
+
+    async reviewMove(uri: vscode.Uri, destination: string): Promise<void> {
+        const folder = await requireXaml(uri);
+        const to = await newWorkspaceFile(destination, folder.uri.toString());
         const plan = await this.plan(uri, to);
         await this.review.open(plan, validate => this.apply(uri, to, plan.review, undefined, validate).then(() => to));
     }
@@ -46,8 +52,9 @@ export class FileMoves implements vscode.Disposable {
     private async apply(from: vscode.Uri, to: vscode.Uri, review: string, signal?: AbortSignal, validate?: () => void): Promise<FileMovePlan> {
         const plan = await this.plan(from, to);
         if (plan.review !== review) throw new Error('The file move changed. Review the current source patches before applying it.');
-        const actual = await realpath(from.fsPath);
-        const parent = await realpath(path.dirname(to.fsPath));
+        const [actual, parent, identity] = await Promise.all([
+            realpath(from.fsPath), realpath(path.dirname(to.fsPath)), lstat(from.fsPath, { bigint: true }),
+        ]);
         if (!samePath(actual, vscode.Uri.parse(plan.from, true).fsPath)
             || !samePath(path.join(parent, path.basename(to.fsPath)), vscode.Uri.parse(plan.to, true).fsPath)) {
             throw new Error('The file or destination moved. Prepare the review again.');
@@ -57,15 +64,26 @@ export class FileMoves implements vscode.Disposable {
         validate?.();
         signal?.throwIfAborted();
         const edit = new vscode.WorkspaceEdit();
-        // A collision at the destination must fail before any buffer is edited.
+        const relocated = sources.find(source => source.uri.toString() === from.toString());
+        if (!relocated) throw new Error('The file moved. Prepare the review again.');
+        // Keep rebasing on the original text model so repeated history follows the file.
+        for (const patch of relocated.edits) edit.replace(from, patch.range, patch.newText);
         edit.renameFile(from, to);
         for (const source of sources) {
-            const uri = source.uri.toString() === from.toString() ? to : source.uri;
-            for (const patch of source.edits) edit.replace(uri, patch.range, patch.newText);
+            if (source === relocated) continue;
+            for (const patch of source.edits) edit.replace(source.uri, patch.range, patch.newText);
         }
-        await this.server.withReviewedFileMove(from, to, async () => {
-            if (!await vscode.workspace.applyEdit(edit)) throw new Error('VS Code could not apply the reviewed file move.');
-        });
+        const applied = await this.server.withReviewedFileMove(from, to, () => vscode.workspace.applyEdit(edit));
+        if (!applied) {
+            this.moveFailed(from);
+            const recovery = await recoverFileMove(from, to, identity, sources);
+            if (recovery) {
+                const restore = () => vscode.workspace.applyEdit(recovery.edit);
+                const restored = recovery.moved ? await this.server.withReviewedFileMove(to, from, restore) : await restore();
+                if (!restored) throw new Error('VS Code could not restore the file move. Check the affected sources before retrying.');
+            }
+            throw new Error('VS Code could not apply the reviewed file move. Review the files and destination before retrying.');
+        }
         return plan;
     }
 
@@ -96,7 +114,8 @@ async function checkedSource(plan: FileMoveDocument, preferred?: vscode.Uri) {
         const normalize = (point: vscode.Position) => stripBom && point.line === 0 ? point.translate(0, -1) : point;
         return new vscode.TextEdit(new vscode.Range(normalize(range.start), normalize(range.end)), patch.newText);
     });
-    return { uri, edits, validate: () => {
+    const withoutBom = (text: string) => stripBom ? text.slice(1) : text;
+    return { uri, edits, before: withoutBom(plan.before), after: withoutBom(plan.after), validate: () => {
         if (find() !== live || (live && live.version !== plan.edit.version)) {
             throw new Error(`The source changed. Review ${path.basename(uri.fsPath)} again.`);
         }

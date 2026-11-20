@@ -81,5 +81,38 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
     await until(async () => doc.getText().includes(changedLink) && await missing(from));
     await vscode.commands.executeCommand('undo');
     await until(async () => doc.getText() === referenced && await missing(to));
+    const renamedView = uri('Archive/Customers (Moved).xaml');
+    const moveView = { path: relative(view), destination: relative(renamedView) };
+    const planView = async () => content<FileMovePlan>(await invoke('ferroui_workspace_plan_xaml_move', moveView));
+    const moveReviewedView = (review: string) => invoke('ferroui_workspace_move_xaml', { ...moveView, review });
+    const occupied = vscode.workspace.onWillRenameFiles(event => {
+        if (event.files.some(file => file.newUri.toString() === renamedView.toString())) {
+            event.waitUntil(write(renamedView, 'Created while the move was starting'));
+        }
+    });
+    try {
+        assert.ok((await moveReviewedView((await planView()).review)).isError);
+        assert.equal(doc.getText(), referenced, 'A collision restores the rebased draft at the original path');
+        assert.equal(await disk(renamedView), 'Created while the move was starting');
+        assert.equal(await snapshot(), before);
+    } finally { occupied.dispose(); }
+    await vscode.workspace.fs.delete(renamedView, { useTrash: false });
+    content<FileMovePlan>(await moveReviewedView((await planView()).review));
+    const titled = (file: string) => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === `Design · ${file}`));
+    await until(() => titled('Customers (Moved).xaml'));
+    assert.equal(await snapshot(), before);
+    const movedViewer = await vscode.workspace.openTextDocument(renamedView);
+    assert.match(movedViewer.getText(), /ResourceInclude Source="\.\.\/Palette\.xaml"/);
+    await vscode.window.showTextDocument(movedViewer);
+    await vscode.commands.executeCommand('undo');
+    await until(async () => await missing(renamedView) && titled('Customers.xaml'));
+    assert.equal(await snapshot(), before);
+    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(view));
+    await vscode.commands.executeCommand('redo');
+    await until(async () => await missing(view) && titled('Customers (Moved).xaml'));
+    assert.equal(await snapshot(), before);
+    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(renamedView));
+    await vscode.commands.executeCommand('undo');
+    await until(async () => await missing(renamedView) && titled('Customers.xaml'));
     console.log('Reviewed XAML file move updated closed and open consumers, retained the native preview, and undid the move with its patches');
 }

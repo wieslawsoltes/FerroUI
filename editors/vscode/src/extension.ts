@@ -48,10 +48,10 @@ export function activate(context: vscode.ExtensionContext) {
     const scaffolds = new ProjectScaffold();
     const handlers = new EventHandlers(server);
     const extraction = new DictionaryExtraction(server);
-    const fileMoves = new FileMoves(server);
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
     const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction);
+    const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
-        return { designer, runtimeSource };
+        return { designer, runtimeSource, fileMoves };
     }
 }
 

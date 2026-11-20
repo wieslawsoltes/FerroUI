@@ -43,6 +43,7 @@ const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOO
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
+    private readonly moves = new Map<DesignerPanel, ReturnType<typeof setTimeout>>();
     private readonly previewChanged = new vscode.EventEmitter<void>();
     readonly onDidChangePreview = this.previewChanged.event;
     private readonly outline: OutlineView;
@@ -142,6 +143,12 @@ export class DesignerWorkbench implements vscode.Disposable {
             vscode.window.registerWebviewViewProvider(DATA_VIEW, this.data.view),
             vscode.window.registerWebviewViewProvider(STYLES_VIEW, this.styles.view),
             vscode.window.onDidChangeActiveTextEditor(() => this.followFocus()),
+            vscode.workspace.onWillRenameFiles(event => {
+                for (const { oldUri, newUri } of event.files) this.prepareMove(oldUri, newUri);
+            }),
+            vscode.workspace.onDidRenameFiles(event => {
+                for (const { oldUri, newUri } of event.files) void this.finishMove(oldUri, newUri);
+            }),
             vscode.window.tabGroups.onDidChangeTabGroups(() => this.followFocus()),
             vscode.window.tabGroups.onDidChangeTabs(() => this.followFocus()),
             vscode.commands.registerCommand('ferroui.openDesigner', (uri?: vscode.Uri) => this.open(uri)),
@@ -253,12 +260,55 @@ export class DesignerWorkbench implements vscode.Disposable {
         caret: vscode.Position, restored?: DesignerCanvasState): DesignerPanel {
         const key = document.uri.toString();
         const designer: DesignerPanel = new DesignerPanel(this.context, this.output, this.projects, panel, document, ++this.nextSession, language,
-            caret, () => { this.panels.delete(key); this.followFocus(); }, message => {
+            caret, () => {
+                this.panels.delete(designer.document.uri.toString());
+                clearTimeout(this.moves.get(designer));
+                this.moves.delete(designer);
+                this.followFocus();
+            }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
             }, restored);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
+    }
+
+    private prepareMove(from: vscode.Uri, to: vscode.Uri): void {
+        const panel = this.panels.get(from.toString());
+        if (!panel || panel.language !== 'xaml' || to.scheme !== 'file' || !to.path.toLowerCase().endsWith('.xaml')) return;
+        clearTimeout(this.moves.get(panel));
+        panel.startFileMove();
+        this.moves.set(panel, setTimeout(() => {
+            this.moves.delete(panel);
+            panel.finishFileMove();
+        }, 15000));
+    }
+
+    cancelFileMove(from: vscode.Uri): void {
+        const panel = this.panels.get(from.toString());
+        if (!panel || !this.moves.has(panel)) return;
+        clearTimeout(this.moves.get(panel));
+        this.moves.delete(panel);
+        panel.finishFileMove();
+    }
+
+    private async finishMove(from: vscode.Uri, to: vscode.Uri): Promise<void> {
+        const key = from.toString();
+        const panel = this.panels.get(key);
+        if (panel && !this.moves.has(panel)) this.prepareMove(from, to);
+        if (!panel || !this.moves.has(panel)) return;
+        clearTimeout(this.moves.get(panel));
+        this.moves.delete(panel);
+        try {
+            const document = await vscode.workspace.openTextDocument(to);
+            if (this.panels.get(key) !== panel) return;
+            this.panels.delete(key);
+            this.panels.set(document.uri.toString(), panel);
+            panel.finishFileMove(document);
+        } catch (error) {
+            this.output.appendLine(`Could not follow the moved XAML file. ${errorMessage(error)}`);
+            panel.finishFileMove();
+        }
     }
 
     designs(): readonly DesignerPanel[] { return [...this.panels.values()]; }
@@ -559,6 +609,8 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.library.dispose();
         this.styles.view.dispose();
         this.columns.dispose();
+        for (const timer of this.moves.values()) clearTimeout(timer);
+        this.moves.clear();
         const panels = [...this.panels.values()];
         this.panels.clear();
         this.active = undefined;
