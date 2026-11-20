@@ -16,7 +16,9 @@ pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskS
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};
 mod file_move;
-pub use file_move::{XamlFileMove, relative_file_reference};
+pub use file_move::{XamlFileMove, relative_file_path, relative_file_reference};
+mod rust_xaml;
+pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy};
 

@@ -2021,8 +2021,10 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-designer-core",
  "libc",
+ "proc-macro2",
  "serde",
  "serde_json",
+ "syn 2.0.119",
 ]
 
 [[package]]

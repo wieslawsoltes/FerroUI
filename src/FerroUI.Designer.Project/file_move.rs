@@ -79,6 +79,12 @@ fn is_xaml(path: &Path) -> bool {
 /// Encode an existing lexical file identity relative to a document's directory.
 /// A different filesystem root has no document-relative spelling.
 pub fn relative_file_reference(from: &str, to: &str) -> Result<String> {
+    relative_asset_uri(&relative_file_path(from, to)?)
+        .ok_or_else(|| ProjectError("Cannot represent a relative file URI".into()))
+}
+
+/// Spell a native path from a source file, with portable slash separators.
+pub fn relative_file_path(from: &str, to: &str) -> Result<String> {
     let source = file_path(from)?;
     let target = file_path(to)?;
     let parent = source
@@ -106,6 +112,5 @@ pub fn relative_file_reference(from: &str, to: &str) -> Result<String> {
         .ok_or_else(|| ProjectError("Cannot represent a relative file URI".into()))?;
         path.push(name);
     }
-    relative_asset_uri(&path.join("/"))
-        .ok_or_else(|| ProjectError("Cannot represent a relative file URI".into()))
+    Ok(path.join("/"))
 }
