@@ -2115,3 +2115,36 @@ fn accessor_name(expr: &Expr) -> Option<String> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn modules_are_named_as_the_converter_names_them() {
+        assert_eq!(module_of("Controls/Button.xaml"), "controls::button");
+        assert_eq!(module_of("Resources/TextBlock_themeresources_v2.5.xaml"), "resources::text_block_themeresources_v2_5");
+        assert_eq!(module_of("WinUITheme.xaml"), "win_ui_theme");
+        assert_eq!(module_of("Controls/WinUIControls.xaml"), "controls::win_ui_controls");
+        assert_eq!(module_of("DensityStyles/Compact.xaml"), "density_styles::compact");
+    }
+
+    #[test]
+    fn values_are_written_as_documents_write_them() {
+        assert_eq!(time_span_text(83.0), "0:0:0.083");
+        assert_eq!(time_span_text(367.0), "0:0:0.367");
+        assert_eq!(nth_text("2", "1"), "odd");
+        assert_eq!(nth_text("3", "-1"), "3n-1");
+        assert_eq!(color_text(0xFF00_0000), "#FF000000");
+    }
+
+    #[test]
+    fn a_markup_extension_becomes_an_element() {
+        let mut out = String::new();
+        extension_element("{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}").write(&mut out, 0);
+        assert_eq!(
+            out,
+            "<Binding Path=\"Text\" RelativeSource=\"{RelativeSource TemplatedParent}\" Converter=\"{x:Static StringConverters.IsNullOrEmpty}\" />\n"
+        );
+    }
+}
