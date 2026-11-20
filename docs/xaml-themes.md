@@ -131,6 +131,27 @@ runs as a step of its own.
 A group is an implementation detail of the markup runtime. Application code adds lazy resources
 with `ResourceDictionary::add_deferred` or `add_deferred_fn`.
 
+**Packed tables (#855, on by default).** A row of the four deferred shapes is a struct of
+sized strings, an optional namespace slice and 32-bit positions: 64 bytes for an alias and for
+the brushes bound to a resource, 48 for a literal brush, each string a pointer the loader
+relocates. With `DEFAULT_PACKED_THEME_ROWS` (`rust_emitter/theme_rows.rs`, on;
+`with_packed_theme_rows(false, ..)` turns it off for the emission of a closure) a run of one of
+these shapes is written as an `rt::PackedRows` instead: one pool of the strings of the table, each written once (a
+string inside one already in the pool is found there), the namespace tables the rows name, and
+one record of 16-bit fields for each row (key offset and length, target or colour key offset and
+length or the two halves of the colour, the namespace table as its index plus one, the
+positions). `rt::add_packed_resource_aliases`, `add_packed_literal_brushes`,
+`add_packed_dynamic_brushes` and `add_packed_static_brushes` decode a record when its row is
+added or built and do what the builders of the slices do, in the same order, with the same
+errors at the same positions. A run with an offset, a length or a position beyond 16 bits, a
+negative position or a key in a form the emitter does not write keeps its slice of rows. A
+record that does not decode is the error of its table, not a panic. The pool is the table's, so
+a trimmed unit takes its strings with it. The helpers of the slices stay for the plain values.
+It is on because the measurement kept it: on macOS the stripped executables were smaller in
+every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
+34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
+typed backend encodes the same runs as its programs; with it no packed table is written.
+
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
 An element changes its styles in a batch (`ValueStore::begin_styling`, `end_styling`): applying
@@ -359,6 +380,22 @@ the theme with the wider of its own table and the table the application register
 documents of a direct dependency construct, so its controls keep their templates whichever crate
 constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
 library keeps its own table. See docs/porting/theme-trimming.md, section 20.
+
+**Themes used together, and types of one name (#848).** An application that uses several themes
+closes over all of them together: a key one theme references and another defines, or a type one
+constructs and another styles, keeps the providing unit. Types of one local name in two assemblies
+keep their own base classes and creates edges. See docs/porting/theme-trimming.md, section 21.
+
+**How the build reads its inputs (#850).**
+- The includes that make up the group of a document are found by the XML parser of the compiler,
+  so entities are decoded and CDATA and comments are skipped. The build and the run-time loader use
+  the same rules.
+- The `[package.metadata.ferroui]` table is read as TOML, so dotted keys, inline tables and string
+  escapes all work.
+- A document consumed by a class (merged into it as well) is not embedded again by
+  `Build::embed_assets`.
+
+Details are in docs/porting/theme-trimming.md, section 22.
 
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
@@ -602,7 +639,8 @@ section 9).
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
-| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
+| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
+| Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
@@ -624,4 +662,5 @@ section 9).
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
+| Packed tables of the deferred rows (section 2.2, `DEFAULT_PACKED_THEME_ROWS`, on by default) | #855 | Kept by its measurement, on by default |
 | Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |

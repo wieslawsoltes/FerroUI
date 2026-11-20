@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <!-- The canary of #850: this dictionary is merged into App.xaml and compiled into a unit of the
+       class, so its text is not embedded as an asset as well. -->
+  <SolidColorBrush x:Key="PartBrush">#ff203040</SolidColorBrush>
+</ResourceDictionary>

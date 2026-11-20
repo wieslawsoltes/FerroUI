@@ -3,7 +3,7 @@
 //! The native pages whose source binds with x:Bind keep it (`Binding`, `Button`, `Canvas`,
 //! `ComboBox`, `Grid`, `HyperlinkButton`, `InfoBar`, `Line`, `PipsPager`, `Popup`, `ProgressRing`,
 //! `RatingControl`, `RepeatButton`, `RichTextBlock`, `ScrollViewer`, `Shape`, `Slider`, `SplitView`,
-//! `StackPanel`, `TextBlock`, `TitleBar`, `ToggleButton`, `ToggleSwitch` and the window of
+//! `StackPanel`, `TextBlock`, `TitleBar`, `ToggleButton`, `ToggleSwitch`, `Viewbox` and the window of
 //! `TitleBarWindow.xaml`): the run-time loader compiles the paths of the named elements,
 //! `examples::create` initializes the bindings once the page is wired, and the attach of a page
 //! initializes them again after `StopTracking`. The WinUI preview of the catalog runs WinUI's own
@@ -40,6 +40,7 @@ const X_BIND_PAGES: &[&str] = &[
     "TitleBar",
     "ToggleButton",
     "ToggleSwitch",
+    "Viewbox",
 ];
 
 fn page(id: &str) -> Ref<Control> {

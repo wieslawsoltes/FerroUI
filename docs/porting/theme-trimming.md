@@ -688,8 +688,9 @@ theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
 # theme-roots = "all"
 ```
 
-`ferroui-build` reads the table from `Cargo.toml` in the crate directory with a small reader of
-these three forms (`theme_roots::ThemeTrimming::from_manifest`). A value in any other form fails the
+`ferroui-build` reads the table from `Cargo.toml` in the crate directory
+(`theme_roots::ThemeTrimming::from_manifest`). Since #850 it reads the manifest as TOML (section
+15.2): a header, dotted keys and an inline table are all the same table. A value in any other form fails the
 build and names the key. A build script can add roots with `Build::theme_roots(&[..])`; step 4
 adds the roots it reads from sources beside them, through `Roots::extend` (section 11.2). The
 roots are:
@@ -1421,8 +1422,8 @@ not read.
 `$OUT_DIR/xaml/theme_roots.txt` lists, for each target (by its root file), the types and keys its
 sources root. A kept unit can therefore be traced to the target that named it.
 
-The manifest is read by the small reader of section 10.1, extended to `[[bin]]` tables. It moves to
-the TOML reader of #850 when that is merged.
+The manifest is read as TOML (section 22.2): `[package] autobins` and the `name` and `path` of each
+`[[bin]]` table.
 
 ### 17.2 What a dependency's code makes
 
@@ -1544,3 +1545,161 @@ registration; the generated `register()` now uses the wider registration instead
   - an application that never names the theme, whose control is named in its sources, gets the
     theme's table with that control's unit, registered with the wider registration;
   - without the theme crate among its direct dependencies, it gets no table.
+
+## 21. Edges of the unit graph across themes, crates and types of one name (#848)
+
+The review found three places where the unit graph lost an edge.
+
+### 21.1 Themes used together
+
+`kept_units` closed over one theme at a time. Suppose a kept unit of theme A references a key that
+only theme B defines, or constructs a type whose control theme only B supplies. Then B kept only
+its ambient unit.
+
+`theme_roots::kept_units_across` (new) closes over every theme the application uses, in one loop:
+
+- the keys a kept unit of any theme references, and the types it constructs, become roots of every
+  theme;
+- the loop runs until no theme keeps another unit, so a cycle of references between two themes
+  ends;
+- the result for each theme does not depend on the order of the themes.
+
+The build calls it for the themes it writes tables for. An application with one theme keeps what it
+kept before.
+
+The reasons of `theme_parts_why.txt` (section 19) follow the same closure: for each theme, what
+the kept units of the other themes reference and construct is one more source of roots, named
+`other themes used together`, which is exact. With one theme that source is empty, and the
+listing is the one of section 19.
+
+A unit records the keys of `{StaticResource}`, `{DynamicResource}` and `ResourceKey` that its
+documents name, including keys no document of its own theme defines (21.4). Without this, a key that
+only another theme provides could not root that theme.
+
+### 21.2 Crates with a theme and ordinary documents
+
+Since #849 a crate exports the references of every document except those of a class constructed
+from selected units (section 14.1). A crate with a theme class and an ordinary `Other.xaml` with
+`<ListBox />` therefore exports `ListBox`. The path that imports checked-in metadata
+(`Build::checked_in_metadata`) copied the documents and the units and dropped the references. It now
+merges them into the references the crate exports.
+
+### 21.3 Types of one name
+
+`TypeGraph` keyed its edges by local name. Two assemblies with `Left.Twin : LeftBase` and
+`Right.Twin : RightBase` gave one chain or the other, depending on the order of the models, and
+their creates edges were merged.
+
+The graph now identifies each type by its full markup name. A base class is found by its Rust path,
+and by its local Rust name only when that name is unique. Roots and units still name types by local
+name, as documents write them. A local name stands for every type of that name, and is live with the
+edges of each. Where the name is not unique, every possible provider is kept rather than one picked
+by order. No ambiguity is reported yet: old metadata and unqualified roots cannot say which type they
+mean.
+
+### 21.4 References to keys of other themes
+
+The unit graph used to drop the argument of a resource extension unless the same theme defines the
+key. It now keeps every such argument as a reference of its unit. Identifier tokens of attribute
+values are still kept only when they spell a key of the theme, since they are only conservative
+guesses. This changes the `references` of the theme units in the `.xamlmeta` of the themes, so the
+checked-in `compiled_xaml.xamlmeta` of a theme whose documents name such a key has to be regenerated
+(its `compiled_xaml_tests` say so). The generated Rust does not change.
+
+### 21.5 Tests
+
+- `theme_roots_tests.rs`:
+  - `themes_used_together_are_closed_over_together`: a key from the other theme, a type theme from
+    the other theme, a cycle, and both orders of the themes;
+  - `types_of_one_local_name_keep_their_own_edges`: both orders of the models;
+  - the existing graph tests, unchanged.
+- `theme_unit_graph_tests.rs`: an extension key that no document of the group defines is a
+  reference of its unit.
+
+## 22. Build inputs read as what they are (#850)
+
+The review that found the problems of section 14 found three places where the build read an input
+as text. Each one has a test that failed on main.
+
+### 22.1 Includes
+
+The group of a document is the document and the documents it includes, directly or not. Both the
+build (`rust_emitter::class_document_group`) and the run-time loader collect it with
+`back_end::include_sources`. That function used to scan the raw text of the document, so:
+
+- `Source="/A&amp;B.xaml"` was collected with its entity, and `A&B.xaml` was left out of the group;
+- `x:Key="a>b"` ended the tag early, and the include behind it was not found;
+- an include written as text inside CDATA was added to the group.
+
+`include_sources` now reads the document with `roxmltree`, over the text the parser of the compiler
+reads. `XDocumentXamlParser::xml_text` (new in `xamlx`) gives that text: the document type
+declaration is blanked out, as `parse` does. The rules are these:
+
+- an include is an element whose local name is `MergeResourceInclude`, `ResourceInclude` or
+  `StyleInclude`, with any prefix, as before;
+- its source is the value of its `Source` attribute that has no namespace, with entities decoded;
+- text, CDATA and comments are not elements.
+
+A document that is not well formed has no includes. It fails when it is compiled or loaded, with
+the diagnostic of the parser, the same diagnostic it gets without includes. No new dependency is
+needed: the parser of `xamlx` already uses `roxmltree`.
+
+### 22.2 The manifest
+
+`[package.metadata.ferroui]` (`theme-trimming`, `theme-roots` and `compile-bindings`) was read by a
+parser of its own lines, which had four faults:
+
+- dotted keys under `[package.metadata]` were ignored;
+- `"Accent\u0042uttonStyle"` lost its escape;
+- `["Accent[Brush"]` was reported as an array that is not closed;
+- a top-level table whose quoted name is `"package.metadata.ferroui"` was taken for the nested
+  table.
+
+`ferroui-build` now parses the manifest with the `toml` crate (1.1.6). That version was already in
+the lock file of the workspace, as a build dependency of `skia-bindings`. `ferroui-build` is a
+build dependency of every crate that uses it, so the parser runs only in build scripts and is linked
+into no application.
+
+The options are read from the table at the path `package.metadata.ferroui`, whatever form the
+manifest writes it in: a header, dotted keys, an inline table, or dotted keys at the top level. A
+value of the wrong type is refused, and the error names the option. A manifest that is not TOML is
+an error of the build; Cargo has already parsed the manifest, so this does not happen in practice.
+The binaries of a package (section 17.1) are read from the same parsed manifest.
+
+The `toml` dependency is kept by a decision of the owner: it is build-only (about 3 s more of a
+cold build, no cost in a binary or at run time).
+
+### 22.3 Assets
+
+`Build::embed_assets` embeds the files of its directories as raw bytes, except the documents the
+compiler consumed. For a class group, that list held only the documents the compiler emitted one by
+one. A dictionary merged into the class has no build function of its own: it is compiled into a
+unit of the class. Such a dictionary under an embedded directory was therefore embedded again. A
+class group now leaves out every document of its group: the document of the class and every
+document it includes, merged documents included.
+
+Every other file is embedded as before, including a document of an embedded directory that no group
+consumed. The theme crates do not use `embed_assets` for their documents; they have filters of their
+own. Their assets, their `.xamlmeta` and the checked-in generated files are unchanged. There is no
+explicit option yet to ship the original text of a consumed document (see the issue).
+
+### 22.4 Tests
+
+- `back_end/includes.rs`:
+  - an entity in a source;
+  - a `>` in an attribute;
+  - an include in CDATA or in a comment;
+  - a document that is not well formed;
+  - a document type declaration.
+- `rust_emitter/compiled.rs` (`the_group_of_a_class_follows_its_includes_as_parsed`): the group of a
+  class with these cases.
+- `tests/FerroUI.Markup.Xaml.UnitTests/xaml/style_include_tests.rs`: a document that is not well
+  formed, with an include, fails to load with the diagnostic of the parser, position included.
+- `theme_roots_tests.rs`:
+  - equivalent forms of the table give the same options;
+  - escapes, and a bracket inside a string;
+  - a quoted top-level table name is a different table;
+  - a value of the wrong type names its option.
+- `tests/GeneratedRustFixture/Library`: `Dictionaries/Part.xaml` is merged into `App.xaml` and its
+  directory is embedded. Neither its path nor the canary comment of the file is in `ASSETS`, while
+  `Dictionaries/Loose.xaml`, which no document consumes, is.

@@ -53,16 +53,12 @@ pub const COMPILE_BINDINGS_KEY: &str = "compile-bindings";
 /// `[package.metadata.ferroui]` (`compile-bindings = true` or `false`, #603); `None` when it says
 /// nothing. An error names the key when its value is not a boolean.
 pub fn compile_bindings_from_manifest(text: &str) -> Result<Option<bool>, String> {
-    let mut compile_bindings = None;
-    for (key, value) in manifest_table(text, MANIFEST_TABLE)? {
-        if key == COMPILE_BINDINGS_KEY {
-            match value {
-                TomlValue::Bool(value) => compile_bindings = Some(value),
-                _ => return Err(format!("[{MANIFEST_TABLE}] {COMPILE_BINDINGS_KEY} must be true or false")),
-            }
-        }
+    let manifest = parse_manifest(text)?;
+    match ferroui_table(&manifest)?.and_then(|table| table.get(COMPILE_BINDINGS_KEY)) {
+        None => Ok(None),
+        Some(toml::Value::Boolean(value)) => Ok(Some(*value)),
+        Some(_) => Err(format!("[{MANIFEST_TABLE}] {COMPILE_BINDINGS_KEY} must be true or false")),
     }
-    Ok(compile_bindings)
 }
 
 /// What the manifest of an application states about the trimming of its themes.
@@ -90,19 +86,23 @@ impl ThemeTrimming {
     /// the forms above.
     pub fn from_manifest(text: &str) -> Result<Self, String> {
         let mut trimming = ThemeTrimming::default();
-        for (key, value) in manifest_table(text, MANIFEST_TABLE)? {
-            match key.as_str() {
-                TRIMMING_KEY => match value {
-                    TomlValue::Bool(enabled) => trimming.enabled = enabled,
-                    _ => return Err(format!("[{MANIFEST_TABLE}] {TRIMMING_KEY} must be true or false")),
-                },
-                ROOTS_KEY => match value {
-                    TomlValue::String(text) if text == "all" => trimming.all = true,
-                    TomlValue::Array(names) => trimming.roots.extend(names),
-                    _ => return Err(format!("[{MANIFEST_TABLE}] {ROOTS_KEY} must be \"all\" or an array of names")),
-                },
-                _ => {}
+        let manifest = parse_manifest(text)?;
+        let Some(table) = ferroui_table(&manifest)? else { return Ok(trimming) };
+        match table.get(TRIMMING_KEY) {
+            None => {}
+            Some(toml::Value::Boolean(enabled)) => trimming.enabled = *enabled,
+            Some(_) => return Err(format!("[{MANIFEST_TABLE}] {TRIMMING_KEY} must be true or false")),
+        }
+        let roots_error = || format!("[{MANIFEST_TABLE}] {ROOTS_KEY} must be \"all\" or an array of names");
+        match table.get(ROOTS_KEY) {
+            None => {}
+            Some(toml::Value::String(text)) if text == "all" => trimming.all = true,
+            Some(toml::Value::Array(names)) => {
+                for name in names {
+                    trimming.roots.push(name.as_str().ok_or_else(roots_error)?.to_string());
+                }
             }
+            Some(_) => return Err(roots_error()),
         }
         Ok(trimming)
     }
@@ -132,18 +132,26 @@ impl Roots {
     }
 }
 
-/// The edges between types that make a type live with another, by local name: the base class
-/// of a class (what keeps the theme of a base class for a class that does not override its
-/// style key) and the classes the code of a class creates (#568, step 4: the containers a
-/// `ListBox` creates, the selection handles of a `TextBox`).
+/// The edges between types that make a type live with another (#568, step 4; #848): the base
+/// class of a class (what keeps the theme of a base class for a class that does not override its
+/// style key) and the classes the code of a class creates (the containers a `ListBox` creates,
+/// the selection handles of a `TextBox`).
+///
+/// A type is identified by its full markup name (`Left.Twin`), so two types of one local name in
+/// two assemblies keep their own edges whatever the order of the models. The roots and the units
+/// name types by local name (`Twin`, as the documents write them): a local name stands for every
+/// type of that name, and is live with the edges of each, so no possible provider is lost where the
+/// name is not unique.
 #[derive(Clone, Debug, Default)]
 pub struct TypeGraph {
-    /// The local name of the base class of each class, by its local name.
+    /// The full name of the base class of each class, by its full name.
     base_of: BTreeMap<String, String>,
-    /// The local names of the classes the code of each class creates, by its local name.
+    /// The full names of the classes the code of each class creates, by its full name.
     creates: BTreeMap<String, BTreeSet<String>>,
-    /// The local names of the classes of the object model.
+    /// The full names of the classes of the object model.
     classes: BTreeSet<String>,
+    /// The full names of the types of each local name.
+    by_local: BTreeMap<String, BTreeSet<String>>,
 }
 
 /// The last segment of a Rust path, without generic arguments (`::a::b::Border<T>` is `Border`).
@@ -158,43 +166,77 @@ fn markup_local_name(full_name: &str) -> &str {
     full_name.rsplit('.').next().unwrap_or(full_name)
 }
 
+/// The Rust path of a type without generic arguments and a leading `::`, the key it is found by
+/// from the base of a class (`::ferroui_controls::border::Border` is
+/// `ferroui_controls::border::Border`).
+fn rust_key(text: &str) -> &str {
+    text.split('<').next().unwrap_or(text).trim().trim_start_matches("::")
+}
+
 impl TypeGraph {
     /// The edges the models state: for each class of the object model with a base class, the
-    /// markup name of the base, found by its Rust name; for each type that creates classes, their
-    /// local names.
+    /// markup name of the base, found by its Rust path (else by its local Rust name, when only one
+    /// type has it); for each type that creates classes, their full names.
     pub fn from_models<'m>(models: impl IntoIterator<Item = &'m AssemblyModel>) -> Self {
         let models: Vec<&AssemblyModel> = models.into_iter().collect();
-        // The markup name of each type, by the local name of its Rust path.
-        let mut markup_name: BTreeMap<String, String> = BTreeMap::new();
+        // The full markup name of each type, by its Rust path and by the paths other crates name
+        // it by; and the full names of each local Rust name.
+        let mut by_path: BTreeMap<String, String> = BTreeMap::new();
+        let mut by_rust_local: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         for model in &models {
             for type_ in &model.types {
-                markup_name.entry(rust_local_name(&type_.rust_path.text).to_string()).or_insert_with(|| type_.name.clone());
+                let full = type_.full_name();
+                for path in std::iter::once(&type_.rust_path.text).chain(type_.public_path.as_ref()) {
+                    by_path.entry(rust_key(path).to_string()).or_insert_with(|| full.clone());
+                }
+                by_rust_local.entry(rust_local_name(&type_.rust_path.text).to_string()).or_default().insert(full);
             }
         }
         let mut graph = Self::default();
         for model in &models {
             for type_ in &model.types {
+                let full = type_.full_name();
+                graph.by_local.entry(type_.name.clone()).or_default().insert(full.clone());
                 if type_.object_model && type_.kind == TypeKind::Class {
-                    graph.classes.insert(type_.name.clone());
+                    graph.classes.insert(full.clone());
                 }
                 if !type_.creates.is_empty() {
-                    let created = graph.creates.entry(type_.name.clone()).or_default();
-                    created.extend(type_.creates.iter().map(|full_name| markup_local_name(full_name).to_string()).filter(|name| *name != type_.name));
+                    let created = graph.creates.entry(full.clone()).or_default();
+                    created.extend(type_.creates.iter().filter(|created| **created != full).cloned());
                 }
                 let Some(base) = &type_.base else { continue };
                 let local = rust_local_name(&base.text);
-                let base = markup_name.get(local).cloned().unwrap_or_else(|| local.to_string());
-                if !base.is_empty() && base != type_.name {
-                    graph.base_of.entry(type_.name.clone()).or_insert(base);
+                let base = match by_path.get(rust_key(&base.text)) {
+                    Some(base) => base.clone(),
+                    None => match by_rust_local.get(local) {
+                        Some(candidates) if candidates.len() == 1 => candidates.iter().next().cloned().unwrap_or_default(),
+                        _ => local.to_string(),
+                    },
+                };
+                if !base.is_empty() && base != full {
+                    graph.base_of.entry(full).or_insert(base);
                 }
             }
+        }
+        // A type named only by an edge (a created class of a crate whose model is not read) is
+        // known by its local name too.
+        let named: Vec<String> = graph.base_of.values().chain(graph.creates.values().flatten()).cloned().collect();
+        for full in named {
+            graph.by_local.entry(markup_local_name(&full).to_string()).or_default().insert(full);
         }
         graph
     }
 
-    /// The base classes stated as pairs `(class, base)`, for the tests.
+    /// The base classes stated as pairs `(class, base)`, for the tests. A name is a full name; a
+    /// name without a dot is its own local name.
     pub fn from_pairs(pairs: &[(&str, &str)]) -> Self {
-        Self { base_of: pairs.iter().map(|(class, base)| (class.to_string(), base.to_string())).collect(), ..Self::default() }
+        let mut graph = Self::default();
+        for (class, base) in pairs {
+            graph.base_of.insert(class.to_string(), base.to_string());
+            graph.know(class);
+            graph.know(base);
+        }
+        graph
     }
 
     /// The graph with the creates edges stated as pairs `(class, created)`, for the tests.
@@ -203,39 +245,72 @@ impl TypeGraph {
             self.creates.entry(class.to_string()).or_default().insert(created.to_string());
             self.classes.insert(class.to_string());
             self.classes.insert(created.to_string());
+            self.know(class);
+            self.know(created);
         }
         self
     }
 
-    /// Whether `name` is a class of the object model of the models, or a class of an edge.
-    pub fn is_class(&self, name: &str) -> bool {
-        self.classes.contains(name)
+    /// Records the full name `full` under its local name.
+    fn know(&mut self, full: &str) {
+        self.by_local.entry(markup_local_name(full).to_string()).or_default().insert(full.to_string());
     }
 
-    /// `name` and its base classes, nearest first.
+    /// The full names `name` stands for: itself when it is a full name of the graph, else the
+    /// types of that local name, else itself.
+    fn identities(&self, name: &str) -> Vec<String> {
+        if name.contains('.') && (self.base_of.contains_key(name) || self.creates.contains_key(name) || self.classes.contains(name)) {
+            return vec![name.to_string()];
+        }
+        match self.by_local.get(name) {
+            Some(full) if !full.is_empty() => full.iter().cloned().collect(),
+            _ => vec![name.to_string()],
+        }
+    }
+
+    /// Whether `name` (a local or a full name) is a class of the object model of the models, or a
+    /// class of an edge.
+    pub fn is_class(&self, name: &str) -> bool {
+        self.identities(name).iter().any(|full| self.classes.contains(full))
+    }
+
+    /// `name` and its base classes, nearest first, by local name. For a local name of several types,
+    /// the chains of all of them, each name once.
     pub fn chain(&self, name: &str) -> Vec<String> {
         let mut chain = vec![name.to_string()];
-        while let Some(base) = self.base_of.get(chain.last().map(String::as_str).unwrap_or_default()) {
-            if chain.contains(base) {
-                break;
+        for full in self.identities(name) {
+            let mut seen = vec![full.clone()];
+            while let Some(base) = self.base_of.get(seen.last().map(String::as_str).unwrap_or_default()) {
+                if seen.contains(base) {
+                    break;
+                }
+                seen.push(base.clone());
             }
-            chain.push(base.clone());
+            for full in seen {
+                let local = markup_local_name(&full).to_string();
+                if !chain.contains(&local) {
+                    chain.push(local);
+                }
+            }
         }
         chain
     }
 
-    /// The types that are live when `name` is: `name`, its base classes, the classes any of them
-    /// creates, and so on, transitively.
+    /// The types that are live when `name` is, by local name: `name`, its base classes, the classes
+    /// any of them creates, and so on, transitively.
     pub fn live(&self, name: &str) -> BTreeSet<String> {
-        let mut live = BTreeSet::new();
-        let mut pending = vec![name.to_string()];
+        let mut live = BTreeSet::from([name.to_string()]);
+        let mut seen: BTreeSet<String> = BTreeSet::new();
+        let mut pending = self.identities(name);
         while let Some(next) = pending.pop() {
-            for type_ in self.chain(&next) {
-                if !live.insert(type_.clone()) {
-                    continue;
-                }
-                pending.extend(self.creates.get(&type_).into_iter().flatten().filter(|created| !live.contains(*created)).cloned());
+            if !seen.insert(next.clone()) {
+                continue;
             }
+            live.insert(markup_local_name(&next).to_string());
+            if let Some(base) = self.base_of.get(&next) {
+                pending.push(base.clone());
+            }
+            pending.extend(self.creates.get(&next).into_iter().flatten().filter(|created| !seen.contains(*created)).cloned());
         }
         live
     }
@@ -317,6 +392,37 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, ful
     let mut indices: Vec<u32> = theme.units.iter().zip(&kept).filter(|(_, kept)| **kept).map(|(unit, _)| unit.index).collect();
     indices.sort_unstable();
     indices
+}
+
+/// The units each theme of `themes` keeps when the application uses them together (#848): the
+/// closure of [`kept_units`] over all of them. What a kept unit of one theme references (its keys)
+/// and constructs (its types) roots the units of every theme, so a key one theme uses and only
+/// another defines, and a type one theme constructs whose control theme only another supplies,
+/// keep the units that provide them. Repeated until no theme keeps another unit; the result is
+/// in the order of `themes`, each as [`kept_units`] gives it.
+pub fn kept_units_across(
+    themes: &[&ThemeUnitsModel],
+    roots: &Roots,
+    graph: &TypeGraph,
+    full_themes: bool,
+) -> Vec<Vec<u32>> {
+    let mut roots = roots.clone();
+    loop {
+        let kept: Vec<Vec<u32>> = themes.iter().map(|theme| kept_units(theme, &roots, graph, full_themes)).collect();
+        if themes.len() < 2 || roots.all || full_themes {
+            return kept;
+        }
+        let (keys, types) = (roots.keys.len(), roots.types.len());
+        for (theme, indices) in themes.iter().zip(&kept) {
+            for unit in theme.units.iter().filter(|unit| indices.contains(&unit.index)) {
+                roots.keys.extend(unit.references.iter().cloned());
+                roots.types.extend(unit.types.iter().cloned());
+            }
+        }
+        if roots.keys.len() == keys && roots.types.len() == types {
+            return kept;
+        }
+    }
 }
 
 /// Why a unit of a theme is kept, and how much of it is used (#852).
@@ -604,6 +710,13 @@ pub fn unit_static_path(table_path: &str, index: u32) -> String {
     format!("{module}::THEME_UNIT_{index}")
 }
 
+/// The manifest `text` as TOML (#850): the `toml` crate, a dependency of this build crate only, so
+/// the parser runs in build scripts and is linked into no application. A manifest Cargo read is
+/// valid TOML; anything else is an error of the build.
+fn parse_manifest(text: &str) -> Result<toml::Table, String> {
+    text.parse::<toml::Table>().map_err(|error| format!("the manifest is not TOML: {}", error.message()))
+}
+
 /// The root files of the binaries of a package, relative to its directory, as Cargo finds them
 /// (#847): the `path` of every `[[bin]]` target (or, without one, `src/bin/<name>.rs`,
 /// `src/bin/<name>/main.rs` or `src/main.rs`), and, unless the package states `autobins = false`,
@@ -653,179 +766,36 @@ pub fn binary_roots(manifest_dir: &std::path::Path, manifest: &str) -> Vec<std::
 
 /// What the manifest `text` states of the binaries of its package: whether Cargo discovers them
 /// (`autobins`, true unless `[package]` says `autobins = false`) and the `name` and `path` of each
-/// `[[bin]]` table, in order.
+/// `[[bin]]` table, in order. The manifest is read as TOML ([`parse_manifest`]); a manifest that is
+/// not states nothing.
 fn binary_targets(text: &str) -> (bool, Vec<(String, Option<String>)>) {
-    #[derive(PartialEq)]
-    enum Section {
-        Package,
-        Bin,
-        Other,
-    }
-    let mut section = Section::Other;
-    let mut autobins = true;
-    let mut binaries: Vec<(String, Option<String>)> = Vec::new();
-    for line in text.lines() {
-        let line = without_comment(line).trim();
-        if line.starts_with('[') {
-            let header: String = line.chars().filter(|c| !c.is_whitespace()).collect();
-            section = match header.as_str() {
-                "[[bin]]" => {
-                    binaries.push((String::new(), None));
-                    Section::Bin
-                }
-                "[package]" => Section::Package,
-                _ => Section::Other,
-            };
-            continue;
-        }
-        let Some((key, value)) = line.split_once('=') else { continue };
-        let (key, value) = (key.trim(), value.trim());
-        match (&section, key) {
-            (Section::Package, "autobins") => autobins = value != "false",
-            (Section::Bin, "name" | "path") => {
-                let Some((value, _)) = string_value(value) else { continue };
-                if let Some(binary) = binaries.last_mut() {
-                    match key {
-                        "name" => binary.0 = value,
-                        _ => binary.1 = Some(value),
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-    (autobins, binaries)
+    let Ok(table) = parse_manifest(text) else { return (true, Vec::new()) };
+    let autobins = table.get("package").and_then(|package| package.get("autobins")).and_then(toml::Value::as_bool);
+    let binaries = table.get("bin").and_then(toml::Value::as_array).map_or_else(Vec::new, |binaries| {
+        binaries
+            .iter()
+            .map(|binary| {
+                let text = |key: &str| binary.get(key).and_then(toml::Value::as_str).map(str::to_string);
+                (text("name").unwrap_or_default(), text("path"))
+            })
+            .collect()
+    });
+    (autobins.unwrap_or(true), binaries)
 }
 
-/// A value of the manifest, of the forms the table of the opt-in has.
-#[derive(Clone, Debug, PartialEq, Eq)]
-enum TomlValue {
-    Bool(bool),
-    String(String),
-    Array(Vec<String>),
-    /// Any other value: a number, a date, an inline table, an array of other values.
-    Other,
-}
-
-/// The text of `line` before a comment (`#` outside a string).
-fn without_comment(line: &str) -> &str {
-    let mut in_string: Option<char> = None;
-    let mut escaped = false;
-    for (index, c) in line.char_indices() {
-        match in_string {
-            Some(quote) => {
-                if escaped {
-                    escaped = false;
-                } else if c == '\\' && quote == '"' {
-                    escaped = true;
-                } else if c == quote {
-                    in_string = None;
-                }
-            }
-            None if c == '"' || c == '\'' => in_string = Some(c),
-            None if c == '#' => return &line[..index],
-            None => {}
+/// The table `package.metadata.ferroui` of the manifest, in whatever form the manifest writes it (a
+/// header, dotted keys, an inline table); `None` when it has none. A value of that path that is
+/// not a table is an error that names it.
+fn ferroui_table(manifest: &toml::Table) -> Result<Option<&toml::Table>, String> {
+    let mut table = manifest;
+    for key in MANIFEST_TABLE.split('.') {
+        match table.get(key) {
+            None => return Ok(None),
+            Some(toml::Value::Table(inner)) => table = inner,
+            Some(_) => return Err(format!("`{MANIFEST_TABLE}` of the manifest must be a table")),
         }
     }
-    line
-}
-
-/// The strings of `text` (`"a"` or `'a'`), in order; `None` when `text` has anything else than
-/// strings, commas and white space between `[` and `]`.
-fn string_items(text: &str) -> Option<Vec<String>> {
-    let inner = text.trim().strip_prefix('[')?.strip_suffix(']')?;
-    let mut items = Vec::new();
-    let mut rest = inner.trim_start();
-    while !rest.is_empty() {
-        let (item, after) = string_value(rest)?;
-        items.push(item);
-        rest = after.trim_start();
-        match rest.strip_prefix(',') {
-            Some(after) => rest = after.trim_start(),
-            None if rest.is_empty() => {}
-            None => return None,
-        }
-    }
-    Some(items)
-}
-
-/// The string at the start of `text` and what follows it.
-fn string_value(text: &str) -> Option<(String, &str)> {
-    let quote = text.chars().next().filter(|c| *c == '"' || *c == '\'')?;
-    let mut value = String::new();
-    let mut escaped = false;
-    for (index, c) in text.char_indices().skip(1) {
-        if escaped {
-            value.push(match c {
-                'n' => '\n',
-                't' => '\t',
-                other => other,
-            });
-            escaped = false;
-        } else if c == '\\' && quote == '"' {
-            escaped = true;
-        } else if c == quote {
-            return Some((value, &text[index + c.len_utf8()..]));
-        } else {
-            value.push(c);
-        }
-    }
-    None
-}
-
-fn parse_value(text: &str) -> TomlValue {
-    let text = text.trim();
-    match text {
-        "true" => return TomlValue::Bool(true),
-        "false" => return TomlValue::Bool(false),
-        _ => {}
-    }
-    if text.starts_with('[') {
-        return string_items(text).map_or(TomlValue::Other, TomlValue::Array);
-    }
-    match string_value(text) {
-        Some((value, rest)) if rest.trim().is_empty() => TomlValue::String(value),
-        _ => TomlValue::Other,
-    }
-}
-
-/// The keys and values of the table `[name]` of the manifest `text`, in order. Only what the
-/// opt-in needs is read: `key = value` lines, an array may span lines. The names of the headers
-/// are compared without white space and quotes.
-fn manifest_table(text: &str, name: &str) -> Result<Vec<(String, TomlValue)>, String> {
-    let normalised = |header: &str| header.chars().filter(|c| !c.is_whitespace() && *c != '"' && *c != '\'').collect::<String>();
-    let mut entries = Vec::new();
-    let mut inside = false;
-    let mut lines = text.lines();
-    while let Some(line) = lines.next() {
-        let line = without_comment(line).trim();
-        if line.is_empty() {
-            continue;
-        }
-        if line.starts_with('[') {
-            let header = line.trim_start_matches('[').trim_end_matches(']');
-            inside = !line.starts_with("[[") && normalised(header) == name;
-            continue;
-        }
-        if !inside {
-            continue;
-        }
-        let Some((key, value)) = line.split_once('=') else { continue };
-        let key = normalised(key);
-        let mut value = value.trim().to_string();
-        // An array that continues on the next lines.
-        if value.starts_with('[') {
-            while value.matches('[').count() > value.matches(']').count() {
-                let Some(next) = lines.next() else {
-                    return Err(format!("[{name}] {key}: the array is not closed"));
-                };
-                value.push(' ');
-                value.push_str(without_comment(next).trim());
-            }
-        }
-        entries.push((key, parse_value(&value)));
-    }
-    Ok(entries)
+    Ok(Some(table))
 }
 
 #[cfg(test)]
