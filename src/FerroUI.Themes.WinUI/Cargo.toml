@@ -25,6 +25,8 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# For the measurement of #988 only: the theme in Rust is the default on this branch.
+default = ["rust-theme"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
 designer-sources = []
