@@ -824,7 +824,7 @@ instead (measured in #992).
 |---|---|---|
 | 1. XAML through the XAML compiler | none (the default) | The documents, by the build script, into `compiled_xaml.rs` (sections 2 and 3) |
 | 2. Rust, compiled directly | `rust-theme` | The modules of `rust_theme/` as code of the crate. The build script compiles no markup and exports the checked-in `compiled_xaml.xamlmeta`, whose unit graph the applications that trim the theme read. `rust_theme/units.rs` has the units with the same names and paths (`compiled_xaml::THEME_UNIT_<n>`) |
-| 3. Rust through the XAML compiler | `rust-theme-compiled` | The modules of `rust_theme/`, read back by the front end of the compiler (`ferroui_build::rust_theme`, `XamlGroup::rust_theme`), which gives the documents they describe to the compiler, so units, trimming by roots, packed rows, shared helpers and compiled bindings apply as in form 1 |
+| 3. Rust through the XAML compiler | `rust-theme-compiled` | The modules of `rust_theme/`, read back by the front end of the compiler (`ferroui_build::rust_theme`, `XamlGroup::rust_theme`), which gives the documents they describe to the compiler, so units, trimming by roots, packed rows, shared helpers and compiled bindings apply as in form 1. The front end is the feature `rust-theme` of ferroui-build, which this feature turns on; other builds compile neither it nor `syn` with `visit` |
 
 The front end of form 3 parses the Rust with `syn`, resolves the types and properties through
 the type models of the build, and writes the XAML document of each module. It reads the API of

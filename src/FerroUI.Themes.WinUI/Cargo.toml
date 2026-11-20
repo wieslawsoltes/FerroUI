@@ -34,8 +34,9 @@ designer-sources = []
 rust-theme = []
 # The theme in Rust read back by the XAML compiler (#988, a prototype): the build script gives the
 # modules of `rust_theme/` to the front end of `ferroui_build::rust_theme`, which writes the
-# documents they describe, and compiles them as the documents of the theme.
-rust-theme-compiled = []
+# documents they describe, and compiles them as the documents of the theme. Turns on the front end
+# in the build dependency (`ferroui-build/rust-theme`), which other builds do not compile.
+rust-theme-compiled = ["ferroui-build/rust-theme"]
 
 [dependencies]
 # The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared

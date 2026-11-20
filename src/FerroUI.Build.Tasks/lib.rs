@@ -213,6 +213,7 @@ pub mod shader_effects;
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
 pub use ferroui_build_scan::{call_forms, export, model, model_set, scanner};
+#[cfg(feature = "rust-theme")]
 pub mod rust_theme;
 pub mod theme_roots;
 pub mod type_system;
@@ -845,6 +846,7 @@ impl Build {
         // The type model of the crate, from its sources.
         // The models the front end of a theme in Rust resolves its types and properties with
         // (#988): taken before the scan takes them.
+        #[cfg(feature = "rust-theme")]
         let front_end_models: Option<Vec<AssemblyModel>> =
             self.groups.iter().any(|group| group.rust_theme.is_some()).then(|| models.clone());
         let scanned = self.export_metadata || on_models;
@@ -993,6 +995,15 @@ impl Build {
                 continue;
             }
             let documents = match (&group.documents, &group.rust_theme) {
+                #[cfg(not(feature = "rust-theme"))]
+                (_, Some(_)) => {
+                    errors.push(format!(
+                        "the group `{}` reads a theme in Rust: enable the feature `rust-theme` of ferroui-build",
+                        group.module
+                    ));
+                    continue;
+                }
+                #[cfg(feature = "rust-theme")]
                 (_, Some((directory, names, units))) => {
                     let directory = self.manifest_dir.join(directory);
                     rerun(&mut lines, &directory);
