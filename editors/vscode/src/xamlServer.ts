@@ -4,6 +4,7 @@ import type { DictionaryMethod } from './dictionaryProtocol';
 import type { HandlerMethod } from './eventHandlerProtocol';
 import type { FileMoveDraft, FileMovePlan, FileMoveRustResolution } from './fileMoveProtocol';
 import { errorMessage } from './protocol';
+import { projectDefinition } from './projectNavigation';
 import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
 
@@ -26,7 +27,7 @@ export class XamlServer implements vscode.Disposable {
             await this.stop();
             const command = await commandFor('languageServer', this.context);
             if (this.disposed) return;
-            const client = new LanguageClient('ferrouiXaml', 'FerroUI XAML', {
+            const client: LanguageClient = new LanguageClient('ferrouiXaml', 'FerroUI XAML', {
                 command, transport: TransportKind.stdio,
             }, {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
@@ -42,7 +43,16 @@ export class XamlServer implements vscode.Disposable {
                     },
                     provideDefinition: async (document, position, token, next) => {
                         const declaration = await this.eventDefinition?.(document, position, token);
-                        return declaration ?? next(document, position, token);
+                        if (declaration) return declaration;
+                        try {
+                            const locations = await projectDefinition(client, document, position, token);
+                            if (locations) return locations;
+                        } catch (error) {
+                            if (token.isCancellationRequested) return [];
+                            this.channel.appendLine(`Rust source navigation: ${errorMessage(error)}`);
+                            return [];
+                        }
+                        return next(document, position, token);
                     },
                 },
                 synchronize: { configurationSection: 'ferroui', fileEvents: this.watch },

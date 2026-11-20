@@ -22,6 +22,8 @@ Multiple indexed solution roots coexist. Closing a project buffer restores its s
 
 Binding member completion, hover and definition navigation use `x:DataType`, explicit Binding DataType, named element sources, self sources and template targets. Nested member paths follow registered property types. Quick fixes correct the casing of a typed binding member or a resource key when the service can resolve one replacement in scope. Hosts register view models with `Schema::register`. Both `TypeInfo` and `PropertyInfo` accept optional `Location` values for code navigation. The language service reads metadata without executing constructors or markup extensions.
 
+Cargo builds publish an optional `xaml-rust-sources.json` companion to `.xamlmeta`. Its anchors identify authored registration macros by package, file, inline module and symbol. Definitions re-parse the current Rust file and return a range only when the same anchor resolves uniquely. Standard `textDocument/definition` uses the saved source. Clients with an open Rust draft can use the negotiated project-definition requests to supply that one buffer. Studio supplies its open Rust tab through the same language service.
+
 ```rust,ignore
 let mut language = LanguageService::new(Schema::ferroui());
 language.index_solution(&solution)?;

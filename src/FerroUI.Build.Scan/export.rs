@@ -265,7 +265,7 @@ impl Export {
             Err(error) => return Outcome { lines, errors: vec![error] },
         };
         let started = Instant::now();
-        let scan = scan_crate(&ScanOptions::new(&self.crate_name, root).with_dependencies(models));
+        let scan = scan_crate(&ScanOptions::new(&self.crate_name, root).with_dependencies(models).with_authored_symbols());
         report.scanned(&scan, started.elapsed());
         for file in &scan.files {
             rerun(&mut lines, &file.path);
@@ -276,6 +276,7 @@ impl Export {
             lines.push(format!("cargo::warning={diagnostic}"));
         }
 
+        let mut authored = scan.authored_symbols(&self.manifest_dir.join("Cargo.toml"));
         let mut model = scan.model;
         if model.name.is_empty() {
             // A crate that states no assembly is the assembly named after the crate, as
@@ -308,6 +309,10 @@ impl Export {
             Err(error) => return Outcome { lines, errors: vec![error] },
         }
         report.write = started.elapsed();
+        authored.assembly.clone_from(&model.name);
+        if let Err(error) = authored.write(&self.out_dir) {
+            return Outcome { lines, errors: vec![error] };
+        }
         if let Err(error) = report.write(&self.out_dir) {
             return Outcome { lines, errors: vec![error] };
         }

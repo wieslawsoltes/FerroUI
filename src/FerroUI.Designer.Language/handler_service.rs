@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 #[path = "handler_contract.rs"]
 mod contract;
 use contract::event_at;
-const MAX_RUST_BYTES: usize = 2 * 1024 * 1024;
+pub(crate) const MAX_RUST_BYTES: usize = 2 * 1024 * 1024;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -248,7 +248,7 @@ impl LanguageService {
     }
 }
 
-fn read_rust(uri: &str) -> Result<String> {
+pub(crate) fn read_rust(uri: &str) -> Result<String> {
     use std::io::Read;
     let path = file_path(uri)?;
     let mut source = String::new();

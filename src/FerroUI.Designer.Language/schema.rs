@@ -1,6 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
+use ferroui_designer_project::MarkupSource;
 pub const FRAMEWORK_NAMESPACE: &str = "https://github.com/ferroui";
+
+#[derive(Clone, Debug)]
+pub struct ModelType {
+    pub name: String,
+    pub namespace: String,
+}
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct PropertyInfo {
@@ -17,6 +25,10 @@ pub struct PropertyInfo {
     pub event: bool,
     #[serde(default)]
     pub definition: Option<crate::Location>,
+    #[serde(skip)]
+    pub authored: Option<Arc<MarkupSource>>,
+    #[serde(skip)]
+    pub model_type: Option<ModelType>,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TypeInfo {
@@ -31,6 +43,10 @@ pub struct TypeInfo {
     pub properties: BTreeMap<String, PropertyInfo>,
     #[serde(default)]
     pub definition: Option<crate::Location>,
+    #[serde(skip)]
+    pub authored: Option<Arc<MarkupSource>>,
+    #[serde(skip)]
+    pub model_base: Option<ModelType>,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ExtensionInfo {
@@ -274,10 +290,7 @@ impl Schema {
                     .entry(name.clone())
                     .or_insert_with(|| property.clone());
             }
-            next = info.base.as_ref().and_then(|name| {
-                self.type_info(name, Some(&info.namespace))
-                    .or_else(|| self.type_info(name, None))
-            });
+            next = self.base_type(info);
         }
         result
     }
@@ -288,6 +301,15 @@ impl Schema {
         name: &str,
     ) -> Option<PropertyInfo> {
         self.property_in_context(owner, namespace, name, namespace)
+    }
+
+    fn base_type(&self, info: &TypeInfo) -> Option<&TypeInfo> {
+        if let Some(base) = &info.model_base {
+            return self.type_info(&base.name, Some(&base.namespace));
+        }
+        let base = info.base.as_ref()?;
+        self.type_info(base, Some(&info.namespace))
+            .or_else(|| self.type_info(base, None))
     }
 
     pub fn attribute_property(
@@ -383,10 +405,7 @@ impl Schema {
                 {
                     return Some(property);
                 }
-                next = info.base.as_ref().and_then(|base| {
-                    self.type_info(base, Some(&info.namespace))
-                        .or_else(|| self.type_info(base, None))
-                });
+                next = self.base_type(info);
             }
             // Attached properties also apply to controls with unregistered metadata.
             property.attached.then_some(property)

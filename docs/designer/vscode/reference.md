@@ -115,6 +115,10 @@ Call `designer_dictionary_extraction` with an authored `node` and the current `e
 
 Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `file_name`, and `review`. The write creates the dictionary and updates the view in one editor transaction. Use `designer_history` in VS Code or `designer_undo` in Studio from the original view. When a source or destination changes, read the target again and review the new plan. [Resources workflow](authoring.md#extract-a-resource-dictionary)
 
+### Find registered Rust definitions with MCP
+
+After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)
+
 ### Rename an RSX control with MCP
 
 In VS Code, read `designer_outline` for the current control ID and frame. Call `designer_rename_rsx_control` with `session`, `node`, `expected_revision`, and the new name in `value`. The editor also exposes the same change as a `designer_property` action through `designer_studio_edit`.

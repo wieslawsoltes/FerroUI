@@ -241,7 +241,7 @@ impl DesignerWorkspace {
                 let locations = {
                     let tools = self.source_tools.borrow();
                     if command == "SourceDefinition" {
-                        tools.service.definitions(&uri, offset)
+                        tools.service.definitions_with_source(&uri, offset, |rust| self.open_rust_source(rust))
                     } else {
                         tools.service.references(&uri, offset)
                     }
@@ -310,12 +310,20 @@ impl DesignerWorkspace {
     }
     pub fn navigate_to(self: &Rc<Self>, location: &Location) -> Result<(), String> {
         self.activate_document(&location.uri)?;
-        let source = self.session.borrow().document().source().to_owned();
+        let source = self.session.borrow().authored_source().to_owned();
         let span = LineIndex::new(&source)
             .span(location.range)
             .map_err(|e| e.to_string())?;
         self.select_source_span(span);
         Ok(())
+    }
+
+    pub(crate) fn open_rust_source(&self, uri: &str) -> Option<String> {
+        let uri = super::project::document_identity(uri).ok()?;
+        let project = self.project.borrow();
+        let tab = project.tabs.get(&uri)?;
+        tab.rust.as_ref()?;
+        Some(tab.source().to_owned())
     }
     /// Apply a versioned completion even while its surrounding XAML is an incomplete draft.
     pub fn apply_source_completion(

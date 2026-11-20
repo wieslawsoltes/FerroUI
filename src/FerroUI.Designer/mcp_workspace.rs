@@ -256,7 +256,7 @@ fn language(workspace: &Rc<DesignerWorkspace>, args: &Value) -> Result<Value, St
             .hover(uri, index(args, "offset")?)
             .map_err(|error| error.to_string())?),
         "definitions" => json!(language
-            .definitions(uri, index(args, "offset")?)
+            .definitions_with_source(uri, index(args, "offset")?, |rust| workspace.open_rust_source(rust))
             .map_err(|error| error.to_string())?),
         "references" => json!(language
             .references_with_declarations(

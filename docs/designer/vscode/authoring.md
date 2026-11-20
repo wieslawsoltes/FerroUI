@@ -22,6 +22,12 @@ Start with a view you can render, then use the same source buffer for text edits
 
 For a partial Rust preview, edit expressions, handler code, or dynamic child lists in the Rust editor. The designer can still edit supported literals and mapped handler expressions and wrap consecutive mapped children. In XAML with bindings, style objects, or property elements that have no static counterpart, edit the authored XAML. Existing XAML design data survives supported counterpart value edits. [Language service](../../../src/FerroUI.Designer.Language/README.md) · [Mapping project controls to RSX](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
+### Follow registered Rust declarations
+
+Run **Build Project XAML Schema** for the owning Cargo target. In XAML, put the caret on a registered control tag, a property name, an `x:Class` or `x:DataType` value, or a member of a typed binding path. Press **F12** or choose **Go to Definition**.
+
+The result opens the authored Rust registration for that type or property. Each step in a path such as `Address.Street` follows the build's type information, including dependency types exposed under a XAML alias. With `{CompiledBinding Street, DataType={x:Type data:PostalAddress}}`, place the caret on `Street` for the registered property or on `data:PostalAddress` for its type. Navigation resolves the current file or open Rust draft, so adding lines above a declaration keeps the selection on its name. Rebuild the schema after moving declarations between files, changing a registration, or using build output without the source index. [Studio workflow](../native-controls.md#follow-a-rust-declaration-from-xaml) · [MCP workflow](reference.md#find-registered-rust-definitions-with-mcp)
+
 ### Rename an RSX control
 
 Select the named control in Design or Outline, then run **FerroUI: Rename RSX Control** from the Command Palette. You can also edit **Name** in Properties. The edit changes the naming literal and applicable references within the active `rsx!` invocation in one Undo step.

@@ -14,6 +14,8 @@ mod handler_tests;
 mod line_index;
 pub mod lsp;
 mod project_schema;
+#[cfg(test)]
+mod project_navigation_tests;
 mod references;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod rust_analyzer;
@@ -26,7 +28,7 @@ pub use references::{
     identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,
     NameOccurrence,
 };
-pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo, FRAMEWORK_NAMESPACE};
+pub use schema::{ExtensionInfo, ModelType, PropertyInfo, Schema, TypeInfo, FRAMEWORK_NAMESPACE};
 pub use service::*;
 use std::fmt;
 #[derive(Clone, Debug, PartialEq, Eq)]

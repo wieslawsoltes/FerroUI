@@ -1,8 +1,8 @@
 //! Binding paths share schema metadata with ordinary property editing. Resolution uses the
 //! explicit source, a named element, template target, or nearest x:DataType in that order.
-use crate::references::{Argument, markup_arguments};
+use crate::references::{markup_arguments, markup_arguments_with_extensions, Argument};
 use crate::{LanguageService, Position, PropertyInfo, Range, Result, Schema, TypeInfo};
-use ferroui_designer_core::{Document, MarkupValue, NodeId, SourceSpan};
+use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, SourceSpan};
 use std::collections::BTreeMap;
 
 mod fixes;
@@ -57,14 +57,22 @@ pub(crate) fn members(
     expression: &str,
     path: &str,
 ) -> BTreeMap<String, PropertyInfo> {
-    let arguments = markup_arguments(expression);
+    let arguments = markup_arguments_with_extensions(expression);
     let mut path = path;
     let Some(mut owner) = source_type(
-        schema, document, node, expression, &arguments, &mut path, |name| {
+        schema,
+        document,
+        node,
+        expression,
+        &arguments,
+        &mut path,
+        |name| {
             let scope = crate::name_scope(document, node);
-            let mut targets = crate::name_occurrences(document).into_iter().filter(|occurrence| {
-                occurrence.declaration && occurrence.scope == scope && occurrence.name == name
-            });
+            let mut targets = crate::name_occurrences(document)
+                .into_iter()
+                .filter(|occurrence| {
+                    occurrence.declaration && occurrence.scope == scope && occurrence.name == name
+                });
             let node = targets.next()?.node;
             targets.next().is_none().then_some(node)
         },
@@ -77,19 +85,63 @@ pub(crate) fn members(
             else {
                 return BTreeMap::new();
             };
-            let Some(next) = property_type(
-                schema,
-                &property.type_name,
-                &owner.namespace,
-                document,
-                node,
-            ) else {
+            let next = if let Some(type_) = &property.model_type {
+                schema.type_info(&type_.name, Some(&type_.namespace))
+            } else {
+                property_type(
+                    schema,
+                    &property.type_name,
+                    &owner.namespace,
+                    document,
+                    node,
+                )
+            };
+            let Some(next) = next else {
                 return BTreeMap::new();
             };
             owner = next;
         }
     }
     schema.properties(&owner.name, Some(&owner.namespace))
+}
+
+/// A type named by an authored XAML type value, including a local binding override.
+pub(crate) fn type_at<'a>(
+    schema: &'a Schema,
+    document: &Document,
+    node: &Node,
+    offset: usize,
+) -> Option<&'a TypeInfo> {
+    let attribute = node
+        .attributes
+        .iter()
+        .find(|attribute| attribute.value_span.contains(offset))?;
+    let directive = attribute.namespace_uri.as_deref()
+        == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+        && attribute.name.rsplit(':').next() == Some("DataType");
+    let native_datatype = attribute.name == "DataType"
+        && schema
+            .type_info(&node.name, node.namespace_uri.as_deref())
+            .is_some_and(|info| {
+                info.namespace == crate::schema::FRAMEWORK_NAMESPACE
+                    && (info.name == "DataTemplate" || is_binding(&info.name))
+            });
+    if directive || native_datatype {
+        return type_reference(schema, document, node.id, &attribute.value);
+    }
+    if attribute.value.trim_start().starts_with('{') {
+        if let Some(type_) = type_reference(schema, document, node.id, &attribute.value) {
+            return Some(type_);
+        }
+    }
+    let raw = &document.source()[attribute.value_span.range()];
+    let local_offset = offset.checked_sub(attribute.value_span.start)?;
+    let argument = markup_arguments_with_extensions(raw).into_iter().find(|argument| {
+        is_native_binding(schema, document, node.id, &argument.extension)
+            && argument.name.as_deref() == Some("DataType")
+            && argument.span.contains(local_offset)
+    })?;
+    type_reference(schema, document, node.id, &argument.value)
 }
 
 /// Resolve the individual path member under the caret, retaining its exact lexical source span.
@@ -108,7 +160,9 @@ pub(crate) fn at(
         }
         let raw = &document.source()[attribute.value_span.range()];
         for argument in markup_arguments(raw) {
-            if !is_path(&argument) {
+            if !is_path(&argument)
+                || !is_native_binding(schema, document, node.id, &argument.extension)
+            {
                 continue;
             }
             let span = SourceSpan::new(
@@ -156,6 +210,20 @@ fn is_binding(extension: &str) -> bool {
         "Binding" | "CompiledBinding" | "ReflectionBinding"
     )
 }
+
+fn is_native_binding(schema: &Schema, document: &Document, node: NodeId, extension: &str) -> bool {
+    let (prefix, _) = extension.split_once(':').unwrap_or(("", extension));
+    let namespaces = document.ast().namespaces(node);
+    schema
+        .extension(extension, namespaces.get(prefix).map(String::as_str))
+        .is_some_and(|info| {
+            matches!(
+                info.name.as_str(),
+                "Binding" | "CompiledBinding" | "ReflectionBinding"
+            )
+        })
+}
+
 fn source_type<'a>(
     schema: &'a Schema,
     document: &Document,
@@ -289,11 +357,12 @@ fn type_reference<'a>(
     } else {
         reference.to_owned()
     };
-    let namespace = reference
-        .split_once(':')
-        .map(|(prefix, _)| prefix)
-        .unwrap_or("");
-    schema.type_info(&reference, namespaces.get(namespace).map(String::as_str))
+    let reference = reference.trim();
+    let namespace = match reference.split_once(':') {
+        Some((prefix, _)) => Some(namespaces.get(prefix)?.as_str()),
+        None => namespaces.get("").map(String::as_str),
+    };
+    schema.type_info(reference, namespace)
 }
 fn property_type<'a>(
     schema: &'a Schema,

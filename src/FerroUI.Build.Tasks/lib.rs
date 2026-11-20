@@ -631,7 +631,8 @@ impl Build {
     /// trims).
     fn scan(&self, dependencies: Vec<AssemblyModel>, references: bool) -> Result<Scan, String> {
         let root = ferroui_build_scan::export::source_root(&self.manifest_dir, self.source_root.as_deref())?;
-        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies).with_source_references(references);
+        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies)
+            .with_source_references(references).with_authored_symbols();
         options.assembly_name = self.assembly.map(|assembly| assembly.name.to_string());
         Ok(scan_crate(&options))
     }
@@ -834,6 +835,7 @@ impl Build {
         // The functions of the inherent `impl` blocks of the crate: what a class whose markup is
         // partitioned into units is checked against for its constructor from units (#849).
         let mut scanned_functions: Vec<InherentFunction> = Vec::new();
+        let mut authored_symbols = None;
 
         // The type model of the crate, from its sources.
         let scanned = self.export_metadata || on_models;
@@ -879,6 +881,7 @@ impl Build {
                         }
                     }
                     scanned_functions = std::mem::take(&mut scan.functions);
+                    authored_symbols = Some(scan.authored_symbols(&manifest));
                     model = Some(scan.model);
                 }
                 Err(error) => {
@@ -1461,6 +1464,12 @@ impl Build {
             symbols.file_inputs.sort();
             symbols.file_inputs.dedup();
             write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
+            if let Some(mut authored) = authored_symbols {
+                authored.assembly = assembly_name.clone();
+                if let Err(error) = authored.write(&self.out_dir) {
+                    errors.push(error);
+                }
+            }
         }
         if !errors.is_empty() {
             return Outcome { lines, errors };

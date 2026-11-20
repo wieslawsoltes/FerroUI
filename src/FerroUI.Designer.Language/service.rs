@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
+mod definitions;
 mod refactoring;
 #[path = "handler_service.rs"]
 mod handlers;
@@ -1331,67 +1332,6 @@ impl LanguageService {
             active_signature: 0,
             active_parameter: active as u32,
         }))
-    }
-    pub fn definitions(&self, uri: &str, offset: usize) -> Result<Vec<Location>> {
-        let schema = self.schema_for(uri);
-        let state = self.state(uri)?;
-        state.index.position(offset)?;
-        if let Some(occurrence) = state
-            .symbols
-            .iter()
-            .find(|o| o.span.contains(offset) || o.span.end == offset)
-            .cloned()
-        {
-            return self
-                .resolve(uri, &occurrence)
-                .into_iter()
-                .map(|(uri, o)| self.location(&uri, o.span))
-                .collect();
-        }
-        if state.document.is_valid() {
-            if let Some((property, _)) = crate::binding::at(schema, &state.document, offset) {
-                return Ok(property.definition.into_iter().collect());
-            }
-            let position = state.index.position(offset)?;
-            if self.is_handler_attribute(uri, position) {
-                let request = HandlerRequest { version: state.version, position, event: None };
-                if let Ok(Some(location)) = self.handler_definition(uri, &request, None) {
-                    return Ok(vec![location]);
-                }
-            }
-            if let Some(node) = state
-                .document
-                .ast()
-                .element_at(offset)
-                .and_then(|id| state.document.ast().node(id))
-            {
-                if node.name_span.contains(offset) {
-                    return Ok(schema
-                        .type_info(&node.name, node.namespace_uri.as_deref())
-                        .and_then(|t| t.definition.clone())
-                        .into_iter()
-                        .collect());
-                }
-                for attribute in &node.attributes {
-                    if attribute.name_span.contains(offset) {
-                        return Ok(schema
-                            .attribute_property(&state.document, node, attribute)
-                            .and_then(|property| property.definition)
-                            .into_iter()
-                            .collect());
-                    }
-                    if attribute.name == "Source" && attribute.value_span.contains(offset) {
-                        if let Ok(target) = self.resource_uri(uri, &attribute.value) {
-                            return Ok(vec![Location {
-                                uri: target,
-                                range: Range::default(),
-                            }]);
-                        }
-                    }
-                }
-            }
-        }
-        Ok(Vec::new())
     }
     pub fn references(&self, uri: &str, offset: usize) -> Result<Vec<Location>> {
         self.references_with_declarations(uri, offset, true)

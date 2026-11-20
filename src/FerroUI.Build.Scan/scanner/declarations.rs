@@ -10,6 +10,7 @@
 //! A form a reader does not know is an error with its line, never a guess.
 
 use proc_macro2::{Delimiter, TokenTree};
+use std::ops::Range;
 
 use super::tokens::{
     generic_type, group_of, ident_of, is_arrow, is_path_separator, is_punct, line_of, split_types, tokens_of, Cursor, ParseError, Tokens, TypeEnd,
@@ -46,6 +47,7 @@ pub(crate) struct Accessor {
     pub return_type: Tokens,
     pub body: Tokens,
     pub line: usize,
+    pub name_range: Range<usize>,
 }
 
 pub(crate) struct EnumMember {
@@ -98,6 +100,7 @@ pub(crate) struct RawAccessor {
 
 pub(crate) struct RawProperty {
     pub name: String,
+    pub name_range: Option<Range<usize>>,
     pub parameters: Vec<RawParameter>,
     pub type_: Tokens,
     pub getter: Option<RawAccessor>,
@@ -255,6 +258,7 @@ fn read_accessor(cursor: &mut Cursor) -> Result<Accessor, ParseError> {
     if !cursor.eat_ident("fn") {
         return cursor.error("`fn` (an accessor of a property: `vis fn name() -> Type { .. }`)");
     }
+    let name_range = cursor.peek().map(|token| token.span().byte_range()).unwrap_or_default();
     let name = cursor.take_ident("the name of the accessor")?;
     let (parameters, _) = cursor.take_group(Delimiter::Parenthesis, "`()`")?;
     if !parameters.is_empty() {
@@ -263,7 +267,7 @@ fn read_accessor(cursor: &mut Cursor) -> Result<Accessor, ParseError> {
     cursor.expect_arrow('-')?;
     let return_type = cursor.take_type(TypeEnd { brace: true, ..TypeEnd::default() }, "the type of the property definition")?.to_vec();
     let (body, _) = cursor.take_group(Delimiter::Brace, "the body of the accessor")?;
-    Ok(Accessor { name, visibility, return_type, body, line })
+    Ok(Accessor { name, visibility, return_type, body, line, name_range })
 }
 
 /// `Name { new: callable, interfaces: [I, J => cast], markup: { .. } }`, the parts in any order.
@@ -535,14 +539,15 @@ fn read_properties_list(tokens: &[TokenTree], line: usize, indexers: bool) -> Re
     let mut cursor = Cursor::new(tokens, line);
     let mut properties = Vec::new();
     while !cursor.is_end() {
-        let (name, parameters) = if indexers {
+        let (name, name_range, parameters) = if indexers {
             let (list, line) = cursor.take_group(Delimiter::Parenthesis, "the parameters of an indexer in parentheses")?;
             cursor.expect_arrow('-')?;
-            (String::new(), split_types(&list, line)?.into_iter().map(positional).collect())
+            (String::new(), None, split_types(&list, line)?.into_iter().map(positional).collect())
         } else {
+            let range = cursor.peek().map(|token| token.span().byte_range());
             let name = cursor.take_ident("the name of a property")?;
             cursor.expect_punct(':')?;
-            (name, Vec::new())
+            (name, range, Vec::new())
         };
         let type_ = cursor.take_type(TypeEnd { brace: true, ..TypeEnd::default() }, "the type of the property")?.to_vec();
         let (accessors, line) = cursor.take_group(Delimiter::Brace, "the accessors in braces")?;
@@ -571,7 +576,7 @@ fn read_properties_list(tokens: &[TokenTree], line: usize, indexers: bool) -> Re
         } else {
             Vec::new()
         };
-        properties.push(RawProperty { name, parameters, type_, getter, setter, attributes });
+        properties.push(RawProperty { name, name_range, parameters, type_, getter, setter, attributes });
         separator(&mut cursor)?;
     }
     Ok(properties)

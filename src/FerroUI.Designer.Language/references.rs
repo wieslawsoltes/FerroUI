@@ -241,16 +241,31 @@ pub(crate) struct Argument {
     pub quote: Option<char>,
 }
 pub(crate) fn markup_arguments(source: &str) -> Vec<Argument> {
+    collect_markup_arguments(source, false)
+}
+
+/// Include direct extension-valued arguments such as `DataType={x:Type local:Model}`.
+pub(crate) fn markup_arguments_with_extensions(source: &str) -> Vec<Argument> {
+    collect_markup_arguments(source, true)
+}
+
+fn collect_markup_arguments(source: &str, include_extensions: bool) -> Vec<Argument> {
     let decoded = Decoded::new(source);
     if !decoded.text.starts_with('{') || decoded.text.starts_with("{}") {
         return Vec::new();
     }
     let mut arguments = Vec::new();
-    parse_extension(&decoded, 0, 0, &mut arguments);
+    parse_extension(&decoded, 0, 0, include_extensions, &mut arguments);
     arguments.sort_by_key(|argument| argument.span.start);
     arguments
 }
-fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Argument>) -> usize {
+fn parse_extension(
+    source: &Decoded,
+    open: usize,
+    depth: usize,
+    include_extensions: bool,
+    out: &mut Vec<Argument>,
+) -> usize {
     if depth >= 128 {
         return source.text.len();
     }
@@ -290,7 +305,7 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
         match ch {
             '\'' | '"' => quote = Some(ch),
             '{' => {
-                at = parse_extension(source, at, depth + 1, out);
+                at = parse_extension(source, at, depth + 1, include_extensions, out);
                 continue;
             }
             '=' => {
@@ -299,7 +314,7 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
                 }
             }
             ',' | '}' => {
-                push_argument(source, extension, depth, segment, at, equal, out);
+                push_argument(source, extension, depth, segment..at, equal, include_extensions, out);
                 if ch == '}' {
                     return next;
                 }
@@ -310,22 +325,22 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
         }
         at = next;
     }
-    push_argument(source, extension, depth, segment, at, equal, out);
+    push_argument(source, extension, depth, segment..at, equal, include_extensions, out);
     at
 }
 fn push_argument(
     source: &Decoded,
     extension: &str,
     depth: usize,
-    start: usize,
-    end: usize,
+    segment: std::ops::Range<usize>,
     equal: Option<usize>,
+    include_extensions: bool,
     out: &mut Vec<Argument>,
 ) {
     let text = &source.text;
-    let name = equal.map(|equal| text[start..equal].trim().to_owned());
-    let mut start = skip_space(text, equal.map_or(start, |equal| equal + 1));
-    let mut end = end;
+    let name = equal.map(|equal| text[segment.start..equal].trim().to_owned());
+    let mut start = skip_space(text, equal.map_or(segment.start, |equal| equal + 1));
+    let mut end = segment.end;
     while end > start
         && text[..end]
             .chars()
@@ -334,7 +349,20 @@ fn push_argument(
     {
         end -= text[..end].chars().next_back().unwrap().len_utf8();
     }
-    if start >= end || text.as_bytes()[start] == b'{' {
+    if start >= end {
+        return;
+    }
+    if text.as_bytes()[start] == b'{' {
+        if include_extensions && depth == 0 {
+            out.push(Argument {
+                extension: extension.into(),
+                depth,
+                name,
+                value: text[start..end].into(),
+                span: SourceSpan::new(source.boundaries[start], source.boundaries[end]),
+                quote: None,
+            });
+        }
         return;
     }
     let quote = text[start..end]

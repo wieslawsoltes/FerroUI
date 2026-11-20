@@ -56,6 +56,7 @@
 
 mod constants;
 mod class_registration;
+mod authored;
 mod declarations;
 mod modules;
 mod source;
@@ -141,6 +142,8 @@ pub struct ScanOptions {
     /// ([`Scan::references`]): what an application that trims its themes roots them by (#568,
     /// step 4 of docs/porting/theme-trimming.md). Off unless asked for.
     pub source_references: bool,
+    /// Retain navigation anchors for authored XAML type and property declarations.
+    pub authored_symbols: bool,
 }
 
 impl ScanOptions {
@@ -152,6 +155,7 @@ impl ScanOptions {
             extern_crates: Vec::new(),
             dependencies: Vec::new(),
             source_references: false,
+            authored_symbols: false,
         }
     }
 
@@ -159,6 +163,11 @@ impl ScanOptions {
     /// ([`ScanOptions::source_references`]).
     pub fn with_source_references(mut self, value: bool) -> Self {
         self.source_references = value;
+        self
+    }
+
+    pub fn with_authored_symbols(mut self) -> Self {
+        self.authored_symbols = true;
         self
     }
 
@@ -385,6 +394,7 @@ pub struct Scan {
     /// The names and the string literals of the code; empty unless the options asked for them
     /// ([`ScanOptions::source_references`]).
     pub references: SourceReferences,
+    authored_definitions: Vec<crate::authored_symbols::AuthoredDefinition>,
     modules: Modules,
 }
 
@@ -528,6 +538,8 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
         model: AssemblyModel::new(options.assembly_name.as_deref().unwrap_or(""), &options.crate_name),
         index: BTreeMap::new(),
         files: Vec::new(),
+        authored_definitions: Vec::new(),
+        capture_definitions: options.authored_symbols,
         reported: BTreeSet::new(),
         statistics: Statistics::default(),
     };
@@ -600,6 +612,8 @@ struct Builder {
     index: BTreeMap<String, usize>,
     /// The file each type of the model is declared in, by the index of the type.
     files: Vec<usize>,
+    authored_definitions: Vec<crate::authored_symbols::AuthoredDefinition>,
+    capture_definitions: bool,
     /// The unresolved paths already reported, by file, line and path.
     reported: BTreeSet<(usize, usize, String)>,
     statistics: Statistics,
@@ -700,7 +714,14 @@ impl Builder {
         type_.object_model = true;
         type_.cfg = site.cfg.clone();
         type_.base = base.map(|base| self.rust_type(base, site, None));
+        let index = self.model.types.len();
         self.add_type(type_, site);
+        let kind = if kind == TypeKind::Static {
+            crate::authored_symbols::DeclarationKind::Static
+        } else {
+            crate::authored_symbols::DeclarationKind::Class
+        };
+        self.record_definition(index, site, kind, name, None, None);
     }
 
     /// The types whose runtime type is implemented by hand: a class when the type
@@ -764,12 +785,14 @@ impl Builder {
     }
 
     fn markup_type(&mut self, kind: TypeKind, type_: &Tokens, is_dyn: bool, name: Option<&str>, body: &MarkupBody, site: &Site) {
+        let origin = crate::authored_symbols::DeclarationKind::MarkupType;
+        let written = text_of(type_);
         // The metadata of a static type that owns attached properties belongs to its
         // runtime type (`type_info: X`).
         if let Some(type_info) = &body.type_info {
             if let Some(index) = plain_path(type_info).filter(|path| path.len() == 1).and_then(|path| self.find_declared(site, &path[0])) {
                 let self_type = self.model.types[index].rust_path.text.clone();
-                self.apply_markup(index, body, site, &self_type);
+                self.apply_markup(index, body, site, &self_type, (origin, &written));
                 return;
             }
         }
@@ -784,7 +807,8 @@ impl Builder {
         model.cfg = site.cfg.clone();
         let index = self.model.types.len();
         self.add_type(model, site);
-        self.apply_markup(index, body, site, &self_type);
+        self.record_definition(index, site, origin, &written, None, None);
+        self.apply_markup(index, body, site, &self_type, (origin, &written));
     }
 
     fn markup_enum(&mut self, name: &str, flags: bool, members: &[EnumMember], body: &MarkupBody, site: &Site) {
@@ -839,7 +863,9 @@ impl Builder {
         let self_type = model.rust_path.text.clone();
         let index = self.model.types.len();
         self.add_type(model, site);
-        self.apply_markup(index, body, site, &self_type);
+        let origin = crate::authored_symbols::DeclarationKind::MarkupEnum;
+        self.record_definition(index, site, origin, name, None, None);
+        self.apply_markup(index, body, site, &self_type, (origin, name));
     }
 
     fn class_info(&mut self, name: &str, new: Option<&[TokenTree]>, interfaces: &[Tokens], markup: Option<&MarkupBody>, site: &Site) {
@@ -857,12 +883,15 @@ impl Builder {
         self.model.types[index].interfaces.extend(interfaces);
         if let Some(markup) = markup {
             self.model.types[index].class_markup = true;
-            self.apply_markup(index, markup, site, &self_type);
+            self.apply_markup(index, markup, site, &self_type, (crate::authored_symbols::DeclarationKind::ClassInfo, name));
         }
     }
 
     /// Adds the parts of markup metadata to the type `index`.
-    fn apply_markup(&mut self, index: usize, body: &MarkupBody, site: &Site, self_type: &str) {
+    fn apply_markup(&mut self, index: usize, body: &MarkupBody, site: &Site, self_type: &str, origin: (crate::authored_symbols::DeclarationKind, &str)) {
+        for property in &body.properties {
+            self.record_definition(index, site, origin.0, origin.1, Some(&property.name), None);
+        }
         let self_type = Some(self_type);
         let handles = self.rust_types(&body.handles, site, self_type);
         let interfaces = self.rust_types(&body.interfaces, site, self_type);
@@ -1043,6 +1072,8 @@ impl Builder {
                     self.source.diagnostic(Severity::Warning, codes::REGISTRATION, &site, message);
                 }
             }
+            self.record_definition(index, &site, crate::authored_symbols::DeclarationKind::Registered, owner,
+                Some(&accessor.name), model.name.as_deref());
             self.model.types[index].registered.push(model);
         }
     }
@@ -1500,6 +1531,7 @@ impl Builder {
         let references = self.source.references.take().unwrap_or_default();
         let mut diagnostics = self.source.diagnostics;
         diagnostics.sort_by(|left, right| (&left.file, left.line, left.severity).cmp(&(&right.file, right.line, right.severity)));
-        Scan { model: self.model, diagnostics, files: self.source.files, functions, statistics, references, modules: self.source.modules }
+        Scan { model: self.model, diagnostics, files: self.source.files, functions, statistics, references,
+            authored_definitions: self.authored_definitions, modules: self.source.modules }
     }
 }

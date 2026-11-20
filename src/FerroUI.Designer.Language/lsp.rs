@@ -193,6 +193,28 @@ impl LspServer {
                 let (uri, offset) = self.position(params)?;
                 Ok(self.locations(self.service.definitions(uri, offset)?))
             }
+            "ferroui/projectDefinitionTarget" | "ferroui/projectDefinition" => {
+                let (uri, offset) = self.position(params)?;
+                crate::require(
+                    params["textDocument"]["version"].as_i64().is_some()
+                        && self.service.version(uri) == params["textDocument"]["version"].as_i64(),
+                    "The XAML document changed before navigation",
+                )?;
+                let target = self.service.definition_source_uri(uri, offset)?;
+                if method == "ferroui/projectDefinitionTarget" {
+                    return Ok(json!(target));
+                }
+                let draft: crate::HandlerDraft = decode(&params["rust"])?;
+                let supplied = ferroui_designer_project::canonical_file_uri(&draft.uri)?;
+                crate::require(
+                    target.as_deref() == Some(supplied.as_str()) && draft.version >= 0,
+                    "The Rust draft no longer matches this definition",
+                )?;
+                let locations = self.service.definitions_with_source(uri, offset, |file| {
+                    (file == supplied).then_some(draft.source)
+                })?;
+                Ok(self.locations(locations))
+            }
             "textDocument/references" => {
                 let (uri, offset) = self.position(params)?;
                 let include = params["context"]["includeDeclaration"]
@@ -458,7 +480,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

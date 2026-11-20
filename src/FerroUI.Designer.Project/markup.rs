@@ -14,6 +14,10 @@ pub use symbols::CompiledXamlOutput;
 mod events;
 pub use events::MarkupEventSignature;
 
+#[path = "markup_sources.rs"]
+mod sources;
+pub use sources::MarkupSource;
+
 pub(crate) const MAX_DIRECTORIES: usize = 1024;
 const MAX_FILES: usize = 256;
 const MAX_BYTES: u64 = 64 * 1024 * 1024;
@@ -56,6 +60,7 @@ impl BuildMetadata {
 pub struct MarkupCatalog {
     models: ModelSet,
     directories: BTreeSet<PathBuf>,
+    sources: sources::MarkupSources,
 }
 
 /// An element with a known XAML constructor and Control ancestry.
@@ -108,6 +113,8 @@ impl MarkupCatalog {
         }
         let mut models = Vec::new();
         let mut directories = BTreeSet::new();
+        let mut sources = sources::MarkupSources::default();
+        let mut source_budget = sources::INDEX_BYTES;
         let mut remaining = MAX_BYTES;
         for path in paths {
             let mut source = String::new();
@@ -121,16 +128,19 @@ impl MarkupCatalog {
                 "Cargo XAML metadata exceeds 64 MiB",
             )?;
             remaining -= source.len() as u64;
-            models.push(AssemblyModel::parse(&source).map_err(|error| {
+            let model = AssemblyModel::parse(&source).map_err(|error| {
                 ProjectError(format!("Cannot read {}: {error}", path.display()))
-            })?);
+            })?;
             if let Some(directory) = path.parent() {
+                sources.read(directory, &model, &mut source_budget);
                 directories.insert(directory.to_owned());
             }
+            models.push(model);
         }
         Ok(Self {
             models: ModelSet::new(models),
             directories,
+            sources,
         })
     }
 
@@ -269,6 +279,7 @@ mod tests {
         let catalog = MarkupCatalog {
             directories: BTreeSet::new(),
             models: ModelSet::new(vec![shell, widgets, framework]),
+            sources: sources::MarkupSources::default(),
         };
         let found = catalog.controls().collect::<Vec<_>>();
         assert_eq!(found.len(), 1);

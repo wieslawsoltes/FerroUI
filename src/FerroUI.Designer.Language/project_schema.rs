@@ -1,5 +1,6 @@
 use crate::{PropertyInfo, Schema, TypeInfo};
-use ferroui_build_scan::model::{RegisteredKind, TypeModel};
+use crate::schema::ModelType;
+use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeModel};
 use ferroui_designer_project::{CompiledResources, MarkupCatalog};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
@@ -27,9 +28,7 @@ impl ProjectSchema {
     pub(crate) fn refresh(&mut self, base: &Schema, overrides: &[TypeInfo]) {
         self.effective = base.clone();
         for info in &self.types {
-            if base.type_info(&info.name, Some(&info.namespace)).is_none() {
-                self.effective.register(info.clone());
-            }
+            self.effective.register_model_type(info);
         }
         for info in overrides {
             self.effective.register(info.clone());
@@ -41,10 +40,27 @@ impl Schema {
     /// Add types exported by the selected Cargo package and its dependencies.
     pub fn register_project(&mut self, catalog: &MarkupCatalog) {
         for info in types_from_models(catalog) {
-            if self.type_info(&info.name, Some(&info.namespace)).is_none() {
-                self.register(info);
+            self.register_model_type(&info);
+        }
+    }
+
+    fn register_model_type(&mut self, info: &TypeInfo) {
+        let Some(existing) = self.type_info(&info.name, Some(&info.namespace)) else {
+            self.register(info.clone());
+            return;
+        };
+        // Keep the checked framework schema's descriptors and add only build
+        // identities to matching members.
+        let mut merged = existing.clone();
+        merged.authored = info.authored.clone();
+        merged.model_base = info.model_base.clone();
+        for (name, property) in &info.properties {
+            if let Some(existing) = merged.properties.get_mut(name) {
+                existing.authored = property.authored.clone();
+                existing.model_type = property.model_type.clone();
             }
         }
+        self.register(merged);
     }
 }
 
@@ -64,7 +80,7 @@ fn types_from_models(catalog: &MarkupCatalog) -> Vec<TypeInfo> {
             )
         })
         .collect();
-    assemblies
+    let mut types: Vec<_> = assemblies
         .iter()
         .flat_map(|assembly| {
             assembly
@@ -87,14 +103,32 @@ fn types_from_models(catalog: &MarkupCatalog) -> Vec<TypeInfo> {
                     }
                     namespaces
                         .into_iter()
-                        .map(|namespace| type_info(catalog, item, namespace, &enums))
+                        .map(|namespace| (
+                            type_info(catalog, assembly, item, namespace, &enums),
+                            (&assembly.name, &assembly.crate_name, &item.rust_path.text),
+                        ))
                         .collect::<Vec<_>>()
                 })
         })
-        .collect()
+        .collect();
+    let mut identities = BTreeMap::<_, BTreeSet<_>>::new();
+    for (info, identity) in &types {
+        identities.entry((info.namespace.clone(), info.name.clone())).or_default().insert(*identity);
+    }
+    for (info, _) in &mut types {
+        if identities[&(info.namespace.clone(), info.name.clone())].len() > 1 {
+            // The assembly-qualified namespace can still disambiguate each
+            // definition when a shared XML namespace names both.
+            info.authored = None;
+            for property in info.properties.values_mut() {
+                property.authored = None;
+            }
+        }
+    }
+    types.into_iter().map(|(info, _)| info).collect()
 }
 
-fn type_info(catalog: &MarkupCatalog, item: &TypeModel, namespace: String, enums: &BTreeMap<&str, Vec<String>>) -> TypeInfo {
+fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel, namespace: String, enums: &BTreeMap<&str, Vec<String>>) -> TypeInfo {
     let property = |name: &str, value: &str, read_only, attached, event| PropertyInfo {
         name: name.into(),
         type_name: local_type(value).into(),
@@ -102,33 +136,26 @@ fn type_info(catalog: &MarkupCatalog, item: &TypeModel, namespace: String, enums
         attached,
         event,
         values: enums.get(value).cloned().unwrap_or_default(),
+        model_type: model_type(catalog, value),
         ..Default::default()
     };
     let mut properties = BTreeMap::new();
     for member in &item.properties {
-        properties.insert(
-            member.name.clone(),
-            property(
-                &member.name,
-                &member.value_type.text,
-                member.setter.is_none(),
-                false,
-                false,
-            ),
-        );
+        let mut info = property(&member.name, &member.value_type.text, member.setter.is_none(), false, false);
+        info.authored = catalog.authored_definition(assembly, item, Some((false, &member.name)));
+        properties.insert(member.name.clone(), info);
     }
     for member in &item.registered {
         if let Some(name) = &member.name {
-            properties.insert(
-                name.clone(),
-                property(
+            let mut info = property(
                     name,
                     &member.value_type.text,
                     member.read_only,
                     member.kind == RegisteredKind::Attached,
                     false,
-                ),
-            );
+                );
+            info.authored = catalog.authored_definition(assembly, item, Some((true, &member.accessor)));
+            properties.insert(name.clone(), info);
         }
     }
     for event in &item.events {
@@ -147,6 +174,8 @@ fn type_info(catalog: &MarkupCatalog, item: &TypeModel, namespace: String, enums
         namespace,
         properties,
         base: item.base.as_ref().map(|base| local_type(&base.text).into()),
+        authored: catalog.authored_definition(assembly, item, None),
+        model_base: item.base.as_ref().and_then(|base| model_type(catalog, &base.text)),
         constructible: !item.unregistered
             && (item.default_constructor.is_some()
                 || item
@@ -157,17 +186,33 @@ fn type_info(catalog: &MarkupCatalog, item: &TypeModel, namespace: String, enums
     }
 }
 
-fn local_type(text: &str) -> &str {
+fn model_type(catalog: &MarkupCatalog, text: &str) -> Option<ModelType> {
+    let (assembly, type_) = catalog.models().find_rust_type(unwrapped_type(text))?;
+    if type_.namespace.is_empty() {
+        return None;
+    }
+    Some(ModelType {
+        name: type_.name.clone(),
+        namespace: format!("clr-namespace:{};assembly={}", type_.namespace, assembly.name),
+    })
+}
+
+fn unwrapped_type(text: &str) -> &str {
     let text = text.trim();
     for wrapper in ["Option<", "Ref<", "Rc<"] {
         if let Some((prefix, value)) = text.split_once(wrapper) {
             if prefix.is_empty() || prefix.ends_with("::") {
                 if let Some(value) = value.strip_suffix('>') {
-                    return local_type(value);
+                    return unwrapped_type(value);
                 }
             }
         }
     }
+    text
+}
+
+fn local_type(text: &str) -> &str {
+    let text = unwrapped_type(text);
     if text.contains('<') {
         text
     } else {

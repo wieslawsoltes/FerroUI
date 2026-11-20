@@ -66,6 +66,7 @@
 #![forbid(unsafe_code)]
 
 pub mod call_forms;
+pub mod authored_symbols;
 pub mod compiled_names;
 pub mod export;
 mod json;

@@ -69,6 +69,10 @@ Choose a palette swatch to open the native color editor. Enter a literal or choo
 
 Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+### Follow a Rust declaration from XAML
+
+Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, or typed binding member and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
+
 ### Extract an XAML resource dictionary
 
 Open the owning project. In **Split** or **Code**, put the caret on the resource, its inline dictionary, or the control that owns the `Resources` property. Choose the file icon **Extract resource dictionary** in the source toolbar. Enter the sibling filename and choose **Review extraction**. Compare **Original source** and **Source replacement**, then read the new file in its named tab.
