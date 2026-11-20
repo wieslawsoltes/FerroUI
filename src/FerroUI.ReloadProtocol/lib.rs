@@ -3,7 +3,7 @@
 #[cfg(feature = "editor-events")]
 mod events;
 #[cfg(feature = "editor-events")]
-pub use events::{Language, Status, enabled, mcp_endpoint, ready, source};
+pub use events::{FrameRequest, FrameStatus, Language, Status, enabled, mcp_endpoint, ready, source, source_with_frame};
 
 /// The FNV-1a revision shared by compiler metadata, reload receipts, and the editor.
 pub fn fingerprint(bytes: &[u8]) -> u64 {

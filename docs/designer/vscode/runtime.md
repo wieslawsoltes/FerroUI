@@ -54,6 +54,8 @@ Choose the layers icon beside a property to trace why that value is effective in
 
 Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledgement time, binding errors, and native layout and scene counters. Open a binding result with a recorded source location to inspect its original declaration. **Show Hot Reload Output** includes build and process messages. Use **Preview Checks** in a design or stage for measured overflow, clipping, ineffective layout values, and accessibility in the accepted preview. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)
 
+Expand **Hot Reload History** and hover over a save to see when its app acknowledged the revision and which compositor batch rendered it. The row shows the time from the editor observing the save to a native frame when the app reports one. Several saves can share a compositor batch within a process generation. A replaced process has its own generation and startup frame. If a revision draws no scene or its process exits first, the hover reports that outcome. Agents can read the same records with `ferroui_reload_history`.
+
 ## Run a native UI scenario
 
 1. Open the [customer search scenario](../../../editors/vscode/test/fixtures/customer-search.ferroui-scenario.json) in the `editors/vscode/test/fixtures` folder as a workspace. The **FerroUI Scenarios** section in Testing lists saved `*.ferroui-scenario.json` files.

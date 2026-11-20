@@ -7,6 +7,7 @@ import { createInterface } from 'node:readline';
 import { setTimeout as delay } from 'node:timers/promises';
 import type { CargoTarget } from './cargoTarget';
 import type { ProcessOutput } from './reloadLog';
+import { parseFrameReceipt, positiveId, reloadFramePrefix, type RuntimeFrameReceipt } from './reloadFrames';
 import { mcpEndpointPrefix, parseMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
 
 const eventPrefix = 'FERROUI_RELOAD_V1=';
@@ -17,6 +18,8 @@ export interface RuntimeEvent {
     file?: string;
     revision?: string;
     message?: string;
+    frame?: number;
+    acknowledgedAt: number;
 }
 
 export function revision(bytes: Buffer): string {
@@ -102,7 +105,8 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
 }
 
 export async function launchArtifact(artifact: string, target: CargoTarget, output: ProcessOutput,
-    onEvent: (event: RuntimeEvent) => void, onMcp: (endpoint: RuntimeMcpEndpoint) => void): Promise<{ process: ReloadProcess; ready: Promise<void> }> {
+    onEvent: (event: RuntimeEvent) => void, onMcp: (endpoint: RuntimeMcpEndpoint) => void,
+    onFrame?: (receipt: RuntimeFrameReceipt) => void): Promise<{ process: ReloadProcess; ready: Promise<void> }> {
     // Keep the live executable side by side with Cargo's output. Native libraries keep their
     // relative lookup path, and Windows lets Cargo replace its own executable on rebuild.
     const executable = path.join(path.dirname(artifact), `.ferroui-${randomUUID()}-${path.basename(artifact)}`);
@@ -110,7 +114,8 @@ export async function launchArtifact(artifact: string, target: CargoTarget, outp
     const cleanup = () => removeLaunchCopy(executable, output);
     let child: ChildProcess;
     try {
-        child = spawn(executable, target.args, { ...options(target), env: { ...process.env, FERROUI_EDITOR_RELOAD: '1' } });
+        child = spawn(executable, target.args, { ...options(target), env: { ...process.env, FERROUI_EDITOR_RELOAD: '1',
+            ...(onFrame ? { FERROUI_RELOAD_FRAMES: '1' } : {}) } });
     } catch (error) {
         await cleanup();
         throw error;
@@ -123,6 +128,11 @@ export async function launchArtifact(artifact: string, target: CargoTarget, outp
         if (line.startsWith(mcpEndpointPrefix)) {
             const endpoint = parseMcpEndpoint(line.slice(mcpEndpointPrefix.length));
             if (endpoint) onMcp(endpoint);
+            return;
+        }
+        if (onFrame && line.startsWith(reloadFramePrefix)) {
+            const receipt = parseFrameReceipt(line.slice(reloadFramePrefix.length));
+            if (receipt) onFrame(receipt);
             return;
         }
         if (!line.startsWith(eventPrefix)) { output.appendLine(line); return; }
@@ -163,11 +173,13 @@ function lines(stream: NodeJS.ReadableStream | null, line: (text: string) => voi
 
 function parseEvent(text: string): RuntimeEvent | undefined {
     try {
-        const event = JSON.parse(text) as RuntimeEvent;
+        const event = JSON.parse(text) as Omit<RuntimeEvent, 'acknowledgedAt'>;
         if (!['xaml', 'rsx'].includes(event.language)) return undefined;
-        if (event.status === 'ready') return event;
-        if (['applied', 'failed', 'rebuild'].includes(event.status) && typeof event.file === 'string'
-            && typeof event.revision === 'string' && /^[a-f0-9]{16}$/.test(event.revision)) return event;
+        if ((event.status !== 'ready' && event.status !== 'applied') || !positiveId(event.frame)) delete event.frame;
+        if (event.status === 'ready' || (['applied', 'failed', 'rebuild'].includes(event.status) && typeof event.file === 'string'
+            && typeof event.revision === 'string' && /^[a-f0-9]{16}$/.test(event.revision))) {
+            return { ...event, acknowledgedAt: Date.now() };
+        }
     } catch { /* unrelated process output */ }
     return undefined;
 }

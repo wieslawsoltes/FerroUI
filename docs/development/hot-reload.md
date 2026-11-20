@@ -565,6 +565,20 @@ adapter; it does not automatically enable other constructor-configured pages.
 
 ## Render-completion measurements
 
+VS Code requests compositor receipts with `FERROUI_RELOAD_FRAMES=1` in a managed
+debug run. The normal window startup hook registers the renderer. Use
+`ferroui_hot_reload::notify_editor_on_open` for a manifest-backed XAML app and
+`ferroui_view::hot::notify_editor_on_open` for a custom RSX app. The standard
+`ferroui_view` launcher registers the RSX hook. The acknowledgement can include
+a process-local `frame` ID. A `FERROUI_RELOAD_FRAME_V1` event reports that ID,
+the compositor batch, and its render outcome. The editor associates it with
+the save fingerprint and the active process generation. Several acknowledgements
+can share a batch. A batch that drew a native scene supplies the save-to-frame
+measurement. Other outcomes include `noSceneUpdate` and `discarded`.
+The startup hook observes a native scene before showing the window. The first
+frame can arrive before the application sends its startup acknowledgement.
+[Read the receipts in VS Code](../designer/vscode/runtime.md#read-diagnostics-and-save-history)
+
 `FERROUI_RELOAD_TIMINGS=1` enables `record_frame_timing` at the sample/catalog
 transaction boundary. The hook requests the pending compositor batch and stamps
 its completion on the render thread. It neither forces layout nor waits on the UI

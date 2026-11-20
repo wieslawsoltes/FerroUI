@@ -88,11 +88,14 @@ pub fn watch() {
 /// registers both automatically.
 pub fn notify_editor_on_open(window: &ferroui_base::Ref<ferroui_controls::Window>) {
     #[cfg(feature = "hot-reload")]
-    if ferroui_reload_protocol::enabled() {
-        window.opened(|| ferroui_reload_protocol::ready(ferroui_reload_protocol::Language::Rsx)).detach();
-    }
+    editor_frames::notify_on_open(window);
+    #[cfg(not(feature = "hot-reload"))]
     let _ = window;
 }
+
+#[cfg(feature = "hot-reload")]
+#[path = "hot_editor_frames.rs"]
+mod editor_frames;
 
 /// Checks the source files for changes now and applies them; what [`watch`]
 /// runs on its timer.
@@ -347,10 +350,12 @@ mod reload {
                     }
                     visible
                 }));
-                let (status, reason) = if visible { (Status::Applied, None) } else {
-                    (Status::Rebuild, Some("The changed RSX literals were not reread by a mounted reactive view"))
-                };
-                protocol::source(Language::Rsx, status, &path, source, reason);
+                if visible {
+                    super::editor_frames::applied(&path, source);
+                } else {
+                    protocol::source(Language::Rsx, Status::Rebuild, &path, source,
+                        Some("The changed RSX literals were not reread by a mounted reactive view"));
+                }
             }
         }
     }

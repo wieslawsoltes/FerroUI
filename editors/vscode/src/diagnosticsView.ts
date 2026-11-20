@@ -13,6 +13,8 @@ import { isWorkspaceFile } from './workspacePaths';
 const viewId = 'ferroui.diagnostics';
 const captions = { applied: 'Reloaded in place', rejected: 'Edit rejected', rebuilt: 'Candidate activated', buildFailed: 'Candidate failed',
     superseded: 'Superseded by a newer save', stopped: 'Session stopped' };
+const frameCaptions = { pending: 'Waiting for a native frame', rendered: 'Native frame rendered', noSceneUpdate: 'No scene drew in this batch',
+    discarded: 'Render batch discarded', processExited: 'Process ended before the frame receipt' };
 type Item = { type: 'group'; group: 'preview' | 'reload' | 'binding' | 'layout' }
     | { type: 'notice'; label: string }
     | { type: 'reload'; record: ReloadRecord }
@@ -93,8 +95,18 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
             const { record } = item;
             const row = new vscode.TreeItem(path.basename(record.file));
             row.id = `reload:${record.id}`;
-            row.description = record.outcome ? `${captions[record.outcome]} · ${record.elapsedMs} ms` : 'Waiting for the application';
-            row.tooltip = [record.file, record.pid ? `PID ${record.pid}` : undefined, record.message].filter(Boolean).join('\n');
+            const { frame } = record;
+            const outcome = record.outcome && captions[record.outcome];
+            const frameTime = frame?.elapsedMs === undefined ? undefined : `${frame.elapsedMs} ms to frame`;
+            const frameOutcome = frame && frameCaptions[frame.status];
+            const timing = frameTime ?? frameOutcome ?? `${record.acknowledgedMs ?? record.elapsedMs} ms`;
+            row.description = outcome ? `${outcome} · ${timing}` : 'Waiting for the application';
+            const resultTime = record.acknowledgedMs !== undefined ? `Application acknowledged in ${record.acknowledgedMs} ms`
+                : record.elapsedMs === undefined ? undefined : `${outcome} in ${record.elapsedMs} ms`;
+            const batch = frame?.batch !== undefined ? `Compositor batch ${frame.batch}` : undefined;
+            row.tooltip = [record.file, record.pid ? `PID ${record.pid}` : undefined,
+                record.generation ? `Process generation ${record.generation}` : undefined, resultTime, frameOutcome, frameTime, batch, record.message].filter(Boolean).join('\n');
+            row.accessibilityInformation = { label: [row.label, row.description, frameOutcome, batch].filter(Boolean).join('. ') };
             row.iconPath = new vscode.ThemeIcon(record.outcome === 'rejected' || record.outcome === 'buildFailed' ? 'error' : 'history');
             row.command = { command: 'ferroui.diagnostics.openSource', title: 'Reveal Source', arguments: [item] };
             return row;

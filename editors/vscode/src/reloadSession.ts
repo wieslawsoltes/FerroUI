@@ -6,6 +6,7 @@ import type { CargoTarget } from './cargoTarget';
 import { isInside } from './workspacePaths';
 import { buildCargo, launchArtifact, ReloadProcess, revision, type ProjectMetadata, type RuntimeEvent } from './reloadProcess';
 import type { ReloadHistory, ReloadRecord } from './reloadHistory';
+import type { RuntimeFrameReceipt } from './reloadFrames';
 import type { ProcessOutput } from './reloadLog';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
@@ -21,17 +22,20 @@ interface SourceChange {
     record: ReloadRecord;
 }
 
+type LiveEvent = RuntimeEvent & { generation: number; pid?: number };
+
 export class ReloadSession implements vscode.Disposable {
     private readonly resources: vscode.Disposable[] = [];
     private readonly changes = new Map<string, SourceChange>();
     private readonly observed = new Map<string, string>();
     private readonly waitingReads = new Map<string, object>();
-    private readonly results = new Map<string, RuntimeEvent>();
+    private readonly results = new Map<string, LiveEvent>();
     private readonly acceptedXaml = new Map<string, string>();
     private readonly languages = new Set<RuntimeEvent['language']>();
     private readonly root: string;
     private readonly targetDirectory: string;
     private live?: ReloadProcess;
+    private liveGeneration?: number;
     private compiler?: ReloadProcess;
     private candidate?: ReloadProcess;
     private replacement?: Promise<void>;
@@ -112,10 +116,10 @@ export class ReloadSession implements vscode.Disposable {
             this.languages.add(event.language);
             return;
         }
-        if (!event.file || !path.isAbsolute(event.file)) return;
+        if (this.liveGeneration === undefined || !event.file || !path.isAbsolute(event.file)) return;
         const key = fileKey(event.file);
         if (!isInside(this.root, key)) return;
-        this.results.set(key, event);
+        this.results.set(key, { ...event, generation: this.liveGeneration, pid: this.pid });
         if (this.changes.has(key)) this.schedule(120);
         // The running app may see a structural edit before VS Code's watcher reports it.
         else if (event.status === 'rebuild') void this.observe(vscode.Uri.file(event.file));
@@ -141,11 +145,11 @@ export class ReloadSession implements vscode.Disposable {
                 else {
                     this.changes.delete(key);
                     if (result.status === 'failed') {
-                        this.history.finish(change.record, 'rejected', this.pid, result.message);
+                        this.history.finish(change.record, 'rejected', result.pid, result.message, result);
                         failed = true;
                         this.status(`${result.language.toUpperCase()} edit rejected`, true);
                     } else {
-                        this.history.finish(change.record, 'applied', this.pid, result.message);
+                        this.history.finish(change.record, 'applied', result.pid, result.message, result);
                         if (result.language === 'xaml') this.acceptedXaml.set(key, change.xamlFingerprint ?? change.fingerprint);
                         applied = `${result.language.toUpperCase()} reloaded`;
                     }
@@ -185,6 +189,7 @@ export class ReloadSession implements vscode.Disposable {
             if (this.superseded(serial)) return;
             this.built(build.metadata());
             const candidateEvents: RuntimeEvent[] = [];
+            const candidateFrames: RuntimeFrameReceipt[] = [];
             let endpoint: RuntimeMcpEndpoint | undefined;
             let live = false;
             const candidate = await launchArtifact(artifact, this.target, this.output, event => {
@@ -195,14 +200,30 @@ export class ReloadSession implements vscode.Disposable {
                 if (this.disposed) return;
                 if (!live) endpoint = value;
                 else if (this.live === candidate.process) this.mcpChanged(value);
+            }, receipt => {
+                if (this.disposed) return;
+                if (!live) {
+                    if (candidateFrames.length === 256) candidateFrames.shift();
+                    candidateFrames.push(receipt);
+                } else if (this.live === candidate.process && this.liveGeneration !== undefined) {
+                    this.history.observeFrame(this.liveGeneration, receipt);
+                }
             });
             this.candidate = candidate.process;
             if (this.superseded(serial)) return;
             await awaitStartup(candidate.process, candidate.ready);
             if (this.superseded(serial)) return;
             this.live = candidate.process;
+            const generation = this.history.startGeneration();
+            this.liveGeneration = generation;
             this.candidate = undefined;
-            for (const change of this.changes.values()) this.history.finish(change.record, 'rebuilt', this.pid);
+            const ready = candidateEvents.find(event => event.status === 'ready');
+            for (const receipt of candidateFrames) this.history.observeFrame(generation, receipt);
+            for (const change of this.changes.values()) {
+                this.history.finish(change.record, 'rebuilt', this.pid, undefined, {
+                    generation, frame: ready?.frame, acknowledgedAt: ready?.acknowledgedAt,
+                });
+            }
             this.changes.clear();
             this.results.clear();
             this.acceptedXaml.clear();
@@ -217,6 +238,8 @@ export class ReloadSession implements vscode.Disposable {
             void this.live.closed.then(code => {
                 if (this.disposed || this.live !== candidate.process) return;
                 this.live = undefined;
+                this.liveGeneration = undefined;
+                this.history.endGeneration(generation);
                 this.mcpChanged();
                 this.languages.clear();
                 this.output.appendLine(`Application exited${code === null ? '' : ` (${code})`}.`);
@@ -251,6 +274,7 @@ export class ReloadSession implements vscode.Disposable {
 
     async dispose(): Promise<void> {
         this.disposed = true;
+        if (this.liveGeneration !== undefined) this.history.endGeneration(this.liveGeneration);
         for (const change of this.changes.values()) this.history.finish(change.record, 'stopped', this.pid);
         this.mcpChanged();
         clearTimeout(this.timer);
