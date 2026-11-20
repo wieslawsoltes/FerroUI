@@ -438,7 +438,23 @@ impl<'a> Reader<'a> {
     fn attribute_name(&mut self, element: &'a TypeModel, expr: &Expr) -> R<String> {
         let (owner, name, kind) = self.property(expr)?;
         let chain = self.chain_of_types(element);
-        let listed = chain.iter().any(|type_| std::ptr::eq(*type_, owner));
+        let accessor = accessor_name(expr);
+        let listed = chain.iter().any(|type_| {
+            std::ptr::eq(*type_, owner)
+                || type_.full_name() == owner.full_name()
+                || type_.registered.iter().any(|registered| Some(registered.accessor.as_str()) == accessor.as_deref())
+        });
+        // An attached property is named alone only where the class of the element registers it
+        // itself (`TextBox` adds `TextWrapping`); elsewhere by its owner (`TemplatedControl.IsTemplateFocusTarget`).
+        let own = element.registered.iter().any(|registered| Some(registered.accessor.as_str()) == accessor.as_deref())
+            || std::ptr::eq(element, owner);
+        if listed && (kind != RegisteredKind::Attached || own) {
+            return Ok(name);
+        }
+        if kind == RegisteredKind::Attached {
+            let owner_type = self.xaml_type(owner);
+            return Ok(format!("{}.{name}", owner_type.name));
+        }
         let has = chain.iter().any(|type_| {
             type_.registered.iter().any(|registered| self.models.name_of(registered) == Some(name.as_str()))
         });
@@ -1177,10 +1193,47 @@ impl<'a> Reader<'a> {
         for statement in &function.block.stmts {
             let Stmt::Expr(expr, _) = statement else { continue };
             let content = unwrap_call(expr, &["Ok", "value", "Some"]);
-            let element = self.element(content, parent)?;
+            let mut element = self.element(content, parent)?;
+            // Compiled bindings to the data context need its type: the class the paths name
+            // (`.member::<T>(..)`), else any object.
+            let text = quote::ToTokens::to_token_stream(&function.block).to_string();
+            let data_paths = text.contains(". member ::") || text.contains(".member::");
+            if (tag != "ControlTemplate" && tag != "WindowDrawnDecorationsTemplate") || data_paths {
+                if text.contains("path ()") || text.contains("path()") {
+                    let data_type = self.data_type_of(&function.block)?;
+                    if !element.attributes.iter().any(|(name, _)| name == "x:DataType") {
+                        element.attributes.insert(0, ("x:DataType".to_string(), data_type));
+                    }
+                }
+            }
             node.child(element);
         }
         Ok(node)
+    }
+
+    /// The type of the data context of the bindings of a template: the type of the first
+    /// `.member::<T>(..)` of its paths, else `x:Object`.
+    fn data_type_of(&mut self, block: &syn::Block) -> R<String> {
+        struct Finder(Option<syn::PathSegment>);
+        impl<'ast> syn::visit::Visit<'ast> for Finder {
+            fn visit_expr_method_call(&mut self, call: &'ast ExprMethodCall) {
+                if self.0.is_none() && call.method == "member" {
+                    if let Some(turbofish) = &call.turbofish {
+                        self.0 = Some(syn::PathSegment {
+                            ident: call.method.clone(),
+                            arguments: syn::PathArguments::AngleBracketed(turbofish.clone()),
+                        });
+                    }
+                }
+                syn::visit::visit_expr_method_call(self, call);
+            }
+        }
+        let mut finder = Finder(None);
+        syn::visit::Visit::visit_block(&mut finder, block);
+        match finder.0 {
+            Some(segment) => Ok(self.type_of_generic(&segment, block)?.0.name),
+            None => Ok("x:Object".to_string()),
+        }
     }
 
     /// The class of the templated parent of a template function: `T` of `Template<T>`.
@@ -1754,7 +1807,7 @@ impl<'a> Reader<'a> {
                         parts.push(format!("RelativeSource={{RelativeSource {mode}}}"));
                     }
                 }
-                parts.push(path);
+                parts.insert(0, path);
                 return Ok(BindingValue::Text(format!("{{ReflectionBinding {}}}", parts.join(", "))));
             }
         }
@@ -1946,9 +1999,8 @@ impl<'a> Reader<'a> {
             Expr::MethodCall(call) if call.method == "expect" => self.value_text(&call.receiver, property),
             Expr::MethodCall(call) if call.method == "to_string" => Ok(string_literal(&call.receiver).unwrap_or_default()),
             Expr::MethodCall(call) if call.method == "property" => {
-                let (_, name, _) = self.property(expr)?;
                 let _ = call;
-                Ok(name)
+                self.source_name(expr)
             }
             other => Err(at(other, format!("the value `{}`", expr_text(other)))),
         }
@@ -2031,4 +2083,20 @@ fn extension_element(text: &str) -> Node {
 /// Whether the property `name` of `owner` is attached (`ScrollViewer.IsDeferredScrollingEnabled`).
 fn owner_has_attached(owner: &TypeModel, name: &str, models: &ModelSet) -> bool {
     owner.registered.iter().any(|registered| registered.kind == RegisteredKind::Attached && models.name_of(registered) == Some(name))
+}
+
+/// The name of the accessor function of `X::name_property()` in `expr`.
+fn accessor_name(expr: &Expr) -> Option<String> {
+    let call = match strip_try(expr) {
+        Expr::Call(call) => call,
+        Expr::MethodCall(method) => match &*method.receiver {
+            Expr::Call(call) => call,
+            _ => return None,
+        },
+        _ => return None,
+    };
+    match &*call.func {
+        Expr::Path(path) => path.path.segments.last().map(|segment| segment.ident.to_string()),
+        _ => None,
+    }
 }

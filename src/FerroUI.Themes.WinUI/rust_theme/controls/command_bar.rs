@@ -170,7 +170,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -421,10 +423,10 @@ fn default_app_bar_button_style(theme: &StyleBuilder) -> Result {
                 },
             )?;
             // The icon and the label centred in the height of the button: the content grid, in the
-            //           middle of the root, which keeps the compact height, and the label bounded by its
-            //           capitals and its baseline (TextLineBounds Tight), so that its capitals are in the middle
-            //           whatever its font (WinUI places both 16 below the top, which lines them up with the
-            //           metrics of Segoe UI only). Deviation (winui-theme/DEVIATIONS.md, G-29).
+            // middle of the root, which keeps the compact height, and the label bounded by its
+            // capitals and its baseline (TextLineBounds Tight), so that its capitals are in the middle
+            // whatever its font (WinUI places both 16 below the top, which lines them up with the
+            // metrics of Segoe UI only). Deviation (winui-theme/DEVIATIONS.md, G-29).
             style.style(nesting().template().of::<Viewbox>().name("ContentViewbox"), |style| {
                 style.set(Layoutable::margin_property(), Thickness::new(12.0, 0.0, 0.0, 0.0));
                 style.set(Layoutable::vertical_alignment_property(), VerticalAlignment::Center);
@@ -1276,7 +1278,7 @@ fn default_app_bar_toggle_button_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The Overflow* states of the CommonStates group, which AppBarToggleButton::ChangeVisualState
-    //         chooses after the ones above for an enabled button in the overflow.
+    // chooses after the ones above for an enabled button in the overflow.
     theme.style(
         nesting().property_is(CommandBarToggleButton::is_in_overflow_property(), true),
         |style| {
@@ -1705,7 +1707,7 @@ fn ellipsis_button(theme: &StyleBuilder) -> Result {
     // FocusVisualMargin="-3": the focus adorner of DefaultButtonStyle.
     theme.template(ellipsis_button_template);
     // The foreground of the states is also the foreground of the button, which the ellipsis
-    //         glyph of the command bar follows.
+    // glyph of the command bar follows.
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
             TemplatedControl::foreground_property(),
@@ -2086,7 +2088,7 @@ fn default_command_bar_style(theme: &StyleBuilder) -> Result {
     );
     theme.dynamic(TemplatedControl::corner_radius_property(), "ControlCornerRadius");
     // The widths FerroUI's CommandBar assumes for an item when it computes the dynamic overflow:
-    //         the Width 68 of DefaultAppBarButtonStyle with the labels at the bottom or collapsed.
+    // the Width 68 of DefaultAppBarButtonStyle with the labels at the bottom or collapsed.
     theme.set(CommandBar::item_width_bottom_property(), 68.0);
     theme.set(CommandBar::item_width_collapsed_property(), 68.0);
     theme.template(default_command_bar_style_template);

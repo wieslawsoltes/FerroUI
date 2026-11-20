@@ -81,7 +81,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The text of ShowProgressText (FerroUI): ProgressTextFormat with its arguments.
-    resources.deferred("ProgressBarTextFormatConverter", |scope| {
+    resources.deferred("ProgressBarTextFormatConverter", |_| {
         Ok(value(::std::rc::Rc::new(StringFormatConverter::new())))
     });
     resources.control_theme("DefaultProgressBarStyle", default_progress_bar_style);
@@ -89,7 +89,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -228,7 +230,7 @@ fn default_progress_bar_style(theme: &StyleBuilder) -> Result {
     theme.static_resource(TemplatedControl::corner_radius_property(), "ProgressBarCornerRadius")?;
     theme.template(default_progress_bar_style_template);
     // The horizontal bar of the source: Grid Height="{TemplateBinding MinHeight}", the track
-    //         ProgressBarTrackHeight high and centred, the indicators from the left.
+    // ProgressBarTrackHeight high and centred, the indicators from the left.
     theme.style(nesting().class(":horizontal"), |style| {
         style.style(nesting().template().of::<Grid>().name("ProgressBarGrid"), |style| {
             style.template_bind(Layoutable::height_property(), Layoutable::min_height_property());
@@ -383,10 +385,10 @@ fn default_progress_bar_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The storyboard of Indeterminate (RepeatBehavior="Forever"): the translation of
-    //         IndeterminateProgressBarIndicator from ContainerAnimationStartPosition to
-    //         ContainerAnimationEndPosition in 1.5 s, held to 2 s, and of
-    //         IndeterminateProgressBarIndicator2 held at Container2AnimationStartPosition to 0.75 s,
-    //         then to Container2AnimationEndPosition at 2 s.
+    // IndeterminateProgressBarIndicator from ContainerAnimationStartPosition to
+    // ContainerAnimationEndPosition in 1.5 s, held to 2 s, and of
+    // IndeterminateProgressBarIndicator2 held at Container2AnimationStartPosition to 0.75 s,
+    // then to Container2AnimationEndPosition at 2 s.
     theme.style(nesting().class(":horizontal").class(":indeterminate").template().of::<Border>().name("IndeterminateProgressBarIndicator"), |style| {
 style.animation(style.scope().make(Animation::new()).set(Animation::iteration_count_property(), literal(IterationCount::parse("Infinite"))?).set(Animation::duration_property(), SignedDuration::from_milliseconds(2000.0)).with(|e| { let items = Animation::children(e); items.add(style.scope().make(KeyFrame::new()).with(|e| { KeyFrame::set_key_time(e, SignedDuration::from_milliseconds(0.0)); Ok(()) })?.with(|e| { let items = KeyFrame::setters(e); items.add(bound_setter(TranslateTransform::x_property(), path().ancestor_of::<ProgressBar>(0).class_member::<ProgressBar>("TemplateSettings").prop(ProgressBarTemplateSettings::container_animation_start_position_property()).binding())); Ok(()) })?.end().into());items.add(style.scope().make(KeyFrame::new()).with(|e| { KeyFrame::set_key_spline(e, Some(literal(KeySpline::parse("0.4,0,0.6,1"))?)); Ok(()) })?.with(|e| { KeyFrame::set_key_time(e, SignedDuration::from_milliseconds(1500.0)); Ok(()) })?.with(|e| { let items = KeyFrame::setters(e); items.add(bound_setter(TranslateTransform::x_property(), path().ancestor_of::<ProgressBar>(0).class_member::<ProgressBar>("TemplateSettings").prop(ProgressBarTemplateSettings::container_animation_end_position_property()).binding())); Ok(()) })?.end().into());items.add(style.scope().make(KeyFrame::new()).with(|e| { KeyFrame::set_key_time(e, SignedDuration::from_milliseconds(2000.0)); Ok(()) })?.with(|e| { let items = KeyFrame::setters(e); items.add(bound_setter(TranslateTransform::x_property(), path().ancestor_of::<ProgressBar>(0).class_member::<ProgressBar>("TemplateSettings").prop(ProgressBarTemplateSettings::container_animation_end_position_property()).binding())); Ok(()) })?.end().into()); Ok(()) })?.end());
 Ok(())

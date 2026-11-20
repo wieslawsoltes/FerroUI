@@ -85,7 +85,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("ExpanderHeaderDownStyle", expander_header_down_style);
     resources.control_theme("ExpanderHeaderUpStyle", expander_header_up_style);
     // No WinUI counterpart: the header of an expander that expands to the left (the chevron of
-    //       the down style turned to point left, and right when expanded).
+    // the down style turned to point left, and right when expanded).
     resources.control_theme("ExpanderHeaderLeftStyle", expander_header_left_style);
     // No WinUI counterpart: the header of an expander that expands to the right.
     resources.control_theme("ExpanderHeaderRightStyle", expander_header_right_style);
@@ -94,7 +94,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -217,7 +219,7 @@ fn expander_header_down_style_template(t: &Template<ToggleButton>) -> Result<Ref
 fn expander_header_down_style(theme: &StyleBuilder) -> Result {
     theme.target::<ToggleButton>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -477,7 +479,7 @@ fn expander_header_up_style(theme: &StyleBuilder) -> Result {
         BackgroundSizing::InnerBorderEdge,
     );
     // The template of the down style with the glyph ExpanderChevronUpGlyph (E70E); its visual
-    //         states set the same values as the ones of the down style, which this theme is based on.
+    // states set the same values as the ones of the down style, which this theme is based on.
     theme.template(expander_header_up_style_template);
     Ok(())
 }
@@ -679,8 +681,8 @@ fn default_expander_style(theme: &StyleBuilder) -> Result {
     theme.set(Layoutable::horizontal_alignment_property(), HorizontalAlignment::Left);
     theme.set(Layoutable::vertical_alignment_property(), VerticalAlignment::Center);
     // Not in the style: the defaults of a WinUI control (Control.HorizontalContentAlignment and
-    //         VerticalContentAlignment are Center), which the content presenter of ExpanderContent
-    //         binds; FerroUI's defaults differ.
+    // VerticalContentAlignment are Center), which the content presenter of ExpanderContent
+    // binds; FerroUI's defaults differ.
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -758,7 +760,7 @@ fn default_expander_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // ExpandStates: ExpandDown and ExpandUp (CollapseDown and CollapseUp keep the corner radius
-    //         of the header).
+    // of the header).
     theme.style(
         nesting()
             .class(":expanded")

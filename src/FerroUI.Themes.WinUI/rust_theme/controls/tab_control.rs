@@ -132,7 +132,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -226,7 +228,7 @@ fn tab_view_scroll_button_style(theme: &StyleBuilder) -> Result {
     // FocusVisualMargin="-3": the focus adorner of DefaultRepeatButtonStyle.
     theme.template(tab_view_scroll_button_style_template);
     // The foreground of the states is also the foreground of the button, which the glyph of
-    //         its content follows.
+    // its content follows.
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
             TemplatedControl::foreground_property(),
@@ -735,7 +737,7 @@ fn tab_scroll_viewer_style_template(t: &Template<ScrollViewer>) -> Result<Ref<Co
                                     path()
                                         .templated_parent()
                                         .method::<Ref<ScrollViewer>>("LineLeft", |this| {
-                                            this.line_left();
+                                            let _ = this.line_left();
                                         })
                                         .binding(),
                                 )
@@ -899,7 +901,7 @@ fn tab_scroll_viewer_style_template(t: &Template<ScrollViewer>) -> Result<Ref<Co
                                     path()
                                         .templated_parent()
                                         .method::<Ref<ScrollViewer>>("LineRight", |this| {
-                                            this.line_right();
+                                            let _ = this.line_right();
                                         })
                                         .binding(),
                                 )
@@ -1050,7 +1052,7 @@ fn default_tab_view_style_template(t: &Template<TabControl>) -> Result<Ref<Contr
                                                     TemplatedControl::padding_property(),
                                                 )
                                                 // The footer, 4 px after the last tab, and the bottom border line of the right
-                                                //                         content column of TabView in the rest of the viewport.
+                                                // content column of TabView in the rest of the viewport.
                                                 .children([
                                                     t.make(Panel::new())
                                                         .name("TabsItemsPresenterHeader")?
@@ -1180,7 +1182,7 @@ fn default_tab_view_style(theme: &StyleBuilder) -> Result {
     theme.set(InputElement::is_tab_stop_property(), false);
     theme.dynamic(TemplatedControl::background_property(), "TabViewBackground");
     // The ItemsStackPanel of TabViewListView, with the width TabView gives every tab in its
-    //         TabWidthMode Equal (the default).
+    // TabWidthMode Equal (the default).
     theme.set(
         ItemsControl::items_panel_property(),
         items_panel(theme.scope(), default_tab_view_style_items_panel),
@@ -1202,21 +1204,21 @@ fn default_tab_view_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The strip at the left or the right: the tabs stacked vertically, scrolled vertically,
-    //         without the bottom border lines.
+    // without the bottom border lines.
     theme.style(
         nesting().property_is(TabControl::tab_strip_placement_property(), Dock::Left),
         |style| {
             // The tabs stacked vertically (a StackPanel as the items panel of the strip, which the
-            //           style below turns vertical also when a derived theme sets a horizontal one).
+            // style below turns vertical also when a derived theme sets a horizontal one).
             style.set(
                 ItemsControl::items_panel_property(),
                 items_panel(style.scope(), default_tab_view_style_items_panel_2),
             );
             // The pane of NavigationView: its items 3 px under the top of the pane
-            //           (NavigationViewPaneContentGridMargin) and the 1 px border of RootSplitView.
+            // (NavigationViewPaneContentGridMargin) and the 1 px border of RootSplitView.
             style.set(TemplatedControl::padding_property(), Thickness::new(0.0, 4.0, 0.0, 0.0));
             // The content is the content grid of NavigationView beside its pane
-            //           (NavigationViewContentBackground, the border and the corner of ContentGrid).
+            // (NavigationViewContentBackground, the border and the corner of ContentGrid).
             style.style(
                 nesting().template().of::<Border>().name("TabContentPresenter"),
                 |style| {
@@ -1286,10 +1288,10 @@ fn default_tab_view_style(theme: &StyleBuilder) -> Result {
                 items_panel(style.scope(), default_tab_view_style_items_panel_3),
             );
             // The pane of NavigationView: its items 3 px under the top of the pane
-            //           (NavigationViewPaneContentGridMargin) and the 1 px border of RootSplitView.
+            // (NavigationViewPaneContentGridMargin) and the 1 px border of RootSplitView.
             style.set(TemplatedControl::padding_property(), Thickness::new(0.0, 4.0, 0.0, 0.0));
             // The content is the content grid of NavigationView beside its pane
-            //           (NavigationViewContentBackground, the border and the corner of ContentGrid, mirrored).
+            // (NavigationViewContentBackground, the border and the corner of ContentGrid, mirrored).
             style.style(
                 nesting().template().of::<Border>().name("TabContentPresenter"),
                 |style| {

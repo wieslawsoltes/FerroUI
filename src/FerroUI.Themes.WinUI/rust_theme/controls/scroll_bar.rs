@@ -89,8 +89,8 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // RadiusX/RadiusY of the track rectangles: the corner radius with
-    //       TopLeftCornerRadiusDoubleValueConverter2x and BottomRightCornerRadiusDoubleValueConverter2x.
-    resources.deferred("ScrollBarTrackCornerRadiusConverter", |scope| {
+    // TopLeftCornerRadiusDoubleValueConverter2x and BottomRightCornerRadiusDoubleValueConverter2x.
+    resources.deferred("ScrollBarTrackCornerRadiusConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusFilterConverter::new());
             object.set_filter(Corners::TOP_LEFT | Corners::TOP_RIGHT | Corners::BOTTOM_RIGHT | Corners::BOTTOM_LEFT);
@@ -129,7 +129,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

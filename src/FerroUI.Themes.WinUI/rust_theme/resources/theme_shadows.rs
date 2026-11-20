@@ -35,10 +35,10 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     // Translation.Z 32: elevation 16, blur 16, offset 8; insets 16 at the sides, 8 above, 24 below.
     resources.add("ThemeShadowFlyoutMargin", Thickness::new(16.0, 8.0, 16.0, 24.0));
     // Translation.Z 40 (a submenu): elevation 20, ambient blur 6.67 and offset 2, directional blur
-    //       20 and offset 10; insets 20 at the sides, 10 above, 30 below.
+    // 20 and offset 10; insets 20 at the sides, 10 above, 30 below.
     resources.add("ThemeShadowSubMenuMargin", Thickness::new(20.0, 10.0, 20.0, 30.0));
     // Translation.Z 16 (a tool tip): elevation 8, blur 8, offset 4; insets 8 at the sides, 4 above,
-    //       12 below.
+    // 12 below.
     resources.add("ThemeShadowToolTipMargin", Thickness::new(8.0, 4.0, 8.0, 12.0));
     // The shadow the elevated elements of the templates cast (UIElement.Shadow).
     resources.deferred("WinUIThemeShadow", |scope| {
@@ -47,7 +47,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

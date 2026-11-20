@@ -87,7 +87,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -553,7 +555,7 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
     // The pane at the left (the only placement of WinUI).
     theme.template(default_split_view_style_template);
     // The pane over the content (Overlay, CompactOverlay) or beside it (Inline, CompactInline):
-    //         the columns of ClosedCompactLeft, OpenInlineLeft and OpenCompactOverlayLeft.
+    // the columns of ClosedCompactLeft, OpenInlineLeft and OpenCompactOverlayLeft.
     theme.style(nesting().class(":left"), |style| {
         style.style(nesting().class(":overlay"), |style| {
             style.style(nesting().template().of::<Panel>().name("PART_PaneRoot"), |style| {
@@ -579,7 +581,7 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The pane at the right: the states ClosedCompactRight, OpenOverlayRight, OpenInlineRight
-    //         and OpenCompactOverlayRight.
+    // and OpenCompactOverlayRight.
     theme.style(nesting().class(":right"), |style| {
         style.template(default_split_view_style_template_2);
         style.style(nesting().class(":overlay"), |style| {
@@ -658,9 +660,9 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The size of the pane: the open length, or the closed one (0, or CompactPaneLength in the
-    //         compact modes). These setters style a part of the template from outside a ControlTemplate,
-    //         where a compiled binding cannot know the templated parent's type, and TemplateBinding has
-    //         no nested path (TemplateSettings.ClosedPaneWidth): they stay reflection bindings (#603).
+    // compact modes). These setters style a part of the template from outside a ControlTemplate,
+    // where a compiled binding cannot know the templated parent's type, and TemplateBinding has
+    // no nested path (TemplateSettings.ClosedPaneWidth): they stay reflection bindings (#603).
     theme.style(
         Selectors::or([
             nesting()
@@ -758,8 +760,8 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The VisualTransitions of DisplayModeStates. Inline panes: Closed to OpenInline in
-    //         SplitViewPaneAnimationOpenDuration and back in SplitViewPaneAnimationCloseDuration, key
-    //         spline 0.0,0.35 0.15,1.0.
+    // SplitViewPaneAnimationOpenDuration and back in SplitViewPaneAnimationCloseDuration, key
+    // spline 0.0,0.35 0.15,1.0.
     theme.style(
         Selectors::or([
             nesting()
@@ -1018,8 +1020,8 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The BackgroundTransition of the Grid PaneRoot (a BrushTransition of 150 ms, the default
-    //         duration): solid colour brushes are interpolated, any other change of the background (to or
-    //         from the acrylic of an overlaying NavigationView pane) is immediate, as in WinUI.
+    // duration): solid colour brushes are interpolated, any other change of the background (to or
+    // from the acrylic of an overlaying NavigationView pane) is immediate, as in WinUI.
     theme.style(nesting().template().of::<Border>().name("PaneRoot"), |style| {
         style.set_value(
             Animatable::transitions_property(),
@@ -1046,9 +1048,9 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // Not in WinUI (DEVIATIONS.md, SPV-7): an overlay pane keeps its background while it closes
-    //         (120 ms, the closing transition), so the content of the pane is not drawn over the content
-    //         without a background. WinUI changes the background at once (NavigationView's
-    //         PaneNotOverlaying) and slides the pane out over the content.
+    // (120 ms, the closing transition), so the content of the pane is not drawn over the content
+    // without a background. WinUI changes the background at once (NavigationView's
+    // PaneNotOverlaying) and slides the pane out over the content.
     theme.style(
         Selectors::or([
             nesting()
@@ -1107,7 +1109,7 @@ fn default_split_view_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // OpenOverlay and OpenCompactOverlay show the light dismiss layer; OverlayVisible
-    //         (LightDismissOverlayMode) fills it.
+    // (LightDismissOverlayMode) fills it.
     theme.style(
         Selectors::or([
             nesting()

@@ -71,7 +71,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -145,7 +147,7 @@ fn table_view_column_header_theme_template(t: &Template<TableViewColumnHeader>) 
     Ok(t.make(Panel::new())
         .name("HeaderCell")?
         // The content presenter draws the fill and the grid line (the border at the trailing
-        //               edge) and honours the corner radius, as in the Fluent template of FerroUI.
+        // edge) and honours the corner radius, as in the Fluent template of FerroUI.
         .children([
             t.make(ContentPresenter::new())
                 .name("PART_ContentPresenter")?
@@ -238,7 +240,7 @@ fn table_view_column_header_theme(theme: &StyleBuilder) -> Result {
     );
     theme.template(table_view_column_header_theme_template);
     // The last header meets the border of the table: its grid line keeps its width without a
-    //         brush.
+    // brush.
     theme.style(
         nesting()
             .nth_last_child(0, 1)

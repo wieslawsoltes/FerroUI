@@ -73,7 +73,7 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
     crate::rust_theme::controls::window_drawn_decorations::merge(&resources)?;
     resources.include(112)?; // Controls/NotificationCard.xaml
                              // The status controls of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md);
-                             //             InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml.
+                             // InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml.
     resources.include(113)?; // Controls/InfoBar.xaml
     resources.include(114)?; // Controls/InfoBadge.xaml
     resources.include(115)?; // Controls/Pivot.xaml
@@ -97,8 +97,8 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
     resources.include(132)?; // Controls/NavigationPage.xaml
     resources.include(133)?; // Controls/DrawerPage.xaml
                              // The navigation of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md):
-                             //             Frame, NavigationView and its items; NavigationView uses the styles of DrawerPage.xaml
-                             //             and NavigationPage.xaml.
+                             // Frame, NavigationView and its items; NavigationView uses the styles of DrawerPage.xaml
+                             // and NavigationPage.xaml.
     resources.include(134)?; // Controls/Frame.xaml
     resources.include(135)?; // Controls/NavigationView.xaml
     resources.include(136)?; // Controls/Carousel.xaml
@@ -146,9 +146,9 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
                              // WinUI's RichEditBox (docs/porting/winui-rich-text.md).
     resources.include(172)?; // Controls/RichEditBox.xaml
                              // The icon of a menu item (MenuItem.Icon, a logical child of the item): unscaled, in the
-                             //       IconRoot Viewbox of 16 of the template of MenuFlyoutItem (DEVIATIONS.md, PI-3). A style of
-                             //       the theme rather than of the control theme of PathIcon, whose nested styles cannot name a
-                             //       parent (the selector MenuItem > ^ there matched every path icon).
+                             // IconRoot Viewbox of 16 of the template of MenuFlyoutItem (DEVIATIONS.md, PI-3). A style of
+                             // the theme rather than of the control theme of PathIcon, whose nested styles cannot name a
+                             // parent (the selector MenuItem > ^ there matched every path icon).
     styles.add(style(scope, of::<MenuItem>().child().of::<PathIcon>(), |style| {
         style.set(Layoutable::width_property(), f64::NAN);
         style.set(Layoutable::height_property(), f64::NAN);
@@ -158,7 +158,8 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
     Ok(())
 }
 
-/// The styles of the document, declared in `scope`.
+/// The styles of the document, declared in `scope`: the document included (`StyleInclude`).
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<Styles>> {
     let styles = Styles::new();
     populate(&styles, scope)?;

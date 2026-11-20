@@ -87,13 +87,15 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // InfoBarCloseButtonStyle (InfoBar_themeresources.xaml), with the AppBarButton brushes the
-    //       InfoBar template gives its close button.
+    // InfoBar template gives its close button.
     resources.control_theme("InfoBarCloseButtonStyle", info_bar_close_button_style);
     resources.control_theme(type_key::<NotificationCard>(), notification_card_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

@@ -99,7 +99,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     // QueryButtonStyle of the template of AutoSuggestBoxTextBoxStyle.
     resources.control_theme("AutoSuggestBoxQueryButtonStyle", auto_suggest_box_query_button_style);
     // The template of SymbolIcon (Controls/SymbolIcon.xaml) with the glyph at
-    //       AutoSuggestBoxIconFontSize, for the query icon (ASB-3).
+    // AutoSuggestBoxIconFontSize, for the query icon (ASB-3).
     resources.deferred("AutoSuggestBoxQuerySymbolIconTemplate", |scope| {
         Ok(value(control_template(
             scope,
@@ -107,12 +107,14 @@ pub(crate) fn merge(resources: &Resources) -> Result {
         )))
     });
     // The implicit style of AutoSuggestBox, with the setters and the template of
-    //       DefaultAutoSuggestBoxStyle.
+    // DefaultAutoSuggestBoxStyle.
     resources.control_theme(type_key::<AutoSuggestBox>(), auto_suggest_box_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -434,8 +436,8 @@ fn auto_suggest_box_theme(theme: &StyleBuilder) -> Result {
     theme.target::<AutoSuggestBox>();
     theme.set(Layoutable::vertical_alignment_property(), VerticalAlignment::Stretch);
     // VerticalContentAlignment and HorizontalContentAlignment (Stretch) of the source are left out:
-    //         FerroUI's AutoSuggestBox is a headered items control, which has neither (ASB-8); the text box
-    //         of the template stretches by its own defaults.
+    // FerroUI's AutoSuggestBox is a headered items control, which has neither (ASB-8); the text box
+    // of the template stretches by its own defaults.
     theme.set(InputElement::is_tab_stop_property(), false);
     theme.dynamic(TemplatedControl::foreground_property(), "TextControlForeground");
     theme.dynamic(TemplatedControl::background_property(), "TextControlBackground");
@@ -453,8 +455,8 @@ fn auto_suggest_box_theme(theme: &StyleBuilder) -> Result {
     theme.dynamic(TemplatedControl::corner_radius_property(), "ControlCornerRadius");
     theme.template(auto_suggest_box_theme_template);
     // The glyph of a SymbolIcon query icon at AutoSuggestBoxIconFontSize (ASB-3): the icon gets the
-    //         template of SymbolIcon with that size, since a style cannot reach into the template of a
-    //         part of the template (one /template/ per selector).
+    // template of SymbolIcon with that size, since a style cannot reach into the template of a
+    // part of the template (one /template/ per selector).
     theme.style(
         nesting()
             .template()

@@ -86,7 +86,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // TreeViewItemTemplateSettings.Indentation: 16 px per level.
-    resources.deferred("TreeViewItemIndentationConverter", |scope| {
+    resources.deferred("TreeViewItemIndentationConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(MarginMultiplierConverter::new());
             object.set_left(true);
@@ -104,7 +104,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

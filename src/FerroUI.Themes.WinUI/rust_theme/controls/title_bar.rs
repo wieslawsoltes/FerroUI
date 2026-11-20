@@ -68,7 +68,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -158,8 +160,8 @@ fn default_title_bar_control_style_template(t: &Template<TitleBar>) -> Result<Re
             Ok(())
         })?
         // The padding columns of WinUI are Auto columns that hold these borders: a column
-        //               definition has no name in FerroUI. The control sets the width of the outer two to the
-        //               caption-button insets of the window.
+        // definition has no name in FerroUI. The control sets the width of the outer two to the
+        // caption-button insets of the window.
         .children([
             t.make(Border::new())
                 .name("LeftPaddingColumn")?

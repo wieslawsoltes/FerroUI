@@ -122,7 +122,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -420,7 +422,7 @@ fn default_date_picker_style_template(t: &Template<DatePicker>) -> Result<Ref<Co
 fn default_date_picker_style(theme: &StyleBuilder) -> Result {
     theme.target::<DatePicker>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         DatePicker::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -848,7 +850,7 @@ fn default_date_picker_flyout_presenter_style_template(t: &Template<DatePickerPr
 fn default_date_picker_flyout_presenter_style(theme: &StyleBuilder) -> Result {
     theme.target::<DatePickerPresenter>();
     // The shadow is drawn outside the bounds of the control: a templated control clips to its
-    //         bounds unless its theme says otherwise (G-24).
+    // bounds unless its theme says otherwise (G-24).
     theme.set(Visual::clip_to_bounds_property(), false);
     theme.set(Layoutable::width_property(), 296.0);
     theme.set(Layoutable::min_width_property(), 296.0);

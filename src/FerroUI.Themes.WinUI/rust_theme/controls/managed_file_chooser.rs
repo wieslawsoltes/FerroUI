@@ -137,19 +137,19 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.text("StringManagedFileChooserOverwritePromptConfirmText", "Yes");
     resources.text("StringManagedFileChooserOverwritePromptCancelText", "No");
     // A list of the file chooser in the look of WinUI's ListView: no background, no border, the
-    //       items scroll vertically.
+    // items scroll vertically.
     resources.control_theme("ManagedFileChooserListViewStyle", managed_file_chooser_list_view_style);
     // An item of a list of the file chooser: DefaultListViewItemStyle, with the chrome of
-    //       ListViewItemPresenter (CListViewBaseItemChrome: the backplate inset by 4,2,4,2 with
-    //       ListViewItemCornerRadius, the selection indicator of 3 x 16 with a left margin of 4, 6 px
-    //       shorter while pressed, the content at ListViewItemDisabledThemeOpacity when disabled).
+    // ListViewItemPresenter (CListViewBaseItemChrome: the backplate inset by 4,2,4,2 with
+    // ListViewItemCornerRadius, the selection indicator of 3 x 16 with a left margin of 4, 6 px
+    // shorter while pressed, the content at ListViewItemDisabledThemeOpacity when disabled).
     resources.control_theme(
         "ManagedFileChooserListViewItemStyle",
         managed_file_chooser_list_view_item_style,
     );
     resources.control_theme(type_key::<ManagedFileChooser>(), managed_file_chooser_theme);
     // DefaultContentDialogStyle (ContentDialog_themeresources.xaml), as the overwrite prompt of the
-    //       file chooser.
+    // file chooser.
     resources.control_theme("DefaultContentDialogStyle", default_content_dialog_style);
     resources.control_theme(
         type_key::<ManagedFileChooserOverwritePrompt>(),
@@ -158,7 +158,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -646,8 +648,8 @@ fn template_data_template(t: &Template<Control>) -> Result<Ref<Control>> {
         .control())
 }
 
-/// The template of `ManagedFileChooser` of `element_style`.
-fn element_style_template(t: &Template<ManagedFileChooser>) -> Result<Ref<Control>> {
+/// The template of `GridSplitter` of `element_style`.
+fn element_style_template(t: &Template<GridSplitter>) -> Result<Ref<Control>> {
     Ok(t.make(Border::new())
         .set(Layoutable::vertical_alignment_property(), VerticalAlignment::Stretch)
         .set(Border::border_thickness_property(), Thickness::uniform(0.0))
@@ -884,7 +886,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                 // The up button, the location and the refresh button.
                 // The file name, the filters, hidden files and the two actions.
                 // The column headers over the entries of the folder; the columns are aligned with the
-                //                 content of the items (their padding, 16) and share their widths with them.
+                // content of the items (their padding, 16) and share their widths with them.
                 .children([
                     t.make(ListBox::new())
                         .name("PART_QuickLinks")?
@@ -927,7 +929,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                     Button::command_property(),
                                     path()
                                         .method::<ManagedFileChooserViewModel>("GoUp", |this| {
-                                            this.go_up();
+                                            let _ = this.go_up();
                                         })
                                         .binding(),
                                 )
@@ -961,7 +963,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                                 KeyBinding::command_property(),
                                                 path()
                                                     .method::<ManagedFileChooserViewModel>("EnterPressed", |this| {
-                                                        this.enter_pressed();
+                                                        let _ = this.enter_pressed();
                                                     })
                                                     .binding(),
                                             )
@@ -981,7 +983,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                     Button::command_property(),
                                     path()
                                         .method::<ManagedFileChooserViewModel>("Refresh", |this| {
-                                            this.refresh();
+                                            let _ = this.refresh();
                                         })
                                         .binding(),
                                 )
@@ -1075,7 +1077,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                             Button::command_property(),
                                             path()
                                                 .method::<ManagedFileChooserViewModel>("Ok", |this| {
-                                                    this.ok();
+                                                    let _ = this.ok();
                                                 })
                                                 .binding(),
                                         )
@@ -1091,7 +1093,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                             Button::command_property(),
                                             path()
                                                 .method::<ManagedFileChooserViewModel>("Cancel", |this| {
-                                                    this.cancel();
+                                                    let _ = this.cancel();
                                                 })
                                                 .binding(),
                                         )
@@ -1334,7 +1336,7 @@ fn default_content_dialog_style_template(t: &Template<ManagedFileChooserOverwrit
                             Ok(())
                         })?
                         // CommandSpace in PrimaryAndCloseVisible: the primary button, the spacing
-                        //                   ContentDialogButtonSpacing (8) and the close button.
+                        // ContentDialogButtonSpacing (8) and the close button.
                         .children([
                             t.make(Border::new())
                                 .dynamic(Border::background_property(), "ContentDialogTopOverlay")
@@ -1422,7 +1424,7 @@ fn default_content_dialog_style_template(t: &Template<ManagedFileChooserOverwrit
                                                         .method::<Ref<ManagedFileChooserOverwritePrompt>>(
                                                             "Confirm",
                                                             |this| {
-                                                                this.confirm();
+                                                                let _ = this.confirm();
                                                             },
                                                         )
                                                         .binding(),
@@ -1451,7 +1453,7 @@ fn default_content_dialog_style_template(t: &Template<ManagedFileChooserOverwrit
                                                         .method::<Ref<ManagedFileChooserOverwritePrompt>>(
                                                             "Cancel",
                                                             |this| {
-                                                                this.cancel();
+                                                                let _ = this.cancel();
                                                             },
                                                         )
                                                         .binding(),
@@ -1480,8 +1482,8 @@ fn default_content_dialog_style(theme: &StyleBuilder) -> Result {
     theme.dynamic(TemplatedControl::corner_radius_property(), "OverlayCornerRadius");
     theme.template(default_content_dialog_style_template);
     // The DialogShowing transition: ControlFasterAnimationDuration (83 ms) for the opacity,
-    //         ControlNormalAnimationDuration (250 ms) with ControlFastOutSlowInKeySpline (0,0,0,1) for the
-    //         scale.
+    // ControlNormalAnimationDuration (250 ms) with ControlFastOutSlowInKeySpline (0,0,0,1) for the
+    // scale.
     theme.style(nesting().template().of::<Border>().name("BackgroundElement"), |style| {
         style.animation(
             style

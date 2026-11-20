@@ -111,7 +111,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -929,7 +931,7 @@ fn time_picker_presenter_theme_template(t: &Template<TimePickerPresenter>) -> Re
 fn time_picker_presenter_theme(theme: &StyleBuilder) -> Result {
     theme.target::<TimePickerPresenter>();
     // The shadow is drawn outside the bounds of the control: a templated control clips to its
-    //         bounds unless its theme says otherwise (G-24).
+    // bounds unless its theme says otherwise (G-24).
     theme.set(Visual::clip_to_bounds_property(), false);
     theme.set(Layoutable::width_property(), 242.0);
     theme.set(Layoutable::min_width_property(), 242.0);

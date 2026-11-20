@@ -90,19 +90,21 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("SplitButtonStyle", split_button_style);
     resources.control_theme(type_key::<SplitButton>(), split_button_theme);
     // The implicit Button style of the Grid.Resources of the template of
-    //       SplitButtonCommandBarStyle.
+    // SplitButtonCommandBarStyle.
     resources.control_theme(
         "SplitButtonCommandBarInnerButtonStyle",
         split_button_command_bar_inner_button_style,
     );
     // WinUI applies the default style beneath a keyed style; this theme is not based on
-    //       SplitButtonStyle, whose state styles select the same element names, and writes out the
-    //       setter of SplitButtonStyle it does not override (BorderThickness).
+    // SplitButtonStyle, whose state styles select the same element names, and writes out the
+    // setter of SplitButtonStyle it does not override (BorderThickness).
     resources.control_theme("SplitButtonCommandBarStyle", split_button_command_bar_style);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -178,7 +180,7 @@ fn split_button_inner_button_style_template(t: &Template<Button>) -> Result<Ref<
 fn split_button_inner_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -481,7 +483,7 @@ fn split_button_style_template(t: &Template<SplitButton>) -> Result<Ref<Control>
 fn split_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<SplitButton>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -515,7 +517,7 @@ fn split_button_style(theme: &StyleBuilder) -> Result {
     theme.dynamic(TemplatedControl::corner_radius_property(), "ControlCornerRadius");
     theme.template(split_button_style_template);
     // The values PrimaryPointerOver, PrimaryPressed, SecondaryPointerOver and SecondaryPressed
-    //         give the half that is not under the pointer.
+    // give the half that is not under the pointer.
     theme.style(nesting().class(":pointerover"), |style| {
         style.style(
             nesting().template().of::<Button>().name("PART_PrimaryButton"),
@@ -570,7 +572,7 @@ fn split_button_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // SecondaryPointerOver (its setter of SecondaryButton.BorderBrush, a brush the inner
-    //         template draws with a thickness of 0, has no effect in WinUI and is left out)
+    // template draws with a thickness of 0, has no effect in WinUI and is left out)
     theme.style(
         nesting()
             .template()
@@ -1081,7 +1083,7 @@ fn split_button_command_bar_style_template(t: &Template<SplitButton>) -> Result<
                     Ok(())
                 })?
                 // The corner radii of the backgrounds are ControlCornerRadius through the filters
-                //                 in WinUI; the CornerRadius of the control, which this theme sets to it, here.
+                // in WinUI; the CornerRadius of the control, which this theme sets to it, here.
                 .children([
                     t.make(Border::new())
                         .name("PrimaryBackgroundGrid")?
@@ -1257,7 +1259,7 @@ fn split_button_command_bar_style_template(t: &Template<SplitButton>) -> Result<
 fn split_button_command_bar_style(theme: &StyleBuilder) -> Result {
     theme.target::<SplitButton>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -1298,7 +1300,7 @@ fn split_button_command_bar_style(theme: &StyleBuilder) -> Result {
     theme.dynamic(TemplatedControl::corner_radius_property(), "ControlCornerRadius");
     theme.template(split_button_command_bar_style_template);
     // The values PrimaryPointerOver, PrimaryPressed, SecondaryPointerOver and SecondaryPressed
-    //         give the half that is not under the pointer.
+    // give the half that is not under the pointer.
     theme.style(nesting().class(":pointerover"), |style| {
         style.style(
             nesting().template().of::<Button>().name("PART_PrimaryButton"),

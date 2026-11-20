@@ -94,7 +94,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -137,7 +139,7 @@ fn default_menu_bar_item_style_template(t: &Template<MenuItem>) -> Result<Ref<Co
                     Decorator::child_property(),
                     t.make(Panel::new())
                         // ContentButton: a Button of DefaultButtonStyle with a transparent background, no
-                        //                   border and the padding MenuBarItemButtonPadding.
+                        // border and the padding MenuBarItemButtonPadding.
                         .children([
                             t.make(Border::new())
                                 .name("Background")?

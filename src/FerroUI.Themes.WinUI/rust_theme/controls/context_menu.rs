@@ -58,7 +58,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -130,7 +132,7 @@ fn context_menu_theme_template(t: &Template<ContextMenu>) -> Result<Ref<Control>
 fn context_menu_theme(theme: &StyleBuilder) -> Result {
     theme.target::<ContextMenu>();
     // The shadow is drawn outside the bounds of the control: a templated control clips to its
-    //         bounds unless its theme says otherwise (G-24).
+    // bounds unless its theme says otherwise (G-24).
     theme.set(Visual::clip_to_bounds_property(), false);
     theme.dynamic(TemplatedControl::background_property(), "MenuFlyoutPresenterBackground");
     theme.static_resource(ContextMenu::system_backdrop_property(), "MenuFlyoutSystemBackdrop")?;

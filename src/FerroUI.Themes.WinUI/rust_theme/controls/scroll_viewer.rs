@@ -98,7 +98,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -342,7 +344,7 @@ fn default_scroll_viewer_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(default_scroll_viewer_style_template);
     // MouseIndicator (ScrollingIndicatorStates): the bars are shown while the pointer is over the
-    //         scroll viewer or a bar is expanded; NoIndicator otherwise (the opacity 0 of the template).
+    // scroll viewer or a bar is expanded; NoIndicator otherwise (the opacity 0 of the template).
     theme.style(
         Selectors::or([
             nesting()

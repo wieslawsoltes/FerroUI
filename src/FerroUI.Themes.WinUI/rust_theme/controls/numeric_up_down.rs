@@ -104,22 +104,24 @@ use ferroui_markup_xaml::rust_theme::type_key;
 pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("NumberBoxSpinButtonStyle", number_box_spin_button_style);
     // WinUI applies the default style beneath a keyed style without BasedOn
-    //       (docs/porting/winui-theme.md, section 4.2).
+    // (docs/porting/winui-theme.md, section 4.2).
     resources.control_theme("NumberBoxPopupSpinButtonStyle", number_box_popup_spin_button_style);
     // The spin buttons of the template, with the RepeatButton brushes the Grid.Resources of the
-    //       template set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
-    //       TextControlButtonBorderBrush; the other disabled brushes are not overridden).
+    // template set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
+    // TextControlButtonBorderBrush; the other disabled brushes are not overridden).
     resources.control_theme("NumericUpDownSpinButtonStyle", numeric_up_down_spin_button_style);
     resources.control_theme("NumberBoxTextBoxStyle", number_box_text_box_style);
     // The layout of the NumberBox template: the text box over the whole control, the spin buttons
-    //       over its end.
+    // over its end.
     resources.control_theme("NumericUpDownButtonSpinnerStyle", numeric_up_down_button_spinner_style);
     // The implicit style of NumberBox (it has no key in WinUI).
     resources.control_theme(type_key::<NumericUpDown>(), numeric_up_down_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -172,8 +174,8 @@ fn numeric_up_down_spin_button_style(theme: &StyleBuilder) -> Result {
         "TextControlButtonBorderBrush",
     );
     // The states also set the Foreground of the button itself, which the glyph paths in the
-    //         content of the spin buttons take (a path does not inherit the foreground of the content
-    //         presenter as the glyph of a FontIcon does).
+    // content of the spin buttons take (a path does not inherit the foreground of the content
+    // presenter as the glyph of a FontIcon does).
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
             TemplatedControl::foreground_property(),
@@ -256,7 +258,7 @@ fn numeric_up_down_spin_button_style(theme: &StyleBuilder) -> Result {
 /// The template of `TextBox` of `number_box_text_box_style`.
 fn number_box_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Control>> {
     // Columns: the spin buttons at the left (FerroUI), InnerLeftContent (FerroUI), the text
-    //             (ContentElement), InnerRightContent (FerroUI), DeleteButton, SpinButtonsColumn.
+    // (ContentElement), InnerRightContent (FerroUI), DeleteButton, SpinButtonsColumn.
     Ok(t.make(Grid::new())
         .with(|e| {
             Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,Auto,*,Auto,Auto,Auto"))?);
@@ -480,7 +482,7 @@ fn number_box_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Contr
                     path()
                         .ancestor_of::<TextBox>(0)
                         .method::<Ref<TextBox>>("Clear", |this| {
-                            this.clear();
+                            let _ = this.clear();
                         })
                         .binding(),
                 )
@@ -531,7 +533,7 @@ fn number_box_text_box_style(theme: &StyleBuilder) -> Result {
     theme.based_on("DefaultTextBoxStyle")?;
     theme.template(number_box_text_box_style_template);
     // SpinButtonStates, set by the NumericUpDown theme on its text box (SpinButtonsCollapsed
-    //         sets the base values).
+    // sets the base values).
     theme.style(
         nesting()
             .property_is(
@@ -814,7 +816,7 @@ fn numeric_up_down_theme(theme: &StyleBuilder) -> Result {
     theme.dynamic(TemplatedControl::foreground_property(), "TextControlForeground");
     theme.dynamic(TemplatedControl::padding_property(), "TextControlThemePadding");
     // Not in the style: the placeholder brush the text box of WinUI uses when NumberBox sets
-    //         none (FerroUI's NumericUpDown passes its own to the text box).
+    // none (FerroUI's NumericUpDown passes its own to the text box).
     theme.dynamic(
         NumericUpDown::placeholder_foreground_property(),
         "TextControlPlaceholderForeground",

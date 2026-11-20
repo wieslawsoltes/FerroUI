@@ -105,7 +105,7 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
     resources.include(75)?; // Resources/Glyphs.xaml
                             // resources:end
                             // The labels of the commands of the context flyout of the text controls (not part of the
-                            //             WinUI theme: WinUI takes them from the resources of the framework).
+                            // WinUI theme: WinUI takes them from the resources of the framework).
     resources.include(76)?; // Strings/InvariantResources.xaml
                             // Not part of the merged dictionaries: the theme looks it up first when its density style is compact.
     resources.deferred("CompactStyles", |scope| {
@@ -115,7 +115,8 @@ pub(crate) fn populate(styles: &Ref<Styles>, scope: &Scope) -> Result {
     Ok(())
 }
 
-/// The styles of the document, declared in `scope`.
+/// The styles of the document, declared in `scope`: the document included (`StyleInclude`).
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<Styles>> {
     let styles = Styles::new();
     populate(&styles, scope)?;

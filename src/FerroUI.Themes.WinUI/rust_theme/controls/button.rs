@@ -51,7 +51,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("DefaultButtonStyle", default_button_style);
     // WinUI applies the default style of a control beneath an explicit style, so the keyed
-    //       themes are based on the default theme (docs/porting/winui-theme.md, section 4.2).
+    // themes are based on the default theme (docs/porting/winui-theme.md, section 4.2).
     resources.control_theme("AccentButtonStyle", accent_button_style);
     resources.control_theme("SubtleButtonStyle", subtle_button_style);
     // TextBlockButtonStyle of generic.xaml: a button that looks like a hyperlink without an underline.
@@ -60,7 +60,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -160,7 +162,7 @@ fn default_button_style_template(t: &Template<Button>) -> Result<Ref<Control>> {
 fn default_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -241,7 +243,7 @@ fn default_button_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The style class `accent` of the framework's controls (a FerroUI addition, DEVIATIONS.md,
-    //         BTN-6): a button with the class looks as one with AccentButtonStyle.
+    // BTN-6): a button with the class looks as one with AccentButtonStyle.
     theme.style(nesting().class("accent"), |style| {
         style.set(
             TemplatedControl::background_sizing_property(),

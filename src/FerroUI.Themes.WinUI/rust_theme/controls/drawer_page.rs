@@ -141,26 +141,28 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     );
     resources.control_theme("PaneToggleButtonStyle", pane_toggle_button_style);
     // The pane toggle buttons of DrawerPage: PaneToggleButtonStyle with the DrawerIcon of the page
-    //       (the content of the button) in place of the glyph.
+    // (the content of the button) in place of the glyph.
     resources.control_theme("DrawerPagePaneToggleButton", drawer_page_pane_toggle_button);
     // An item of the left pane of NavigationView for a ListBoxItem: the template of
-    //       MUX_NavigationViewItemPresenterStyleWhenOnLeftPane with the values of the implicit style of
-    //       NavigationViewItem (font, corner radius), as the tabs at the left of Controls/TabItem.xaml:
-    //       its pointer states, the selection indicator of the selected item and the disabled opacity.
-    //       A ListBoxItem has no icon: the icon column has the 8 of IconCollapsed. The expand chevron,
-    //       the info badge and the compact pane states are left out.
+    // MUX_NavigationViewItemPresenterStyleWhenOnLeftPane with the values of the implicit style of
+    // NavigationViewItem (font, corner radius), as the tabs at the left of Controls/TabItem.xaml:
+    // its pointer states, the selection indicator of the selected item and the disabled opacity.
+    // A ListBoxItem has no icon: the icon column has the 8 of IconCollapsed. The expand chevron,
+    // the info badge and the compact pane states are left out.
     resources.control_theme("DrawerPageNavigationViewItem", drawer_page_navigation_view_item);
     // The menu items of the pane (MenuItemsHost of NavigationView.xaml) for a ListBox in the drawer:
-    //       a list without a background or a border of its own, whose items are the items of the left
-    //       pane (DrawerPageNavigationViewItem). DrawerPage cannot style the content of its drawer (a
-    //       control theme reaches only its template), so an application gives its drawer's list this
-    //       theme: <ListBox Theme="{StaticResource DrawerPageNavigationViewMenu}">.
+    // a list without a background or a border of its own, whose items are the items of the left
+    // pane (DrawerPageNavigationViewItem). DrawerPage cannot style the content of its drawer (a
+    // control theme reaches only its template), so an application gives its drawer's list this
+    // theme: <ListBox Theme="{StaticResource DrawerPageNavigationViewMenu}">.
     resources.control_theme("DrawerPageNavigationViewMenu", drawer_page_navigation_view_menu);
     resources.control_theme(type_key::<DrawerPage>(), drawer_page_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -1382,7 +1384,7 @@ fn drawer_page_theme(theme: &StyleBuilder) -> Result {
         },
     )?;
     // A horizontal pane (top or bottom): the compact toggle docks left so that the drawer fills
-    //         the rest.
+    // the rest.
     theme.style(
         nesting()
             .class(":placement-bottom")

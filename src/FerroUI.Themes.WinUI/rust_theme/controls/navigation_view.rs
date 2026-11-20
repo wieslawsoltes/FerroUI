@@ -145,7 +145,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The search button of the closed compact pane (PaneAutoSuggestButton), with the
-    //       NavigationViewItem brushes of the Button.Resources of the template.
+    // NavigationViewItem brushes of the Button.Resources of the template.
     resources.control_theme(
         "NavigationViewPaneSearchButtonStyle",
         navigation_view_pane_search_button_style,
@@ -163,7 +163,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -328,7 +330,7 @@ fn navigation_view_theme(theme: &StyleBuilder) -> Result {
     theme.template(navigation_view_theme_template);
     // DisplayModeGroup: Compact and Expanded have no setters. Minimal, MinimalWithBackButton.
     // Minimal: the toggle button (or the pane title) beside the back or close button, not over it
-    //         them side by side).
+    // them side by side).
     // Centred in its column; a style, so that MinimalWithBackButton can align it left.
     theme.style(nesting().template().of::<Button>().name("TogglePaneButton"), |style| {
         style.set(Layoutable::horizontal_alignment_property(), HorizontalAlignment::Center);
@@ -596,7 +598,7 @@ fn navigation_view_theme(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The row of the back button of PaneContentGrid, which NavigationView sizes in code
-    //         (c_backButtonRowDefinition, c_backButtonHeight).
+    // (c_backButtonRowDefinition, c_backButtonHeight).
     theme.style(
         nesting()
             .class(":back-button-row-visible")
@@ -635,7 +637,7 @@ Ok(())
 fn navigation_view_item_theme(theme: &StyleBuilder) -> Result {
     theme.target::<NavigationViewItem>();
     // The content alignment of a WinUI control (Control.VerticalContentAlignment, Center), where a
-    //         FerroUI content control is at the top: the text of an item is centred on its icon (NVI-12).
+    // FerroUI content control is at the top: the text of an item is centred on its icon (NVI-12).
     theme.set(
         ContentControl::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -984,7 +986,7 @@ fn navigation_view_item_theme(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // ItemOnNavigationViewListPositionStates: OnTopNavigationPrimary, the presenter of the top pane
-    //         (MUX_NavigationViewItemPresenterStyleWhenOnTopPane).
+    // (MUX_NavigationViewItemPresenterStyleWhenOnTopPane).
     theme.style(nesting().class(":on-top-navigation-primary"), |style| {
         style.style(
             nesting().template().of::<Panel>().name("NavigationViewItemPresenter"),

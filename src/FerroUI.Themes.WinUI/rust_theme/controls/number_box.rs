@@ -90,8 +90,8 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The popup spin buttons with the RepeatButton brushes that the Grid.Resources of
-    //       PopupContentRoot set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
-    //       TextControlButtonBorderBrush; the other disabled brushes are not overridden).
+    // PopupContentRoot set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
+    // TextControlButtonBorderBrush; the other disabled brushes are not overridden).
     resources.control_theme(
         "NumberBoxPopupContentRootButtonStyle",
         number_box_popup_content_root_button_style,
@@ -101,7 +101,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

@@ -98,7 +98,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -364,7 +366,7 @@ fn tab_item_theme_template_2(t: &Template<TabItem>) -> Result<Ref<Control>> {
                         Ok(())
                     })?
                     // IconColumn: the icon box in the compact pane length less 8 (40), or 8 wide
-                    //                     without an icon (IconCollapsed).
+                    // without an icon (IconCollapsed).
                     .children([
                         t.make(Border::new())
                             .name("IconColumn")?
@@ -508,7 +510,7 @@ fn tab_item_theme_template_3(t: &Template<TabItem>) -> Result<Ref<Control>> {
                         Ok(())
                     })?
                     // IconColumn: the icon box in the compact pane length less 8 (40), or 8 wide
-                    //                     without an icon (IconCollapsed).
+                    // without an icon (IconCollapsed).
                     .children([
                         t.make(Border::new())
                             .name("IconColumn")?
@@ -772,7 +774,7 @@ fn tab_item_theme(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // DisabledStates: Disabled (IconControl.Foreground is set twice in the source; the second
-    //         value, TabViewButtonForegroundDisabled, is the one in effect)
+    // value, TabViewButtonForegroundDisabled, is the one in effect)
     theme.style(nesting().class(":disabled"), |style| {
         style.style(nesting().template().of::<Border>().name("TabContainer"), |style| {
             style.dynamic(Border::background_property(), "TabViewItemHeaderBackgroundDisabled");
@@ -807,7 +809,7 @@ fn tab_item_theme(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // The tabs at the bottom: the strip turns them upside down; the header and the icon are
-    //         turned back.
+    // turned back.
     theme.style(
         nesting()
             .property_is(TabItem::tab_strip_placement_property(), Some(Dock::Bottom))
@@ -823,7 +825,7 @@ fn tab_item_theme(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The tabs at the left and at the right: the items of the left pane of NavigationView
-    //         (MUX_NavigationViewItemPresenterStyleWhenOnLeftPane, NavigationViewItem).
+    // (MUX_NavigationViewItemPresenterStyleWhenOnLeftPane, NavigationViewItem).
     theme.style(
         nesting().property_is(TabItem::tab_strip_placement_property(), Some(Dock::Left)),
         |style| {

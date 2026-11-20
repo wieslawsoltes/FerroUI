@@ -88,23 +88,23 @@ pub(crate) fn merge(resources: &Resources) -> Result {
         Ok(value(literal(BoxShadows::parse("0 2 10 2 #80000000"))?))
     });
     // WindowCaptionButton (generic.xaml): a caption button. The glyph is the content of the button
-    //       (a Path filled with the foreground of the button); the states set the background of the
-    //       template and the foreground of the button, which the source sets on the Path.
+    // (a Path filled with the foreground of the button); the states set the background of the
+    // template and the foreground of the button, which the source sets on the Path.
     resources.control_theme("WindowCaptionButton", window_caption_button);
     // The close button: CloseButtonPointerOver and CloseButtonPressed of WindowCaptionButton, with
-    //       the CloseButton* resources of generic.xaml.
+    // the CloseButton* resources of generic.xaml.
     resources.control_theme(
         "WindowDrawnDecorationsCloseButton",
         window_drawn_decorations_close_button,
     );
     // TitleBarBackButtonStyle (TitleBar_themeresources.xaml). The Content of the source (E72B) is the
-    //       glyph of the template.
+    // glyph of the template.
     resources.control_theme("TitleBarBackButtonStyle", title_bar_back_button_style);
     // TitleBarPaneToggleButtonStyle (TitleBar_themeresources.xaml). The Content of the source (E700)
-    //       is the glyph of the template.
+    // is the glyph of the template.
     resources.control_theme("TitleBarPaneToggleButtonStyle", title_bar_pane_toggle_button_style);
     // WindowChromeStyle (generic.xaml): the style WinUI's window chrome applies to the content of
-    //       a window with a custom title bar. ClientAreaPresenter is FerroUI's PART_ContentPresenter.
+    // a window with a custom title bar. ClientAreaPresenter is FerroUI's PART_ContentPresenter.
     resources.control_theme("WindowChromeStyle", window_chrome_style);
     // DefaultTitleBarStyle (TitleBar.xaml), as the drawn decorations of a window.
     resources.control_theme("DefaultTitleBarStyle", default_title_bar_style);
@@ -112,7 +112,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -542,8 +544,8 @@ fn default_title_bar_style_decorations(
                 t.make(Panel::new())
                     .name("PART_OverlayWrapper")?
                     // PART_TitleText of TitleBar, above the content of the window. Its left margin is
-                    //                   TitleBarLeftPaddingWidth + TitleBarLeftHeaderPaddingWidth, its right margin
-                    //                   TitleBarTitleMargin.
+                    // TitleBarLeftPaddingWidth + TitleBarLeftHeaderPaddingWidth, its right margin
+                    // TitleBarTitleMargin.
                     .children([
                         t.make(Panel::new())
                             .name("PART_TitleTextPanel")?
@@ -882,7 +884,7 @@ fn default_title_bar_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The elements of the title bar the platform does not support or the hints of the
-    //         decorations (TitleBarDecorationHints) do not ask for.
+    // decorations (TitleBarDecorationHints) do not ask for.
     theme.style(
         nesting()
             .not(class(":has-minimize"))
