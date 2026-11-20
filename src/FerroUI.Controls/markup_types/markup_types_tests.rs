@@ -845,6 +845,8 @@ fn a_converter_made_in_code_is_assignable_to_its_contract() {
     // registration of the crate (#612): a converter made by code, without markup, converts too.
     let value = boxed(Rc::new(BorderGapMaskConverter::new()));
     assert!(from_markup_value::<Rc<dyn IMultiValueConverter>>(&value).is_some());
+    // The nullable form of the contract comes with the start-up registration of the crates.
+    crate::register_types();
     let value = boxed(Rc::new(EnumToBoolConverter::default()));
     assert!(from_markup_value::<Option<Rc<dyn IValueConverter>>>(&value).is_some_and(|c| c.is_some()));
     let value = boxed(TreeViewItemIndentConverter::instance());
