@@ -46,13 +46,15 @@ impl ProjectWorkspace {
         };
         let owner =
             package(&source).ok_or_else(|| ProjectError("Choose a project XAML file".into()))?;
+        let root = owner.authored_package_root(&source).to_path_buf();
         require(
-            package(&target).is_some_and(|destination| destination.root == owner.root),
+            package(&target)
+                .is_some_and(|destination| destination.authored_package_root(&target) == root),
             "Choose a destination in the same Cargo package or loose-file project",
         )?;
         require(
             !target
-                .strip_prefix(&owner.root)
+                .strip_prefix(&root)
                 .unwrap()
                 .components()
                 .any(|part| {
@@ -66,7 +68,7 @@ impl ProjectWorkspace {
         Ok(XamlFileMove {
             from: file_uri(source)?,
             to: file_uri(target)?,
-            package_root: owner.root.clone(),
+            package_root: root,
         })
     }
 }
@@ -79,18 +81,17 @@ fn is_xaml(path: &Path) -> bool {
 /// Encode an existing lexical file identity relative to a document's directory.
 /// A different filesystem root has no document-relative spelling.
 pub fn relative_file_reference(from: &str, to: &str) -> Result<String> {
-    relative_asset_uri(&relative_file_path(from, to)?)
-        .ok_or_else(|| ProjectError("Cannot represent a relative file URI".into()))
-}
-
-/// Spell a native path from a source file, with portable slash separators.
-pub fn relative_file_path(from: &str, to: &str) -> Result<String> {
     let source = file_path(from)?;
-    let target = file_path(to)?;
     let parent = source
         .parent()
         .ok_or_else(|| ProjectError("Document has no parent directory".into()))?;
-    let mut start = parent.components().peekable();
+    relative_asset_uri(&relative_file_path(parent, &file_path(to)?)?)
+        .ok_or_else(|| ProjectError("Cannot represent a relative file URI".into()))
+}
+
+/// Spell a native path from a base directory, with portable slash separators.
+pub fn relative_file_path(base: &Path, target: &Path) -> Result<String> {
+    let mut start = base.components().peekable();
     let mut end = target.components().peekable();
     while start.peek().is_some() && start.peek() == end.peek() {
         start.next();

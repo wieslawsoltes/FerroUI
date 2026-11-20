@@ -19,7 +19,7 @@ mod file_moves;
 #[path = "file_move_literals.rs"]
 mod file_move_literals;
 pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
-pub use file_moves::{FileMoveDocument, FileMovePlan};
+pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

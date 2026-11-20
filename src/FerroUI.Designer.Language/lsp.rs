@@ -335,8 +335,10 @@ impl LspServer {
                 text(params, "uri")?, decode(&params["request"])?)?)),
             "ferroui/planDictionaryExtraction" => Ok(json!(self.service.plan_dictionary_extraction(
                 text(params, "uri")?, decode(&params["request"])?, text(params, "fileName")?)?)),
-            "ferroui/planFileMove" => Ok(json!(self.service.plan_file_move(
-                text(params, "from")?, text(params, "to")?)?)),
+            "ferroui/planFileMove" => {
+                let drafts = if params["rustDrafts"].is_null() { Vec::new() } else { decode(&params["rustDrafts"])? };
+                Ok(json!(self.service.plan_file_move_with_drafts(text(params, "from")?, text(params, "to")?, &drafts)?))
+            }
             "workspace/didChangeWorkspaceFolders" => {
                 if let Some(folders) = params["event"]["removed"].as_array() {
                     for folder in folders {
@@ -451,7 +453,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

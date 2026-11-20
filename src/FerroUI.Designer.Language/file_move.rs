@@ -1,6 +1,6 @@
 //! Plan a workspace file move against the same source snapshots used for navigation.
 use super::{file_move_literals, LanguageService, State};
-use crate::{require, DocumentEdits, LanguageError, Result, TextEdit};
+use crate::{require, DocumentEdits, LanguageError, LineIndex, Result, TextEdit};
 use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_project::{
     file_path, relative_asset_uri, relative_file_reference, XamlFileMove,
@@ -10,6 +10,16 @@ use std::{
     hash::{DefaultHasher, Hash, Hasher},
     path::Path,
 };
+
+#[path = "file_move_rust.rs"]
+mod rust;
+
+#[derive(Debug, Deserialize)]
+pub struct FileMoveDraft {
+    pub uri: String,
+    pub version: i64,
+    pub source: String,
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct FileMoveDocument {
@@ -30,6 +40,15 @@ impl LanguageService {
     /// Include unopened references and reload physical snapshots before each review.
     /// Open drafts keep precedence over disk even when an adjacent file changed.
     pub fn plan_file_move(&mut self, from: &str, to: &str) -> Result<FileMovePlan> {
+        self.plan_file_move_with_drafts(from, to, &[])
+    }
+
+    pub fn plan_file_move_with_drafts(
+        &mut self,
+        from: &str,
+        to: &str,
+        drafts: &[FileMoveDraft],
+    ) -> Result<FileMovePlan> {
         let source = self.document_uri(from)?.into_owned();
         let root = self.workspace_root(&source).cloned().ok_or_else(|| {
             LanguageError("Open the source in its workspace before moving it".into())
@@ -40,7 +59,7 @@ impl LanguageService {
             self.workspaces[&root].plan_xaml_move(from, to)? == movement,
             "The file or destination moved while planning",
         )?;
-        self.review_file_move(movement)
+        self.review_file_move(movement, drafts)
     }
 
     fn refresh_move_projects(&mut self) -> Result<()> {
@@ -69,7 +88,11 @@ impl LanguageService {
         Ok(())
     }
 
-    fn review_file_move(&self, movement: XamlFileMove) -> Result<FileMovePlan> {
+    fn review_file_move(
+        &self,
+        movement: XamlFileMove,
+        drafts: &[FileMoveDraft],
+    ) -> Result<FileMovePlan> {
         let moved = self.state(&movement.from)?;
         require(
             moved.document.is_valid(),
@@ -92,9 +115,13 @@ impl LanguageService {
             }
             let patches = self.move_patches(uri, state, &movement)?;
             if !patches.is_empty() || uri == &movement.from {
-                documents.push(move_document(uri, state, patches)?);
+                let document = move_document(uri, state.version, &state.index, patches)?;
+                Document::new(&document.after)?;
+                documents.push(document);
             }
         }
+        documents.extend(self.move_rust_paths(&movement, drafts)?);
+        documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
         let disk = std::fs::read(file_path(&movement.from)?)
             .map_err(|error| LanguageError(error.to_string()))?;
         let mut id = DefaultHasher::new();
@@ -164,23 +191,27 @@ impl LanguageService {
     }
 }
 
-fn move_document(uri: &str, state: &State, patches: Vec<TextPatch>) -> Result<FileMoveDocument> {
-    let before = state.document.source();
+fn move_document(
+    uri: &str,
+    version: i64,
+    index: &LineIndex,
+    patches: Vec<TextPatch>,
+) -> Result<FileMoveDocument> {
+    let before = index.source();
     let edits = patches
         .iter()
         .map(|patch| {
             Ok(TextEdit {
-                range: state.index.range(patch.span)?,
+                range: index.range(patch.span)?,
                 new_text: patch.replacement.clone(),
             })
         })
         .collect::<Result<_>>()?;
     let after = TextPatch::apply_all(before, patches)?;
-    Document::new(&after)?;
     Ok(FileMoveDocument {
         edit: DocumentEdits {
             uri: uri.to_owned(),
-            version: state.version,
+            version,
             edits,
         },
         before: before.to_owned(),

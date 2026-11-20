@@ -1,14 +1,15 @@
 //! Source ranges for Rust literals whose XAML path has a known base.
 mod build_script;
+mod macros;
 
 use self::build_script::{BuildScript, Site};
+use self::macros::MacroSyntax;
 use crate::{ProjectError, Result};
 use proc_macro2::Span;
 use std::ops::Range;
 use syn::{
-    punctuated::Punctuated,
     visit::{self, Visit},
-    Expr, ExprLit, Lit, LitStr, Macro, Stmt, Token,
+    Expr, ExprLit, Lit, LitStr, Macro, Stmt,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -49,6 +50,7 @@ pub struct RustXamlReferences {
     pub paths: Vec<RustXamlPath>,
     /// Explicit document discovery roots authored on a Cargo build builder.
     pub xaml_roots: Vec<String>,
+    pub discovers_xaml: bool,
 }
 
 impl RustXamlReferences {
@@ -79,6 +81,7 @@ impl RustXamlReferences {
             offset: source.len() - body.len(),
             cargo_build,
             build: cargo_build.then(|| BuildScript::new(&file)),
+            macros: MacroSyntax::new(&file),
             references: Self::default(),
         };
         collector.visit_file(&file);
@@ -97,6 +100,7 @@ struct Collector<'source> {
     offset: usize,
     cargo_build: bool,
     build: Option<BuildScript<'source>>,
+    macros: MacroSyntax,
     references: RustXamlReferences,
 }
 
@@ -142,12 +146,14 @@ impl<'source> Visit<'source> for Collector<'source> {
     }
 
     fn visit_macro(&mut self, expression: &'source Macro) {
-        if let Some((literal, anchor, prefix)) =
-            include_path(expression).or_else(|| manifest_path(expression))
+        if let Some((literal, anchor, prefix)) = self
+            .macros
+            .include_path(expression)
+            .or_else(|| self.macros.manifest_path(expression))
         {
             self.record(&literal, anchor, prefix, None);
         } else if self.cargo_build {
-            if let Some(args) = macro_arguments(expression, "println") {
+            if let Some(args) = self.macros.arguments(expression, "println") {
                 let directive = args.first().and_then(string_literal);
                 for prefix in ["cargo::rerun-if-changed=", "cargo:rerun-if-changed="] {
                     if let Some(literal) =
@@ -175,8 +181,9 @@ impl<'source> Visit<'source> for Collector<'source> {
                 match entry {
                     Site::Path(literal, anchor) => self.record(literal, anchor, "", None),
                     Site::Root(literal) => self.references.xaml_roots.push(literal.value()),
+                    Site::Discovery => self.references.discovers_xaml = true,
                     Site::Key(literal, input) => {
-                        if let Some((value, anchor, prefix)) = include_path(input) {
+                        if let Some((value, anchor, prefix)) = self.macros.include_path(input) {
                             if let Some(path) = value.value().strip_prefix(prefix) {
                                 self.record(
                                     literal,
@@ -219,71 +226,6 @@ fn string_literal(expr: &Expr) -> Option<&LitStr> {
         Expr::Group(group) => string_literal(&group.expr),
         _ => None,
     }
-}
-
-fn take_literal(expr: Expr) -> Option<LitStr> {
-    match expr {
-        Expr::Lit(ExprLit {
-            lit: Lit::Str(literal),
-            ..
-        }) => Some(literal),
-        Expr::Paren(paren) => take_literal(*paren.expr),
-        Expr::Group(group) => take_literal(*group.expr),
-        _ => None,
-    }
-}
-
-fn include_path(expression: &Macro) -> Option<(LitStr, RustPathAnchor, &'static str)> {
-    let args = macro_arguments(expression, "include_str")
-        .or_else(|| macro_arguments(expression, "include_bytes"))?;
-    if args.len() != 1 {
-        return None;
-    }
-    let argument = args.into_iter().next()?;
-    match argument {
-        Expr::Macro(nested) => manifest_path(&nested.mac),
-        value => Some((take_literal(value)?, RustPathAnchor::SourceFile, "")),
-    }
-}
-
-fn manifest_path(expression: &Macro) -> Option<(LitStr, RustPathAnchor, &'static str)> {
-    let args = macro_arguments(expression, "concat")?;
-    if args.len() != 2 {
-        return None;
-    }
-    let mut args = args.into_iter();
-    let Expr::Macro(env) = args.next()? else {
-        return None;
-    };
-    let env = macro_arguments(&env.mac, "env")?;
-    if env.len() != 1 || env.first().and_then(string_literal)?.value() != "CARGO_MANIFEST_DIR" {
-        return None;
-    }
-    Some((take_literal(args.next()?)?, RustPathAnchor::Package, "/"))
-}
-
-fn is_builtin(expression: &Macro, name: &str) -> bool {
-    let mut segments = expression.path.segments.iter();
-    let Some(first) = segments.next() else {
-        return false;
-    };
-    match segments.next() {
-        None => first.ident == name && expression.path.leading_colon.is_none(),
-        Some(last) => {
-            (first.ident == "std" || first.ident == "core")
-                && last.ident == name
-                && segments.next().is_none()
-        }
-    }
-}
-
-fn macro_arguments(expression: &Macro, name: &str) -> Option<Punctuated<Expr, Token![,]>> {
-    if !is_builtin(expression, name) {
-        return None;
-    }
-    expression
-        .parse_body_with(Punctuated::parse_terminated)
-        .ok()
 }
 
 #[cfg(test)]
@@ -361,5 +303,19 @@ mod tests {
                 .len(),
             1
         );
+    }
+
+    #[test]
+    fn does_not_treat_a_shadowed_macro_as_a_builtin_include() {
+        let source = r#"
+        macro_rules! include_str { ($value:literal) => { $value } }
+        fn view() {
+            let _label = include_str!("Label.xaml");
+            let _document = ::std::include_str!("View.xaml");
+        }
+        "#;
+        let paths = RustXamlReferences::parse(source, false).unwrap().paths;
+        assert_eq!(paths.len(), 1);
+        assert_eq!(paths[0].path, "View.xaml");
     }
 }

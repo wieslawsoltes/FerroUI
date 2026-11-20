@@ -7,6 +7,7 @@ pub(super) enum Site<'source> {
     Path(&'source LitStr, RustPathAnchor),
     Key(&'source LitStr, &'source Macro),
     Root(&'source LitStr),
+    Discovery,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -85,14 +86,22 @@ impl<'source> BuildScript<'source> {
     }
 
     pub(super) fn paths(&self, call: &'source ExprMethodCall) -> Vec<Site<'source>> {
+        let builder = self.builder(&call.receiver);
+        if builder == Some(Builder::Build) && call.method == "compile_xaml" && call.args.is_empty()
+        {
+            return vec![Site::Discovery];
+        }
         let Some(argument) = call.args.first().filter(|_| call.args.len() == 1) else {
             return Vec::new();
         };
         let value = self.value(argument);
-        match (
-            self.builder(&call.receiver),
-            call.method.to_string().as_str(),
-        ) {
+        match (builder, call.method.to_string().as_str()) {
+            (Some(Builder::Build), "compile_group")
+                if self.builder(value) == Some(Builder::Group)
+                    && self.documents(value).is_none() =>
+            {
+                vec![Site::Discovery]
+            }
             (Some(Builder::Build), "input") => string_literal(value)
                 .map(|literal| Site::Path(literal, RustPathAnchor::Package))
                 .into_iter()
@@ -160,11 +169,18 @@ impl<'source> BuildScript<'source> {
 
     fn documents(&self, expression: &'source Expr) -> Option<&'source Expr> {
         let mut expression = self.value(expression);
-        while let Expr::MethodCall(call) = expression {
+        for _ in 0..128 {
+            let Expr::MethodCall(call) = expression else {
+                return None;
+            };
             if call.method == "documents" {
                 return call.args.first();
             }
-            expression = self.value(&call.receiver);
+            let receiver = self.value(&call.receiver);
+            if std::ptr::eq(receiver, expression) {
+                return None;
+            }
+            expression = receiver;
         }
         None
     }

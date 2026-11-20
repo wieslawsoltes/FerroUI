@@ -32,6 +32,18 @@ pub struct ProjectDescriptor {
     pub documents: Vec<DocumentEntry>,
     pub targets: Vec<CargoTarget>,
 }
+
+impl ProjectDescriptor {
+    /// Resolve a nested package when the workspace was opened as a loose folder.
+    pub fn authored_package_root<'a>(&'a self, source: &'a Path) -> &'a Path {
+        source
+            .ancestors()
+            .skip(1)
+            .take_while(|parent| parent.starts_with(&self.root))
+            .find(|parent| parent.join("Cargo.toml").is_file())
+            .unwrap_or(&self.root)
+    }
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Solution {
     pub format_version: u32,
