@@ -269,7 +269,20 @@ pub fn exact<T: Clone + 'static>(
     line: i32,
     position: i32,
 ) -> Result<T, XamlLoadError> {
+    // The conversion and its error do not depend on `T` beyond its value type (#1000): one
+    // function for every type, and only the typed read of the result in each instance.
     let target = ValueType::of::<T>();
+    let (value, converted) = exact_conversion(value, target);
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(converted) => Ok(converted.clone()),
+        None => Err(exact_error(&value, target, member, index, line, position)),
+    }
+}
+
+/// The conversion of [`exact`] to the value type `target`: the value as the conversion read
+/// it, and the converted value, if any.
+#[inline(never)]
+fn exact_conversion(value: MarkupValue, target: ValueType) -> (MarkupValue, Option<BoxedValue>) {
     let value = match (&value, target.is_object()) {
         (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
         _ => value,
@@ -279,25 +292,26 @@ pub fn exact<T: Clone + 'static>(
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
     };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(converted) => Ok(converted.clone()),
-        None => {
-            // A value whose cast refuses it (a negative time span for a `Duration`): the
-            // error of the cast, as the run-time loader reports it (`to_exact`).
-            if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
-                return Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position));
-            }
-            let error = MarkupInvokeError::Argument {
-                index,
-                expected: target.name(),
-                actual: match &value {
-                    Some(value) => value.type_name().to_string(),
-                    None => "null".to_string(),
-                },
-            };
-            Err(at("InvalidCastException", format!("{member}: {error}"), line, position))
-        }
+    (value, converted)
+}
+
+/// The error of [`exact`] for a value that does not convert to `target`.
+#[inline(never)]
+fn exact_error(value: &MarkupValue, target: ValueType, member: &str, index: usize, line: i32, position: i32) -> XamlLoadError {
+    // A value whose cast refuses it (a negative time span for a `Duration`): the error of the
+    // cast, as the run-time loader reports it (`to_exact`).
+    if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+        return at(TARGET_INVOCATION_EXCEPTION, error, line, position);
     }
+    let error = MarkupInvokeError::Argument {
+        index,
+        expected: target.name(),
+        actual: match value {
+            Some(value) => value.type_name().to_string(),
+            None => "null".to_string(),
+        },
+    };
+    at("InvalidCastException", format!("{member}: {error}"), line, position)
 }
 
 /// The type name of the exception a member call of generated code that
@@ -1535,7 +1549,13 @@ pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
 /// ([`untyped_object_form`]), then cast to the untyped value, which is what
 /// a member typed `object` receives from the run-time loader.
 pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
-    let boxed: BoxedValue = Rc::new(value);
+    // Only the box depends on `T` (#1000).
+    boxed_object(Rc::new(value))
+}
+
+/// [`to_object`] of a boxed value.
+#[inline(never)]
+fn boxed_object(boxed: BoxedValue) -> MarkupValue {
     let boxed = untyped_object_form(&boxed).unwrap_or(boxed);
     if let Some(untyped) = boxed.downcast_ref::<Option<BoxedValue>>() {
         return untyped.clone();
@@ -1687,20 +1707,35 @@ pub fn instance<'a, T: 'static>(
 /// two types, which is when the cast succeeds; a value it does not convert is
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
+    // The conversion and its error do not depend on the types beyond the value type of `T`
+    // (#1000): one function for every pair, and in each instance the untyped form of the value
+    // and the typed read of the result.
     let target = ValueType::of::<T>();
     let value = into_markup_value(value);
-    let converted = match &value {
+    let converted = cast_conversion(&value, target);
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(value) => Ok(value.clone()),
+        None => Err(cast_error(&value, target, line, position)),
+    }
+}
+
+/// The conversion of [`cast`] and of [`cast_untyped`] to the value type `target`.
+#[inline(never)]
+fn cast_conversion(value: &MarkupValue, target: ValueType) -> Option<BoxedValue> {
+    match value {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(value) => Ok(value.clone()),
-        None => match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
-            // A value whose cast refuses it (a negative time span for a `Duration`).
-            Some(error) => Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position)),
-            None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-        },
+    }
+}
+
+/// The error of [`cast`] for a value that does not convert to `target`.
+#[inline(never)]
+fn cast_error(value: &MarkupValue, target: ValueType, line: i32, position: i32) -> XamlLoadError {
+    match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+        // A value whose cast refuses it (a negative time span for a `Duration`).
+        Some(error) => at(TARGET_INVOCATION_EXCEPTION, error, line, position),
+        None => at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position),
     }
 }
 
@@ -1723,11 +1758,7 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<MarkupValue, XamlLoadError> {
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
+    let converted = cast_conversion(&into_markup_value(value), target);
     match converted {
         Some(converted) => Ok(to_untyped(converted)),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
