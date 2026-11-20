@@ -158,6 +158,20 @@ The action moves the whole inline dictionary, including comments, namespace alia
 
 ![After Apply, the view references the new resource dictionary and the native preview still renders the palette](../images/vscode-extracted-dictionary-applied.jpg)
 
+## Move an XAML file and its references
+
+1. Right-click the XAML file in **Explorer** or **FerroUI → Project → Views** and choose **Move XAML File…**. You can also run the command from an open XAML editor.
+2. Enter the destination path relative to the workspace folder. Choose an existing directory in the same Cargo package or loose-file project and an available `.xaml` filename.
+3. Expand each file in the Changes editor. It shows the destination, the paths rebased in the moved file, and the reference edits in other open or indexed XAML files. Choose **Apply File Move** or **Cancel File Move** in the editor toolbar.
+
+Apply moves the file and changes its editor buffers together. An open **Design** tab follows the file and keeps its last frame visible while rendering the new source location. Undo or Redo from an affected source editor steps through the whole operation. Use **Save All** to persist the updated reference text before building the app. If the destination becomes occupied or a file changes during the review, prepare a new review.
+
+The planner follows literal XAML includes and typed URI and image properties. A reference that resolves to another file with the same name stays intact. Check paths supplied by Rust, computed expressions, and saved stage or scenario files when they refer to the moved view. [Studio workflow](../native-controls.md#move-an-xaml-file) · [MCP workflow](reference.md#move-an-xaml-file-with-mcp)
+
+![The Changes editor shows the new dictionary location and each affected reference beside the preview](../images/vscode-xaml-file-move-review.jpg)
+
+![The view uses the relocated dictionary and retains the same native preview after Apply](../images/vscode-xaml-file-move-applied.jpg)
+
 ## Trace an effective property value
 
 Select one control in **Design** or **Outline**. In **Properties**, choose the layers icon beside a property to open its value trace. The title shows the effective value from the current native preview. An authored value or expression appears when the editor can map it to XAML or RSX.

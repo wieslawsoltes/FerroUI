@@ -48,3 +48,7 @@ Clients can discover the requests through `experimental.ferrouiEventHandlers`. `
 ## Resource dictionary extraction
 
 Clients that set `initializationOptions.ferrouiExtractionCommands` receive the `refactor.extract` action for an authored dictionary. `ferroui/dictionaryExtractionTarget` resolves the caret and version to an inline scope. `ferroui/planDictionaryExtraction` adds a sibling `fileName` and returns the replacement, the proposed file, and a review identifier. The host asks for a fresh plan and matches the identifier before committing the edits. Studio uses the same service directly. [User guide](../../docs/designer/vscode/authoring.md#extract-a-resource-dictionary)
+
+## File moves
+
+Clients can discover the reviewed move planner through `experimental.ferrouiFileMove`. Call `ferroui/planFileMove` with `from` and `to` file URIs. It refreshes the workspace index, retains open drafts, and returns the canonical paths, a review identifier, and each file's versioned edits and before and after source. The host replans immediately before applying the file operation and versioned text edits. Studio uses `LanguageService::plan_file_move` and its native transaction history. [User guide](../../docs/designer/vscode/authoring.md#move-an-xaml-file-and-its-references)

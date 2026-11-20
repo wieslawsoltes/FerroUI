@@ -75,6 +75,12 @@ Open the owning project. In **Split** or **Code**, put the caret on the resource
 
 Choose **Apply extraction** to create the file and update the view. The original view stays open for review and save. Undo from that view restores the inline resources and removes the generated dictionary while its file and contents match the creation. Use Redo to create it again. If you edit the generated dictionary, undo those edits before reversing the extraction. [VS Code and MCP workflows](vscode/authoring.md#extract-a-resource-dictionary)
 
+### Move an XAML file
+
+Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Choose each affected file and compare **Original source** and **Proposed source** before applying.
+
+**Apply file move** transfers the file and updates the participating buffers. Save the buffers to persist the new references. Undo or Redo from a participating tab restores the matching file location and source changes as one operation. When a later edit or an external file change conflicts with the move, resolve that change before using its history. [VS Code and MCP workflows](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native
