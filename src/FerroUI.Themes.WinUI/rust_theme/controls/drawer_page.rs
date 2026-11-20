@@ -212,7 +212,7 @@ fn pane_toggle_button_style_template(t: &Template<Button>) -> Result<Ref<Control
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 .children([
@@ -504,7 +504,7 @@ fn drawer_page_navigation_view_item_template(t: &Template<ListBoxItem>) -> Resul
                         HorizontalAlignment::Stretch,
                     )
                     .with(|e| {
-                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("8,*"))?);
+                        e.set_column_definitions(literal(ColumnDefinitions::parse("8,*"))?);
                         Ok(())
                     })?
                     .children([t

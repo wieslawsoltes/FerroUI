@@ -229,11 +229,11 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                         t.make(Grid::new())
                             .name("ControlPanelGrid")?
                             .with(|e| {
-                                Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                                e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                                 Ok(())
                             })?
                             .with(|e| {
-                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+                                e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
                                 Ok(())
                             })?
                             .children([
@@ -263,7 +263,7 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                                         t.make(Grid::new())
                                             .name("MediaTransportControls_Timeline_Grid")?
                                             .with(|e| {
-                                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                                                e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                                                 Ok(())
                                             })?
                                             .children([
@@ -406,10 +406,9 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                                             .name("MediaControlsCommandBar")?
                                             .set(Layoutable::margin_property(), Thickness::symmetric(0.0, 3.0))
                                             .with(|e| {
-                                                Grid::set_column_definitions(
-                                                    e,
-                                                    literal(ColumnDefinitions::parse("Auto,*,Auto"))?,
-                                                );
+                                                e.set_column_definitions(literal(ColumnDefinitions::parse(
+                                                    "Auto,*,Auto",
+                                                ))?);
                                                 Ok(())
                                             })?
                                             .children([

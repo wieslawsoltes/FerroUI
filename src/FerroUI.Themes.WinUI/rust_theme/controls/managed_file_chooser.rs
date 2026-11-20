@@ -112,7 +112,7 @@ use ferroui_dialogs::internal::ManagedFileChooserViewModel;
 use ferroui_dialogs::ManagedFileChooser;
 use ferroui_dialogs::ManagedFileChooserOverwritePrompt;
 use ferroui_markup_xaml::rust_theme::class;
-use ferroui_markup_xaml::rust_theme::data_template;
+use ferroui_markup_xaml::rust_theme::data_template_of;
 use ferroui_markup_xaml::rust_theme::dynamic_resource_binding;
 use ferroui_markup_xaml::rust_theme::focus_adorner;
 use ferroui_markup_xaml::rust_theme::named;
@@ -910,7 +910,10 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                         .set(InputElement::focusable_property(), false)
                         .set(
                             ItemsControl::item_template_property(),
-                            Some(data_template(t.scope(), template_data_template)),
+                            Some(data_template_of::<ManagedFileChooserItemViewModel>(
+                                t.scope(),
+                                template_data_template,
+                            )),
                         )
                         .control(),
                     t.make(Grid::new())
@@ -918,7 +921,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                         .set(DockPanel::dock_property(), Dock::Top)
                         .set(Layoutable::margin_property(), Thickness::new(12.0, 5.0, 12.0, 5.0))
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .set(Grid::column_spacing_property(), 8.0)
@@ -1008,7 +1011,7 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                         .set(DockPanel::dock_property(), Dock::Bottom)
                         .set(Layoutable::margin_property(), Thickness::new(12.0, 0.0, 12.0, 5.0))
                         .with(|e| {
-                            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto"))?);
+                            e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto"))?);
                             Ok(())
                         })?
                         .set(Grid::row_spacing_property(), 4.0)
@@ -1271,7 +1274,10 @@ fn managed_file_chooser_theme_template(t: &Template<ManagedFileChooser>) -> Resu
                                 )
                                 .set(
                                     ItemsControl::item_template_property(),
-                                    Some(data_template(t.scope(), template_data_template_2)),
+                                    Some(data_template_of::<ManagedFileChooserItemViewModel>(
+                                        t.scope(),
+                                        template_data_template_2,
+                                    )),
                                 )
                                 .control(),
                         ])
@@ -1332,7 +1338,7 @@ fn default_content_dialog_style_template(t: &Template<ManagedFileChooserOverwrit
                     Decorator::child_property(),
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                            e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                             Ok(())
                         })?
                         // CommandSpace in PrimaryAndCloseVisible: the primary button, the spacing
@@ -1393,10 +1399,7 @@ fn default_content_dialog_style_template(t: &Template<ManagedFileChooserOverwrit
                                     Decorator::child_property(),
                                     t.make(Grid::new())
                                         .with(|e| {
-                                            Grid::set_column_definitions(
-                                                e,
-                                                literal(ColumnDefinitions::parse("*,8,*"))?,
-                                            );
+                                            e.set_column_definitions(literal(ColumnDefinitions::parse("*,8,*"))?);
                                             Ok(())
                                         })?
                                         .children([
@@ -1498,7 +1501,7 @@ fn default_content_dialog_style(theme: &StyleBuilder) -> Result {
                             .scope()
                             .make(KeyFrame::new())
                             .with(|e| {
-                                KeyFrame::set_cue(e, literal(Cue::parse("0%"))?);
+                                e.set_cue(literal(Cue::parse("0%"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -1514,7 +1517,7 @@ fn default_content_dialog_style(theme: &StyleBuilder) -> Result {
                             .scope()
                             .make(KeyFrame::new())
                             .with(|e| {
-                                KeyFrame::set_cue(e, literal(Cue::parse("100%"))?);
+                                e.set_cue(literal(Cue::parse("100%"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -1543,7 +1546,7 @@ fn default_content_dialog_style(theme: &StyleBuilder) -> Result {
                             .scope()
                             .make(KeyFrame::new())
                             .with(|e| {
-                                KeyFrame::set_cue(e, literal(Cue::parse("0%"))?);
+                                e.set_cue(literal(Cue::parse("0%"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -1560,7 +1563,7 @@ fn default_content_dialog_style(theme: &StyleBuilder) -> Result {
                             .scope()
                             .make(KeyFrame::new())
                             .with(|e| {
-                                KeyFrame::set_cue(e, literal(Cue::parse("100%"))?);
+                                e.set_cue(literal(Cue::parse("100%"))?);
                                 Ok(())
                             })?
                             .with(|e| {

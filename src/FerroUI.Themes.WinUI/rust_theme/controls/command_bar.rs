@@ -253,11 +253,11 @@ fn default_app_bar_button_style_template(t: &Template<CommandBarButton>) -> Resu
                 .name("ContentRoot")?
                 .dynamic(Layoutable::min_height_property(), "AppBarThemeMinHeight")
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto"))?);
                     Ok(())
                 })?
                 .children([
@@ -674,11 +674,11 @@ fn default_app_bar_toggle_button_style_template(t: &Template<CommandBarToggleBut
                 .name("ContentRoot")?
                 .dynamic(Layoutable::min_height_property(), "AppBarThemeMinHeight")
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto"))?);
                     Ok(())
                 })?
                 // E73E CheckMark of 16 px in a box of 14 x 14.
@@ -1918,7 +1918,7 @@ fn default_command_bar_style_template(t: &Template<CommandBar>) -> Result<Ref<Co
                         .children([
                             t.make(Grid::new())
                                 .with(|e| {
-                                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                                     Ok(())
                                 })?
                                 .children([

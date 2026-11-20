@@ -106,6 +106,8 @@ struct Node {
 
 enum Child {
     Node(Node),
+    /// A comment of the document (the front end writes none: `syn` keeps no comments).
+    #[allow(dead_code)]
     Comment(String),
 }
 
@@ -164,7 +166,6 @@ fn escape_text(text: &str) -> String {
 struct XamlType {
     /// `Border`, `n0:InfoBarPanel`.
     name: String,
-    full_name: String,
 }
 
 struct Reader<'a> {
@@ -362,20 +363,29 @@ impl<'a> Reader<'a> {
     /// The name of a type in the document, with the prefix of its namespace.
     fn xaml_type(&mut self, type_: &TypeModel) -> XamlType {
         let namespace = type_.namespace.clone();
-        let full_name = format!("{}.{}", namespace, type_.name);
         if self.default_namespaces.contains(&namespace) {
-            return XamlType { name: type_.name.clone(), full_name };
+            return XamlType { name: type_.name.clone() };
         }
         let uri = format!("using:{namespace}");
         let prefix = match self.prefixes.iter().find(|(_, existing)| **existing == uri) {
             Some((prefix, _)) => prefix.clone(),
             None => {
-                let prefix = format!("n{}", self.prefixes.len());
+                // The prefix a person writes: the last part of the namespace in lower case
+                // (`using:FerroUI.Themes.WinUI.Accents` is `accents`), with the part before it
+                // when another namespace has that prefix (`winuiconverters`).
+                let parts: Vec<String> = namespace.split('.').map(|part| part.to_lowercase()).collect();
+                let mut prefix = parts.last().cloned().unwrap_or_default();
+                if self.prefixes.contains_key(&prefix) || prefix == "x" {
+                    prefix = parts.iter().rev().take(2).rev().cloned().collect::<Vec<_>>().concat();
+                }
+                while self.prefixes.contains_key(&prefix) {
+                    prefix.push('_');
+                }
                 self.prefixes.insert(prefix.clone(), uri);
                 prefix
             }
         };
-        XamlType { name: format!("{prefix}:{}", type_.name), full_name }
+        XamlType { name: format!("{prefix}:{}", type_.name) }
     }
 
     fn type_of_path(&mut self, path: &syn::Path) -> R<(XamlType, &'a TypeModel)> {
@@ -1949,6 +1959,11 @@ impl<'a> Reader<'a> {
                             return Ok(member.name.clone());
                         }
                     }
+                }
+                // A constant of a value type: `FontWeight::SemiBold` is `SemiBold`, `Colors::LIGHT_GRAY`
+                // is `LightGray`.
+                if last.chars().any(|c| c.is_ascii_lowercase()) {
+                    return Ok(last);
                 }
                 Ok(pascal(&last.to_lowercase()).replace('_', ""))
             }

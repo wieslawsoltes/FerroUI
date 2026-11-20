@@ -573,7 +573,7 @@ fn time_picker_presenter_theme_template(t: &Template<TimePickerPresenter>) -> Re
             t.make(Grid::new())
                 .name("ContentPanel")?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 // The columns are set by the presenter.
@@ -832,7 +832,7 @@ fn time_picker_presenter_theme_template(t: &Template<TimePickerPresenter>) -> Re
                             "TimePickerFlyoutPresenterAcceptDismissHostGridHeight",
                         )
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,*"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("*,*"))?);
                             Ok(())
                         })?
                         .children([

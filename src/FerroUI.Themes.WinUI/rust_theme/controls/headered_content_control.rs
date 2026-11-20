@@ -88,7 +88,7 @@ fn headered_content_control_theme_template(t: &Template<HeaderedContentControl>)
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 .children([

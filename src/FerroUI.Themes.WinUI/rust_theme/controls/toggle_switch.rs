@@ -134,7 +134,7 @@ fn default_toggle_switch_style_template(t: &Template<ToggleSwitch>) -> Result<Re
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 .children([

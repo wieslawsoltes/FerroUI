@@ -94,7 +94,7 @@ fn swipe_item_style_template(t: &Template<CommandBarButton>) -> Result<Ref<Contr
                 .set(Layoutable::vertical_alignment_property(), VerticalAlignment::Center)
                 .set(Layoutable::horizontal_alignment_property(), HorizontalAlignment::Center)
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 // Font Size 12pt == 16px in the redlines

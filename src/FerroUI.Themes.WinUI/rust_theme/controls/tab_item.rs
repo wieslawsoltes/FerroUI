@@ -117,7 +117,7 @@ fn tab_item_theme_template(t: &Template<TabItem>) -> Result<Ref<Control>> {
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                     Ok(())
                 })?
                 // The tab shape of TabViewTemplateSettings.TabGeometry.
@@ -167,7 +167,7 @@ fn tab_item_theme_template(t: &Template<TabItem>) -> Result<Ref<Control>> {
                         .set(Layoutable::margin_property(), Thickness::symmetric(-4.0, 0.0))
                         .set(Visual::is_visible_property(), false)
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("4,*,4"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("4,*,4"))?);
                             Ok(())
                         })?
                         .children([
@@ -242,7 +242,7 @@ fn tab_item_theme_template(t: &Template<TabItem>) -> Result<Ref<Control>> {
                             t.make(Grid::new())
                                 .name("TabContentGrid")?
                                 .with(|e| {
-                                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                                     Ok(())
                                 })?
                                 .set(
@@ -362,7 +362,7 @@ fn tab_item_theme_template_2(t: &Template<TabItem>) -> Result<Ref<Control>> {
                         HorizontalAlignment::Stretch,
                     )
                     .with(|e| {
-                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                        e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                         Ok(())
                     })?
                     // IconColumn: the icon box in the compact pane length less 8 (40), or 8 wide
@@ -506,7 +506,7 @@ fn tab_item_theme_template_3(t: &Template<TabItem>) -> Result<Ref<Control>> {
                         HorizontalAlignment::Stretch,
                     )
                     .with(|e| {
-                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                        e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                         Ok(())
                     })?
                     // IconColumn: the icon box in the compact pane length less 8 (40), or 8 wide

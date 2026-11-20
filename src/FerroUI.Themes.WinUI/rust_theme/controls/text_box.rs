@@ -605,7 +605,7 @@ fn default_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Control>
             ContentControl::content_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto,Auto,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto,Auto,Auto"))?);
                     Ok(())
                 })?
                 // InnerLeftContent of FerroUI's text box.

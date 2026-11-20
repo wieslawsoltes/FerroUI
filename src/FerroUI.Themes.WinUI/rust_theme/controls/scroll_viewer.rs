@@ -128,11 +128,11 @@ fn default_scroll_viewer_style_template(t: &Template<ScrollViewer>) -> Result<Re
             t.make(Grid::new())
                 .template_bind(Panel::background_property(), TemplatedControl::background_property())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 // Opacity 0: NoIndicator; the opacity animates over ScrollBarOpacityChangeDuration.

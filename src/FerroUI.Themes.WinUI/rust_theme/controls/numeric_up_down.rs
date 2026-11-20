@@ -261,7 +261,7 @@ fn number_box_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Contr
     // (ContentElement), InnerRightContent (FerroUI), DeleteButton, SpinButtonsColumn.
     Ok(t.make(Grid::new())
         .with(|e| {
-            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,Auto,*,Auto,Auto,Auto"))?);
+            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,Auto,*,Auto,Auto,Auto"))?);
             Ok(())
         })?
         // SpinButtonsColumn (Width 72 in SpinButtonsVisible)

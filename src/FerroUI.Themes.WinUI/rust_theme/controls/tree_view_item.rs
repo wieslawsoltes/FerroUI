@@ -260,7 +260,7 @@ fn mux_tree_view_item_style_template(t: &Template<TreeViewItem>) -> Result<Ref<C
                                 Decorator::child_property(),
                                 t.make(Grid::new())
                                     .with(|e| {
-                                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                                        e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                                         Ok(())
                                     })?
                                     .children([

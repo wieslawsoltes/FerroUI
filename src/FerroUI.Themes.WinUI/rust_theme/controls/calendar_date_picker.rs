@@ -396,7 +396,7 @@ fn default_calendar_date_picker_template(t: &Template<CalendarDatePicker>) -> Re
             t.make(Grid::new())
                 .name("Root")?
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,32"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,32"))?);
                     Ok(())
                 })?
                 .children([

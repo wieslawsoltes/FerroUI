@@ -334,7 +334,7 @@ fn default_pivot_style_template(t: &Template<Pivot>) -> Result<Ref<Control>> {
         )
         .template_bind(Panel::background_property(), TemplatedControl::background_property())
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
             Ok(())
         })?
         .children([
@@ -392,11 +392,11 @@ fn default_pivot_style_template(t: &Template<Pivot>) -> Result<Ref<Control>> {
                                 .make(Grid::new())
                                 .name("PivotLayoutElement")?
                                 .with(|e| {
-                                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                                     Ok(())
                                 })?
                                 .with(|e| {
-                                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                                     Ok(())
                                 })?
                                 .children([

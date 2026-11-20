@@ -113,7 +113,7 @@ fn default_radio_button_style_template(t: &Template<RadioButton>) -> Result<Ref<
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("20,*"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("20,*"))?);
                     Ok(())
                 })?
                 .children([

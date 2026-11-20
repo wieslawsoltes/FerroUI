@@ -153,7 +153,7 @@ fn expander_header_down_style_template(t: &Template<ToggleButton>) -> Result<Ref
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .children([
@@ -403,7 +403,7 @@ fn expander_header_up_style_template(t: &Template<ToggleButton>) -> Result<Ref<C
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .children([

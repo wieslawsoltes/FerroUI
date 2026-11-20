@@ -367,7 +367,7 @@ fn default_combo_box_style_template(t: &Template<ComboBox>) -> Result<Ref<Contro
             t.make(Grid::new())
                 .name("LayoutRoot")?
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,38"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,38"))?);
                     Ok(())
                 })?
                 // The AnimatedIcon DropDownGlyph (12 x 12, AnimatedChevronDownSmallVisualSource): the

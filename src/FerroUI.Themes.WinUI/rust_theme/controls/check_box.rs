@@ -108,7 +108,7 @@ fn default_check_box_style_template(t: &Template<CheckBox>) -> Result<Ref<Contro
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 .children([

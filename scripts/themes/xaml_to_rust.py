@@ -1226,7 +1226,10 @@ class Converter:
                     None,
                 )
                 return f"{self.use('::ferroui_markup_xaml::rust_theme::data_template_for')}::<String>({context.scope}, {function})"
-            typed = self.type_name(node.attrib["DataType"]) if "DataType" in node.attrib else None
+            # `DataType` (and `x:DataType`, which the compiler also sets as the `DataType` of the
+            # template) is the type of the data the template is for.
+            typed_text = node.attrib.get("DataType") or node.attrib.get(f"{{{NS_X}}}DataType")
+            typed = self.type_name(typed_text) if typed_text else None
             function = self.template_function(
                 node, control_entry, owner_fn, "data_template", f"/// A data template of `{owner_fn}`.", control, ".control()",
                 typed or context.data_type,
@@ -1362,7 +1365,8 @@ class Converter:
             if prop.setter is None:
                 raise Unsupported(f"the plain property {name} without a setter")
             literal = self.literal(text, prop.value_type, own)
-            return f".with(|e| {{ {self.use_call(prop.setter)}(e, {literal}); Ok(()) }})?"
+            method = prop.setter.rsplit("::", 1)[1]
+            return f".with(|e| {{ e.{method}({literal}); Ok(()) }})?"
         accessor = self.accessor(prop)
         if isinstance(ext, Ext):
             if ext.name == "TemplateBinding":

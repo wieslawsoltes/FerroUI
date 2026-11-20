@@ -255,7 +255,7 @@ fn notification_card_theme_template(t: &Template<NotificationCard>) -> Result<Re
                     Decorator::child_property(),
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .children([
@@ -462,7 +462,7 @@ fn notification_card_theme(theme: &StyleBuilder) -> Result {
                                 .scope()
                                 .make(KeyFrame::new())
                                 .with(|e| {
-                                    KeyFrame::set_cue(e, literal(Cue::parse("100%"))?);
+                                    e.set_cue(literal(Cue::parse("100%"))?);
                                     Ok(())
                                 })?
                                 .with(|e| {

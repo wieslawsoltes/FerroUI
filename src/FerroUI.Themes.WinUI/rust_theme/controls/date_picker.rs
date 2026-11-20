@@ -321,10 +321,9 @@ fn default_date_picker_style_template(t: &Template<DatePicker>) -> Result<Ref<Co
                             t.make(Grid::new())
                                 .name("PART_ButtonContentGrid")?
                                 .with(|e| {
-                                    Grid::set_column_definitions(
-                                        e,
-                                        literal(ColumnDefinitions::parse("78*,Auto,132*,Auto,78*"))?,
-                                    );
+                                    e.set_column_definitions(literal(ColumnDefinitions::parse(
+                                        "78*,Auto,132*,Auto,78*",
+                                    ))?);
                                     Ok(())
                                 })?
                                 .children([
@@ -551,7 +550,7 @@ fn default_date_picker_flyout_presenter_style_template(t: &Template<DatePickerPr
             t.make(Grid::new())
                 .name("ContentPanel")?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .children([
@@ -751,7 +750,7 @@ fn default_date_picker_flyout_presenter_style_template(t: &Template<DatePickerPr
                             "DatePickerFlyoutPresenterAcceptDismissHostGridHeight",
                         )
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,*"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("*,*"))?);
                             Ok(())
                         })?
                         .children([

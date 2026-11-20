@@ -426,7 +426,7 @@ fn navigation_page_theme_template(t: &Template<NavigationPage>) -> Result<Ref<Co
                     Decorator::child_property(),
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .children([

@@ -382,7 +382,7 @@ fn default_slider_style_template(t: &Template<Slider>) -> Result<Ref<Control>> {
                             .name("HorizontalTemplate")?
                             .dynamic(Layoutable::min_height_property(), "SliderHorizontalHeight")
                             .with(|e| {
-                                Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,Auto,*"))?);
+                                e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,Auto,*"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -579,7 +579,7 @@ fn default_slider_style_template_2(t: &Template<Slider>) -> Result<Ref<Control>>
                             .name("VerticalTemplate")?
                             .dynamic(Layoutable::min_width_property(), "SliderVerticalWidth")
                             .with(|e| {
-                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto,Auto"))?);
+                                e.set_row_definitions(literal(RowDefinitions::parse("*,Auto,Auto"))?);
                                 Ok(())
                             })?
                             .with(|e| {

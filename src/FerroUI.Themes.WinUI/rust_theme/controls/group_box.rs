@@ -77,7 +77,7 @@ fn group_box_theme_template(t: &Template<GroupBox>) -> Result<Ref<Control>> {
     Ok(t.make(Grid::new())
         .name("RootGrid")?
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
             Ok(())
         })?
         .children([

@@ -256,7 +256,7 @@ fn auto_suggest_box_theme_template(t: &Template<AutoSuggestBox>) -> Result<Ref<C
     Ok(t.make(Grid::new())
         .name("LayoutRoot")?
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
             Ok(())
         })?
         .children([

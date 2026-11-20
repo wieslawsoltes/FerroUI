@@ -535,7 +535,7 @@ fn calendar_item_theme_template(t: &Template<CalendarItem>) -> Result<Ref<Contro
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto,*"))?);
                     Ok(())
                 })?
                 // The views: 300 px high, the height of the month view of the source (2 + 42 + 2 + 6 x 42 + 2),
@@ -543,7 +543,7 @@ fn calendar_item_theme_template(t: &Template<CalendarItem>) -> Result<Ref<Contro
                 .children([
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
                             Ok(())
                         })?
                         .template_bind(Panel::background_property(), CalendarItem::header_background_property())
@@ -655,7 +655,7 @@ fn calendar_item_theme_template(t: &Template<CalendarItem>) -> Result<Ref<Contro
                         .name("Views")?
                         .set(Grid::row_property(), 2)
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                             Ok(())
                         })?
                         .set(Layoutable::min_height_property(), 300.0)

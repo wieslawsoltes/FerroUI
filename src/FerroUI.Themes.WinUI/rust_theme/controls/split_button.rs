@@ -1079,7 +1079,7 @@ fn split_button_command_bar_style_template(t: &Template<SplitButton>) -> Result<
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,23"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,23"))?);
                     Ok(())
                 })?
                 // The corner radii of the backgrounds are ControlCornerRadius through the filters

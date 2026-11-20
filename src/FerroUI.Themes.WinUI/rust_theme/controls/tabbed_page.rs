@@ -299,7 +299,7 @@ fn tabbed_page_tab_item_theme_template(t: &Template<TabItem>) -> Result<Ref<Cont
                 t.make(Grid::new())
                     .name("ContentGrid")?
                     .with(|e| {
-                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                        e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                         Ok(())
                     })?
                     .children([
