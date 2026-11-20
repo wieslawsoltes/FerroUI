@@ -382,7 +382,7 @@ fn lookup_theme_dictionary(
     }
 }
 
-fn theme_key(document: &Document, node: &Node) -> Option<String> {
+pub(crate) fn theme_key(document: &Document, node: &Node) -> Option<String> {
     if let Some(key) = literal_key(node) {
         // The runtime's built-in ThemeVariant converter trims surrounding whitespace.
         return Some(if matches!(key.trim(), "Default" | "Light" | "Dark") {
@@ -558,7 +558,7 @@ pub(crate) fn validate_copied_references(
     Ok(())
 }
 
-pub(super) fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
+pub(crate) fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
     let (prefix, local) = name.rsplit_once(':').unwrap_or(("", name));
     if !document
         .ast()
@@ -575,7 +575,7 @@ pub(super) fn extension_kind(document: &Document, node: NodeId, name: &str) -> O
     }
 }
 
-pub(super) fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
+pub(crate) fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
     extension
         .arguments
         .iter()

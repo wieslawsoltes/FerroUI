@@ -296,7 +296,7 @@ pub(crate) fn ensure_key_available(
     )
 }
 
-fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeId>> {
+pub(crate) fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeId>> {
     let node = element(document, owner)?;
     if framework(node) && node.local_name() == "ResourceDictionary" {
         require(
@@ -382,7 +382,12 @@ fn create_resource(
     }
 }
 
-fn keyed_fragment(document: &Document, owner: NodeId, source: &str, key: &str) -> Result<String> {
+pub(crate) fn keyed_fragment(
+    document: &Document,
+    owner: NodeId,
+    source: &str,
+    key: &str,
+) -> Result<String> {
     let mut candidate = context_fragment(document, owner, source)?;
     let roots = candidate.ast().element_children(candidate.ast().root());
     require(
@@ -616,7 +621,7 @@ fn apply_resource(
     Ok(edits)
 }
 
-fn setters(document: &Document, owner: NodeId) -> Result<(NodeId, Vec<NodeId>)> {
+pub(crate) fn setters(document: &Document, owner: NodeId) -> Result<(NodeId, Vec<NodeId>)> {
     let owner = element(document, owner)?;
     require(
         framework(owner) && matches!(owner.local_name(), "ControlTheme" | "Style"),
@@ -988,7 +993,10 @@ fn property_resource_source(
     Ok(source)
 }
 
-fn creation_namespaces(document: &Document, owner: NodeId) -> (String, String, String) {
+pub(crate) fn creation_namespaces(
+    document: &Document,
+    owner: NodeId,
+) -> (String, String, String) {
     let mut namespaces = document.ast().namespaces(owner);
     let ui = namespaces
         .iter()

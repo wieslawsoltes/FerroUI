@@ -2,6 +2,8 @@
 mod canvas_guides;
 mod canvas_guide_edit;
 mod components;
+pub mod component_styles;
+pub mod component_palette;
 mod geometry;
 mod grid_tracks;
 pub mod scenario;

@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[path = "component_authoring.rs"]
-mod authoring;
+pub(crate) mod authoring;
 #[path = "component_resource_refs.rs"]
-mod references;
+pub(crate) mod references;
 #[path = "item_templates.rs"]
 mod item_templates;
 pub use authoring::{
