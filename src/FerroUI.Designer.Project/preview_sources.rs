@@ -1,5 +1,5 @@
 //! Build an immutable, workspace-scoped view of literal XAML includes.
-use crate::{file_path, file_uri, resolve_uri};
+use crate::{file_path, file_uri, resolve_uri, CompiledResources};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind};
 use serde::Deserialize;
 use std::{
@@ -34,6 +34,16 @@ pub fn local_preview_sources(
     source: &Document,
     buffers: &[PreviewSourceBuffer],
 ) -> LocalPreviewSources {
+    local_preview_sources_with_resources(root, source_uri, source, buffers, None)
+}
+
+pub fn local_preview_sources_with_resources(
+    root: Option<&Path>,
+    source_uri: &str,
+    source: &Document,
+    buffers: &[PreviewSourceBuffer],
+    resources: Option<&CompiledResources>,
+) -> LocalPreviewSources {
     let Ok(path) = file_path(source_uri) else {
         return LocalPreviewSources::default();
     };
@@ -61,11 +71,12 @@ pub fn local_preview_sources(
         root,
         buffers,
         result: LocalPreviewSources::default(),
-        visited: BTreeSet::new(),
-        active: BTreeSet::from([path]),
+        visited: BTreeMap::new(),
+        active: BTreeSet::from([path.clone()]),
         remaining: MAX_GRAPH_BYTES,
+        resources,
     };
-    walker.walk(source_uri, source);
+    walker.walk(source_uri, &path, source);
     walker.result
 }
 
@@ -73,35 +84,45 @@ struct Walker<'a> {
     root: PathBuf,
     buffers: BTreeMap<PathBuf, Option<&'a str>>,
     result: LocalPreviewSources,
-    visited: BTreeSet<String>,
+    visited: BTreeMap<String, PathBuf>,
     active: BTreeSet<PathBuf>,
     remaining: usize,
+    resources: Option<&'a CompiledResources>,
 }
 
 impl Walker<'_> {
-    fn walk(&mut self, source_uri: &str, document: &Document) {
+    fn walk(&mut self, loader_uri: &str, source_path: &Path, document: &Document) {
+        let Ok(owner) = file_uri(source_path) else {
+            return;
+        };
         for node in document.ast().elements() {
-            if let Some(reference) = include_reference(document, node) {
-                if let Ok(uri) = resolve_uri(source_uri, &reference) {
-                    if uri.starts_with("file:") {
-                        self.visit(&uri);
-                    }
-                }
+            let Some(reference) = include_reference(document, node) else {
+                continue;
+            };
+            let Ok(uri) = resolve_uri(loader_uri, &reference) else {
+                continue;
+            };
+            let mapped = self
+                .resources
+                .map_or(Ok(None), |resources| resources.resolve(&owner, &reference));
+            let path = match mapped {
+                Ok(Some(source)) => file_path(source),
+                Ok(None) if uri.starts_with("file:") => file_path(&uri),
+                Ok(None) => continue,
+                Err(error) => Err(error),
+            };
+            let result = path
+                .map_err(|error| error.to_string())
+                .and_then(|path| self.load(&uri, &path));
+            if let Err(message) = result {
+                self.result.accepted.remove(&uri);
+                self.result.unavailable.insert(uri, message);
             }
         }
     }
 
-    fn visit(&mut self, uri: &str) {
-        let result = self.load(uri);
-        if let Err(message) = result {
-            self.result.accepted.remove(uri);
-            self.result.unavailable.insert(uri.into(), message);
-        }
-    }
-
-    fn load(&mut self, uri: &str) -> Result<(), String> {
-        let path = file_path(uri).map_err(|error| error.to_string())?;
-        let path = canonical_path(&path).map_err(|error| error.to_string())?;
+    fn load(&mut self, uri: &str, requested: &Path) -> Result<(), String> {
+        let path = canonical_path(requested).map_err(|error| error.to_string())?;
         if !path.starts_with(&self.root)
             || !path
                 .extension()
@@ -114,13 +135,22 @@ impl Walker<'_> {
         if self.active.contains(&path) {
             return Err(format!("Circular XAML include: {uri}"));
         }
-        if self.visited.len() >= MAX_INCLUDES && !self.visited.contains(uri) {
+        if let Some(previous) = self.visited.get(uri) {
+            return if previous == &path {
+                Ok(())
+            } else {
+                Err(format!(
+                    "Compiled XAML groups resolve {uri} to different inputs"
+                ))
+            };
+        }
+        if self.visited.len() >= MAX_INCLUDES {
             return Err("The native preview supports up to 128 local XAML includes".into());
         }
-        if !self.visited.insert(uri.into()) {
-            return Ok(());
+        self.visited.insert(uri.into(), path.clone());
+        if file_path(uri).is_ok_and(|alias| alias == requested) {
+            self.result.dependencies.insert(uri.into());
         }
-        self.result.dependencies.insert(uri.into());
         if let Ok(canonical) = file_uri(&path) {
             self.result.dependencies.insert(canonical);
         }
@@ -129,7 +159,7 @@ impl Walker<'_> {
             Some(Some(source)) => (*source).to_owned(),
             Some(None) => {
                 return Err(format!(
-                    "The open XAML draft exceeds the preview source limit: {uri}"
+                    "The open XAML draft is unavailable for preview: {uri}"
                 ))
             }
             None => {
@@ -153,7 +183,7 @@ impl Walker<'_> {
         let document = Document::new(source)
             .map_err(|error| format!("Repair included XAML {uri}: {error}"))?;
         self.active.insert(path.clone());
-        self.walk(uri, &document);
+        self.walk(uri, &path, &document);
         self.active.remove(&path);
         if !self.result.unavailable.contains_key(uri) {
             self.result.accepted.insert(uri.into(), source.into());

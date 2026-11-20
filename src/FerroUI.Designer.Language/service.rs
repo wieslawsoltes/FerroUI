@@ -299,8 +299,14 @@ impl LanguageService {
         )
     }
     fn publish_project_catalog(&mut self, root: std::path::PathBuf, catalog: std::sync::Arc<ferroui_designer_project::MarkupCatalog>) {
-        let schema = ProjectSchema::new(&self.schema, &self.overrides, catalog);
+        // The sidecar is optional for type completion. Move review validates it
+        // separately when it needs authoritative compiled input positions.
+        let resources = catalog.compiled_resources(&root).unwrap_or_default();
+        let schema = ProjectSchema::new(&self.schema, &self.overrides, catalog, resources);
         self.package_schemas.insert(root, schema);
+    }
+    pub fn compiled_resources(&self, owner: &str) -> Option<std::sync::Arc<ferroui_designer_project::CompiledResources>> {
+        self.project_schema_for(owner).map(|(_, schema)| schema.resources.clone())
     }
     pub fn document(&self, uri: &str) -> Option<&Document> {
         self.state(uri).ok().map(|s| &s.document)
@@ -1590,6 +1596,12 @@ impl LanguageService {
         Ok(out)
     }
     pub fn resource_uri(&self, base: &str, reference: &str) -> Result<String> {
+        if let Some((_, schema)) = self.project_schema_for(base) {
+            let owner = self.document_uri(base)?;
+            if let Some(uri) = schema.resources.resolve(&owner, reference)? {
+                return Ok(uri.to_owned());
+            }
+        }
         let resolved = ferroui_designer_project::resolve_uri(base, reference)?;
         if resolved.starts_with("ferres://") || resolved.starts_with("resm:") {
             let owner = self.document_uri(base)?;
@@ -1666,6 +1678,11 @@ impl LanguageService {
                 "Rename destination is already indexed",
             )?;
         }
+        for schema in self.package_schemas.values_mut() {
+            if mapping.keys().any(|from| schema.resources.contains_source(from)) {
+                std::sync::Arc::make_mut(&mut schema.resources).retarget(&mapping);
+            }
+        }
         let staged: Vec<_> = mapping
             .iter()
             .filter_map(|(old, new)| {
@@ -1705,10 +1722,14 @@ impl LanguageService {
             if !state.document.is_valid() {
                 continue;
             }
+            let resources = self.compiled_resources(uri);
             let mut edits = Vec::new();
             for node in state.document.ast().elements() {
                 for attribute in &node.attributes {
                     if attribute.name == "Source"
+                        && resources.as_ref().is_none_or(|resources| {
+                            matches!(resources.resolve(uri, &attribute.value), Ok(None))
+                        })
                         && self
                             .resource_uri(uri, &attribute.value)
                             .is_ok_and(|target| target == old)

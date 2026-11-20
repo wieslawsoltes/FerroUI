@@ -3,6 +3,8 @@ mod discovery;
 mod dictionary_file;
 mod markup;
 mod preview_sources;
+mod compiled_resources;
+pub use compiled_resources::{compiled_resource_key, CompiledResources};
 mod tasks;
 mod toolbox;
 mod uri;
@@ -25,7 +27,7 @@ pub use rust_xaml::{
     check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
     RustXamlRegistration,
 };
-pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
+pub use preview_sources::{local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer};
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -15,6 +15,8 @@ mod compiled;
 mod symbols;
 #[path = "file_move_input_tests.rs"]
 mod inputs;
+#[path = "file_move_resource_tests.rs"]
+mod resources;
 
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";

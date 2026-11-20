@@ -99,7 +99,7 @@ impl LanguageService {
                 ));
             }
             let file_paths = match compiled_inputs {
-                Some(inputs) => inputs::paths(inputs, source, references, package)?,
+                Some(inputs) => inputs::paths(inputs, source, references, movement)?,
                 None => Vec::new(),
             };
             let roots = xaml_roots(package, references);

@@ -175,6 +175,7 @@ impl LanguageService {
             owner
         };
         let mut patches = Vec::new();
+        let resources = self.compiled_resources(owner);
         for site in file_move_literals::paths(&state.document, self.schema_for(owner)) {
             let suffix = if site.value.starts_with("resm:") {
                 &['#'][..]
@@ -185,6 +186,16 @@ impl LanguageService {
             let (path, suffix) = site.value.split_at(delimiter);
             if path.is_empty() {
                 continue;
+            }
+            if let Some(resources) = &resources {
+                match resources.resolve(owner, path) {
+                    // File-backed keys remain in the same compiled group. Both design
+                    // and build resolve this spelling through the same logical route.
+                    Ok(Some(_)) => continue,
+                    Err(error) if owner == movement.from || resources.references(owner, path, &movement.from) => return Err(error.into()),
+                    Err(_) => continue,
+                    Ok(None) => {}
+                }
             }
             if let Some(next) = addresses.replacement(self, owner, path) {
                 if next != path {
@@ -216,12 +227,15 @@ impl LanguageService {
                     path.ancestors().skip(1).find(|parent| parent.join("Cargo.toml").is_file())
                         == Some(movement.package_root.as_path())
                 })
+                && resources.as_ref().is_none_or(|resources| {
+                    resources.has_compiled_base(owner) || !resources.covers_compiled_sources()
+                })
             {
                 // The Cargo compiler still resolves this literal relative to the
                 // published key. Rebasing it for the physical file could break
                 // the compiled tree even if it worked in an isolated preview.
                 return Err(LanguageError(format!(
-                    "Use an explicit XAML resource URI for '{}' in {owner} before moving this file-backed registration",
+                    "The selected build does not map the compiled target of '{}' in {owner}. Use an explicit XAML resource URI or rebuild the project schema before reviewing the move.",
                     site.value
                 )));
             }

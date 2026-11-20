@@ -2,7 +2,7 @@
 use super::{refers_to, rust_files};
 use crate::{LanguageError, LanguageService, Result};
 use ferroui_build_scan::compiled_index::CompiledXamlInput;
-use ferroui_designer_project::{RustXamlPath, RustXamlReferences, XamlFileMove};
+use ferroui_designer_project::{CompiledResources, RustXamlPath, RustXamlReferences, XamlFileMove};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::Path,
@@ -12,12 +12,17 @@ pub(super) fn by_source(
     service: &LanguageService,
     movement: &XamlFileMove,
     inputs: Vec<CompiledXamlInput>,
+    resources: &CompiledResources,
 ) -> Result<BTreeMap<String, Vec<CompiledXamlInput>>> {
     let package = movement.package_root.as_path();
     let mut result = BTreeMap::<_, Vec<_>>::new();
-    let affected = inputs
-        .into_iter()
-        .filter(|input| refers_to(package, &input.path, &movement.from));
+    let affected =
+        inputs
+            .into_iter()
+            .filter(|input| match resources.current_input_source(&input.path) {
+                Some(source) => source == movement.from,
+                None => refers_to(package, &input.path, &movement.from),
+            });
     let mut files = None;
     for input in affected {
         let files = files.get_or_insert_with(|| rust_files(service));
@@ -43,8 +48,9 @@ pub(super) fn paths<'a>(
     inputs: &[CompiledXamlInput],
     source: &str,
     references: &'a RustXamlReferences,
-    package: &Path,
+    movement: &XamlFileMove,
 ) -> Result<Vec<&'a RustXamlPath>> {
+    let package = &movement.package_root;
     inputs
         .iter()
         .map(|input| {
@@ -53,7 +59,8 @@ pub(super) fn paths<'a>(
                 .file_documents
                 .iter()
                 .find(|candidate| {
-                    candidate.callee.contains(&offset) && candidate.site.path == input.path
+                    candidate.callee.contains(&offset)
+                        && refers_to(package, &candidate.site.path, &movement.from)
                 })
                 .map(|candidate| &candidate.site)
                 .ok_or_else(|| unmapped(input, package))

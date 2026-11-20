@@ -5,8 +5,8 @@ use ferroui_build_scan::{
     compiled_index::CompiledXamlInput, compiled_names::CompiledGroupKind, model::AssemblyModel,
 };
 use ferroui_designer_project::{
-    canonical_file_uri, file_path, file_uri, relative_asset_path, resolve_uri, RustXamlReferences,
-    RustXamlRegistration, XamlFileMove,
+    canonical_file_uri, compiled_resource_key as address_key, file_path, file_uri,
+    relative_asset_path, RustXamlReferences, RustXamlRegistration, XamlFileMove,
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -175,8 +175,12 @@ impl CompiledAddresses {
                         }
                     }
                 }
-                addresses.file_inputs =
-                    inputs::by_source(service, movement, output.index.file_inputs)?;
+                addresses.file_inputs = inputs::by_source(
+                    service,
+                    movement,
+                    output.index.file_inputs,
+                    &project.resources,
+                )?;
             }
         }
         if let Ok(references) = references {
@@ -314,28 +318,4 @@ fn known_private(
 
 fn absolute(assembly: &str, key: &str) -> String {
     format!("ferres://{assembly}/{}", key.trim_start_matches('/'))
-}
-
-fn address_key(uri: &str) -> Option<String> {
-    if !uri.starts_with("ferres://") {
-        return None;
-    }
-    let normalized = resolve_uri(uri, uri).ok()?;
-    let (assembly, path) = normalized.strip_prefix("ferres://")?.split_once('/')?;
-    let path = relative_asset_path(path)?;
-    // Match the compiled loader's ordinal, case-insensitive resource comparison.
-    Some(
-        assembly
-            .chars()
-            .chain(['/'])
-            .chain(path.chars())
-            .map(|character| {
-                let mut upper = character.to_uppercase();
-                match (upper.next(), upper.next()) {
-                    (Some(single), None) => single,
-                    _ => character,
-                }
-            })
-            .collect(),
-    )
 }

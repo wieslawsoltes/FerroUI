@@ -1,6 +1,6 @@
 use crate::{PropertyInfo, Schema, TypeInfo};
 use ferroui_build_scan::model::{RegisteredKind, TypeModel};
-use ferroui_designer_project::MarkupCatalog;
+use ferroui_designer_project::{CompiledResources, MarkupCatalog};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
@@ -9,14 +9,16 @@ pub(crate) struct ProjectSchema {
     types: Vec<TypeInfo>,
     pub(crate) effective: Schema,
     pub(crate) catalog: Arc<MarkupCatalog>,
+    pub(crate) resources: Arc<CompiledResources>,
 }
 
 impl ProjectSchema {
-    pub(crate) fn new(base: &Schema, overrides: &[TypeInfo], catalog: Arc<MarkupCatalog>) -> Self {
+    pub(crate) fn new(base: &Schema, overrides: &[TypeInfo], catalog: Arc<MarkupCatalog>, resources: CompiledResources) -> Self {
         let mut configured = Self {
             types: types_from_models(&catalog),
             effective: base.clone(),
             catalog,
+            resources: Arc::new(resources),
         };
         configured.refresh(base, overrides);
         configured
