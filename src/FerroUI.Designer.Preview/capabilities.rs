@@ -4,6 +4,7 @@ pub(crate) fn initialize() -> Value {
     let capabilities: serde_json::Map<String, Value> = [
         "isolatedDesign",
         "appHostedDesign",
+        "hostedSourceSnapshots",
         "hostedAnimationRestoration",
         "hostedPreviewRanges",
         "hostedClipAuthoring",

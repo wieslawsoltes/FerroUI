@@ -73,6 +73,30 @@ fn preview_resources_fence_cycles_missing_and_out_of_scope_paths() {
 }
 
 #[test]
+fn hosted_preview_uses_runtime_addresses_and_watches_workspace_inputs() {
+    let fixture = Fixture::new();
+    let source = r#"<Border xmlns="https://github.com/ferroui"><ResourceInclude Source="Dictionaries/Outer.xaml"/><ResourceInclude Source="Embedded.xaml"/><ResourceInclude Source="../../Other/Private.xaml"/></Border>"#;
+    let uri = fixture.write("Authoring/View.xaml", source);
+    let outer = fixture.write("Authoring/Dictionaries/Outer.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude Source="../Color%20set.xaml"/></ResourceDictionary>"#);
+    let colors = fixture.write("Authoring/Color set.xaml", "<ResourceDictionary/>");
+    let embedded = file_uri(fixture.0.join("Authoring/Embedded.xaml")).unwrap();
+    let document = ferroui_designer_core::Document::new(source).unwrap();
+    let buffers = [PreviewSourceBuffer { uri: colors.clone(), source: Some("<ResourceDictionary><!-- draft --></ResourceDictionary>".into()) }];
+    let base = "ferres://test/Packaged/View.xaml";
+    let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &buffers, None);
+    assert_eq!(graph.dependencies, [outer, colors.clone(), embedded].into_iter().collect());
+    assert_eq!(graph.accepted.len(), 2);
+    assert_eq!(graph.accepted["ferres://test/Packaged/Color%20set.xaml"], buffers[0].source.as_deref().unwrap());
+    assert!(graph.uses_drafts);
+    assert!(graph.unavailable.is_empty());
+
+    let invalid = [PreviewSourceBuffer { uri: colors, source: None }];
+    let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &invalid, None);
+    assert!(!graph.accepted.contains_key("ferres://test/Packaged/Color%20set.xaml"));
+    assert!(graph.unavailable["ferres://test/Packaged/Color%20set.xaml"].contains("draft"));
+}
+
+#[test]
 fn toolbox_snippets_overlay_the_active_package_and_ignore_invalid_fragments() {
     let fixture = Fixture::new();
     fixture.write(".ferroui/toolbox/Card.xaml", "<Button Content='Shared'/>");

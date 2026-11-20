@@ -10,7 +10,7 @@ use crate::{
 use ferroui_remote_protocol::designer::{
     DesignKeyframeSelectionResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
-    DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage,
+    DesignFrameMessage, DesignFrameReceivedMessage, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
 };
 use ferroui_remote_protocol::input::{
@@ -35,6 +35,7 @@ use std::sync::{
 use std::time::Duration;
 
 mod animation;
+mod sources;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
@@ -62,8 +63,9 @@ struct Events {
 
 pub(crate) struct Relay {
     server: Option<DisposableServer>,
-    incoming: mpsc::Receiver<Connection>,
+    incoming: mpsc::Receiver<(Connection, bool)>,
     connection: Option<Connection>,
+    source_snapshots: bool,
     events: Arc<(Mutex<Events>, Condvar)>,
     sent: Option<(i64, i64)>,
     next_animation: i64,
@@ -82,6 +84,14 @@ pub(crate) struct Design {
     fixture: Option<String>,
     restore_animation: Option<Restore>,
     select_clip_key: Option<String>,
+    workspace: Option<sources::Workspace>,
+}
+
+#[derive(Serialize)]
+pub(crate) struct WorkspaceFrame {
+    frame: Option<Frame>,
+    error: Option<String>,
+    dependencies: Option<Vec<String>>,
 }
 
 #[derive(Deserialize)]
@@ -140,6 +150,7 @@ impl Relay {
             server: Some(server),
             incoming,
             connection: None,
+            source_snapshots: false,
             events,
             sent: None,
             next_animation: 0,
@@ -156,7 +167,7 @@ impl Relay {
     fn accept(
         connection: Connection,
         nonce: Arc<str>,
-        ready: mpsc::SyncSender<Connection>,
+        ready: mpsc::SyncSender<(Connection, bool)>,
         events: Arc<(Mutex<Events>, Condvar)>,
         claimed: Arc<AtomicBool>,
     ) {
@@ -174,10 +185,11 @@ impl Relay {
                 return;
             };
             if !admitted.load(Ordering::Acquire) {
-                if message
+                let start = message.downcast_ref::<StartDesignSourceSessionMessage>();
+                let session_id = start.and_then(|start| start.session_id.as_deref()).or_else(|| message
                     .downcast_ref::<StartDesignerSessionMessage>()
-                    .and_then(|start| start.session_id.as_deref())
-                    != Some(nonce.as_ref())
+                    .and_then(|start| start.session_id.as_deref()));
+                if session_id != Some(nonce.as_ref())
                     || claimed.swap(true, Ordering::AcqRel)
                 {
                     connection.dispose();
@@ -185,7 +197,7 @@ impl Relay {
                     return;
                 }
                 admitted.store(true, Ordering::Release);
-                let _ = authorized.try_send(ready.try_send(connection.clone()).is_ok());
+                let _ = authorized.try_send(ready.try_send((connection.clone(), start.is_some())).is_ok());
                 return;
             }
             let mut state = result.0.lock().unwrap();
@@ -257,7 +269,7 @@ impl Relay {
         if let Some(connection) = &self.connection {
             return Ok(connection.clone());
         }
-        let connection = self.incoming.recv_timeout(STARTUP_TIMEOUT)
+        let (connection, source_snapshots) = self.incoming.recv_timeout(STARTUP_TIMEOUT)
             .map_err(|_| "The Cargo binary did not start a FerroUI design session. Check its preview arguments and output.")?;
         if let Some(server) = self.server.take() {
             server.dispose();
@@ -276,10 +288,23 @@ impl Relay {
             }),
         )?;
         self.connection = Some(connection.clone());
+        self.source_snapshots = source_snapshots;
         Ok(connection)
     }
 
     pub(crate) fn render(&mut self, design: Design, projects: &Projects) -> Result<Frame, String> {
+        self.render_source(design, projects, &mut None)
+    }
+
+    pub(crate) fn render_workspace(&mut self, design: Design, projects: &Projects) -> WorkspaceFrame {
+        let mut dependencies = None;
+        match self.render_source(design, projects, &mut dependencies) {
+            Ok(frame) => WorkspaceFrame { frame: Some(frame), error: None, dependencies },
+            Err(error) => WorkspaceFrame { frame: None, error: Some(error), dependencies },
+        }
+    }
+
+    fn render_source(&mut self, design: Design, projects: &Projects, dependencies: &mut Option<Vec<String>>) -> Result<Frame, String> {
         let revision = design.revision;
         if let Some(name) = &design.fixture {
             ferroui_designer_core::design_fixtures::validate_name(name)?;
@@ -315,7 +340,11 @@ impl Relay {
             };
         }
         self.animation_sources.retain(design.restore_animation.as_ref());
-        let document = crate::document::DesignDocument::parse(&design.document, projects.source(&design.document)?)?;
+        let project = projects.source(&design.document)?;
+        let document = crate::document::DesignDocument::parse(&design.document, project)?;
+        let prepared = design.workspace.as_ref().map(|workspace| {
+            workspace.prepare(&design, &document.xaml, project.map(|project| &project.resources), dependencies)
+        }).transpose()?;
         let scope = SourceScope {
             uri: design.document.uri.clone(),
             assembly: design.assembly.clone(),
@@ -329,10 +358,12 @@ impl Relay {
             assembly_path: Some(format!("{}.exe", design.assembly)),
             xaml_file_project_path: Some(design.project_path),
         };
-        send(
-            &connection,
-            Arc::new(UpdateDesignMessage { revision, source, fixture: design.fixture }),
-        )?;
+        let update = UpdateDesignMessage { revision, source, fixture: design.fixture };
+        let message = match prepared {
+            Some(sources) => sources.message(update, self.source_snapshots)?,
+            None => Arc::new(update),
+        };
+        send(&connection, message)?;
         let (mut state, _) = self
             .events
             .1

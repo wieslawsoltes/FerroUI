@@ -150,6 +150,26 @@ impl CompiledResources {
         self.complete
     }
 
+    /// A detached application preview needs the original packaged base URI for
+    /// relative assets. Resolve an alias only when the file identity is unique.
+    pub fn preview_base<'a>(&'a self, owner: &str, fallback: &'a str) -> Result<&'a str> {
+        let owner = canonical_file_uri(owner)?;
+        let Some(bases) = self.by_source.get(&owner).map(|id| &self.bases[*id]) else {
+            return Ok(fallback);
+        };
+        let Some(first) = bases.first() else {
+            return Ok(fallback);
+        };
+        let key = compiled_resource_key(fallback);
+        if let Some(base) = bases.iter().find(|base| compiled_resource_key(&base.uri) == key) {
+            return Ok(&base.uri);
+        }
+        if bases.iter().all(|base| base.uri == first.uri) {
+            return Ok(&first.uri);
+        }
+        Err(ProjectError(format!("The packaged XAML base for {owner} is ambiguous")))
+    }
+
     /// Resolve against the author's actual group(s). A local member wins over the
     /// package's public addresses, including private dictionaries merged by a class.
     pub fn resolve(&self, owner: &str, reference: &str) -> Result<Option<&str>> {

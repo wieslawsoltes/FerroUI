@@ -27,6 +27,7 @@ pub struct LocalPreviewSources {
     pub unavailable: BTreeMap<String, String>,
     pub dependencies: BTreeSet<String>,
     pub includes: PreviewIncludes,
+    pub uses_drafts: bool,
 }
 
 /// Accepted include addresses and the authored documents that supplied them.
@@ -80,6 +81,29 @@ pub fn local_preview_sources_with_resources(
     buffers: &[PreviewSourceBuffer],
     resources: Option<&CompiledResources>,
 ) -> LocalPreviewSources {
+    preview_sources(root, source_uri, source, buffers, resources, None)
+}
+
+/// Traverse the files backing an application loader's resource tree.
+pub fn hosted_preview_sources(
+    root: &Path,
+    source_uri: &str,
+    base_uri: &str,
+    source: &Document,
+    buffers: &[PreviewSourceBuffer],
+    resources: Option<&CompiledResources>,
+) -> LocalPreviewSources {
+    preview_sources(Some(root), source_uri, source, buffers, resources, Some(base_uri))
+}
+
+fn preview_sources(
+    root: Option<&Path>,
+    source_uri: &str,
+    source: &Document,
+    buffers: &[PreviewSourceBuffer],
+    resources: Option<&CompiledResources>,
+    hosted_base: Option<&str>,
+) -> LocalPreviewSources {
     let Ok(path) = file_path(source_uri) else {
         return LocalPreviewSources::default();
     };
@@ -111,8 +135,9 @@ pub fn local_preview_sources_with_resources(
         active: BTreeSet::from([path.clone()]),
         remaining: MAX_GRAPH_BYTES,
         resources,
+        hosted: hosted_base.is_some(),
     };
-    walker.walk(source_uri, &path, source);
+    walker.walk(hosted_base.unwrap_or(source_uri), &path, source);
     walker.result
 }
 
@@ -124,6 +149,7 @@ struct Walker<'a> {
     active: BTreeSet<PathBuf>,
     remaining: usize,
     resources: Option<&'a CompiledResources>,
+    hosted: bool,
 }
 
 impl Walker<'_> {
@@ -144,6 +170,12 @@ impl Walker<'_> {
             let path = match mapped {
                 Ok(Some(source)) => file_path(source),
                 Ok(None) if uri.starts_with("file:") => file_path(&uri),
+                Ok(None) if self.hosted && uri.starts_with("ferres://") => {
+                    let Some(path) = self.relative_hosted_source(&owner, &reference) else {
+                        continue;
+                    };
+                    Ok(path)
+                }
                 Ok(None) => continue,
                 Err(error) => Err(error),
             };
@@ -158,13 +190,25 @@ impl Walker<'_> {
         }
     }
 
+    fn relative_hosted_source(&mut self, owner: &str, reference: &str) -> Option<PathBuf> {
+        // A literal relative project include can also refer to an embedded asset.
+        // Watch the physical candidate and leave unmapped assets to the app loader.
+        if reference.starts_with('/') {
+            return None;
+        }
+        let uri = resolve_uri(owner, reference).ok()?;
+        let path = canonical_path(&file_path(&uri).ok()?).ok()?;
+        if !path.starts_with(&self.root) || !is_xaml(&path) {
+            return None;
+        }
+        self.result.dependencies.insert(uri);
+        self.result.dependencies.insert(file_uri(&path).ok()?);
+        (path.is_file() || self.buffers.contains_key(&path)).then_some(path)
+    }
+
     fn load(&mut self, uri: &str, requested: &Path) -> Result<(), String> {
         let path = canonical_path(requested).map_err(|error| error.to_string())?;
-        if !path.starts_with(&self.root)
-            || !path
-                .extension()
-                .is_some_and(|suffix| suffix.eq_ignore_ascii_case("xaml"))
-        {
+        if !path.starts_with(&self.root) || !is_xaml(&path) {
             return Err(format!(
                 "The include must be a XAML file inside the preview workspace: {uri}"
             ));
@@ -191,6 +235,7 @@ impl Walker<'_> {
         let canonical = file_uri(&path).map_err(|error| error.to_string())?;
         self.result.dependencies.insert(canonical.clone());
         let max = self.remaining.min(MAX_DOCUMENT_BYTES);
+        self.result.uses_drafts |= self.buffers.contains_key(&path);
         let source = match self.buffers.get(&path) {
             Some(Some(source)) => (*source).to_owned(),
             Some(None) => {
@@ -230,6 +275,10 @@ impl Walker<'_> {
         }
         Ok(())
     }
+}
+
+fn is_xaml(path: &Path) -> bool {
+    path.extension().is_some_and(|suffix| suffix.eq_ignore_ascii_case("xaml"))
 }
 
 fn canonical_path(path: &Path) -> crate::Result<PathBuf> {

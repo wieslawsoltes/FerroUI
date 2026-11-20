@@ -1,4 +1,4 @@
-import type { Source } from './protocol';
+import type { PreviewSourceBuffer, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
     HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction, HostedKeyframeSelection } from './hostedAnimationProtocol';
 import type { CurvePoint, KeyframeDraftPreview, KeyframeLocation } from './timelineProtocol';
@@ -21,6 +21,17 @@ export interface HostedFrame {
     fixtures?: string[] | null;
     animations?: HostedAnimationCatalog;
     animationPresentation?: HostedAnimationPresentation;
+}
+
+export interface HostedWorkspaceSources {
+    root: string;
+    localSources: PreviewSourceBuffer[];
+}
+
+export interface HostedWorkspaceFrame {
+    frame: HostedFrame | null;
+    error: string | null;
+    dependencies: string[] | null;
 }
 
 export interface HostedAnimationSample {

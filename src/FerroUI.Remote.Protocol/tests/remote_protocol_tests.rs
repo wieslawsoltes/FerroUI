@@ -19,7 +19,8 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
-    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignIncludedSource, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
+    UpdateDesignMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::input::{
     InputEventMessageBase, InputModifiers, Key, KeyEventMessage, MouseButton, PhysicalKey, PointerEventMessageBase,
@@ -154,8 +155,14 @@ fn entities() -> Vec<Message> {
             }),
         }),
         Arc::new(StartDesignerSessionMessage { session_id: Some("a8098c1a-f86e-11da-bd1a-00112444be1e".to_string()) }),
+        Arc::new(StartDesignSourceSessionMessage { session_id: Some("source-session".into()) }),
         Arc::new(HtmlTransportStartedMessage { uri: Some("e902893a-9d22-3c7e-a7b8-d6e313b71d9f".to_string()) }),
         Arc::new(ferroui_remote_protocol::designer::UpdateDesignMessage { revision: 40, fixture: Some("Loading".into()), source: UpdateXamlMessage { xaml: Some("<Border/>".into()), ..Default::default() } }),
+        Arc::new(UpdateDesignSourcesMessage {
+            update: UpdateDesignMessage { revision: 41, fixture: Some("Ready".into()), source: UpdateXamlMessage { xaml: Some("<Grid/>".into()), ..Default::default() } },
+            base_uri: "ferres://test/Preview.xaml".into(),
+            includes: vec![DesignIncludedSource { uri: "ferres://test/Resources/Colors.xaml".into(), xaml: "<ResourceDictionary/>".into() }],
+        }),
         Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default(), fixtures: Some(vec!["Content".into(), "Loading".into()]) }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),

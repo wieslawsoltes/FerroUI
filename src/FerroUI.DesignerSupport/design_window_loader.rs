@@ -34,6 +34,17 @@ pub(crate) struct LoadedDesign {
     pub(crate) rust_fixture: bool,
 }
 
+pub(crate) struct DesignLoad<'a> {
+    pub(crate) xaml: &'a str,
+    pub(crate) assembly_path: Option<&'a str>,
+    pub(crate) project_path: Option<&'a str>,
+    pub(crate) render_scaling: f64,
+    pub(crate) fixture: Option<&'a str>,
+    pub(crate) animation_document: Option<&'a str>,
+    pub(crate) freeze_animation_clock: bool,
+    pub(crate) base_uri: Option<url::Url>,
+}
+
 impl DesignWindowLoader {
     /// `LoadDesignerWindow(xaml, assemblyPath, xamlFileProjectPath)`: with a
     /// render scaling of one.
@@ -64,25 +75,25 @@ impl DesignWindowLoader {
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
     ) -> Result<Ref<Window>, XamlLoadError> {
-        Self::load_with_fixture(xaml, assembly_path, xaml_file_project_path, render_scaling, None, None, false)
-            .map(|loaded| loaded.window)
+        Self::load(DesignLoad {
+            xaml,
+            assembly_path,
+            project_path: xaml_file_project_path,
+            render_scaling,
+            fixture: None,
+            animation_document: None,
+            freeze_animation_clock: false,
+            base_uri: None,
+        }).map(|loaded| loaded.window)
     }
 
-    pub(crate) fn load_with_fixture(
-        xaml: &str,
-        assembly_path: Option<&str>,
-        xaml_file_project_path: Option<&str>,
-        render_scaling: f64,
-        fixture: Option<&str>,
-        animation_document: Option<&str>,
-        freeze_animation_clock: bool,
-    ) -> Result<LoadedDesign, XamlLoadError> {
+    pub(crate) fn load(input: DesignLoad<'_>) -> Result<LoadedDesign, XamlLoadError> {
         let window: Ref<Window>;
         let control: Ref<Control>;
         let rust_fixture;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
-            let fixture = fixture.map(|name| preview_fixtures::create(xaml_file_project_path, name))
+            let fixture = input.fixture.map(|name| preview_fixtures::create(input.project_path, name))
                 .transpose().map_err(XamlLoadError::with_message)?;
             rust_fixture = matches!(fixture, Some(PreviewFixture::RustView(_)));
 
@@ -94,7 +105,7 @@ impl DesignWindowLoader {
                 }
                 control.clone()
             } else {
-                load_preview_control(xaml, assembly_path, xaml_file_project_path, animation_document)?
+                load_preview_control(&input)?
             };
 
             let (preview, wrap_content) = match control.cast::<Window>() {
@@ -102,7 +113,7 @@ impl DesignWindowLoader {
                 None => (Window::new(), true),
             };
             window = preview;
-            if freeze_animation_clock && !rust_fixture {
+            if input.freeze_animation_clock && !rust_fixture {
                 use ferroui_designer_animation::native::FrozenPreviewClock;
                 window.set_clock(Some(Rc::new(FrozenPreviewClock)));
             }
@@ -116,9 +127,9 @@ impl DesignWindowLoader {
             if let Some(platform_impl) = window.platform_impl() {
                 let platform_impl = platform_impl.as_any();
                 if let Some(previewer_impl) = platform_impl.downcast_ref::<PreviewerWindowImpl>() {
-                    previewer_impl.set_render_scaling(render_scaling);
+                    previewer_impl.set_render_scaling(input.render_scaling);
                 } else if let Some(offscreen_impl) = platform_impl.downcast_ref::<OffscreenTopLevelImplBase>() {
-                    offscreen_impl.set_render_scaling(render_scaling);
+                    offscreen_impl.set_render_scaling(input.render_scaling);
                 }
             }
 
@@ -142,17 +153,11 @@ impl DesignWindowLoader {
     }
 }
 
-fn load_preview_control(
-    xaml: &str,
-    assembly_path: Option<&str>,
-    xaml_file_project_path: Option<&str>,
-    animation_document: Option<&str>,
-) -> Result<Ref<Control>, XamlLoadError> {
+fn load_preview_control(input: &DesignLoad<'_>) -> Result<Ref<Control>, XamlLoadError> {
     let loader = FerroLocator::current().get_required_service::<dyn IRuntimeXamlLoader>();
-    let mut base_uri = None;
-    if let Some(assembly_path) = assembly_path {
-        let xaml_file_project_path = xaml_file_project_path.unwrap_or("/Fake.xaml");
-        //Fabricate fake Uri
+    let mut base_uri = input.base_uri.clone();
+    if let (None, Some(assembly_path)) = (&base_uri, input.assembly_path) {
+        let xaml_file_project_path = input.project_path.unwrap_or("/Fake.xaml");
         let uri = format!(
             "{ASSET_SCHEME}://{}{xaml_file_project_path}",
             get_file_name_without_extension(assembly_path)
@@ -167,7 +172,7 @@ fn load_preview_control(
     // into the process that previews it, so the assembly is the
     // registered one of that name, if there is one.
     let local_asm =
-        assembly_path.and_then(|assembly_path| MarkupAssembly::find(get_file_name_without_extension(assembly_path)));
+        input.assembly_path.and_then(|assembly_path| MarkupAssembly::find(get_file_name_without_extension(assembly_path)));
 
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = local_asm;
@@ -180,8 +185,8 @@ fn load_preview_control(
     // assembly is not registered.
     configuration.use_compiled_bindings_by_default =
         local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
-    let mut document = RuntimeXamlLoaderDocument::with_base_uri(base_uri, xaml);
-    if let Some(name) = animation_document {
+    let mut document = RuntimeXamlLoaderDocument::with_base_uri(base_uri, input.xaml);
+    if let Some(name) = input.animation_document {
         document.document = Some(name.to_owned());
         configuration.set_create_source_info(true);
     }

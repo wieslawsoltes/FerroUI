@@ -9,7 +9,7 @@ use crate::design_animation_authoring::{DesignAnimationAuthoringRequest, DesignA
 use crate::design_animation_curve::{DesignAnimationCurveRequest, DesignAnimationCurveResult};
 use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
 use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
-use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage};
+use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
     KeyEventMessage, PointerMovedEventMessage, PointerPressedEventMessage, PointerReleasedEventMessage,
@@ -64,7 +64,9 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateXamlMessage>(),
         ExportedType::of::<UpdateXamlResultMessage>(),
         ExportedType::of::<StartDesignerSessionMessage>(),
+        ExportedType::of::<StartDesignSourceSessionMessage>(),
         ExportedType::of::<UpdateDesignMessage>(),
+        ExportedType::of::<UpdateDesignSourcesMessage>(),
         ExportedType::of::<UpdateDesignResultMessage>(),
         ExportedType::of::<DesignFrameMessage>(),
         ExportedType::of::<DesignFrameReceivedMessage>(),
@@ -125,7 +127,9 @@ mod tests {
         ("HtmlTransportStartedMessage", "53778004-78fa-4381-8ec3-176a6f2328b6"),
     ];
     const FERROUI_DESIGN_MESSAGES: &[(&str, &str)] = &[
+        ("StartDesignSourceSessionMessage", "7D76A249-3594-4C51-956D-6E4E8C1CF1F6"),
         ("UpdateDesignMessage", "58FA5FA8-5669-4C04-80FA-8F573BA45ACD"),
+        ("UpdateDesignSourcesMessage", "408BAE3B-C488-4DAC-9255-E3AD3C99D2C5"),
         ("UpdateDesignResultMessage", "CB085DBB-7231-4C16-8797-D8D97BCF9341"),
         ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
         ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),

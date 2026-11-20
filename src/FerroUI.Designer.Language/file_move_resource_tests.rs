@@ -5,7 +5,8 @@ use ferroui_build_scan::{
     model::AssemblyModel,
 };
 use ferroui_designer_project::{
-    local_preview_sources_with_resources, resolve_uri, BuildMetadata, PreviewSourceBuffer,
+    hosted_preview_sources, local_preview_sources_with_resources, resolve_uri, BuildMetadata,
+    PreviewSourceBuffer,
 };
 
 const CARD: &str = "Themes/Card.xaml";
@@ -115,6 +116,10 @@ fn moving_a_compiled_owner_keeps_its_group_base_in_the_preview() {
         graph.dependencies.into_iter().collect::<Vec<_>>(),
         [project.uri(COLORS)]
     );
+    let hosted_base = resources.preview_base(&to, "ferres://Customer.Views/Themes/Archive/Renamed%20Card.xaml").unwrap();
+    assert_eq!(hosted_base, "ferres://Customer.Views/App/Card.xaml");
+    let hosted = hosted_preview_sources(&project.0, &to, hosted_base, &main, &[], Some(&resources));
+    assert!(hosted.accepted["ferres://Customer.Views/App/Colors.xaml"].contains("#1199CC"));
 }
 
 #[test]

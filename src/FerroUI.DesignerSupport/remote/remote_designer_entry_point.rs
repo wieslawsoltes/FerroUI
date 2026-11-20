@@ -1,5 +1,6 @@
-use crate::design_window_loader::DesignWindowLoader;
+use crate::design_window_loader::{DesignLoad, DesignWindowLoader};
 use crate::remote::hosted_animation;
+use crate::remote::hosted_sources;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
@@ -11,7 +12,7 @@ use ferroui_markup_xaml::xaml_error_scope::with_xaml_errors;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
     DesignKeyframeSelectionRequest,
-    DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage, ExceptionDetails, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
@@ -324,8 +325,13 @@ impl RemoteDesignerEntryPoint {
             die(Some(&e.to_string()));
         }));
         transport.start();
-        log("Sending StartDesignerSessionMessage");
-        transport.send(Arc::new(StartDesignerSessionMessage { session_id: Some(args.session_id.clone()) }));
+        log("Sending preview session identity");
+        let session_id = Some(args.session_id);
+        if hosted_sources::requested(args.transport.as_ref(), args.method == methods::FERRO_REMOTE) {
+            transport.send(Arc::new(StartDesignSourceSessionMessage { session_id }));
+        } else {
+            transport.send(Arc::new(StartDesignerSessionMessage { session_id }));
+        }
 
         Dispatcher::ui_thread().main_loop(&CancellationToken::none());
         std::process::exit(0)
@@ -394,7 +400,8 @@ impl RemoteDesignerEntryPoint {
             VIEWPORT_ALLOCATED_MESSAGE.with(|slot| *slot.borrow_mut() = Some(arg.clone()));
             Self::rebuild_pre_flight();
         }
-        let versioned = arg.downcast_ref::<UpdateDesignMessage>();
+        let snapshot = arg.downcast_ref::<UpdateDesignSourcesMessage>();
+        let versioned = snapshot.map(|snapshot| &snapshot.update).or_else(|| arg.downcast_ref::<UpdateDesignMessage>());
         let source = versioned.map(|update| &update.source).or_else(|| arg.downcast_ref::<UpdateXamlMessage>());
         if let Some(xaml) = source {
             // Keep the last valid preview alive until a replacement was successfully built.
@@ -427,15 +434,21 @@ impl RemoteDesignerEntryPoint {
             let loaded = catch_unwind(AssertUnwindSafe(|| {
                 dispatcher.capture_unhandled_exceptions(|| {
                     with_xaml_errors(|| {
-                        DesignWindowLoader::load_with_fixture(
-                            xaml.xaml.as_deref().unwrap_or(""),
-                            xaml.assembly_path.as_deref(),
-                            xaml.xaml_file_project_path.as_deref(),
-                            LAST_RENDER_SCALING.get(),
-                            versioned.and_then(|update| update.fixture.as_deref()),
-                            animations.as_ref().map(|source| source.identity.as_str()),
-                            animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
-                        )
+                        let snapshot = snapshot.map(hosted_sources::prepare).transpose()?;
+                        let load = |base_uri| DesignWindowLoader::load(DesignLoad {
+                            xaml: xaml.xaml.as_deref().unwrap_or(""),
+                            assembly_path: xaml.assembly_path.as_deref(),
+                            project_path: xaml.xaml_file_project_path.as_deref(),
+                            render_scaling: LAST_RENDER_SCALING.get(),
+                            fixture: versioned.and_then(|update| update.fixture.as_deref()),
+                            animation_document: animations.as_ref().map(|source| source.identity.as_str()),
+                            freeze_animation_clock: animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
+                            base_uri,
+                        });
+                        match snapshot {
+                            Some((base, sources)) => sources.run(|| load(Some(base))),
+                            None => load(None),
+                        }
                     })
                 })
             }));

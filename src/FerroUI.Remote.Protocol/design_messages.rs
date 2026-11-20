@@ -17,6 +17,46 @@ bson_class!(UpdateDesignMessage as "UpdateDesignMessage" {
     "Fixture" => fixture: Option<String>,
 });
 
+pub const DESIGN_SOURCE_SNAPSHOT_QUERY: &str = "ferroui-design-sources";
+pub const DESIGN_SOURCE_SNAPSHOT_VERSION: &str = "1";
+
+/// Sent in place of the legacy start only when the relay requests this version.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct StartDesignSourceSessionMessage {
+    pub session_id: Option<String>,
+}
+
+ferro_remote_message_guid!(StartDesignSourceSessionMessage, "7D76A249-3594-4C51-956D-6E4E8C1CF1F6");
+bson_class!(StartDesignSourceSessionMessage as "StartDesignSourceSessionMessage" {
+    "SessionId" => session_id: Option<String>,
+});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignIncludedSource {
+    pub uri: String,
+    pub xaml: String,
+}
+
+bson_class!(DesignIncludedSource as "DesignIncludedSource" {
+    "Uri" => uri: String,
+    "Xaml" => xaml: String,
+});
+
+/// Build one candidate from a consistent snapshot of the primary view and its includes.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct UpdateDesignSourcesMessage {
+    pub update: UpdateDesignMessage,
+    pub base_uri: String,
+    pub includes: Vec<DesignIncludedSource>,
+}
+
+ferro_remote_message_guid!(UpdateDesignSourcesMessage, "408BAE3B-C488-4DAC-9255-E3AD3C99D2C5");
+bson_class!(UpdateDesignSourcesMessage as "UpdateDesignSourcesMessage" {
+    "Update" => update: UpdateDesignMessage,
+    "BaseUri" => base_uri: String,
+    "Includes" => includes: Vec<DesignIncludedSource>,
+});
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UpdateDesignResultMessage {
     pub revision: i64,

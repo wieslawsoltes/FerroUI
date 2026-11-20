@@ -29,7 +29,7 @@ pub use rust_xaml::{
     RustXamlRegistration,
 };
 pub use preview_sources::{
-    local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
+    hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
     PreviewInclude, PreviewIncludes, PreviewSourceBuffer,
 };
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};

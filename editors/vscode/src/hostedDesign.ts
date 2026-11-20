@@ -4,6 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
+import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { chooseHostedClipEdit } from './hostedClipActions';
@@ -199,6 +200,7 @@ export class HostedDesign implements vscode.Disposable {
 
 class HostedSession {
     readonly animations: HostedAnimations;
+    private readonly dependencies = new DesignerDependencies();
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
     private compiler?: ReloadProcess;
@@ -227,8 +229,18 @@ class HostedSession {
             state => this.showAnimations(state),
             error => this.report(errorMessage(error), Boolean(this.currentFrame)),
             () => Boolean(this.client?.capabilities.hostedPreviewRanges));
+        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, '**/*.[xX][aA][mM][lL]'));
+        const dependencyChanged = (uri: vscode.Uri) => {
+            if (uri.toString() !== editor.document.uri.toString() && this.dependencies.change(uri)) this.update();
+        };
         this.subscriptions = [
-            vscode.workspace.onDidChangeTextDocument(event => { if (event.document === editor.document) this.update(); }),
+            watcher, watcher.onDidCreate(dependencyChanged), watcher.onDidChange(dependencyChanged), watcher.onDidDelete(dependencyChanged),
+            vscode.workspace.onDidChangeTextDocument(event => {
+                if (!event.contentChanges.length) return;
+                if (event.document === editor.document) this.update();
+                else dependencyChanged(event.document.uri);
+            }),
+            vscode.workspace.onDidCloseTextDocument(document => dependencyChanged(document.uri)),
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (language === 'rust' && event.textEditor === editor) this.update();
             }),
@@ -312,11 +324,17 @@ class HostedSession {
             const projectPath = '/' + path.relative(path.dirname(this.target.manifest), document.uri.fsPath).split(path.sep).map(encodeURIComponent).join('/');
             let frame: HostedFrame | null;
             if (update) {
+                this.dependencies.start();
                 const source = await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project);
                 if (this.disposed || revision !== this.revision) return;
-                frame = await client.renderHosted({ revision, assembly, projectPath, document: source, fixture: this.fixture,
+                const result = await client.renderHostedWorkspace({ revision, assembly, projectPath, document: source, fixture: this.fixture,
                     restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
-                    selectClipKey: this.clipSelection?.version === document.version ? this.clipSelection.key : undefined });
+                    selectClipKey: this.clipSelection?.version === document.version ? this.clipSelection.key : undefined },
+                { root: this.target.folder.uri.fsPath, localSources: dirtyXamlSources([document.uri], document) });
+                if (this.disposed || client !== this.client || revision !== this.revision) return;
+                if (result.dependencies && this.dependencies.accept(result.dependencies)) { this.update(); return; }
+                if (result.error) throw new Error(result.error);
+                frame = result.frame;
             } else frame = await client.hostedFrame();
             if (!this.disposed && client === this.client && frame?.revision === this.revision) {
                 if (update) this.clipSelection = undefined;
@@ -329,6 +347,7 @@ class HostedSession {
                 this.report(message);
             }
         } finally {
+            this.dependencies.stop();
             this.pending = false;
             this.schedule(this.requested === this.revision ? 160 : 0);
         }

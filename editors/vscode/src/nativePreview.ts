@@ -10,7 +10,7 @@ import type { NativeProjectInventory } from './projectInventory';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
-import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
+import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource, HostedWorkspaceFrame, HostedWorkspaceSources } from './hostedProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -36,7 +36,7 @@ export class NativePreview implements vscode.Disposable {
     assets: readonly Asset[] = [];
     canvasGuides?: GuideCatalog;
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; itemTemplateAuthoring?: boolean; propertyTrace?: boolean; styleComposition?: boolean;
@@ -131,6 +131,12 @@ export class NativePreview implements vscode.Disposable {
     renderHosted(source: HostedSource): Promise<HostedFrame> {
         // The first request covers process startup, authentication and the first native frame.
         return this.send('hostedRender', source, 35_000);
+    }
+    async renderHostedWorkspace(source: HostedSource, workspace: HostedWorkspaceSources): Promise<HostedWorkspaceFrame> {
+        if (!this.capabilities.hostedSourceSnapshots) {
+            return { frame: await this.renderHosted(source), error: null, dependencies: null };
+        }
+        return this.send('hostedRenderWorkspace', { ...source, workspace }, 35_000);
     }
     hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
