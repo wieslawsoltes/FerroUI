@@ -1,11 +1,12 @@
 //! Identify the authored FerroUI builders without inspecting generated Rust.
-use super::{string_literal, RustPathAnchor};
+use super::{RustPathAnchor, string_literal};
 use std::collections::BTreeMap;
 use syn::{Expr, ExprMethodCall, Item, LitStr, Local, Macro, Pat, UseTree};
 
 pub(super) enum Site<'source> {
     Path(&'source LitStr, RustPathAnchor),
     Key(&'source LitStr, &'source Macro),
+    Registration(&'source LitStr, &'source LitStr, &'source Macro),
     Root(&'source LitStr),
     Discovery,
 }
@@ -97,10 +98,9 @@ impl<'source> BuildScript<'source> {
         let value = self.value(argument);
         match (builder, call.method.to_string().as_str()) {
             (Some(Builder::Build), "compile_group")
-                if self.builder(value) == Some(Builder::Group)
-                    && self.documents(value).is_none() =>
+                if self.builder(value) == Some(Builder::Group) =>
             {
-                vec![Site::Discovery]
+                self.compile_group(value)
             }
             (Some(Builder::Build), "input") => string_literal(value)
                 .map(|literal| Site::Path(literal, RustPathAnchor::Package))
@@ -167,22 +167,45 @@ impl<'source> BuildScript<'source> {
         }
     }
 
-    fn documents(&self, expression: &'source Expr) -> Option<&'source Expr> {
-        let mut expression = self.value(expression);
-        for _ in 0..128 {
-            let Expr::MethodCall(call) = expression else {
-                return None;
-            };
-            if call.method == "documents" {
-                return call.args.first();
+    fn compile_group(&self, expression: &'source Expr) -> Vec<Site<'source>> {
+        let Some(documents) = self.documents(expression) else {
+            return vec![Site::Discovery];
+        };
+        for member in self.builder_chain(expression) {
+            match member {
+                Expr::MethodCall(call) if call.method == "internal" => return Vec::new(),
+                Expr::Call(constructor) => {
+                    let module = constructor
+                        .args
+                        .first()
+                        .and_then(|arg| string_literal(self.value(arg)));
+                    return module.map_or_else(Vec::new, |module| {
+                        self.keys(documents)
+                            .into_iter()
+                            .map(|(key, input)| Site::Registration(module, key, input))
+                            .collect()
+                    });
+                }
+                _ => {}
             }
-            let receiver = self.value(&call.receiver);
-            if std::ptr::eq(receiver, expression) {
-                return None;
-            }
-            expression = receiver;
         }
-        None
+        Vec::new()
+    }
+
+    fn documents(&self, expression: &'source Expr) -> Option<&'source Expr> {
+        self.builder_chain(expression)
+            .find_map(|member| match member {
+                Expr::MethodCall(call) if call.method == "documents" => call.args.first(),
+                _ => None,
+            })
+    }
+
+    fn builder_chain(&self, expression: &'source Expr) -> impl Iterator<Item = &'source Expr> + '_ {
+        std::iter::successors(Some(self.value(expression)), |member| match member {
+            Expr::MethodCall(call) => Some(self.value(&call.receiver)),
+            _ => None,
+        })
+        .take(128)
     }
 
     fn keys(&self, value: &'source Expr) -> Vec<(&'source LitStr, &'source Macro)> {

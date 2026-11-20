@@ -8,8 +8,8 @@ use crate::{ProjectError, Result};
 use proc_macro2::Span;
 use std::ops::Range;
 use syn::{
-    visit::{self, Visit},
     Expr, ExprLit, Lit, LitStr, Macro, Stmt,
+    visit::{self, Visit},
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -48,9 +48,19 @@ impl RustXamlPath {
 #[derive(Debug, Default)]
 pub struct RustXamlReferences {
     pub paths: Vec<RustXamlPath>,
+    /// Explicit documents passed to an exported Cargo compilation group.
+    pub registrations: Vec<RustXamlRegistration>,
     /// Explicit document discovery roots authored on a Cargo build builder.
     pub xaml_roots: Vec<String>,
     pub discovers_xaml: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RustXamlRegistration {
+    pub module: String,
+    pub key: String,
+    pub input: String,
+    pub anchor: RustPathAnchor,
 }
 
 impl RustXamlReferences {
@@ -105,6 +115,12 @@ struct Collector<'source> {
 }
 
 impl Collector<'_> {
+    fn included_file(&self, input: &Macro) -> Option<(String, RustPathAnchor)> {
+        let (value, anchor, prefix) = self.macros.include_path(input)?;
+        let value = value.value();
+        Some((value.strip_prefix(prefix)?.to_owned(), anchor))
+    }
+
     fn record(
         &mut self,
         literal: &LitStr,
@@ -183,15 +199,18 @@ impl<'source> Visit<'source> for Collector<'source> {
                     Site::Root(literal) => self.references.xaml_roots.push(literal.value()),
                     Site::Discovery => self.references.discovers_xaml = true,
                     Site::Key(literal, input) => {
-                        if let Some((value, anchor, prefix)) = self.macros.include_path(input) {
-                            if let Some(path) = value.value().strip_prefix(prefix) {
-                                self.record(
-                                    literal,
-                                    RustPathAnchor::XamlRoot,
-                                    "",
-                                    Some((path.to_owned(), anchor)),
-                                );
-                            }
+                        if let Some(input) = self.included_file(input) {
+                            self.record(literal, RustPathAnchor::XamlRoot, "", Some(input));
+                        }
+                    }
+                    Site::Registration(module, key, input) => {
+                        if let Some((input, anchor)) = self.included_file(input) {
+                            self.references.registrations.push(RustXamlRegistration {
+                                module: module.value(),
+                                key: key.value(),
+                                input,
+                                anchor,
+                            });
                         }
                     }
                 }
@@ -286,6 +305,15 @@ mod tests {
         "#;
         let references = RustXamlReferences::parse(source, true).unwrap();
         assert_eq!(references.xaml_roots, ["Xaml"]);
+        assert_eq!(
+            references.registrations,
+            [RustXamlRegistration {
+                module: "views".into(),
+                key: "Views/Card.xaml".into(),
+                input: "Xaml/Views/Card.xaml".into(),
+                anchor: RustPathAnchor::SourceFile,
+            }]
+        );
         let paths = references.paths;
         assert_eq!(paths.len(), 5);
         assert_eq!(
@@ -302,6 +330,30 @@ mod tests {
                 .paths
                 .len(),
             1
+        );
+    }
+
+    #[test]
+    fn registrations_come_from_exported_compilation_groups() {
+        let source = r#"
+        use ferroui_build::{Build, XamlGroup};
+        const MODULE: &str = "customer_views";
+        fn main() {
+            let _unused = XamlGroup::new("unused").documents(&[("Unused.xaml", include_str!("Physical.xaml"))]);
+            let public = XamlGroup::new(MODULE).documents(&[("Published/Card.xaml", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/Physical.xaml")))]);
+            let internal = XamlGroup::new("offscreen").documents(&[("Internal.xaml", include_str!("Physical.xaml"))]).internal();
+            Build::from_env().compile_group(public).compile_group(internal).run();
+        }
+        "#;
+        let references = RustXamlReferences::parse(source, true).unwrap();
+        assert_eq!(
+            references.registrations,
+            [RustXamlRegistration {
+                module: "customer_views".into(),
+                key: "Published/Card.xaml".into(),
+                input: "Physical.xaml".into(),
+                anchor: RustPathAnchor::Package,
+            }]
         );
     }
 

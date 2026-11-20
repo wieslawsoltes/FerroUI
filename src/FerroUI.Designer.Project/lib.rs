@@ -18,7 +18,7 @@ pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, rela
 mod file_move;
 pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
 mod rust_xaml;
-pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences};
+pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences, RustXamlRegistration};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 
