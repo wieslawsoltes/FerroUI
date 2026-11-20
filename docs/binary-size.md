@@ -1293,6 +1293,50 @@ needs either fewer value types reaching an application, which is what the trimmi
 to 4.16 does, or one untyped core under the typed surface, which is a redesign of the property
 store and not a step.
 
+### 5.6 Generic instances by family (#986, 2026-11-20)
+
+`scripts/generic_instances.py` reads a link map or an unstripped binary and groups the symbols of
+one generic function (one path, different instance hashes in the legacy mangling) into a family;
+a family of two or more instances is generic code. Counted on the builders hello world (release,
+unstripped, a build of 2026-11-18) and on the statically linked C hello world over the whole
+framework (`samples/CApi/gauge.c`, release, `-Wl,-dead_strip`, the tables of every type, #976):
+
+| | Rust code | In families of 2+ instances | Share |
+|---|---:|---:|---:|
+| `hello-world-builders` | 10.61 MB | 6.31 MB | 59.5 % |
+| `gauge.c`, static, every type | 24.95 MB | 14.57 MB | 58.4 % |
+
+By crate (hello world): `ferroui_base` 3.97 of 6.14 MB generic, `core` 1.28 of 1.55, `alloc` 0.38
+of 0.39, `hashbrown` 0.17 of 0.17, `ferroui_controls` 0.05 of 0.76 (its classes are not generic).
+
+The largest families of the hello world:
+
+| Family | Instances | Size |
+|---|---:|---:|
+| Closures: `FnOnce::call_once` and its vtable shims | 4,449 + 1,334 | 0.61 MB |
+| Property code per value type (`set_and_raise_core`, `ValueStore::set_value`/`get_value`/`get_base_value`/`inherited_or_default`, the `StyledProperty<T>` routes, `EffectiveValue<T>` entries), 129 to 175 value types | about 2,000 | about 1.5 MB |
+| `AnyValue::any_value_eq` and `Any::type_id` per type | 1,113 + 3,223 | 0.26 MB |
+| `nullable_operation` per value type | 380 | 0.16 MB |
+| `Rc::drop_slow` | 554 | 0.13 MB |
+| Value conversions (`TypedConvert` conversion and cast adapters) | 455 + 218 | 0.13 MB |
+| Animation per animator type (`AnimationInstance<A>`, its observer and interpolation) | 28 each | about 0.17 MB |
+| `hashbrown::RawTable::reserve_rehash` | 85 | 0.12 MB |
+| Stable sorts (`quicksort`, `drift::sort`) | 37 each | 0.11 MB |
+| `LocalKey::with` | 109 | 0.05 MB |
+
+With every type registered (the C program) the same families grow with the number of types:
+closures 25,107 instances (1.80 MB), the property code about 297 value types (more than 3 MB),
+`any_value_eq` 2,855 instances (0.51 MB), `nullable_operation` 1,110 (0.47 MB), typed binding
+expressions 120 instances of about ten functions (0.6 MB).
+
+The candidates of #986, in the order of the count: the property code per value type (the untyped
+core of section 5.5), closures (generic over a closure only on hot paths), the per-type
+`AnyValue`/`nullable_operation`/conversion functions (made only for the types that need them),
+animation per animator type, and the `core`/`alloc` generics (one sort and one table per element
+size). Each step is measured by size and by the local gate (section 8.4); the shared setter and
+handler functions of the builders (#956) are the example of a step left out: 40 to 50 kB for
++3.9 % instructions on a re-run.
+
 ## 6. The settings applications should use
 
 - `cargo run --profile fast-release -p <application>` to try an application with optimised code:
