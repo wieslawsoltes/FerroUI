@@ -11,7 +11,7 @@ use crate::rendering::composition::CompositionOptions;
 use crate::rendering::PlatformRenderInterfaceContextManager;
 use crate::reactive::IDisposable;
 use crate::threading::Dispatcher;
-use crate::utilities::ReleaseExcess;
+use crate::utilities::ReleaseAtRest;
 use crate::{Matrix, PixelSize, Size, Vector};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -108,12 +108,26 @@ impl BatchQueue {
         }
     }
 
-    fn return_data(&self, mut data: BatchStreamData) {
-        data.reset();
+    /// Takes the pooled streams down to what a buffer keeps at rest (#836): the streams of the
+    /// batch of the first frame of a large tree are pooled with the storage of that batch.
+    pub(crate) fn release_pool_at_rest(&self) -> bool {
+        let Ok(mut pool) = self.data_pool.try_lock() else { return false };
+        let mut released = false;
+        for data in pool.iter_mut() {
+            released |= data.release_at_rest();
+        }
+        released
+    }
+
+    /// Pools the streams of a read batch, emptied, and tells whether they gave storage back beyond
+    /// what an emptied buffer keeps (the batch of the first frame of a large tree, #836).
+    fn return_data(&self, mut data: BatchStreamData) -> bool {
+        let burst = data.reset();
         let mut pool = self.data_pool.lock().unwrap();
         if pool.len() < 16 {
             pool.push(data);
         }
+        burst
     }
 }
 
@@ -187,6 +201,9 @@ pub struct ServerCompositor {
     visual_own_properties_recompute_pass: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
     /// What the next readback pass writes, a visual at most once.
     visual_readback_update_pass_queue: RefCell<Vec<ReadbackQueueEntry>>,
+    /// Whether a buffer of the render thread gave storage back beyond what an emptied buffer keeps
+    /// since the last step at rest (#836): the step runs only then.
+    rest_pending: Cell<bool>,
     /// The number of the next readback pass, which the visuals in its queue
     /// are stamped with. Starts at one: zero is a visual in no queue.
     visual_readback_pass: Cell<u64>,
@@ -263,6 +280,7 @@ impl ServerCompositor {
             render_resources_invalidation_set: RefCell::new(HashSet::new()),
             visual_own_properties_recompute_pass: RefCell::new(VecDeque::new()),
             visual_readback_update_pass_queue: RefCell::new(Vec::new()),
+            rest_pending: Cell::new(false),
             visual_readback_pass: Cell::new(1),
             adorner_update_queue: RefCell::new(VecDeque::new()),
             visual_surfaces: RefCell::new(Vec::new()),
@@ -454,7 +472,9 @@ impl ServerCompositor {
             for id in std::mem::take(&mut *self.disposed_in_batch.borrow_mut()) {
                 self.remove_object(id);
             }
-            self.batches.return_data(std::mem::take(&mut batch.changes));
+            if self.batches.return_data(std::mem::take(&mut batch.changes)) {
+                self.rest_pending.set(true);
+            }
             self.last_batch_id.set(batch.batch.sequence_id());
             self.to_notify_processed.borrow_mut().push(batch.batch);
             had_batches = true;
@@ -626,7 +646,9 @@ impl ServerCompositor {
             visual.recompute_own_properties();
         }
         // The first frame of a large tree queues every visual of it.
-        self.visual_own_properties_recompute_pass.borrow_mut().release_excess();
+        if self.visual_own_properties_recompute_pass.borrow_mut().release_burst() {
+            self.rest_pending.set(true);
+        }
     }
 
     pub fn enqueue_visual_for_own_properties_update_pass(&self, visual: Rc<ServerCompositionVisual>) {
@@ -676,7 +698,9 @@ impl ServerCompositor {
         // writes every visual of it.
         let mut queue = self.visual_readback_update_pass_queue.borrow_mut();
         if queue.is_empty() {
-            entries.release_excess();
+            if entries.release_burst() {
+                self.rest_pending.set(true);
+            }
             *queue = entries;
         }
     }
@@ -1086,8 +1110,33 @@ impl ServerCompositor {
             }
         }
 
+        // No tick is pending: what the passes of a burst filled is released, and the allocator
+        // gives its free pages back (#836). Only after a burst: one of the buffers gave storage
+        // back beyond what an emptied buffer keeps.
+        if self.rest_pending.replace(false) {
+            self.release_at_rest();
+        }
+
         // Otherwise there is no need to waste CPU cycles, tell the timer to pause
         false
+    }
+
+    /// The step of the render thread when no tick is pending after a burst (`utilities::resting`,
+    /// #836): the
+    /// queues of the passes and the pooled streams are taken down to what a buffer keeps at rest,
+    /// and when one of them gave storage back the allocator is asked for its free pages.
+    fn release_at_rest(&self) {
+        let mut released = false;
+        if let Ok(mut pass) = self.visual_own_properties_recompute_pass.try_borrow_mut() {
+            released |= pass.release_at_rest();
+        }
+        if let Ok(mut queue) = self.visual_readback_update_pass_queue.try_borrow_mut() {
+            released |= queue.release_at_rest();
+        }
+        released |= self.batches.release_pool_at_rest();
+        if released {
+            crate::utilities::release_free_pages();
+        }
     }
 }
 
