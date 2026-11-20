@@ -729,6 +729,7 @@ section 9).
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
 | Packed tables of the deferred rows (section 2.2, `DEFAULT_PACKED_THEME_ROWS`, on by default) | #855 | Kept by its measurement, on by default |
 | Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |
+| Themes written in Rust: the converter, the WinUI theme in Rust, the front end of the compiler for it (section 10) | #988 | Prototype, not for merging |
 
 ## 10. Themes written in Rust (#988, a prototype)
 
