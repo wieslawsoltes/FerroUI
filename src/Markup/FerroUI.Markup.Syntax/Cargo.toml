@@ -1,0 +1,18 @@
+[package]
+name = "ferroui-markup-syntax"
+description = "Portable style selector parsing and text primitives shared by FerroUI and its authoring tools"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[package.metadata.release]
+group = "markup"

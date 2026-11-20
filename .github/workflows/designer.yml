@@ -12,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
+      - 'src/Markup/FerroUI.Markup.Syntax/**'
       - 'src/FerroUI.View/**'
       - 'src/FerroUI.View.Macros/**'
       - 'src/FerroUI.View.Syntax/**'
@@ -80,9 +81,9 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy
       - name: Source preservation, transaction, language, timeline and convergence regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
+        run: cargo test --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
 
   native:
     name: Native studio, MCP and render smoke

@@ -1,7 +1,7 @@
 //! Argument list parsing (`[a, b]`) on top of [`CharacterReader`].
 
-use crate::data::core::ExpressionParseError;
-use crate::utilities::character_reader::{is_white_space, CharacterReader};
+use crate::character_reader::{is_white_space, CharacterReader};
+use crate::ExpressionParseError;
 
 impl CharacterReader<'_> {
     /// Parses a list of arguments enclosed in `open`/`close` and separated by

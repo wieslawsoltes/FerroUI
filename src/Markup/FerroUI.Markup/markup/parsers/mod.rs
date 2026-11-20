@@ -4,7 +4,7 @@ pub mod container_query_grammar;
 pub mod container_query_parser;
 pub mod property_parser;
 pub mod property_path_grammar;
-pub mod selector_grammar;
+pub use ferroui_markup_syntax::selector_grammar;
 pub mod selector_parser;
 
 pub use container_query_grammar::{ContainerQueryGrammar, ContainerQuerySyntax};

@@ -1702,6 +1702,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
+ "ferroui-markup-syntax",
  "ferroui-system",
  "icu_locale_core",
  "libc",
@@ -2406,8 +2407,13 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-markup-syntax",
  "url",
 ]
+
+[[package]]
+name = "ferroui-markup-syntax"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-markup-xaml"

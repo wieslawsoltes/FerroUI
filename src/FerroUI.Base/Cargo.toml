@@ -79,6 +79,7 @@ tagged-weak-references = []
 # re-exported here at the paths they had before they moved (`lib.rs`, `utilities`, `data::model`,
 # `threading`, `collections`).
 ferroui-system = { workspace = true }
+ferroui-markup-syntax.workspace = true
 # The hasher of identity-keyed maps on hot paths (the layout queues).
 rustc-hash = { workspace = true }
 smallvec = { workspace = true }

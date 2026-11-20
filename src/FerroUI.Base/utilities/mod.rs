@@ -24,7 +24,7 @@ pub use synchronous_completion_async_result::{
 };
 
 pub mod math_utilities;
-pub mod span_helpers;
+pub use ferroui_markup_syntax::span_helpers;
 pub mod span_string_tokenizer;
 pub mod spring_solver;
 
@@ -58,10 +58,7 @@ mod thread_bound;
 pub use thread_bound::ThreadBound;
 pub use uri_extensions::UriExtensions;
 
-pub mod character_reader;
-pub mod identifier_parser;
-pub mod keyword_parser;
-pub mod style_class_parser;
+pub use ferroui_markup_syntax::{character_reader, identifier_parser, keyword_parser, style_class_parser};
 mod cancel_event_args;
 mod event_args;
 pub use cancel_event_args::CancelEventArgs;
