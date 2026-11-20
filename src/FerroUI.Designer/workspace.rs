@@ -290,6 +290,7 @@ impl DesignerWorkspace {
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
+        self.connect_event_handlers();
         self.connect_rust_source();
         self.connect_authoring();
         self.connect_timeline_curves();
@@ -556,18 +557,8 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         let result = match action {
-            Action::Undo => self
-                .session
-                .borrow_mut()
-                .undo()
-                .map(|_| ())
-                .map_err(|error| error.to_string()),
-            Action::Redo => self
-                .session
-                .borrow_mut()
-                .redo()
-                .map(|_| ())
-                .map_err(|error| error.to_string()),
+            Action::Undo => self.source_history(false),
+            Action::Redo => self.source_history(true),
             Action::Delete => crate::workspace_tools::delete(&mut self.session.borrow_mut()),
             Action::Duplicate => self.duplicate(),
             Action::ZoomOut => {
@@ -980,6 +971,10 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[path = "workspace_history.rs"]
+mod history;
+#[path = "workspace_event_handlers.rs"]
+mod event_handlers;
 #[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;

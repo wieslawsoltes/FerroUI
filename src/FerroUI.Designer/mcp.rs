@@ -549,7 +549,7 @@ impl UiToolProvider for DesignerMcp {
                     .ensure_selection_workflow_context()?;
             }
         }
-        if workspace_tools::handles(name) {
+        if workspace_tools::handles(name) || (self.workspace.is_some() && matches!(name, "designer_undo" | "designer_redo")) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -569,6 +569,11 @@ impl UiToolProvider for DesignerMcp {
                 }
             }
             drop(workspace.try_language_service()?);
+            if matches!(name, "designer_undo" | "designer_redo") {
+                workspace.source_history(name == "designer_redo")?;
+                workspace.refresh(true);
+                return Ok(state(&owner.borrow()));
+            }
             if name == "designer_project_task"
                 && args["action"] != "cancel"
                 && !permissions.allow_input

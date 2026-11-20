@@ -65,6 +65,10 @@ Select a style or theme in **Library** to edit its selector, setters, or base th
 
 Choose a palette swatch to open the native color editor. Enter a literal or choose a color and apply it. To add a token, choose the layer, fill in the key and color, and use the plus button. An accepted color or style edit takes one Undo step. Use the source arrow beside a swatch to open its exact declaration. [VS Code guide](vscode/styles.md) · [MCP arguments](vscode/reference.md#edit-styles-and-palettes-with-mcp)
 
+### Create an XAML event handler
+
+Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

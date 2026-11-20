@@ -79,6 +79,10 @@ impl RustDocument {
         self.history.redo_label().is_some()
     }
 
+    pub(crate) fn history_label(&self, redo: bool) -> Option<&str> {
+        if redo { self.history.redo_label() } else { self.history.undo_label() }
+    }
+
     fn catalog(&self) -> &RsxCatalog {
         self.catalog
             .as_deref()

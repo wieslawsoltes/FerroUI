@@ -19,6 +19,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_project_task"
             | "designer_language"
             | "designer_language_apply"
+            | "designer_event_handler"
+            | "designer_scaffold_handler"
             | "designer_reveal_rsx_animation_issue"
             | "designer_reveal_rsx_state"
     )
@@ -101,6 +103,8 @@ pub(super) fn tools() -> Vec<Value> {
         s::actions("designer_project_task","Save checked editor buffers and explicitly start a Cargo check/build/run task, or cancel the owned task. Starting a process additionally requires allow_input because builds execute the project's build scripts with host privileges. Poll designer_project for status/output; no shell text is accepted.",tasks,true),
         s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 byte offsets; returned ranges are LSP UTF-16. format returns text edits with the current version; rename returns a versioned WorkspaceEdit for designer_language_apply.",queries,false),
         s::tool("designer_language_apply","Apply a prepared multi-document language WorkspaceEdit atomically through retained editor tabs and the project version guards. The active document also requires expected_revision; no files are saved automatically.",s::object(json!({"expected_revision":s::revision(),"edit":s::workspace_edit()}),&["expected_revision","edit"]),true),
+        s::tool("designer_event_handler","Read the Rust owner, signature, current Rust version and existing declaration for an authored XAML event. Pass handler to preview the checked two-file edits.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision()}),&["node","event","expected_revision"]),false),
+        s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
     ];
     tools.extend(canvas_guides::tools());
     tools
@@ -167,6 +171,12 @@ pub(super) fn call(
             project(workspace, true)
         }
         "designer_language" => language(workspace, args),
+        "designer_event_handler" => workspace.inspect_event_handler(super::node_id(args, "node")?, &text(args, "event")?, args["handler"].as_str()),
+        "designer_scaffold_handler" => {
+            let version = i64::try_from(integer(args, "expected_rust_version")?).map_err(|_| "Rust version is out of range")?;
+            let plan = workspace.scaffold_event_handler(super::node_id(args, "node")?, &text(args, "event")?, &text(args, "handler")?, version)?;
+            Ok(json!(plan))
+        }
         "designer_language_apply" => {
             let edit: WorkspaceEdit = decode(args, "edit")?;
             workspace.apply_language_edits(edit)?;

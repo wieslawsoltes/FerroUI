@@ -1,6 +1,6 @@
 use crate::{DesignerAsset, registered_designer_assets};
 use ferroui_designer_language::Schema;
-use ferroui_designer_project::{BuildMetadata, file_path};
+use ferroui_designer_project::{BuildMetadata, MarkupCatalog, file_path};
 use ferroui_designer_rsx::RsxCatalog;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -10,6 +10,7 @@ use std::sync::mpsc::{self, Receiver, TryRecvError};
 struct Package {
     assets: Vec<DesignerAsset>,
     rust: Arc<RsxCatalog>,
+    catalog: Arc<MarkupCatalog>,
 }
 
 /// Each accepted build replaces the selected package's controls. Older jobs
@@ -51,6 +52,7 @@ impl ProjectMarkup {
                     Package {
                         assets: registered_designer_assets(&catalog, package),
                         rust: Arc::new(RsxCatalog::from_project(&catalog, &schema, package)),
+                        catalog: Arc::new(catalog),
                     }
                 })
                 .map_err(|error| error.to_string());
@@ -60,13 +62,13 @@ impl ProjectMarkup {
         Ok(())
     }
 
-    pub(super) fn poll(&mut self) -> Vec<Result<(), String>> {
+    pub(super) fn poll(&mut self) -> Vec<Result<(PathBuf, Arc<MarkupCatalog>), String>> {
         let mut results = Vec::new();
         self.loading
             .retain(|root, receiver| match receiver.try_recv() {
                 Ok(Ok(package)) => {
+                    results.push(Ok((root.clone(), package.catalog.clone())));
                     self.accepted.insert(root.clone(), package);
-                    results.push(Ok(()));
                     false
                 }
                 Ok(Err(error)) => {

@@ -105,7 +105,9 @@ impl DesignerWorkspace {
             });
     }
     pub(super) fn refresh_source_tools(self: &Rc<Self>) {
-        if self.refresh_rust_source_tools() {
+        let rust = self.refresh_rust_source_tools();
+        self.root.get_control::<Button>("CreateEventHandler").set_is_visible(!rust);
+        if rust {
             return;
         }
         let (uri, source, revision) = {

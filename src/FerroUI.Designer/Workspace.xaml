@@ -286,6 +286,9 @@
             <ComboBox Name="RustInvocations" IsVisible="False" MinWidth="132" AutomationProperties.Name="RSX view" ToolTip.Tip="Choose an RSX invocation in the current Rust file" />
             <Button Name="CompleteSource" Classes="nav" Content="Complete" />
             <Button Name="SourceDefinition" Classes="nav" Content="Definition" />
+            <Button Name="CreateEventHandler" Classes="icon" AutomationProperties.Name="Create Rust event handler" ToolTip.Tip="Create Rust event handler from the XAML event at the caret">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M9,0 L2,9 7,9 5,16 14,6 9,6 Z" />
+            </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
             <Button Name="FormatSource" Classes="nav" Content="Format" />

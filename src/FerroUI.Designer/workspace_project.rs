@@ -52,6 +52,7 @@ impl Tab {
 pub(super) struct ProjectUi {
     pub(super) workspace: Option<ProjectWorkspace>,
     pub(super) tabs: BTreeMap<String, Tab>,
+    pub(super) linked_history: super::history::WorkspaceHistory,
     selected: usize,
     discovery: Option<
         std::sync::mpsc::Receiver<
@@ -216,6 +217,12 @@ impl DesignerWorkspace {
         let mut tab = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
+                if let Some(tab) = state.linked_history.take_closed(uri) {
+                    let current = state.workspace.as_ref().and_then(|workspace| workspace.read_source(uri).ok());
+                    if current.as_deref() == Some(&tab.saved) { state.tabs.insert(uri.into(), tab); }
+                }
+            }
+            if !state.tabs.contains_key(uri) {
                 let workspace = state
                     .workspace.as_ref()
                     .ok_or("Open a solution before navigating to another document")?;
@@ -298,7 +305,7 @@ impl DesignerWorkspace {
         }
         self.close_language_document(uri)?;
         let mut state = self.project.borrow_mut();
-        state.tabs.remove(uri);
+        if let Some(tab) = state.tabs.remove(uri) { state.linked_history.retain_closed(uri, tab); }
         if let Some(workspace) = state.workspace.as_mut() {
             if workspace.buffer(uri).is_some() {
                 workspace.close(uri, true).map_err(|e| e.to_string())?;
@@ -666,7 +673,10 @@ impl DesignerWorkspace {
             self.refresh_project_toolbox();
             self.refresh_rust_catalog();
         }
-        for result in refreshed.into_iter().chain(added) {
+        let published = refreshed.into_iter().map(|result| result.and_then(|(root, catalog)| {
+            self.try_language_service()?.set_project_catalog(root, catalog).map_err(|error| error.to_string())
+        }));
+        for result in published.chain(added) {
             if let Err(error) = result { self.status.set_text(Some(&error)); }
         }
     }
