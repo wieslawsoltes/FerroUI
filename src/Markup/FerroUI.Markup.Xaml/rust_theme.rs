@@ -569,8 +569,8 @@ impl Resources {
     pub fn theme(&self, variant: ThemeVariant, populate: fn(&Resources) -> Result) -> Result {
         let dictionary = match self.dictionary.theme_dictionary(&variant) {
             Some(existing) => existing
-                .as_any()
-                .and_then(|any| any.downcast_ref::<Ref<ResourceDictionary>>().cloned())
+                .as_object()
+                .and_then(|object| object.to_ref().cast::<ResourceDictionary>())
                 .ok_or_else(|| XamlLoadError::with_message("The theme dictionary is not a resource dictionary."))?,
             None => {
                 let dictionary = ResourceDictionary::new();
@@ -610,15 +610,24 @@ fn report(key: &ResourceKey, error: &XamlLoadError) {
 /// Assigns the markup value `value` (a static resource) to `property` of `target`: a binding is
 /// bound, the unset marker clears the property, anything else is set with `priority`.
 fn assign(target: &FerroObject, property: &'static FerroProperty, value: MarkupValue, priority: BindingPriority) -> Result {
-    if let Some(boxed) = &value {
+    if value.is_some() {
         if let Some(binding) = ferroui_base::metadata::from_markup_value::<Rc<dyn BindingBase>>(&value) {
             let _ = target.bind_binding(property, &*binding);
             return Ok(());
         }
-        let _ = target.set_value_untyped(property, &**boxed, priority);
-    } else {
-        let _ = target.set_value_untyped(property, &None::<BoxedValue>, priority);
     }
+    let target_type = ValueType::new(property.property_type(), property.property_type_name());
+    let whole: BoxedValue = Rc::new(value.clone());
+    let converted = ferroui_base::data::core::ValueTypes::try_cast(&whole, target_type)
+        .or_else(|| value.as_ref().and_then(|boxed| ferroui_base::data::core::ValueTypes::try_cast(boxed, target_type)))
+        .ok_or_else(|| {
+            XamlLoadError::with_message(format!(
+                "The value of the property '{}' is not of its type ({}).",
+                property.name(),
+                property.property_type_name()
+            ))
+        })?;
+    let _ = target.set_value_untyped(property, &*converted, priority);
     Ok(())
 }
 
@@ -687,10 +696,14 @@ impl StyleBuilder {
     pub fn dynamic(&self, property: &'static impl AnyProperty, key: &str) -> &Self {
         let property = property.property();
         let anchor = HeldAnchor::from(DynamicResourceAnchor::Provider(Rc::<dyn IResourceProvider>::from(&self.style)));
-        let binding: Rc<dyn BindingBase> =
-            Rc::new(dynamic_resource(key, Some(anchor), self.scope.variant(), BindingPriority::LocalValue));
+        let extension = crate::markup_extensions::DynamicResourceExtension::at_place(
+            key,
+            Some(anchor),
+            self.scope.variant(),
+            BindingPriority::LocalValue,
+        );
         let setter = rt::new_setter(property);
-        rt::add_setter_value(&self.style, &setter, rt::to_value(binding));
+        rt::add_setter_value(&self.style, &setter, rt::to_object(extension));
         self
     }
 
@@ -719,7 +732,7 @@ impl StyleBuilder {
     pub fn set_template<P: ThemeProperty>(&self, property: &'static P, build: fn(&Template<Control>) -> Result<P::Value>) -> &Self {
         let scope = self.scope.clone();
         let template: Rc<dyn ferroui_base::styling::ITemplate> = FuncTemplate::new(move || {
-            let template = Template { parent: None, names: Some(NameScopeRef::new(NameScope::new())), scope: &scope, priority: BindingPriority::Template };
+            let template = Template::new(None, Some(NameScopeRef::new(NameScope::new())), &scope);
             build(&template).unwrap_or_else(|error| panic!("{error}"))
         });
         self.style.add_setter(Setter::new_template(property.untyped(), template));
@@ -765,10 +778,10 @@ pub fn control_template<T: ObjectType + Upcast<TemplatedControl>>(
 ) -> Rc<dyn IControlTemplate> {
     let scope = scope.clone();
     FuncControlTemplate::new(move |parent, names| {
-        let parent = parent.cast::<T>().unwrap_or_else(|| {
-            panic!("Unable to cast object of type '{}' to type '{}'.", parent.get_type().name(), T::TYPE.name())
-        });
-        let template = Template { parent: Some(&parent), names: Some(names.clone()), scope: &scope, priority: BindingPriority::Template };
+        // A template applied to a control of another class (a test, a theme of a base class)
+        // builds without the typed parent; its bindings find the templated parent at run time.
+        let parent = parent.cast::<T>();
+        let template = Template::new(parent.as_ref(), Some(names.clone()), &scope);
         match build(&template) {
             Ok(content) => content,
             Err(error) => panic!("{error}"),
@@ -780,7 +793,7 @@ pub fn control_template<T: ObjectType + Upcast<TemplatedControl>>(
 pub fn items_panel(scope: &Scope, build: fn(&Template<Control>) -> Result<Ref<Panel>>) -> Rc<FuncTemplate<Option<Ref<Panel>>>> {
     let scope = scope.clone();
     FuncTemplate::new(move || {
-        let template = Template { parent: None, names: None, scope: &scope, priority: BindingPriority::Template };
+        let template = Template::new(None, None, &scope);
         Some(build(&template).unwrap_or_else(|error| panic!("{error}")))
     })
 }
@@ -790,7 +803,7 @@ pub fn focus_adorner(scope: &Scope, build: fn(&Template<Control>) -> Result<Ref<
     let scope = scope.clone();
     FuncTemplate::new(move || {
         let names = NameScopeRef::new(NameScope::new());
-        let template = Template { parent: None, names: Some(names), scope: &scope, priority: BindingPriority::Template };
+        let template = Template::new(None, Some(names), &scope);
         Some(build(&template).unwrap_or_else(|error| panic!("{error}")))
     })
 }
@@ -801,7 +814,7 @@ pub fn template_of(scope: &Scope, build: fn(&Template<Control>) -> Result<Ref<Co
     let scope = scope.clone();
     FuncTemplate::new(move || {
         let names = NameScopeRef::new(NameScope::new());
-        let template = Template { parent: None, names: Some(names), scope: &scope, priority: BindingPriority::Template };
+        let template = Template::new(None, Some(names), &scope);
         build(&template).unwrap_or_else(|error| panic!("{error}"))
     })
 }
@@ -823,7 +836,7 @@ struct DecorationsTemplate<T: ObjectType> {
 impl<T: ObjectType> DecorationsTemplate<T> {
     fn build_content(&self) -> ferroui_controls::templates::TemplateResult<Ref<ferroui_controls::chrome::WindowDrawnDecorationsContent>> {
         let names = NameScopeRef::new(NameScope::new());
-        let template = Template { parent: None, names: Some(names.clone()), scope: &self.scope, priority: BindingPriority::Template };
+        let template = Template::new(None, Some(names.clone()), &self.scope);
         let content = (self.build)(&template).unwrap_or_else(|error| panic!("{error}"));
         ferroui_controls::templates::TemplateResult::new(content, names)
     }
@@ -847,7 +860,7 @@ pub fn data_template(scope: &Scope, build: fn(&Template<Control>) -> Result<Ref<
     FuncDataTemplate::new(
         |_| true,
         move |_, names| {
-            let template = Template { parent: None, names: Some(names.clone()), scope: &scope, priority: BindingPriority::Template };
+            let template = Template::new(None, Some(names.clone()), &scope);
             Some(build(&template).unwrap_or_else(|error| panic!("{error}")))
         },
         true,
@@ -861,7 +874,7 @@ pub fn data_template_of<T: MarkupTyped + ?Sized>(scope: &Scope, build: fn(&Templ
     FuncDataTemplate::new(
         |data| rt::is_instance(&data.cloned(), rt::markup_handle(T::MARKUP)),
         move |_, names| {
-            let template = Template { parent: None, names: Some(names.clone()), scope: &scope, priority: BindingPriority::Template };
+            let template = Template::new(None, Some(names.clone()), &scope);
             Some(build(&template).unwrap_or_else(|error| panic!("{error}")))
         },
         true,
@@ -875,7 +888,7 @@ pub fn data_template_for<T: 'static>(scope: &Scope, build: fn(&Template<Control>
     FuncDataTemplate::new(
         |data| data.is_some_and(|data| data.downcast_ref::<T>().is_some()),
         move |_, names| {
-            let template = Template { parent: None, names: Some(names.clone()), scope: &scope, priority: BindingPriority::Template };
+            let template = Template::new(None, Some(names.clone()), &scope);
             Some(build(&template).unwrap_or_else(|error| panic!("{error}")))
         },
         true,
@@ -920,9 +933,16 @@ pub struct Template<'a, T: ObjectType> {
     names: Option<NameScopeRef>,
     scope: &'a Scope,
     priority: BindingPriority,
+    /// The elements being built, innermost last: the anchor of the bindings of an object of
+    /// the template that is not an element (a transform, a key binding).
+    elements: RefCell<Vec<Ref<FerroObject>>>,
 }
 
 impl<'a, T: ObjectType> Template<'a, T> {
+    fn new(parent: Option<&'a Ref<T>>, names: Option<NameScopeRef>, scope: &'a Scope) -> Self {
+        Template { parent, names, scope, priority: BindingPriority::Template, elements: RefCell::new(Vec::new()) }
+    }
+
     /// The control the template is applied to (none for a template of a panel, an adorner or
     /// data).
     pub fn parent(&self) -> Option<&Ref<T>> {
@@ -951,7 +971,7 @@ impl<'a, T: ObjectType> Template<'a, T> {
 
     /// Starts the element `object` of the template.
     pub fn make<E: ObjectType + Upcast<FerroObject>>(&self, object: Ref<E>) -> Element<'_, E> {
-        Element::start(object, self.scope, self.names.as_ref(), self.priority)
+        Element::start_in(object, self.scope, self.names.as_ref(), self.priority, Some(&self.elements))
     }
 }
 
@@ -963,6 +983,11 @@ pub struct Element<'a, E: ObjectType> {
     scope: &'a Scope,
     names: Option<&'a NameScopeRef>,
     priority: BindingPriority,
+    /// The nearest element around this object, for the bindings of an object that is not an
+    /// element (a brush, a transform): what they find named elements and ancestors from.
+    anchor: Option<Ref<FerroObject>>,
+    /// The elements of the template being built.
+    elements: Option<&'a RefCell<Vec<Ref<FerroObject>>>>,
 }
 
 impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
@@ -973,9 +998,25 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
     }
 
     fn start(object: Ref<E>, scope: &'a Scope, names: Option<&'a NameScopeRef>, priority: BindingPriority) -> Self {
-        let this = Self { object, scope, names, priority };
-        if let Some(element) = this.styled() {
-            element.begin_init();
+        Self::start_in(object, scope, names, priority, None)
+    }
+
+    fn start_in(
+        object: Ref<E>,
+        scope: &'a Scope,
+        names: Option<&'a NameScopeRef>,
+        priority: BindingPriority,
+        elements: Option<&'a RefCell<Vec<Ref<FerroObject>>>>,
+    ) -> Self {
+        let mut this = Self { object, scope, names, priority, anchor: None, elements };
+        match this.styled() {
+            Some(element) => {
+                element.begin_init();
+                if let Some(elements) = elements {
+                    elements.borrow_mut().push(element.upcast());
+                }
+            }
+            None => this.anchor = elements.and_then(|elements| elements.borrow().last().cloned()),
         }
         this
     }
@@ -990,7 +1031,14 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
 
     /// Starts the element `object` as a child of this one (with its scope, names and priority).
     pub fn make<C: ObjectType + Upcast<FerroObject>>(&self, object: Ref<C>) -> Element<'a, C> {
-        Element::start(object, self.scope, self.names, self.priority)
+        let mut child = Element::start_in(object, self.scope, self.names, self.priority, self.elements);
+        if child.styled().is_none() {
+            child.anchor = match self.styled() {
+                Some(element) => Some(element.upcast()),
+                None => self.anchor.clone(),
+            };
+        }
+        child
     }
 
     /// Sets `property` to `value`.
@@ -1038,7 +1086,11 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
 
     /// Binds `property` to `binding`.
     pub fn bind(self, property: &'static impl AnyProperty, binding: Rc<dyn BindingBase>) -> Self {
-        let _ = self.as_object().bind_binding(property.property(), &*binding);
+        let anchor = match self.styled() {
+            Some(_) => None,
+            None => self.anchor.as_ref(),
+        };
+        let _ = self.as_object().bind_binding_with_anchor(property.property(), &*binding, anchor);
         self
     }
 
@@ -1142,6 +1194,9 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
     /// Ends the initialisation of the element and returns it.
     pub fn end(self) -> Ref<E> {
         if let Some(element) = self.styled() {
+            if let Some(elements) = self.elements {
+                elements.borrow_mut().pop();
+            }
             element.end_init();
         }
         self.object

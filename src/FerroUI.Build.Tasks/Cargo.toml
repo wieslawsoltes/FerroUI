@@ -53,6 +53,11 @@ naga = { workspace = true, features = ["wgsl-in", "glsl-out"], optional = true }
 # 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
 # crate under the names they had here.
 ferroui-build-scan = { workspace = true }
+# The front end of themes written in Rust (`rust_theme`, #988): the parser the compiler already
+# builds with (`ferroui-markup-xaml-loader/compiler`).
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "clone-impls"] }
+quote = { version = "1", default-features = false }
+proc-macro2 = { version = "1", default-features = false }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

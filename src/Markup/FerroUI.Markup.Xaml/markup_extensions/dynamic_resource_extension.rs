@@ -89,6 +89,22 @@ impl DynamicResourceExtension {
         this
     }
 
+    /// The extension with the key `key` as `provide_value` leaves it at a place with the anchor
+    /// `anchor`, the theme variant `theme_variant` and the priority `priority`: what a theme in
+    /// Rust gives a setter (`crate::rust_theme`, #988).
+    pub(crate) fn at_place(
+        key: &str,
+        anchor: Option<HeldAnchor>,
+        theme_variant: Option<ThemeVariant>,
+        priority: BindingPriority,
+    ) -> Rc<Self> {
+        let this = Self::with_resource_key(crate::xaml_il::runtime::compiled::string_object(key));
+        *this.anchor.borrow_mut() = anchor;
+        *this.theme_variant.borrow_mut() = theme_variant;
+        this.priority.set(priority);
+        this
+    }
+
     /// The extension as the binding contract.
     pub fn as_binding(&self) -> Rc<dyn BindingBase> {
         self.this.upgrade().expect("the extension is alive while it is used")

@@ -82,7 +82,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The text of ShowProgressText (FerroUI): ProgressTextFormat with its arguments.
     resources.deferred("ProgressBarTextFormatConverter", |scope| {
-        Ok(value(StringFormatConverter::new()))
+        Ok(value(::std::rc::Rc::new(StringFormatConverter::new())))
     });
     resources.control_theme("DefaultProgressBarStyle", default_progress_bar_style);
     resources.control_theme(type_key::<ProgressBar>(), progress_bar_theme);

@@ -149,11 +149,20 @@ fn main() {
         }
         return;
     }
+    // The theme in Rust through the compiler (#988): the same group, its documents read from the
+    // modules of the theme in Rust.
+    let names: Vec<&str> = documents.iter().map(|(name, _)| *name).collect();
+    let group = ferroui_build::XamlGroup::new("compiled_xaml");
+    let group = if env::var_os("CARGO_FEATURE_RUST_THEME_COMPILED").is_some() {
+        println!("cargo::rerun-if-changed={}", root.join("rust_theme").display());
+        group.rust_theme("rust_theme", &names, "compiled_xaml.xamlmeta")
+    } else {
+        group.documents(&documents)
+    };
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
         .compile_group(
-            ferroui_build::XamlGroup::new("compiled_xaml")
-                .documents(&documents)
+            group
                 .class_document("WinUITheme.xaml")
                 .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_registered_parts")),
         )

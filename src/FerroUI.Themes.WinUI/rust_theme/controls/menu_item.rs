@@ -112,7 +112,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     resources.deferred("MenuItemKeyGestureConverter", |scope| {
-        Ok(value(PlatformKeyGestureConverter::new()))
+        Ok(value(::std::rc::Rc::new(PlatformKeyGestureConverter::new())))
     });
     resources.control_theme("DefaultMenuFlyoutItemStyle", default_menu_flyout_item_style);
     // WinUI applies the default style of a control beneath an explicit style, so the keyed

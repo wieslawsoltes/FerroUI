@@ -576,6 +576,12 @@ class Converter:
         path = self.type_path(entry)
         return f"<dyn {path}>" if entry["rust_path"].startswith("dyn ") else path
 
+    def shared_handle(self, entry: dict) -> bool:
+        """Whether the class is held as `Rc<Self>` (a converter, a transition of markup)."""
+        if entry.get("this", "").startswith("::std::rc::Rc<"):
+            return True
+        return f"::std::rc::Rc<{entry['rust_path']}>" in entry.get("handles", [])
+
     def constructor(self, entry: dict) -> str:
         """The call of the default constructor of a class outside the object model."""
         for constructor in entry.get("constructors", []):
@@ -588,11 +594,11 @@ class Converter:
             if callable_path:
                 function = callable_path.rsplit("::", 1)[1]
                 made = f"{self.qualified(entry)}::{function}()"
-                if entry.get("this", "").startswith("::std::rc::Rc<") and function == "new":
+                if self.shared_handle(entry) and function == "new":
                     return f"{self.use('::std::rc::Rc')}::new({made})"
                 return made
         made = f"{self.qualified(entry)}::new()"
-        if entry.get("this", "").startswith("::std::rc::Rc<"):
+        if self.shared_handle(entry):
             return f"{self.use('::std::rc::Rc')}::new({made})"
         return made
 

@@ -32,6 +32,10 @@ designer-sources = []
 # `scripts/themes/xaml_to_rust.py`) instead of the compiled markup: #988, a prototype; the build
 # script compiles no markup (docs/xaml-themes.md, section 10).
 rust-theme = []
+# The theme in Rust read back by the XAML compiler (#988, a prototype): the build script gives the
+# modules of `rust_theme/` to the front end of `ferroui_build::rust_theme`, which writes the
+# documents they describe, and compiles them as the documents of the theme.
+rust-theme-compiled = []
 
 [dependencies]
 # The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared
