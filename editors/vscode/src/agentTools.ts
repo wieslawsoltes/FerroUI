@@ -16,6 +16,7 @@ import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
+import type { ProjectDefinition } from './projectLibrary';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { ScenarioRunner } from './scenarioRunner';
@@ -94,6 +95,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
+    query?: string;
+    entry?: ProjectDefinition;
+    destination?: 'preview' | 'source';
 }
 
 export class AgentTools {
@@ -163,6 +167,8 @@ export class AgentTools {
             return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal, args.runtime);
         }
         if (tool === 'ferroui_project_files') return this.project.list(args.folder, args.kind as ProjectFile['kind'] | undefined, args.offset ?? 0, args.limit ?? 100, signal);
+        if (tool === 'ferroui_project_library') return this.workbench.projectLibrary.list(args.folder, args.query ?? '', args.offset ?? 0, args.limit ?? 100, signal);
+        if (tool === 'designer_open_project_definition') return this.workbench.openProjectDefinition(args.entry!, args.destination ?? 'preview', signal);
         if (tool === 'ferroui_project_scaffold') return this.scaffolds.create(args.kind as 'view' | 'component', args.language!, args.path, args.folder, signal);
         if (tool === 'ferroui_scenario_run') {
             const uri = await resolveWorkspaceFile(args.path, args.folder);

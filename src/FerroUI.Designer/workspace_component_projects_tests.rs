@@ -1,6 +1,7 @@
 use super::*;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_designer_project::{Solution, file_uri};
+use ferroui_designer_tools::ComponentKind;
 
 const MAIN: &str =
     r#"<UserControl xmlns="https://github.com/ferroui"><TextBlock Text="Main"/></UserControl>"#;

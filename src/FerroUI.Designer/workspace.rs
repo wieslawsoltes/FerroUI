@@ -974,6 +974,9 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[cfg(feature = "mcp")]
+#[path = "workspace_project_library.rs"]
+mod project_library;
 #[path = "workspace_history.rs"]
 mod history;
 #[path = "workspace_event_handlers.rs"]

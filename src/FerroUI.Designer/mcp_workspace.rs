@@ -9,9 +9,11 @@ use std::rc::Rc;
 
 #[path = "mcp_canvas_guides.rs"]
 mod canvas_guides;
+#[path = "mcp_project_library.rs"]
+mod project_library;
 
 pub(super) fn handles(name: &str) -> bool {
-    canvas_guides::handles(name) || matches!(
+    canvas_guides::handles(name) || project_library::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -127,6 +129,7 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_rename_resource","Apply the reviewed project resource rename in one Studio history step. Copy review from designer_plan_resource_rename.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
     ];
     tools.extend(canvas_guides::tools());
+    tools.extend(project_library::tools());
     tools
 }
 pub(super) fn call(
@@ -137,6 +140,9 @@ pub(super) fn call(
 ) -> Result<Value, String> {
     if canvas_guides::handles(name) {
         return canvas_guides::call(workspace, name, args);
+    }
+    if project_library::handles(name) {
+        return project_library::call(workspace, name, args);
     }
     match name {
         "designer_reveal_rsx_animation_issue" => {

@@ -20,6 +20,7 @@ pub struct LspServer {
     open_uris: BTreeMap<String, String>,
     handler_commands: bool,
     extraction_commands: bool,
+    library_notifications: bool,
     cancelled: Arc<Mutex<BTreeSet<String>>>,
     tokens: tokens::TokenResults,
 }
@@ -33,6 +34,7 @@ impl Default for LspServer {
             open_uris: BTreeMap::new(),
             handler_commands: false,
             extraction_commands: false,
+            library_notifications: false,
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
             tokens: tokens::TokenResults::default(),
         }
@@ -86,6 +88,12 @@ impl LspServer {
         }
         let mut notifications = Vec::new();
         let result = self.dispatch(method, &params, &mut notifications);
+        if self.library_notifications && result.is_ok() && matches!(method,
+            "textDocument/didOpen" | "textDocument/didChange" | "textDocument/didClose" |
+            "workspace/didChangeWorkspaceFolders" | "workspace/didChangeWatchedFiles" | "workspace/didRenameFiles")
+        {
+            notifications.push(json!({"jsonrpc":"2.0", "method":"ferroui/projectLibraryChanged", "params":{}}));
+        }
         if let Some(id) = id {
             if self.cancelled.lock().unwrap().remove(&id.to_string()) {
                 notifications.push(error(id, -32800, "Request cancelled"));
@@ -192,6 +200,11 @@ impl LspServer {
             "textDocument/definition" => {
                 let (uri, offset) = self.position(params)?;
                 Ok(self.locations(self.service.definitions(uri, offset)?))
+            }
+            "ferroui/projectLibrary" => Ok(json!(self.service.project_library(&decode(params)?)?)),
+            "ferroui/resolveProjectLibrary" => {
+                self.service.resolve_project_library(&decode(params)?)?;
+                Ok(Value::Null)
             }
             "ferroui/projectDefinitionTarget" | "ferroui/projectDefinition" => {
                 let (uri, offset) = self.position(params)?;
@@ -486,6 +499,7 @@ impl LspServer {
         self.initialized = true;
         self.handler_commands = params["initializationOptions"]["ferrouiHandlerCommands"] == true;
         self.extraction_commands = params["initializationOptions"]["ferrouiExtractionCommands"] == true;
+        self.library_notifications = params["initializationOptions"]["ferrouiProjectLibrary"] == true;
         let roots: Vec<String> = params["workspaceFolders"]
             .as_array()
             .map(|folders| {
@@ -523,7 +537,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiResourceRename": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiProjectLibrary": true, "ferrouiResourceRename": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

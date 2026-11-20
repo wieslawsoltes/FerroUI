@@ -15,11 +15,15 @@ export class XamlServer implements vscode.Disposable {
     private transition = Promise.resolve();
     private disposed = false;
     private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
+    private readonly libraryChanged = new vscode.EventEmitter<void>();
+    readonly onProjectLibraryChange = this.libraryChanged.event;
     private readonly projects = new Map<string, ProjectMetadata>();
     private reviewedMove?: { from: string; to: string };
     eventDefinition?: (document: vscode.TextDocument, at: vscode.Position, token: vscode.CancellationToken) => Promise<vscode.Location | undefined>;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly channel: vscode.OutputChannel) {}
+
+    get running(): boolean { return this.client !== undefined; }
 
     start(restart = false): Promise<void> {
         this.transition = this.transition.then(async () => {
@@ -31,7 +35,9 @@ export class XamlServer implements vscode.Disposable {
                 command, transport: TransportKind.stdio,
             }, {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
-                initializationOptions: { ferrouiHandlerCommands: true, ferrouiExtractionCommands: vscode.workspace.isTrusted },
+                initializationOptions: {
+                    ferrouiHandlerCommands: true, ferrouiExtractionCommands: vscode.workspace.isTrusted, ferrouiProjectLibrary: true,
+                },
                 middleware: {
                     workspace: {
                         willRenameFiles: (event, next) => {
@@ -60,8 +66,10 @@ export class XamlServer implements vscode.Disposable {
             });
             this.client = client;
             try {
+                client.onNotification('ferroui/projectLibraryChanged', () => this.libraryChanged.fire());
                 await client.start();
                 for (const metadata of this.projects.values()) await this.publishMetadata(client, metadata);
+                if (restart) this.libraryChanged.fire();
             } catch (error) {
                 await this.stop();
                 throw error;
@@ -106,6 +114,23 @@ export class XamlServer implements vscode.Disposable {
             throw new Error('Use a FerroUI XAML language server that supports reviewed resource renames.');
         }
         return client.sendRequest<T>(`ferroui/${method}`, params);
+    }
+
+    async projectLibraryRequest<T>(method: 'projectLibrary' | 'resolveProjectLibrary', params: object, signal: AbortSignal): Promise<T> {
+        await this.start();
+        signal.throwIfAborted();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiProjectLibrary !== true) {
+            throw new Error('Update the FerroUI XAML language server to browse project definitions.');
+        }
+        const cancellation = new vscode.CancellationTokenSource();
+        const abort = () => cancellation.cancel();
+        signal.addEventListener('abort', abort, { once: true });
+        try { return await client.sendRequest<T>(`ferroui/${method}`, params, cancellation.token); }
+        finally {
+            signal.removeEventListener('abort', abort);
+            cancellation.dispose();
+        }
     }
 
     async registeredPropertyRequest<T>(method: 'registeredPropertyTarget' | 'planRegisteredPropertyRename', params: object): Promise<T> {
@@ -167,6 +192,7 @@ export class XamlServer implements vscode.Disposable {
     dispose(): void {
         this.disposed = true;
         this.watch.dispose();
+        this.libraryChanged.dispose();
         void this.transition.then(() => this.stop()).catch(error => this.channel.appendLine(errorMessage(error)));
     }
 }

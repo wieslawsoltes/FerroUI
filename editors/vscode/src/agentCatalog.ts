@@ -6,6 +6,16 @@ const session = { session: integer(1) };
 const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
+const lspPosition = { type: 'object', additionalProperties: false, required: ['line', 'character'],
+    properties: { line: integer(0), character: integer(0) } };
+const libraryAddress = { type: 'object', additionalProperties: false, required: ['folder', 'path', 'definition'], properties: {
+    folder: workspacePath, path: workspacePath,
+    definition: { type: 'object', additionalProperties: false, required: ['kind', 'name', 'range'], properties: {
+        kind: choice('UserControl', 'CustomControl', 'ControlTemplate', 'DataTemplate', 'ControlTheme', 'Style'),
+        name: text, key: text, targetType: text,
+        range: { type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: lspPosition, end: lspPosition } },
+    } },
+} };
 const cargoSelection = { folder: workspacePath, manifest_path: workspacePath, package: workspacePath, binary: workspacePath,
     label: workspacePath, features: { type: 'array', items: workspacePath, maxItems: 128 } };
 const unit = { type: 'number', minimum: 0, maximum: 1 };
@@ -89,6 +99,10 @@ export const agentCatalog = {
         } } }, ['direction', 'source']),
     ferroui_project_files: tool('Browse indexed Cargo manifests, XAML, RSX invocations, assets, stage sets and scenarios in the workbench project model.',
         { folder: workspacePath, kind: choice('cargo', 'xaml', 'rsx', 'asset', 'stages', 'scenario'), offset: integer(0), limit: integer(1, 200) }),
+    ferroui_project_library: tool('Find reusable XAML components, styles, themes, and templates in the project Library. Results reflect unsaved drafts. Choose a folder in a multi-root workspace.',
+        { folder: workspacePath, query: { type: 'string', maxLength: 4096 }, offset: integer(0), limit: integer(1, 200) }),
+    designer_open_project_definition: tool('Open a current project Library entry in its source or scoped native preview. Pass an entry returned by ferroui_project_library.',
+        { entry: libraryAddress, destination: choice('preview', 'source') }, ['entry'], true, false),
     ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',
         { kind: choice('view', 'component'), language: choice('xaml', 'rsx'), path: workspacePath, folder: workspacePath }, ['kind', 'language', 'path'], true, false),
     ferroui_designs: tool('List open FerroUI designer sessions and the active session in this VS Code window.'),

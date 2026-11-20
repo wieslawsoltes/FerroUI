@@ -41,6 +41,12 @@ Byte/UTF-16 conversions use sparse Unicode checkpoints and binary searches inste
 
 File documents use canonical filesystem identity, including symlink and `localhost` aliases and not-yet-created files under an existing parent. Query/edit entry points accept the original URI spelling; returned file locations use canonical URIs. LSP file-rename notifications validate their complete mapping before changing the index, support swaps, and reject duplicate or conflicting destinations without partially moving documents.
 
+## Project Library
+
+The `ferrouiProjectLibrary` capability advertises `ferroui/projectLibrary` and `ferroui/resolveProjectLibrary`. Pass the indexed workspace `folder` URI, a `limit` between 1 and 200, and optional `query` and `offset`. The result contains `entries`, `total`, and `offset`. Each entry contains a workspace-relative `path`, its `folder`, and the definition’s kind, name, UTF-16 name range, and authored key or target when present.
+
+Open the source buffer before resolving a result. Send its `uri` and synchronized `version` together with the entry’s fields. The language service checks the folder, current definition and buffer version. Clients can set `initializationOptions.ferrouiProjectLibrary` to receive `ferroui/projectLibraryChanged` when the underlying index changes. [Browse the Library in VS Code](../../docs/designer/vscode/authoring.md#find-reusable-xaml-definitions)
+
 ## Project event handlers
 
 `ferroui/projectMetadata` supplies the selected package’s build registry. The handler service resolves `x:Class` in that package, reads the event contract from the control’s exported type or its bases, and finds the authored `ferro_class_info!` registration through Cargo sources. The Rust and XAML snapshots use independent versions. The Rust grammar validates the original registration and reparses the proposed callback before returning the source changes.

@@ -4,7 +4,6 @@ import { errorMessage } from './protocol';
 import { StudioContext, type StudioItem } from './studioContext';
 import { behaviorItems } from './studioBehaviors';
 import { contentSections } from './studioContent';
-import { findDefinition } from './studioLibrary';
 import { focusItems } from './studioFocus';
 import { chooseGridTrack, gridItems } from './studioGrid';
 import { layerItems } from './studioLayers';
@@ -27,13 +26,6 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
         this.view = vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true });
         this.subscriptions = [this.view, this.changed, this.view.onDidChangeVisibility(visible),
             vscode.commands.registerCommand('ferroui.showStudio', () => vscode.commands.executeCommand(`${viewId}.focus`)),
-            vscode.commands.registerCommand('ferroui.studio.findDefinition', async () => {
-                try {
-                    const context = this.context();
-                    if (!context) throw new Error('Open a FerroUI design before finding a definition.');
-                    await findDefinition(context);
-                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
-            }),
             vscode.commands.registerCommand('ferroui.studio.gridTracks', async () => {
                 try {
                     const context = this.context();

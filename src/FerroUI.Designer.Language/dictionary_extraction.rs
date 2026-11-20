@@ -298,6 +298,7 @@ fn target(state: &State, uri: &str, site: &DictionarySite) -> Result<DictionaryE
 
 fn candidate(document: Document, version: i64) -> State {
     State {
+        library: Default::default(),
         index: LineIndex::new(document.source()),
         symbols: occurrences(&document),
         resource_edges: resource_edges(&document),

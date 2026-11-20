@@ -154,13 +154,21 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
-| **Library** | Filter authored components, templates, themes, styles, and dictionaries by kind. **Find Definition in Designer** searches them and opens a scoped native preview. Use the definition’s actions to reveal its declaration and references. XAML authors can create a data or control template and duplicate or rename applicable resources. |
+| **Library** | Browse reusable XAML definitions across the project and group the active design’s definitions by kind. Open a scoped native preview or reveal the original declaration. The current document’s Library also exposes references, template creation, and applicable resource actions. |
 | **Assets** | Browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. In **Behaviors**, attach routed-event or data-condition triggers and configure their actions in supported XAML. |
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
+
+### Find reusable XAML definitions
+
+1. Run **FerroUI: Show Library**, then expand **Project**. In a multi-root workspace, expand the folder that owns the definition. The index includes reusable components, styles, control themes, and templates in unopened XAML files.
+2. Use the search icon in Library or run **FerroUI: Find Definition in Designer**. Filter results by name, type, or file. The picker groups matches by workspace folder and includes definitions from the current design when its preview is ready.
+3. Choose a search result to open its scoped native preview. In the tree, expand an entry and choose **Preview definition** or **Reveal definition in source**. **Current document** offers the actions for the original authored scope, including **Return to document preview**.
+
+The Library follows unsaved XAML drafts and updates when files change on disk. Repair an invalid draft to bring its definitions back. If a definition changes while the search is open, reopen the search to get its current name and location. [Studio Library](../components.md#use-the-library) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ## Create a Rust handler for an XAML event
 

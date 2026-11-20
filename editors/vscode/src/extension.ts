@@ -14,6 +14,7 @@ import { HostedDesign } from './hostedDesign';
 import { FerroMcpProvider } from './mcpProvider';
 import { ProjectAssets } from './projectAssets';
 import { ProjectInventory } from './projectInventory';
+import { ProjectLibrary } from './projectLibrary';
 import { ProjectScaffold } from './projectScaffold';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
 import { ProjectView } from './projectView';
@@ -53,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
     const resourceRename = new ResourceRename(server);
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
-    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename);
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, new ProjectLibrary(server));
     const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
     const propertyRename = new RegisteredRename(server, 'property');
     const typeRename = new RegisteredRename(server, 'type');
@@ -79,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))
-                && vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true);
+                && (server.running || vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage))) void server.start(true);
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
         vscode.commands.registerCommand('ferroui.moveXamlFile', async (uri?: vscode.Uri) => {

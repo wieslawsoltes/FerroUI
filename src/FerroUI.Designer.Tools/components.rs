@@ -99,6 +99,24 @@ impl ComponentCatalog {
         Ok(Self { entries })
     }
 
+    /// Reusable definitions that can appear in a project Library. A document's
+    /// local Library can also show private styles and ordinary resources.
+    pub fn project_definitions(document: &Document) -> Result<Vec<ComponentEntry>> {
+        let root = document.ast().root();
+        let mut definitions = Self::declarations(document)?;
+        definitions.retain(|entry| match entry.kind {
+            ComponentKind::UserControl | ComponentKind::CustomControl => entry.node == root,
+            ComponentKind::ControlTheme | ComponentKind::DataTemplate => true,
+            ComponentKind::ControlTemplate => entry.target_type.is_some() || entry.key.is_some(),
+            ComponentKind::Style => entry
+                .target_type
+                .as_deref()
+                .is_some_and(|selector| !selector.contains('^')),
+            ComponentKind::Resource | ComponentKind::ResourceDictionary => false,
+        });
+        Ok(definitions)
+    }
+
     /// Authored definitions without a reference scan. Usage counts are zero.
     pub fn declarations(document: &Document) -> Result<Vec<ComponentEntry>> {
         valid_document(document)?;

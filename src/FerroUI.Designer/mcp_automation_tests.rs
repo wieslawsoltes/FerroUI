@@ -814,6 +814,40 @@ fn language_tools_rename_across_project_tabs_atomically_with_version_and_revisio
 }
 
 #[test]
+fn project_library_tools_open_an_unopened_dictionary_in_its_authored_scope() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Files::new();
+    let original = r#"<Button xmlns="https://github.com/ferroui" Name="Target"/>"#;
+    let start = files.write("View.xaml", original);
+    let source = concat!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n",
+        "  <DataTemplate x:Key='CustomerCard'><TextBlock Text='Card'/></DataTemplate>\n",
+        "</ResourceDictionary>",
+    );
+    let uri = files.write("Cards.xaml", source);
+    let workspace = DesignerWorkspace::with_uri(original, start.clone()).unwrap();
+    workspace.set_solution(ferroui_designer_project::Solution::discover(&files.0).unwrap()).unwrap();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let page = provider.call("ferroui_project_library", &json!({"query":"customer cards", "limit":1}), Permissions::default()).unwrap();
+    let entry = page["entries"][0].clone();
+    assert_eq!(page["total"], 1);
+    assert_eq!(entry["path"], "Cards.xaml");
+    assert!(!workspace.document_uris().contains(&uri));
+    let mut args = json!({"entry":entry, "destination":"preview"});
+    assert!(provider.call("designer_open_project_definition", &args, Permissions::default()).is_err());
+    args["entry"]["definition"]["name"] = json!("RetiredCard");
+    assert!(provider.call("designer_open_project_definition", &args, write()).is_err());
+    assert_eq!(workspace.session().borrow().document_uri(), start);
+    args["entry"]["definition"]["name"] = json!("CustomerCard");
+    let opened = provider.call("designer_open_project_definition", &args, write()).unwrap();
+    assert_eq!(opened["uri"], uri);
+    let session = workspace.session();
+    assert!(session.borrow().definition_scope().is_some());
+    assert_eq!(session.borrow().document().source(), source);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
 fn language_queries_share_editor_schema_and_build_plans_never_start_processes() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let files = Files::new();

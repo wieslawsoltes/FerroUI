@@ -8,8 +8,10 @@ use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::{Arc, OnceLock};
 
 mod definitions;
+mod project_library;
 mod registered_rename;
 mod registered_rsx;
 mod registered_types;
@@ -29,6 +31,7 @@ pub use file_move_literals::relocate_xaml_fragment;
 pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
+pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
 pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget};
@@ -119,6 +122,7 @@ struct State {
     symbols: Vec<Occurrence>,
     resource_edges: BTreeMap<u64, Vec<ResourceEdge>>,
     index: LineIndex,
+    library: Arc<OnceLock<Vec<LibraryDefinition>>>,
     version: i64,
     opened: bool,
 }
@@ -134,6 +138,7 @@ impl State {
             resource_edges: resource_edges(&document),
             document,
             index,
+            library: Default::default(),
             version,
             opened: self.opened,
         }
@@ -373,6 +378,7 @@ impl LanguageService {
                 resource_edges: resource_edges(&document),
                 document,
                 index: LineIndex::new(&source),
+                library: Default::default(),
                 version,
                 opened: true,
             }),
@@ -1734,6 +1740,9 @@ impl LanguageService {
     }
     fn workspace_root(&self, uri: &str) -> Option<&std::path::PathBuf> {
         let path = ferroui_designer_project::file_path(uri).ok()?;
+        self.workspace_root_for_path(&path)
+    }
+    fn workspace_root_for_path(&self, path: &std::path::Path) -> Option<&std::path::PathBuf> {
         self.workspaces
             .keys()
             .filter(|root| path.starts_with(root))

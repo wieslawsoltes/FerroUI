@@ -13,6 +13,8 @@ mod handler_project;
 mod handler_tests;
 mod line_index;
 pub mod lsp;
+#[cfg(test)]
+mod project_library_tests;
 mod project_schema;
 #[cfg(test)]
 mod project_navigation_tests;

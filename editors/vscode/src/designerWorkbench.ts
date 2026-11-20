@@ -14,13 +14,14 @@ import { DockView } from './dockView';
 import { sourceColumn } from './editorHistory';
 import type { EventHandlers, HandlerEditSite } from './eventHandlers';
 import { includedSourceUri } from './includedSource';
-import { LIBRARY_VIEW, LibraryView } from './libraryView';
+import { LIBRARY_VIEW, LibraryView, type DefinitionDestination } from './libraryView';
 import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
 import { showPropertyTrace, type DesignTraceSource, type PropertyTrace } from './propertyTrace';
 import type { ProjectAssets } from './projectAssets';
+import type { ProjectDefinition, ProjectLibrary } from './projectLibrary';
 import { promptRsxControlName } from './rsxRename';
 import { editBinding } from './studioBinding';
 import { StudioContext } from './studioContext';
@@ -30,13 +31,14 @@ import { chooseWrapper } from './studioWrap';
 import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
 import { editItemTemplates } from './studioItemTemplates';
+import type { ComponentLibrary } from './studioLibrary';
 import { StudioView } from './studioView';
 import type { LocatedStyleSource } from './stylesProtocol';
 import { STYLES_VIEW, StylesView } from './stylesView';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
 import { errorMessage, type CanvasPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
-import { asPosition, languageOf } from './textDocument';
+import { asPosition, asRange, languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
 const OUTLINE_VIEW = 'ferroui.outline';
@@ -81,7 +83,7 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers,
-        readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename) {
+        readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename, readonly projectLibrary: ProjectLibrary) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -123,6 +125,8 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.library = new LibraryView(changed, async (panel, node) => {
             this.styles.openDefinition(panel, node);
             await this.showDock(STYLES_VIEW, panel.session);
+        }, projectLibrary, async (entry, destination) => {
+            await this.openProjectDefinition(entry, destination, AbortSignal.timeout(15_000));
         });
         this.columns = new ColumnsView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
@@ -246,6 +250,40 @@ export class DesignerWorkbench implements vscode.Disposable {
         const designer = this.attach(panel, document, language, position);
         this.setActive(designer);
         return designer;
+    }
+
+    async openProjectDefinition(entry: ProjectDefinition, destination: DefinitionDestination, signal: AbortSignal) {
+        const { document, range, ensure } = await this.projectLibrary.resolve(entry, signal);
+        const columns = this.active && this.definitionColumns(this.active);
+        const address = { uri: document.uri.toString(), range: entry.definition.range };
+        if (destination === 'source') {
+            await vscode.window.showTextDocument(document, { viewColumn: columns?.source, selection: range, preview: false });
+            ensure();
+            return address;
+        }
+        const panel = await this.openDocument(document.uri, range.start, columns);
+        const snapshot = await panel.waitForSnapshot(signal);
+        ensure();
+        const token = panel.currentToken;
+        if (token === undefined) throw new Error('Wait for the current definition preview.');
+        const { components } = await panel.studioQuery('designer_components', {}, undefined, signal) as ComponentLibrary;
+        ensure();
+        const target = snapshot.nodes.find(node => asRange(node.nameRange).isEqual(range));
+        const definition = entry.definition;
+        if (panel.currentToken !== token || !target || !components.some(component => component.node === target.id
+            && component.kind === definition.kind && component.display_name === definition.name
+            && (component.key ?? undefined) === definition.key && (component.target_type ?? undefined) === definition.targetType)) {
+            throw new Error('The accepted preview no longer contains this Library definition. Search again.');
+        }
+        if (snapshot.definitionScope !== target.id) {
+            const scope = await panel.studioPresent(token, 'designer_definition', { action: 'enter', node: target.id }, undefined, signal);
+            ensure();
+            if (scope?.definitionScope !== target.id || panel.snapshot?.definitionScope !== target.id) {
+                throw new Error('The design changed while opening the definition.');
+            }
+        }
+        panel.panel.reveal(undefined, true);
+        return { ...address, session: panel.session, revision: panel.currentToken };
     }
 
     private async restore(panel: vscode.WebviewPanel, state: unknown): Promise<void> {
