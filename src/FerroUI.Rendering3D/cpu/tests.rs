@@ -271,12 +271,13 @@ fn a_diffuse_layer_paints_its_gradient_over_the_texture_coordinates() {
         let brush = horizontal_gradient(stops);
         let layers = vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush)];
         let quad = model(quad(1, -1.0, -1.0, 1.0, 1.0, 0.0), layers, vec![]);
-        let before = crate::layers_with_unsampled_brushes();
+        // The columns of the gradient show that the brush is sampled (an unsampled layer is drawn
+        // with its colour alone). The process-wide count of unsampled layers is not compared:
+        // tests that run in parallel add to it.
         let image = draw(&snapshot(orthographic(), vec![quad], vec![white_ambient()]), CpuRenderOptions::default());
         for x in [0, 25, 50, 77, 99] {
             assert_gradient_column(&image, x, 50, 255);
         }
-        assert_eq!(before, crate::layers_with_unsampled_brushes(), "{stops} stops are sampled");
     }
 }
 
