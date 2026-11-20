@@ -637,10 +637,12 @@ impl ValueStore {
                 return T::from_storage(cast_effective_value::<T::Storage>(&*values[index].1).value());
             }
         }
-        if property.inherits() {
-            self.inherited_or_default(owner, property)
-        } else {
-            property.get_default_value_for(owner)
+        // The inherited value is read once for each storage type; only the default stays with the
+        // value type, written once for both cases.
+        let inherited = if property.inherits() { self.inherited_stored_value::<T::Storage>(property) } else { None };
+        match inherited {
+            Some(value) => T::from_storage(value),
+            None => property.get_default_value_for(owner),
         }
     }
 
@@ -661,17 +663,10 @@ impl ValueStore {
         }
     }
 
+    /// The value of the nearest inheritance ancestor that holds one, as the store keeps it.
     // Keep the inherited value's temporary Rc and its unwind cleanup off the
     // hot paths for a local value or the default of a non-inheriting property.
     #[inline(never)]
-    fn inherited_or_default<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
-        match self.inherited_stored_value::<T::Storage>(property) {
-            Some(value) => T::from_storage(value),
-            None => property.get_default_value_for(owner),
-        }
-    }
-
-    /// The value of the nearest inheritance ancestor that holds one, as the store keeps it.
     fn inherited_stored_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
         self.try_get_inherited_value(property).map(|value| cast_effective_value::<S>(&*value).value())
     }
