@@ -39,6 +39,9 @@ mod cards {
             pub fn tone_property() -> StyledProperty<String> {
                 FerroProperty::register::<Card, String>("Tone", StyledPropertyMetadata::default())
             }
+            pub fn badge_property() -> AttachedProperty<String> {
+                FerroProperty::register_attached::<Card, Control, String>("Badge", String::new())
+            }
         }
     }
 }"#;

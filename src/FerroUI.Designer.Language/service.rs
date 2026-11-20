@@ -12,6 +12,7 @@ use std::collections::{BTreeMap, BTreeSet};
 mod definitions;
 mod registered_rename;
 mod registered_types;
+mod style_selectors;
 mod refactoring;
 mod source_review;
 #[path = "handler_service.rs"]

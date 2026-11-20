@@ -53,6 +53,8 @@ Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two revie
 
 The service resolves the property through the consuming package's build schema, refreshes unopened XAML, and validates each patch against the proposed name. The review contains each affected document's original text, versioned patches, proposed text, and any potential XAML references with unmapped targets. Hosts recompute the plan and compare its review identifier before staging a single undoable transaction. Studio calls the same planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-property)
 
+Selector operands come from `ferroui-markup-syntax`, the grammar used by the XAML compiler and runtime. The language service carries the declared target through each selector branch and resolves nested targets and attached owners against the Cargo schema. It maps decoded XML token boundaries back to the source before planning patches. Go to Definition and the two registered rename reviews use these same operands. [Style selector workflow](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-type)
+
 ## Registered type rename
 
 The `ferrouiRegisteredTypeRename` capability advertises `ferroui/registeredTypeTarget`, `ferroui/planRegisteredTypeRename`, and `ferroui/completeRegisteredTypeRename`. Use `textDocument.uri` and a versioned UTF-16 `request` to identify the build-registered type. The plan also takes `newName` and the relevant open Rust `sourceDrafts`. A literal alias returns a complete review.

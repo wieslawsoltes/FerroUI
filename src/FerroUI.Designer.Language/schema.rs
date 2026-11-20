@@ -255,6 +255,13 @@ impl Schema {
     }
 
     pub fn type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
+        self.exact_type_info(name, namespace).or_else(|| {
+            // XamlX accepts the omitted Extension suffix in object-element syntax too.
+            self.exact_type_info(&format!("{name}Extension"), namespace)
+        })
+    }
+
+    pub(crate) fn exact_type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
         let namespace = namespace.unwrap_or(FRAMEWORK_NAMESPACE);
         let namespace = if namespace == crate::design_support::DESIGN_NAMESPACE {
             FRAMEWORK_NAMESPACE
@@ -262,16 +269,12 @@ impl Schema {
             namespace
         };
         let name = name.rsplit(':').next().unwrap_or(name);
-        let resolve = |name: &str| {
-            let key = format!("{namespace}|{name}");
-            self.types.get(&key).or_else(|| {
-                builtin_aliases()
-                    .get(&key)
-                    .and_then(|canonical| self.types.get(canonical))
-            })
-        };
-        // XamlX accepts the omitted Extension suffix in object-element syntax too.
-        resolve(name).or_else(|| resolve(&format!("{name}Extension")))
+        let key = format!("{namespace}|{name}");
+        self.types.get(&key).or_else(|| {
+            builtin_aliases()
+                .get(&key)
+                .and_then(|canonical| self.types.get(canonical))
+        })
     }
     pub fn properties(
         &self,
@@ -303,7 +306,7 @@ impl Schema {
         self.property_in_context(owner, namespace, name, namespace)
     }
 
-    fn base_type(&self, info: &TypeInfo) -> Option<&TypeInfo> {
+    pub(crate) fn base_type(&self, info: &TypeInfo) -> Option<&TypeInfo> {
         if let Some(base) = &info.model_base {
             return self.type_info(&base.name, Some(&base.namespace));
         }

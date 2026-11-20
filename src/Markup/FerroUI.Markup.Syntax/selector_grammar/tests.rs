@@ -1,5 +1,35 @@
 use super::*;
 
+#[test]
+fn retains_operand_spans_through_nested_selectors() {
+    let source =
+        "ns|Étiquette[Caption=🧭]:not(Button[(ui|Card.Tone)=Caption]), :is(ns|Étiquette)#Caption";
+    let (syntax, operands) = SelectorGrammar::operand_ranges(source).unwrap();
+    assert_eq!(syntax, SelectorGrammar::parse(source).unwrap());
+    let text: Vec<_> = operands
+        .iter()
+        .map(|operand| match operand {
+            SelectorOperand::Type(span) => ("type", &source[span.clone()], None),
+            SelectorOperand::Property(span) => ("property", &source[span.clone()], None),
+            SelectorOperand::AttachedProperty { owner, property } => (
+                "attached",
+                &source[owner.clone()],
+                Some(&source[property.clone()]),
+            ),
+        })
+        .collect();
+    assert_eq!(
+        text,
+        [
+            ("type", "Étiquette", None),
+            ("property", "Caption", None),
+            ("type", "Button", None),
+            ("attached", "Card", Some("Tone")),
+            ("type", "Étiquette", None),
+        ]
+    );
+}
+
 fn parse(s: &str) -> Vec<SelectorSyntax> {
     SelectorGrammar::parse(s).unwrap()
 }
@@ -475,7 +505,11 @@ fn empty_selector_parses_to_nothing() {
 fn template_without_spaces() {
     assert_eq!(
         parse("Button/template/Border"),
-        [of_type("Button"), SelectorSyntax::Template, of_type("Border")]
+        [
+            of_type("Button"),
+            SelectorSyntax::Template,
+            of_type("Border")
+        ]
     );
 }
 
@@ -556,7 +590,10 @@ fn name_and_template_errors() {
 fn property_errors() {
     assert_eq!(error("Button[Foo]"), "Expected '=', got ']'");
     assert_eq!(error("Button[Foo"), "Expected '=', got ''");
-    assert_eq!(error("Button[Foo=bar"), "Expected ']', got end of selector.");
+    assert_eq!(
+        error("Button[Foo=bar"),
+        "Expected ']', got end of selector."
+    );
 }
 
 #[test]
@@ -573,7 +610,10 @@ fn attached_property_errors() {
         error("Button[(Grid.Column)=1"),
         "Expected ']', got end of selector."
     );
-    assert_eq!(error("Button[(1.Column)=1]"), "Expected an identifier, got '1");
+    assert_eq!(
+        error("Button[(1.Column)=1]"),
+        "Expected an identifier, got '1"
+    );
 }
 
 #[test]

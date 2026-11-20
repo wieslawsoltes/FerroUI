@@ -5,6 +5,10 @@ use crate::span_helpers::{try_parse_int, NumberStyles};
 use crate::ExpressionParseError;
 use std::ops::Range;
 
+mod spans;
+pub use spans::SelectorOperand;
+use spans::SourceRanges;
+
 /// A syntax element of a parsed selector.
 #[derive(Clone, Debug, PartialEq)]
 pub enum SelectorSyntax {
@@ -60,36 +64,28 @@ impl SelectorGrammar {
     /// Parses `s` into a list of syntax elements.
     pub fn parse(s: &str) -> Result<Vec<SelectorSyntax>, ExpressionParseError> {
         let mut r = CharacterReader::new(s);
-        parse(&mut r, None, false, &mut None)
+        parse(&mut r, None, false, &mut SourceRanges::new(s))
     }
 
     /// Collect name tests using the same grammar as runtime style application.
     pub fn name_ranges(
         s: &str,
     ) -> Result<(Vec<SelectorSyntax>, Vec<SelectorName>), ExpressionParseError> {
-        let mut names = Some(NameRanges {
-            input: s,
-            spans: Vec::new(),
-        });
-        let syntax = parse(&mut CharacterReader::new(s), None, false, &mut names)?;
-        Ok((syntax, names.unwrap().spans))
+        let mut ranges = SourceRanges::new(s);
+        ranges.names = Some(Vec::new());
+        let syntax = parse(&mut CharacterReader::new(s), None, false, &mut ranges)?;
+        Ok((syntax, ranges.names.unwrap()))
     }
-}
 
-struct NameRanges<'a> {
-    input: &'a str,
-    spans: Vec<SelectorName>,
-}
-
-impl NameRanges<'_> {
-    fn record(&mut self, name: &str, in_template: bool) {
-        // The reader returns a slice of the original UTF-8 input.
-        let start = name.as_ptr() as usize - self.input.as_ptr() as usize;
-        self.spans.push(SelectorName {
-            range: start..start + name.len(),
-            in_template,
-            ancestor: false,
-        });
+    /// Collect selector type and property operands in lexical order, including inside `:not`.
+    /// Consume one operand for each corresponding syntax node during a depth-first walk.
+    pub fn operand_ranges(
+        s: &str,
+    ) -> Result<(Vec<SelectorSyntax>, Vec<SelectorOperand>), ExpressionParseError> {
+        let mut ranges = SourceRanges::new(s);
+        ranges.operands = Some(Vec::new());
+        let syntax = parse(&mut CharacterReader::new(s), None, false, &mut ranges)?;
+        Ok((syntax, ranges.operands.unwrap()))
     }
 }
 
@@ -120,30 +116,26 @@ fn parse(
     r: &mut CharacterReader<'_>,
     end: Option<char>,
     starts_in_template: bool,
-    names: &mut Option<NameRanges<'_>>,
+    ranges: &mut SourceRanges<'_>,
 ) -> ParseResult<Vec<SelectorSyntax>> {
     let mut state = State::Start;
     let mut selector = Vec::new();
     let mut in_template = starts_in_template;
-    let mut subject_start = names.as_ref().map_or(0, |names| names.spans.len());
+    let mut subject_start = ranges.names.as_ref().map_or(0, Vec::len);
     while !r.end() && state != State::End {
         let syntax;
         (state, syntax) = match state {
             State::Start => parse_start(r),
             State::Middle => parse_middle(r, end),
             State::CanHaveType => (parse_can_have_type(r), None),
-            State::Colon => parse_colon(r, in_template, names)?,
+            State::Colon => parse_colon(r, in_template, ranges)?,
             State::Class => parse_class(r)?,
             State::Traversal => parse_traversal(r),
-            State::TypeName => parse_type_name(r)?,
-            State::Property => parse_property(r)?,
+            State::TypeName => parse_type_name(r, ranges)?,
+            State::Property => parse_property(r, ranges)?,
             State::Template => parse_template(r)?,
-            State::Name => parse_name(r, |name| {
-                if let Some(names) = names {
-                    names.record(name, in_template);
-                }
-            })?,
-            State::AttachedProperty => parse_attached_property(r)?,
+            State::Name => parse_name(r, |name| ranges.record_name(name, in_template))?,
+            State::AttachedProperty => parse_attached_property(r, ranges)?,
             State::End => (State::End, None),
         };
         if let Some(syntax) = syntax {
@@ -151,14 +143,14 @@ fn parse(
                 syntax,
                 SelectorSyntax::Template | SelectorSyntax::Child | SelectorSyntax::Descendant
             );
-            if let Some(names) = names {
+            if let Some(names) = &mut ranges.names {
                 if combinator {
-                    for name in &mut names.spans[subject_start..] {
+                    for name in &mut names[subject_start..] {
                         name.ancestor = true;
                     }
                 }
                 if combinator || matches!(syntax, SelectorSyntax::Comma) {
-                    subject_start = names.spans.len();
+                    subject_start = names.len();
                 }
                 if matches!(syntax, SelectorSyntax::Template | SelectorSyntax::Comma) {
                     in_template = starts_in_template || matches!(syntax, SelectorSyntax::Template);
@@ -231,7 +223,7 @@ fn parse_can_have_type(r: &mut CharacterReader<'_>) -> State {
 fn parse_colon(
     r: &mut CharacterReader<'_>,
     in_template: bool,
-    names: &mut Option<NameRanges<'_>>,
+    ranges: &mut SourceRanges<'_>,
 ) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let identifier = r.parse_style_class();
 
@@ -250,14 +242,18 @@ fn parse_colon(
     if identifier == IS_KEYWORD && r.take_if('(') {
         let (xmlns, type_name) = parse_type(r)?;
         expect(r, ')')?;
+        ranges.record_type(type_name);
 
         return Ok((
             State::CanHaveType,
-            Some(SelectorSyntax::Is { type_name, xmlns }),
+            Some(SelectorSyntax::Is {
+                type_name: type_name.into(),
+                xmlns: xmlns.into(),
+            }),
         ));
     }
     if identifier == NOT_KEYWORD && r.take_if('(') {
-        let argument = parse(r, Some(')'), in_template, names)?;
+        let argument = parse(r, Some(')'), in_template, ranges)?;
         expect(r, ')')?;
 
         return Ok((State::Middle, Some(SelectorSyntax::Not { argument })));
@@ -352,16 +348,26 @@ fn parse_name<'a>(
     ))
 }
 
-fn parse_type_name(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
+fn parse_type_name(
+    r: &mut CharacterReader<'_>,
+    ranges: &mut SourceRanges<'_>,
+) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let (xmlns, type_name) = parse_type(r)?;
+    ranges.record_type(type_name);
     Ok((
         State::CanHaveType,
-        Some(SelectorSyntax::OfType { type_name, xmlns }),
+        Some(SelectorSyntax::OfType {
+            type_name: type_name.into(),
+            xmlns: xmlns.into(),
+        }),
     ))
 }
 
-fn parse_property(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
-    let property = r.parse_identifier();
+fn parse_property(
+    r: &mut CharacterReader<'_>,
+    ranges: &mut SourceRanges<'_>,
+) -> ParseResult<(State, Option<SelectorSyntax>)> {
+    let property = identifier_at(r);
 
     if r.take_if('(') {
         return Ok((State::AttachedProperty, None));
@@ -375,6 +381,7 @@ fn parse_property(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
     let value = r.take_until(']');
 
     take_close_bracket(r)?;
+    ranges.record_property(property);
 
     Ok((
         State::CanHaveType,
@@ -387,6 +394,7 @@ fn parse_property(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
 
 fn parse_attached_property(
     r: &mut CharacterReader<'_>,
+    ranges: &mut SourceRanges<'_>,
 ) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let (xmlns, type_name) = parse_type(r)?;
     if !r.take_if('.') {
@@ -420,13 +428,14 @@ fn parse_attached_property(
     let value = r.take_until(']');
 
     take_close_bracket(r)?;
+    ranges.record_attached(type_name, property);
 
     let state = if r.end() { State::End } else { State::Middle };
     Ok((
         state,
         Some(SelectorSyntax::AttachedProperty {
-            xmlns,
-            type_name,
+            xmlns: xmlns.into(),
+            type_name: type_name.into(),
             property: property.to_string(),
             value: value.to_string(),
         }),
@@ -447,7 +456,7 @@ fn take_close_bracket(r: &mut CharacterReader<'_>) -> ParseResult<()> {
 }
 
 /// Parses `Type` or `ns|Type`, returning `(xmlns, type_name)`.
-fn parse_type(r: &mut CharacterReader<'_>) -> ParseResult<(String, String)> {
+fn parse_type<'a>(r: &mut CharacterReader<'a>) -> ParseResult<(&'a str, &'a str)> {
     let mut ns = "";
     let namespace_or_type_name = r.parse_identifier();
 
@@ -466,12 +475,22 @@ fn parse_type(r: &mut CharacterReader<'_>) -> ParseResult<(String, String)> {
                 "Unexpected end of selector.",
             ));
         }
-        r.parse_identifier()
+        identifier_at(r)
     } else {
         namespace_or_type_name
     };
 
-    Ok((ns.to_string(), type_name.to_string()))
+    Ok((ns, type_name))
+}
+
+fn identifier_at<'a>(r: &mut CharacterReader<'a>) -> &'a str {
+    let word = r.parse_identifier();
+    // The existing grammar can yield an empty identifier before runtime validation.
+    if word.is_empty() {
+        r.try_peek(0)
+    } else {
+        word
+    }
 }
 
 /// Parses the arguments of `:nth-child(`/`:nth-last-child(` including the

@@ -1,25 +1,37 @@
 //! Lex type-bearing XAML syntax while retaining the original local-name span.
+use crate::service::style_selectors::{self, References};
 use crate::{
     references::markup_tokens, require, LanguageError, Result, Schema, TypeInfo,
     FRAMEWORK_NAMESPACE,
 };
 use ferroui_designer_core::{Attribute, Document, Node, NodeKind, SourceSpan, TextPatch};
 use ferroui_designer_project::MarkupSource;
-use std::{collections::BTreeMap, path::Path};
+use std::{borrow::Cow, collections::BTreeMap, path::Path};
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
 pub(super) struct TypeSite<'a> {
     pub span: SourceSpan,
-    pub spelling: &'a str,
-    namespace: Option<String>,
-    class: Option<&'a str>,
+    pub spelling: Cow<'a, str>,
+    context: Context<'a>,
+}
+
+enum Context<'a> {
+    Markup(Option<String>),
+    Class(&'a str),
+    Selector(String),
 }
 
 impl TypeSite<'_> {
     pub(super) fn resolve<'s>(&self, schema: &'s Schema, package: &Path) -> Option<&'s TypeInfo> {
-        let Some(namespace) = self.class else {
-            return schema.type_info(self.spelling, self.namespace.as_deref());
+        let namespace = match &self.context {
+            Context::Markup(namespace) => {
+                return schema.type_info(&self.spelling, namespace.as_deref())
+            }
+            Context::Selector(namespace) => {
+                return schema.exact_type_info(&self.spelling, Some(namespace))
+            }
+            Context::Class(namespace) => namespace,
         };
         let prefix = format!("clr-namespace:{namespace};assembly=");
         let mut candidates = schema.types.values().filter(|info| {
@@ -47,6 +59,16 @@ pub(super) fn of_node<'a>(
     schema: &Schema,
     document: &'a Document,
     node: &'a Node,
+) -> Vec<TypeSite<'a>> {
+    let selectors = style_selectors::references(schema, document, node);
+    with_selectors(schema, document, node, selectors.as_ref())
+}
+
+fn with_selectors<'a>(
+    schema: &Schema,
+    document: &'a Document,
+    node: &'a Node,
+    selectors: Option<&References>,
 ) -> Vec<TypeSite<'a>> {
     let mut sites = Vec::new();
     let namespaces = document.ast().namespaces(node.id);
@@ -87,6 +109,15 @@ pub(super) fn of_node<'a>(
             }
         }
     }
+    if let Some(selectors) = selectors {
+        sites.extend(selectors.types.iter().filter_map(|site| {
+            Some(TypeSite {
+                span: site.span,
+                spelling: Cow::Owned(site.spelling.clone()),
+                context: Context::Selector(site.namespace.clone()?),
+            })
+        }));
+    }
     sites
 }
 
@@ -120,10 +151,9 @@ impl<'a> AttributeContext<'a, '_> {
                     let (namespace, spelling) = raw.rsplit_once('.').unwrap_or(("", raw));
                     if crate::is_xaml_identifier(spelling) {
                         sites.push(TypeSite {
-                            spelling,
+                            spelling: Cow::Borrowed(spelling),
                             span: trim_span(raw, start, spelling),
-                            namespace: None,
-                            class: Some(namespace),
+                            context: Context::Class(namespace),
                         });
                     }
                 }
@@ -251,9 +281,8 @@ fn xml_name<'a>(
     }
     sites.push(TypeSite {
         span: trim_span(text, offset, spelling),
-        spelling,
-        namespace: namespaces.get(prefix).cloned(),
-        class: None,
+        spelling: Cow::Borrowed(spelling),
+        context: Context::Markup(namespaces.get(prefix).cloned()),
     });
 }
 
@@ -288,10 +317,11 @@ pub(super) fn review(
     let mut unmapped = Vec::new();
     let short = super::schema::shortened(old);
     for node in document.ast().elements() {
-        let sites = of_node(before, document, node);
+        let selector = style_selectors::references(before, document, node);
+        let sites = with_selectors(before, document, node, selector.as_ref());
         for site in &sites {
             if resolves(site, before, package, target) {
-                let spelling = if Some(site.spelling) == short {
+                let spelling = if Some(site.spelling.as_ref()) == short {
                     super::schema::shortened(new).unwrap_or(new)
                 } else {
                     new
@@ -307,6 +337,12 @@ pub(super) fn review(
             }
         }
         for attribute in &node.attributes {
+            if selector
+                .as_ref()
+                .is_some_and(|selector| selector.span == attribute.value_span)
+            {
+                continue;
+            }
             if matches!(
                 local(&attribute.name),
                 "Selector" | "DataType" | "TargetType" | "Member" | "Class" | "TypeArguments"
@@ -317,6 +353,27 @@ pub(super) fn review(
                 })
             {
                 unmapped.push(attribute.value_span);
+            }
+        }
+        if let Some(selector) = selector {
+            if selector.unparsed
+                && document
+                    .valid_source()
+                    .get(selector.span.range())
+                    .is_some_and(|value| type_mentioned(value, old, short))
+            {
+                unmapped.push(selector.span);
+            }
+            for operand in selector.types {
+                if (operand.spelling == old || Some(operand.spelling.as_str()) == short)
+                    && operand
+                        .namespace
+                        .as_deref()
+                        .and_then(|ns| before.exact_type_info(&operand.spelling, Some(ns)))
+                        .is_none()
+                {
+                    unmapped.push(operand.span);
+                }
             }
         }
     }

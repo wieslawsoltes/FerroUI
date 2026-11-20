@@ -74,9 +74,19 @@ fn a_control_name_updates_class_uses_and_requires_its_rust_declaration() {
     </StackPanel>"#;
     let code_behind = r#"<Border xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Customer.Views.Card" />"#;
+    let style = r##"<Styles xmlns="https://github.com/ferroui" xmlns:ui="using:Customer.Views">
+        <!-- 🧭 Card -->
+        <Style Selector="ui|Card#Card.Card[Title=Card] &gt; :is(ui|Card):not(ui|Card[Title=Card]), Button[(ui|Card.Badge)=Card]"/>
+        <Style>
+            <Style.Selector>
+                ui|C&#97;rd &gt; Button:not(ui|Card)
+            </Style.Selector>
+        </Style>
+    </Styles>"##.replace('\n', "\r\n");
     let use_source = "use crate::controls::cards::Card;\npub fn inspect(_: &Card) {}\n";
     fixture.write("app/ControlRename.xaml", view);
     fixture.write("app/ClassConsumer.xaml", code_behind);
+    fixture.write("app/SelectorConsumer.xaml", &style);
     fixture.write("app/other.rs", use_source);
     let uri = file_uri(fixture.0.join("app/ControlRename.xaml")).unwrap();
     let source_uri = file_uri(fixture.0.join("app/other.rs")).unwrap();
@@ -86,20 +96,26 @@ fn a_control_name_updates_class_uses_and_requires_its_rust_declaration() {
         .unwrap();
     service.set_build_metadata(&metadata).unwrap();
     service.open(&uri, view, 1).unwrap();
-    let request = request(view, "Card a:Card");
+    let request = request(view, "Card.hot");
     let new_name = "SummaryCard";
     let base = service
         .plan_registered_type_rename(&uri, &request, new_name, &[])
         .unwrap();
-    assert_eq!(base.unmapped.len(), 1);
-    assert!(base
-        .documents
-        .iter()
-        .any(|document| document.after == view.replace("a:Card", "a:SummaryCard")));
+    assert!(base.unmapped.is_empty());
+    assert!(base.documents.iter().any(|document| document.after
+        == view
+            .replace("a:Card", "a:SummaryCard")
+            .replace("a|Card", "a|SummaryCard")));
     assert!(base
         .documents
         .iter()
         .any(|document| document.after == code_behind.replace(".Card", ".SummaryCard")));
+    assert!(base.documents.iter().any(|document| {
+        document.after
+            == style
+                .replace("ui|Card", "ui|SummaryCard")
+                .replace("ui|C&#97;rd", "ui|SummaryCard")
+    }));
     let rust = base.rust_rename.as_ref().unwrap();
     assert!(rust.uri.ends_with("/app/rust/controls.rs"));
     assert_eq!(rust.old_name, "Card");

@@ -1,3 +1,4 @@
+use crate::service::style_selectors::{self, References};
 use crate::{binding, require, LanguageError, PropertyInfo, Result, Schema, FRAMEWORK_NAMESPACE};
 use ferroui_designer_core::{Attribute, Document, Node, NodeId, SourceSpan, TextPatch};
 
@@ -9,6 +10,16 @@ pub(super) struct Site {
 }
 
 pub(super) fn of_node(schema: &Schema, document: &Document, node: &Node) -> Vec<Site> {
+    let selector = style_selectors::references(schema, document, node);
+    with_selector(schema, document, node, selector.as_ref())
+}
+
+fn with_selector(
+    schema: &Schema,
+    document: &Document,
+    node: &Node,
+    selector: Option<&References>,
+) -> Vec<Site> {
     let mut sites = Vec::new();
     if node.name.contains('.') {
         if let Some(property) = node
@@ -46,6 +57,20 @@ pub(super) fn of_node(schema: &Schema, document: &Document, node: &Node) -> Vec<
                     .into_iter()
                     .map(|(span, property)| Site { span, property }),
             );
+        }
+    }
+    if let Some(selector) = selector {
+        for operand in &selector.properties {
+            if let Some(property) = operand
+                .member
+                .as_ref()
+                .filter(|member| member.authored.is_some())
+            {
+                sites.push(Site {
+                    span: operand.span,
+                    property: property.clone(),
+                });
+            }
         }
     }
     sites
@@ -93,6 +118,9 @@ fn setter_target<'a>(
     if parent.name.contains('.') {
         parent = document.ast().node(parent.parent?)?;
     }
+    if style_selectors::is_style(schema, parent) {
+        return style_selectors::target_type(schema, document, parent);
+    }
     if !native(schema, parent, "ControlTheme") {
         return None;
     }
@@ -116,10 +144,14 @@ fn unmapped_operands(
     node: &Node,
     name: &str,
     mapped: &[Site],
+    selector: Option<&References>,
 ) -> Vec<SourceSpan> {
     node.attributes
         .iter()
         .filter_map(|attribute| {
+            if selector.is_some_and(|selector| selector.span == attribute.value_span) {
+                return None;
+            }
             let local = attribute.name.rsplit([':', '.']).next()?;
             let property_operand =
                 matches!(local, "Property" | "TargetProperty" | "Path" | "Selector")
@@ -161,7 +193,8 @@ pub(super) fn review_uses(
     let mut patches = Vec::new();
     let mut unmapped = Vec::new();
     for node in document.ast().elements() {
-        let before = of_node(before_schema, document, node);
+        let selector = style_selectors::references(before_schema, document, node);
+        let before = with_selector(before_schema, document, node, selector.as_ref());
         let after = of_node(after_schema, document, node);
         require(
             !after.iter().any(|site| {
@@ -181,7 +214,30 @@ pub(super) fn review_uses(
                     replacement: new.into(),
                 }),
         );
-        unmapped.extend(unmapped_operands(document, node, old, &before));
+        unmapped.extend(unmapped_operands(
+            document,
+            node,
+            old,
+            &before,
+            selector.as_ref(),
+        ));
+        if let Some(selector) = selector {
+            if selector.unparsed
+                && document
+                    .valid_source()
+                    .get(selector.span.range())
+                    .is_some_and(|value| mentions(value, old))
+            {
+                unmapped.push(selector.span);
+            }
+            unmapped.extend(
+                selector
+                    .properties
+                    .into_iter()
+                    .filter(|operand| operand.spelling == old && operand.member.is_none())
+                    .map(|operand| operand.span),
+            );
+        }
     }
     Ok((patches, unmapped))
 }
@@ -192,7 +248,7 @@ pub(super) fn has_mapped_reference(
     old: &str,
     registration: &MarkupSource,
 ) -> bool {
-    mentions(document.source(), old)
+    (mentions(document.source(), old) || document.source().contains('&'))
         && document.ast().elements().any(|node| {
             of_node(schema, document, node)
                 .iter()

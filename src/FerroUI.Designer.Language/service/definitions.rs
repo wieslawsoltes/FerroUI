@@ -1,4 +1,5 @@
 use super::handlers::{read_rust, MAX_RUST_BYTES};
+use super::style_selectors;
 use super::{HandlerRequest, LanguageService, LineIndex, Location, Range, Result, SourceSpan};
 use ferroui_designer_project::{file_uri, MarkupSource};
 use std::sync::Arc;
@@ -125,6 +126,29 @@ impl LanguageService {
                     info.definition.clone(),
                     info.authored.clone(),
                 ));
+            }
+            if let Some(selector) = style_selectors::references(schema, &state.document, node) {
+                if let Some(ty) = selector
+                    .types
+                    .iter()
+                    .find(|site| site.span.contains(offset))
+                    .and_then(|site| {
+                        schema.exact_type_info(&site.spelling, Some(site.namespace.as_deref()?))
+                    })
+                {
+                    return Ok(Definition::member(
+                        ty.definition.clone(),
+                        ty.authored.clone(),
+                    ));
+                }
+                if let Some(member) = selector
+                    .properties
+                    .into_iter()
+                    .find(|site| site.span.contains(offset))
+                    .and_then(|site| site.member)
+                {
+                    return Ok(Definition::member(member.definition, member.authored));
+                }
             }
             for attribute in &node.attributes {
                 if attribute.name_span.contains(offset) {

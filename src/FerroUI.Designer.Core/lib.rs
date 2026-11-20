@@ -16,7 +16,7 @@ mod history;
 mod markup;
 mod source_anchor;
 
-pub use ast::{Ast, Attribute, Node, NodeId, NodeKind, SourceSpan};
+pub use ast::{Ast, Attribute, Node, NodeId, NodeKind, SourceSpan, XmlText};
 pub use document::{
     ChangeSet, DesignerError, Diagnostic, Document, Edit, SourceUpdate, TextPatch, Transaction,
 };

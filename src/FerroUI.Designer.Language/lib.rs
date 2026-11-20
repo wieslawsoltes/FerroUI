@@ -18,6 +18,8 @@ mod project_schema;
 mod project_navigation_tests;
 #[cfg(test)]
 mod registered_type_rename_tests;
+#[cfg(test)]
+mod registered_style_rename_tests;
 mod references;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod rust_analyzer;
