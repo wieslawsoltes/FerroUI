@@ -35,12 +35,16 @@ export const fileMoveCatalog = {
         { ...location, destination: path, review: revision }, ['path', 'destination', 'review'], true),
 };
 
-const propertyRename = { ...location, position: at, new_name: { type: 'string', maxLength: 256 } };
-export const propertyRenameCatalog = {
+const registeredRename = { ...location, position: at, new_name: { type: 'string', maxLength: 256 } };
+export const registeredRenameCatalog = {
     ferroui_workspace_plan_property_rename: tool('Review the public name change of a Cargo-registered XAML property or typed binding member at a UTF-16 position. Returns the authored Rust registration, XAML patches and possible unmapped references.',
-        propertyRename, ['path', 'position', 'new_name']),
+        registeredRename, ['path', 'position', 'new_name']),
     ferroui_workspace_rename_property: tool('Apply the exact reviewed property rename as one edit across Rust and XAML. Copy review from ferroui_workspace_plan_property_rename after inspecting the patches and unmapped locations.',
-        { ...propertyRename, review: revision }, ['path', 'position', 'new_name', 'review'], true),
+        { ...registeredRename, review: revision }, ['path', 'position', 'new_name', 'review'], true),
+    ferroui_workspace_plan_type_rename: tool('Review a Cargo-registered XAML type at a UTF-16 position. Returns edits to the registration and mapped XAML type uses. For names derived from Rust, rust-analyzer supplies the authored Rust reference edits.',
+        registeredRename, ['path', 'position', 'new_name']),
+    ferroui_workspace_rename_type: tool('Apply a reviewed XAML type rename across Rust and XAML in one Undo step. Use the review identifier from ferroui_workspace_plan_type_rename.',
+        { ...registeredRename, review: revision }, ['path', 'position', 'new_name', 'review'], true),
 };
 
 export type WorkspaceTool = keyof typeof workspaceCatalog;

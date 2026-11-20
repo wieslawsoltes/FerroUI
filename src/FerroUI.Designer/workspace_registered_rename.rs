@@ -1,10 +1,11 @@
 use super::{
-    DesignerWorkspace,
     reviewed_sources::{check_saved, patched, sync},
+    DesignerWorkspace,
 };
 use ferroui_designer_core::Edit;
 use ferroui_designer_language::{
     HandlerDraft, RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget,
+    ReviewedDocument,
 };
 use std::rc::Rc;
 
@@ -14,14 +15,18 @@ mod tests;
 #[path = "workspace_registered_rename_ui.rs"]
 mod ui;
 
-struct RenameAnchor {
-    uri: String,
-    revision: u64,
-    request: RegisteredPropertyRequest,
+#[derive(Clone, PartialEq, Eq)]
+pub(super) struct RenameAnchor {
+    pub(super) uri: String,
+    pub(super) revision: u64,
+    pub(super) request: RegisteredPropertyRequest,
 }
 
 impl DesignerWorkspace {
-    fn registered_property_anchor(self: &Rc<Self>, offset: usize) -> Result<RenameAnchor, String> {
+    pub(super) fn registered_rename_anchor(
+        self: &Rc<Self>,
+        offset: usize,
+    ) -> Result<RenameAnchor, String> {
         if self.pending_source.get() {
             return Err("Apply the current source draft before reviewing the rename".into());
         }
@@ -45,6 +50,16 @@ impl DesignerWorkspace {
         })
     }
 
+    pub(super) fn require_rename_anchor(&self, anchor: &RenameAnchor) -> Result<(), String> {
+        if self.pending_source.get()
+            || self.current_xaml_file()? != anchor.uri
+            || self.session.borrow().document().revision() != anchor.revision
+        {
+            return Err("The XAML source changed. Prepare the rename review again".into());
+        }
+        Ok(())
+    }
+
     fn registered_property_target(
         &self,
         anchor: &RenameAnchor,
@@ -59,12 +74,7 @@ impl DesignerWorkspace {
         anchor: &RenameAnchor,
         new_name: &str,
     ) -> Result<RegisteredPropertyPlan, String> {
-        if self.pending_source.get()
-            || self.current_xaml_file()? != anchor.uri
-            || self.session.borrow().document().revision() != anchor.revision
-        {
-            return Err("The XAML source changed. Prepare the property review again".into());
-        }
+        self.require_rename_anchor(anchor)?;
         let project = self.project.borrow();
         let mut language = self.try_language_service()?;
         for (uri, tab) in &project.tabs {
@@ -91,6 +101,24 @@ impl DesignerWorkspace {
         new_name: &str,
         review: &str,
     ) -> Result<RegisteredPropertyPlan, String> {
+        let plan = self.review_registered_property(anchor, new_name)?;
+        if plan.review != review {
+            return Err(
+                "The property rename changed. Review the current source patches before applying it"
+                    .into(),
+            );
+        }
+        self.apply_reviewed_rename(anchor, "Rename registered property", &plan.documents)?;
+        Ok(plan)
+    }
+
+    pub(super) fn apply_reviewed_rename(
+        self: &Rc<Self>,
+        anchor: &RenameAnchor,
+        label: &str,
+        documents: &[ReviewedDocument],
+    ) -> Result<(), String> {
+        self.require_rename_anchor(anchor)?;
         {
             let session = self.session.borrow();
             session
@@ -102,21 +130,10 @@ impl DesignerWorkspace {
                 );
             }
         }
-        let plan = self.review_registered_property(anchor, new_name)?;
-        if plan.review != review {
-            return Err(
-                "The property rename changed. Review the current source patches before applying it"
-                    .into(),
-            );
-        }
         let mut staged = self.stage_reviewed_sources()?;
-        let label = self
-            .project
-            .borrow_mut()
-            .linked_history
-            .label("Rename registered property")?;
+        let label = self.project.borrow_mut().linked_history.label(label)?;
         let mut participants = Vec::new();
-        for change in &plan.documents {
+        for change in documents {
             let uri = &change.edit.uri;
             let tab = staged.tab(self, uri)?;
             check_saved(&staged.workspace, uri, &tab)?;
@@ -126,28 +143,34 @@ impl DesignerWorkspace {
             participants.push(uri.clone());
         }
         staged.prepare_edits(&participants)?;
-        let source = plan
-            .documents
+        if let Some(source) = documents
             .iter()
             .find(|change| change.edit.uri == anchor.uri)
-            .ok_or("The review no longer changes the selected property")?;
-        self.session
-            .borrow_mut()
-            .apply_at(
-                anchor.revision,
-                &label,
-                vec![Edit::ReplaceSource {
-                    source: source.after.clone(),
-                }],
-            )
-            .map_err(|error| error.to_string())?;
+        {
+            self.session
+                .borrow_mut()
+                .apply_at(
+                    anchor.revision,
+                    &label,
+                    vec![Edit::ReplaceSource {
+                        source: source.after.clone(),
+                    }],
+                )
+                .map_err(|error| error.to_string())?;
+        } else {
+            self.session
+                .borrow_mut()
+                .record_workspace_operation(anchor.revision, label.clone())
+                .map_err(|error| error.to_string())?;
+            participants.push(anchor.uri.clone());
+        }
         self.publish_reviewed_sources(staged, &participants)?;
         self.project
             .borrow_mut()
             .linked_history
             .link(label, participants);
         self.refresh(true);
-        Ok(plan)
+        Ok(())
     }
 
     #[cfg(feature = "mcp")]
@@ -157,7 +180,7 @@ impl DesignerWorkspace {
         new_name: &str,
         review: Option<&str>,
     ) -> Result<RegisteredPropertyPlan, String> {
-        let anchor = self.registered_property_anchor(offset)?;
+        let anchor = self.registered_rename_anchor(offset)?;
         match review {
             Some(review) => self.apply_registered_property(&anchor, new_name, review),
             None => self.review_registered_property(&anchor, new_name),

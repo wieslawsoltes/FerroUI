@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
-import type { RegisteredPropertyRename } from '../src/registeredPropertyRename';
+import type { RegisteredRename } from '../src/registeredRename';
 import { until } from './wait';
 
 export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, rustUri: vscode.Uri) {
-    const extension = vscode.extensions.getExtension<{ propertyRename: RegisteredPropertyRename }>('FerroUI.ferroui')!;
+    const extension = vscode.extensions.getExtension<{ propertyRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { propertyRename } = await extension.activate();
     const original = xaml.getText();
     const sibling = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredPropertyConsumer.xaml');

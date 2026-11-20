@@ -369,6 +369,13 @@ impl DesignerSession {
         Ok(change)
     }
 
+    pub(crate) fn record_workspace_operation(
+        &mut self, revision: u64, label: String,
+    ) -> Result<(), DesignerError> {
+        self.ensure_writable()?;
+        self.document.record_workspace_operation(revision, label)
+    }
+
     pub fn update_source(&mut self, source: impl Into<String>) -> SourceUpdate {
         if self.read_only {
             return self.rejected_source_update("This collaboration role has read-only access");

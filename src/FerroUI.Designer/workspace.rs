@@ -984,8 +984,12 @@ mod dictionary_extraction;
 mod file_move;
 #[path = "workspace_reviewed_sources.rs"]
 mod reviewed_sources;
+#[path = "workspace_rust_review.rs"]
+mod rust_review;
 #[path = "workspace_registered_rename.rs"]
 mod registered_rename;
+#[path = "workspace_type_rename.rs"]
+mod type_rename;
 #[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;

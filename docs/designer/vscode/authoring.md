@@ -38,6 +38,16 @@ Review both sides of each diff, then choose the check icon **Apply Property Rena
 
 Save the changed buffers and rebuild the owning Cargo schema to use the new name for completion and preview. When an explicit RSX builder mapping uses the property, update its public property key before the build. Open the workspace folders that contain the registration and its consumers before reviewing. [Studio workflow](../native-controls.md#review-a-registered-property-rename) · [MCP workflow](reference.md#review-a-registered-property-rename-with-mcp) · [RSX builder mappings](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
+### Rename a registered XAML type
+
+Run **Build Project XAML Schema**, then place the caret on a registered control tag or a type reference such as `x:DataType="local:Customer"`. Choose **FerroUI: Rename Registered Type…** and enter the new name.
+
+For an explicit `as "Name"` registration, the review edits the public alias. When XAML takes the name from Rust, VS Code asks the active rust-analyzer provider to rename the declaration and find Rust references. Open the Cargo workspace that owns the declaration and wait for rust-analyzer to finish loading it.
+
+The Changes editor includes mapped start and end tags, qualified property owners, `x:Class`, type arguments, and explicit type values such as `{x:Type local:Customer}`. Inspect Rust and XAML together. If the review reports possible selector or computed references, **Show Locations** opens those sites for inspection. Use the check icon to apply the reviewed files. Undo restores the group.
+
+Save the changed files and rebuild the Cargo schema for the new name. Update explicit RSX builder metadata that uses the old public type name before rebuilding. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
+
 ### Rename an RSX control
 
 Select the named control in Design or Outline, then run **FerroUI: Rename RSX Control** from the Command Palette. You can also edit **Name** in Properties. The edit changes the naming literal and applicable references within the active `rsx!` invocation in one Undo step.

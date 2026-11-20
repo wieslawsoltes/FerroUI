@@ -18,7 +18,7 @@ import { ProjectScaffold } from './projectScaffold';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
 import { ProjectView } from './projectView';
 import { errorMessage } from './protocol';
-import { RegisteredPropertyRename } from './registeredPropertyRename';
+import { RegisteredRename } from './registeredRename';
 import type { ProjectMetadata } from './reloadProcess';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
@@ -53,7 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
     const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction);
     const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
-    const propertyRename = new RegisteredPropertyRename(server);
+    const propertyRename = new RegisteredRename(server, 'property');
+    const typeRename = new RegisteredRename(server, 'type');
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
@@ -64,12 +65,14 @@ export function activate(context: vscode.ExtensionContext) {
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios, hosted, fileMoves, propertyRename), previewOutput, runtimes);
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios, hosted, fileMoves, {
+        property: propertyRename, type: typeRename,
+    }), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -83,6 +86,10 @@ export function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand('ferroui.renameRegisteredProperty', async () => {
             try { await propertyRename.open(vscode.window.activeTextEditor); }
+            catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
+        vscode.commands.registerCommand('ferroui.renameRegisteredType', async () => {
+            try { await typeRename.open(vscode.window.activeTextEditor); }
             catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
         }),
         vscode.workspace.onDidGrantWorkspaceTrust(() => { if (vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true); }),
@@ -110,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
-        return { designer, runtimeSource, fileMoves, propertyRename, publishProjectMetadata: publish };
+        return { designer, runtimeSource, fileMoves, propertyRename, typeRename, publishProjectMetadata: publish };
     }
 }
 

@@ -54,6 +54,7 @@ pub(super) struct ProjectUi {
     pub(super) tabs: BTreeMap<String, Tab>,
     pub(super) linked_history: super::history::WorkspaceHistory,
     pub(super) rust_move: Option<super::file_move::RustMoveReview>,
+    pub(super) type_rename: Option<super::type_rename::TypeRenameReview>,
     selected: usize,
     discovery: Option<
         std::sync::mpsc::Receiver<
@@ -116,6 +117,7 @@ impl DesignerWorkspace {
             project.selected = 0;
             project.markup = Default::default();
             project.rust_move = None;
+            project.type_rename = None;
         }
         let mut session = self.session.borrow_mut();
         session.set_workspace_preview_buffers(Vec::new());

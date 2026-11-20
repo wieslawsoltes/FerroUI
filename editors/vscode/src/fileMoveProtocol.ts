@@ -17,14 +17,18 @@ export interface FileMovePlan {
     generatedRust?: GeneratedRustRename[];
 }
 
-export interface GeneratedRustRename {
+export interface RustSymbolRename {
     uri: string;
     position: Position;
     oldName: string;
     newName: string;
 }
 
-export interface FileMoveRustResolution {
-    rename: GeneratedRustRename;
+export type GeneratedRustRename = RustSymbolRename;
+
+export interface RustRenameResolution {
+    rename: RustSymbolRename;
     documents: FileMoveDocument['edit'][];
 }
+
+export type FileMoveRustResolution = RustRenameResolution;

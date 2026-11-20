@@ -5,6 +5,7 @@ import { describeCargoTarget, discoverCargoTargets, selectCargoTarget } from '..
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import { buildCargo } from '../src/reloadProcess';
 import { verifyRegisteredPropertyRename } from './registeredPropertyRename';
+import { verifyRegisteredTypeRename } from './registeredTypeRename';
 import { until } from './wait';
 
 export async function verifyCargoTarget(workspace: vscode.Uri, designer: DesignerWorkbench): Promise<void> {
@@ -29,7 +30,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     await write('build.rs', exportMetadata(metadata, {
         manifest: vscode.Uri.joinPath(project, 'Cargo.toml').fsPath, assembly: 'Audit Application', crate_name: 'audit_app',
         definitions: [
-            { ...appSite, kind: 'class' },
+            { ...appSite, kind: 'class', type_declaration: { file: 'src/main.rs', name: 'AuditCard' } },
             { ...appSite, kind: 'class_info', member: 'Caption' },
         ],
     }));
@@ -94,6 +95,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
     await verifyDefinitions(xaml, source, dependencySource);
     await verifyRegisteredPropertyRename(xaml, source);
+    await verifyRegisteredTypeRename(xaml, source);
 
     const view = await write('View.xaml', '<StackPanel xmlns="https://github.com/ferroui" />');
     const panel = await designer.openDocument(view);

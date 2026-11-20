@@ -125,6 +125,12 @@ In VS Code, call `ferroui_workspace_plan_property_rename` with the XAML file in 
 
 In Studio, use `designer_plan_property_rename` with the active XAML byte `offset`, `new_name`, and `expected_revision`. Pass the same inputs and `review` to `designer_rename_property`. Apply requires the host's existing MCP write permission and rechecks the current source. One Undo rolls back the full transaction. [VS Code workflow](authoring.md#rename-a-registered-xaml-property) · [Studio workflow](../native-controls.md#review-a-registered-property-rename)
 
+### Review a registered type rename with MCP
+
+In VS Code, call `ferroui_workspace_plan_type_rename` with `path`, optional `folder`, a zero-based UTF-16 `position`, and `new_name`. The extension resolves any Rust symbol edits through its active rust-analyzer provider. Review the documents and `unmapped` locations before passing the same inputs and `review` to `ferroui_workspace_rename_type`.
+
+In Studio, use `designer_plan_type_rename` with the active XAML byte `offset`, `new_name`, and `expected_revision`. For a name derived from Rust, start analysis with `allow_input` and poll with the same fields while the result reports `status: "resolving"`. A literal alias returns a plan directly. Use `cancel` to discard the pending review. Apply with `designer_rename_type` and the current `review` under the existing MCP write permission. [VS Code workflow](authoring.md#rename-a-registered-xaml-type) · [Studio workflow](../native-controls.md#review-a-registered-type-rename)
+
 ### Rename an RSX control with MCP
 
 In VS Code, read `designer_outline` for the current control ID and frame. Call `designer_rename_rsx_control` with `session`, `node`, `expected_revision`, and the new name in `value`. The editor also exposes the same change as a `designer_property` action through `designer_studio_edit`.

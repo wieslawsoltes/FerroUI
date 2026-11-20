@@ -109,7 +109,7 @@ impl DesignerWorkspace {
         })
     }
 
-    fn refresh_move_drafts(&self, from: &str) -> Result<Vec<FileMoveDraft>, String> {
+    pub(super) fn refresh_move_drafts(&self, from: &str) -> Result<Vec<FileMoveDraft>, String> {
         let state = self.project.borrow();
         let mut language = self.try_language_service()?;
         let mut rust_drafts = Vec::new();

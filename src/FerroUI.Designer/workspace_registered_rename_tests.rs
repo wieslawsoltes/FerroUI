@@ -1,7 +1,7 @@
 use super::*;
 use crate::mcp::DesignerMcp;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_designer_project::{BuildMetadata, Solution, file_uri};
+use ferroui_designer_project::{file_uri, BuildMetadata, Solution};
 use ferroui_mcp::{Permissions, UiToolProvider};
 use serde_json::json;
 use std::{fs, path::PathBuf};
@@ -9,7 +9,7 @@ use std::{fs, path::PathBuf};
 const VIEW: &str = r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:a="using:Audit" x:DataType="a:Customer" Text="{Binding Street}"/>"#;
 const RUST: &str = r#"// Keep the getter 🪴
 pub struct Customer;
-ferro_markup_type!(struct Customer {
+ferro_markup_type!(struct Customer as "Customer" {
     namespace: "Audit",
     properties: [Street: String { get: address_street }],
 });
@@ -24,7 +24,7 @@ impl Drop for TestProject {
 }
 
 #[test]
-fn studio_applies_and_undoes_a_reviewed_property_across_three_sources() {
+fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let root = std::env::temp_dir().join(format!(
         "ferroui-studio-registered-property-{}",
@@ -49,10 +49,10 @@ fn studio_applies_and_undoes_a_reviewed_property_across_three_sources() {
         }]
     }).to_string()).unwrap();
     fs::write(files.0.join("out/xaml-rust-sources.json"), json!({
-        "version":1,"manifest":manifest,"assembly":"Audit","crate_name":"audit","definitions":[{
-            "rust_type":"::audit::Customer","type":"Customer","kind":"markup_type","file":"lib.rs",
-            "owner":"Customer","member":"Street"
-        }]
+        "version":1,"manifest":manifest,"assembly":"Audit","crate_name":"audit","definitions":[
+            {"rust_type":"::audit::Customer","type":"Customer","kind":"markup_type","file":"lib.rs","owner":"Customer"},
+            {"rust_type":"::audit::Customer","type":"Customer","kind":"markup_type","file":"lib.rs","owner":"Customer","member":"Street"}
+        ]
     }).to_string()).unwrap();
     let primary = file_uri(files.0.join("Primary.xaml")).unwrap();
     let workspace = DesignerWorkspace::with_uri(VIEW, primary.clone()).unwrap();
@@ -85,19 +85,15 @@ fn studio_applies_and_undoes_a_reviewed_property_across_three_sources() {
         .unwrap();
     assert_eq!(plan["documents"].as_array().unwrap().len(), 3);
     request["review"] = plan["review"].clone();
-    assert!(
-        provider
-            .call("designer_rename_property", &request, Permissions::default())
-            .is_err()
-    );
+    assert!(provider
+        .call("designer_rename_property", &request, Permissions::default())
+        .is_err());
     let saved_consumer = format!("<!-- 🧭 revised -->\n{VIEW}");
     fs::write(&other, &saved_consumer).unwrap();
-    assert!(
-        provider
-            .call("designer_rename_property", &request, writes)
-            .unwrap_err()
-            .contains("rename changed")
-    );
+    assert!(provider
+        .call("designer_rename_property", &request, writes)
+        .unwrap_err()
+        .contains("rename changed"));
     assert_eq!(session.borrow().authored_source(), VIEW);
     request.as_object_mut().unwrap().remove("review");
     let plan = provider
@@ -136,4 +132,27 @@ fn studio_applies_and_undoes_a_reviewed_property_across_three_sources() {
         saved_consumer.replace("Street", "AddressLine")
     );
     assert_eq!(fs::read_to_string(other).unwrap(), saved_consumer);
+    workspace.source_history(false).unwrap();
+    workspace.activate_document(&primary).unwrap();
+    let mut rename = json!({
+        "offset": VIEW.find("Customer").unwrap() + 1, "new_name": "ClientRecord", "expected_revision": revision()
+    });
+    let plan = provider
+        .call("designer_plan_type_rename", &rename, Permissions::default())
+        .unwrap();
+    assert_eq!(plan["documents"].as_array().unwrap().len(), 3);
+    rename["review"] = plan["review"].clone();
+    provider
+        .call("designer_rename_type", &rename, writes)
+        .unwrap();
+    assert_eq!(
+        session.borrow().authored_source(),
+        VIEW.replace("a:Customer", "a:ClientRecord")
+    );
+    workspace.activate_document(&rust).unwrap();
+    let changed = RUST.replace("as \"Customer\"", "as \"ClientRecord\"");
+    assert_eq!(session.borrow().authored_source(), changed);
+    workspace.source_history(false).unwrap();
+    assert_eq!(session.borrow().authored_source(), RUST);
+    assert_eq!(workspace.project.borrow().tabs[&primary].source(), VIEW);
 }

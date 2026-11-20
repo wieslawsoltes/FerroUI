@@ -1,5 +1,5 @@
 import { choice, integer, object, text, tool, truth } from './agentSchema';
-import { fileMoveCatalog, propertyRenameCatalog, workspaceCatalog } from './workspaceCatalog';
+import { fileMoveCatalog, registeredRenameCatalog, workspaceCatalog } from './workspaceCatalog';
 
 const node = integer(1);
 const session = { session: integer(1) };
@@ -81,7 +81,7 @@ const resizeRequired = ['session', 'expected_revision', 'node', 'handle', 'dx', 
 export const agentCatalog = {
     ...workspaceCatalog,
     ...fileMoveCatalog,
-    ...propertyRenameCatalog,
+    ...registeredRenameCatalog,
     designer_design_tokens: tool('Plan a DTCG-to-XAML import or XAML-to-DTCG export with candidate source, mapping rows and issues. Mapping keys use token paths during import and XAML resource keys during export. Use a separate workspace creation action to write the reviewed candidate.',
         { direction: choice('import', 'export'), source: text, options: { type: 'object', additionalProperties: false, properties: {
             pixelsPerRem: { type: 'number' }, mappings: { type: 'object', maxProperties: 4096,

@@ -27,6 +27,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_move_xaml"
             | "designer_plan_property_rename"
             | "designer_rename_property"
+            | "designer_plan_type_rename"
+            | "designer_rename_type"
             | "designer_reveal_rsx_animation_issue"
             | "designer_reveal_rsx_state"
     )
@@ -117,6 +119,8 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_move_xaml","Move the active XAML file and change its references in one Studio history step. Pass the destination and review identifier from designer_plan_xaml_move.",s::object(json!({"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["destination","review","expected_revision"]),true),
         s::tool("designer_plan_property_rename","Review a registered XAML property or typed binding member at a byte offset in the active view. Returns checked Rust and XAML patches and possible unmapped locations.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision()}),&["offset","new_name","expected_revision"]),false),
         s::tool("designer_rename_property","Apply the reviewed property rename across Rust and XAML as one Studio history step. Copy review from designer_plan_property_rename.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
+        s::tool("designer_plan_type_rename","Review a Cargo-registered XAML type name. At the active XAML byte offset, returns a checked Rust and XAML plan. For an implicit Rust name, start analysis with allow_input and poll with the same offset, name and revision. Pass cancel to discard the review.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["offset","new_name","expected_revision"]),false),
+        s::tool("designer_rename_type","Apply the registered type rename reviewed by designer_plan_type_rename as one Studio history step. Pass its review identifier.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
     ];
     tools.extend(canvas_guides::tools());
     tools
@@ -212,6 +216,11 @@ pub(super) fn call(
             Ok(json!(workspace.registered_property_rename(
                 index(args, "offset")?, &text(args, "new_name")?, review.as_deref(),
             )?))
+        }
+        "designer_plan_type_rename" | "designer_rename_type" => {
+            let review = (name == "designer_rename_type").then(|| text(args, "review")).transpose()?;
+            workspace.registered_type_rename(index(args, "offset")?, &text(args, "new_name")?,
+                review.as_deref(), allow_input, args["cancel"] == true)
         }
         "designer_language_apply" => {
             let edit: WorkspaceEdit = decode(args, "edit")?;

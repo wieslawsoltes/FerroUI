@@ -2,19 +2,85 @@ use super::super::reviewed_sources::ui::{panel, relative, source_diffs, toolbar}
 use super::{DesignerWorkspace, RenameAnchor};
 use crate::{
     icons,
-    workspace::inspector_actions::{SOURCE, add_button, text},
+    workspace::inspector_actions::{add_button, text, SOURCE},
 };
-use ferroui_base::{Ref, media::TextWrapping};
+use ferroui_base::{
+    media::TextWrapping,
+    threading::{DispatcherPriority, DispatcherTimer},
+    Ref,
+};
 use ferroui_controls::{
-    Button, ComboBox, Control, Flyout, PlacementMode, TextBox,
     automation::{AutomationLiveSetting, AutomationProperties},
+    Button, ComboBox, Control, Flyout, PlacementMode, TextBlock, TextBox,
 };
 use ferroui_designer_language::RegisteredPropertyPlan;
-use std::rc::Rc;
+use std::{cell::Cell, rc::Rc, time::Duration};
+
+#[derive(Clone, Copy)]
+enum Subject {
+    Property,
+    Type,
+}
+
+impl Subject {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Property => "property",
+            Self::Type => "type",
+        }
+    }
+
+    fn target_name(
+        self,
+        workspace: &DesignerWorkspace,
+        anchor: &RenameAnchor,
+    ) -> Result<String, String> {
+        match self {
+            Self::Property => workspace
+                .registered_property_target(anchor)
+                .map(|target| target.name),
+            Self::Type => workspace
+                .try_language_service()?
+                .registered_type_target(&anchor.uri, &anchor.request)
+                .map(|target| target.name)
+                .map_err(|error| error.to_string()),
+        }
+    }
+
+    fn review(
+        self,
+        workspace: &DesignerWorkspace,
+        anchor: &RenameAnchor,
+        name: &str,
+    ) -> Result<Option<RegisteredPropertyPlan>, String> {
+        match self {
+            Self::Property => workspace.review_registered_property(anchor, name).map(Some),
+            Self::Type => workspace.review_registered_type(anchor, name, true),
+        }
+    }
+
+    fn apply(
+        self,
+        workspace: &Rc<DesignerWorkspace>,
+        anchor: &RenameAnchor,
+        name: &str,
+        review: &str,
+    ) -> Result<RegisteredPropertyPlan, String> {
+        match self {
+            Self::Property => workspace.apply_registered_property(anchor, name, review),
+            Self::Type => workspace.apply_registered_type(anchor, name, review),
+        }
+    }
+}
 
 impl DesignerWorkspace {
     pub(in super::super) fn connect_registered_rename(self: &Rc<Self>) {
-        let button = self.root.get_control::<Button>("RenameRegisteredProperty");
+        self.connect_rename_flyout("RenameRegisteredProperty", Subject::Property);
+        self.connect_rename_flyout("RenameRegisteredType", Subject::Type);
+    }
+
+    fn connect_rename_flyout(self: &Rc<Self>, name: &str, subject: Subject) {
+        let button = self.root.get_control::<Button>(name);
         let flyout = Flyout::new();
         flyout.set_placement(PlacementMode::Top);
         flyout.popup().set_should_use_overlay_layer(true);
@@ -24,7 +90,7 @@ impl DesignerWorkspace {
         flyout
             .opening(move |_| {
                 if let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) {
-                    choose_name(&workspace, &popup);
+                    choose_name(&workspace, &popup, subject);
                 }
             })
             .detach();
@@ -32,7 +98,7 @@ impl DesignerWorkspace {
     }
 }
 
-fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
+fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>, subject: Subject) {
     let caret = workspace.source.caret_index();
     if workspace.pending_source.get() {
         workspace.apply_source();
@@ -43,11 +109,11 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     let offset = crate::workspace::source_tools::byte_from_utf16(source.authored_source(), caret);
     drop(source);
     let (anchor, target) = match workspace
-        .registered_property_anchor(offset)
+        .registered_rename_anchor(offset)
         .and_then(|anchor| {
-            workspace
-                .registered_property_target(&anchor)
-                .map(|target| (anchor, target))
+            subject
+                .target_name(workspace, &anchor)
+                .map(|name| (anchor, name))
         }) {
         Ok(result) => result,
         Err(error) => {
@@ -57,8 +123,11 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     };
     let input = TextBox::new();
     input.set_min_width(240.0);
-    input.set_text(Some(&target.name));
-    AutomationProperties::set_name(&input, Some("New public property name"));
+    input.set_text(Some(&target));
+    AutomationProperties::set_name(
+        &input,
+        Some(&format!("New public {} name", subject.label())),
+    );
     let row = toolbar();
     row.children().add(input.clone().upcast::<Control>());
     let status = text("");
@@ -67,29 +136,104 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     let (popup, name, message) = (flyout.downgrade(), input.downgrade(), status.downgrade());
     let owner = Rc::downgrade(workspace);
     let anchor = Rc::new(anchor);
-    add_button(&row, SOURCE, "Review property rename", move || {
-        let (Some(workspace), Some(popup), Some(name)) =
-            (owner.upgrade(), popup.upgrade(), name.upgrade())
-        else {
-            return;
-        };
-        let name = name.text().unwrap_or_default().trim().to_owned();
-        match workspace.review_registered_property(&anchor, &name) {
-            Ok(plan) => show_plan(&workspace, &popup, anchor.clone(), plan),
-            Err(error) => {
-                if let Some(status) = message.upgrade() {
-                    status.set_text(Some(&error));
+    let busy = Rc::new(Cell::new(false));
+    add_button(
+        &row,
+        SOURCE,
+        &format!("Review {} rename", subject.label()),
+        move || {
+            if busy.get() {
+                return;
+            }
+            let (Some(workspace), Some(popup), Some(name)) =
+                (owner.upgrade(), popup.upgrade(), name.upgrade())
+            else {
+                return;
+            };
+            let new_name = name.text().unwrap_or_default().trim().to_owned();
+            match subject.review(&workspace, &anchor, &new_name) {
+                Ok(Some(plan)) => show_plan(&workspace, &popup, subject, anchor.clone(), plan),
+                Ok(None) => {
+                    if let Some(message) = message.upgrade() {
+                        message.set_text(Some("Resolving Rust references…"));
+                        busy.set(true);
+                        poll_type_review(
+                            &workspace,
+                            &popup,
+                            &name,
+                            &message,
+                            anchor.clone(),
+                            new_name,
+                            busy.clone(),
+                        );
+                    }
+                }
+                Err(error) => {
+                    if let Some(status) = message.upgrade() {
+                        status.set_text(Some(&error));
+                    }
                 }
             }
-        }
-    });
+        },
+    );
     body.children().add(row.upcast::<Control>());
     body.children().add(status.upcast::<Control>());
+}
+
+fn poll_type_review(
+    workspace: &Rc<DesignerWorkspace>,
+    popup: &Ref<Flyout>,
+    name: &Ref<TextBox>,
+    message: &Ref<TextBlock>,
+    anchor: Rc<RenameAnchor>,
+    new_name: String,
+    busy: Rc<Cell<bool>>,
+) {
+    let owner = Rc::downgrade(workspace);
+    let (popup, name, message) = (popup.downgrade(), name.downgrade(), message.downgrade());
+    DispatcherTimer::run(
+        move || {
+            let Some(workspace) = owner.upgrade() else {
+                return false;
+            };
+            let controls = popup
+                .upgrade()
+                .filter(|popup| popup.is_open())
+                .zip(message.upgrade());
+            let same_input = name
+                .upgrade()
+                .and_then(|name| name.text())
+                .is_some_and(|name| name.trim() == new_name);
+            if let Some((popup, message)) = controls.filter(|_| same_input) {
+                match workspace.review_registered_type(&anchor, &new_name, false) {
+                    Ok(None) => return true,
+                    Ok(Some(plan)) => {
+                        show_plan(&workspace, &popup, Subject::Type, anchor.clone(), plan)
+                    }
+                    Err(error) => {
+                        workspace.cancel_registered_type(&anchor, &new_name);
+                        message.set_text(Some(&error));
+                    }
+                }
+            } else {
+                workspace.cancel_registered_type(&anchor, &new_name);
+                if let Some(message) = message.upgrade() {
+                    message.set_text(Some(""));
+                }
+            }
+            busy.set(false);
+            false
+        },
+        Duration::from_millis(120),
+        DispatcherPriority::BACKGROUND,
+    )
+    .detach();
 }
 
 fn show_plan(
     workspace: &Rc<DesignerWorkspace>,
     flyout: &Ref<Flyout>,
+    subject: Subject,
     anchor: Rc<RenameAnchor>,
     plan: RegisteredPropertyPlan,
 ) {
@@ -105,15 +249,17 @@ fn show_plan(
     let owner = Rc::downgrade(workspace);
     let has_unmapped = !plan.unmapped.is_empty();
     let apply = if has_unmapped {
-        "Apply mapped rename"
+        "Apply mapped rename".into()
     } else {
-        "Apply property rename"
+        format!("Apply {} rename", subject.label())
     };
-    add_button(&actions, icons::CHECK, apply, move || {
+    let apply_anchor = anchor.clone();
+    let new_name = plan.new_name.clone();
+    add_button(&actions, icons::CHECK, &apply, move || {
         let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) else {
             return;
         };
-        match workspace.apply_registered_property(&anchor, &plan.new_name, &plan.review) {
+        match subject.apply(&workspace, &apply_anchor, &new_name, &plan.review) {
             Ok(_) => popup.hide(),
             Err(error) => {
                 if let Some(status) = message.upgrade() {
@@ -123,11 +269,17 @@ fn show_plan(
         }
     });
     let popup = flyout.downgrade();
+    let owner = Rc::downgrade(workspace);
     add_button(
         &actions,
         icons::CLOSE,
-        "Cancel property rename",
+        &format!("Cancel {} rename", subject.label()),
         move || {
+            if matches!(subject, Subject::Type) {
+                if let Some(workspace) = owner.upgrade() {
+                    workspace.cancel_registered_type(&anchor, &plan.new_name);
+                }
+            }
             if let Some(popup) = popup.upgrade() {
                 popup.hide();
             }
@@ -136,7 +288,10 @@ fn show_plan(
     if has_unmapped {
         let row = toolbar();
         let choices = ComboBox::new();
-        AutomationProperties::set_name(&choices, Some("Potential property references"));
+        AutomationProperties::set_name(
+            &choices,
+            Some(&format!("Potential {} references", subject.label())),
+        );
         for location in &plan.unmapped {
             choices.items().add(Some(Rc::new(format!(
                 "{}  ·  line {}",
@@ -152,7 +307,7 @@ fn show_plan(
         add_button(
             &row,
             SOURCE,
-            "Reveal potential property reference",
+            &format!("Reveal potential {} reference", subject.label()),
             move || {
                 if let (Some(workspace), Some(choices), Some(popup)) =
                     (owner.upgrade(), choices.upgrade(), popup.upgrade())
