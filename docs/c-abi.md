@@ -7,15 +7,22 @@ against, the way Skia, SQLite and wgpu-native are consumed. This document descri
 of #636, with the changes #950 proposed for languages that have neither pointers nor
 closures in their FFI (Osprey, WebAssembly hosts, Dart, Go, Python).
 
+For application and binding authors, docs/c-abi-languages.md is the guide: how to call the ABI
+from each language and which path is the fastest for each kind of work.
+
 Phase 1 is the "full" build of #636: the tables of types are on, so any registered type,
-property and routed event can be found by name, and there is no markup. Selecting what an
-application uses, and trimming the library to it, is phase 2 (section 11).
+property and routed event can be found by name, and there is no markup. The by-use mode links
+only the classes a program registers with their entries, and the units of the theme they need
+(section 16); a library built for one application is phase 2 (section 11).
 
 ## 1. Building the library
 
 ```sh
 cargo build -p ferroui-capi            # with the desktop platform (Skia, the Fluent theme)
-cargo build -p ferroui-capi --no-default-features   # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features type-tables
+                                       # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features desktop
+                                       # by use: no tables of types (section 16)
 ```
 
 The crate is built as a dynamic library (`libferroui_capi.dylib`, `.so`, `ferroui_capi.dll`),
@@ -338,9 +345,8 @@ machine: the numbers say how large the overhead is, not its exact value.
 
 - **Selection and generation (#636, step 2):** a manifest of the controls, properties, events
   and features an application uses (written by hand or collected from its sources), and a
-  generator of a per-application library from it: only those exports, the Cargo features
-  that go with them, the roots of the theme units, `type-tables` off. Then a size measurement
-  of a hello world built this way against the Rust hello world.
+  generator of a per-application library from it (#977): only those exports, the Cargo features
+  that go with them, the class entries and theme units of section 16, `type-tables` off.
 - **Bindings:** a header-only C++ wrapper with RAII handles and typed accessors generated from
   the selection; Go (cgo, `runtime.LockOSThread` for the UI thread); Dart and Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
@@ -654,3 +660,199 @@ docs/bindings-design.md, section 2.1.
 
 The tests are `src/FerroUI.CApi/tests/signals_tests.rs` and `test_signals` of
 `samples/CApi/abi_test.c`; the Osprey sample is `samples/CApi/osprey-bindings/temperature_signals`.
+
+## 15. Controls written in another language
+
+A control and its code-behind can be written in C, and through the generated bindings in any
+language (#974). The language registers a class on one of four bases, sets the callbacks of the
+members it overrides, and registers the properties of the class; the framework then creates,
+styles, lays out, renders and routes input to instances of the class as to any control.
+
+### 15.1 How it works without a cost for Rust applications
+
+Nothing outside `ferroui-capi` changed: the class model, the property system and the hot paths
+of layout, styling and rendering are untouched.
+
+- **One Rust class per base**, in this crate, written as any Rust control: `ForeignControl:
+  Control`, `ForeignPanel: Panel`, `ForeignDecorator: Decorator`, `ForeignContentControl:
+  ContentControl`. Their overrides (measure, arrange, render, property changed, attached,
+  detached, apply template, pointer and key) read the class of the instance and call its
+  callback, or call the base when the class has none.
+- **A registered class is a type of its own.** `ferro_class_register(name, length, base)` makes a
+  `TypeInfo` at run time with the public constructors of the type system (`TypeInfo::new`, the
+  Rust class of the base as its base, a constructor of a fixed pool of 64), registers it with the
+  tables of types and copies the virtual table of the Rust class of the base, changing only its
+  type slot. Each instance is attached to the copy, so `get_type()` answers the registered
+  class: styles select it by name, `ferro_type_id` and `ferro_create` find it, frames create it,
+  and `is::<Control>()` holds.
+- **The callbacks of a class** are a table of function pointers (`ferro_class_on_measure`, ...)
+  set once; each instance holds a pointer to its class and the language's data pointer, so a
+  virtual call reads two fields and calls one function: no lookup, no allocation, no boxed value.
+- **Registered properties** (`ferro_property_register`) are styled (or attached) properties of the
+  property system, owned by an internal class outside every hierarchy and registered on the
+  registered class, so they are found by name only there (and on its subclasses; `Owner.Name`
+  for attached ones). Setters and getters of the ABI, frames, signals, styles, bindings and
+  animations use them as built-in ones; the flags make a change invalidate the measure, the
+  arrange or the render, and the property-changed callback runs for the class's own properties
+  only.
+
+### 15.2 The calls
+
+| Call | What it does |
+| --- | --- |
+| `ferro_class_register(name, length, base)` | a class on `FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR` or `_CONTENT_CONTROL`: its type ID |
+| `ferro_class_set_data(class_id, data)` | the data of the class, given to its create callback |
+| `ferro_class_on_create` | each new instance: the callback gives it its data with `ferro_object_set_data(object, data, release)` |
+| `ferro_class_on_measure`, `_on_arrange` | `(data, object, width_in, height_in, double *width, double *height)` |
+| `ferro_class_on_render` | `(data, object, context)`: draw with `ferro_draw_*` on `context` |
+| `ferro_class_on_property_changed` | `(data, object, property_id)` for the class's own properties |
+| `ferro_class_on_attached`, `_on_detached`, `_on_apply_template` | `(data, object, 0)` |
+| `ferro_class_on_pointer` | `(data, object, kind, x, y, modifiers)`, position relative to the instance; `1` handles it |
+| `ferro_class_on_key` | `(data, object, kind, key, modifiers)`; `1` handles it |
+| `ferro_property_register(owner, name, length, kind, default_number, default_text, flags)` | a property of a kind of signal (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`) with `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS`, `_ATTACHED`: its property ID |
+| `ferro_object_data(object)` | the data of an instance |
+| `ferro_layout_measure`, `_arrange`, `_desired_width`, `_desired_height`, `_bounds_width`, `_bounds_height` | lay out children from the callbacks, read sizes |
+| `ferro_layout_result(width, height)` | the result of the running measure or arrange callback, for a language that cannot write a `double *` |
+| `ferro_panel_child_count`, `ferro_panel_child` | the children of a class on `FERRO_BASE_PANEL` |
+| `ferro_template_part(object, name, length)` | a named part of the applied template, from the apply-template callback on |
+| `ferro_draw_brush(argb)`, `ferro_draw_pen(argb, thickness)` | brush and pen IDs (the same colour is the same ID); make them once |
+| `ferro_draw_rect`, `_ellipse`, `_line`, `_path`, `_text` | draw (a rounded rectangle, an ellipse, a line, path markup, text in the default typeface) |
+| `ferro_draw_push_clip`, `_push_transform`, `_push_opacity`, `ferro_draw_pop` | state; what a callback leaves pushed is popped after it |
+
+### 15.3 The rules for a callback
+
+1. **A plain C function pointer and a data pointer per instance**: no closures and no thunks of
+   the library. The data pointer is the language's own object (a `GCHandle` in .NET, a global
+   reference in Java, `Unmanaged` in Swift, a `cgo.Handle` in Go), released by the function given
+   to `ferro_object_set_data` when the instance goes away.
+2. **Scalars only**: no structure passed or returned by value, no varargs; sizes come back through
+   `double *` (or `ferro_layout_result`).
+3. **Synchronous on the UI thread, and reentrant**: a callback may call the ABI again (measure and
+   arrange its children, read and write properties, draw). The library holds none of its own state
+   (no `UiCell` access) while it calls out.
+4. **Errors as statuses**: a callback returns `0` (or `1` for a handled event), a negative status on
+   a failure, which the library records (`ferro_last_error`) and answers with the base behaviour.
+   Nothing may unwind out of a callback; the library catches what fails inside its own calls.
+5. **What it costs**: an unimplemented member never calls the language; layout callbacks run only
+   for invalidated elements; render is retained, called when the element is invalidated, and the
+   GPU scene replays what it recorded.
+
+Drawing records into the same retained GPU scene as the built-in controls (the render of a
+foreign class runs through the recorder of the compositing renderer): there is no CPU drawing
+path. Handles are checked as everywhere, every call is UI-thread only, and an ID or a context
+that is not valid is a status.
+
+### 15.4 What it costs
+
+`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`, the same Mac as section
+13, the median of five runs (load 9 to 19 while it ran):
+
+| Operation | The control in Rust | Through the ABI |
+| --- | ---: | ---: |
+| measure and arrange 1000 elements in a stack panel (each invalidated) | 60.2 us | 70.1 us |
+| render 1000 elements (a filled rounded rectangle each) into the recorder | 25.0 us | 38.9 us |
+| write a number property that affects the measure (`MinWidth` / a registered one) | 30.9 ns | 26.9 ns |
+| read it | 7.2 ns | 7.4 ns |
+
+A measure and an arrange through callbacks cost about 10 ns more per element than the same Rust
+overrides (two indirect calls, the remembered handle checked, the result out-parameters kept for
+`ferro_layout_result`); a render about 14 ns more (the context made reachable to the drawing calls
+and the brush looked up by ID). A registered property is a styled property like the built-in ones:
+it costs the same.
+
+### 15.5 What is not there yet
+
+- Text input (`on_text_input`), focus members, automation peers and custom hit testing are not
+  forwarded; the base runs them.
+- More bases (an items control, a templated control without a content) can follow the same pattern.
+- Classes are found by name in the tables of types; the XAML loader creates them by name once it
+  reads markup through the C ABI (step 7 of #636).
+- At most 64 registered classes per process (the pool of constructors).
+
+The tests are `src/FerroUI.CApi/tests/foreign_tests.rs` and `test_controls` of
+`samples/CApi/abi_test.c`; the samples are `samples/CApi/gauge.h` (with `gauge.c`, `make -C
+samples/CApi run-gauge`) and `samples/CApi/osprey-bindings/gauge_control`.
+
+## 16. Classes by use
+
+The full library (section 1) has the tables of types: every class of the framework is linked and
+found by name, and the theme is the whole Fluent theme, so a statically linked C hello world is
+as large as an application that uses every control. The by-use mode (#976) links what a program
+registers instead.
+
+### 16.1 The entries of the classes
+
+Every class of the API model in the base crate and the controls (455 of them) has an **entry**,
+an exported function without arguments that returns its type ID:
+
+```c
+int64_t window = ferro_type_window();
+int64_t button = ferro_type_button();
+int64_t combo  = ferro_type_combo_box();
+```
+
+An entry registers the class (it is then found by name too), its default constructor and the
+type ID of the model (the constant of the generated bindings), and records the units of the
+Fluent theme the class adds to the ambient ones. The model lists the entry of each class
+(`entry` in `bindings/model/ferroui-api.json`); the entries are `src/FerroUI.CApi/api_types.rs`,
+which `tests/types_tests.rs` writes from the model and compares with the file
+(`FERROUI_CAPI_WRITE_TYPES=1 cargo test -p ferroui-capi --lib types` writes it again). The units
+of a class are the closure the build tool computes for a Rust application that names the class
+(`ferroui_build::theme_roots::kept_units`, docs/porting/theme-trimming.md), over the type models of
+the dependencies that the build script of the crate hands to the test: the template of a
+`ComboBox` brings the units of its popup, its items and its scroll bars.
+
+### 16.2 The two modes
+
+| | Full (default features) | By use (`--no-default-features --features desktop`) |
+| --- | --- | --- |
+| Tables of types | on: every class found by name | off: the classes registered by their entries, or created by the framework |
+| An entry | returns the ID (the class is known already) | registers the class and its units, returns the ID |
+| `ferro_type_id("Button")` | finds it | finds it once its entry was called |
+| Theme of `ferro_app_run` | the whole Fluent theme | the ambient units and the units of the registered classes |
+| A static program keeps | every class | the classes it registers and what they use |
+
+In the by-use mode a program calls the entries of the classes it uses **before `ferro_app_run`**,
+which constructs the theme from the units registered so far. An entry called later registers its
+class, but the theme does not grow: its control theme is missing. A class that is not registered
+is not found (`FERRO_NOT_FOUND`, with a message that names the entries). Generated bindings do it
+for the program: the Osprey bindings of a selection declare the entries of the classes it names
+and call them in `registerTypes()`, which `run` calls before the main loop (docs/osprey.md); the
+full bindings register nothing. `samples/CApi/hello_world.c` and `gauge.c` call them in `main`.
+
+A class written in another language (section 15) needs no entry: its registration registers it,
+and its default constructor is registered beside its type, so it is created in both modes.
+
+### 16.3 What it saves
+
+macOS (arm64), release, the C samples linked statically against `libferroui_capi.a` with
+`-Wl,-dead_strip` and stripped; the start-up is the wall time of 15 interleaved runs that close the
+window 200 ms after the start callback, less those 200 ms (a loaded machine: compare the columns,
+not the absolute numbers):
+
+| Program | Full | By use | Rust hello world |
+| --- | ---: | ---: | ---: |
+| `hello_world.c` (Window, StackPanel, TextBlock, Button) | 36.97 MB | 20.12 MB | 16.7 to 20.4 MB |
+| `gauge.c` (Window, StackPanel, a class written in C) | 36.99 MB | 20.17 MB | |
+| a window alone (`ferro_type_window()`) | | 19.99 MB | |
+| start-up of `hello_world.c`, median | 238 ms | 235 ms | |
+| start-up of `gauge.c`, median | 234 ms | 233 ms | |
+
+What one entry keeps beyond a window (the same link): `Button` and `TextBlock` nothing (a text block
+has no control theme, and the closure of the ambient units already keeps the one of a button), `ListBox` 2.03 MB,
+`TreeView` 2.12 MB, `TextBox` 2.70 MB, `ComboBox` 2.89 MB, `CalendarDatePicker` 3.23 MB.
+
+By crate (`scripts/capi/size_by_crate.py` over the link map, MB of symbols):
+
+| Crate | Full | By use |
+| --- | ---: | ---: |
+| ferroui_base | 14.77 | 8.01 |
+| ferroui_controls | 6.13 | 1.64 |
+| native (Skia, HarfBuzz, codecs) | 4.60 | 4.60 |
+| core | 3.78 | 1.77 |
+| ferroui_themes_fluent | 2.06 | 0.38 |
+| total | 34.89 | 18.97 |
+
+A dynamic library exports every entry, so it keeps every class whatever the program calls: the
+by-use mode pays off where the program is linked statically, or with a library built for one
+application with the exports of its selection only (#977).

@@ -4,10 +4,12 @@
 
 mod abi_tests;
 mod events_tests;
+mod foreign_tests;
 mod frame_tests;
 mod header_tests;
 mod osprey_tests;
 mod signals_tests;
 mod support;
 mod tree_tests;
+mod types_tests;
 mod values_tests;

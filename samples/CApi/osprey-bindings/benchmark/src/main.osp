@@ -111,6 +111,7 @@ fn main() = {
     }
     report("api", checkApi())
     let _ = ferro_init()
+    let _ = registerTypes()
     let _ = ferro_frame_dispatcher(function: dispatch)
     let text = ferro_create(typeId: textBlockTypeId())
     let button = ferro_create(typeId: buttonTypeId())

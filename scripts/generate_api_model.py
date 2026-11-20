@@ -164,6 +164,18 @@ def c_type(text):
     return C_TYPES.get(text, text)
 
 
+# The crates whose classes have an entry in the library (`ferro_type_<class>()`, `api_types.rs`,
+# docs/c-abi.md, section 16): the ones it depends on for its classes.
+ENTRY_CRATES = ("ferroui_base", "ferroui_controls")
+
+
+def entry_of(rust_path, class_words):
+    """The entry of a class (`ferro_type_button`), or None for a class of no crate of the library."""
+    if not rust_path or rust_path.split("::")[0] not in ENTRY_CRATES:
+        return None
+    return "ferro_type_" + "_".join(class_words)
+
+
 def read_header():
     """The functions, callback types and status codes of `include/ferroui.h`."""
     header = meta.read(HEADER)
@@ -215,7 +227,8 @@ def param_of(text):
     found = re.match(r"^(.*?)(\w+)$", text.strip())
     kind = found.group(1).strip()
     return {"name": found.group(2), "type": c_type(kind) if kind not in ("FerroEventFn", "FerroStartFn", "FerroPostFn",
-            "FerroEventDataFn", "FerroReleaseFn", "FerroPostDataFn") else "callback:" + kind}
+            "FerroEventDataFn", "FerroReleaseFn", "FerroPostDataFn", "FerroCreateFn", "FerroReleaseDataFn",
+            "FerroLayoutFn", "FerroRenderFn", "FerroNotifyFn", "FerroPointerFn", "FerroKeyFn") else "callback:" + kind}
 
 
 # ---- the frame layout ------------------------------------------------------------------------
@@ -305,6 +318,38 @@ SIGNAL_LAYOUT = {
     "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch",
 }
 
+# Controls written in another language (docs/c-abi.md, section 15): what a backend needs to
+# present a class registered through the ABI the way its language writes a class.
+CONTROL_LAYOUT = {
+    "register": "ferro_class_register",
+    "bases": [
+        {"value": 1, "name": "Control"}, {"value": 2, "name": "Panel"},
+        {"value": 3, "name": "Decorator"}, {"value": 4, "name": "ContentControl"},
+    ],
+    "callbacks": [
+        {"setter": "ferro_class_on_create", "type": "FerroCreateFn", "member": "created"},
+        {"setter": "ferro_class_on_measure", "type": "FerroLayoutFn", "member": "measure_override"},
+        {"setter": "ferro_class_on_arrange", "type": "FerroLayoutFn", "member": "arrange_override"},
+        {"setter": "ferro_class_on_render", "type": "FerroRenderFn", "member": "render"},
+        {"setter": "ferro_class_on_property_changed", "type": "FerroNotifyFn", "member": "on_property_changed"},
+        {"setter": "ferro_class_on_attached", "type": "FerroNotifyFn", "member": "on_attached_to_visual_tree"},
+        {"setter": "ferro_class_on_detached", "type": "FerroNotifyFn", "member": "on_detached_from_visual_tree"},
+        {"setter": "ferro_class_on_apply_template", "type": "FerroNotifyFn", "member": "on_apply_template"},
+        {"setter": "ferro_class_on_pointer", "type": "FerroPointerFn", "member": "on_pointer_*"},
+        {"setter": "ferro_class_on_key", "type": "FerroKeyFn", "member": "on_key_*"},
+    ],
+    "property": {
+        "register": "ferro_property_register",
+        "kinds": "the kinds of signals: 1 i64, 2 f64, 3 bool, 5 text",
+        "flags": [
+            {"value": 1, "name": "affects_measure"}, {"value": 2, "name": "affects_arrange"},
+            {"value": 4, "name": "affects_render"}, {"value": 8, "name": "inherits"}, {"value": 16, "name": "attached"},
+        ],
+    },
+    "data": {"instance": "ferro_object_set_data", "class": "ferro_class_set_data"},
+    "status": "a callback returns 0 (or 1: handled) on success, a negative status on a failure",
+}
+
 
 # ---- the model --------------------------------------------------------------------------------
 
@@ -385,6 +430,7 @@ def build():
             "words": words(name),
             "base": model.bases.get(name) if model.bases.get(name) in type_ids else None,
             "rust_path": meta.class_path(model, name),
+            "entry": entry_of(meta.class_path(model, name), words(name)),
             "creatable": name in model.creatable,
             "control": is_control,
             "children": children_of(model, name),
@@ -418,6 +464,10 @@ def build():
         })
 
     functions, callbacks, statuses = read_header()
+    # The class entries are the classes' (`entry`), not functions of the ABI a binding declares
+    # by hand: a binding declares the entries of the classes it selects.
+    entries = {cls["entry"] for cls in out_classes if cls["entry"]}
+    functions = [function for function in functions if function["name"] not in entries]
     abi_version = int(re.search(r"#define FERRO_ABI_VERSION (\d+)", meta.read(HEADER)).group(1))
 
     document = {
@@ -430,6 +480,7 @@ def build():
         "abi": {"functions": functions, "callbacks": callbacks, "statuses": statuses},
         "frame": FRAME_LAYOUT,
         "signals": SIGNAL_LAYOUT,
+        "controls": CONTROL_LAYOUT,
         "classes": out_classes,
         "properties": out_properties,
         "events": out_events,
