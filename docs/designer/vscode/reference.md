@@ -123,6 +123,8 @@ When the Cargo build publishes generated XAML symbols, VS Code uses rust-analyze
 
 In Studio, open the source file and call `designer_plan_xaml_move` with `destination` and `expected_revision`. Send the same arguments and `review` to `designer_move_xaml` with write permission. Studio updates the saved stage sets and scenarios on Apply. Save the changed XAML and Rust buffers to publish their new references. Use Undo or Redo in a participating source tab to replay the move, including the saved files. [File move workflow](authoring.md#move-an-xaml-file-and-its-references)
 
+For a generated Rust build function, build the owning Cargo package and make rust-analyzer available to Studio. Start `designer_plan_xaml_move` with `allow_input` so Studio can launch the analyzer. If the result has `status: "resolving"`, repeat the plan call with the same destination and revision until it returns `review` and `documents`. Pass `cancel: true` to discard that review. Apply uses the resolved edits and checks the current sources and revision again. [Studio setup](../native-controls.md#move-an-xaml-file)
+
 Read the open board again after Apply, Undo, or Redo. Use `designer_stages` in VS Code or `designer_preview_stages` in Studio. A moved card keeps its stage ID and returns a new epoch for input, selection, and inspection.
 
 ### Read Preview Checks with MCP

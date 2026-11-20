@@ -111,7 +111,7 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
         s::tool("designer_dictionary_extraction","Read an inline XAML dictionary size, source range and suggested file. Pass file_name to review the checked patch, new dictionary and review identifier.",s::object(json!({"node":s::id(),"file_name":s::string(),"expected_revision":s::revision()}),&["node","expected_revision"]),false),
         s::tool("designer_extract_dictionary","Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.",s::object(json!({"node":s::id(),"file_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["node","file_name","review","expected_revision"]),true),
-        s::tool("designer_plan_xaml_move","Review a move of the active XAML file. Pass a workspace-relative destination to get edits for XAML, Rust, Cargo builds, saved stage sets, and native scenarios, plus a review identifier.",s::object(json!({"destination":s::string(),"expected_revision":s::revision()}),&["destination","expected_revision"]),false),
+        s::tool("designer_plan_xaml_move","Review a move of the active XAML file. Pass a workspace-relative destination to get edits for XAML, Rust, Cargo builds, saved stage sets, and scenarios. Generated Rust references may return status resolving. Start that analysis with allow_input, then poll with the same destination and revision until the review identifier arrives. Pass cancel to discard the pending or completed review.",s::object(json!({"destination":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["destination","expected_revision"]),false),
         s::tool("designer_move_xaml","Move the active XAML file and change its references in one Studio history step. Pass the destination and review identifier from designer_plan_xaml_move.",s::object(json!({"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["destination","review","expected_revision"]),true),
     ];
     tools.extend(canvas_guides::tools());
@@ -121,6 +121,7 @@ pub(super) fn call(
     workspace: &Rc<DesignerWorkspace>,
     name: &str,
     args: &Value,
+    allow_input: bool,
 ) -> Result<Value, String> {
     if canvas_guides::handles(name) {
         return canvas_guides::call(workspace, name, args);
@@ -190,7 +191,17 @@ pub(super) fn call(
             let plan = workspace.extract_reviewed_dictionary(super::node_id(args, "node")?, &text(args, "file_name")?, &text(args, "review")?)?;
             Ok(json!(plan))
         }
-        "designer_plan_xaml_move" => Ok(json!(workspace.plan_project_file_move(&text(args, "destination")?)?)),
+        "designer_plan_xaml_move" => {
+            let destination = text(args, "destination")?;
+            if args["cancel"] == true {
+                workspace.cancel_project_file_move_review(&destination)?;
+                return Ok(json!({"status":"cancelled"}));
+            }
+            Ok(match workspace.plan_project_file_move(&destination, allow_input)? {
+                Some(plan) => json!(plan),
+                None => json!({"status":"resolving"}),
+            })
+        }
         "designer_move_xaml" => Ok(json!(workspace.apply_project_file_move(&text(args, "destination")?, &text(args, "review")?)?)),
         "designer_language_apply" => {
             let edit: WorkspaceEdit = decode(args, "edit")?;

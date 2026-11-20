@@ -53,6 +53,7 @@ pub(super) struct ProjectUi {
     pub(super) workspace: Option<ProjectWorkspace>,
     pub(super) tabs: BTreeMap<String, Tab>,
     pub(super) linked_history: super::history::WorkspaceHistory,
+    pub(super) rust_move: Option<super::file_move::RustMoveReview>,
     selected: usize,
     discovery: Option<
         std::sync::mpsc::Receiver<
@@ -63,6 +64,11 @@ pub(super) struct ProjectUi {
     markup: markup::ProjectMarkup,
 }
 impl DesignerWorkspace {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(super) fn cargo_analysis_configuration(&self, root: &std::path::Path) -> ferroui_designer_project::CargoBuildConfiguration {
+        self.project.borrow().markup.cargo(root)
+    }
+
     pub fn open_solution(self: &Rc<Self>, path: impl AsRef<std::path::Path>) -> Result<(), String> {
         let path = path.as_ref().to_owned();
         if self.project.borrow().discovery.is_some() {
@@ -109,6 +115,7 @@ impl DesignerWorkspace {
             project.workspace = Some(ProjectWorkspace::new(solution));
             project.selected = 0;
             project.markup = Default::default();
+            project.rust_move = None;
         }
         let mut session = self.session.borrow_mut();
         session.set_workspace_preview_buffers(Vec::new());
@@ -673,12 +680,12 @@ impl DesignerWorkspace {
             self.root
                 .get_control::<TextBlock>("BuildStatus")
                 .set_text(Some(&format!("{status:?}")));
-            build = task.take_build_metadata();
+            build = task.take_build_metadata().map(|metadata| (metadata, task.cargo_configuration().clone()));
         }
-        let added = build.filter(|metadata| {
+        let added = build.filter(|(metadata, _)| {
             metadata.package_root().is_ok_and(|root| state.workspace.as_ref()
                 .is_some_and(|workspace| workspace.solution.owns_package_root(&root)))
-        }).map(|metadata| state.markup.load(metadata));
+        }).map(|(metadata, config)| state.markup.load(metadata, config));
         let refreshed = state.markup.poll();
         drop(state);
         if refreshed.iter().any(Result::is_ok) {

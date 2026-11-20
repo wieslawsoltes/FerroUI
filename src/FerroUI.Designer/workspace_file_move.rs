@@ -1,25 +1,27 @@
+/Users/wieslawsoltes/.codex/worktrees/adee/FerroUI/src/FerroUI.Designer/workspace_file_move.rs:
+
 use super::{
-    project::{document_identity, Tab},
     DesignerWorkspace,
+    project::{Tab, document_identity},
 };
-use crate::{rsx_document::RustDocument, PreviewStageSourceMoves};
+use crate::{PreviewStageSourceMoves, rsx_document::RustDocument};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::{
     FileMoveDocument, FileMoveDraft, FileMovePlan, LanguageService, LineIndex,
 };
 use ferroui_designer_project::{
-    file_path, file_uri, MovedSourceFile, ProjectWorkspace, SavedDesignFile, SavedReferenceEdit,
+    MovedSourceFile, ProjectWorkspace, SavedDesignFile, SavedReferenceEdit, file_path, file_uri,
 };
 use std::{collections::BTreeMap, path::Path, rc::Rc};
 
+#[path = "workspace_file_move_resolution.rs"]
+mod resolution;
 #[path = "workspace_file_move_review.rs"]
 mod review;
+pub(super) use resolution::RustMoveReview;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_file_move_tests.rs"]
 mod tests;
-
-const RUST_MOVE_REVIEW: &str =
-    "Review this move in VS Code with rust-analyzer to update its generated Rust references";
 
 #[derive(Clone)]
 pub(super) struct MovedXaml {
@@ -44,7 +46,60 @@ impl DesignerWorkspace {
     pub(crate) fn plan_project_file_move(
         self: &Rc<Self>,
         destination: &str,
-    ) -> Result<FileMovePlan, String> {
+        allow_analyzer: bool,
+    ) -> Result<Option<FileMovePlan>, String> {
+        let target = self.move_target(destination)?;
+        let existing = {
+            let mut project = self.project.borrow_mut();
+            if project
+                .rust_move
+                .as_ref()
+                .is_some_and(|review| review.matches(&target))
+            {
+                project.rust_move.take()
+            } else {
+                None
+            }
+        };
+        if let Some(mut review) = existing {
+            let plan = match review.poll()? {
+                Some((base, resolutions)) => {
+                    let rust_drafts = self.refresh_move_drafts(&target.from)?;
+                    Some(
+                        self.try_language_service()?
+                            .complete_file_move(
+                                &target.from,
+                                &target.to,
+                                &rust_drafts,
+                                base,
+                                resolutions,
+                            )
+                            .map_err(|error| error.to_string())?,
+                    )
+                }
+                None => None,
+            };
+            self.project.borrow_mut().rust_move = Some(review);
+            return Ok(plan);
+        }
+        let rust_drafts = self.refresh_move_drafts(&target.from)?;
+        let plan = self
+            .try_language_service()?
+            .plan_file_move_with_drafts(&target.from, &target.to, &rust_drafts)
+            .map_err(|error| error.to_string())?;
+        if plan.generated_rust.is_empty() {
+            return Ok(Some(plan));
+        }
+        if !allow_analyzer {
+            return Err("Start a Rust move review in Studio or use allow_input to run rust-analyzer through MCP".into());
+        }
+        self.project.borrow_mut().rust_move = None;
+        let review = RustMoveReview::start(self, target, plan, rust_drafts)?;
+        self.project.borrow_mut().rust_move = Some(review);
+        Ok(None)
+    }
+
+    fn move_target(&self, destination: &str) -> Result<resolution::MoveTarget, String> {
         if self.pending_source.get() {
             return Err("Apply the current draft before moving its file".into());
         }
@@ -56,10 +111,19 @@ impl DesignerWorkspace {
             .ok_or("Open the owning project first")?;
         let to = file_uri(workspace.solution.root.join(Path::new(destination)))
             .map_err(|e| e.to_string())?;
+        Ok(resolution::MoveTarget {
+            from,
+            to,
+            revision: self.session.borrow().document().revision(),
+        })
+    }
+
+    fn refresh_move_drafts(&self, from: &str) -> Result<Vec<FileMoveDraft>, String> {
+        let state = self.project.borrow();
         let mut language = self.try_language_service()?;
         let mut rust_drafts = Vec::new();
         for (uri, tab) in &state.tabs {
-            if !uri.starts_with("file://") || uri == &from {
+            if !uri.starts_with("file://") || uri == from {
                 continue;
             }
             if tab.rust.is_some() {
@@ -75,12 +139,10 @@ impl DesignerWorkspace {
         }
         sync(
             &mut language,
-            &from,
+            from,
             self.session.borrow().document().source(),
         )?;
-        language
-            .plan_file_move_with_drafts(&from, &to, &rust_drafts)
-            .map_err(|e| e.to_string())
+        Ok(rust_drafts)
     }
 
     pub(crate) fn apply_project_file_move(
@@ -89,15 +151,14 @@ impl DesignerWorkspace {
         review: &str,
     ) -> Result<FileMovePlan, String> {
         self.ensure_local_file_move()?;
-        let plan = self.plan_project_file_move(destination)?;
+        let plan = self
+            .plan_project_file_move(destination, false)?
+            .ok_or("Wait for the Rust reference review before applying the move")?;
         if plan.review != review {
             return Err(
                 "The file move changed. Review the current source patches before applying it"
                     .into(),
             );
-        }
-        if !plan.generated_rust.is_empty() {
-            return Err(RUST_MOVE_REVIEW.into());
         }
         let mut staged = self.stage_file_move()?;
         let label = self
@@ -137,7 +198,25 @@ impl DesignerWorkspace {
             .moves
             .insert(label, MovedXaml { file, participants });
         self.accept_file_move(staged, &plan.from, &plan.to, &stage_moves)?;
+        self.project.borrow_mut().rust_move = None;
         Ok(plan)
+    }
+
+    fn cancel_move_resolution(&self, target: &resolution::MoveTarget) {
+        let mut project = self.project.borrow_mut();
+        if project
+            .rust_move
+            .as_ref()
+            .is_some_and(|review| review.matches(target))
+        {
+            project.rust_move = None;
+        }
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn cancel_project_file_move_review(&self, destination: &str) -> Result<(), String> {
+        self.cancel_move_resolution(&self.move_target(destination)?);
+        Ok(())
     }
 
     pub(super) fn step_file_move(
@@ -269,7 +348,10 @@ impl DesignerWorkspace {
             project.linked_history.take_closed(to);
         }
         *self.try_language_service()? = staged.language;
-        self.preview_stages.board.borrow_mut().retarget_sources(stage_moves);
+        self.preview_stages
+            .board
+            .borrow_mut()
+            .retarget_sources(stage_moves);
         self.present_project_tab(active, tab)?;
         self.rebuild_project_tree();
         Ok(())

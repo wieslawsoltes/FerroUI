@@ -1,6 +1,8 @@
+/Users/wieslawsoltes/.codex/worktrees/adee/FerroUI/src/FerroUI.Designer/workspace_markup.rs:
+
 use crate::{DesignerAsset, registered_designer_assets};
 use ferroui_designer_language::Schema;
-use ferroui_designer_project::{BuildMetadata, MarkupCatalog, file_path};
+use ferroui_designer_project::{BuildMetadata, CargoBuildConfiguration, MarkupCatalog, file_path};
 use ferroui_designer_rsx::RsxCatalog;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -11,6 +13,8 @@ struct Package {
     assets: Vec<DesignerAsset>,
     rust: Arc<RsxCatalog>,
     catalog: Arc<MarkupCatalog>,
+    #[cfg(not(target_arch = "wasm32"))]
+    cargo: CargoBuildConfiguration,
 }
 
 /// Each accepted build replaces the selected package's controls. Older jobs
@@ -39,7 +43,21 @@ impl ProjectMarkup {
         self.accepted.get(root).map(|package| package.rust.clone())
     }
 
-    pub(super) fn load(&mut self, metadata: BuildMetadata) -> Result<(), String> {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(super) fn cargo(&self, root: &Path) -> CargoBuildConfiguration {
+        self.accepted
+            .get(root)
+            .map(|package| package.cargo.clone())
+            .unwrap_or_default()
+    }
+
+    pub(super) fn load(
+        &mut self,
+        metadata: BuildMetadata,
+        cargo: CargoBuildConfiguration,
+    ) -> Result<(), String> {
+        #[cfg(target_arch = "wasm32")]
+        drop(cargo);
         let root = metadata.package_root().map_err(|error| error.to_string())?;
         let (sender, receiver) = mpsc::channel();
         std::thread::spawn(move || {
@@ -53,6 +71,8 @@ impl ProjectMarkup {
                         assets: registered_designer_assets(&catalog, package),
                         rust: Arc::new(RsxCatalog::from_project(&catalog, &schema, package)),
                         catalog: Arc::new(catalog),
+                        #[cfg(not(target_arch = "wasm32"))]
+                        cargo,
                     }
                 })
                 .map_err(|error| error.to_string());

@@ -580,7 +580,7 @@ impl UiToolProvider for DesignerMcp {
             {
                 return Err("Starting project processes requires allow_input".into());
             }
-            return workspace_tools::call(&workspace, name, args);
+            return workspace_tools::call(&workspace, name, args, permissions.allow_input);
         }
         let mut session = owner
             .try_borrow_mut()

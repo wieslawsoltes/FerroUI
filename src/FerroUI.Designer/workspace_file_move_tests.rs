@@ -19,6 +19,9 @@ use std::{
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
 
+#[path = "workspace_file_move_rust_tests.rs"]
+mod rust;
+
 #[test]
 fn studio_mcp_moves_unopened_references_and_replays_the_physical_file_from_a_consumer() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
@@ -170,7 +173,8 @@ fn studio_moves_a_view_and_undoes_its_rust_reference_from_the_code_tab() {
     let rust_uri = files.uri("compiled_view.rs");
     fs::write(files.0.join("compiled_view.rs"), rust).unwrap();
     let plan = workspace
-        .plan_project_file_move("Archive/Customer card.xaml")
+        .plan_project_file_move("Archive/Customer card.xaml", true)
+        .unwrap()
         .unwrap();
     let edited = plan
         .documents
@@ -246,7 +250,7 @@ fn studio_move_persists_saved_design_references_and_replays_them_from_source_his
     })).unwrap();
     fs::write(&stage_path, &stage).unwrap();
     fs::write(&scenario_path, &scenario).unwrap();
-    let plan = workspace.plan_project_file_move(destination).unwrap();
+    let plan = workspace.plan_project_file_move(destination, true).unwrap().unwrap();
     assert_eq!(plan.documents.len(), 3);
     workspace.apply_project_file_move(destination, &plan.review).unwrap();
     let moved = workspace.preview_stage(id).unwrap();
