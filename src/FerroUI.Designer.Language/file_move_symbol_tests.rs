@@ -67,7 +67,7 @@ fn compiled_project(
     });
     fs::write(
         directory.join(CompiledXamlIndex::FILE_NAME),
-        serde_json::to_string(&index).unwrap(),
+        index.to_json(),
     )
     .unwrap();
     fs::write(

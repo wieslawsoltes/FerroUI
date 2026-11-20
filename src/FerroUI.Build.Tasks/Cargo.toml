@@ -52,7 +52,7 @@ naga = { workspace = true, features = ["wgsl-in", "glsl-out"], optional = true }
 # The type model, the source scanner and the export of a model (docs/porting/xaml.md, 9.5.1 and
 # 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
 # crate under the names they had here.
-ferroui-build-scan = { workspace = true, features = ["compiled-index"] }
+ferroui-build-scan = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

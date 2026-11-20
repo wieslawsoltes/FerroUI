@@ -1438,10 +1438,7 @@ impl Build {
             }
         }
         if errors.is_empty() {
-            match serde_json::to_string(&symbols) {
-                Ok(text) => write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &text, &mut errors),
-                Err(error) => errors.push(format!("Cannot encode the compiled XAML symbol index: {error}")),
-            }
+            write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
         }
         if !errors.is_empty() {
             return Outcome { lines, errors };

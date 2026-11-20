@@ -2,11 +2,6 @@
 
 /// Composition of a generated XAML module, which determines which names it reserves.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "compiled-index",
-    derive(serde::Deserialize, serde::Serialize)
-)]
-#[cfg_attr(feature = "compiled-index", serde(rename_all = "snake_case"))]
 pub enum CompiledGroupKind {
     Documents,
     /// The first document populates a class. The remaining documents have build functions.

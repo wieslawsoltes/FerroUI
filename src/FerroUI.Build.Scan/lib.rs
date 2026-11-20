@@ -66,8 +66,6 @@
 #![forbid(unsafe_code)]
 
 pub mod call_forms;
-#[cfg(feature = "compiled-index")]
-pub mod compiled_index;
 pub mod compiled_names;
 pub mod export;
 mod json;
@@ -75,6 +73,7 @@ pub mod model;
 pub mod model_set;
 pub mod scanner;
 pub mod xaml_metadata;
+pub use xaml_metadata::compiled_index;
 
 /// The XML namespace of the framework, as the base crate states it
 /// (`ferroui_base::metadata::FERRO_XML_NAMESPACE`). The scanner reads the

@@ -89,9 +89,10 @@ mod tests {
             .compile_group(group)
             .execute();
         assert!(build.errors.is_empty(), "{:?}", build.errors);
-        let index: CompiledXamlIndex =
-            serde_json::from_slice(&fs::read(out.join(CompiledXamlIndex::FILE_NAME)).unwrap())
-                .unwrap();
+        let index = CompiledXamlIndex::parse(
+            &fs::read_to_string(out.join(CompiledXamlIndex::FILE_NAME)).unwrap(),
+        )
+        .unwrap();
         assert!(index.is_supported());
         assert_eq!(index.manifest, fixtures.join("Cargo.toml"));
         let [group] = index.groups.as_slice() else {

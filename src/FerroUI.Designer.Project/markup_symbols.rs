@@ -36,7 +36,7 @@ impl MarkupCatalog {
             )?;
             let text = read_text(&path, remaining)?;
             remaining -= text.len() as u64;
-            let index = serde_json::from_str::<CompiledXamlIndex>(&text).map_err(|error| {
+            let index = CompiledXamlIndex::parse(&text).map_err(|error| {
                 ProjectError(format!("Cannot read {}: {error}", path.display()))
             })?;
             if !index.manifest.is_absolute()
