@@ -10,6 +10,7 @@ const scope = element<HTMLInputElement>('details-filtered');
 const list = element('details-list');
 const status = element('details-message');
 const title = element('details-title');
+const commandBinding = document.querySelector<HTMLButtonElement>('#edit-command-binding');
 let state: DetailsState = {};
 let contentKey = '';
 let request = 0;
@@ -19,6 +20,13 @@ let error: string | undefined;
 
 filter.addEventListener('input', applyFilter);
 scope.addEventListener('change', applyFilter);
+commandBinding?.addEventListener('click', () => {
+    if (!state.target || pending !== undefined) return;
+    pending = ++request;
+    error = undefined;
+    vscode.postMessage({ type: 'commandBinding', request: pending, target: state.target });
+    applyFilter();
+});
 window.addEventListener('message', ({ data }: MessageEvent<ToDetails>) => {
     if (data.type === 'state') {
         if (data.state.frame?.session !== state.frame?.session || data.state.target?.node !== state.target?.node) error = undefined;
@@ -59,6 +67,10 @@ function applyFilter(): void {
         if (!row.hidden) count++;
     }
     list.toggleAttribute('inert', !state.frame || !items || pending !== undefined);
+    if (commandBinding) {
+        commandBinding.hidden = !state.commandBinding;
+        commandBinding.disabled = pending !== undefined || !state.target;
+    }
     const message = error ?? pendingMessage ?? state.message
         ?? (count ? '' : items?.length ? 'No matches.' : view === 'events'
             ? state.target ? 'This control has no catalogued events.' : 'Select an authored control to browse its events.'

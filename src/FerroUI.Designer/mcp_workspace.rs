@@ -11,9 +11,11 @@ use std::rc::Rc;
 mod canvas_guides;
 #[path = "mcp_project_library.rs"]
 mod project_library;
+#[path = "mcp_command_bindings.rs"]
+mod command_bindings;
 
 pub(super) fn handles(name: &str) -> bool {
-    canvas_guides::handles(name) || project_library::handles(name) || matches!(
+    canvas_guides::handles(name) || project_library::handles(name) || command_bindings::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -130,6 +132,7 @@ pub(super) fn tools() -> Vec<Value> {
     ];
     tools.extend(canvas_guides::tools());
     tools.extend(project_library::tools());
+    tools.extend(command_bindings::tools());
     tools
 }
 pub(super) fn call(
@@ -143,6 +146,9 @@ pub(super) fn call(
     }
     if project_library::handles(name) {
         return project_library::call(workspace, name, args);
+    }
+    if command_bindings::handles(name) {
+        return command_bindings::call(workspace, name, args);
     }
     match name {
         "designer_reveal_rsx_animation_issue" => {

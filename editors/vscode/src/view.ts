@@ -244,7 +244,10 @@ export function detailsHtml(webview: vscode.Webview, root: vscode.Uri, view: Det
     return page(webview, root, 'details', `FerroUI ${title}`, `
 <main class="details" id="${view}-panel" data-view="${view}">
     <header class="details-header">
-        <strong id="details-title" hidden></strong>
+        <div class="details-selection">
+            <strong id="details-title" hidden></strong>
+            ${events ? tool('edit-command-binding', 'link', 'Edit command binding…', 'hidden') : ''}
+        </div>
         <div class="details-filter">${icon('search')}<input type="search" id="details-search" aria-label="Filter ${view}" placeholder="Filter ${view}"></div>
         <label class="details-option"><input type="checkbox" id="details-filtered">${events ? 'Assigned handlers only' : 'Visible to selection'}</label>
     </header>

@@ -57,6 +57,12 @@ The `ferrouiAssetMove` capability advertises `ferroui/planAssetMove`. Pass local
 
 Clients can discover the requests through `experimental.ferrouiEventHandlers`. `ferroui/eventHandlerTarget` returns the code-behind URI and signature. `ferroui/planEventHandler` accepts the current Rust text and version and returns a two-document `WorkspaceEdit` plus the new declaration range. `ferroui/eventHandlerDefinition` accepts the Rust buffer for navigation before save. A client that sets `initializationOptions.ferrouiHandlerCommands` gets a Quick Fix using its `ferroui.createEventHandler` command. The host checks both versions again before applying the patch atomically. [User guide](../../docs/designer/vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+## Typed command bindings
+
+Discover `ferroui/commandBindings` and `ferroui/planCommandBinding` through `experimental.ferrouiCommandBindings`. Send `uri` and a `request` with the synchronized document `version` and UTF-16 `position` at the start of the authored control’s tag name. An optional `prefix` browses the registered members of a nested data-context property.
+
+The planner also accepts `change` with the command `property` and tagged `command` and `parameter` choices. It verifies the writable command slot, the binding paths, and the current authored expression, then validates the proposed XAML before returning a versioned `WorkspaceEdit`. The calling host checks the frame and buffer again before applying the edit. Studio calls the same planner directly. [MCP source edits](../../docs/designer/vscode/reference.md#bind-a-command-with-mcp)
+
 ## Reviewed resource rename
 
 The `ferrouiResourceRename` capability advertises `ferroui/resourceRenameTarget` and `ferroui/planResourceRename`. Send `textDocument.uri` and a `request` with the current `version` and UTF-16 `position` on the key, declaration tag, or reference operand. The target returns its name and declaration location. The plan also takes `newName`, refreshes the project index, and validates the same scope semantics as standard XAML rename.

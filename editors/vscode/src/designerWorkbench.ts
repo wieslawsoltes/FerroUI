@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { COLUMNS_VIEW, ColumnsView } from './columnsView';
+import type { CommandBindings, CommandSite } from './commandBindings';
 import { DATA_VIEW, DesignDataView } from './designDataView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
@@ -83,7 +84,8 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers,
-        readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename, readonly projectLibrary: ProjectLibrary) {
+        readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename,
+        readonly projectLibrary: ProjectLibrary, readonly commandBindings: CommandBindings) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -193,6 +195,16 @@ export class DesignerWorkbench implements vscode.Disposable {
             }),
             vscode.commands.registerCommand('ferroui.editItemTemplates', () => editTemplates()),
             vscode.commands.registerCommand('ferroui.editControlTemplate', () => editTemplates('Template')),
+            vscode.commands.registerCommand('ferroui.editCommandBinding', async () => {
+                try {
+                    const panel = this.active;
+                    const token = panel?.currentToken;
+                    if (!panel || token === undefined || panel.selectedIds.length !== 1) {
+                        throw new Error('Select one authored control in the current XAML design.');
+                    }
+                    await this.openCommandBinding({ session: panel.session, token, node: panel.selectedIds[0] });
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+            }),
             vscode.commands.registerCommand('ferroui.rsx.renameControl', async () => {
                 try {
                     const editor = vscode.window.activeTextEditor;
@@ -590,6 +602,12 @@ export class DesignerWorkbench implements vscode.Disposable {
         }
         if (message.type === 'ready') return;
         try {
+            if (message.type === 'commandBinding') {
+                if (view !== 'events') throw new Error('Use the Events view to edit the command binding.');
+                await this.openCommandBinding(message.target);
+                this.details.events.post({ type: 'edit', request: message.request });
+                return;
+            }
             if (message.type === 'extractDictionary' || message.type === 'renameResource') {
                 if (view !== 'resources') throw new Error('Use the Resources view to review project resources.');
                 const panel = this.panelFor(message.frame);
@@ -630,6 +648,25 @@ export class DesignerWorkbench implements vscode.Disposable {
         } catch (error) {
             this.details[view].post({ type: 'edit', request: message.request, error: errorMessage(error) });
         }
+    }
+
+    private async openCommandBinding(target: NodeTarget): Promise<void> {
+        const panel = this.panelFor(target);
+        await this.commandBindings.open(this.commandBindingSite(panel, target, true));
+    }
+
+    commandBindingSite(panel: DesignerPanel, target: NodeTarget, requireSelection = false): CommandSite {
+        const control = panel.nodes.find(control => control.id === target.node && control.selectable !== false);
+        if (!control) throw new Error('Select an authored control in the current XAML design.');
+        const validate = () => {
+            if (panel.language !== 'xaml' || !panel.canUse(target)
+                || requireSelection && (this.active !== panel || panel.selectedIds.length !== 1 || panel.selectedNode?.id !== target.node)) {
+                throw new Error('The source or selection changed. Reopen the command binding picker.');
+            }
+        };
+        validate();
+        return { document: panel.document, version: panel.document.version, position: control.nameRange.start, validate,
+            reveal: range => panel.revealSource(target, range) };
     }
 
     eventHandlerSite(panel: DesignerPanel, frame: FrameTarget, node: number, event: string): HandlerEditSite {

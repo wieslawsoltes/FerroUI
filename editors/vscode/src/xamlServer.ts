@@ -98,6 +98,15 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<T>(`ferroui/${method}`, params);
     }
 
+    async commandBindingRequest<T>(method: 'commandBindings' | 'planCommandBinding', params: object): Promise<T> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiCommandBindings !== true) {
+            throw new Error('Update the FerroUI XAML language server to edit command bindings.');
+        }
+        return client.sendRequest<T>(`ferroui/${method}`, params);
+    }
+
     async dictionaryRequest<T>(method: DictionaryMethod, params: object): Promise<T> {
         await this.start();
         const client = this.client;

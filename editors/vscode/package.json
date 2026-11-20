@@ -156,6 +156,12 @@
         "icon": "$(layout)"
       },
       {
+        "command": "ferroui.editCommandBinding",
+        "title": "Edit Command Binding",
+        "category": "FerroUI",
+        "icon": "$(link)"
+      },
+      {
         "command": "ferroui.columns.add",
         "title": "Add Column",
         "icon": "$(add)"

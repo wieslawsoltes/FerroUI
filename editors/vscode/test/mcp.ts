@@ -49,6 +49,7 @@ import { verifyProjectLibrary } from './projectLibraryMcp';
 import { verifyAssetImport } from './assetImportMcp';
 import { verifyAssetMove } from './assetMoveMcp';
 import { verifyControlTemplate } from './controlTemplateMcp';
+import { verifyCommandBindings } from './commandBindingsMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -189,6 +190,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyColumnsMcp({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyControlTemplate({ invoke, content });
+        await verifyCommandBindings({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });
         await verifyIncludedTemplateCopiesMcp({ invoke, content });
         await verifyResourceRename({ invoke, content });

@@ -185,6 +185,7 @@ impl DesignerWorkspace {
         this.connect_preview_checks();
         this.connect_columns();
         this.connect_item_templates();
+        this.connect_command_bindings();
         this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
@@ -775,6 +776,7 @@ impl DesignerWorkspace {
         self.refresh_property_transfer_commands();
         self.refresh_columns_command();
         self.refresh_item_template_command();
+        self.refresh_command_binding();
         self.refresh_file_title();
         if changed || generation_changed {
             self.rebuild_outline();
@@ -981,6 +983,8 @@ mod project_library;
 mod history;
 #[path = "workspace_event_handlers.rs"]
 mod event_handlers;
+#[path = "workspace_command_bindings.rs"]
+mod command_bindings;
 #[path = "workspace_dictionary_extraction.rs"]
 mod dictionary_extraction;
 #[path = "workspace_file_move.rs"]

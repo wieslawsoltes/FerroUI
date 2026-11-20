@@ -129,6 +129,14 @@ Call `designer_dictionary_extraction` with an authored `node` and the current `e
 
 Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `file_name`, and `review`. The write creates the dictionary and updates the view in one editor transaction. Use `designer_history` in VS Code or `designer_undo` in Studio from the original view. When a source or destination changes, read the target again and review the new plan. [Resources workflow](authoring.md#extract-a-resource-dictionary)
 
+### Bind a command with MCP
+
+1. Find the authored control using `designer_outline`. Call `designer_command_bindings` with its `node` and current `expected_revision`. VS Code also takes the design `session`. The result includes `uri`, `version`, command `slots`, authored values and ranges, and available typed `members`. Pass a member’s `path` as `prefix` to browse its children.
+2. Send `designer_command_binding` with the same node and revision. Copy `uri` to `expected_uri` and `version` to `expected_version`. In Studio, also copy `scopeEpoch` to `expected_scope_epoch`.
+3. Put the slot’s `property` and both choices in `change`. Use `{"kind":"bind","path":"Actions.Save"}` for a registered path, `{"kind":"keep"}` to preserve the current value, or `{"kind":"clear"}` to remove a simple binding. For a slot without a parameter, pass `{"kind":"keep"}` as the `parameter` choice.
+
+The edit stays in the current buffer and groups both changes into one Undo step. A value with `editable: false` provides a range for opening its authored expression. [Command binding picker](authoring.md#bind-a-command-and-its-parameter)
+
 ### Find registered Rust definitions with MCP
 
 After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)
@@ -185,7 +193,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
-| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Show Events**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
+| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Edit Control Template**, **Show Events**, **Edit Command Binding**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Extract an inline XAML dictionary | **Extract Resource Dictionary…**, **Review New Dictionary**, **Apply Extraction**, **Cancel Extraction** |
 | Review and move an XAML file | **Move XAML File…**, **Apply File Move**, **Cancel File Move** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |

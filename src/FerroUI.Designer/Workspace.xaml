@@ -329,12 +329,15 @@
           </StackPanel>
         </Border>
         <Grid Name="InspectorDesignPane" Grid.Row="1" RowDefinitions="54,Auto,38,Auto,*">
-          <Grid ColumnDefinitions="24,*" Margin="12,10,12,6">
+          <Grid ColumnDefinitions="24,*,Auto" Margin="12,10,12,6">
             <PathIcon Classes="designer-icon" Name="SelectionIcon" Width="16" Height="16" VerticalAlignment="Top" Margin="0,3,0,0" Foreground="{DynamicResource DesignerAccentBrush}" Data="F1 M1,1 L17,1 17,17 1,17 Z M3,3 L3,15 15,15 15,3 Z" />
             <StackPanel Grid.Column="1" Spacing="2">
               <TextBlock Name="SelectionTitle" Text="Select an element" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
               <TextBlock Name="SelectionType" Text="Select on the canvas or in Layers" Foreground="{DynamicResource DesignerMutedBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
             </StackPanel>
+            <Button Name="EditCommandBinding" Grid.Column="2" Classes="nav" IsVisible="False" VerticalAlignment="Top" Padding="5,3" ToolTip.Tip="Edit command binding" AutomationProperties.Name="Edit command binding">
+              <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M6.7 3.3L8.5 1.5A3.5 3.5 0 0 1 13.5 6.5L11.7 8.3 10.6 7.2 12.4 5.4A2 2 0 0 0 9.6 2.6L7.8 4.4Z M8.3 11.7L6.5 13.5A3.5 3.5 0 0 1 1.5 8.5L3.3 6.7 4.4 7.8 2.6 9.6A2 2 0 0 0 5.4 12.4L7.2 10.6Z M5 8.9L8.9 5 10 6.1 6.1 10Z" />
+            </Button>
           </Grid>
           <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
           <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="4" Margin="12,3,12,8">

@@ -202,6 +202,16 @@ The XAML and Rust updates form one Undo step. Both source buffers stay open for 
 
 ![The Events dock reveals the unsaved Rust registration while the native canvas stays visible](../images/vscode-event-handler-source.jpg)
 
+## Bind a command and its parameter
+
+Give the XAML view an `x:DataType` that exposes the command, and run **FerroUI: Build Project XAML Schema** for custom types. For example, a view model can expose `Actions.Save` as an `ICommand` and `SelectedTask` as its command parameter. The picker follows the same registered member paths as XAML completion.
+
+1. Select one authored control in **Design** or **Outline**. In **Events**, choose the link icon **Edit command binding**. You can also run **FerroUI: Edit Command Binding** from the Command Palette.
+2. Choose the command property if the control exposes several. Browse to a registered command, such as **Actions** and then **Actions.Save**. Only members with a registered command type can be assigned to the command property.
+3. If the control exposes a matching parameter property, choose a data member such as **SelectedTask** or keep its current value. Each field also offers source reveal for an existing value and clear for a simple binding. Escape cancels the picker. Completing the last field applies the two choices as one edit.
+
+Undo restores both values in the owning XAML file. Named sources, converters, resources, and object-form values open at their source. The parameter uses a typed data path. Its accepted runtime values depend on the command’s implementation. [Designer Studio](../native-controls.md#bind-a-command-and-its-parameter) · [MCP workflow](reference.md#bind-a-command-with-mcp)
+
 ## Rename a resource across XAML files
 
 1. Open the containing project in a trusted workspace. In **Resources**, use the rename icon beside the key. In **Library**, choose **Rename resource and references…** on a keyed definition. From XAML, place the caret on a resource declaration or reference and run **FerroUI: Rename Resource and References…**.

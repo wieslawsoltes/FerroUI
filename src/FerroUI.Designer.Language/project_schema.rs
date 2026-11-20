@@ -211,7 +211,7 @@ fn model_type(catalog: &MarkupCatalog, text: &str) -> Option<ModelType> {
     })
 }
 
-fn unwrapped_type(text: &str) -> &str {
+pub(crate) fn unwrapped_type(text: &str) -> &str {
     let text = text.trim();
     for wrapper in ["Option<", "Ref<", "Rc<"] {
         if let Some((prefix, value)) = text.split_once(wrapper) {

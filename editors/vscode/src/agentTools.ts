@@ -4,6 +4,7 @@ import { validate } from './agentSchema';
 import type { AssetImportRequest } from './assetImport';
 import type { CanvasSnapInput, GuideEdit } from './canvasGuidesProtocol';
 import type { CargoSelection } from './cargoTarget';
+import type { CommandBindingEdit } from './commandBindings';
 import type { TokenRequest } from './designTokenProtocol';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
@@ -37,6 +38,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     session: number;
     expected_revision: number;
     expected_version: number;
+    expected_uri: string;
+    prefix?: string;
+    change?: CommandBindingEdit;
     expected_rust_version: number;
     expected_generation: number;
     expected_sequence: number;
@@ -378,6 +382,15 @@ export class AgentTools {
                 return tool === 'designer_event_handler'
                     ? this.workbench.handlers.inspect(site, args.handler, signal)
                     : this.workbench.handlers.scaffold(site, args.handler!, args.expected_rust_version, signal);
+            }
+            case 'designer_command_bindings': case 'designer_command_binding': {
+                const site = this.workbench.commandBindingSite(panel, { session: panel.session, token: args.expected_revision, node: args.node! });
+                if (tool === 'designer_command_bindings') return this.workbench.commandBindings.inspect(site, args.prefix, signal);
+                if (args.expected_uri !== document.uri.toString() || args.expected_version !== site.version) {
+                    throw new Error('The XAML source changed. Read the command binding again.');
+                }
+                await this.workbench.commandBindings.apply(site, args.change!, signal);
+                break;
             }
             case 'designer_dictionary_extraction': case 'designer_extract_dictionary': {
                 const site = await this.workbench.dictionarySite(panel, { session: panel.session, token: args.expected_revision }, args.node!);

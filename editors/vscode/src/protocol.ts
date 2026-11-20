@@ -118,6 +118,7 @@ export interface DetailsState {
     label?: string;
     events?: EventField[];
     codeBehind?: boolean;
+    commandBinding?: boolean;
     reviewResources?: boolean;
     resources?: ResourceRow[];
     message?: string;
@@ -126,6 +127,7 @@ export type FromDetails = { type: 'ready' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
     | { type: 'extractDictionary'; request: number; frame: FrameTarget; resource: number }
     | { type: 'renameResource'; request: number; frame: FrameTarget; range: Range }
+    | { type: 'commandBinding'; request: number; target: NodeTarget }
     | { type: 'handler'; request: number; target: NodeTarget; event: string; action: 'create' | 'reveal'; range?: Range }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToDetails = { type: 'state'; state: DetailsState }

@@ -10,6 +10,7 @@ use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, OnceLock};
 
+mod command_bindings;
 mod definitions;
 mod project_library;
 mod registered_rename;
@@ -34,6 +35,7 @@ pub use file_move_literals::relocate_xaml_fragment;
 pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
+pub use command_bindings::{CommandBindingEdit, CommandBindingModel, CommandBindingRequest, CommandMember, CommandSelection, CommandSlot, CommandValue};
 pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};

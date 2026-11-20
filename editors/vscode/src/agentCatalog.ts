@@ -8,6 +8,12 @@ const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
 const assetImport = { source: workspacePath, destination: workspacePath, folder: workspacePath };
 const assetMove = { path: workspacePath, destination: workspacePath, folder: workspacePath };
+const bindingChoice = { type: 'object', additionalProperties: false, required: ['kind'], properties: {
+    kind: choice('keep', 'clear', 'bind'), path: workspacePath,
+} };
+const commandBindingChange = { type: 'object', additionalProperties: false,
+    required: ['property', 'command', 'parameter'],
+    properties: { property: workspacePath, command: bindingChoice, parameter: bindingChoice } };
 const lspPosition = { type: 'object', additionalProperties: false, required: ['line', 'character'],
     properties: { line: integer(0), character: integer(0) } };
 const libraryAddress = { type: 'object', additionalProperties: false, required: ['folder', 'path', 'definition'], properties: {
@@ -222,6 +228,11 @@ export const agentCatalog = {
     designer_scaffold_handler: tool('Register a Rust handler and assign its XAML event in one editor edit. Pass the accepted design revision and the Rust version from designer_event_handler.',
         { ...frame, node, event: text, handler: text, expected_rust_version: integer(1) },
         ['session', 'expected_revision', 'node', 'event', 'handler', 'expected_rust_version'], true),
+    designer_command_bindings: tool('Read command properties, current authored values, and typed XAML DataContext paths for a control. Pass prefix to browse a nested member.',
+        { ...frame, node, prefix: workspacePath }, ['session', 'expected_revision', 'node']),
+    designer_command_binding: tool('Set, keep, or clear a simple typed XAML command binding and its parameter as one edit. Copy the URI and version from designer_command_bindings. Bind requires a registered path.',
+        { ...frame, node, expected_uri: workspacePath, expected_version: integer(1), change: commandBindingChange },
+        ['session', 'expected_revision', 'node', 'expected_uri', 'expected_version', 'change'], true, false),
     designer_dictionary_extraction: tool('Read an inline XAML dictionary size, source range and suggested file. Pass file_name to review the checked patch, new dictionary and review identifier.',
         { ...frame, node, file_name: workspacePath }, ['session', 'expected_revision', 'node']),
     designer_extract_dictionary: tool('Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.',

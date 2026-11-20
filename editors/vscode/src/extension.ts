@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { AssetMoves } from './assetMoves';
+import { CommandBindings } from './commandBindings';
 import { AgentTools } from './agentTools';
 import { FileMoves } from './fileMoves';
 import { BuiltProjects } from './builtProjects';
@@ -56,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
     const resourceRename = new ResourceRename(server);
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
-    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, new ProjectLibrary(server));
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, new ProjectLibrary(server), new CommandBindings(server));
     const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
     const propertyRename = new RegisteredRename(server, 'property');
     const typeRename = new RegisteredRename(server, 'type');

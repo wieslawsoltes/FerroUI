@@ -34,6 +34,7 @@ export class DetailsViews {
             language: panel?.language, label: node?.name || node?.label, message: panel?.status,
         };
         this.events.show({ ...state, events: inspection.data?.events, codeBehind,
+            commandBinding: state.language === 'xaml' && !!state.target && panel?.selectedIds.length === 1,
             message: state.message ?? inspection.message }, file);
         const resources = this.resources.visible ? this.readResources(panel, frame) : {};
         this.resources.show({ ...state, resources: resources.data,

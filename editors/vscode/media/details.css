@@ -1,4 +1,8 @@
 .details-header { display: grid; gap: 5px; padding: 7px 9px 5px; }
+.details-selection { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-inline-size: 0; }
+.details-selection:has(> :not([hidden])) { min-block-size: 22px; }
+.details-selection:not(:has(> :not([hidden]))) { display: none; }
+.details-selection strong { overflow-wrap: anywhere; }
 .details-filter { display: flex; align-items: center; gap: 6px; color: var(--muted); }
 .details-filter input { inline-size: 100%; }
 .details-option { display: flex; align-items: center; gap: 5px; color: var(--muted); }
