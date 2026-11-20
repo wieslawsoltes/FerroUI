@@ -1,0 +1,189 @@
+// The hand-written core of the Osprey bindings of FerroUI (docs/osprey.md), beside the generated
+// abi.osp: errors as Result values, the check of the fingerprint, and the start of an
+// application. Status codes stay inside the bindings: a write records its failure in the
+// library, and `failure()` reports it.
+
+namespace ferroui;
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+// The address of the value of an environment variable as an integer, 0 when it is not set (from
+// the C library).
+extern fn getenv(name: string) -> int
+
+// Whether the environment variable `name` is set.
+fn envSet(name: string) -> bool = getenv(name: name) != 0
+
+// The failure the library recorded since the last call of `failure()` (a write that failed in a
+// chain of setters), cleared: `Error` with its message, or `Success`.
+fn failure() -> Result<string, string> = match toInt(ferro_last_error_code()) == 0 {
+    true => Success { value: "ok" }
+    false => {
+        let message = "${ferro_last_error()}"
+        ferro_clear_error()
+        Error { message: message }
+    }
+}
+
+// The result of a read after `ferro_clear_error`: the value, or the failure the read recorded.
+fn readResult<T>(value: T) -> Result<T, string> =
+    if toInt(ferro_last_error_code()) == 0 { Success { value: value } } else { Error { message: "${ferro_last_error()}" } }
+
+// Compares the library with the bindings: the ABI version and the fingerprint of the API model
+// whose IDs the bindings call it with.
+fn checkApi() -> Result<string, string> =
+    if toInt(ferro_abi_version()) != abiVersion() {
+        Error { message: "the library implements ABI version ${ferro_abi_version()}; the bindings need ${abiVersion()}" }
+    } else {
+        if ferro_api_fingerprint() != apiFingerprint() {
+            Error { message: "the library was built from another API model (fingerprint ${ferro_api_fingerprint()}, the bindings ${apiFingerprint()}): generate the bindings again" }
+        } else {
+            Success { value: "ok" }
+        }
+    }
+
+// Prints a failure, if there is one, with what was being done.
+fn report(what: string, result: Result<string, string>) -> Unit = match result {
+    Success { value } => nothing()
+    Error { message } => print("${what}: ${message}")
+}
+
+// Adds `child` to the children of `parent` (the children of a panel, the content of a window or a
+// button, the child of a border) and returns `parent`, so that children chain with the pipe.
+fn add(parent: int, child: int) -> int = {
+    let _ = ferro_add_child(parent: parent, child: child)
+    parent
+}
+
+// Adds every handle of `children` to `parent` in order and returns `parent`.
+fn children(parent: int, items: List<int>) -> int = match items {
+    [] => parent
+    [first, ...rest] => children(parent: add(parent: parent, child: first), items: rest)
+}
+
+// Shows a window: the library holds it while it is open.
+fn showWindow(window: int) -> int = {
+    let _ = ferro_show(window: window)
+    window
+}
+
+// ---- the dispatcher and the start ----------------------------------------------------------
+//
+// Osprey passes a callback to C only as a named function at the call site, so an application
+// has one dispatcher, `dispatch(tag, sender, arg) -> int`, that it gives the library itself:
+//
+//     fn main() = run(ferro_frame_dispatcher(function: dispatch))
+//
+// The tag 0 is the start (build or render the first window); the event helpers of layer 1
+// (`onClick(object, tag)`) and the event attributes of layer 2 dispatch their tags to it.
+
+// The one trampoline of the bindings: every event subscribed by a helper of layer 1 calls the
+// dispatcher of the application with the tag of the subscription.
+fn dispatchEvent(token: int, sender: int, arg: int) -> int = ferro_frame_dispatch(tag: token, sender: sender, arg: arg)
+
+// The start of the main loop: the dispatcher is called with the tag 0.
+fn dispatchStart(token: int) -> int = {
+    let _ = ferro_frame_dispatch(tag: 0, sender: 0, arg: 0)
+    0
+}
+
+// Runs the application whose dispatcher `registered` is the status of setting
+// (`ferro_frame_dispatcher(function: dispatch)`): checks the library, runs the main loop until
+// the last window closes, and returns the status of `ferro_app_run`.
+fn run(registered: int32) -> int = match checkApi() {
+    Error { message } => {
+        print(message)
+        1
+    }
+    Success { value } => match toInt(registered) == 0 {
+        false => {
+            print("the dispatcher was not set: ${registered}")
+            1
+        }
+        true => toInt(ferro_app_run(options: osprey_ffi_null(), onStart: dispatchStart, token: 0))
+    }
+}
+
+// ---- signals (docs/osprey.md, section 7) ------------------------------------------------------
+//
+// A signal is a slot of the signal table of the library (docs/c-abi.md, section 14), named by
+// its index like a handle. A property bound to a signal (`signalBind`, or `bound(attr, signal)`
+// in a view) follows every write of the signal at the next apply, which the library makes at
+// the end of every dispatch and at the start of every frame commit, with no call per property;
+// a property watched into a signal (`signalWatch`) is written into it by the library, and
+// `signalReadText` (`signalReadNumber`, ...) reads it, no call to the control. Osprey cannot
+// read or write memory, so a write and a read are one small call each.
+
+// Creates the signal table (once per process; later calls keep the first capacity).
+fn signalsInit(capacity: int) -> int = toInt(ferro_signals_init(capacity: capacity))
+
+fn signalText(text: string) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(5))
+    let _ = ferro_signal_set_str(slot: signal, text: text, length: -1)
+    signal
+}
+
+fn signalNumber(value: float) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(2))
+    let _ = ferro_signal_set_f64(slot: signal, value: value)
+    signal
+}
+
+fn signalInteger(value: int) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(1))
+    let _ = ferro_signal_set_i64(slot: signal, value: value)
+    signal
+}
+
+fn signalBool(value: bool) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(3))
+    let _ = ferro_signal_set_bool(slot: signal, value: value ? toInt8(1) : toInt8(0))
+    signal
+}
+
+// Writes a signal; the bound properties follow at the next apply.
+fn signalSetText(signal: int, text: string) -> Unit = {
+    let _ = ferro_signal_set_str(slot: signal, text: text, length: -1)
+}
+
+fn signalSetNumber(signal: int, value: float) -> Unit = {
+    let _ = ferro_signal_set_f64(slot: signal, value: value)
+}
+
+fn signalSetInteger(signal: int, value: int) -> Unit = {
+    let _ = ferro_signal_set_i64(slot: signal, value: value)
+}
+
+fn signalSetBool(signal: int, value: bool) -> Unit = {
+    let _ = ferro_signal_set_bool(slot: signal, value: value ? toInt8(1) : toInt8(0))
+}
+
+// Reads a signal: what the language wrote, or what the library wrote into a watched one.
+fn signalReadText(signal: int) -> string = "${ferro_signal_get_cstr(slot: signal)}"
+
+fn signalReadNumber(signal: int) -> float = ferro_signal_get_f64(slot: signal)
+
+fn signalReadInteger(signal: int) -> int = ferro_signal_get_i64(slot: signal)
+
+fn signalReadBool(signal: int) -> bool = ferro_signal_get_bool(slot: signal) != toInt8(0)
+
+// The version of a signal: it moves every time the value changes.
+fn signalVersion(signal: int) -> int = ferro_signal_version(slot: signal)
+
+// Binds `property` of `object` to `signal` and returns `object`, for the pipe.
+fn signalBind(object: int, property: int, signal: int) -> int = {
+    let _ = ferro_signal_bind(slot: signal, object: object, property: property)
+    object
+}
+
+// Watches `property` of `object` into `signal` and returns `object`, for the pipe.
+fn signalWatch(object: int, property: int, signal: int) -> int = {
+    let _ = ferro_signal_watch(slot: signal, object: object, property: property)
+    object
+}
+
+// Applies the written signals now (outside a dispatch: a timer of the application).
+fn signalsApply() -> int = ferro_signals_apply()

@@ -11,12 +11,13 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/protranslate.yml'
+  # A pull request runs it when it changes ProTranslate itself (docs/ci.md); a push to main also
+  # when the binding sources of ferroui-base it depends on change (the Linux job of ci.yml tests
+  # the crates with every change of them).
   pull_request:
     paths:
       - 'src/ProTranslate/**'
       - 'samples/ProTranslateDemo/**'
-      - 'src/FerroUI.Base/data/core/multi_binding_expression.rs'
-      - 'src/FerroUI.Base/data/core/expression_nodes/collection_node_base.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/protranslate.yml'

@@ -344,6 +344,70 @@ fn the_texels_of_a_brush_are_read_once_while_the_rasterizer_keeps_them() {
     assert_eq!([0, 0, 255, 255], third.pixel(25, 50));
 }
 
+#[test]
+fn the_content_of_a_drawing_brush_is_rendered_once_per_generation_and_sampled_as_an_image() {
+    use ferroui_base::media::{Brushes, DrawingBrush, GeometryDrawing, IBrush, RectangleGeometry, SharedBrush, Stretch};
+    use ferroui_base::rendering::scene3d::{Scene3DBrushContent, Scene3DMaterialKind, Scene3DMaterialLayer};
+    use ferroui_base::rendering::testing::MockPlatformRenderInterface;
+    use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
+    let (_scope, _) = MockPlatformRenderInterface::install();
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some(Brushes::red()));
+    let rect = ferroui_base::Rect::new(0.0, 0.0, 20.0, 10.0);
+    drawing.set_geometry(RectangleGeometry::with_rect(rect).upcast::<ferroui_base::media::Geometry>());
+    let brush = DrawingBrush::new();
+    brush.set_drawing(&drawing);
+    brush.set_stretch(Stretch::Fill);
+    let handle: Rc<dyn IBrush> = brush.into();
+    let layer = |generation: u64| {
+        let content = Scene3DBrushContent::record(handle.as_scene_brush().unwrap(), 1, generation).unwrap();
+        Scene3DMaterialLayer {
+            brush: SharedBrush::from_scene_content(&*handle, content),
+            ..crate::test_scenes::layer(Scene3DMaterialKind::Diffuse, WHITE)
+        }
+    };
+    let scene = |generation: u64| {
+        snapshot(orthographic(), vec![model(quad(1, -1.0, -1.0, 1.0, 1.0, 0.0), vec![layer(generation)], vec![])], vec![
+            white_ambient(),
+        ])
+    };
+
+    // The renderer stands for the 2D renderer of a backend: it paints the left half of the
+    // content green and its right half blue, and records the sizes it was asked for.
+    let sizes = Arc::new(Mutex::new(Vec::new()));
+    let asked = sizes.clone();
+    let mut rasterizer = CpuRasterizer::new();
+    rasterizer.set_content_renderer(Some(Box::new(move |content: &Scene3DBrushContent, (width, height)| {
+        asked.lock().unwrap().push((content.generation(), width, height));
+        let mut rgba = Vec::new();
+        for _ in 0..height {
+            for x in 0..width {
+                rgba.extend_from_slice(if x < width / 2 { &[0, 255, 0, 255] } else { &[0, 0, 255, 255] });
+            }
+        }
+        Some(crate::brush::BrushTexels { width, height, rgba, premultiplied: true })
+    })));
+
+    let first = rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
+    // The content of 20 by 10 units at 2 pixels a unit.
+    assert_eq!(vec![(1, 40, 20)], *sizes.lock().unwrap());
+    assert_eq!([0, 255, 0, 255], first.pixel(20, 50));
+    assert_eq!([0, 0, 255, 255], first.pixel(80, 50));
+    // The same generation in a new snapshot: not rendered again.
+    rasterizer.render(&scene(1), SIZE, 2.0, CpuRenderOptions::default());
+    assert_eq!(1, sizes.lock().unwrap().len());
+    // A new generation is rendered again.
+    rasterizer.render(&scene(2), SIZE, 2.0, CpuRenderOptions::default());
+    assert_eq!(vec![(1, 40, 20), (2, 40, 20)], *sizes.lock().unwrap());
+
+    // Without a renderer the layer is drawn with its colour, and counted.
+    let before = crate::layers_with_unsampled_brushes();
+    let plain = CpuRasterizer::new().render(&scene(3), SIZE, 1.0, CpuRenderOptions::default());
+    assert_eq!([255, 255, 255, 255], plain.pixel(50, 50));
+    assert!(crate::layers_with_unsampled_brushes() > before);
+}
+
 /// The rasterizer, the output cache and the shared brushes of the materials keep the auto traits
 /// of the published release (`Send`, `Sync`, unwind safe) with the textures of brushes (the API
 /// gate checks them against the release; this test fails to compile first).

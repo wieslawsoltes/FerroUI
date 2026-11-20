@@ -1066,6 +1066,125 @@ fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() 
     assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
 }
 
+/// The tooltip text of a Cartesian point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CartesianSeries`): the label of its category when the X axis has labels, and the code-only
+/// `XToolTipLabelFormatter` and `YToolTipLabelFormatter` of the series, which the chart observes.
+#[test]
+fn cartesian_tooltip_text_takes_the_category_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 400.0);
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = ColumnSeries::new();
+    series.set_name("Sales".into());
+    series.set_numeric_values([5.0]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &CartesianChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Sales: 5");
+    let months = Axis::new();
+    months.set_labels(vec!["Jan".into()]);
+    chart.x_axes().add(months);
+    assert_eq!(label(&chart), "Sales: Jan: 5");
+    let revision = chart.revision();
+    series.set_y_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} units", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Sales: Jan: 5 units");
+    series.set_x_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("month {}", point.secondary_value + 1.0)
+    })));
+    assert_eq!(label(&chart), "Sales: month 1: 5 units");
+}
+
+/// `GeometrySvg` of the scatter and column series from markup: each point is drawn as the path,
+/// which the chart observes.
+#[test]
+fn scatter_and_column_series_draw_their_geometry_svg_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:ScatterSeries GeometrySvg="M0,0 L10,0 L5,10 Z">
+            <lc:ChartPoint X="0" Y="1" />
+            <lc:ChartPoint X="1" Y="2" />
+          </lc:ScatterSeries>
+          <lc:ColumnSeries>
+            <lc:ChartPoint X="0" Y="3" />
+          </lc:ColumnSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let size = Size::new(400.0, 400.0);
+    let paths = |chart: &CartesianChart, series: usize| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some_and(|id| id.series == series)
+                    && matches!(p.geometry, ferroui_livecharts::Geometry::Path(_))
+            })
+            .count()
+    };
+    assert_eq!(paths(&chart, 0), 2);
+    assert_eq!(paths(&chart, 1), 0);
+    let column = chart.series().get(1).cast::<ColumnSeries>().unwrap();
+    let revision = chart.revision();
+    column.set_geometry_svg(Some("M0,0 L10,0 L10,10 Z".into()));
+    assert!(chart.revision() > revision);
+    assert_eq!(paths(&chart, 1), 1);
+}
+
+/// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
+/// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
+/// `SankeySeries` and `TreemapSeries`, which the chart observes.
+#[test]
+fn node_tooltip_text_takes_the_tool_tip_label_formatter_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let labels = |chart: &Chart| {
+        let mut labels: Vec<_> = chart
+            .scene(size)
+            .unwrap()
+            .hits
+            .iter()
+            .map(|h| h.label.clone())
+            .collect();
+        labels.sort();
+        labels
+    };
+    let formatter = NodeTooltipFormatter::new(|point| {
+        format!("{} ({}) {}", point.label, point.index, point.value)
+    });
+    let sankey = SankeyChart::new();
+    sankey.set_animations_speed(0.0);
+    let (series, _) = sankey_fixture();
+    sankey.series().add(series.clone().upcast());
+    assert_eq!(labels(&sankey), ["A: 6", "B: 6", "X: 4", "Y: 8"]);
+    let revision = sankey.revision();
+    series.set_tool_tip_label_formatter(Some(formatter.clone()));
+    assert!(sankey.revision() > revision);
+    assert_eq!(labels(&sankey), ["A (0) 6", "B (1) 6", "X (2) 4", "Y (3) 8"]);
+    let treemap = TreemapChart::new();
+    treemap.set_animations_speed(0.0);
+    let series = TreemapSeries::new();
+    series.set_nodes(TreemapNodes::from_items([
+        TreemapNode::with_value(3.0, "Lisbon"),
+        TreemapNode::with_value(2.0, "Porto"),
+    ]));
+    treemap.series().add(series.clone().upcast());
+    assert_eq!(labels(&treemap), ["Lisbon: 3", "Porto: 2"]);
+    let revision = treemap.revision();
+    series.set_tool_tip_label_formatter(Some(formatter));
+    assert!(treemap.revision() > revision);
+    assert_eq!(labels(&treemap), ["Lisbon (0) 3", "Porto (1) 2"]);
+}
+
 /// The gradient bar of a `HeatLegend` (`Legend` of a chart, the source's `SKHeatLegend`).
 fn heat_legend_bar(scene: &ferroui_livecharts::Scene) -> ferroui_base::Rect {
     scene
@@ -1086,6 +1205,76 @@ fn has_text(scene: &ferroui_livecharts::Scene, wanted: &str) -> bool {
     scene.primitives.iter().any(|p| {
         matches!(&p.geometry, ferroui_livecharts::Geometry::Text { text, .. } if text == wanted)
     })
+}
+
+/// `LegendTextSize` and `LegendBackgroundPaint` of a chart (`IChartView`), from markup: the heat
+/// legend writes its labels at the text size and fills its whole room with the background under
+/// its bar; without them the labels take the theme's 16 and nothing is under the bar.
+#[test]
+fn heat_legend_takes_the_legend_text_size_and_background_of_the_chart() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts" LegendPosition="Right"
+              LegendTextSize="24" LegendBackgroundPaint="#FFEEEEEE">
+          <lc:CartesianChart.Legend>
+            <lc:HeatLegend />
+          </lc:CartesianChart.Legend>
+          <lc:HeatSeries>
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="10" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="40" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    assert_eq!(chart.legend_text_size(), Some(24.0));
+    let size = Size::new(400.0, 400.0);
+    let text_sizes = |scene: &ferroui_livecharts::Scene| -> Vec<f64> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Text { text, size, .. }
+                    if text == "10" || text == "40" =>
+                {
+                    Some(*size)
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let background = Some(ferroui_base::media::Color::from_rgb(0xEE, 0xEE, 0xEE));
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [24.0, 24.0]);
+    let bar = heat_legend_bar(&scene);
+    let fill = scene
+        .primitives
+        .iter()
+        .position(|p| p.id.is_none() && p.style.fill == background)
+        .expect("the background of the legend");
+    let ferroui_livecharts::Geometry::Rectangle { rect, .. } = scene.primitives[fill].geometry else {
+        panic!("a rectangle")
+    };
+    // The room of the legend, the bar padded by 10 on every side, at the right of the control.
+    assert!((rect.x + rect.width - 400.0).abs() < 1e-6);
+    assert!((rect.x + 10.0 - bar.x).abs() < 1e-6 && (rect.y + 10.0 - bar.y).abs() < 1e-6);
+    let bar_index = scene
+        .primitives
+        .iter()
+        .position(|p| p.style.fill_brush.is_some() && p.id.is_none())
+        .unwrap();
+    assert!(fill < bar_index, "the background is under the bar");
+    chart.set_legend_text_size(None);
+    chart.set_legend_background_paint(None);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [16.0, 16.0]);
+    assert!(!scene
+        .primitives
+        .iter()
+        .any(|p| p.id.is_none() && p.style.fill == background));
 }
 
 /// SKChartingVisualsTests.SKHeatLegend_IsDrawnWhenAttachedToCartesianChartWithHeatSeries and

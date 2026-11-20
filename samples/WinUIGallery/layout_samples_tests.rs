@@ -144,3 +144,98 @@ fn relative_panel_places_the_rectangles_by_their_relations() {
     assert_eq!(position("Rectangle4"), (250.0, 58.0));
     window.close();
 }
+
+#[test]
+fn viewbox_options_size_and_stretch_the_viewbox() {
+    use ferroui_base::media::{Stretch, StretchDirection};
+    use ferroui_controls::{Image, RadioButtons, Viewbox};
+    let _application = start();
+    let root = page("Viewbox");
+    let viewbox = root.get_control::<Viewbox>("Control1");
+    // The source's Slices.png where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(crate::layout_samples::SLICES).is_ok();
+    assert_eq!(root.get_control::<Image>("ViewboxImage").source().is_some(), decoded);
+    // The source's OneWay x:Bind of the size slider's Value to the Width and Height.
+    assert_eq!((viewbox.width(), viewbox.height()), (200.0, 200.0));
+    root.get_control::<Slider>("SizeSlider")
+        .set_range_value(120.0);
+    assert_eq!((viewbox.width(), viewbox.height()), (120.0, 120.0));
+    // Stretch_SelectionChanged: the Tag of the selected option is the Stretch.
+    assert_eq!(viewbox.stretch(), Stretch::Uniform);
+    let stretch = root.get_control::<RadioButtons>("StretchRadioButtons");
+    for (index, expected) in [
+        (0, Stretch::None),
+        (1, Stretch::Fill),
+        (3, Stretch::UniformToFill),
+        (2, Stretch::Uniform),
+    ] {
+        stretch.set_selected_index(index);
+        assert_eq!(viewbox.stretch(), expected);
+    }
+    // StretchDirection_SelectionChanged.
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
+    let direction = root.get_control::<RadioButtons>("StretchDirectionRadioButtons");
+    direction.set_selected_index(0);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::UpOnly);
+    direction.set_selected_index(1);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::DownOnly);
+    direction.set_selected_index(2);
+    assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
+}
+
+#[test]
+fn wrap_panel_options_set_the_orientation_spacing_and_padding() {
+    use ferroui_base::layout::Orientation;
+    use ferroui_controls::{RadioButtons, WrapPanel};
+    let _application = start();
+    let root = page("WrapPanel");
+    let panel = root.get_control::<WrapPanel>("Control1");
+    let host = root.get_control::<Border>("LayoutHost");
+    assert_eq!(panel.children().count(), 10);
+    assert_eq!((panel.item_spacing(), panel.line_spacing()), (8.0, 8.0));
+    assert_eq!(host.padding(), Thickness::new(12.0, 12.0, 12.0, 12.0));
+    // OrientationGroup_SelectionChanged: the Tag is the Orientation, and the host is 360 high
+    // for Vertical and 200 otherwise.
+    let group = root.get_control::<RadioButtons>("OrientationGroup");
+    group.set_selected_index(1);
+    assert_eq!(panel.orientation(), Orientation::Vertical);
+    assert_eq!(host.height(), 360.0);
+    group.set_selected_index(0);
+    assert_eq!(panel.orientation(), Orientation::Horizontal);
+    assert_eq!(host.height(), 200.0);
+    // The ValueChanged handlers of the three sliders.
+    root.get_control::<Slider>("ItemSpacingSlider")
+        .set_range_value(16.0);
+    assert_eq!(panel.item_spacing(), 16.0);
+    root.get_control::<Slider>("LineSpacingSlider")
+        .set_range_value(4.0);
+    assert_eq!(panel.line_spacing(), 4.0);
+    root.get_control::<Slider>("PaddingSlider")
+        .set_range_value(24.0);
+    assert_eq!(host.padding(), Thickness::new(24.0, 24.0, 24.0, 24.0));
+    // The second example: five fixed items and the final item (no ItemsStretch in FerroUI).
+    let second = root.get_control::<WrapPanel>("Control2");
+    assert_eq!(second.children().count(), 6);
+    assert_eq!(second.item_spacing(), 8.0);
+}
+
+#[test]
+fn pivot_page_shows_the_source_title_and_items() {
+    use ferroui_controls::{Pivot, PivotItem};
+    let _application = start();
+    let root = page("Pivot");
+    let pivot = root.get_control::<Pivot>("EmailPivot");
+    assert_eq!(
+        pivot.title().and_then(|title| title.downcast_ref::<String>().cloned()).as_deref(),
+        Some("EMAIL")
+    );
+    assert_eq!(pivot.min_height(), 400.0);
+    let headers: Vec<String> = (0..pivot.items().count())
+        .filter_map(|index| pivot.items().get_at(index))
+        .filter_map(|item| Control::from_boxed(&item).and_then(|item| item.cast::<PivotItem>()))
+        .filter_map(|item| item.header().and_then(|header| header.downcast_ref::<String>().cloned()))
+        .collect();
+    assert_eq!(headers, ["All", "Unread", "Flagged", "Urgent"]);
+    pivot.set_selected_index(2);
+    assert_eq!(pivot.selected_index(), 2);
+}

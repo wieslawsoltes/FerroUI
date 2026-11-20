@@ -1,0 +1,155 @@
+name: C ABI
+
+# The universal C ABI (docs/c-abi.md, #636): the crate ferroui-capi, its generated header, the C
+# tests of the ABI and the C hello world. A pull request runs it when it changes the crate, the
+# sample, the workflow or the dependencies; main runs it on a push of those and every night.
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.CApi/**'
+      - 'samples/CApi/**'
+      - 'bindings/**'
+      - 'docs/c-abi.md'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/capi.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/FerroUI.CApi/**'
+      - 'samples/CApi/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/capi.yml'
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: capi-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # The ABI without the desktop platform (no renderer): the Rust tests of the crate, the check that
+  # the header is the one of the sources, the C tests of the ABI and the benchmark, on Linux. The
+  # macOS job below runs the same tests against the library with the desktop platform, so that the
+  # workflow asks for one macOS runner.
+  abi:
+    name: ABI tests (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: capi-abi
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Rust tests of the ABI and the header check
+        run: cargo test --locked -p ferroui-capi --no-default-features --lib
+      - name: C tests of the ABI
+        run: make -C samples/CApi test CARGO_FLAGS=--no-default-features
+      # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
+      # a shared runner is not a quiet machine.
+      - name: Call overhead (informative)
+        run: cargo bench --locked -p ferroui-capi --no-default-features --bench call_overhead
+
+  # The C hello world on the desktop platform: the library with Skia, the sample compiled and
+  # linked against it, and a smoke run of three seconds (FERROUI_SMOKE_EXIT_MS); on macOS also the
+  # Rust and C tests of the ABI and the Osprey samples.
+  sample-macos:
+    name: ABI tests and C hello world (macOS)
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: capi-desktop
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Rust tests of the ABI with the desktop platform
+        run: cargo test --locked -p ferroui-capi --lib
+      - name: Build the hello world and the C tests
+        run: make -C samples/CApi all
+      - name: C tests of the ABI
+        run: make -C samples/CApi test
+      - name: The hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: make -C samples/CApi run
+      # The Osprey samples (samples/CApi/osprey) with the pinned release of the Osprey compiler,
+      # downloaded into the temporary directory of the job and checked against its SHA-256: each
+      # is compiled against the library of the steps above (target/debug) and runs the steps of
+      # its scenario (FERROUI_SAMPLE_SCRIPT), which print one line per check.
+      - name: Osprey samples
+        env:
+          OSPREY_VERSION: 0.29.0
+          OSPREY_SHA256: 0d2a58c07989a393e0849a0aac0f69f509a3a49521e994cc3e879ee80f39aff1
+          FERROUI_SAMPLE_SCRIPT: 1
+          FERROUI_SMOKE_EXIT_MS: 4000
+        run: |
+          tools="$RUNNER_TEMP/osprey"
+          mkdir -p "$tools"
+          curl -fsSL -o "$tools/osprey.tar.gz" \
+            "https://github.com/Nimblesite/osprey/releases/download/v$OSPREY_VERSION/osprey-$OSPREY_VERSION-darwin-arm64.tar.gz"
+          echo "$OSPREY_SHA256  $tools/osprey.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$tools/osprey.tar.gz" -C "$tools"
+          osprey="$tools/osprey-$OSPREY_VERSION-darwin-arm64/osprey"
+          mkdir -p target/osprey
+          failed=0
+          for sample in samples/CApi/osprey/*.osp; do
+            name=$(basename "$sample" .osp)
+            echo "::group::$name"
+            "$osprey" "$sample" --compile --memory=arc --quiet -o "target/osprey/$name"
+            DYLD_LIBRARY_PATH=target/debug "target/osprey/$name" | tee "target/osprey/$name.log"
+            if grep -q 'FAILED' "target/osprey/$name.log" || ! grep -q '^script: .*: ok$' "target/osprey/$name.log"; then
+              echo "::error::the scenario of $name failed"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $failed
+
+  sample-linux:
+    name: C hello world (Linux, X11 under Xvfb)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: capi-desktop
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # As the X11 job of ci.yml: the X libraries are opened at run time, and Skia links FreeType
+      # and Fontconfig and needs a font for the default family.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth x11-utils openbox dbus dbus-daemon \
+            libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
+            libgl1 libglx-mesa0 libegl1 libegl-mesa0 libgl1-mesa-dri \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config \
+            libglib2.0-0 libgtk-3-0 libvulkan1 mesa-vulkan-drivers
+      - name: Build the hello world
+        run: make -C samples/CApi all
+      - name: The hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run

@@ -37,6 +37,14 @@ testing = []
 # looks types up by name: the run-time XAML loader, the designer, DevTools, hot reload, Inspect,
 # the declarative View API and the behaviors' member lookup. The unit tests of this crate keep the
 # tables too (`cfg(test)`), as they look types up by name.
+#
+# Bounded reflection (#851, an experiment): built with `--cfg ferroui_bounded_reflection` (in
+# `RUSTFLAGS`), `type-tables` registers no table of the framework and keeps no default
+# constructor, as without the feature, while the crates that enable it still build. What a
+# bounded dynamic use needs is then registered by the application one by one:
+# `TypeInfo::register_all` for the types it finds by name (the owner of an attached property a
+# behavior names), `TypeInfo::register_constructor` for the classes it creates by reflection,
+# `MarkupType::register_all` for the markup types it looks up by name.
 type-tables = []
 # Every unit of the compiled themes (#568): what can show a control that no compiled document and
 # no source of the application names (the run-time XAML loader, hot reload, the designer,
@@ -96,7 +104,7 @@ ferroui-build-scan = { workspace = true }
 # `--cfg ferro_tls_table` makes every `ferro_thread_local!` of a build use the table of the Android
 # targets on a Linux or macOS host, so that test suites run against it (`ferro_thread_local.rs`).
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ["cfg(ferro_tls_table)"] }
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(ferro_tls_table)", "cfg(ferroui_bounded_reflection)"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

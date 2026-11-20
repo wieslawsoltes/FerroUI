@@ -1,3 +1,5 @@
+use std::cell::{Cell, RefCell};
+use std::error::Error;
 use std::rc::Rc;
 
 use super::dispatcher_operation::DispatcherException;
@@ -64,6 +66,93 @@ impl Dispatcher {
                 local.unhandled_exception_filter.remove(token);
             }
         })
+    }
+
+    /// Raises an error of application code that has no caller to return it to: a
+    /// callback the framework runs, such as an event handler, a posted job, a
+    /// layout or property changed callback, or the handler of a markup event.
+    ///
+    /// The error goes through [`unhandled_exception_filter`](Self::unhandled_exception_filter)
+    /// and [`unhandled_exception`](Self::unhandled_exception), as the panic of a posted
+    /// callback does, so a handler can mark it handled; the payload of the event is the
+    /// error, a `Box<dyn Error + Send + Sync>`
+    /// ([`DispatcherUnhandledExceptionEventArgs::error`]). This is where the fallible
+    /// callbacks ([`post_fallible`](Self::post_fallible),
+    /// `Interactive::add_fallible_handler`) send their errors (#567).
+    ///
+    /// Called off the dispatcher thread, the error is posted to it.
+    ///
+    /// # Panics
+    /// An error no handler handles is fatal, as an unhandled exception is in the
+    /// reference: with `panic = "unwind"` its message is logged and unwinds as the
+    /// payload (a `String`, as of a panic with it), to the top of the dispatcher
+    /// loop without being filtered again; with `panic = "abort"` the process ends
+    /// with a panic that carries the message.
+    pub fn raise_unhandled_exception(&self, error: impl Into<Box<dyn Error + Send + Sync>>) {
+        self.raise_unhandled_error(error.into())
+    }
+
+    /// Runs `work` and returns the message of the first exception of application code
+    /// that reaches the unhandled-exception events of this dispatcher while it runs and
+    /// that no other handler handles: an error raised with
+    /// [`raise_unhandled_exception`](Self::raise_unhandled_exception) (by a fallible
+    /// callback, a markup delegate, an animation an animator rejects) or, in a build that unwinds, the panic of a job.
+    /// The exception is marked handled.
+    ///
+    /// This is how a development tool (the Designer, the previewer, hot reload) fails a
+    /// step with the error of the code it previews, without catching a panic (#567).
+    /// Only the innermost capture of the thread records an exception.
+    ///
+    /// # Panics
+    /// Panics when called from a thread other than the dispatcher thread.
+    pub fn capture_unhandled_exceptions<T>(&self, work: impl FnOnce() -> T) -> Result<T, String> {
+        crate::ferro_thread_local! {
+            static CAPTURE_DEPTH: Cell<usize> = const { Cell::new(0) };
+        }
+        struct Capture(Rc<dyn IDisposable>);
+        impl Drop for Capture {
+            fn drop(&mut self) {
+                CAPTURE_DEPTH.set(CAPTURE_DEPTH.get() - 1);
+                self.0.dispose();
+            }
+        }
+
+        self.verify_access();
+        let depth = CAPTURE_DEPTH.get() + 1;
+        CAPTURE_DEPTH.set(depth);
+        let first = Rc::new(RefCell::new(None::<String>));
+        let seen = first.clone();
+        let capture = Capture(self.unhandled_exception(move |args| {
+            if args.handled() || CAPTURE_DEPTH.get() != depth {
+                return;
+            }
+            let mut first = seen.borrow_mut();
+            if first.is_none() {
+                *first = Some(args.exception_message().unwrap_or("an error of application code").to_owned());
+            }
+            args.set_handled(true);
+        }));
+        let result = work();
+        drop(capture);
+        match first.take() {
+            Some(message) => Err(message),
+            None => Ok(result),
+        }
+    }
+
+    #[inline(never)]
+    fn raise_unhandled_error(&self, error: Box<dyn Error + Send + Sync>) {
+        if !self.check_access() {
+            let dispatcher = self.to_arc();
+            self.post(move || dispatcher.raise_unhandled_error(error), super::DispatcherPriority::SEND);
+            return;
+        }
+        let exception: DispatcherException = Box::new(error);
+        if self.try_catch_when(&exception) {
+            return;
+        }
+        self.forget_exception_if_outermost(&exception);
+        fail_unhandled(self, exception)
     }
 
     /// Exception filter returns true if exception should be caught.
@@ -157,5 +246,35 @@ impl Dispatcher {
                 local.seen_exceptions.borrow_mut().retain(|seen| *seen != key);
             }
         }
+    }
+}
+
+/// Ends an error that no handler of the dispatcher handled (#567).
+#[cold]
+fn fail_unhandled(dispatcher: &Dispatcher, exception: DispatcherException) -> ! {
+    let message = super::dispatcher_unhandled_exception_event_args::exception_text(&*exception)
+        .unwrap_or_else(|| "an error of application code".into());
+    drop(exception);
+    #[cfg(panic = "unwind")]
+    {
+        // No panic ran the hook for an error value: say what ends the thread.
+        match crate::logging::Logger::try_get(crate::logging::LogEventLevel::Error, crate::logging::LogArea::CONTROL) {
+            Some(logger) => logger.log_with_values(None, "Unhandled exception: {Error}", &[&message]),
+            None => eprintln!("Unhandled exception: {message}"),
+        }
+        // The payload is the message, as the payload of a panic with it is; the operations of
+        // the dispatcher it unwinds through have seen it already.
+        let payload: DispatcherException = Box::new(message);
+        if let Some(local) = dispatcher.try_local() {
+            if local.executing_depth.get() > 0 {
+                local.seen_exceptions.borrow_mut().push(exception_key(&payload));
+            }
+        }
+        std::panic::resume_unwind(payload)
+    }
+    #[cfg(not(panic = "unwind"))]
+    {
+        let _ = dispatcher;
+        panic!("Unhandled exception: {message}")
     }
 }

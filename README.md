@@ -112,7 +112,7 @@ The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integ
 
 The declarative API (`ferroui-view` with `ferroui-view-macros`, [docs/declarative-ui.md](docs/declarative-ui.md)) and the developer tools (`ferroui-diagnostics`) are crates of the release too: `ferroui-view = "=0.5.0"` and `ferroui-diagnostics = "=0.5.0"` beside the crates above (the facade has the developer tools as its feature `diagnostics`).
 
-The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0`, `0.4.0` and `0.5.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next version is published as previews of it; the previews of `0.5.1` (`0.5.1-preview.1`, ...) keep the public API of 0.5, and a preview of a later minor version may change any part of it. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
+The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0`, `0.4.0` and `0.5.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next version is published as previews of it; a preview may change any part of the public API. No `0.5.x` release follows `0.5.0`: the work towards it is released in `0.6.0`. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
 
 The platforms that are not part of platform detection are named by their own crates beside the others: `ferroui-wayland`, `ferroui-linuxframebuffer`, `ferroui-ios`, `ferroui-android`, `ferroui-browser`, `ferroui-winui` and `ferroui-headless-vnc`.
 
@@ -507,6 +507,10 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 |---|---|
 | ![ReactiveDemo, the getting-started sample of ReactiveUI as a crate browser, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
 
+### C and other languages
+
+The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
+
 ### Developer tools
 
 AI agents can inspect and drive a running application through the optional [MCP server](docs/mcp.md): visual, logical and automation trees, properties, styles, resources, input, screenshots and condition waits. ControlCatalog supports `--features mcp` with stdio or authenticated loopback HTTP, including headless runs.
@@ -561,6 +565,7 @@ Using the framework:
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
 - [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
+- [The C ABI](docs/c-abi.md): `ferroui-capi` and its generated header, the rules of handles, IDs, values, errors, threads and callbacks, and a hello world in C.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the developer tools attached with F12, member by member.
 - [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.

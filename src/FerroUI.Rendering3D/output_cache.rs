@@ -105,6 +105,12 @@ impl<T: Clone> Scene3DOutputCache<T> {
         Some(value)
     }
 
+    /// Sets what renders the contents of visual and drawing brushes for the CPU reference
+    /// ([`CpuRasterizer::set_content_renderer`]).
+    pub fn set_content_renderer(&mut self, renderer: Option<crate::cpu::ContentRenderer>) {
+        self.rasterizer.set_content_renderer(renderer);
+    }
+
     /// The number of outputs kept.
     pub fn len(&self) -> usize {
         self.entries.len()

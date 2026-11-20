@@ -22,6 +22,7 @@ mod font_manager_impl;
 mod framebuffer_render_target;
 mod geometry_group_impl;
 mod geometry_impl;
+mod glyph_bounds_cache;
 mod glyph_run_impl;
 mod graphite_metal_ownership;
 mod i_drawable_bitmap_impl;

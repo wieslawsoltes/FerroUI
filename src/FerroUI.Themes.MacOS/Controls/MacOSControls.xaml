@@ -118,6 +118,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Frame.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NavigationView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TitleBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ListView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/GridView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Pivot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SwipeControl.xaml" />
       </ResourceDictionary.MergedDictionaries>

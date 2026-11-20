@@ -122,6 +122,92 @@ fn only_trimmed_type_keys_are_reported() {
     assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &[]));
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The runs of the region tests, in the order they were applied.
+    static APPLIED: std::cell::RefCell<Vec<&'static str>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+fn logged(name: &'static str) -> Result<(), XamlLoadError> {
+    APPLIED.with(|applied| applied.borrow_mut().push(name));
+    Ok(())
+}
+
+fn applied() -> Vec<&'static str> {
+    APPLIED.with(|applied| std::mem::take(&mut *applied.borrow_mut()))
+}
+
+fn base_light(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+    logged("base light")
+}
+
+fn base_dark(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+    logged("base dark")
+}
+
+fn button_light(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+    logged("button light")
+}
+
+fn failing(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+    logged("failing")?;
+    Err(XamlLoadError::with_message("the run failed"))
+}
+
+fn list_light(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+    logged("list light")
+}
+
+static REGION_BASE: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[base_light, base_dark] };
+static REGION_BUTTON: ThemeUnit = ThemeUnit { name: "Controls/Button.xaml", index: 2, runs: &[button_light] };
+static REGION_FAILING: ThemeUnit = ThemeUnit { name: "Controls/Failing.xaml", index: 3, runs: &[failing] };
+static REGION_LIST: ThemeUnit = ThemeUnit { name: "Controls/List.xaml", index: 4, runs: &[list_light] };
+static REGION_UNITS: &[&ThemeUnit] = &[&AMBIENT, &REGION_BASE, &REGION_BUTTON, &REGION_LIST];
+
+/// #853: a region applies the runs of the units the table has, in the order of the region, and
+/// the same runs as one call of `apply_theme_unit` for each pair.
+#[test]
+fn a_region_applies_the_runs_of_the_table_in_its_order() {
+    let dictionary = ResourceDictionary::new();
+    let context = context_of(&dictionary);
+    applied();
+    let region: &[(u16, u16)] = &[(1, 0), (2, 0), (3, 0), (4, 0), (1, 1)];
+    apply_theme_region(REGION_UNITS, region, &context, &dictionary).expect("the region");
+    let by_region = applied();
+    assert_eq!(by_region, ["base light", "button light", "list light", "base dark"]);
+    for &(unit, run) in region {
+        apply_theme_unit(REGION_UNITS, u32::from(unit), usize::from(run), &context, &dictionary).expect("a run");
+    }
+    assert_eq!(applied(), by_region);
+}
+
+/// #853: a selection leaves out the runs of the units it does not have, and a pair of a run the
+/// unit does not have adds nothing; units that do not ascend are found too.
+#[test]
+fn a_region_with_a_selection_applies_only_the_selected_units() {
+    static SELECTION: &[&ThemeUnit] = &[&AMBIENT, &REGION_BUTTON, &REGION_LIST];
+    let dictionary = ResourceDictionary::new();
+    let context = context_of(&dictionary);
+    applied();
+    let region: &[(u16, u16)] = &[(1, 0), (2, 0), (2, 5), (4, 0), (2, 0), (1, 1), (9, 0)];
+    apply_theme_region(SELECTION, region, &context, &dictionary).expect("the region");
+    assert_eq!(applied(), ["button light", "list light", "button light"]);
+    apply_theme_region(&[], &[(1, 0), (2, 0)], &context, &dictionary).expect("an empty table");
+    assert!(applied().is_empty());
+}
+
+/// #853: the first failure of a region is its error, and the runs after it are not applied.
+#[test]
+fn a_region_stops_at_the_first_failure() {
+    static WITH_FAILING: &[&ThemeUnit] = &[&AMBIENT, &REGION_BASE, &REGION_BUTTON, &REGION_FAILING, &REGION_LIST];
+    let dictionary = ResourceDictionary::new();
+    let context = context_of(&dictionary);
+    applied();
+    let region: &[(u16, u16)] = &[(1, 0), (3, 0), (4, 0)];
+    let error = apply_theme_region(WITH_FAILING, region, &context, &dictionary).expect_err("the failure");
+    assert_eq!(error.message(), "the run failed");
+    assert_eq!(applied(), ["base light", "failing"]);
+}
+
 /// Not from upstream (#846): the wider table registered for a class stays, whichever crate
 /// registers first, and a compiled construction applies the registered table when it is wider
 /// than the table of its own crate.
