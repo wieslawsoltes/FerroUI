@@ -19,7 +19,7 @@ name = "ferroui-xaml-lsp"
 path = "main.rs"
 
 [dependencies]
-ferroui-build-scan = { workspace = true }
+ferroui-build-scan = { workspace = true, features = ["compiled-index"] }
 ferroui-designer-core = { workspace = true }
 ferroui-designer-project = { workspace = true }
 ferroui-designer-tools = { workspace = true }

@@ -14,9 +14,13 @@ use std::{
 
 #[path = "file_move_rust.rs"]
 mod rust;
+#[path = "file_move_symbol_edits.rs"]
+mod symbol_edits;
 #[path = "file_move_saved.rs"]
 mod saved;
 use rust::CompiledAddresses;
+pub use rust::GeneratedRustRename;
+pub use symbol_edits::FileMoveRustResolution;
 
 const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
 
@@ -40,6 +44,8 @@ pub struct FileMovePlan {
     pub to: String,
     pub review: String,
     pub documents: Vec<FileMoveDocument>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "generatedRust")]
+    pub generated_rust: Vec<GeneratedRustRename>,
 }
 
 impl LanguageService {
@@ -128,13 +134,13 @@ impl LanguageService {
                 documents.push(document);
             }
         }
-        documents.extend(self.move_rust_paths(&movement, &drafts, &addresses)?);
-        documents.extend(saved::plan(self, &movement, &drafts)?);
-        documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
         let disk = std::fs::read(file_path(&movement.from)?)
             .map_err(|error| LanguageError(error.to_string()))?;
         let mut id = DefaultHasher::new();
         (&movement.from, &movement.to, &disk).hash(&mut id);
+        documents.extend(self.move_rust_paths(&movement, &drafts, &addresses, &mut id)?);
+        documents.extend(saved::plan(self, &movement, &drafts)?);
+        documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
         for document in &documents {
             (
                 &document.edit.uri,
@@ -144,11 +150,15 @@ impl LanguageService {
             )
                 .hash(&mut id);
         }
+        for rename in &addresses.generated_rust {
+            (&rename.uri, rename.position.line, rename.position.character, &rename.old_name, &rename.new_name).hash(&mut id);
+        }
         Ok(FileMovePlan {
             review: format!("{:016x}", id.finish()),
             from: movement.from,
             to: movement.to,
             documents,
+            generated_rust: addresses.generated_rust,
         })
     }
 

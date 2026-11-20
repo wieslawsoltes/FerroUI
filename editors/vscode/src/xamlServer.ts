@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import type { DictionaryMethod } from './dictionaryProtocol';
 import type { HandlerMethod } from './eventHandlerProtocol';
-import type { FileMoveDraft, FileMovePlan } from './fileMoveProtocol';
+import type { FileMoveDraft, FileMovePlan, FileMoveRustResolution } from './fileMoveProtocol';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
@@ -96,6 +96,16 @@ export class XamlServer implements vscode.Disposable {
             throw new Error('Update the FerroUI XAML language server to review Rust, stage set, and scenario references.');
         }
         return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString(), sourceDrafts });
+    }
+
+    async completeFileMove(from: vscode.Uri, to: vscode.Uri, sourceDrafts: readonly FileMoveDraft[], review: string, resolutions: FileMoveRustResolution[]): Promise<FileMovePlan> {
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiFileMoveRustSymbols !== true) {
+            throw new Error('Update the FerroUI XAML language server to review compiled Rust symbols.');
+        }
+        return client.sendRequest<FileMovePlan>('ferroui/completeFileMove', {
+            from: from.toString(), to: to.toString(), sourceDrafts, review, resolutions,
+        });
     }
 
     async withReviewedFileMove<T>(from: vscode.Uri, to: vscode.Uri, apply: () => PromiseLike<T>): Promise<T> {

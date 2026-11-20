@@ -85,6 +85,8 @@ An open **Preview Stages** card follows its source through the move, Undo, and R
 
 For explicit Cargo registrations, the review keeps authored URI aliases and rebases file-derived keys along with their literal XAML and Rust consumers. Build the owning package to load metadata for custom assembly names. [How the planner handles compiled addresses](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
+For a move that changes a generated Rust build function, use **Move XAML File…** in VS Code with rust-analyzer loaded for the owning package. Studio includes the affected generated declarations in its move plan. [Review a move with generated Rust references](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

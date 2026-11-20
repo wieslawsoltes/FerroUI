@@ -1,6 +1,8 @@
 //! Source ranges for Rust literals whose XAML path has a known base.
 mod build_script;
 mod macros;
+mod tokens;
+pub use tokens::check_rust_rename_tokens;
 
 use self::build_script::{BuildScript, Site};
 use self::macros::MacroSyntax;
@@ -48,7 +50,7 @@ impl RustXamlPath {
 #[derive(Debug, Default)]
 pub struct RustXamlReferences {
     pub paths: Vec<RustXamlPath>,
-    /// Explicit documents passed to an exported Cargo compilation group.
+    /// Explicit documents passed to a Cargo compilation group.
     pub registrations: Vec<RustXamlRegistration>,
     /// Explicit document discovery roots authored on a Cargo build builder.
     pub xaml_roots: Vec<String>,
@@ -61,6 +63,7 @@ pub struct RustXamlRegistration {
     pub key: String,
     pub input: String,
     pub anchor: RustPathAnchor,
+    pub exported: bool,
 }
 
 impl RustXamlReferences {
@@ -78,13 +81,7 @@ impl RustXamlReferences {
     }
 
     pub fn parse(source: &str, cargo_build: bool) -> Result<Self> {
-        let body = source.strip_prefix('\u{feff}').unwrap_or(source);
-        let body = match body.strip_prefix("#!") {
-            Some(after) if !after.trim_start().starts_with('[') => {
-                body.find('\n').map_or("", |end| &body[end..])
-            }
-            _ => body,
-        };
+        let body = rust_body(source);
         let file =
             syn::parse_str::<syn::File>(body).map_err(|error| ProjectError(error.to_string()))?;
         let mut collector = Collector {
@@ -103,6 +100,16 @@ impl RustXamlReferences {
         collector.references.xaml_roots.sort();
         collector.references.xaml_roots.dedup();
         Ok(collector.references)
+    }
+}
+
+fn rust_body(source: &str) -> &str {
+    let body = source.strip_prefix('\u{feff}').unwrap_or(source);
+    match body.strip_prefix("#!") {
+        Some(after) if !after.trim_start().starts_with('[') => {
+            body.find('\n').map_or("", |end| &body[end..])
+        }
+        _ => body,
     }
 }
 
@@ -203,13 +210,14 @@ impl<'source> Visit<'source> for Collector<'source> {
                             self.record(literal, RustPathAnchor::XamlRoot, "", Some(input));
                         }
                     }
-                    Site::Registration(module, key, input) => {
+                    Site::Registration(module, key, input, exported) => {
                         if let Some((input, anchor)) = self.included_file(input) {
                             self.references.registrations.push(RustXamlRegistration {
                                 module: module.value(),
                                 key: key.value(),
                                 input,
                                 anchor,
+                                exported,
                             });
                         }
                     }
@@ -312,6 +320,7 @@ mod tests {
                 key: "Views/Card.xaml".into(),
                 input: "Xaml/Views/Card.xaml".into(),
                 anchor: RustPathAnchor::SourceFile,
+                exported: true,
             }]
         );
         let paths = references.paths;
@@ -334,7 +343,7 @@ mod tests {
     }
 
     #[test]
-    fn registrations_come_from_exported_compilation_groups() {
+    fn registrations_distinguish_exported_and_internal_compilation_groups() {
         let source = r#"
         use ferroui_build::{Build, XamlGroup};
         const MODULE: &str = "customer_views";
@@ -348,12 +357,22 @@ mod tests {
         let references = RustXamlReferences::parse(source, true).unwrap();
         assert_eq!(
             references.registrations,
-            [RustXamlRegistration {
-                module: "customer_views".into(),
-                key: "Published/Card.xaml".into(),
-                input: "Physical.xaml".into(),
-                anchor: RustPathAnchor::Package,
-            }]
+            [
+                RustXamlRegistration {
+                    module: "offscreen".into(),
+                    key: "Internal.xaml".into(),
+                    input: "Physical.xaml".into(),
+                    anchor: RustPathAnchor::SourceFile,
+                    exported: false,
+                },
+                RustXamlRegistration {
+                    module: "customer_views".into(),
+                    key: "Published/Card.xaml".into(),
+                    input: "Physical.xaml".into(),
+                    anchor: RustPathAnchor::Package,
+                    exported: true,
+                },
+            ]
         );
     }
 

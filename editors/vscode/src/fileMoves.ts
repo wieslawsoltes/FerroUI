@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import type { FileMoveDocument, FileMovePlan } from './fileMoveProtocol';
 import { recoverFileMove } from './fileMoveRecovery';
 import { FileMoveReview } from './fileMoveReview';
+import { isCompiledXamlRust, resolveFileMoveRust } from './fileMoveRust';
 import { asRange } from './textDocument';
 import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
 import type { XamlServer } from './xamlServer';
@@ -39,27 +40,34 @@ export class FileMoves implements vscode.Disposable {
         const folder = await requireXaml(from);
         const to = await newWorkspaceFile(request.destination, folder.uri.toString());
         signal.throwIfAborted();
-        const result = review === undefined ? await this.plan(from, to) : await this.apply(from, to, review, signal);
+        const result = review === undefined ? await this.plan(from, to, signal) : await this.apply(from, to, review, signal);
         signal.throwIfAborted();
         return result;
     }
 
-    private async plan(from: vscode.Uri, to: vscode.Uri): Promise<FileMovePlan> {
+    private async plan(from: vscode.Uri, to: vscode.Uri, signal?: AbortSignal): Promise<FileMovePlan> {
         await requireXaml(from);
+        const plan = await this.server.planFileMove(from, to, await this.drafts());
+        if (!plan.generatedRust?.length) return plan;
+        const resolutions = await resolveFileMoveRust(plan.generatedRust, signal);
+        return this.server.completeFileMove(from, to, await this.drafts(), plan.review, resolutions);
+    }
+
+    private async drafts() {
         const open = vscode.workspace.textDocuments.filter(document => {
             const extension = path.extname(document.uri.path).toLowerCase();
-            return extension === '.rs' || (document.isDirty && (extension === '.json' || extension === '.ferrostages'));
+            return (extension === '.rs' && !isCompiledXamlRust(document)) || (document.isDirty && (extension === '.json' || extension === '.ferrostages'));
         });
         const projectFiles = await Promise.all(open.map(document => isWorkspaceFile(document.uri)));
         const drafts = open.filter((document, index) => projectFiles[index] && !document.isClosed).map(document => ({
             uri: document.uri.toString(), version: document.version, source: document.getText(),
         }));
         if (Buffer.byteLength(JSON.stringify(drafts)) > 12 * 1024 * 1024) throw new Error('Save larger drafts before reviewing this move.');
-        return this.server.planFileMove(from, to, drafts);
+        return drafts;
     }
 
     private async apply(from: vscode.Uri, to: vscode.Uri, review: string, signal?: AbortSignal, validate?: () => void): Promise<FileMovePlan> {
-        const plan = await this.plan(from, to);
+        const plan = await this.plan(from, to, signal);
         if (plan.review !== review) throw new Error('The file move changed. Review the current source patches before applying it.');
         const [actual, parent, identity] = await Promise.all([
             realpath(from.fsPath), realpath(path.dirname(to.fsPath)), lstat(from.fsPath, { bigint: true }),

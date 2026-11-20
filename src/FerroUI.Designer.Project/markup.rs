@@ -6,6 +6,10 @@ use std::collections::BTreeSet;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+#[path = "markup_symbols.rs"]
+mod symbols;
+pub use symbols::CompiledXamlOutput;
+
 #[path = "markup_events.rs"]
 mod events;
 pub use events::MarkupEventSignature;
@@ -51,6 +55,7 @@ impl BuildMetadata {
 /// a bounded read of the reported outputs and never executes application code.
 pub struct MarkupCatalog {
     models: ModelSet,
+    directories: BTreeSet<PathBuf>,
 }
 
 /// An element with a known XAML constructor and Control ancestry.
@@ -102,6 +107,7 @@ impl MarkupCatalog {
             }
         }
         let mut models = Vec::new();
+        let mut directories = BTreeSet::new();
         let mut remaining = MAX_BYTES;
         for path in paths {
             let mut source = String::new();
@@ -118,9 +124,13 @@ impl MarkupCatalog {
             models.push(AssemblyModel::parse(&source).map_err(|error| {
                 ProjectError(format!("Cannot read {}: {error}", path.display()))
             })?);
+            if let Some(directory) = path.parent() {
+                directories.insert(directory.to_owned());
+            }
         }
         Ok(Self {
             models: ModelSet::new(models),
+            directories,
         })
     }
 
@@ -257,6 +267,7 @@ mod tests {
         shell.types.push(badge);
 
         let catalog = MarkupCatalog {
+            directories: BTreeSet::new(),
             models: ModelSet::new(vec![shell, widgets, framework]),
         };
         let found = catalog.controls().collect::<Vec<_>>();

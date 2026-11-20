@@ -9,12 +9,14 @@ use ferroui_designer_project::{
 };
 use std::{
     collections::BTreeMap,
+    hash::{Hash, Hasher},
     path::{Path, PathBuf},
 };
 
 #[path = "file_move_compiled.rs"]
 mod compiled;
 pub(super) use compiled::CompiledAddresses;
+pub use compiled::GeneratedRustRename;
 
 impl LanguageService {
     pub(super) fn move_rust_paths(
@@ -22,6 +24,7 @@ impl LanguageService {
         movement: &XamlFileMove,
         drafts: &BTreeMap<String, &FileMoveDraft>,
         addresses: &CompiledAddresses,
+        review: &mut impl Hasher,
     ) -> Result<Vec<FileMoveDocument>> {
         let files = rust_files(self);
         let from = file_path(&movement.from)?;
@@ -29,6 +32,9 @@ impl LanguageService {
         let mut builds = BTreeMap::new();
         let mut documents = Vec::new();
         for (entry, project, workspace) in files.values() {
+            if addresses.is_generated(&entry.path) {
+                continue;
+            }
             let version = drafts.get(&entry.uri).map_or(-1, |draft| draft.version);
             let cached_build = addresses.build_for(&entry.uri);
             let saved;
@@ -40,6 +46,10 @@ impl LanguageService {
                 saved = workspace.read_source(&entry.uri)?;
                 saved.as_str()
             };
+            if !addresses.generated_rust.is_empty() {
+                // Bind asynchronously resolved Rust references to these exact buffers.
+                (&entry.uri, version, source).hash(review);
+            }
             let package = if cached_build.is_some() {
                 movement.package_root.as_path()
             } else {
@@ -114,7 +124,7 @@ impl LanguageService {
     }
 }
 
-fn rust_files(
+pub(super) fn rust_files(
     service: &LanguageService,
 ) -> BTreeMap<&str, (&DocumentEntry, &ProjectDescriptor, &ProjectWorkspace)> {
     let mut files = BTreeMap::new();
@@ -213,13 +223,17 @@ impl RustMove<'_> {
     }
 
     fn key(&self, site: &RustXamlPath) -> Result<Option<String>> {
-        if let Some((input, anchor)) = &site.input {
-            if !self
-                .base(*anchor)
-                .is_some_and(|base| self.refers_to_move(base, input))
-            {
-                return Ok(None);
-            }
+        let Some((input, anchor)) = &site.input else {
+            // Discovery scans below the configured root, and selects the class
+            // by its raw path relative to the manifest.
+            return if self.refers_to_move(self.package, &site.path) {
+                Ok(Some(relative_file_path(self.package, self.destination)?))
+            } else {
+                Ok(None)
+            };
+        };
+        if !self.base(*anchor).is_some_and(|base| self.refers_to_move(base, input)) {
+            return Ok(None);
         }
         compiled_key(
             self.movement,

@@ -6,7 +6,7 @@ use syn::{Expr, ExprMethodCall, Item, LitStr, Local, Macro, Pat, UseTree};
 pub(super) enum Site<'source> {
     Path(&'source LitStr, RustPathAnchor),
     Key(&'source LitStr, &'source Macro),
-    Registration(&'source LitStr, &'source LitStr, &'source Macro),
+    Registration(&'source LitStr, &'source LitStr, &'source Macro, bool),
     Root(&'source LitStr),
     Discovery,
 }
@@ -171,9 +171,10 @@ impl<'source> BuildScript<'source> {
         let Some(documents) = self.documents(expression) else {
             return vec![Site::Discovery];
         };
+        let mut exported = true;
         for member in self.builder_chain(expression) {
             match member {
-                Expr::MethodCall(call) if call.method == "internal" => return Vec::new(),
+                Expr::MethodCall(call) if call.method == "internal" => exported = false,
                 Expr::Call(constructor) => {
                     let module = constructor
                         .args
@@ -182,7 +183,7 @@ impl<'source> BuildScript<'source> {
                     return module.map_or_else(Vec::new, |module| {
                         self.keys(documents)
                             .into_iter()
-                            .map(|(key, input)| Site::Registration(module, key, input))
+                            .map(|(key, input)| Site::Registration(module, key, input, exported))
                             .collect()
                     });
                 }

@@ -1,4 +1,4 @@
-use super::DesignerWorkspace;
+use super::{DesignerWorkspace, RUST_MOVE_REVIEW};
 use crate::{
     icons,
     workspace::inspector_actions::{add_button, text, SOURCE},
@@ -127,23 +127,27 @@ fn show_review(
     body.children().add(file.upcast::<Control>());
     body.children().add(tabs.upcast::<Control>());
     let actions = toolbar();
-    let status = text("");
-    let popup = flyout.downgrade();
-    let owner = Rc::downgrade(workspace);
-    let message = status.downgrade();
-    add_button(&actions, icons::CHECK, "Apply file move", move || {
-        let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) else {
-            return;
-        };
-        match workspace.apply_project_file_move(&destination, &plan.review) {
-            Ok(_) => popup.hide(),
-            Err(error) => {
-                if let Some(message) = message.upgrade() {
-                    message.set_text(Some(&error));
+    let needs_rust = !plan.generated_rust.is_empty();
+    let status = text(if needs_rust { RUST_MOVE_REVIEW } else { "" });
+    status.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
+    if !needs_rust {
+        let popup = flyout.downgrade();
+        let owner = Rc::downgrade(workspace);
+        let message = status.downgrade();
+        add_button(&actions, icons::CHECK, "Apply file move", move || {
+            let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) else {
+                return;
+            };
+            match workspace.apply_project_file_move(&destination, &plan.review) {
+                Ok(_) => popup.hide(),
+                Err(error) => {
+                    if let Some(message) = message.upgrade() {
+                        message.set_text(Some(&error));
+                    }
                 }
             }
-        }
-    });
+        });
+    }
     let popup = flyout.downgrade();
     add_button(&actions, icons::CLOSE, "Cancel file move", move || {
         if let Some(popup) = popup.upgrade() {

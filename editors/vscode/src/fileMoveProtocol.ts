@@ -1,4 +1,4 @@
-import type { TextEdit } from './protocol';
+import type { Position, TextEdit } from './protocol';
 
 export interface FileMoveDraft {
     uri: string;
@@ -17,4 +17,17 @@ export interface FileMovePlan {
     to: string;
     review: string;
     documents: FileMoveDocument[];
+    generatedRust?: GeneratedRustRename[];
+}
+
+export interface GeneratedRustRename {
+    uri: string;
+    position: Position;
+    oldName: string;
+    newName: string;
+}
+
+export interface FileMoveRustResolution {
+    rename: GeneratedRustRename;
+    documents: FileMoveDocument['edit'][];
 }

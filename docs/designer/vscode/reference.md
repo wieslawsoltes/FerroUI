@@ -119,6 +119,8 @@ Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `f
 
 In VS Code, call `ferroui_workspace_plan_xaml_move` with `path` and `destination`. Use `folder` to disambiguate the root in a multi-root workspace. Inspect the proposed location and the `before`, `after`, and `edit` for each affected XAML file, Rust file, Cargo build, stage set, or scenario. Call `ferroui_workspace_move_xaml` with the same inputs and the returned `review`. The move requires `ferroui.mcp.allowWrites`.
 
+When the Cargo build publishes generated XAML symbols, VS Code uses rust-analyzer to add the affected authored Rust references to the review. The `generatedRust` entries identify each declaration and its old and new names. Review the Rust source changes in `documents`. A stale buffer or an unresolved declaration requires a fresh review. [Build the project schema and move a compiled view](authoring.md#move-an-xaml-file-and-its-references)
+
 In Studio, open the source file and call `designer_plan_xaml_move` with `destination` and `expected_revision`. Send the same arguments and `review` to `designer_move_xaml` with write permission. Studio updates the saved stage sets and scenarios on Apply. Save the changed XAML and Rust buffers to publish their new references. Use Undo or Redo in a participating source tab to replay the move, including the saved files. [File move workflow](authoring.md#move-an-xaml-file-and-its-references)
 
 Read the open board again after Apply, Undo, or Redo. Use `designer_stages` in VS Code or `designer_preview_stages` in Studio. A moved card keeps its stage ID and returns a new epoch for input, selection, and inspection.

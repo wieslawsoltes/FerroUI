@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
-        return { designer, runtimeSource, fileMoves };
+        return { designer, runtimeSource, fileMoves, publishProjectMetadata: publish };
     }
 }
 

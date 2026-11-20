@@ -11,12 +11,18 @@ use std::{
     path::PathBuf,
 };
 
+#[path = "file_move_symbols.rs"]
+mod symbols;
+pub use symbols::GeneratedRustRename;
+
 #[derive(Default)]
 pub(crate) struct CompiledAddresses {
     /// A registered absolute address is authoritative even if it keeps its spelling.
     routes: BTreeMap<String, Option<String>>,
     workspace: Option<PathBuf>,
     build: Option<BuildSnapshot>,
+    pub(crate) generated_rust: Vec<GeneratedRustRename>,
+    generated_directory: Option<PathBuf>,
 }
 
 pub(super) struct BuildSnapshot {
@@ -60,17 +66,14 @@ impl CompiledAddresses {
             // The Rust patch planner reports incomplete scripts that reference the moved file.
             return Ok(Self::default());
         };
-        if references.registrations.is_empty() {
-            return Ok(Self::default());
-        }
         let destination = file_path(&movement.to)?;
         let mut addresses = Self {
             workspace: service.workspace_root(&movement.from).cloned(),
             ..Self::default()
         };
         let crate_name = name.replace('-', "_");
-        let catalog = service
-            .project_schema_for(&movement.from)
+        let schema = service.project_schema_for(&movement.from);
+        let catalog = schema
             .into_iter()
             .flat_map(|(_, project)| project.catalog.models().models())
             .filter(|model| model.crate_name == crate_name)
@@ -83,7 +86,7 @@ impl CompiledAddresses {
             "Rebuild the package XAML schema to resolve conflicting assembly names",
         )?;
         let roots = xaml_roots(package, &references);
-        for registration in &references.registrations {
+        for registration in references.registrations.iter().filter(|item| item.exported) {
             let Some(base) = input_base(package, &script_path, registration.anchor) else {
                 continue;
             };
@@ -110,6 +113,16 @@ impl CompiledAddresses {
                 )?;
             }
         }
+        if let Some((_, project)) = schema {
+            let manifest = package.join("Cargo.toml").canonicalize()
+                .map_err(ferroui_designer_project::ProjectError::from)?;
+            if let Some(output) = project.catalog.compiled_xaml_output(&manifest)? {
+                addresses.generated_directory = Some(output.module_directory());
+                addresses.generated_rust = symbols::plan(
+                    &output, movement, &roots, &script, &script_path, &references,
+                )?;
+            }
+        }
         addresses.build = Some(BuildSnapshot {
             uri: script,
             source,
@@ -121,6 +134,10 @@ impl CompiledAddresses {
 
     pub(super) fn build_for(&self, uri: &str) -> Option<&BuildSnapshot> {
         self.build.as_ref().filter(|snapshot| snapshot.uri == uri)
+    }
+
+    pub(super) fn is_generated(&self, file: &std::path::Path) -> bool {
+        self.generated_directory.as_ref().is_some_and(|directory| file.starts_with(directory))
     }
 
     fn check_destinations(&self) -> Result<()> {

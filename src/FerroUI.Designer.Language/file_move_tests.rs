@@ -11,6 +11,8 @@ use std::{
 mod saved;
 #[path = "file_move_compiled_tests.rs"]
 mod compiled;
+#[path = "file_move_symbol_tests.rs"]
+mod symbols;
 
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";

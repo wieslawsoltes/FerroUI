@@ -11,14 +11,14 @@ mod workspace;
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
 pub use dictionary_file::{DictionaryDestination, dictionary_destination, suggested_dictionary_name};
 use std::fmt;
-pub use markup::{BuildMetadata, MarkupAnimationProperty, MarkupCatalog, MarkupControl, MarkupEventSignature};
+pub use markup::{BuildMetadata, CompiledXamlOutput, MarkupAnimationProperty, MarkupCatalog, MarkupControl, MarkupEventSignature};
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};
 mod file_move;
 pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
 mod rust_xaml;
-pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences, RustXamlRegistration};
+pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences, RustXamlRegistration, check_rust_rename_tokens};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 

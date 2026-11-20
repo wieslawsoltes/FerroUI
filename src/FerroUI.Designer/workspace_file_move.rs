@@ -18,6 +18,9 @@ mod review;
 #[path = "workspace_file_move_tests.rs"]
 mod tests;
 
+const RUST_MOVE_REVIEW: &str =
+    "Review this move in VS Code with rust-analyzer to update its generated Rust references";
+
 #[derive(Clone)]
 pub(super) struct MovedXaml {
     file: MovedSourceFile,
@@ -92,6 +95,9 @@ impl DesignerWorkspace {
                 "The file move changed. Review the current source patches before applying it"
                     .into(),
             );
+        }
+        if !plan.generated_rust.is_empty() {
+            return Err(RUST_MOVE_REVIEW.into());
         }
         let mut staged = self.stage_file_move()?;
         let label = self

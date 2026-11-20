@@ -4,6 +4,7 @@ import type { FileMovePlan } from '../src/fileMoveProtocol';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 import { verifyCompiledFileMove } from './fileMoveCompiledMcp';
+import { verifyGeneratedRustMove } from './fileMoveGeneratedRust';
 import { verifySavedFileMove } from './fileMoveSavedMcp';
 import { verifyStageFileMove } from './stageFileMoveMcp';
 
@@ -120,6 +121,7 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
     console.log('Reviewed XAML file move updated closed and open consumers, retained the native preview, and undid the move with its patches');
     await verifyRustReferences({ invoke, content });
     await verifyCompiledFileMove({ invoke, content });
+    await verifyGeneratedRustMove({ invoke, content });
     await verifySavedFileMove({ invoke, content });
     await verifyStageFileMove({ invoke, content });
 }
