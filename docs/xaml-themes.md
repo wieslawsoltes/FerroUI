@@ -461,6 +461,9 @@ switch of `ThemeUnitPlan` (`rust_emitter`), both off: the generated files are wh
   is outside every unit, the others write the value the dictionary has. With the switch they
   are entries of the unit of their document: they go into its run, and a trimmed unit takes
   them with it. Without it they stay in the population function, one between each two calls.
+  Since #994 the merge leaves these repeated assignments out (an equal `Key` is not assigned
+  again; docs/porting/xaml.md, deviation 28), so the switch has almost nothing left to move:
+  each theme variant assigns its key once, before its first run.
 - `regions`: calls of runs that add to one dictionary, with only comments between them, are
   one call of `rt::apply_theme_region(active_theme_units(), &[(unit, run), ..], ..)`. It
   applies the same runs in the same order and stops at the same failure; the units of a region

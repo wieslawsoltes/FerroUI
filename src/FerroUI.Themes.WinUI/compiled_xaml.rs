@@ -133,285 +133,81 @@ pub fn populate_winuitheme_xaml(
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_28 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_28), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_30 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_30), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 3, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_114 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_114), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 4, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_125 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_125), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 7, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_127 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_127), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_128 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_128), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 9, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_132 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_132), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 10, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_156 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_156), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 11, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_158 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_158), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 12, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_159 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_159), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 13, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_160 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_160), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 14, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_161 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_161), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 15, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_162 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_162), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 16, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_163 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_163), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 17, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_164 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_164), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 18, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_165 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_165), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 19, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_166 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_166), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 20, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_167 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_167), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 21, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_168 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_168), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 22, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_169 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_169), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 25, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_170 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_170), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 26, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_171 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_171), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 27, 0, &context, &resource_dictionary_1)?;
     let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
-    // WinUITheme.xaml(16,6) Key
-    let value_172 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_172), 16, 6)?);
     rt::apply_theme_unit(active_theme_units(), 28, 0, &context, &resource_dictionary_1)?;
     ::core::mem::drop(namespace_scope_3);
-    // WinUITheme.xaml(14,6) Key
-    let value_173 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_173), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 29, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_174 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_174), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 30, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_175 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_175), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 31, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_176 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_176), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 32, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_180 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_180), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 33, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_181 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_181), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 34, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_182 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_182), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 35, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_184 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_184), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 36, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_185 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_185), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 37, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_186 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_186), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_187 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_187), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 39, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_190 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_190), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_191 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_191), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 41, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_192 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_192), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_194 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_194), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_196 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_196), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_197 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_197), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_198 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_198), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_199 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_199), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_200 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_200), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_201 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_201), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_202 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_202), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_203 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_203), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_204 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_204), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 52, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_205 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_205), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_206 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_206), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_207 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_207), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_208 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_208), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_209 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_209), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_210 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_210), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_211 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_211), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_212 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_212), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_213 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_213), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_214 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_214), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_215 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_215), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 63, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_216 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_216), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_217 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_217), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_218 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_218), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 66, 1, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_219 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_219), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_220 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_220), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 68, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_221 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_221), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(14,6) Key
-    let value_222 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_222), 14, 6)?);
     rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(15,6) Key
-    let value_223 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_223), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(15,6) Key
-    let value_224 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_224), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_1)?;
-    // WinUITheme.xaml(15,6) Key
-    let value_226 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_226), 15, 6)?);
     rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_1)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 14, 6)?), 14, 6)?;
     // WinUITheme.xaml(311,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_227 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    let value_159 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     // WinUITheme.xaml(311,6) ResourceDictionary
     let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_2.clone()));
@@ -421,288 +217,84 @@ pub fn populate_winuitheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 311, 6)?, count_2.wrapping_add(2410_i32));
     }
     // WinUITheme.xaml(311,6) Key
-    let value_228 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 311, 6)?, rt::cast(::core::clone::Clone::clone(&value_228), 311, 6)?);
+    let value_160 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 311, 6)?, rt::cast(::core::clone::Clone::clone(&value_160), 311, 6)?);
     rt::apply_theme_unit(active_theme_units(), 1, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(27,6) Key
-    let value_255 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_255), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 2, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(218,6) Key
-    let value_257 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 218, 6)?, rt::cast(::core::clone::Clone::clone(&value_257), 218, 6)?);
     rt::apply_theme_unit(active_theme_units(), 3, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(40,6) Key
-    let value_341 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_341), 40, 6)?);
     rt::apply_theme_unit(active_theme_units(), 4, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(77,6) Key
-    let value_352 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 77, 6)?, rt::cast(::core::clone::Clone::clone(&value_352), 77, 6)?);
     rt::apply_theme_unit(active_theme_units(), 7, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(96,6) Key
-    let value_354 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 96, 6)?, rt::cast(::core::clone::Clone::clone(&value_354), 96, 6)?);
     rt::apply_theme_unit(active_theme_units(), 8, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(66,6) Key
-    let value_355 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 66, 6)?, rt::cast(::core::clone::Clone::clone(&value_355), 66, 6)?);
     rt::apply_theme_unit(active_theme_units(), 9, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(119,6) Key
-    let value_359 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 119, 6)?, rt::cast(::core::clone::Clone::clone(&value_359), 119, 6)?);
     rt::apply_theme_unit(active_theme_units(), 10, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(59,6) Key
-    let value_383 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 59, 6)?, rt::cast(::core::clone::Clone::clone(&value_383), 59, 6)?);
     rt::apply_theme_unit(active_theme_units(), 11, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(19,6) Key
-    let value_385 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_385), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 12, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(29,6) Key
-    let value_386 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 29, 6)?, rt::cast(::core::clone::Clone::clone(&value_386), 29, 6)?);
     rt::apply_theme_unit(active_theme_units(), 13, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(72,6) Key
-    let value_387 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_387), 72, 6)?);
     rt::apply_theme_unit(active_theme_units(), 14, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(50,6) Key
-    let value_388 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_388), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 15, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(17,6) Key
-    let value_389 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_389), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 16, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(79,6) Key
-    let value_390 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 79, 6)?, rt::cast(::core::clone::Clone::clone(&value_390), 79, 6)?);
     rt::apply_theme_unit(active_theme_units(), 17, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(42,6) Key
-    let value_391 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 42, 6)?, rt::cast(::core::clone::Clone::clone(&value_391), 42, 6)?);
     rt::apply_theme_unit(active_theme_units(), 18, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(74,6) Key
-    let value_392 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 74, 6)?, rt::cast(::core::clone::Clone::clone(&value_392), 74, 6)?);
     rt::apply_theme_unit(active_theme_units(), 19, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(36,6) Key
-    let value_393 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_393), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 20, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(57,6) Key
-    let value_394 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 57, 6)?, rt::cast(::core::clone::Clone::clone(&value_394), 57, 6)?);
     rt::apply_theme_unit(active_theme_units(), 21, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(87,6) Key
-    let value_395 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 87, 6)?, rt::cast(::core::clone::Clone::clone(&value_395), 87, 6)?);
     rt::apply_theme_unit(active_theme_units(), 22, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(19,6) Key
-    let value_396 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_396), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 25, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(63,6) Key
-    let value_397 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 63, 6)?, rt::cast(::core::clone::Clone::clone(&value_397), 63, 6)?);
     rt::apply_theme_unit(active_theme_units(), 26, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(72,6) Key
-    let value_398 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_398), 72, 6)?);
     rt::apply_theme_unit(active_theme_units(), 27, 1, &context, &resource_dictionary_2)?;
     let namespace_scope_4 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
-    // WinUITheme.xaml(20,6) Key
-    let value_399 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_399), 20, 6)?);
     rt::apply_theme_unit(active_theme_units(), 28, 1, &context, &resource_dictionary_2)?;
     ::core::mem::drop(namespace_scope_4);
-    // WinUITheme.xaml(32,6) Key
-    let value_400 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 32, 6)?, rt::cast(::core::clone::Clone::clone(&value_400), 32, 6)?);
     rt::apply_theme_unit(active_theme_units(), 29, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(38,6) Key
-    let value_401 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_401), 38, 6)?);
     rt::apply_theme_unit(active_theme_units(), 30, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(40,6) Key
-    let value_402 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_402), 40, 6)?);
     rt::apply_theme_unit(active_theme_units(), 31, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(92,6) Key
-    let value_403 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_403), 92, 6)?);
     rt::apply_theme_unit(active_theme_units(), 32, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(102,6) Key
-    let value_407 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 102, 6)?, rt::cast(::core::clone::Clone::clone(&value_407), 102, 6)?);
     rt::apply_theme_unit(active_theme_units(), 33, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(31,6) Key
-    let value_408 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 31, 6)?, rt::cast(::core::clone::Clone::clone(&value_408), 31, 6)?);
     rt::apply_theme_unit(active_theme_units(), 34, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(50,6) Key
-    let value_409 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_409), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 35, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(37,6) Key
-    let value_411 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 37, 6)?, rt::cast(::core::clone::Clone::clone(&value_411), 37, 6)?);
     rt::apply_theme_unit(active_theme_units(), 36, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(36,6) Key
-    let value_412 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_412), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 37, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(17,6) Key
-    let value_413 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_413), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 38, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(81,6) Key
-    let value_414 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 81, 6)?, rt::cast(::core::clone::Clone::clone(&value_414), 81, 6)?);
     rt::apply_theme_unit(active_theme_units(), 39, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(70,6) Key
-    let value_417 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 70, 6)?, rt::cast(::core::clone::Clone::clone(&value_417), 70, 6)?);
     rt::apply_theme_unit(active_theme_units(), 40, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(17,6) Key
-    let value_418 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_418), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 41, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(65,6) Key
-    let value_419 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 65, 6)?, rt::cast(::core::clone::Clone::clone(&value_419), 65, 6)?);
     rt::apply_theme_unit(active_theme_units(), 42, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(50,6) Key
-    let value_421 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_421), 50, 6)?);
     rt::apply_theme_unit(active_theme_units(), 43, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(26,6) Key
-    let value_423 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 26, 6)?, rt::cast(::core::clone::Clone::clone(&value_423), 26, 6)?);
     rt::apply_theme_unit(active_theme_units(), 44, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(24,6) Key
-    let value_424 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 24, 6)?, rt::cast(::core::clone::Clone::clone(&value_424), 24, 6)?);
     rt::apply_theme_unit(active_theme_units(), 45, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(28,6) Key
-    let value_425 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 28, 6)?, rt::cast(::core::clone::Clone::clone(&value_425), 28, 6)?);
     rt::apply_theme_unit(active_theme_units(), 46, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(80,6) Key
-    let value_426 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 80, 6)?, rt::cast(::core::clone::Clone::clone(&value_426), 80, 6)?);
     rt::apply_theme_unit(active_theme_units(), 47, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(17,6) Key
-    let value_427 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_427), 17, 6)?);
     rt::apply_theme_unit(active_theme_units(), 48, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(27,6) Key
-    let value_428 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_428), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 49, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(18,6) Key
-    let value_429 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_429), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 50, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(18,6) Key
-    let value_430 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_430), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 51, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(27,6) Key
-    let value_431 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_431), 27, 6)?);
     rt::apply_theme_unit(active_theme_units(), 52, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(55,6) Key
-    let value_432 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 55, 6)?, rt::cast(::core::clone::Clone::clone(&value_432), 55, 6)?);
     rt::apply_theme_unit(active_theme_units(), 53, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(23,6) Key
-    let value_433 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_433), 23, 6)?);
     rt::apply_theme_unit(active_theme_units(), 54, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(46,6) Key
-    let value_434 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_434), 46, 6)?);
     rt::apply_theme_unit(active_theme_units(), 55, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(19,6) Key
-    let value_435 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_435), 19, 6)?);
     rt::apply_theme_unit(active_theme_units(), 56, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(18,6) Key
-    let value_436 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_436), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 57, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(92,6) Key
-    let value_437 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_437), 92, 6)?);
     rt::apply_theme_unit(active_theme_units(), 58, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(20,6) Key
-    let value_438 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_438), 20, 6)?);
     rt::apply_theme_unit(active_theme_units(), 59, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(119,6) Key
-    let value_439 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 119, 6)?, rt::cast(::core::clone::Clone::clone(&value_439), 119, 6)?);
     rt::apply_theme_unit(active_theme_units(), 60, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(25,6) Key
-    let value_440 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 25, 6)?, rt::cast(::core::clone::Clone::clone(&value_440), 25, 6)?);
     rt::apply_theme_unit(active_theme_units(), 61, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(22,6) Key
-    let value_441 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_441), 22, 6)?);
     rt::apply_theme_unit(active_theme_units(), 62, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(18,6) Key
-    let value_442 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_442), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 63, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(22,6) Key
-    let value_443 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_443), 22, 6)?);
     rt::apply_theme_unit(active_theme_units(), 64, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(38,6) Key
-    let value_444 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_444), 38, 6)?);
     rt::apply_theme_unit(active_theme_units(), 65, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(23,6) Key
-    let value_445 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_445), 23, 6)?);
     rt::apply_theme_unit(active_theme_units(), 66, 2, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(33,6) Key
-    let value_446 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 33, 6)?, rt::cast(::core::clone::Clone::clone(&value_446), 33, 6)?);
     rt::apply_theme_unit(active_theme_units(), 67, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(43,6) Key
-    let value_447 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_447), 43, 6)?);
     rt::apply_theme_unit(active_theme_units(), 68, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(43,6) Key
-    let value_448 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_448), 43, 6)?);
     rt::apply_theme_unit(active_theme_units(), 69, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(36,6) Key
-    let value_449 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_449), 36, 6)?);
     rt::apply_theme_unit(active_theme_units(), 70, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(46,6) Key
-    let value_450 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_450), 46, 6)?);
     rt::apply_theme_unit(active_theme_units(), 71, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(30,6) Key
-    let value_451 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 30, 6)?, rt::cast(::core::clone::Clone::clone(&value_451), 30, 6)?);
     rt::apply_theme_unit(active_theme_units(), 72, 1, &context, &resource_dictionary_2)?;
-    // WinUITheme.xaml(18,6) Key
-    let value_453 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_453), 18, 6)?);
     rt::apply_theme_unit(active_theme_units(), 73, 1, &context, &resource_dictionary_2)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_227), rt::cast(resource_dictionary_2.clone(), 311, 6)?), 311, 6)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_159), rt::cast(resource_dictionary_2.clone(), 311, 6)?), 311, 6)?;
     // WinUITheme.xaml(607,6) ThemeDictionaries
     let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_454 = crate::WinUITheme::__markup_field_HighContrast();
+    let value_318 = crate::WinUITheme::__markup_field_HighContrast();
     // WinUITheme.xaml(607,6) ResourceDictionary
     let resource_dictionary_3 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_3.clone()));
@@ -712,285 +304,81 @@ pub fn populate_winuitheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 607, 6)?, count_3.wrapping_add(2410_i32));
     }
     // WinUITheme.xaml(607,25) Key
-    let value_455 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 607, 25)?, rt::cast(::core::clone::Clone::clone(&value_455), 607, 25)?);
+    let value_319 = crate::WinUITheme::__markup_field_HighContrast();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 607, 25)?, rt::cast(::core::clone::Clone::clone(&value_319), 607, 25)?);
     rt::apply_theme_unit(active_theme_units(), 1, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(40,25) Key
-    let value_482 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_482), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 2, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(425,25) Key
-    let value_484 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 425, 25)?, rt::cast(::core::clone::Clone::clone(&value_484), 425, 25)?);
     rt::apply_theme_unit(active_theme_units(), 3, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(66,25) Key
-    let value_568 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_568), 66, 25)?);
     rt::apply_theme_unit(active_theme_units(), 4, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(140,25) Key
-    let value_579 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 140, 25)?, rt::cast(::core::clone::Clone::clone(&value_579), 140, 25)?);
     rt::apply_theme_unit(active_theme_units(), 7, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(178,25) Key
-    let value_581 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 178, 25)?, rt::cast(::core::clone::Clone::clone(&value_581), 178, 25)?);
     rt::apply_theme_unit(active_theme_units(), 8, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(118,25) Key
-    let value_582 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 118, 25)?, rt::cast(::core::clone::Clone::clone(&value_582), 118, 25)?);
     rt::apply_theme_unit(active_theme_units(), 9, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(224,25) Key
-    let value_586 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 224, 25)?, rt::cast(::core::clone::Clone::clone(&value_586), 224, 25)?);
     rt::apply_theme_unit(active_theme_units(), 10, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(104,25) Key
-    let value_610 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 104, 25)?, rt::cast(::core::clone::Clone::clone(&value_610), 104, 25)?);
     rt::apply_theme_unit(active_theme_units(), 11, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(24,25) Key
-    let value_612 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_612), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 12, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(44,25) Key
-    let value_613 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 44, 25)?, rt::cast(::core::clone::Clone::clone(&value_613), 44, 25)?);
     rt::apply_theme_unit(active_theme_units(), 13, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(130,25) Key
-    let value_614 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_614), 130, 25)?);
     rt::apply_theme_unit(active_theme_units(), 14, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(86,25) Key
-    let value_615 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_615), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 15, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(20,25) Key
-    let value_616 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_616), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 16, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(144,25) Key
-    let value_617 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 144, 25)?, rt::cast(::core::clone::Clone::clone(&value_617), 144, 25)?);
     rt::apply_theme_unit(active_theme_units(), 17, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(70,25) Key
-    let value_618 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 70, 25)?, rt::cast(::core::clone::Clone::clone(&value_618), 70, 25)?);
     rt::apply_theme_unit(active_theme_units(), 18, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(134,25) Key
-    let value_619 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 134, 25)?, rt::cast(::core::clone::Clone::clone(&value_619), 134, 25)?);
     rt::apply_theme_unit(active_theme_units(), 19, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(58,25) Key
-    let value_620 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_620), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 20, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(100,25) Key
-    let value_621 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 100, 25)?, rt::cast(::core::clone::Clone::clone(&value_621), 100, 25)?);
     rt::apply_theme_unit(active_theme_units(), 21, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(160,25) Key
-    let value_622 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 160, 25)?, rt::cast(::core::clone::Clone::clone(&value_622), 160, 25)?);
     rt::apply_theme_unit(active_theme_units(), 22, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(24,25) Key
-    let value_623 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_623), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 25, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(112,25) Key
-    let value_624 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 112, 25)?, rt::cast(::core::clone::Clone::clone(&value_624), 112, 25)?);
     rt::apply_theme_unit(active_theme_units(), 26, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(130,25) Key
-    let value_625 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_625), 130, 25)?);
     rt::apply_theme_unit(active_theme_units(), 27, 2, &context, &resource_dictionary_3)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
-    // WinUITheme.xaml(24,25) Key
-    let value_626 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_626), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 28, 2, &context, &resource_dictionary_3)?;
     ::core::mem::drop(namespace_scope_5);
-    // WinUITheme.xaml(50,25) Key
-    let value_627 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 50, 25)?, rt::cast(::core::clone::Clone::clone(&value_627), 50, 25)?);
     rt::apply_theme_unit(active_theme_units(), 29, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(62,25) Key
-    let value_628 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_628), 62, 25)?);
     rt::apply_theme_unit(active_theme_units(), 30, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(66,25) Key
-    let value_629 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_629), 66, 25)?);
     rt::apply_theme_unit(active_theme_units(), 31, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(170,25) Key
-    let value_630 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_630), 170, 25)?);
     rt::apply_theme_unit(active_theme_units(), 32, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(190,25) Key
-    let value_634 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 190, 25)?, rt::cast(::core::clone::Clone::clone(&value_634), 190, 25)?);
     rt::apply_theme_unit(active_theme_units(), 33, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(48,25) Key
-    let value_635 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 48, 25)?, rt::cast(::core::clone::Clone::clone(&value_635), 48, 25)?);
     rt::apply_theme_unit(active_theme_units(), 34, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(86,25) Key
-    let value_636 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_636), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 35, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(60,25) Key
-    let value_639 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 60, 25)?, rt::cast(::core::clone::Clone::clone(&value_639), 60, 25)?);
     rt::apply_theme_unit(active_theme_units(), 36, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(58,25) Key
-    let value_640 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_640), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 37, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(20,25) Key
-    let value_641 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_641), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 38, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(148,25) Key
-    let value_642 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 148, 25)?, rt::cast(::core::clone::Clone::clone(&value_642), 148, 25)?);
     rt::apply_theme_unit(active_theme_units(), 39, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(126,25) Key
-    let value_645 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 126, 25)?, rt::cast(::core::clone::Clone::clone(&value_645), 126, 25)?);
     rt::apply_theme_unit(active_theme_units(), 40, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(20,25) Key
-    let value_646 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_646), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 41, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(117,25) Key
-    let value_647 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 117, 25)?, rt::cast(::core::clone::Clone::clone(&value_647), 117, 25)?);
     rt::apply_theme_unit(active_theme_units(), 42, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(86,25) Key
-    let value_649 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_649), 86, 25)?);
     rt::apply_theme_unit(active_theme_units(), 43, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(38,25) Key
-    let value_652 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 38, 25)?, rt::cast(::core::clone::Clone::clone(&value_652), 38, 25)?);
     rt::apply_theme_unit(active_theme_units(), 44, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(34,25) Key
-    let value_653 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 34, 25)?, rt::cast(::core::clone::Clone::clone(&value_653), 34, 25)?);
     rt::apply_theme_unit(active_theme_units(), 45, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(42,25) Key
-    let value_654 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 42, 25)?, rt::cast(::core::clone::Clone::clone(&value_654), 42, 25)?);
     rt::apply_theme_unit(active_theme_units(), 46, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(146,25) Key
-    let value_655 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 146, 25)?, rt::cast(::core::clone::Clone::clone(&value_655), 146, 25)?);
     rt::apply_theme_unit(active_theme_units(), 47, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(20,25) Key
-    let value_656 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_656), 20, 25)?);
     rt::apply_theme_unit(active_theme_units(), 48, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(40,25) Key
-    let value_657 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_657), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 49, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(22,25) Key
-    let value_658 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_658), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 50, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(22,25) Key
-    let value_659 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_659), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 51, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(40,25) Key
-    let value_660 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_660), 40, 25)?);
     rt::apply_theme_unit(active_theme_units(), 52, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(96,25) Key
-    let value_661 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 96, 25)?, rt::cast(::core::clone::Clone::clone(&value_661), 96, 25)?);
     rt::apply_theme_unit(active_theme_units(), 53, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(32,25) Key
-    let value_662 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 32, 25)?, rt::cast(::core::clone::Clone::clone(&value_662), 32, 25)?);
     rt::apply_theme_unit(active_theme_units(), 54, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(78,25) Key
-    let value_663 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 78, 25)?, rt::cast(::core::clone::Clone::clone(&value_663), 78, 25)?);
     rt::apply_theme_unit(active_theme_units(), 55, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(24,25) Key
-    let value_664 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_664), 24, 25)?);
     rt::apply_theme_unit(active_theme_units(), 56, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(22,25) Key
-    let value_665 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_665), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 57, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(170,25) Key
-    let value_666 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_666), 170, 25)?);
     rt::apply_theme_unit(active_theme_units(), 58, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(26,25) Key
-    let value_667 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 26, 25)?, rt::cast(::core::clone::Clone::clone(&value_667), 26, 25)?);
     rt::apply_theme_unit(active_theme_units(), 59, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(224,25) Key
-    let value_668 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 224, 25)?, rt::cast(::core::clone::Clone::clone(&value_668), 224, 25)?);
     rt::apply_theme_unit(active_theme_units(), 60, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(36,25) Key
-    let value_669 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 36, 25)?, rt::cast(::core::clone::Clone::clone(&value_669), 36, 25)?);
     rt::apply_theme_unit(active_theme_units(), 61, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(30,25) Key
-    let value_670 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_670), 30, 25)?);
     rt::apply_theme_unit(active_theme_units(), 62, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(22,25) Key
-    let value_671 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_671), 22, 25)?);
     rt::apply_theme_unit(active_theme_units(), 63, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(30,25) Key
-    let value_672 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_672), 30, 25)?);
     rt::apply_theme_unit(active_theme_units(), 64, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(62,25) Key
-    let value_673 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_673), 62, 25)?);
     rt::apply_theme_unit(active_theme_units(), 65, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(32,25) Key
-    let value_674 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 32, 25)?, rt::cast(::core::clone::Clone::clone(&value_674), 32, 25)?);
     rt::apply_theme_unit(active_theme_units(), 66, 3, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(52,25) Key
-    let value_675 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 52, 25)?, rt::cast(::core::clone::Clone::clone(&value_675), 52, 25)?);
     rt::apply_theme_unit(active_theme_units(), 67, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(72,25) Key
-    let value_676 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_676), 72, 25)?);
     rt::apply_theme_unit(active_theme_units(), 68, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(72,25) Key
-    let value_677 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_677), 72, 25)?);
     rt::apply_theme_unit(active_theme_units(), 69, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(58,25) Key
-    let value_678 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_678), 58, 25)?);
     rt::apply_theme_unit(active_theme_units(), 70, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(77,25) Key
-    let value_679 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 77, 25)?, rt::cast(::core::clone::Clone::clone(&value_679), 77, 25)?);
     rt::apply_theme_unit(active_theme_units(), 71, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(45,25) Key
-    let value_680 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 45, 25)?, rt::cast(::core::clone::Clone::clone(&value_680), 45, 25)?);
     rt::apply_theme_unit(active_theme_units(), 72, 2, &context, &resource_dictionary_3)?;
-    // WinUITheme.xaml(21,25) Key
-    let value_682 = crate::WinUITheme::__markup_field_HighContrast();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 21, 25)?, rt::cast(::core::clone::Clone::clone(&value_682), 21, 25)?);
     rt::apply_theme_unit(active_theme_units(), 73, 2, &context, &resource_dictionary_3)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_454), rt::cast(resource_dictionary_3.clone(), 607, 6)?), 607, 6)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_318), rt::cast(resource_dictionary_3.clone(), 607, 6)?), 607, 6)?;
     rt::apply_theme_unit(active_theme_units(), 1, 3, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 3, 3, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
@@ -1053,8 +441,8 @@ pub fn populate_winuitheme_xaml(
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 18, 6)?), 18, 6)?;
     // WinUITheme.xaml(111,4) Content
     let service_provider_0 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_687 = build_controls_winuicontrols_xaml(rt::cast(service_provider_0.clone(), 111, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_687.clone(), 111, 4)?), 111, 4)?;
+    let value_483 = build_controls_winuicontrols_xaml(rt::cast(service_provider_0.clone(), 111, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_483.clone(), 111, 4)?), 111, 4)?;
     context.pop_parent();
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 13, 2)?;
     ::core::result::Result::Ok(())
@@ -1289,8 +677,8 @@ fn populate_winuitheme_xaml_unit_12(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,52) Content (resource)
-    let value_29 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_29))), 15, 52)?;
+    let value_28 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_28))), 15, 52)?;
     // WinUITheme.xaml(16,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_34)?;
     // WinUITheme.xaml(17,8) Content (resource)
@@ -1374,8 +762,8 @@ fn populate_winuitheme_xaml_unit_15(
     // WinUITheme.xaml(15,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_51)?;
     // WinUITheme.xaml(32,53) Content (resource)
-    let value_126 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 32, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_126))), 32, 53)?;
+    let value_122 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1576992510_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 32, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_122))), 32, 53)?;
     // WinUITheme.xaml(33,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_52)?;
     // WinUITheme.xaml(58,8) Content (resource)
@@ -1635,8 +1023,8 @@ fn populate_winuitheme_xaml_unit_19(
     // WinUITheme.xaml(43,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_72)?;
     // WinUITheme.xaml(45,56) Content (resource)
-    let value_157 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_157))), 45, 56)?;
+    let value_149 = ::ferroui_base::media::Color::__markup_FromUInt32_2(872415231_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_149))), 45, 56)?;
     // WinUITheme.xaml(46,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_73)?;
     // WinUITheme.xaml(57,50) Content (resource)
@@ -1953,14 +1341,14 @@ fn populate_winuitheme_xaml_unit_38(
     // WinUITheme.xaml(76,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_121)?;
     // WinUITheme.xaml(88,66) Content (resource)
-    let value_177 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 88, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 88, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_177))), 88, 66)?;
+    let value_150 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 88, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 88, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_150))), 88, 66)?;
     // WinUITheme.xaml(89,57) Content (resource)
-    let value_178 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 89, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 89, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_178))), 89, 57)?;
+    let value_151 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 89, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 89, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_151))), 89, 57)?;
     // WinUITheme.xaml(90,55) Content (resource)
-    let value_179 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 90, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 90, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_179))), 90, 55)?;
+    let value_152 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 90, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 90, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_152))), 90, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2010,8 +1398,8 @@ fn populate_winuitheme_xaml_unit_41(
     // WinUITheme.xaml(19,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 19, 54)?;
     // WinUITheme.xaml(20,59) Content (resource)
-    let value_183 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 20, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_183))), 20, 59)?;
+    let value_153 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 20, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_153))), 20, 59)?;
     // WinUITheme.xaml(21,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_128)?;
     // WinUITheme.xaml(46,8) Content (resource)
@@ -2079,11 +1467,11 @@ fn populate_winuitheme_xaml_unit_45(
     // WinUITheme.xaml(21,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_135)?;
     // WinUITheme.xaml(27,58) Content (resource)
-    let value_188 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 27, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 27, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_188))), 27, 58)?;
+    let value_154 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 27, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 27, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_154))), 27, 58)?;
     // WinUITheme.xaml(28,53) Content (resource)
-    let value_189 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 28, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 28, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_189))), 28, 53)?;
+    let value_155 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 28, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 28, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_155))), 28, 53)?;
     // WinUITheme.xaml(29,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_136)?;
     // WinUITheme.xaml(66,8) Content (resource)
@@ -2135,8 +1523,8 @@ fn populate_winuitheme_xaml_unit_48(
     // WinUITheme.xaml(17,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_143)?;
     // WinUITheme.xaml(19,55) Content (resource)
-    let value_193 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 19, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_193))), 19, 55)?;
+    let value_156 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 19, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_156))), 19, 55)?;
     // WinUITheme.xaml(20,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_144)?;
     // WinUITheme.xaml(42,8) Content (resource)
@@ -2160,8 +1548,8 @@ fn populate_winuitheme_xaml_unit_49(
     // WinUITheme.xaml(44,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_149)?;
     // WinUITheme.xaml(48,59) Content (resource)
-    let value_195 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 48, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 48, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_195))), 48, 59)?;
+    let value_157 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 48, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 48, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_157))), 48, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2590,8 +1978,8 @@ fn populate_winuitheme_xaml_unit_78(
     // WinUITheme.xaml(16,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_201)?;
     // WinUITheme.xaml(18,53) Content (resource)
-    let value_225 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 18, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_225))), 18, 53)?;
+    let value_158 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 18, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_158))), 18, 53)?;
     // WinUITheme.xaml(19,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_202)?;
     // WinUITheme.xaml(21,53) Content (resource)
@@ -2721,8 +2109,8 @@ fn populate_winuitheme_xaml_unit_81(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(28,52) Content (resource)
-    let value_256 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_256))), 28, 52)?;
+    let value_187 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_187))), 28, 52)?;
     // WinUITheme.xaml(29,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_239)?;
     // WinUITheme.xaml(30,8) Content (resource)
@@ -2806,8 +2194,8 @@ fn populate_winuitheme_xaml_unit_84(
     // WinUITheme.xaml(78,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_256)?;
     // WinUITheme.xaml(95,53) Content (resource)
-    let value_353 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_353))), 95, 53)?;
+    let value_281 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_281))), 95, 53)?;
     // WinUITheme.xaml(96,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_257)?;
     // WinUITheme.xaml(121,8) Content (resource)
@@ -3069,8 +2457,8 @@ fn populate_winuitheme_xaml_unit_88(
     // WinUITheme.xaml(88,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_278)?;
     // WinUITheme.xaml(90,56) Content (resource)
-    let value_384 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 90, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_384))), 90, 56)?;
+    let value_308 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 90, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_308))), 90, 56)?;
     // WinUITheme.xaml(91,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_279)?;
     // WinUITheme.xaml(102,50) Content (resource)
@@ -3387,14 +2775,14 @@ fn populate_winuitheme_xaml_unit_107(
     // WinUITheme.xaml(154,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_327)?;
     // WinUITheme.xaml(166,66) Content (resource)
-    let value_404 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_404))), 166, 66)?;
+    let value_309 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_309))), 166, 66)?;
     // WinUITheme.xaml(167,57) Content (resource)
-    let value_405 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 167, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 167, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_405))), 167, 57)?;
+    let value_310 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 167, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 167, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_310))), 167, 57)?;
     // WinUITheme.xaml(168,55) Content (resource)
-    let value_406 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 168, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 168, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_406))), 168, 55)?;
+    let value_311 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 168, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 168, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_311))), 168, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3444,8 +2832,8 @@ fn populate_winuitheme_xaml_unit_110(
     // WinUITheme.xaml(55,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 55, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 55, 54)?;
     // WinUITheme.xaml(56,59) Content (resource)
-    let value_410 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 56, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_410))), 56, 59)?;
+    let value_312 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 56, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_312))), 56, 59)?;
     // WinUITheme.xaml(57,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_334)?;
     // WinUITheme.xaml(80,8) Content (resource)
@@ -3515,11 +2903,11 @@ fn populate_winuitheme_xaml_unit_114(
     // WinUITheme.xaml(88,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_342)?;
     // WinUITheme.xaml(94,58) Content (resource)
-    let value_415 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 94, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 94, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_415))), 94, 58)?;
+    let value_313 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 94, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 94, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_313))), 94, 58)?;
     // WinUITheme.xaml(95,53) Content (resource)
-    let value_416 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 95, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_416))), 95, 53)?;
+    let value_314 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 95, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_314))), 95, 53)?;
     // WinUITheme.xaml(96,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_343)?;
     // WinUITheme.xaml(133,8) Content (resource)
@@ -3571,8 +2959,8 @@ fn populate_winuitheme_xaml_unit_117(
     // WinUITheme.xaml(68,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_350)?;
     // WinUITheme.xaml(70,55) Content (resource)
-    let value_420 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_420))), 70, 55)?;
+    let value_315 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_315))), 70, 55)?;
     // WinUITheme.xaml(71,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_351)?;
     // WinUITheme.xaml(94,8) Content (resource)
@@ -3596,8 +2984,8 @@ fn populate_winuitheme_xaml_unit_118(
     // WinUITheme.xaml(80,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_356)?;
     // WinUITheme.xaml(84,59) Content (resource)
-    let value_422 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_422))), 84, 59)?;
+    let value_316 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_316))), 84, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4026,8 +3414,8 @@ fn populate_winuitheme_xaml_unit_147(
     // WinUITheme.xaml(31,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_408)?;
     // WinUITheme.xaml(33,53) Content (resource)
-    let value_452 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 33, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 33, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_452))), 33, 53)?;
+    let value_317 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 33, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 33, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_317))), 33, 53)?;
     // WinUITheme.xaml(34,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_409)?;
     // WinUITheme.xaml(36,53) Content (resource)
@@ -4123,8 +3511,8 @@ fn populate_winuitheme_xaml_unit_150(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(41,52) Content (resource)
-    let value_483 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 41, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_483))), 41, 52)?;
+    let value_346 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 41, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_346))), 41, 52)?;
     // WinUITheme.xaml(42,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_434)?;
     // WinUITheme.xaml(43,8) Content (resource)
@@ -4192,8 +3580,8 @@ fn populate_winuitheme_xaml_unit_153(
     // WinUITheme.xaml(147,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_451)?;
     // WinUITheme.xaml(158,53) Content (resource)
-    let value_580 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 158, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_580))), 158, 53)?;
+    let value_440 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 158, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_440))), 158, 53)?;
     // WinUITheme.xaml(159,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_452)?;
     // WinUITheme.xaml(165,8) Content (resource)
@@ -4311,8 +3699,8 @@ fn populate_winuitheme_xaml_unit_157(
     // WinUITheme.xaml(143,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_483)?;
     // WinUITheme.xaml(144,56) Content (resource)
-    let value_611 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 144, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_611))), 144, 56)?;
+    let value_467 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 144, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_467))), 144, 56)?;
     // WinUITheme.xaml(145,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_484)?;
     // WinUITheme.xaml(156,50) Content (resource)
@@ -4647,14 +4035,14 @@ fn populate_winuitheme_xaml_unit_176(
     // WinUITheme.xaml(232,52) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_541)?;
     // WinUITheme.xaml(244,66) Content (resource)
-    let value_631 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_631))), 244, 66)?;
+    let value_468 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_468))), 244, 66)?;
     // WinUITheme.xaml(245,57) Content (resource)
-    let value_632 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 245, 57)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 245, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_632))), 245, 57)?;
+    let value_469 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 245, 57)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 245, 57)?, rt::string_object("CalendarViewWeekDayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_469))), 245, 57)?;
     // WinUITheme.xaml(246,55) Content (resource)
-    let value_633 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 246, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 246, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_633))), 246, 55)?;
+    let value_470 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 246, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 246, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_470))), 246, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4706,8 +4094,8 @@ fn populate_winuitheme_xaml_unit_179(
     // WinUITheme.xaml(87,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_548)?;
     // WinUITheme.xaml(110,72) Content (resource)
-    let value_637 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("DatePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_637))), 110, 72)?;
+    let value_471 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("DatePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_471))), 110, 72)?;
     // WinUITheme.xaml(111,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_549)?;
     // WinUITheme.xaml(112,57) Content (resource)
@@ -4715,8 +4103,8 @@ fn populate_winuitheme_xaml_unit_179(
     // WinUITheme.xaml(116,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 116, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 116, 54)?;
     // WinUITheme.xaml(117,59) Content (resource)
-    let value_638 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 117, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 117, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_638))), 117, 59)?;
+    let value_472 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 117, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 117, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_472))), 117, 59)?;
     // WinUITheme.xaml(118,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_551)?;
     // WinUITheme.xaml(120,57) Content (resource)
@@ -4784,11 +4172,11 @@ fn populate_winuitheme_xaml_unit_183(
     // WinUITheme.xaml(192,48) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_558)?;
     // WinUITheme.xaml(198,58) Content (resource)
-    let value_643 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 198, 58)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 198, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_643))), 198, 58)?;
+    let value_473 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 198, 58)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 198, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_473))), 198, 58)?;
     // WinUITheme.xaml(199,53) Content (resource)
-    let value_644 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 199, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 199, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_644))), 199, 53)?;
+    let value_474 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 199, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 199, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_474))), 199, 53)?;
     // WinUITheme.xaml(200,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_559)?;
     ::core::result::Result::Ok(())
@@ -4844,8 +4232,8 @@ fn populate_winuitheme_xaml_unit_186(
     // WinUITheme.xaml(143,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_568)?;
     // WinUITheme.xaml(145,55) Content (resource)
-    let value_648 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 145, 55)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 145, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_648))), 145, 55)?;
+    let value_475 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 145, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 145, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_475))), 145, 55)?;
     // WinUITheme.xaml(146,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_569)?;
     ::core::result::Result::Ok(())
@@ -4861,8 +4249,8 @@ fn populate_winuitheme_xaml_unit_187(
     // WinUITheme.xaml(87,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_570)?;
     // WinUITheme.xaml(110,72) Content (resource)
-    let value_650 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("TimePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_650))), 110, 72)?;
+    let value_476 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("TimePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_476))), 110, 72)?;
     // WinUITheme.xaml(111,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_571)?;
     // WinUITheme.xaml(112,8) Content (resource)
@@ -4876,8 +4264,8 @@ fn populate_winuitheme_xaml_unit_187(
     // WinUITheme.xaml(117,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_573)?;
     // WinUITheme.xaml(120,59) Content (resource)
-    let value_651 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_651))), 120, 59)?;
+    let value_477 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_477))), 120, 59)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5330,8 +4718,8 @@ fn populate_winuitheme_xaml_unit_216(
     // WinUITheme.xaml(46,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_637)?;
     // WinUITheme.xaml(48,53) Content (resource)
-    let value_681 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 48, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 48, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_681))), 48, 53)?;
+    let value_478 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 48, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 48, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_478))), 48, 53)?;
     // WinUITheme.xaml(49,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_638)?;
     // WinUITheme.xaml(51,53) Content (resource)
@@ -5897,11 +5285,11 @@ fn populate_winuitheme_xaml_unit_251(
     // WinUITheme.xaml(353,60) Content (resource)
     rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_702)?;
     // WinUITheme.xaml(357,53) Content (resource)
-    let value_683 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_683))), 357, 53)?;
+    let value_479 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_479))), 357, 53)?;
     // WinUITheme.xaml(358,62) Content (resource)
-    let value_684 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 358, 62)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 358, 62)?, rt::string_object("ComboBoxPlaceholderTextThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_684))), 358, 62)?;
+    let value_480 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 358, 62)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 358, 62)?, rt::string_object("ComboBoxPlaceholderTextThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_480))), 358, 62)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5965,13 +5353,13 @@ fn populate_winuitheme_xaml_unit_255(
     // WinUITheme.xaml(72,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 72, 42)?, rt::string_object("InfoBarTitleFontSize"), rt::to_object(14.0_f64)), 72, 42)?;
     // WinUITheme.xaml(73,46) Content (resource)
-    let value_685 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 73, 46)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 73, 46)?, rt::string_object("InfoBarTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_685))), 73, 46)?;
+    let value_481 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 73, 46)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 73, 46)?, rt::string_object("InfoBarTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_481))), 73, 46)?;
     // WinUITheme.xaml(74,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 74, 44)?, rt::string_object("InfoBarMessageFontSize"), rt::to_object(14.0_f64)), 74, 44)?;
     // WinUITheme.xaml(75,48) Content (resource)
-    let value_686 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 75, 48)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 75, 48)?, rt::string_object("InfoBarMessageFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_686))), 75, 48)?;
+    let value_482 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 75, 48)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 75, 48)?, rt::string_object("InfoBarMessageFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_482))), 75, 48)?;
     // WinUITheme.xaml(76,38) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_711)?;
     // WinUITheme.xaml(79,51) Content (resource)
