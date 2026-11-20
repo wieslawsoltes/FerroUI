@@ -1391,7 +1391,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-base"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
@@ -1408,7 +1408,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-benchmarks"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -1424,7 +1424,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-build"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1437,7 +1437,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-build-scan"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1446,7 +1446,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-controls"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-base",
@@ -1459,7 +1459,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-controls-treedatagrid"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -1471,7 +1471,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-dialogs"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -1483,7 +1483,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-harfbuzz"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -1492,7 +1492,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-headless"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -1502,14 +1502,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-markup"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-markup-xaml"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1520,7 +1520,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-markup-xaml-loader"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1534,14 +1534,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-metal"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-opengl"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1552,7 +1552,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-remote-protocol"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-system",
  "uuid",
@@ -1560,7 +1560,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-skia"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "cc",
  "ferroui-base",
@@ -1574,14 +1574,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-system"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "smallvec",
 ]
 
 [[package]]
 name = "ferroui-themes-fluent"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -1592,7 +1592,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-themes-simple"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -1603,7 +1603,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-treedatagrid-benchmarks"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-benchmarks",
@@ -1614,7 +1614,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-treedatagrid-core"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1641,7 +1641,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-view"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -1652,7 +1652,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-view-macros"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1661,7 +1661,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-vulkan"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
@@ -7036,7 +7036,7 @@ dependencies = [
 
 [[package]]
 name = "xamlx"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "roxmltree 0.20.0",
 ]

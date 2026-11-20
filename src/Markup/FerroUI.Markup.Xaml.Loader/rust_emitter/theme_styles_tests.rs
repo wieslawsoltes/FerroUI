@@ -479,6 +479,80 @@ fn another_choice_keeps_its_chain() {
     assert_eq!(resource_choice("value_0", &moved), None);
 }
 
+// --- template bindings whose setter is chosen at run time (#854) ---------------------------
+
+const TEMPLATE_BINDING: &str = "::ferroui_base::data::TemplateBinding";
+
+/// The statements the emitter writes for `Content="{TemplateBinding Content}"` of a
+/// `ContentPresenter`, whose setter is chosen at run time, with the locals numbered `n`.
+fn chosen_template_binding(n: usize, line: i32) -> Vec<String> {
+    let property = "::ferroui_controls::presenters::ContentPresenter::content_property()";
+    [
+        format!("// Controls/WinUIControls.xaml({line},27) Content (setter chosen at run time)"),
+        format!("let priority_{n} = ::ferroui_base::data::BindingPriority::Template;"),
+        format!("let template_binding_{n} = {TEMPLATE_BINDING}::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));"),
+        format!("let provided_{n} = {TEMPLATE_BINDING}::__markup_ProvideValue_0(&template_binding_{n});"),
+        format!("let value_{n}: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_{n});"),
+        format!("if value_{n}.is_some() {{"),
+        format!("    rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), {property}, value_{n}.clone(), {line}, 27)?;"),
+        "} else {".to_string(),
+        format!("    content_presenter_0.set_value_with_priority({property}, rt::exact(value_{n}.clone(), \"ContentControl.Content\", 1, {line}, 27)?, priority_{n});"),
+        "}".to_string(),
+    ]
+    .iter()
+    .map(|statement| format!("    {statement}"))
+    .collect()
+}
+
+/// #854: off by default and scoped.
+#[test]
+fn resolved_template_bindings_are_off_by_default() {
+    assert!(!DEFAULT_RESOLVED_TEMPLATE_BINDINGS);
+    assert!(!resolves_template_bindings());
+    assert!(with_resolved_template_bindings(true, resolves_template_bindings));
+    assert!(!resolves_template_bindings());
+    let lines = chosen_template_binding(0, 34);
+    assert_eq!(resolve_template_bindings(lines.clone(), Some(TEMPLATE_BINDING)), lines);
+}
+
+/// #854: the choice of the setter of a template binding is the template binding it always is,
+/// and it joins the run of the template bindings on its object.
+#[test]
+fn a_template_binding_whose_setter_is_chosen_at_run_time_is_resolved() {
+    let mut lines = chosen_template_binding(0, 34);
+    lines.push(binding("content_presenter_0", "background_property", "background_property", 35));
+    let resolved = with_resolved_template_bindings(true, || resolve_template_bindings(lines.clone(), Some(TEMPLATE_BINDING)));
+    assert_eq!(resolved, vec![
+        lines[0].clone(),
+        "    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), \
+         ::ferroui_controls::presenters::ContentPresenter::content_property(), \
+         rt::property(::ferroui_controls::ContentControl::content_property()), 34, 27)?;"
+            .to_string(),
+        lines[10].clone(),
+    ]);
+    let mut pool = StylePool::new("build_x", "x.xaml");
+    let body = template_binding_runs(&mut pool, resolved);
+    assert_eq!(body.len(), 2, "{body:?}");
+    assert!(body[1].contains("rt::bind_template_bindings(content_presenter_0"), "{body:?}");
+    assert_eq!(pool.items.join("\n").matches("rt::TemplateBindingRow {").count(), 2);
+}
+
+/// #854: a choice whose locals are named elsewhere, or of another shape, stays as it was.
+#[test]
+fn a_choice_that_is_not_only_a_template_binding_stays() {
+    let mut named = chosen_template_binding(0, 34);
+    named.push("    use_value(&value_0);".to_string());
+    let kept = with_resolved_template_bindings(true, || resolve_template_bindings(named.clone(), Some(TEMPLATE_BINDING)));
+    assert_eq!(kept, named);
+    let mut other = chosen_template_binding(1, 40);
+    other[1] = "    let priority_1 = ::ferroui_base::data::BindingPriority::Style;".to_string();
+    let kept = with_resolved_template_bindings(true, || resolve_template_bindings(other.clone(), Some(TEMPLATE_BINDING)));
+    assert_eq!(kept, other);
+    // Without the path of the class nothing is resolved.
+    let lines = chosen_template_binding(2, 41);
+    assert_eq!(with_resolved_template_bindings(true, || resolve_template_bindings(lines.clone(), None)), lines);
+}
+
 #[test]
 fn typed_theme_program_emits_local_imports_and_preserves_native_value_bodies() {
     let theme = parse_theme(&button_factory(), THEME_RETURNED).expect("complete factory");

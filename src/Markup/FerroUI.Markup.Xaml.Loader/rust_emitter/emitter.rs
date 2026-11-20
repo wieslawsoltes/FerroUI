@@ -70,7 +70,7 @@ pub(crate) mod theme_rows;
 /// Control themes, selector chains, resource setter choices and template bindings written as
 /// tables (#568, step 5).
 #[path = "theme_styles.rs"]
-mod theme_styles;
+pub(crate) mod theme_styles;
 
 #[path = "selector_visitor.rs"]
 mod selector_visitor;
@@ -999,6 +999,9 @@ struct Emitter<'a> {
     /// The tables of control themes and template bindings and the items they share (#568,
     /// [`theme_styles`]).
     theme_styles: theme_styles::StylePool,
+    /// The theme dictionaries the body assigned a key outside every unit (#853,
+    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]), by the local that holds them.
+    keyed_theme_dictionaries: HashSet<String>,
 }
 
 struct ScopedNamespaceTable {
@@ -1037,6 +1040,36 @@ impl<'a> Emitter<'a> {
 
     fn line(&mut self, text: String) {
         self.lines.push(format!("    {text}"));
+    }
+
+    /// The unit of `assignment` when it is the key a merged theme dictionary assigns again to the
+    /// theme dictionary `target` it was merged into (#853, with
+    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]): an assignment of
+    /// `IThemeVariantProvider.Key` in the body of the function of the document, recorded as an
+    /// entry of a unit, to a dictionary the body assigned a key outside every unit before. The
+    /// merge joins only theme dictionaries with equal keys, so it writes the key the dictionary
+    /// has. Any other key assignment of a theme dictionary is recorded as its first.
+    fn theme_key_reassignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        target: &Typed<'a>,
+    ) -> Option<u32> {
+        let plan = theme_units::ThemeUnitPlan::current();
+        if !plan.keys_in_runs() || self.deferred_depth != 0 || assignment.property.name() != "Key" {
+            return None;
+        }
+        if assignment.property.declaring_type.borrow().full_name() != "FerroUI.Controls.IThemeVariantProvider" {
+            return None;
+        }
+        let unit = self.documents.units().and_then(|units| units.unit_of(node));
+        match unit {
+            Some(unit) if self.keyed_theme_dictionaries.contains(&target.expr) => Some(unit),
+            _ => {
+                self.keyed_theme_dictionaries.insert(target.expr.clone());
+                None
+            }
+        }
     }
 
     /// The position marker of 9.3.6: `// <document>(line,position) <what>`.
@@ -2182,7 +2215,15 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlPropertyAssignmentNode>() {
             self.assignments.push(n.clone());
+            // The key a merged theme dictionary assigns again is an entry of its unit (#853).
+            let unit = self.theme_key_reassignment(node, &n, target);
+            if let Some(unit) = unit {
+                self.lines.push(theme_units::begin_marker(unit));
+            }
             let result = self.property_assignment(node, &n, target);
+            if unit.is_some() {
+                self.lines.push(format!("    {}", theme_units::END_MARKER));
+            }
             self.assignments.pop();
             return result;
         }
@@ -3403,10 +3444,14 @@ impl<'a> Emitter<'a> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
         let body_lines = self.apply_row_runs(body_lines, |_, _| {});
-        // Runs of template bindings on one object, as tables (#568, step 5).
+        // Runs of template bindings on one object, as tables (#568, step 5), after the template
+        // bindings whose setter is chosen at run time are resolved (#854, off by default). The
+        // typed backend encodes those choices itself, so the native forms are left to it.
         let body_lines = if self.documents.backend.uses_construction_programs() {
             body_lines
         } else {
+            let template_binding = self.types.framework_path(FrameworkType::TemplateBinding).map(|path| absolute(&path));
+            let body_lines = theme_styles::resolve_template_bindings(body_lines, template_binding.as_deref());
             let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
             // And runs of dynamic resources on one object (#568).
             theme_styles::dynamic_resource_runs(&mut self.theme_styles, body_lines)
@@ -5467,6 +5512,7 @@ pub fn emit_function<'a>(
         resolved_calls: Default::default(),
         row_tables: Vec::new(),
         deferred_depth: 0,
+        keyed_theme_dictionaries: HashSet::new(),
         theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
