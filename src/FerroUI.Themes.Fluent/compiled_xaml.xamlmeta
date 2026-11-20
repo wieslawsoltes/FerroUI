@@ -44,11 +44,11 @@
         {
           "name": "ambient",
           "index": 0,
-          "documents": ["FluentTheme.xaml", "Accents/BaseColorsPalette.xaml", "DensityStyles/Compact.xaml", "Controls/FluentControls.xaml", "Controls/AdornerLayer.xaml", "Controls/OverlayPopupHost.xaml", "Controls/PopupRoot.xaml", "Controls/Window.xaml", "Controls/WindowDrawnDecorations.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/RefreshVisualizer.xaml", "Controls/ThemeVariantScope.xaml"],
-          "keys": ["ButtonPadding", "ButtonSpinnerPadding", "CalendarButtonMinHeight", "CalendarButtonMinWidth", "CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonHeight", "CaptionButtonWidth", "CheckBoxMinHeight", "CheckBoxPadding", "ComboBoxEditableTextPadding", "ComboBoxItemThemePadding", "ComboBoxMinHeight", "ComboBoxPadding", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarPadding", "CommandBarSeparatorMinHeight", "CommandBarToggleButtonPadding", "CompactStyles", "ControlContentThemeFontSize", "DatePickerHostMonthPadding", "DatePickerHostPadding", "FluentDrawnCaptionButton", "ListBoxItemPadding", "MenuBarItemPadding", "MenuFlyoutItemThemePaddingNarrow", "NavigationViewItemOnLeftMinHeight", "PipsPagerNavigationButtonSize", "RadioButtonMinHeight", "RadioButtonPadding", "SystemAltHighColor", "SystemAltLowColor", "SystemAltMediumColor", "SystemAltMediumHighColor", "SystemAltMediumLowColor", "SystemBaseHighColor", "SystemBaseLowColor", "SystemBaseMediumColor", "SystemBaseMediumHighColor", "SystemBaseMediumLowColor", "SystemChromeAltLowColor", "SystemChromeBlackHighColor", "SystemChromeBlackLowColor", "SystemChromeBlackMediumColor", "SystemChromeBlackMediumLowColor", "SystemChromeDisabledHighColor", "SystemChromeDisabledLowColor", "SystemChromeGrayColor", "SystemChromeHighColor", "SystemChromeLowColor", "SystemChromeMediumColor", "SystemChromeMediumLowColor", "SystemChromeWhiteColor", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryThickness", "SystemErrorTextColor", "SystemListLowColor", "SystemListMediumColor", "SystemRegionColor", "SystemRevealListLowColor", "SystemRevealListMediumColor", "TabItemHeaderMargin", "TabItemMinHeight", "TableViewCellPadding", "TableViewColumnResizerMargin", "TableViewColumnResizerWidth", "TableViewRowPadding", "TextControlThemeMinHeight", "TextControlThemeMinWidth", "TextControlThemePadding", "TimePickerHostPadding", "TreeViewItemMinHeight", "WindowDrawnDecorationsWindowBorderBoxShadow"],
-          "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "ThemeVariantScope", "Window", "WindowDrawnDecorations"],
-          "references": ["CaptionButtonBackground", "CaptionButtonBorderBrush", "CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonForeground", "CaptionButtonHeight", "CaptionButtonWidth", "ContentControlThemeFontFamily", "ControlContentThemeFontSize", "FluentDrawnCaptionButton", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "RefreshVisualizerIndicatorSize", "SystemControlBackgroundAltHighBrush", "SystemControlBackgroundChromeMediumLowBrush", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryBrush", "SystemControlFocusVisualSecondaryThickness", "SystemControlForegroundBaseHighBrush", "SystemControlForegroundBaseMediumBrush", "SystemControlTransparentBrush", "SystemRegionBrush", "TitleBarBackgroundBrush", "WindowDrawnDecorationsWindowBorderBoxShadow"],
-          "types": ["AdornerLayer", "Border", "BoxShadows", "Button", "Color", "ColorPaletteResourcesCollection", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "LayoutTransformControl", "MergeResourceInclude", "OverlayPopupHost", "Panel", "Path", "PathIcon", "PopupRoot", "RefreshVisualizer", "ResourceDictionary", "ResourceInclude", "RotateTransform", "Setter", "SolidColorBrush", "StackPanel", "Style", "StyleInclude", "Styles", "SystemAccentColors", "Template", "TextBlock", "ThemeVariantScope", "Thickness", "Viewbox", "VisualLayerManager", "Window", "WindowDrawnDecorations", "WindowDrawnDecorationsContent", "WindowDrawnDecorationsTemplate"]
+          "documents": ["FluentTheme.xaml", "Accents/BaseColorsPalette.xaml", "DensityStyles/Compact.xaml", "Controls/FluentControls.xaml", "Controls/AdornerLayer.xaml", "Controls/OverlayPopupHost.xaml", "Controls/PopupRoot.xaml", "Controls/Window.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/RefreshVisualizer.xaml", "Controls/ThemeVariantScope.xaml"],
+          "keys": ["ButtonPadding", "ButtonSpinnerPadding", "CalendarButtonMinHeight", "CalendarButtonMinWidth", "CheckBoxMinHeight", "CheckBoxPadding", "ComboBoxEditableTextPadding", "ComboBoxItemThemePadding", "ComboBoxMinHeight", "ComboBoxPadding", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarPadding", "CommandBarSeparatorMinHeight", "CommandBarToggleButtonPadding", "CompactStyles", "ControlContentThemeFontSize", "DatePickerHostMonthPadding", "DatePickerHostPadding", "ListBoxItemPadding", "MenuBarItemPadding", "MenuFlyoutItemThemePaddingNarrow", "NavigationViewItemOnLeftMinHeight", "PipsPagerNavigationButtonSize", "RadioButtonMinHeight", "RadioButtonPadding", "SystemAltHighColor", "SystemAltLowColor", "SystemAltMediumColor", "SystemAltMediumHighColor", "SystemAltMediumLowColor", "SystemBaseHighColor", "SystemBaseLowColor", "SystemBaseMediumColor", "SystemBaseMediumHighColor", "SystemBaseMediumLowColor", "SystemChromeAltLowColor", "SystemChromeBlackHighColor", "SystemChromeBlackLowColor", "SystemChromeBlackMediumColor", "SystemChromeBlackMediumLowColor", "SystemChromeDisabledHighColor", "SystemChromeDisabledLowColor", "SystemChromeGrayColor", "SystemChromeHighColor", "SystemChromeLowColor", "SystemChromeMediumColor", "SystemChromeMediumLowColor", "SystemChromeWhiteColor", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryThickness", "SystemErrorTextColor", "SystemListLowColor", "SystemListMediumColor", "SystemRegionColor", "SystemRevealListLowColor", "SystemRevealListMediumColor", "TabItemHeaderMargin", "TabItemMinHeight", "TableViewCellPadding", "TableViewColumnResizerMargin", "TableViewColumnResizerWidth", "TableViewRowPadding", "TextControlThemeMinHeight", "TextControlThemeMinWidth", "TextControlThemePadding", "TimePickerHostPadding", "TreeViewItemMinHeight"],
+          "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"],
+          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "RefreshVisualizerIndicatorSize", "SystemControlBackgroundAltHighBrush", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryBrush", "SystemControlFocusVisualSecondaryThickness", "SystemControlForegroundBaseHighBrush", "SystemRegionBrush"],
+          "types": ["AdornerLayer", "Border", "Color", "ColorPaletteResourcesCollection", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "LayoutTransformControl", "MergeResourceInclude", "OverlayPopupHost", "Panel", "PathIcon", "PopupRoot", "RefreshVisualizer", "ResourceDictionary", "ResourceInclude", "Setter", "StyleInclude", "Styles", "SystemAccentColors", "Template", "ThemeVariantScope", "Thickness", "VisualLayerManager", "Window"]
         },
         {
           "name": "Accents/BaseResources.xaml",
@@ -591,8 +591,17 @@
           "types": ["ControlTemplate", "ControlTheme", "DataTemplate", "ResourceDictionary", "ReversibleStackPanel", "Setter", "StackPanel", "Style", "TextBlock", "WindowNotificationManager"]
         },
         {
-          "name": "Controls/ComboBox.xaml",
+          "name": "Controls/WindowDrawnDecorations.xaml",
           "index": 61,
+          "documents": ["Controls/WindowDrawnDecorations.xaml"],
+          "keys": ["CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonHeight", "CaptionButtonWidth", "FluentDrawnCaptionButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "type_keys": ["WindowDrawnDecorations"],
+          "references": ["CaptionButtonBackground", "CaptionButtonBorderBrush", "CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonForeground", "CaptionButtonHeight", "CaptionButtonWidth", "FluentDrawnCaptionButton", "SystemControlBackgroundChromeMediumLowBrush", "SystemControlForegroundBaseMediumBrush", "SystemControlTransparentBrush", "TitleBarBackgroundBrush", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "types": ["Border", "BoxShadows", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "ResourceDictionary", "RotateTransform", "Setter", "SolidColorBrush", "StackPanel", "Style", "TextBlock", "Viewbox", "WindowDrawnDecorations", "WindowDrawnDecorationsContent", "WindowDrawnDecorationsTemplate"]
+        },
+        {
+          "name": "Controls/ComboBox.xaml",
+          "index": 62,
           "documents": ["Controls/ComboBox.xaml"],
           "keys": ["ComboBoxEditableTextPadding", "ComboBoxMinHeight", "ComboBoxPadding", "ComboBoxPopupMaxNumberOfItems", "ComboBoxPopupMaxNumberOfItemsThatCanBeShownOnOneSide", "ComboBoxTopHeaderMargin"],
           "type_keys": ["ComboBox"],
@@ -601,7 +610,7 @@
         },
         {
           "name": "Controls/ComboBoxItem.xaml",
-          "index": 62,
+          "index": 63,
           "documents": ["Controls/ComboBoxItem.xaml"],
           "keys": [],
           "type_keys": ["ComboBoxItem"],
@@ -610,7 +619,7 @@
         },
         {
           "name": "Controls/ContextMenu.xaml",
-          "index": 63,
+          "index": 64,
           "documents": ["Controls/ContextMenu.xaml"],
           "keys": ["MenuFlyoutScrollerMargin"],
           "type_keys": ["ContextMenu"],
@@ -619,7 +628,7 @@
         },
         {
           "name": "Controls/DataValidationErrors.xaml",
-          "index": 64,
+          "index": 65,
           "documents": ["Controls/DataValidationErrors.xaml"],
           "keys": ["TooltipDataValidationErrors"],
           "type_keys": ["DataValidationErrors"],
@@ -628,7 +637,7 @@
         },
         {
           "name": "Controls/DateTimePickerShared.xaml",
-          "index": 65,
+          "index": 66,
           "documents": ["Controls/DateTimePickerShared.xaml"],
           "keys": ["FluentDateTimePickerButton", "FluentDateTimePickerDownButton", "FluentDateTimePickerItem", "FluentDateTimePickerUpButton"],
           "type_keys": [],
@@ -637,7 +646,7 @@
         },
         {
           "name": "Controls/DatePicker.xaml",
-          "index": 66,
+          "index": 67,
           "documents": ["Controls/DatePicker.xaml"],
           "keys": ["DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DatePickerHostMonthPadding", "DatePickerHostPadding", "DatePickerSpacerThemeWidth", "DatePickerThemeMaxWidth", "DatePickerThemeMinWidth", "FluentDatePickerFlyoutButton"],
           "type_keys": ["DatePicker", "DatePickerPresenter"],
@@ -646,7 +655,7 @@
         },
         {
           "name": "Controls/TimePicker.xaml",
-          "index": 67,
+          "index": 68,
           "documents": ["Controls/TimePicker.xaml"],
           "keys": ["FluentTimePickerFlyoutButton", "TimePickerBorderThemeThickness", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerFlyoutPresenterItemPadding", "TimePickerHostPadding", "TimePickerSpacerThemeWidth", "TimePickerThemeMaxWidth", "TimePickerThemeMinWidth"],
           "type_keys": ["TimePicker", "TimePickerPresenter"],
@@ -655,7 +664,7 @@
         },
         {
           "name": "Controls/DropDownButton.xaml",
-          "index": 68,
+          "index": 69,
           "documents": ["Controls/DropDownButton.xaml"],
           "keys": ["DropDownButtonMinHeight"],
           "type_keys": ["DropDownButton"],
@@ -664,7 +673,7 @@
         },
         {
           "name": "Controls/Slider.xaml",
-          "index": 69,
+          "index": 70,
           "documents": ["Controls/Slider.xaml"],
           "keys": ["FluentSliderHorizontalRepeatButton", "FluentSliderThumbTheme", "FluentSliderVerticalRepeatButton", "SliderHorizontalHeight", "SliderHorizontalThumbHeight", "SliderHorizontalThumbWidth", "SliderPostContentMargin", "SliderPreContentMargin", "SliderThumbCornerRadius", "SliderTopHeaderMargin", "SliderVerticalThumbHeight", "SliderVerticalThumbWidth", "SliderVerticalWidth"],
           "type_keys": ["Slider"],
@@ -673,7 +682,7 @@
         },
         {
           "name": "Controls/ManagedFileChooser.xaml",
-          "index": 70,
+          "index": 71,
           "documents": ["Controls/ManagedFileChooser.xaml"],
           "keys": ["ManagedFileChooserQuickLinksBoxShadow"],
           "type_keys": ["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"],
@@ -682,7 +691,7 @@
         },
         {
           "name": "Controls/SelectableTextBlock.xaml",
-          "index": 71,
+          "index": 72,
           "documents": ["Controls/SelectableTextBlock.xaml"],
           "keys": ["SelectableTextBlockContextFlyout"],
           "type_keys": ["SelectableTextBlock"],
@@ -691,7 +700,7 @@
         },
         {
           "name": "Controls/RefreshContainer.xaml",
-          "index": 72,
+          "index": 73,
           "documents": ["Controls/RefreshContainer.xaml"],
           "keys": [],
           "type_keys": ["RefreshContainer"],
@@ -700,7 +709,7 @@
         },
         {
           "name": "Controls/HeaderedContentControl.xaml",
-          "index": 73,
+          "index": 74,
           "documents": ["Controls/HeaderedContentControl.xaml"],
           "keys": [],
           "type_keys": ["HeaderedContentControl"],
@@ -709,7 +718,7 @@
         },
         {
           "name": "Controls/TextSelectionHandle.xaml",
-          "index": 74,
+          "index": 75,
           "documents": ["Controls/TextSelectionHandle.xaml"],
           "keys": ["TextCaretHandleDrawing", "TextCaretHandlePath", "TextSelectHandleSize", "TextSelectionHandleDrawing", "TextSelectionHandlePath"],
           "type_keys": ["TextSelectionHandle"],
