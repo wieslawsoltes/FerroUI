@@ -29,6 +29,9 @@ mod layout;
 #[path = "preview_stage_manifest.rs"]
 mod manifest;
 pub use manifest::{PreviewStageDetails, PreviewStageManifest, PreviewStageSet, PreviewStageSnapshot, PreviewStageSpec};
+#[path = "preview_stage_source_moves.rs"]
+mod source_moves;
+pub use source_moves::PreviewStageSourceMoves;
 #[path = "preview_stage_prototype_elements.rs"]
 mod prototype_elements;
 use layout::StageLayoutHost;
@@ -520,6 +523,26 @@ impl PreviewStageBoard {
         options_epoch: u64,
         local_includes: &BTreeMap<&str, &LocalPreviewSources>,
     ) -> Result<(), String> {
+        self.sync_sources_after_move(
+            active_uri,
+            sources,
+            options,
+            options_epoch,
+            local_includes,
+            &PreviewStageSourceMoves::default(),
+        )
+    }
+
+    /// Move stage source bindings after validating the next source snapshots.
+    pub fn sync_sources_after_move(
+        &mut self,
+        active_uri: &str,
+        sources: Vec<PreviewStageSource>,
+        options: PreviewHostOptions,
+        options_epoch: u64,
+        local_includes: &BTreeMap<&str, &LocalPreviewSources>,
+        moves: &PreviewStageSourceMoves,
+    ) -> Result<(), String> {
         validate_uri(active_uri)?;
         let mut next = BTreeMap::new();
         for mut source in sources {
@@ -530,6 +553,7 @@ impl PreviewStageBoard {
             }
         }
         let includes = IncludeCatalogs::new(&next, local_includes, options_epoch)?;
+        self.retarget_sources(moves);
         let active_changed = self.active_uri != active_uri;
         let sources_changed = self.sources.len() != next.len()
             || next.iter().any(|(uri, source)| {
@@ -842,35 +866,6 @@ impl PreviewStageBoard {
 
     pub fn restore(&mut self, snapshot: PreviewStageSnapshot) -> Result<(), String> {
         self.restore_manifest(snapshot)
-    }
-
-    /// Call after a successful Save As, before synchronizing the new URI snapshots.
-    /// The old graph stays visible but immediately loses source-selection authority.
-    pub fn retarget_source(&mut self, old_uri: &str, new_uri: &str) -> Result<(), String> {
-        validate_uri(new_uri)?;
-        if old_uri == new_uri {
-            return Ok(());
-        }
-        let mut changed = Vec::new();
-        for (index, stage) in self.stages.iter_mut().enumerate() {
-            if stage.spec.configuration.source_uri == old_uri {
-                stage.spec.configuration.source_uri = new_uri.into();
-                stage.observed = None;
-                stage.status = PreviewStageStatus::MissingDocument;
-                stage.epoch = stage
-                    .epoch
-                    .checked_add(1)
-                    .expect("Preview stage epoch exhausted");
-                changed.push(index);
-            }
-        }
-        if !changed.is_empty() {
-            for index in changed {
-                self.apply_mode(index);
-            }
-            self.bump();
-        }
-        Ok(())
     }
 
     pub fn runtime_tree(

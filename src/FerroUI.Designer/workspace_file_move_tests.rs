@@ -228,12 +228,16 @@ fn studio_move_persists_saved_design_references_and_replays_them_from_source_his
     let old = files.uri("Customer.xaml");
     let destination = "Archive/Customer & notes.xaml";
     let next = files.uri(destination);
+    let configuration = crate::PreviewStageConfiguration::new(
+        "Customer review", &old, crate::PreviewEnvironment::default()
+    );
+    let id = workspace.add_preview_stage(configuration.clone()).unwrap();
+    let initial = workspace.preview_stage(id).unwrap();
     let stage_path = files.0.join("Review.ferrostages");
     let scenario_path = files.0.join("Review.ferroui-scenario.json");
     let stage = serde_json::to_string_pretty(&json!({
-        "version":3, "active":0, "stages":[json!(crate::PreviewStageConfiguration::new(
-            "Customer review", &old, crate::PreviewEnvironment::default()
-        ))], "prototype":{"flows":[{"name":"Review","start":0}],"links":[]}
+        "version":3, "active":0, "stages":[configuration],
+        "prototype":{"flows":[{"name":"Review","start":0}],"links":[]}
     })).unwrap();
     let scenario = serde_json::to_string_pretty(&json!({
         "version":1,"name":"Review customer", "document":"./Customer.xaml",
@@ -245,6 +249,10 @@ fn studio_move_persists_saved_design_references_and_replays_them_from_source_his
     let plan = workspace.plan_project_file_move(destination).unwrap();
     assert_eq!(plan.documents.len(), 3);
     workspace.apply_project_file_move(destination, &plan.review).unwrap();
+    let moved = workspace.preview_stage(id).unwrap();
+    assert_eq!(moved.configuration.source_uri, next);
+    assert!(moved.epoch > initial.epoch);
+    assert!(matches!(moved.status, crate::PreviewStageStatus::Ready { .. }));
     let changed_stage = stage.replace(&old, &next);
     let changed_scenario = scenario.replace(&old, &next).replace("Customer.xaml", destination);
     assert_eq!(fs::read_to_string(&stage_path).unwrap(), changed_stage);
@@ -260,16 +268,25 @@ fn studio_move_persists_saved_design_references_and_replays_them_from_source_his
     fs::rename(&scenario_path, &retained).unwrap();
     fs::write(&scenario_path, "External scenario replacement").unwrap();
     assert!(history("designer_undo").is_err());
+    let retained_stage = workspace.preview_stage(id).unwrap();
+    assert_eq!(retained_stage.epoch, moved.epoch);
+    assert_eq!(retained_stage.configuration.source_uri, next);
     assert!(files.0.join(destination).is_file());
     assert_eq!(fs::read_to_string(&stage_path).unwrap(), changed_stage);
     assert_eq!(fs::read_to_string(&scenario_path).unwrap(), "External scenario replacement");
     fs::remove_file(&scenario_path).unwrap();
     fs::rename(&retained, &scenario_path).unwrap();
     history("designer_undo").unwrap();
+    let restored = workspace.preview_stage(id).unwrap();
+    assert_eq!(restored.configuration.source_uri, old);
+    assert!(restored.epoch > moved.epoch);
     assert!(files.0.join("Customer.xaml").is_file());
     assert_eq!(fs::read_to_string(&stage_path).unwrap(), stage);
     assert_eq!(fs::read_to_string(&scenario_path).unwrap(), scenario);
     history("designer_redo").unwrap();
+    let reapplied = workspace.preview_stage(id).unwrap();
+    assert_eq!(reapplied.configuration.source_uri, next);
+    assert!(reapplied.epoch > restored.epoch);
     assert!(files.0.join(destination).is_file());
     assert_eq!(fs::read_to_string(&scenario_path).unwrap(), changed_scenario);
 }

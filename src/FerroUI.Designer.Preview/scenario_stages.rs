@@ -194,5 +194,6 @@ fn resolve_sources(
         manifest: Some(manifest),
         additional: documents.into_values().map(scoped).collect(),
         local_sources: Vec::new(),
+        source_moves: Default::default(),
     })
 }

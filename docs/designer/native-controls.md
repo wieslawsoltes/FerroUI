@@ -81,6 +81,8 @@ Open an XAML file from the owning project. In **Split** or **Code**, choose the 
 
 **Apply file move** transfers the file, writes the reviewed stage sets and scenarios, and updates the participating source buffers. Save the buffers to persist their new references. Undo or Redo from a participating XAML or Rust tab restores the matching location, source edits, and saved reference files as one operation. Studio checks the saved files for external changes when replaying history. [Supported paths and VS Code workflow](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
+An open **Preview Stages** card follows its source through the move, Undo, and Redo. The board keeps its card configuration and prototype links. A paused card holds its image until you refresh it or turn updates on.
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

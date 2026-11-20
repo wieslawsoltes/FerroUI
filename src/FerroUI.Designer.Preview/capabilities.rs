@@ -13,6 +13,7 @@ pub(crate) fn initialize() -> Value {
         "stageKeyboard",
         "prototypeEditing",
         "stageIncludes",
+        "stageSourceMoves",
         "projectCatalog",
         "canvasInteraction",
         "canvasFocusOrder",

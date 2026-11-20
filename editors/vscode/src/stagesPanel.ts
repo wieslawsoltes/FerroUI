@@ -1,15 +1,15 @@
 import { Buffer } from 'node:buffer';
-import { pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
-import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { DesignerDependencies, dirtyXamlSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
+import { sameStageSource, stageUsesSource, retargetStageManifest, type StageFileMove } from './stageSourceMoves';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { stagesHtml, webviewOptions } from './view';
@@ -19,7 +19,7 @@ const stageView = 'ferroui.stages';
 
 export class StagesPanel implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
-    private readonly views = new Map<string, StageSession>();
+    private readonly views = new Set<StageSession>();
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects) {
@@ -27,6 +27,12 @@ export class StagesPanel implements vscode.Disposable {
         const fileChanged = (uri: vscode.Uri) => this.views.forEach(session => session.fileChanged(uri));
         this.subscriptions = [
             xaml, xaml.onDidChange(fileChanged), xaml.onDidCreate(fileChanged), xaml.onDidDelete(fileChanged),
+            vscode.workspace.onDidRenameFiles(event => {
+                for (const move of event.files) {
+                    if (!xamlPath(move.oldUri) || !xamlPath(move.newUri) || !vscode.workspace.getWorkspaceFolder(move.newUri)) continue;
+                    this.views.forEach(session => session.followMove(move));
+                }
+            }),
             vscode.commands.registerCommand('ferroui.openStages', () => {
                 const editor = vscode.window.activeTextEditor;
                 if (!editor || !languageOf(editor.document)) {
@@ -40,7 +46,7 @@ export class StagesPanel implements vscode.Disposable {
                     const serialized = state as { uri?: unknown } | undefined;
                     if (typeof serialized?.uri !== 'string') { panel.dispose(); return; }
                     const uri = vscode.Uri.parse(serialized.uri, true);
-                    if (!await isWorkspaceFile(uri) || this.views.has(uri.toString())) { panel.dispose(); return; }
+                    if (!await isWorkspaceFile(uri) || this.find(uri)) { panel.dispose(); return; }
                     this.attach(panel, await vscode.workspace.openTextDocument(uri), new vscode.Position(0, 0));
                 } catch { panel.dispose(); }
             } }),
@@ -48,7 +54,7 @@ export class StagesPanel implements vscode.Disposable {
     }
 
     open(document: vscode.TextDocument, caret: vscode.Position): StageSession {
-        const previous = this.views.get(document.uri.toString());
+        const previous = this.find(document.uri);
         if (previous) { previous.panel.reveal(); return previous; }
         const panel = vscode.window.createWebviewPanel(stageView, `Stages · ${path.basename(document.fileName)}`,
             { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
@@ -57,17 +63,20 @@ export class StagesPanel implements vscode.Disposable {
     }
 
     board(uri: vscode.Uri): StageSession {
-        const board = this.views.get(uri.toString());
+        const board = this.find(uri);
         if (!board) throw new Error('Open Stages for this design first.');
         return board;
     }
 
     private attach(panel: vscode.WebviewPanel, document: vscode.TextDocument, caret: vscode.Position): StageSession {
-        const key = document.uri.toString();
         const session = new StageSession(panel, document, caret, this.context, this.output, this.projects);
-        this.views.set(key, session);
-        panel.onDidDispose(() => this.views.delete(key));
+        this.views.add(session);
+        panel.onDidDispose(() => this.views.delete(session));
         return session;
+    }
+
+    private find(uri: vscode.Uri): StageSession | undefined {
+        return [...this.views].find(session => sameStageSource(session.uri, uri));
     }
 
     dispose(): void {
@@ -80,7 +89,10 @@ class StageSession {
     private readonly dependencies = new DesignerDependencies();
     private readonly inputImages = new Map<number, ReturnType<typeof setTimeout>>();
     private readonly subscriptions: vscode.Disposable[];
-    private readonly cacheKey: string;
+    private cacheKey: string;
+    private primary: vscode.Uri;
+    private readonly sourceMoves: StageFileMove[] = [];
+    private nativeManifest?: StageManifest;
     private client?: Promise<NativePreview>;
     private model?: StageModel;
     private modelVersion?: number;
@@ -92,10 +104,11 @@ class StageSession {
     private disposed = false;
     private manifest?: StageManifest;
 
-    constructor(readonly panel: vscode.WebviewPanel, private readonly document: vscode.TextDocument,
+    constructor(readonly panel: vscode.WebviewPanel, private document: vscode.TextDocument,
         private readonly caret: vscode.Position, private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects) {
-        this.cacheKey = `ferroui.stages:${document.uri.toString()}`;
+        this.primary = document.uri;
+        this.cacheKey = `ferroui.stages:${this.primary.toString()}`;
         this.manifest = context.workspaceState.get<StageManifest>(this.cacheKey);
         this.subscriptions = [
             panel.onDidDispose(() => this.dispose()),
@@ -107,9 +120,7 @@ class StageSession {
             vscode.workspace.onDidChangeTextDocument(event => {
                 const language = languageOf(event.document);
                 if (!language || !event.contentChanges.length) return;
-                const uri = pathToFileURL(event.document.uri.fsPath).toString();
-                const dependency = this.dependencies.change(event.document.uri);
-                if (dependency || event.document === document || this.model?.manifest.stages.some(stage => stage.source_uri === uri)) this.schedule();
+                this.fileChanged(event.document.uri);
             }),
             vscode.workspace.onDidCloseTextDocument(closed => { if (closed.isDirty) this.fileChanged(closed.uri); }),
         ];
@@ -117,8 +128,25 @@ class StageSession {
         panel.webview.html = stagesHtml(panel.webview, context.extensionUri);
     }
 
+    get uri(): vscode.Uri { return this.primary; }
+
+    followMove(move: StageFileMove): void {
+        const primary = sameStageSource(this.primary, move.oldUri);
+        if (!primary && !this.busy && !this.usesSource(move.oldUri)) return;
+        if (primary) {
+            this.primary = move.newUri;
+            this.panel.title = `Stages · ${path.basename(this.primary.fsPath)}`;
+        }
+        this.sourceMoves.push(move);
+        this.schedule();
+    }
+
+    private usesSource(uri: vscode.Uri): boolean {
+        return stageUsesSource(this.manifest ?? this.nativeManifest, uri, this.sourceMoves);
+    }
+
     fileChanged(uri: vscode.Uri): void {
-        if (this.dependencies.change(uri)) this.schedule();
+        if (this.dependencies.change(uri) || sameStageSource(this.primary, uri) || this.usesSource(uri)) this.schedule();
     }
 
     async wait(signal: AbortSignal): Promise<StageModel> {
@@ -215,8 +243,8 @@ class StageSession {
             signal.throwIfAborted();
             if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
             const model = await client.editStages(request);
+            this.nativeManifest = model.manifest;
             if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
-            if (generation !== this.generation && !this.manifest) this.manifest = model.manifest;
             await this.publish(model, client, generation);
             return model;
         } finally {
@@ -263,24 +291,38 @@ class StageSession {
     private async sync(): Promise<void> {
         if (this.busy || this.disposed) return;
         const generation = this.generation;
-        const language = languageOf(this.document);
-        if (!language) return;
+        const uri = this.primary;
         this.busy = true;
         this.dependencies.start();
         try {
             const client = await this.getClient();
-            const manifest = this.manifest;
-            const source = await client.inProject(sourceOf(this.document, language, this.document.validatePosition(this.caret)),
-                this.projects.forDocument(this.document.uri));
-            const active = stageDocument(source, this.document.uri);
-            const additional = await this.stageSources(manifest ?? this.model?.manifest, active.uri, client);
+            const retargeted = this.document.uri.toString() !== uri.toString();
+            if (retargeted && !await isWorkspaceFile(uri)) throw new Error('Open the moved stage source inside its workspace.');
+            const document = !retargeted && !this.document.isClosed
+                ? this.document : await vscode.workspace.openTextDocument(uri);
+            if (generation !== this.generation || this.disposed) return;
+            const language = languageOf(document);
+            if (!language) throw new Error('Open a FerroUI XAML or Rust source for this Stages board.');
+            const pending = this.manifest;
+            const moveCount = this.sourceMoves.length;
+            const { manifest, bindings } = retargetStageManifest(pending ?? this.nativeManifest, this.sourceMoves);
+            const replaceBoard = pending !== undefined || (bindings !== undefined && !client.capabilities.stageSourceMoves);
+            const source = await client.inProject(sourceOf(document, language, document.validatePosition(this.caret)),
+                this.projects.forDocument(uri));
+            const active = stageDocument(source, uri);
+            const additional = await this.stageSources(manifest, active.uri, client);
             const localSources = client.capabilities.stageIncludes
-                ? dirtyXamlSources([this.document.uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
-            const model = await client.syncStages(active, manifest, additional, localSources);
+                ? dirtyXamlSources([uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
+            if (generation !== this.generation || this.disposed) return;
+            const model = await client.syncStages(active, replaceBoard ? manifest : undefined, additional, localSources,
+                replaceBoard ? undefined : bindings);
+            this.document = document;
+            this.nativeManifest = model.manifest;
+            this.sourceMoves.splice(0, moveCount);
+            if (pending === this.manifest) this.manifest = undefined;
             if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
-            if (manifest === this.manifest) this.manifest = undefined;
             await this.publish(model, client, generation);
-        } catch (error) { this.report(error); }
+        } catch (error) { if (generation === this.generation) this.report(error); }
         finally {
             this.dependencies.stop();
             this.busy = false;
@@ -294,7 +336,12 @@ class StageSession {
         this.model = model;
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
-        await this.context.workspaceState.update(this.cacheKey, model.manifest);
+        const key = `ferroui.stages:${this.document.uri.toString()}`;
+        await this.context.workspaceState.update(key, model.manifest);
+        if (this.cacheKey !== key) {
+            await this.context.workspaceState.update(this.cacheKey, undefined);
+            this.cacheKey = key;
+        }
         if (generation !== this.generation || this.model !== model || this.disposed) return;
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
         for (const stage of model.stages) {

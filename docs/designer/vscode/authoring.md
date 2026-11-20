@@ -166,6 +166,8 @@ The action moves the whole inline dictionary, including comments, namespace alia
 
 Apply moves the file and updates the participating buffers together. An open **Design** tab follows the file and keeps its last frame visible while rendering the new source location. Undo or Redo from an affected editor steps through the whole operation. Use **Save All** before building the app or running a saved scenario. If the destination becomes occupied or a file changes during the review, prepare a new review.
 
+Open **Stages** boards follow the file in either direction, including when it appears as a secondary comparison source. A board named for the moved file updates its tab title. The bundled preview helper keeps each card, its environment, and prototype links intact. A paused card keeps its current image until you refresh it or resume updates. [Compare designs in Stages](motion.md#compare-design-data-and-environments)
+
 The planner follows literal XAML includes, typed URI and image properties, and complete `ferres://` or `resm:` addresses it can resolve. In Rust, it updates the literal paths in `include_str!` and `include_bytes!`, including paths anchored with `concat!(env!("CARGO_MANIFEST_DIR"), "/…")`. Open Rust and XAML buffers contribute their unsaved text to the review.
 
 In the selected Cargo build target, the review can update `Build::input`, Cargo rerun directives, and the registration keys in `XamlGroup::documents` and `class_document` that directly identify the moved file. Rust includes keep the filesystem spelling. Compiled registration keys follow their XAML root and use URI escapes such as `%20` for a space. Review computed paths, custom logical aliases, and references to generated build functions in source.

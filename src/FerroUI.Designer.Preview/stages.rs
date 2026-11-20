@@ -11,7 +11,7 @@ use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
     PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
-    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageMode, PreviewStageStateOptions,
+    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
@@ -38,6 +38,8 @@ pub(crate) struct Sync {
     pub(crate) additional: Vec<StageDocument>,
     #[serde(default, rename = "localSources")]
     pub(crate) local_sources: Vec<PreviewSourceBuffer>,
+    #[serde(default, rename = "sourceMoves")]
+    pub(crate) source_moves: BTreeMap<String, String>,
 }
 
 #[derive(Deserialize)]
@@ -127,6 +129,10 @@ impl Stages {
         if request.additional.len() >= ferroui_designer::MAX_PREVIEW_STAGES {
             return Err("Open at most 16 preview documents".into());
         }
+        if let Some(manifest) = &request.manifest {
+            manifest.validate()?;
+        }
+        let moves = PreviewStageSourceMoves::new(request.source_moves)?;
         let mut sources = BTreeMap::new();
         for source in std::iter::once(request.source).chain(request.additional) {
             let key = source.authored.uri.clone();
@@ -139,7 +145,8 @@ impl Stages {
             );
         }
         let epoch = self.board.epoch();
-        stages_sources::sync_board(&mut self.board, &uri, sources.iter().map(|(uri, source)| (uri.as_str(), source)))?;
+        stages_sources::sync_board(&mut self.board, &uri,
+            sources.iter().map(|(uri, source)| (uri.as_str(), source)), &moves)?;
         if let Some(manifest) = request.manifest {
             self.board.restore_stage_set(manifest)?;
         } else if self.active.is_none() {
@@ -238,7 +245,7 @@ impl Stages {
                 .filter(|(key, _)| *key != &uri)
                 .map(|(uri, entry)| (uri.as_str(), entry))
                 .chain(std::iter::once((uri.as_str(), &entry)));
-            stages_sources::sync_board(&mut self.board, active, documents)?;
+            stages_sources::sync_board(&mut self.board, active, documents, &PreviewStageSourceMoves::default())?;
             self.sources.insert(uri, entry);
         }
         self.board.add(configuration)?;

@@ -2,7 +2,7 @@ use super::{
     project::{document_identity, Tab},
     DesignerWorkspace,
 };
-use crate::rsx_document::RustDocument;
+use crate::{rsx_document::RustDocument, PreviewStageSourceMoves};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::{
     FileMoveDocument, FileMoveDraft, FileMovePlan, LanguageService, LineIndex,
@@ -120,6 +120,7 @@ impl DesignerWorkspace {
         }
         let source = staged.tabs[&plan.from].saved.clone();
         staged.prepare(&plan.from, &plan.to, &participants)?;
+        let stage_moves = self.stage_source_moves(&plan.from, &plan.to)?;
         let file = staged
             .workspace
             .move_source_file_with_references(&plan.from, &plan.to, &source, references)
@@ -129,7 +130,7 @@ impl DesignerWorkspace {
             .linked_history
             .moves
             .insert(label, MovedXaml { file, participants });
-        self.accept_file_move(staged, &plan.from, &plan.to)?;
+        self.accept_file_move(staged, &plan.from, &plan.to, &stage_moves)?;
         Ok(plan)
     }
 
@@ -173,6 +174,7 @@ impl DesignerWorkspace {
         }
         let saved = staged.tabs[&from].saved.clone();
         staged.prepare(&from, &to, &participants)?;
+        let stage_moves = self.stage_source_moves(&from, &to)?;
         staged
             .workspace
             .replay_source_move(&mut moved.file, redo, &saved)
@@ -182,7 +184,7 @@ impl DesignerWorkspace {
             .linked_history
             .moves
             .insert(label.into(), moved);
-        self.accept_file_move(staged, &from, &to)
+        self.accept_file_move(staged, &from, &to, &stage_moves)
     }
 
     fn current_xaml_file(&self) -> Result<String, String> {
@@ -226,11 +228,26 @@ impl DesignerWorkspace {
         })
     }
 
+    fn stage_source_moves(&self, from: &str, to: &str) -> Result<PreviewStageSourceMoves, String> {
+        let moves = self
+            .preview_stages
+            .board
+            .borrow()
+            .stages()
+            .into_iter()
+            .map(|stage| stage.configuration.source_uri)
+            .filter(|uri| document_identity(uri).is_ok_and(|source| source == from))
+            .map(|uri| (uri, to.to_owned()))
+            .collect();
+        PreviewStageSourceMoves::new(moves)
+    }
+
     fn accept_file_move(
         self: &Rc<Self>,
         staged: MoveState,
         from: &str,
         to: &str,
+        stage_moves: &PreviewStageSourceMoves,
     ) -> Result<(), String> {
         let active = if staged.active == from {
             to
@@ -246,6 +263,7 @@ impl DesignerWorkspace {
             project.linked_history.take_closed(to);
         }
         *self.try_language_service()? = staged.language;
+        self.preview_stages.board.borrow_mut().retarget_sources(stage_moves);
         self.present_project_tab(active, tab)?;
         self.rebuild_project_tree();
         Ok(())

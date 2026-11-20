@@ -160,7 +160,7 @@ pub use preview_stages::{
     MAX_PREVIEW_STAGES, PreviewStageBoard,
     PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
-    PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
+    PreviewStageSource, PreviewStageSourceMoves, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
 };
 pub use preview_stage_editor::PreviewStageEditor;

@@ -1,6 +1,6 @@
 //! Prepare authored stages with the same bounded local include resolver as the canvas.
 use crate::{document::DesignDocument, projects::Projects, protocol::Source};
-use ferroui_designer::{PreviewHostOptions, PreviewStageBoard, PreviewStageSource};
+use ferroui_designer::{PreviewHostOptions, PreviewStageBoard, PreviewStageSource, PreviewStageSourceMoves};
 use ferroui_designer_project::{local_preview_sources, LocalPreviewSources, PreviewSourceBuffer};
 use serde::Deserialize;
 use std::{
@@ -60,6 +60,7 @@ pub(crate) fn sync_board<'a>(
     board: &mut PreviewStageBoard,
     active: &str,
     sources: impl IntoIterator<Item = (&'a str, &'a StageSource)>,
+    moves: &PreviewStageSourceMoves,
 ) -> Result<(), String> {
     let mut documents = Vec::new();
     let mut includes = BTreeMap::new();
@@ -67,12 +68,13 @@ pub(crate) fn sync_board<'a>(
         documents.push(source.preview.clone());
         includes.insert(uri, &source.includes);
     }
-    board.sync_sources_with_local_includes(
+    board.sync_sources_after_move(
         active,
         documents,
         PreviewHostOptions::default(),
         0,
         &includes,
+        moves,
     )
 }
 

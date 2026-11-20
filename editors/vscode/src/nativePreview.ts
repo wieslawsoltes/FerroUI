@@ -37,7 +37,7 @@ export class NativePreview implements vscode.Disposable {
     canvasGuides?: GuideCatalog;
     capabilities: {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
-        stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
+        stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; itemTemplateAuthoring?: boolean; propertyTrace?: boolean; styleComposition?: boolean;
         projectInventory?: boolean; tokenHandoff?: boolean;
@@ -170,9 +170,10 @@ export class NativePreview implements vscode.Disposable {
             ...(metric === 'velocity' && { metric }), ...(channel && channel !== 'value' && { channel }) }, 12_000);
     }
 
-    syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[]): Promise<StageModel> {
+    syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[],
+        sourceMoves?: Record<string, string>): Promise<StageModel> {
         if (!this.capabilities.stages) throw new Error('Update the FerroUI preview helper to use Stages.');
-        const params = { source, manifest, additional };
+        const params = { source, manifest, additional, sourceMoves };
         const drafts = localSources?.length ? fitStageDrafts(params, localSources) : undefined;
         return this.send('stagesSync', { ...params, localSources: drafts });
     }
