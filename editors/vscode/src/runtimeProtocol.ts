@@ -45,13 +45,14 @@ export interface RuntimeFrame {
 export type ToRuntime =
     | { type: 'state'; target?: RuntimeTarget; targets: RuntimeTarget[]; status: string; windows: RuntimeNode[]; root?: number }
     | { type: 'frame'; frame: RuntimeFrame }
-    | { type: 'inspection'; token: number; view: RuntimeInspection; node: number; data: unknown; canReveal: boolean; canApply: boolean }
+    | { type: 'inspection'; token: number; view: RuntimeInspection; node: number; data: unknown; canReveal: boolean; canApply: boolean; canTrace: boolean }
     | { type: 'problem'; message: string };
 
 type RuntimeFrameAction =
     | { type: 'select'; node: number; view: RuntimeInspection }
     | { type: 'pointer'; x: number; y: number; interact: boolean; overlap?: boolean }
     | { type: 'reveal'; node: number }
+    | { type: 'trace'; node: number; property: string }
     | { type: 'text'; node: number; text: string }
     | { type: 'key'; node: number; key: string }
     | { type: 'scroll'; node: number; x: number; y: number }

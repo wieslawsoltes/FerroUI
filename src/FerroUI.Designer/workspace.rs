@@ -944,6 +944,8 @@ mod preview_checks;
 mod columns;
 #[path = "inspector_actions.rs"]
 mod inspector_actions;
+#[path = "workspace_property_trace.rs"]
+mod property_trace_view;
 #[path = "workspace_item_templates.rs"]
 mod item_templates;
 #[path = "inspector_drag.rs"]

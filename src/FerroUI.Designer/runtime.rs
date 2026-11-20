@@ -12,6 +12,9 @@ use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
+
+#[path = "runtime_property_sources.rs"]
+mod property_sources;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);
@@ -754,14 +757,7 @@ impl RuntimePreview {
         // One scan of source positions, followed by indexed lookup for each runtime object.
         let mut names = BTreeMap::new();
         let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
-        let source_document = self.design_projection.as_ref().map_or_else(
-            || {
-                self.definition_projection
-                    .as_ref()
-                    .map_or(document, |projection| &projection.document)
-            },
-            |projection| &projection.document,
-        );
+        let source_document = self.preview_source_document(document);
         let mut elements = source_document.ast().elements().collect::<Vec<_>>();
         elements.sort_by_key(|node| node.span.start);
         let source = source_document.valid_source();

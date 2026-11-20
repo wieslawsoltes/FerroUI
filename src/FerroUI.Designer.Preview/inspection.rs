@@ -94,6 +94,6 @@ fn runtime_property(info: &PropertyInfo) -> PropertyField {
     PropertyField::runtime(
         &info.name,
         &info.priority_name(),
-        ferroui_inspect::display_value(Some(&info.value)),
+        ferroui_inspect::display_property_value(&info.value).unwrap_or_else(|| "Null".into()),
     )
 }

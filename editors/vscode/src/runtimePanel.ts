@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import { errorMessage } from './protocol';
+import { showPropertyTrace, type PropertyTrace } from './propertyTrace';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import { readRuntimeDiagnostics } from './runtimeDiagnostics';
-import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from './runtimeProtocol';
+import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, RuntimeSource, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import { runtimeHtml, webviewOptions } from './view';
 
@@ -194,6 +195,22 @@ export class RuntimePanel implements vscode.Disposable {
             const node = nodes.find(node => node.node_id === message.node);
             if (!node) return;
             const node_id = message.node;
+            if (message.type === 'trace') {
+                if (typeof message.property !== 'string' || !message.property || message.property.length > 256) return;
+                if (!await client.supports('get_property_trace')) throw new Error('This app does not expose value traces.');
+                const trace = await client.call<PropertyTrace<RuntimeSource>>('get_property_trace', { node_id, property: message.property });
+                if (epoch !== this.epoch || client !== this.client) return;
+                await showPropertyTrace(trace, async anchor => {
+                    const source = await this.authoredSource.resolve(anchor);
+                    if (epoch !== this.epoch || client !== this.client) return;
+                    if (!source) throw new Error('The contributing source is unavailable in the current workspace or revision.');
+                    const { document, position } = source;
+                    await vscode.window.showTextDocument(document, {
+                        selection: new vscode.Range(position, position), viewColumn: vscode.ViewColumn.Beside,
+                    });
+                });
+                return;
+            }
             if (message.type === 'select') await this.inspect(client, epoch, frame.token, node_id, message.view);
             else if (message.type === 'text' && typeof message.text === 'string' && message.text.length <= 8192) {
                 await client.call('type_text', { node_id, text: message.text });
@@ -225,9 +242,14 @@ export class RuntimePanel implements vscode.Disposable {
             case 'diagnostics': data = await readRuntimeDiagnostics(client); break;
             default: return;
         }
-        const source = await this.authoredSource.read(client, node);
+        const [source, canTrace] = await Promise.all([
+            this.authoredSource.read(client, node),
+            view === 'properties' ? client.supports('get_property_trace') : false,
+        ]);
         const canApply = view === 'properties' && source && this.authoredSource.canApply(source, this.target);
-        if (epoch === this.epoch && this.frame?.token === token) this.post({ type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply) });
+        if (epoch === this.epoch && this.frame?.token === token) this.post({
+            type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply), canTrace,
+        });
     }
 
     private post(message: ToRuntime): void {

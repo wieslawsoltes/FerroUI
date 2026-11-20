@@ -1,12 +1,10 @@
 use crate::document::DesignDocument;
 use crate::edits::editable_attribute;
-use ferroui_base::{BoxedValue, media::IBrush};
 use ferroui_designer_core::{Node, NodeKind, SourceSpan};
 use ferroui_designer_language::{PropertyInfo, Range};
 use ferroui_designer_tools::{PropertyDescriptor, PropertyKind, PropertyRegistry};
 use serde::Serialize;
 use std::collections::BTreeMap;
-use std::rc::Rc;
 use std::sync::OnceLock;
 
 #[derive(Serialize)]
@@ -26,6 +24,7 @@ pub(crate) struct PropertyField {
     can_promote: bool,
     can_edit_brush: bool,
     can_record: bool,
+    can_trace: bool,
     mixed: bool,
 }
 
@@ -46,6 +45,7 @@ impl PropertyField {
             can_promote: false,
             can_edit_brush: false,
             can_record: false,
+            can_trace: true,
             mixed: false,
         }
     }
@@ -63,6 +63,7 @@ pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<Property
         field.can_promote = false;
         field.can_edit_brush = false;
         field.can_record &= other.can_record;
+        field.can_trace = false;
         field.range = None;
         if field.mixed {
             field.authored = None;
@@ -172,7 +173,7 @@ pub(crate) fn property_fields(
                 kind,
                 options,
                 authored,
-                effective: runtime.and_then(|info| effective_value(&info.value)),
+                effective: runtime.and_then(|info| ferroui_inspect::display_property_value(&info.value)),
                 range: span.and_then(|span| design.range(span).ok()),
                 origin,
                 editable,
@@ -181,30 +182,11 @@ pub(crate) fn property_fields(
                 can_promote,
                 can_edit_brush,
                 can_record,
+                can_trace: runtime.is_some(),
                 mixed: false,
             })
         })
         .collect()
-}
-
-fn effective_value(value: &BoxedValue) -> Option<String> {
-    if let Some(brush) = value.downcast_ref::<Option<Rc<dyn IBrush>>>() {
-        return brush.as_deref().map(display_brush);
-    }
-    if let Some(brush) = value.downcast_ref::<Rc<dyn IBrush>>() {
-        return Some(display_brush(brush.as_ref()));
-    }
-    Some(ferroui_inspect::display_value(Some(value)))
-}
-
-fn display_brush(brush: &dyn IBrush) -> String {
-    if let Some(solid) = brush.as_solid_color_brush() {
-        format!("#{:08X}", solid.color().to_uint32())
-    } else if brush.as_gradient_brush().is_some() {
-        "Gradient brush".into()
-    } else {
-        "Brush".into()
-    }
 }
 
 pub(crate) fn can_add_property(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {

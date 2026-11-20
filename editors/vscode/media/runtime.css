@@ -39,7 +39,7 @@
 #runtime-details pre { margin: 0; padding: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
 #runtime-details form {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content max-content;
+    grid-template-columns: minmax(0, 1fr) max-content;
     gap: 3px;
     align-items: center;
     padding: 4px 5px;
@@ -47,4 +47,5 @@
 #runtime-details form + form { border-block-start: 1px solid var(--line); }
 #runtime-details label { grid-column: 1 / -1; overflow-wrap: anywhere; }
 #runtime-details small { color: var(--muted); }
+.runtime-property-actions { display: inline-flex; gap: 3px; }
 @media (max-width: 580px) { .runtime-main { grid-template-columns: minmax(0, 1fr); } }

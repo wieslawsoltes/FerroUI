@@ -48,6 +48,7 @@ mod column_authoring;
 mod item_template_authoring;
 mod item_template_samples;
 mod item_template_scope;
+mod property_trace;
 mod preview_environment;
 mod preview_host;
 mod preview_prototype;

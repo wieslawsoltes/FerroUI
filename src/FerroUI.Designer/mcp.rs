@@ -28,6 +28,9 @@ mod grid;
 mod columns;
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
+#[path = "mcp_property_trace.rs"]
+mod property_trace;
+pub use property_trace::property_trace_report;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
@@ -254,6 +257,13 @@ impl UiToolProvider for DesignerMcp {
                 false,
             ),
             definition(
+                "designer_property_trace",
+                "Trace a property on one source or runtime node against the accepted native preview. Read the effective value, contributor precedence, and any authored locations.",
+                json!({"node":schema::id(),"runtime_node":schema::id(),"property":{"type":"string","minLength":1,"maxLength":256}}),
+                &["property"],
+                false,
+            ),
+            definition(
                 "designer_timeline",
                 "Read typed keyframe tracks, playback state and import diagnostics.",
                 json!({}),
@@ -326,6 +336,7 @@ impl UiToolProvider for DesignerMcp {
             || grid::handles(name)
             || columns::handles(name)
             || item_templates::handles(name)
+            || name == "designer_property_trace"
             || components::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
@@ -698,6 +709,7 @@ impl UiToolProvider for DesignerMcp {
                 Ok(json!({"document":state(&session),"nodes":rows}))
             }
             "designer_preview_checks" => Ok(json!({"revision":session.document().revision(),"findings":session.preview_checks()?})),
+            "designer_property_trace" => property_trace_report(&session, args, None),
             "designer_timeline" => Ok(
                 json!({"timeline":session.timeline(),"time":session.time(),"playing":session.is_playing(),"recording":session.recording(),"warnings":session.animation_warnings()}),
             ),

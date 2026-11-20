@@ -96,32 +96,7 @@ fn reference_target(
             .ok_or("This application expression does not declare a designer reference")?;
     match extension_name {
         "StaticResource" | "DynamicResource" => {
-            let arguments = extension
-                .arguments
-                .iter()
-                .filter(|argument| {
-                    argument
-                        .name
-                        .as_deref()
-                        .is_none_or(|name| name == "ResourceKey")
-                })
-                .collect::<Vec<_>>();
-            let [argument] = arguments.as_slice() else {
-                return Err("The resource expression must have one string key".into());
-            };
-            let MarkupValue::Literal(key) = &argument.value else {
-                return Err("An application resource key must be inspected in XAML".into());
-            };
-            let context = session.component_resource_context(node);
-            let resource = ferroui_designer_tools::component_resource_resolution(
-                document,
-                node,
-                key,
-                context.as_ref(),
-            )
-            .map_err(|error| error.to_string())?
-            .resolved()
-            .ok_or("The resource is external, missing or ambiguous in this preview context")?;
+            let resource = crate::property_trace::resolve_property_resource(session, node, &extension)?;
             Ok(PropertyReferenceTarget::Resource(resource))
         }
         "Binding" | "CompiledBinding" | "ReflectionBinding" => {

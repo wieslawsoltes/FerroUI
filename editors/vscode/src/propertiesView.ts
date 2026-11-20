@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { FrameTarget, FromProperties, NodeOperation, NodeTarget, PropertiesState, PropertyAuthoring, Range, ToProperties } from './protocol';
+import type { FrameTarget, FromProperties, NodeOperation, NodeTarget, PropertiesState, PropertyAuthoring, PropertyTraceTarget, Range, ToProperties } from './protocol';
 import { errorMessage } from './protocol';
 import { propertiesHtml, webviewOptions } from './view';
 
@@ -18,6 +18,7 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
         private readonly openToolbox: () => void,
         private readonly reveal: (frame: FrameTarget, range: Range) => Promise<void>,
         private readonly author: (target: NodeTarget, authoring: PropertyAuthoring) => Promise<void>,
+        private readonly trace: (frame: FrameTarget, target: PropertyTraceTarget, property: string) => Promise<void>,
     ) {}
 
     get visible(): boolean { return this.view?.visible ?? false; }
@@ -50,6 +51,9 @@ export class PropertiesView implements vscode.WebviewViewProvider, vscode.Dispos
             this.openToolbox();
         } else if (message.type === 'reveal') {
             await this.reveal(message.frame, message.range);
+        } else if (message.type === 'trace') {
+            try { await this.trace(message.frame, message.target, message.property); }
+            catch (failure) { void vscode.window.showErrorMessage(errorMessage(failure)); }
         } else if (message.type === 'edit' || message.type === 'author') {
             let error: string | undefined;
             try {

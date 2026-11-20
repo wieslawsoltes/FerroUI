@@ -8,6 +8,7 @@ interface Actions {
     binding?: () => void;
     promote?: () => void;
     brush?: () => void;
+    trace?: () => void;
 }
 
 export function propertyEditor(property: PropertyField, actions: Actions): HTMLElement {
@@ -55,6 +56,7 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
         const range = property.range;
         value.append(actionButton('go-to-file', `Reveal ${property.name} in source`, () => actions.reveal(range)));
     }
+    if (actions.trace) value.append(actionButton('layers', `Trace ${property.name} value`, actions.trace));
     if (!property.editable) row.classList.add('read-only');
     const commit = () => {
         if (property.editable && input.value !== initial) actions.set(input.value);

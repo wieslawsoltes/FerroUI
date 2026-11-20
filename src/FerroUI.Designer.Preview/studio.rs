@@ -116,6 +116,14 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if query.name == "designer_preview_checks" {
         return crate::preview_checks::query(stage, &query.arguments);
     }
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_property_trace") {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        let project = rust.projection()?;
+        let (_, map) = project.mapped_markup();
+        return stage.sources.run(|| ferroui_designer::mcp::property_trace_report(
+            &stage.session.borrow(), &query.arguments, Some((rust.source(), &map)),
+        ));
+    }
     if query.name == "designer_columns" && stage.authored_rsx.is_some() {
         return Ok(json!({"table":null,"reason":"Edit Rust-owned column collections in the authored Rust source."}));
     }

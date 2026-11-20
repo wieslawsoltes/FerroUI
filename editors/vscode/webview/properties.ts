@@ -8,7 +8,7 @@ const message = element('view-message');
 const recording = element('property-recording');
 const recordingTime = element('property-recording-time');
 const seconds = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
-const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, author);
+const inspector = new Inspector(edit, () => vscode.postMessage({ type: 'toolbox' }), reveal, author, trace);
 let state: PropertiesState = {};
 let error: string | undefined;
 let request = 0;
@@ -37,6 +37,13 @@ function author(authoring: PropertyAuthoring): void {
 
 function reveal(range: Range): void {
     if (state.frame) vscode.postMessage({ type: 'reveal', frame: state.frame, range });
+}
+
+function trace(property: string): void {
+    if (!state.frame) return;
+    const target = state.runtime ? { type: 'runtime', id: state.runtime.inspector_id } as const
+        : state.node ? { type: 'source', node: state.node.id } as const : undefined;
+    if (target) vscode.postMessage({ type: 'trace', frame: state.frame, target, property });
 }
 
 function receive(next: ToProperties): void {

@@ -31,6 +31,7 @@ interface Frame {
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
     itemTemplateAuthoring: boolean;
+    propertyTrace: boolean;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -178,6 +179,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
+    get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -727,6 +729,7 @@ export class DesignerPanel implements vscode.Disposable {
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(client.capabilities.columnAuthoring),
                 itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
+                propertyTrace: Boolean(client.capabilities.propertyTrace),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),

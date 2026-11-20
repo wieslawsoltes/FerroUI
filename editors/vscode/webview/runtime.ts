@@ -69,7 +69,7 @@ function renderTree() {
     if (focused && /^\d+$/.test(focused)) tree.querySelector<HTMLElement>(`[data-node="${focused}"]`)?.focus();
 }
 
-function showProperties(data: RuntimeProperty[], canApply: boolean) {
+function showProperties(data: RuntimeProperty[], canApply: boolean, canTrace: boolean) {
     const rows = data.map(property => {
         const row = create('form');
         row.dataset.property = property.name;
@@ -83,12 +83,20 @@ function showProperties(data: RuntimeProperty[], canApply: boolean) {
         const apply = iconButton('check', `Set ${property.name} live`);
         apply.type = 'submit';
         apply.disabled = !editable;
-        row.append(name, value, apply);
+        const actions = create('span');
+        actions.className = 'runtime-property-actions';
+        actions.append(apply);
+        row.append(name, value, actions);
         if (canApply && editable) {
             const source = iconButton('edit', `Apply ${property.name} to Source`, () => {
                 if (frame && selected !== undefined) send({ type: 'assignSource', token: frame.token, node: selected, property: property.name, value: value.value });
             });
-            row.append(source);
+            actions.append(source);
+        }
+        if (canTrace) {
+            actions.append(iconButton('layers', `Trace ${property.name} value`, () => {
+                if (frame && selected !== undefined) send({ type: 'trace', token: frame.token, node: selected, property: property.name });
+            }));
         }
         row.addEventListener('submit', event => {
             event.preventDefault();
@@ -158,7 +166,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         propertyFilter.hidden = message.view !== 'properties';
         setMode(interaction);
         for (const button of tree.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
-        if (message.view === 'properties') showProperties(message.data as RuntimeProperty[], message.canApply);
+        if (message.view === 'properties') showProperties(message.data as RuntimeProperty[], message.canApply, message.canTrace);
         else inspector.replaceChildren(create('pre', JSON.stringify(message.data, null, 2)));
     } else if (message.type === 'problem') {
         problem.textContent = message.message;

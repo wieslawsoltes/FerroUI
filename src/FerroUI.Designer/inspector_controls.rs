@@ -524,6 +524,7 @@ pub(super) struct PropertyRow {
     pub metadata: Option<crate::editors::PropertyEditorMetadata>,
     pub can_reset: bool,
     pub reveal: Option<Rc<dyn Fn()>>,
+    trace: Option<super::property_trace_view::TraceAction>,
     source_actions: Vec<(String, Rc<dyn Fn()>)>,
     validate_drop: Option<PropertyDropValidator>,
     // Resolve on hover so animations can update diagnostics without replacing an editor
@@ -730,7 +731,9 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
     }
     let cell = Grid::new();
     cell.classes().add("property-value-cell");
-    cell.set_column_definitions(ColumnDefinitions::parse("*,22").unwrap());
+    let trace_column = if row.trace.is_some() && row.context.is_some() { 2 } else { 1 };
+    let columns = if trace_column == 2 { "*,22,22" } else { "*,22" };
+    cell.set_column_definitions(ColumnDefinitions::parse(columns).unwrap());
     cell.set_min_height(28.0);
     cell.set_margin(Thickness::new(0.0, 1.0, 0.0, 1.0));
     ToolTip::set_tip(
@@ -847,6 +850,11 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         value.set_font_size(12.0);
         AutomationProperties::set_name(&value, Some(&format!("{} read only value", row.name)));
         cell.children().add(value.upcast::<Control>());
+    }
+    if let Some(trace) = &row.trace {
+        let button = trace();
+        Grid::set_column(&button, trace_column);
+        cell.children().add(button.upcast::<Control>());
     }
     cell.upcast::<Control>()
 }
@@ -1993,6 +2001,7 @@ impl DesignerWorkspace {
                     })
             })
             .collect::<Vec<_>>();
+        let trace_snapshot = crate::design_time::DesignTimeSnapshot::capture(&session);
         drop(session);
         let resource_owners = self.component_owners();
         let factories = Rc::new(self.property_editors.borrow().clone());
@@ -2171,6 +2180,9 @@ impl DesignerWorkspace {
                 });
                 Rc::new(PropertyRow {
                     category: None,
+                    trace: (selected.len() == 1 && native_property.is_some()).then(|| {
+                        self.property_trace_action(&trace_snapshot, crate::property_trace::TraceTarget::Authored(selected[0]), &name)
+                    }),
                     source_actions: if can_reset && selected.len() == 1 {
                         self.property_source_actions(&name, source_kind)
                     } else { Vec::new() },
@@ -2214,6 +2226,7 @@ impl DesignerWorkspace {
         let uri = session.document_uri().to_owned();
         let revision = session.document().revision();
         let ast_snapshot = session.document().ast_snapshot();
+        let trace_snapshot = crate::design_time::DesignTimeSnapshot::capture(&session);
         drop(session);
         let mut rows = Inspector::properties(&object)
             .into_iter()
@@ -2224,6 +2237,7 @@ impl DesignerWorkspace {
                 let name = info.name.clone();
                 Rc::new(PropertyRow {
                     category: None,
+                    trace: Some(self.property_trace_action(&trace_snapshot, crate::property_trace::TraceTarget::Runtime(id), &name)),
                     name: info.name.clone(),
                     display_value: ferroui_inspect::display_value(Some(&info.value)),
                     effective: ferroui_inspect::display_value(Some(&info.value)),
@@ -2343,6 +2357,7 @@ impl DesignerWorkspace {
                 factories: Rc::new(Vec::new()),
                 can_reset: false,
                 reveal: None,
+                trace: None,
                 source_actions: Vec::new(),
                 validate_drop: None,
                 tooltip: Rc::new(|| None),

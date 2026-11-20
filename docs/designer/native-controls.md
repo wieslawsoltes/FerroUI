@@ -51,6 +51,14 @@ the view without generating an authoring callback. `control()` embeds a compound
 another view; a scrubber is itself a native control. Existing `PropertyEditorFactory` extension
 points take precedence over built-ins and are used by the contextual panel editors too.
 
+### Trace property values
+
+Select a control and choose the layers icon beside a property. The flyout shows its effective value and the applied local, style, theme, template, inheritance, and default contributors. An animated property includes its base value when available. A current value override has its own row.
+
+Use a source arrow to reveal an authored property, setter, or resource. The popup reads the current native preview and leaves the document and undo history intact. [VS Code workflow](vscode/authoring.md#trace-an-effective-property-value) · [MCP arguments](vscode/reference.md#trace-property-values-with-mcp)
+
+![Designer Studio traces a card background to its local resource and shows the inactive style and type default](images/designer-property-value-trace.png)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

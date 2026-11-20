@@ -1,5 +1,6 @@
 //! A private stdio renderer process. The extension owns the authored buffer and
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
+mod capabilities;
 mod document;
 mod canvas_guides;
 mod canvas_snap;
@@ -97,50 +98,7 @@ fn respond(
         return Ok(());
     }
     let result = match method {
-        "initialize" => Ok(json!({
-            "version": protocol::PROTOCOL_VERSION,
-            "assets": toolbox::catalog(),
-            "canvasGuides": canvas_guides::catalog(),
-            "capabilities": {
-                "isolatedDesign": true,
-                "appHostedDesign": true,
-                "hostedAnimationRestoration": true,
-                "hostedPreviewRanges": true,
-                "hostedClipAuthoring": true,
-                "hostedStateAuthoring": true,
-                "rsxLanguage": true,
-                "stages": true,
-                "prototypeEditing": true,
-                "stageIncludes": true,
-                "projectCatalog": true,
-                "canvasInteraction": true,
-                "canvasFocusOrder": true,
-                "spacingHelpers": true,
-                "selectionWrapping": true,
-                "columnAuthoring": true,
-                "itemTemplateAuthoring": true,
-                "projectInventory": true,
-                "tokenHandoff": true,
-                "designFixtures": true,
-                "timelineTransport": true,
-                "timelineRecording": true,
-                "timelineGeometryRecording": true,
-                "timelineKeyframeDrafts": true,
-                "timelineKeyframeScale": true,
-                "timelineKeyframeTransfer": true,
-                "rsxKeyframeStructure": true,
-                "rsxAnimationPrograms": true,
-                "timelineCurves": true,
-                "timelineCurveVelocity": true,
-                "timelineCurveChannels": true,
-                "timelineCombinedPlayback": true,
-                "timelineProgramTargets": true,
-                "timelineClipPlacement": true,
-                "stateTransitionPreview": true,
-                "rsxStateAuthoring": true,
-                "rsxStateStructure": true,
-            },
-        })),
+        "initialize" => Ok(capabilities::initialize()),
         "canvasGuideEdit" => serde_json::from_value::<canvas_guides::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan())),
         "canvasSnap" => serde_json::from_value::<canvas_snap::Request>(message["params"].clone())

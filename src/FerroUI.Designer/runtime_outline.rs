@@ -42,6 +42,11 @@ impl DesignerSession {
     }
 
     pub fn inspected_preview_properties(&self, id: u64) -> Result<Vec<PropertyInfo>, String> {
+        let object = self.inspected_preview_object(id)?;
+        Ok(Inspector::properties(&object))
+    }
+
+    pub(crate) fn inspected_preview_object(&self, id: u64) -> Result<Ref<FerroObject>, String> {
         if !self
             .runtime_outline(RuntimeOutlineMode::Combined)
             .iter()
@@ -49,8 +54,7 @@ impl DesignerSession {
         {
             return Err("The runtime object no longer belongs to this preview".into());
         }
-        let object: Ref<FerroObject> = Inspector::shared().borrow().resolve(id)?;
-        Ok(Inspector::properties(&object))
+        Inspector::shared().borrow().resolve(id)
     }
 }
 

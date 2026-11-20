@@ -18,6 +18,7 @@ export class Inspector {
     private selectedKey?: string;
     private contentKey?: string;
     private recording = false;
+    private canTrace = false;
     private readonly expanded = new Set<string>();
 
     constructor(
@@ -25,6 +26,7 @@ export class Inspector {
         private readonly openToolbox: () => void,
         private readonly reveal: (range: Range) => void,
         private readonly author: (authoring: PropertyAuthoring) => void,
+        private readonly trace: (property: string) => void,
     ) {
         this.filter.addEventListener('input', () => this.applyFilter());
         this.itemTemplates.addEventListener('click', () => this.author({ action: 'itemTemplate' }));
@@ -34,6 +36,7 @@ export class Inspector {
         const { node, runtime, fields } = state;
         this.recording = state.recordingTime !== undefined;
         const group = (state.selectionCount ?? 0) > 1;
+        this.canTrace = Boolean(state.frame && state.propertyTrace && !group);
         const label = group ? `${state.selectionCount} controls` : runtime?.type ?? node?.label;
         this.selection.hidden = !label;
         this.itemTemplates.hidden = !state.itemTemplates;
@@ -61,7 +64,7 @@ export class Inspector {
         // keeps stale fields inert while the next inspection is being fetched.
         if (!fields && !changedSelection) return;
         element('filter-row').hidden = !fields?.length;
-        const contentKey = JSON.stringify([key, node?.id, fields, this.recording, node?.canInsert, node?.canRemove]);
+        const contentKey = JSON.stringify([key, node?.id, fields, this.recording, this.canTrace, node?.canInsert, node?.canRemove]);
         if (this.contentKey === contentKey) return;
         this.contentKey = contentKey;
         const focus = (document.activeElement as HTMLElement | null)?.dataset.property;
@@ -153,6 +156,7 @@ export class Inspector {
             binding: node !== undefined && field.canBind ? () => this.author({ action: 'binding', property: field.name }) : undefined,
             promote: node !== undefined && field.canPromote ? () => this.author({ action: 'promoteResource', property: field.name }) : undefined,
             brush: node !== undefined && field.canEditBrush ? () => this.author({ action: 'brush', property: field.name }) : undefined,
+            trace: this.canTrace && field.canTrace ? () => this.trace(field.name) : undefined,
         });
     }
 

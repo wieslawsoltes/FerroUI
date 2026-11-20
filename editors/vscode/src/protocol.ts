@@ -88,6 +88,7 @@ export interface PropertyField {
     canPromote?: boolean;
     canEditBrush?: boolean;
     canRecord?: boolean;
+    canTrace?: boolean;
     mixed?: boolean;
 }
 export interface EventField {
@@ -124,6 +125,7 @@ export type FromDetails = { type: 'ready' }
 export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };
 export type InspectionTarget = { type: 'source'; node: number } | { type: 'selection'; nodes: number[] } | { type: 'runtime'; id: number };
+export type PropertyTraceTarget = Exclude<InspectionTarget, { type: 'selection' }>;
 export interface Inspection { properties: PropertyField[]; events: EventField[]; itemTemplates?: boolean }
 export interface OutlineNode {
     id: number;
@@ -180,6 +182,7 @@ export interface PropertiesState {
     frame?: FrameTarget;
     fields?: PropertyField[];
     itemTemplates?: boolean;
+    propertyTrace?: boolean;
     selectionCount?: number;
     recordingTime?: number;
 }
@@ -189,6 +192,7 @@ export type PropertyAuthoring =
 export type FromProperties = { type: 'ready' }
     | { type: 'toolbox' }
     | { type: 'reveal'; frame: FrameTarget; range: Range }
+    | { type: 'trace'; frame: FrameTarget; target: PropertyTraceTarget; property: string }
     | { type: 'author'; authoring: PropertyAuthoring; request: number; target: NodeTarget }
     | { type: 'edit'; request: number; target: NodeTarget; operation: NodeOperation };
 export type ToProperties = { type: 'state'; state: PropertiesState }

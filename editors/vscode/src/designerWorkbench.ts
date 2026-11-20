@@ -14,6 +14,7 @@ import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
 import { SelectionInspection } from './selectionInspection';
 import { PROPERTIES_VIEW, PropertiesView } from './propertiesView';
+import { showPropertyTrace, type DesignTraceSource, type PropertyTrace } from './propertyTrace';
 import type { ProjectAssets } from './projectAssets';
 import { promptRsxControlName } from './rsxRename';
 import { editBinding } from './studioBinding';
@@ -88,6 +89,16 @@ export class DesignerWorkbench implements vscode.Disposable {
                 else if (authoring.action === 'binding') await editBinding(context, target.node, authoring.property);
                 else if (authoring.action === 'promoteResource') await promoteResource(context, target.node, authoring.property);
                 else await editBrush(context, target.node, authoring.property);
+            }, async (frame, target, property) => {
+                const panel = this.active;
+                if (!panel?.supportsPropertyTrace || !panel.canUse(frame)) throw new Error('Wait for the current native preview.');
+                const current = () => this.active === panel && (target.type === 'runtime'
+                    ? panel.runtimeSelection?.inspector_id === target.id
+                    : panel.selectedIds.length === 1 && panel.selectedIds[0] === target.node);
+                const context = new StudioContext(panel, frame.token, current);
+                const args = target.type === 'runtime' ? { runtime_node: target.id, property } : { node: target.node, property };
+                const trace = await context.read<PropertyTrace<DesignTraceSource>>('designer_property_trace', args);
+                await showPropertyTrace(trace, source => context.revealRange(source.range), source => source.text);
             });
         this.timeline = new TimelineView(context.extensionUri, changed);
         this.studio = new StudioView(changed, (context, route) => this.timeline.openTransition(context, route));
@@ -324,6 +335,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             frame,
             fields: inspection.data?.properties,
             itemTemplates: inspection.data?.itemTemplates,
+            propertyTrace: panel?.supportsPropertyTrace,
             target: panel && node && token !== undefined && !panel.status
                 ? { session: panel.session, token, node: node.id, selection: [...panel.selectedIds] } : undefined,
             selectionCount: panel?.selectedIds.length,

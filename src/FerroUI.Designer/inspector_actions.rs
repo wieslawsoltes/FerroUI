@@ -1,4 +1,4 @@
-//! Compact native inspector controls shared by column and template authoring.
+//! Compact native inspector controls shared by contextual property tools.
 use crate::icons;
 use ferroui_base::Ref;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
@@ -34,8 +34,15 @@ pub(super) const SOURCE: &str =
 pub(super) const COPY: &str = "F1 M5 1H15V11H13.5V2.5H5Z M1 5H11V15H1Z M2.5 6.5V13.5H9.5V6.5Z";
 pub(super) const RESET: &str =
     "F1 M1 2L2.2 3.2A6 6 0 1 1 4.2 13.8L5 12.4A4.4 4.4 0 1 0 3.4 4.4L5 6H1Z";
+pub(super) const TRACE: &str = "F1 M1 5L8 1 15 5 8 9Z M1 8L8 12 15 8V10L8 14 1 10Z";
 
 pub(super) fn icon_button(icon: &str, label: &str, action: impl Fn() + 'static) -> Ref<Button> {
+    let button = tool_button(icon, label);
+    button.click(move |_, _| action());
+    button
+}
+
+pub(super) fn tool_button(icon: &str, label: &str) -> Ref<Button> {
     let button = Button::new();
     button.classes().add("nav");
     button.set_min_width(26.0);
@@ -43,7 +50,6 @@ pub(super) fn icon_button(icon: &str, label: &str, action: impl Fn() + 'static) 
     button.set_content(Some(Control::boxed(icons::vector_icon(icon, 13.0))));
     AutomationProperties::set_name(&button, Some(label));
     ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
-    button.click(move |_, _| action());
     button
 }
 

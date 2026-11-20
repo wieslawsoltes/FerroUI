@@ -128,6 +128,24 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
 
+## Trace an effective property value
+
+Select one control in **Design** or **Outline**. In **Properties**, choose the layers icon beside a property to open its value trace. The title shows the effective value from the current native preview. An authored value or expression appears when the editor can map it to XAML or RSX.
+
+| Entry | What it shows |
+|---|---|
+| **Effective** | The exact contributor supplying the value, such as a local value, style setter, theme, inherited value, or type default. |
+| **Animation base** | The value under the animation. The animated value appears as the effective contributor. |
+| **Current value override** | A value applied through the framework’s current-value API. The authored declaration remains visible. |
+| **Overridden**, **Inactive**, or **Unset** | A lower-priority entry, an inactive selector, or a local binding without a current contribution. |
+| **Referenced resource** | A resource key that resolves unambiguously inside the current authored XAML document and theme. |
+
+Choose a source arrow or press Enter on a linked row to reveal its declaration. Preview-only controls and sources supplied by an external file may have entries without an authored range. Opening the trace leaves source and Undo history intact.
+
+Try [PropertyTraceWorkbench.xaml](../../../editors/vscode/test/fixtures/PropertyTraceWorkbench.xaml). **StyleCard → Opacity** shows the winning `Border.priority` setter and the overridden `Border.account` setter, both with value `0.72`. **LocalCard → Opacity** shows its local `0.9` value. Trace **Background** to reach the `AccountSurface` resource. [Studio workflow](../native-controls.md#trace-property-values) · [MCP workflow](reference.md#trace-property-values-with-mcp)
+
+![The VS Code value trace shows the effective, overridden, and inactive setters for the selected card](../images/vscode-property-value-trace.jpg)
+
 ## Edit table columns
 
 1. Open the designer for [ColumnsWorkbench.xaml](../../../editors/vscode/test/fixtures/ColumnsWorkbench.xaml). Select **Portfolio** or **Status** in the canvas or **Outline**.
