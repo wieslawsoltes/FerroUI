@@ -302,4 +302,6 @@ Use an updated preview helper for stage keyboard input. While playing a prototyp
 
 ## Play a prototype
 
-Switch the Stages board to **Prototype**. Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Use **Play Prototype** to follow the flow and test the native input. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)
+Switch the Stages board to **Prototype**. Each flow lists its starting stage, which the play button also announces to screen readers. Hover a shortened name in a narrow tab to read it in full. Use the play button beside a flow or choose **Play Prototype** from the toolbar.
+
+Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)

@@ -50,12 +50,22 @@ export class PrototypeGraphView {
         this.addLink.disabled = !model.stages.some(stage => stage.status.state === 'ready');
         this.flows.replaceChildren(...(graph?.flows ?? []).map((flow, index) => {
             const row = create('li');
+            row.className = 'prototype-flow';
             const play = tool('play', `Play ${flow.name}`, `flow-play-${index}`, () => {
                 this.send({ type: 'prototype', command: { action: 'start', flow: flow.name } });
             });
-            const description = create('span', `Starts at ${this.stageName(flow.start)}`);
+            const details = create('div');
+            details.className = 'prototype-flow-details';
+            const name = create('strong', flow.name);
+            name.title = flow.name;
+            const start = `Starts at ${this.stageName(flow.start)}`;
+            const description = create('span', start);
             description.className = 'prototype-flow-start';
-            row.append(play, create('strong', flow.name), description,
+            description.id = `prototype-flow-start-${index}`;
+            description.title = start;
+            play.setAttribute('aria-describedby', description.id);
+            details.append(name, description);
+            row.append(play, details,
                 tool('edit', `Edit ${flow.name}`, `flow-edit-${index}`, () => this.edit({ kind: 'flow', index })));
             return row;
         }));
