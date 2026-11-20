@@ -85,7 +85,7 @@ impl LanguageService {
             };
             let before_schema = self.schema_for(source_uri);
             if !state.document.is_valid() {
-                check_incomplete(source_uri, state, &target.name, new_name)?;
+                check_incomplete(source_uri, state, &[&target.name, new_name])?;
                 continue;
             }
             let source = state.document.source();
@@ -223,13 +223,22 @@ fn rust_document(
     )
 }
 
-pub(super) fn check_incomplete(uri: &str, state: &State, old: &str, new: &str) -> Result<()> {
-    let relevant = |source: &str| sites::mentions(source, old) || sites::mentions(source, new);
+pub(super) fn check_incomplete(uri: &str, state: &State, names: &[&str]) -> Result<()> {
+    let mentions = |source: &str| names.iter().any(|name| sites::mentions(source, name));
+    let relevant = |source: &str| {
+        mentions(source)
+            || source.contains('&')
+                && ferroui_designer_core::XmlText::text_node(source, SourceSpan::new(0, source.len()))
+                    .is_some_and(|text| mentions(text.value()))
+    };
     let path = file_path(uri)?;
-    let disk_mentions =
-        state.opened && path.is_file() && read_xaml(&path).map(|source| relevant(&source))?;
+    let draft_mentions = relevant(state.document.source()) || relevant(state.document.valid_source());
+    let disk_mentions = !draft_mentions
+        && state.opened
+        && path.is_file()
+        && read_xaml(&path).map(|source| relevant(&source))?;
     require(
-        !relevant(state.document.source()) && !disk_mentions,
+        !draft_mentions && !disk_mentions,
         format!("Repair the incomplete XAML that may use the name before reviewing: {uri}"),
     )
 }

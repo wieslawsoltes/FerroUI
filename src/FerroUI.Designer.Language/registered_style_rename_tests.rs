@@ -99,4 +99,13 @@ fn reviews_typed_selector_members_and_preserves_decoy_words() {
         .plan_registered_property_rename(&uri, &request_tone, "Accent", None)
         .unwrap_err();
     assert!(captured.0.contains("capture an existing"));
+
+    let encoded = r#"<Style xmlns="https://github.com/ferroui" xmlns:ui="using:Customer.Views"
+        Selector="ui|Card[To&#110;e=Ready]"/>"#;
+    fixture.write("app/UnopenedStyles.xaml", encoded);
+    service.open(&unopened, "<Style", 1).unwrap();
+    let incomplete = service
+        .plan_registered_property_rename(&uri, &request_tone, "Accent", None)
+        .unwrap_err();
+    assert!(incomplete.0.contains("incomplete XAML"));
 }

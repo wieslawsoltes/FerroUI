@@ -80,7 +80,11 @@ impl LanguageService {
                 continue;
             };
             if !state.document.is_valid() {
-                check_incomplete(source_uri, state, old_short, new_short)?;
+                check_incomplete(
+                    source_uri,
+                    state,
+                    &[&target.name, new_name, old_short, new_short],
+                )?;
                 continue;
             }
             let source = state.document.source();
