@@ -111,6 +111,7 @@ impl DesignerWorkspace {
         self.root.get_control::<Button>("MoveXamlFile").set_is_visible(!rust && self.project.borrow().workspace.is_some());
         self.root.get_control::<Button>("RenameRegisteredProperty").set_is_visible(!rust && self.project.borrow().workspace.is_some());
         self.root.get_control::<Button>("RenameRegisteredType").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("RenameResource").set_is_visible(!rust && self.project.borrow().workspace.is_some());
         if rust {
             return;
         }

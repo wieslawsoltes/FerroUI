@@ -301,6 +301,9 @@
             <Button Name="RenameRegisteredType" Classes="icon" AutomationProperties.Name="Rename registered type" ToolTip.Tip="Review a registered control or type rename at the caret">
               <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 1H15V14H1Z M2.5 2.5V12.5H13.5V2.5Z M4 4H12V6H9V11H7V6H4Z" />
             </Button>
+            <Button Name="RenameResource" Classes="icon" AutomationProperties.Name="Rename resource and references" ToolTip.Tip="Review a resource key and its project references">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 1H8L15 8L8 15L1 8Z M2.5 2.5V7.4L8 12.9L12.9 8L7.4 2.5Z M4 4H6V6H4Z" />
+            </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
             <Button Name="FormatSource" Classes="nav" Content="Format" />

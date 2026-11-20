@@ -1,0 +1,17 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Palette.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <!-- 🧭 Resolve through the included palette -->
+  <Border Background="{DynamicResource BrandInk}" Height="80" />
+  <Border>
+    <Border.Resources>
+      <SolidColorBrush x:Key="BrandInk" Color="#FF558456" />
+    </Border.Resources>
+    <TextBlock Text="Review queue" Foreground="{StaticResource BrandInk}" />
+  </Border>
+</StackPanel>

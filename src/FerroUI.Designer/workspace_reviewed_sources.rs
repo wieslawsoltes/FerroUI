@@ -21,6 +21,17 @@ pub(super) struct ReviewedSources {
 }
 
 impl DesignerWorkspace {
+    pub(super) fn sync_xaml_review_drafts(&self, active: &str) -> Result<(), String> {
+        let project = self.project.borrow();
+        let mut language = self.try_language_service()?;
+        for (uri, tab) in &project.tabs {
+            if uri.starts_with("file://") && uri != active && tab.rust.is_none() {
+                sync(&mut language, uri, tab.source())?;
+            }
+        }
+        sync(&mut language, active, self.session.borrow().document().source())
+    }
+
     pub(super) fn stage_reviewed_sources(&self) -> Result<ReviewedSources, String> {
         let active = document_identity(self.session.borrow().document_uri())?;
         self.capture_tab();

@@ -2,7 +2,7 @@ use super::{
     DesignerWorkspace,
     project::document_identity,
 };
-use super::reviewed_sources::{ReviewedSources, check_saved, patched, sync};
+use super::reviewed_sources::{ReviewedSources, check_saved, patched};
 use crate::PreviewStageSourceMoves;
 use ferroui_designer_language::{
     FileMoveDraft, FileMovePlan,
@@ -110,29 +110,19 @@ impl DesignerWorkspace {
     }
 
     pub(super) fn refresh_move_drafts(&self, from: &str) -> Result<Vec<FileMoveDraft>, String> {
+        self.sync_xaml_review_drafts(from)?;
         let state = self.project.borrow();
-        let mut language = self.try_language_service()?;
         let mut rust_drafts = Vec::new();
         for (uri, tab) in &state.tabs {
-            if !uri.starts_with("file://") || uri == from {
-                continue;
-            }
-            if tab.rust.is_some() {
+            if uri.starts_with("file://") && uri != from && tab.rust.is_some() {
                 rust_drafts.push(FileMoveDraft {
                     uri: uri.clone(),
                     version: i64::try_from(tab.document.revision())
                         .map_err(|_| "Rust document revision exhausted")?,
                     source: tab.source().to_owned(),
                 });
-            } else {
-                sync(&mut language, uri, tab.source())?;
             }
         }
-        sync(
-            &mut language,
-            from,
-            self.session.borrow().document().source(),
-        )?;
         Ok(rust_drafts)
     }
 

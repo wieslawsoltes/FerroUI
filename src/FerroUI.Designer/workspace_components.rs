@@ -1,5 +1,5 @@
 //! Document-backed library, reusable definitions and template editing navigation.
-//! Views emit commands; all mutations pass through the shared component planner.
+//! Views route mutations through the shared authoring and source review engines.
 use super::DesignerWorkspace;
 use crate::component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
 use crate::resource_editor::{
@@ -1343,6 +1343,12 @@ impl DesignerWorkspace {
                             self.select_source_span(span);
                         }
                         return Ok(());
+                    }
+                    DefinitionEditorCommand::Rename(key)
+                        if self.project.borrow().workspace.is_some()
+                            && self.session.borrow().document_uri().starts_with("file://") =>
+                    {
+                        return self.show_library_resource_rename(node, &key);
                     }
                     DefinitionEditorCommand::Rename(key) => ComponentAction::RenameResource {
                         resource: node,

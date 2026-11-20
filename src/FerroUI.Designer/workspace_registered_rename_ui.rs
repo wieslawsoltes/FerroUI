@@ -13,13 +13,15 @@ use ferroui_controls::{
     automation::{AutomationLiveSetting, AutomationProperties},
     Button, ComboBox, Control, Flyout, PlacementMode, TextBlock, TextBox,
 };
-use ferroui_designer_language::RegisteredPropertyPlan;
-use std::{cell::Cell, rc::Rc, time::Duration};
+use ferroui_designer_core::NodeId;
+use ferroui_designer_language::SourceRenamePlan;
+use std::{cell::{Cell, RefCell}, rc::Rc, time::Duration};
 
 #[derive(Clone, Copy)]
 enum Subject {
     Property,
     Type,
+    Resource,
 }
 
 impl Subject {
@@ -27,6 +29,7 @@ impl Subject {
         match self {
             Self::Property => "property",
             Self::Type => "type",
+            Self::Resource => "resource",
         }
     }
 
@@ -44,6 +47,11 @@ impl Subject {
                 .registered_type_target(&anchor.uri, &anchor.request)
                 .map(|target| target.name)
                 .map_err(|error| error.to_string()),
+            Self::Resource => workspace
+                .try_language_service()?
+                .resource_rename_target(&anchor.uri, &anchor.request)
+                .map(|target| target.name)
+                .map_err(|error| error.to_string()),
         }
     }
 
@@ -52,10 +60,11 @@ impl Subject {
         workspace: &DesignerWorkspace,
         anchor: &RenameAnchor,
         name: &str,
-    ) -> Result<Option<RegisteredPropertyPlan>, String> {
+    ) -> Result<Option<SourceRenamePlan>, String> {
         match self {
             Self::Property => workspace.review_registered_property(anchor, name).map(Some),
             Self::Type => workspace.review_registered_type(anchor, name, true),
+            Self::Resource => workspace.review_resource_rename(anchor, name).map(Some),
         }
     }
 
@@ -65,10 +74,11 @@ impl Subject {
         anchor: &RenameAnchor,
         name: &str,
         review: &str,
-    ) -> Result<RegisteredPropertyPlan, String> {
+    ) -> Result<SourceRenamePlan, String> {
         match self {
             Self::Property => workspace.apply_registered_property(anchor, name, review),
             Self::Type => workspace.apply_registered_type(anchor, name, review),
+            Self::Resource => workspace.apply_resource_rename(anchor, name, review),
         }
     }
 }
@@ -77,14 +87,12 @@ impl DesignerWorkspace {
     pub(in super::super) fn connect_registered_rename(self: &Rc<Self>) {
         self.connect_rename_flyout("RenameRegisteredProperty", Subject::Property);
         self.connect_rename_flyout("RenameRegisteredType", Subject::Type);
+        self.connect_rename_flyout("RenameResource", Subject::Resource);
     }
 
     fn connect_rename_flyout(self: &Rc<Self>, name: &str, subject: Subject) {
         let button = self.root.get_control::<Button>(name);
-        let flyout = Flyout::new();
-        flyout.set_placement(PlacementMode::Top);
-        flyout.popup().set_should_use_overlay_layer(true);
-        flyout.flyout_presenter_classes().add("designer-chrome");
+        let flyout = rename_flyout();
         let owner = Rc::downgrade(self);
         let popup = flyout.downgrade();
         flyout
@@ -96,6 +104,31 @@ impl DesignerWorkspace {
             .detach();
         button.set_flyout(Some(flyout.upcast()));
     }
+
+    pub(in super::super) fn show_library_resource_rename(
+        self: &Rc<Self>,
+        resource: NodeId,
+        new_key: &str,
+    ) -> Result<(), String> {
+        let offset = self.session.borrow().document().ast().node(resource)
+            .ok_or("The resource definition changed")?.name_span.start;
+        let anchor = Rc::new(self.source_rename_anchor(offset)?);
+        let plan = self.review_resource_rename(&anchor, new_key)?;
+        let flyout = rename_flyout();
+        show_plan(self, &flyout, Subject::Resource, anchor, plan);
+        let keep = Rc::new(RefCell::new(Some(flyout.clone())));
+        flyout.closed(move || { keep.borrow_mut().take(); }).detach();
+        flyout.show_at(&self.root.get_control::<Button>("CloseAuthoring"));
+        Ok(())
+    }
+}
+
+fn rename_flyout() -> Ref<Flyout> {
+    let flyout = Flyout::new();
+    flyout.set_placement(PlacementMode::Top);
+    flyout.popup().set_should_use_overlay_layer(true);
+    flyout.flyout_presenter_classes().add("designer-chrome");
+    flyout
 }
 
 fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>, subject: Subject) {
@@ -109,7 +142,7 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>, subject:
     let offset = crate::workspace::source_tools::byte_from_utf16(source.authored_source(), caret);
     drop(source);
     let (anchor, target) = match workspace
-        .registered_rename_anchor(offset)
+        .source_rename_anchor(offset)
         .and_then(|anchor| {
             subject
                 .target_name(workspace, &anchor)
@@ -126,7 +159,11 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>, subject:
     input.set_text(Some(&target));
     AutomationProperties::set_name(
         &input,
-        Some(&format!("New public {} name", subject.label())),
+        Some(match subject {
+            Subject::Resource => "New resource key",
+            Subject::Property => "New public property name",
+            Subject::Type => "New public type name",
+        }),
     );
     let row = toolbar();
     row.children().add(input.clone().upcast::<Control>());
@@ -235,7 +272,7 @@ fn show_plan(
     flyout: &Ref<Flyout>,
     subject: Subject,
     anchor: Rc<RenameAnchor>,
-    plan: RegisteredPropertyPlan,
+    plan: SourceRenamePlan,
 ) {
     let body = panel(workspace);
     body.children()

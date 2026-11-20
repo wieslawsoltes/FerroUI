@@ -22,7 +22,7 @@ impl DesignerWorkspace {
         cancel: bool,
     ) -> Result<serde_json::Value, String> {
         use serde_json::json;
-        let anchor = self.registered_rename_anchor(offset)?;
+        let anchor = self.source_rename_anchor(offset)?;
         if let Some(review) = review {
             return Ok(json!(self.apply_registered_type(&anchor, name, review)?));
         }

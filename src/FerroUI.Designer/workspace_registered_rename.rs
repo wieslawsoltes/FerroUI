@@ -4,8 +4,7 @@ use super::{
 };
 use ferroui_designer_core::Edit;
 use ferroui_designer_language::{
-    RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget,
-    ReviewedDocument,
+    RegisteredPropertyPlan, RegisteredPropertyTarget, ReviewedDocument, SourceReviewRequest,
 };
 use std::rc::Rc;
 
@@ -19,11 +18,11 @@ mod ui;
 pub(super) struct RenameAnchor {
     pub(super) uri: String,
     pub(super) revision: u64,
-    pub(super) request: RegisteredPropertyRequest,
+    pub(super) request: SourceReviewRequest,
 }
 
 impl DesignerWorkspace {
-    pub(super) fn registered_rename_anchor(
+    pub(super) fn source_rename_anchor(
         self: &Rc<Self>,
         offset: usize,
     ) -> Result<RenameAnchor, String> {
@@ -34,7 +33,7 @@ impl DesignerWorkspace {
         self.synchronize_language_service()?;
         let revision = self.session.borrow().document().revision();
         let tool = self.try_language_service()?;
-        let request = RegisteredPropertyRequest {
+        let request = SourceReviewRequest {
             version: tool
                 .version(&uri)
                 .ok_or("Index the active XAML file before reviewing")?,
@@ -112,7 +111,7 @@ impl DesignerWorkspace {
                 .map_err(|error| error.to_string())?;
             if session.collaboration_actor().is_some() {
                 return Err(
-                    "Open the local project for source edits spanning XAML and Rust".into(),
+                    "Open the local project for source edits spanning files".into(),
                 );
             }
         }
@@ -166,7 +165,7 @@ impl DesignerWorkspace {
         new_name: &str,
         review: Option<&str>,
     ) -> Result<RegisteredPropertyPlan, String> {
-        let anchor = self.registered_rename_anchor(offset)?;
+        let anchor = self.source_rename_anchor(offset)?;
         match review {
             Some(review) => self.apply_registered_property(&anchor, new_name, review),
             None => self.review_registered_property(&anchor, new_name),

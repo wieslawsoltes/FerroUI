@@ -984,6 +984,8 @@ mod dictionary_extraction;
 mod file_move;
 #[path = "workspace_reviewed_sources.rs"]
 mod reviewed_sources;
+#[path = "workspace_resource_rename.rs"]
+mod resource_rename;
 #[path = "workspace_rust_review.rs"]
 mod rust_review;
 #[path = "workspace_registered_rename.rs"]

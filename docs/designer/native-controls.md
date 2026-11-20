@@ -75,6 +75,12 @@ Open the owning Cargo project and build it from **Project** to load the exported
 
 Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, typed binding member, or style selector operand and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
 
+### Review a resource rename
+
+Open the owning project. In **Code** or **Split**, place the caret on a keyed resource or reference. Choose the **Rename resource and references** icon, enter the new key, and choose **Review resource rename**. From the **Library** definition editor, enter a key and choose **Rename** to open the same project review.
+
+For each file, compare **Original source** and **Proposed source**. The review follows included dictionaries and uses the current drafts for open views. Use the check icon to apply one history step across the participating buffers. Undo or Redo from any participating tab steps through the complete change. Save when the files are ready. [VS Code workflow](vscode/authoring.md#rename-a-resource-across-xaml-files) · [MCP workflow](vscode/reference.md#review-a-resource-rename-with-mcp)
+
 ### Review a registered property rename
 
 Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name, a typed binding member, or a property inside a style selector. Choose the **Rename registered property** icon, enter its new public name, and choose **Review property rename**.
