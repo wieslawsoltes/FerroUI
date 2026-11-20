@@ -1,5 +1,5 @@
 //! Project tooling index of the generated Rust entry points of each XAML module.
-use super::{JsonParser, JsonValue, field, json_optional, json_string};
+use super::{field, json_optional, json_string, JsonParser, JsonValue};
 use crate::compiled_names::CompiledGroupKind;
 use std::path::PathBuf;
 
@@ -13,6 +13,8 @@ pub struct CompiledXamlIndex {
     pub version: u32,
     pub manifest: PathBuf,
     pub groups: Vec<CompiledXamlGroup>,
+    /// Effective assembly name for the file-backed resource paths.
+    pub assembly: Option<String>,
     /// File inputs actually read by the build, including unused candidates of class groups.
     pub file_inputs: Vec<CompiledXamlInput>,
 }
@@ -25,6 +27,7 @@ impl CompiledXamlIndex {
             version: VERSION,
             manifest,
             groups: Vec::new(),
+            assembly: None,
             file_inputs: Vec::new(),
         }
     }
@@ -43,6 +46,7 @@ impl CompiledXamlIndex {
         Ok(Self {
             version: field(root, "version")?.integer("version")?,
             manifest: field(root, "manifest")?.string("manifest")?.into(),
+            assembly: optional_string(root, "assembly")?,
             groups: field(root, "groups")?
                 .array("groups")?
                 .iter()
@@ -78,6 +82,9 @@ impl CompiledXamlIndex {
                 .map(CompiledXamlInput::to_json)
                 .collect::<Vec<_>>();
             json.push_str(&format!(",\"file_inputs\":[{}]", inputs.join(",")));
+        }
+        if let Some(assembly) = &self.assembly {
+            json.push_str(&format!(",\"assembly\":{}", json_string(assembly)));
         }
         json.push('}');
         json
@@ -194,6 +201,8 @@ pub struct CompiledXamlMember {
     pub symbol: Option<String>,
     /// The group's loader can resolve this document by its public address.
     pub public: bool,
+    /// Physical input of this compiler member, relative to the manifest unless absolute.
+    pub source_path: Option<String>,
 }
 
 impl CompiledXamlMember {
@@ -203,17 +212,30 @@ impl CompiledXamlMember {
             key: field(member, "key")?.string("key")?.into(),
             symbol: field(member, "symbol")?.optional_string("symbol")?,
             public: field(member, "public")?.boolean("public")?,
+            source_path: optional_string(member, "source_path")?,
         })
     }
 
     fn to_json(&self) -> String {
-        format!(
-            "{{\"key\":{},\"symbol\":{},\"public\":{}}}",
+        let mut json = format!(
+            "{{\"key\":{},\"symbol\":{},\"public\":{}",
             json_string(&self.key),
             json_optional(&self.symbol),
             self.public
-        )
+        );
+        if let Some(path) = &self.source_path {
+            json.push_str(&format!(",\"source_path\":{}", json_string(path)));
+        }
+        json.push('}');
+        json
     }
+}
+
+fn optional_string(object: &[(String, JsonValue)], key: &str) -> Result<Option<String>, String> {
+    object
+        .iter()
+        .find(|(name, _)| name == key)
+        .map_or(Ok(None), |(_, value)| value.optional_string(key))
 }
 
 #[cfg(test)]
@@ -226,10 +248,8 @@ mod tests {
         let index = CompiledXamlIndex::parse(input).unwrap();
         assert!(index.is_supported());
         assert_eq!(index.to_json(), input);
-        assert!(
-            CompiledXamlIndex::parse(&"[".repeat(1000))
-                .unwrap_err()
-                .contains("deeply")
-        );
+        assert!(CompiledXamlIndex::parse(&"[".repeat(1000))
+            .unwrap_err()
+            .contains("deeply"));
     }
 }

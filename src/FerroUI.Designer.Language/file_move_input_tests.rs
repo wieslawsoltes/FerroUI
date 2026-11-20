@@ -155,6 +155,7 @@ fn main() {
             key: PATH.into(),
             symbol: Some("populate".into()),
             public: true,
+            source_path: None,
         }],
     });
     index.file_inputs.push(CompiledXamlInput {

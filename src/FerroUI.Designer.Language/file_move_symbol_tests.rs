@@ -63,6 +63,7 @@ fn compiled_project(
                 key: (*key).into(),
                 symbol: Some(name.clone()),
                 public: true,
+                source_path: None,
             })
             .collect(),
     });

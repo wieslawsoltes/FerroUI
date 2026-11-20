@@ -1,5 +1,6 @@
 //! Retain the actual group membership and exported entry points for file refactors.
 use crate::{GroupDocuments, XamlGroup};
+use ferroui_base::utilities::UriRef;
 use ferroui_build_scan::{
     compiled_index::{CompiledXamlGroup, CompiledXamlMember},
     compiled_names::CompiledGroupKind,
@@ -10,10 +11,26 @@ use std::{collections::BTreeMap, path::Path};
 pub(super) fn group<'a>(
     group: &XamlGroup,
     kind: CompiledGroupKind,
+    root_uri: &str,
     xaml_root: &Path,
     keys: impl IntoIterator<Item = &'a str>,
     documents: &[DocumentModel],
 ) -> CompiledXamlGroup {
+    let mut sources = BTreeMap::new();
+    if let Some(GroupDocuments::Files(files)) = &group.documents {
+        for (key, input) in files {
+            let name = match kind {
+                CompiledGroupKind::Documents => key.clone(),
+                CompiledGroupKind::Class => {
+                    let Ok(uri) = UriRef::parse_absolute(&format!("{root_uri}{key}")) else {
+                        continue;
+                    };
+                    uri.path().trim_start_matches('/').to_owned()
+                }
+            };
+            sources.insert(name, &input.path);
+        }
+    }
     let symbols: BTreeMap<_, _> = documents
         .iter()
         .filter_map(|document| {
@@ -41,6 +58,7 @@ pub(super) fn group<'a>(
                     key: key.to_owned(),
                     symbol,
                     public,
+                    source_path: sources.get(key).map(|path| (*path).clone()),
                 }
             })
             .collect(),
@@ -54,6 +72,26 @@ mod tests {
     use ferroui_build_scan::compiled_index::CompiledXamlIndex;
     use ferroui_build_scan::export::Export;
     use std::{env, fs};
+
+    #[test]
+    fn class_members_record_the_source_for_a_normalized_key() {
+        let group = XamlGroup::new("page").document_files(&[xaml_document_file!(
+            "Published/Page with spaces.xaml",
+            "Sources/Page.xaml"
+        )]);
+        let index = super::group(
+            &group,
+            CompiledGroupKind::Class,
+            "ferres://My.App/",
+            Path::new("."),
+            ["Published/Page%20with%20spaces.xaml"],
+            &[],
+        );
+        assert_eq!(
+            index.members[0].source_path.as_deref(),
+            Some("Sources/Page.xaml")
+        );
+    }
 
     #[test]
     fn cargo_build_indexes_private_generated_functions() {
@@ -137,6 +175,10 @@ mod tests {
             .groups
             .iter()
             .all(|group| group.file_backed && group.members[0].key == key));
+        assert!(before
+            .groups
+            .iter()
+            .all(|group| group.members[0].source_path.as_deref() == old_path.to_str()));
         let old_input = format!("cargo::rerun-if-changed={}", old_path.display());
         assert_eq!(
             backed
@@ -158,7 +200,12 @@ mod tests {
         fs::rename(&old_path, &new_path).unwrap();
         let rebuilt = compile(xaml_document_file!(key, new_path.to_str().unwrap()));
         assert!(rebuilt.errors.is_empty(), "{:?}", rebuilt.errors);
-        assert_eq!(read_index().file_inputs[0].path, new_path.to_str().unwrap());
+        let current = read_index();
+        assert_eq!(current.file_inputs[0].path, new_path.to_str().unwrap());
+        assert_eq!(
+            current.groups[0].members[0].source_path.as_deref(),
+            new_path.to_str()
+        );
         assert!(!rebuilt.lines.contains(&old_input));
         assert_eq!(fs::read(out.join("xaml/styles.rs")).unwrap(), generated);
         assert_eq!(fs::read_to_string(&metadata_path).unwrap(), metadata);

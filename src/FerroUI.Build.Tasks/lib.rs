@@ -990,6 +990,7 @@ impl Build {
                         continue;
                     };
                     symbols.file_inputs.extend(files.iter().map(|(_, input)| input.clone()));
+                    symbols.assembly = Some(assembly_name.clone());
                     documents
                 }
                 None => {
@@ -1075,7 +1076,7 @@ impl Build {
                         let class_metadata = file.metadata(&[]);
                         if let Some(members) = &in_group {
                             symbols.groups.push(compiled_index::group(
-                                group, CompiledGroupKind::Class, &self.xaml_root,
+                                group, CompiledGroupKind::Class, &root_uri, &self.xaml_root,
                                 members.iter().map(|(key, _)| key.as_str()), &class_metadata.documents,
                             ));
                         }
@@ -1184,7 +1185,7 @@ impl Build {
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             let group_metadata = file.metadata(&self.crate_name, &module_path, &[]);
             symbols.groups.push(compiled_index::group(
-                group, CompiledGroupKind::Documents, &self.xaml_root,
+                group, CompiledGroupKind::Documents, &root_uri, &self.xaml_root,
                 file.documents.iter().map(|(key, _)| key.as_str()), &group_metadata.documents,
             ));
             if group.exported {
