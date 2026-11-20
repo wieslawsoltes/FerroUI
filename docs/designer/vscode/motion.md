@@ -292,11 +292,13 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 
 ### Use the keyboard in a stage
 
-1. Switch a ready stage to **Interact**. Choose the key icon labeled **Keyboard input for** the stage, or click a control directly on the artboard.
+1. Switch a ready stage to **Interact**. Choose **Keyboard input for** the stage with the **abc** icon, or click a control directly on the artboard.
 2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the focused control’s name and role when available.
 3. Press Escape to return to the card toolbar. Each card has its own temporary control values. Pausing the card or editing its source ends keyboard input.
 
-Use an updated preview helper for the key icon and keyboard input. While playing a prototype, use the player’s interaction controls to follow its authored links. [Stage automation](reference.md#send-keyboard-input-to-a-stage)
+![The Desktop stage accepts Release review while the Compact stage shows its own text. The status announces SearchInput and the Escape shortcut.](../images/vscode-stage-keyboard.jpg)
+
+Use an updated preview helper for stage keyboard input. While playing a prototype, use the player’s interaction controls to follow its authored links. [Stage automation](reference.md#send-keyboard-input-to-a-stage)
 
 ## Play a prototype
 
