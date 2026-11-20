@@ -39,7 +39,7 @@ pub use command_bindings::{CommandBindingEdit, CommandBindingModel, CommandBindi
 pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
-pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget};
+pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget, ThemeResourceFamily, ThemeResourceMember};
 pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename, SourceRenamePlan, SourceReviewRequest};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -1914,16 +1914,8 @@ impl LanguageService {
         }
         let edges = state.resource_edges.get(&scope).into_iter().flatten();
         let lookup_edge = |edge: &ResourceEdge| {
-            let (target, next) = if let Some(source) = &edge.source {
-                let Ok(target) = self.resource_uri(uri, source) else {
-                    return ResourceLookup::missing();
-                };
-                let Some(imported) = self.documents.get(&target) else {
-                    return ResourceLookup::missing();
-                };
-                (target, imported.document.ast().root())
-            } else {
-                (uri.into(), edge.node)
+            let Some((target, next)) = self.resource_edge_target(uri, edge) else {
+                return ResourceLookup::missing();
             };
             let mut result = self.resources_at(&target, next, name, &seen, overrides);
             if edge.kind != ResourceEdgeKind::Collection && !result.matches.is_empty() {
@@ -1968,6 +1960,16 @@ impl LanguageService {
             result.fallback(lookup_edge(edge));
         }
         result
+    }
+
+    fn resource_edge_target(&self, uri: &str, edge: &ResourceEdge) -> Option<(String, u64)> {
+        if let Some(source) = &edge.source {
+            let target = self.resource_uri(uri, source).ok()?;
+            let root = self.documents.get(&target)?.document.ast().root();
+            Some((target, root))
+        } else {
+            Some((uri.into(), edge.node))
+        }
     }
     fn set_state(&mut self, uri: String, state: Option<State>) {
         if let Some(old) = self.documents.remove(&uri) {

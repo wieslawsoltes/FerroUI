@@ -37,7 +37,7 @@ export const fileMoveCatalog = {
 
 const rename = { ...location, position: at, new_name: { type: 'string', maxLength: 256 } };
 export const renameCatalog = {
-    ferroui_workspace_plan_resource_rename: tool('Review a XAML resource key and its resolved project references. Pass a UTF-16 location on the declaration, element name, or resource operand. Returns exact source patches and a review identifier.',
+    ferroui_workspace_plan_resource_rename: tool('Review a XAML resource key and its resolved project references. Pass a UTF-16 location on the declaration, element name, or resource operand. A matched theme family includes its authored layers. Returns exact patches and a review identifier.',
         rename, ['path', 'position', 'new_name']),
     ferroui_workspace_rename_resource: tool('Apply a checked XAML resource rename across the project in one Undo step. Copy review from ferroui_workspace_plan_resource_rename.',
         { ...rename, review: revision }, ['path', 'position', 'new_name', 'review'], true),

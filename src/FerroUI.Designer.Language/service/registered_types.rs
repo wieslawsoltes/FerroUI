@@ -147,6 +147,7 @@ impl LanguageService {
             documents,
             unmapped,
             rust_rename,
+            theme_family: None,
         })
     }
 

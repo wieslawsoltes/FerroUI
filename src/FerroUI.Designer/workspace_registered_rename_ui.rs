@@ -277,6 +277,12 @@ fn show_plan(
     let body = panel(workspace);
     body.children()
         .add(text(&format!("{}  →  {}", plan.name, plan.new_name)).upcast::<Control>());
+    if let Some(family) = &plan.theme_family {
+        let layers = family.members.iter().flat_map(|member| member.layers.iter().map(String::as_str)).collect::<Vec<_>>();
+        let label = text(&format!("Theme family · {}", layers.join(", ")));
+        label.set_text_wrapping(TextWrapping::Wrap);
+        body.children().add(label.upcast::<Control>());
+    }
     source_diffs(workspace, &body, &anchor.uri, Rc::new(plan.documents));
     let actions = toolbar();
     let status = text("");

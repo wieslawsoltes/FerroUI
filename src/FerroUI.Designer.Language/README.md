@@ -69,6 +69,8 @@ The `ferrouiResourceRename` capability advertises `ferroui/resourceRenameTarget`
 
 The plan retains each file’s version, original text, exact changes, and proposed text. Qualified resource extensions, XML escapes, and object-form key operands have source spans. Hosts replan on Apply, compare the review identifier, and stage a single source transaction. Studio calls the planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-resource-across-xaml-files)
 
+If the target belongs to one authored theme family, the service verifies the shared and per-layer declarations through the existing resource graph. Target and preview responses include `themeFamily` with the owner and each declaration’s layer and range. The planner checks existing and proposed resolution for references to both keys, including references using a merged, ancestor, or theme fallback. [User guide](../../docs/designer/vscode/authoring.md#rename-a-key-across-theme-variants)
+
 ## Registered property rename
 
 Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and the relevant open Rust `sourceDrafts` to `ferroui/planRegisteredPropertyRename`. Each draft supplies `uri`, `version`, and `source`. The single `rust` draft argument remains supported for clients that supply only the registration source.

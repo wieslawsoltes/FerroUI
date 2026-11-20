@@ -48,6 +48,8 @@ pub struct SourceRenamePlan {
     /// A semantic Rust rename required before applying the review.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rust_rename: Option<RustSymbolRename>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub theme_family: Option<super::refactoring::resource_rename::ThemeResourceFamily>,
 }
 
 pub use SourceRenamePlan as RegisteredRenamePlan;

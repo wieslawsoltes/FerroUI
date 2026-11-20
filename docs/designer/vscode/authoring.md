@@ -220,6 +220,12 @@ Undo restores both values in the owning XAML file. Named sources, converters, re
 
 The planner renames authored string keys. It follows includes, static and dynamic resource operands, and the same scopes used for XAML navigation. It asks you to reopen the review when a participating buffer or file changes. Resolve ambiguous theme providers and repair relevant incomplete drafts before applying the rename. Try the workflow on the included palette in [AccountCard.xaml](../../../editors/vscode/test/fixtures/ResourceRename/AccountCard.xaml). [Studio workflow](../native-controls.md#review-a-resource-rename) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
 
+### Rename a key across theme variants
+
+Run **Rename Resource and References** from a member of a palette or from a resource reference that resolves to that palette. When the declarations belong to one theme family, **Rename Theme Resource** shows its layers. Review the owning dictionary, supported included layer files, and consuming views together.
+
+The review covers an authored key shared by **Shared**, **Default**, **Light**, and **Dark** layers in one owning dictionary. It preserves local shadows and checks whether the new key would overlap a declaration or change where a consumer resolves the key. If a reference can fall back to another owner, use its definition links to inspect the competing providers. [Compare theme colors](styles.md) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
+
 ## Extract a resource dictionary
 
 1. Open the XAML view in a trusted workspace. Place the caret on the owning control, its `Resources` property, or a resource in the dictionary. Choose **Refactor…** and **Extract Resource Dictionary…**. In the **Resources** dock, the file icon beside a resource offers the same action for its dictionary.

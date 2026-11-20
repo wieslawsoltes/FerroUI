@@ -153,6 +153,7 @@ impl LanguageService {
             documents,
             unmapped,
             rust_rename: None,
+            theme_family: None,
         })
     }
 

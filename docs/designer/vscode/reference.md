@@ -119,7 +119,7 @@ Call `designer_scaffold_handler` with the same target, `handler`, and `expected_
 
 ### Review a resource rename with MCP
 
-In VS Code, call `ferroui_workspace_plan_resource_rename` with `path`, a zero-based UTF-16 `position` at the key or resource reference, and `new_name`. Use `folder` to select the project in a multi-root window. Inspect each returned document’s `before`, versioned `edit`, and `after` source, including any unopened consumers.
+In VS Code, call `ferroui_workspace_plan_resource_rename` with `path`, a zero-based UTF-16 `position` at the key or resource reference, and `new_name`. Use `folder` to select the project in a multi-root window. Inspect each returned document’s `before`, versioned `edit`, and `after` source, including any unopened consumers. A family review also returns `themeFamily.owner` and the declaration ranges and layers in `themeFamily.members`.
 
 Call `ferroui_workspace_rename_resource` with the same fields and the returned `review`. The write requires `ferroui.mcp.allowWrites` and applies all changes in one editor Undo step. In Studio, use `designer_plan_resource_rename` and `designer_rename_resource` with the active XAML UTF-8 byte `offset`, `new_name`, and `expected_revision`. Pass the `review` on apply. Use Undo from a participating tab to restore all buffers. [Authoring workflow](authoring.md#rename-a-resource-across-xaml-files)
 

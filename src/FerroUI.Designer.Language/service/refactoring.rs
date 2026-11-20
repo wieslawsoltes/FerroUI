@@ -21,7 +21,15 @@ impl LanguageService {
         target: &(String, Occurrence),
         new_name: &str,
     ) -> Result<WorkspaceEdit> {
-        let (target_uri, declaration) = target;
+        self.rename_declarations(std::slice::from_ref(target), new_name)
+    }
+
+    fn rename_declarations(
+        &self,
+        targets: &[(String, Occurrence)],
+        new_name: &str,
+    ) -> Result<WorkspaceEdit> {
+        let (target_uri, declaration) = &targets[0];
         let resource = declaration.kind == SymbolKind::Resource;
         require(
             if resource {
@@ -38,37 +46,38 @@ impl LanguageService {
         if new_name == declaration.name {
             return Ok(WorkspaceEdit::default());
         }
-        let state = self.state(target_uri)?;
-        let mut new_entries = self.declarations.get(new_name).cloned().unwrap_or_default();
-        require(
-            !new_entries.iter().any(|(uri, symbol)| {
-                uri == target_uri
-                    && symbol.kind == declaration.kind
-                    && (!resource
-                        || resource_scope(&state.document, symbol.node)
-                            == resource_scope(&state.document, declaration.node))
-            }),
-            "A declaration with this name already exists in scope",
-        )?;
-
         // Keep syntax identities and the dictionary graph fixed while testing the
         // proposed spelling through the same resolver that powers navigation.
+        let mut grouped = BTreeMap::<String, Vec<TextEdit>>::new();
+        let mut new_entries = self.declarations.get(new_name).cloned().unwrap_or_default();
         let mut old_entries = self.declarations[&declaration.name].clone();
-        old_entries.retain(|entry| !same_declaration(entry, target));
-        let mut renamed = target.clone();
-        renamed.1.name = new_name.into();
-        new_entries.push(renamed);
+        let selected = |entry: &(String, Occurrence)| {
+            targets.iter().any(|target| same_declaration(entry, target))
+        };
+        old_entries.retain(|entry| !selected(entry));
+        for target in targets {
+            let (uri, symbol) = target;
+            let state = self.state(uri)?;
+            require(
+                !new_entries.iter().any(|(other_uri, other)| {
+                    other_uri == uri && other.kind == symbol.kind
+                        && (!resource || resource_scope(&state.document, other.node)
+                            == resource_scope(&state.document, symbol.node))
+                }),
+                "A declaration with this name already exists in scope",
+            )?;
+            let mut renamed = target.clone();
+            renamed.1.name = new_name.into();
+            new_entries.push(renamed);
+            grouped.entry(uri.clone()).or_default().push(TextEdit {
+                range: state.index.range(symbol.span)?,
+                new_text: replacement(symbol, new_name),
+            });
+        }
         let overrides = DeclarationIndex::from([
             (declaration.name.clone(), old_entries),
             (new_name.into(), new_entries),
         ]);
-        let mut grouped = BTreeMap::from([(
-            target_uri.clone(),
-            vec![TextEdit {
-                range: state.index.range(declaration.span)?,
-                new_text: replacement(declaration, new_name),
-            }],
-        )]);
         for (uri, state) in &self.documents {
             if !resource && uri != target_uri {
                 continue;
@@ -79,8 +88,7 @@ impl LanguageService {
                     && (symbol.name == declaration.name || symbol.name == new_name)
             }) {
                 let before = self.resolve_with_context(uri, reference);
-                let rewrite =
-                    matches!(before.matches.as_slice(), [entry] if same_declaration(entry, target));
+                let rewrite = !before.matches.is_empty() && before.matches.iter().all(selected);
                 let mut proposed = reference.clone();
                 if rewrite {
                     proposed.name = new_name.into();

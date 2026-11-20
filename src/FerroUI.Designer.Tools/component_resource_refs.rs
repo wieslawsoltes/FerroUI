@@ -452,7 +452,8 @@ fn lookup_dictionary<'a>(
     Lookup::external()
 }
 
-pub(crate) fn theme_key(document: &Document, node: &Node) -> Option<String> {
+/// Decode an authored theme layer using the same rules as palette and resource lookup.
+pub fn theme_key(document: &Document, node: &Node) -> Option<String> {
     if let Some(key) = literal_key(node) {
         // The runtime's built-in ThemeVariant converter trims surrounding whitespace.
         return Some(if matches!(key.trim(), "Default" | "Light" | "Dark") {
