@@ -436,8 +436,11 @@ pub trait ElementBuilder: Sized {
 }
 
 /// Puts `value` into the values of `element`, in the place of a value it gave `property` before
-/// ([`ElementBuilder::prop`]): one function for every property and every type of value.
-#[inline(never)]
+/// ([`ElementBuilder::prop`]): one function for every property and every type of value. Inlined
+/// into each setter: a component that runs again calls its setters, and a call per setter took
+/// 3.7 % more instructions re-running a parent of memoized components (local gate,
+/// `declarative::ViewBenchmark.run_parent_of_components`); the handlers stay shared.
+#[inline]
 fn set_prop(element: &mut ControlElement, property: &'static FerroProperty, value: PropValue) {
     let props = &mut element.props;
     if props.capacity() == 0 {
