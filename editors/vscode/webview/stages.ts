@@ -22,6 +22,7 @@ const player = new PrototypePlayer(root, send);
 let model: StageModel | undefined;
 let scene: PrototypeScene | null = null;
 let graphOpen = false;
+let keyboardCurrent = false;
 const graph = new PrototypeGraphView(send, id => {
     switchSurface(false);
     const stage = cards.get(id);
@@ -32,8 +33,18 @@ const graph = new PrototypeGraphView(send, id => {
 window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (data.type === 'status') { report(data.message); return; }
     if (data.type === 'prototype') { showScene(data.scene); return; }
+    if (data.type === 'keyboardUnavailable') {
+        keyboardCurrent = false;
+        updateKeyboard();
+        return;
+    }
+    if (data.type === 'keyboardFocus') {
+        cards.get(data.id)?.keyboardFocus(data.epoch, data.focus);
+        return;
+    }
     if (data.type === 'model') {
         model = data.model;
+        keyboardCurrent = true;
         vscode.setState({ uri: data.uri });
         const keep = new Set(model.stages.map(stage => stage.id));
         for (const [id, previous] of cards) {
@@ -63,7 +74,12 @@ function showScene(next: PrototypeScene | null): void {
     if (scene !== next) menu.close();
     scene = next;
     player.update(scene, model, cards);
+    updateKeyboard();
     showSurface();
+}
+
+function updateKeyboard(): void {
+    for (const card of cards.values()) card.setKeyboard(model?.keyboardInput === true, keyboardCurrent);
 }
 
 function report(message: string): void {

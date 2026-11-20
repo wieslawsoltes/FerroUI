@@ -19,7 +19,7 @@ import type { ScenarioRunner } from './scenarioRunner';
 import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
-import type { PrototypeCommand, StageChange } from './stagesProtocol';
+import type { PrototypeCommand, StageChange, StageInput } from './stagesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
 import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
@@ -87,7 +87,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     stage?: number;
     expected_epoch?: number;
     debug_configuration?: string;
-    input?: CanvasInteraction;
+    input?: CanvasInteraction | StageInput;
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
@@ -286,7 +286,7 @@ export class AgentTools {
                 return { ...result, revision: result.frame.token };
             }
             case 'designer_canvas_input':
-                await panel.interact(args.expected_revision, args.input!, signal);
+                await panel.interact(args.expected_revision, args.input as CanvasInteraction, signal);
                 return describe(panel);
             case 'designer_select': {
                 const frame = { session: panel.session, token: args.expected_revision };
@@ -413,6 +413,9 @@ export class AgentTools {
             case 'designer_stage_checks': return this.stages.board(document.uri).checks(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_states': return this.stages.board(document.uri).stateOptions(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_fixtures': return this.stages.board(document.uri).fixtureOptions(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_input': return this.stages.board(document.uri).keyboard({
+                id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageInput,
+            }, signal);
             case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
             case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal);
         }

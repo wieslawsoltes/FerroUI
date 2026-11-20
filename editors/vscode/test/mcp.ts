@@ -31,6 +31,7 @@ import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
+import { verifyStageKeyboard } from './stageKeyboardMcp';
 import { verifyDesignTokens } from './designTokenMcp';
 import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
@@ -102,6 +103,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
         const guideWrite = { session: 1, expected_revision: 0, expected_epoch: 0, edit: { action: 'clear' } };
         assert.match((await invoke('designer_canvas_guides_edit', guideWrite)).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_stage_input', { session: 1, stage: 1, expected_epoch: 0,
+            input: { kind: 'focus' } })).content[0]?.text ?? '', /allowWrites/);
         const hostedKey = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
             arguments: { program: 1, target: 1, property: 'BoxShadow', previous: 2, time: 2, value: '8 14 24 2 #60244B90', easing: 'Linear' } };
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
@@ -243,6 +246,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyResourcePromotion({ invoke, content });
         await verifyPreviewChecks({ invoke, content });
         await verifyStageStates({ invoke, content });
+        await verifyStageKeyboard({ invoke, content });
         await verifyDesignTokens({ invoke, content });
         await verifyBrushMcp({ invoke, content });
         await verifyFocusOverlay({ invoke, content });

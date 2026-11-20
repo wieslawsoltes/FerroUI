@@ -10,6 +10,7 @@ pub(crate) fn initialize() -> Value {
         "hostedStateAuthoring",
         "rsxLanguage",
         "stages",
+        "stageKeyboard",
         "prototypeEditing",
         "stageIncludes",
         "projectCatalog",

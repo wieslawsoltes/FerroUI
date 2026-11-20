@@ -11,7 +11,7 @@ use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
     PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
-    PreviewStageMode, PreviewStageStateOptions,
+    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageMode, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
@@ -112,6 +112,13 @@ pub(crate) struct Pointer {
     target: StageTarget,
     x: f64,
     y: f64,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct Keyboard {
+    #[serde(flatten)]
+    target: StageTarget,
+    input: PreviewStageKeyboardInput,
 }
 
 impl Stages {
@@ -327,6 +334,15 @@ impl Stages {
         let parsed = DesignDocument::parse(source, projects.source(source)?)?;
         let range = parsed.node_name_range(selection.node)?;
         Ok(json!({"range":range,"uri":source.uri}))
+    }
+
+    pub(crate) fn keyboard(&mut self, request: Keyboard) -> Result<Option<PreviewStageFocus>, String> {
+        if self.playback.scene().is_some() {
+            return Err("Close prototype playback before using stage keyboard input".into());
+        }
+        let target = self.board.keyboard_target(request.target.id, request.target.epoch)?;
+        self.mounted(&request.target)?;
+        target.input(request.input)
     }
 
     fn stage_info(&self, target: &StageTarget) -> Result<PreviewStageInfo, String> {

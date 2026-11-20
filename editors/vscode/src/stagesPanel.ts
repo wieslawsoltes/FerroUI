@@ -7,7 +7,7 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { choose, editText } from './studioContext';
@@ -78,6 +78,7 @@ export class StagesPanel implements vscode.Disposable {
 
 class StageSession {
     private readonly dependencies = new DesignerDependencies();
+    private readonly inputImages = new Map<number, ReturnType<typeof setTimeout>>();
     private readonly subscriptions: vscode.Disposable[];
     private readonly cacheKey: string;
     private client?: Promise<NativePreview>;
@@ -98,7 +99,9 @@ class StageSession {
         this.manifest = context.workspaceState.get<StageManifest>(this.cacheKey);
         this.subscriptions = [
             panel.onDidDispose(() => this.dispose()),
-            panel.onDidChangeViewState(() => this.schedule()),
+            panel.onDidChangeViewState(() => {
+                if (panel.visible && this.modelGeneration !== this.generation) this.schedule();
+            }),
             panel.webview.onDidReceiveMessage((message: StagesRequest) => { void this.receive(message); }),
             projects.onDidChange(() => this.schedule()),
             vscode.workspace.onDidChangeTextDocument(event => {
@@ -147,6 +150,45 @@ class StageSession {
 
     fixtureOptions(id: number, epoch: number, signal: AbortSignal) {
         return this.readStage({ id, epoch }, signal, (client, stage) => client.stageFixtureOptions(stage));
+    }
+
+    async keyboard(target: StageKeyboard, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        return this.applyKeyboard(await this.getClient(), model, target, signal);
+    }
+
+    private async applyKeyboard(client: NativePreview, model: StageModel, target: StageKeyboard, signal: AbortSignal) {
+        signal.throwIfAborted();
+        const stage = this.currentInputStage(model, target);
+        // Pointer and keyboard requests enter the same native stdio queue. A
+        // click sent just before a key can establish the native focus target.
+        const focus = await client.stageKeyboard(target);
+        this.currentInputStage(model, target);
+        this.post({ type: 'keyboardFocus', id: stage.id, epoch: stage.epoch, focus });
+        this.scheduleInputImage(client, model, stage);
+        signal.throwIfAborted();
+        return focus;
+    }
+
+    private currentInputStage(model: StageModel, target: StageTarget): StageInfo {
+        if (this.busy || this.timer || this.disposed || this.model !== model
+            || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) {
+            throw new Error('The stage changed. Use its current frame.');
+        }
+        const stage = model.stages.find(entry => entry.id === target.id && entry.epoch === target.epoch);
+        if (!stage) throw new Error('Read the current stage ID and epoch.');
+        return stage;
+    }
+
+    private scheduleInputImage(client: NativePreview, model: StageModel, stage: StageInfo): void {
+        if (this.inputImages.has(stage.id)) return;
+        this.inputImages.set(stage.id, setTimeout(() => {
+            this.inputImages.delete(stage.id);
+            if (this.disposed || this.model !== model || this.modelGeneration !== this.generation) return;
+            void this.image(client, stage).catch(error => {
+                if (this.model === model && this.modelGeneration === this.generation) this.report(error);
+            });
+        }, 32));
     }
 
     private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
@@ -212,6 +254,7 @@ class StageSession {
 
     private schedule(): void {
         this.generation++;
+        if (this.model?.keyboardInput) this.post({ type: 'keyboardUnavailable' });
         clearTimeout(this.timer);
         this.timer = undefined;
         if (this.ready && this.panel.visible && !this.disposed) this.timer = setTimeout(() => { this.timer = undefined; void this.sync(); }, 170);
@@ -247,6 +290,7 @@ class StageSession {
 
     private async publish(model: StageModel, client: NativePreview, generation: number): Promise<void> {
         if (generation !== this.generation || this.disposed) return;
+        model.keyboardInput = client.capabilities.stageKeyboard === true;
         this.model = model;
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
@@ -295,10 +339,14 @@ class StageSession {
                 }
                 return;
             }
+            if (message.type === 'keyboard') {
+                await this.applyKeyboard(client, model, message, AbortSignal.timeout(15_000));
+                return;
+            }
             if (message.type === 'pointer') {
-                const version = this.document.version;
+                const stage = this.currentInputStage(model, message);
                 const result = await client.stagePointer(message);
-                if (generation !== this.generation || this.document.version !== version) return;
+                this.currentInputStage(model, message);
                 if (result.prototype) {
                     model.prototype = result.prototype;
                     this.post({ type: 'prototype', scene: result.prototype });
@@ -306,8 +354,7 @@ class StageSession {
                 if (result.range && result.uri) {
                     await this.revealStageSource(result.uri, result.range, generation);
                 }
-                const stage = model.stages.find(stage => stage.id === message.id);
-                if (result.interacted && stage) await this.image(client, stage);
+                if (result.interacted) this.scheduleInputImage(client, model, stage);
                 return;
             }
             if (message.type === 'checks') {
@@ -487,6 +534,8 @@ class StageSession {
     private dispose(): void {
         this.disposed = true;
         clearTimeout(this.timer);
+        this.inputImages.forEach(timer => clearTimeout(timer));
+        this.inputImages.clear();
         void this.client?.then(client => client.dispose(), () => {});
         this.subscriptions.forEach(subscription => subscription.dispose());
     }

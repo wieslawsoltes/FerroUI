@@ -161,6 +161,7 @@ pub use preview_stages::{
     PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
+    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
 };
 pub use preview_stage_editor::PreviewStageEditor;
 pub use preview_stage_export::{

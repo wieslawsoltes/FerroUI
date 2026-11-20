@@ -290,6 +290,14 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 
 ![The compact stage reports the edges clipped by its own viewport](../images/vscode-layout-stage-checks.jpg)
 
+### Use the keyboard in a stage
+
+1. Switch a ready stage to **Interact**. Choose the key icon labeled **Keyboard input for** the stage, or click a control directly on the artboard.
+2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the focused control’s name and role when available.
+3. Press Escape to return to the card toolbar. Each card has its own temporary control values. Pausing the card or editing its source ends keyboard input.
+
+Use an updated preview helper for the key icon and keyboard input. While playing a prototype, use the player’s interaction controls to follow its authored links. [Stage automation](reference.md#send-keyboard-input-to-a-stage)
+
 ## Play a prototype
 
 Switch the Stages board to **Prototype**. Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Use **Play Prototype** to follow the flow and test the native input. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)

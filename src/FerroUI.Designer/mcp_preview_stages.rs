@@ -20,6 +20,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_preview_stage_checks"
             | "designer_preview_stage_states"
             | "designer_preview_stage_fixtures"
+            | "designer_preview_stage_input"
     )
 }
 
@@ -160,6 +161,18 @@ pub(super) fn tools() -> Vec<Value> {
     edit["annotations"]["readOnlyHint"] = json!(false);
     edit["annotations"]["destructiveHint"] = json!(true);
     edit["inputSchema"]["required"] = json!(["action", "expected_model"]);
+    let mut input = s::tool(
+        "designer_preview_stage_input",
+        "Focus the current Live stage or send it a key gesture or text. Use the model and stage epoch from designer_preview_stages. Returns the focused control's accessible name and role. Requires allow_input and allow_property_writes.",
+        s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"expected_epoch":s::revision(),
+            "input":{"oneOf":[
+                s::object(json!({"kind":{"const":"focus"}}), &["kind"]),
+                s::object(json!({"kind":{"const":"key"},"key":bounded_string(64)}), &["kind","key"]),
+                s::object(json!({"kind":{"const":"text"},"text":bounded_string(8192)}), &["kind","text"])
+            ]}}), &["stage","expected_model","expected_epoch","input"]),
+        true,
+    );
+    input["annotations"]["destructiveHint"] = json!(false);
     vec![
         s::tool(
             "designer_preview_stages",
@@ -195,6 +208,7 @@ pub(super) fn tools() -> Vec<Value> {
             "Read the authored design fixtures for a stage. Set design_fixture in its configuration to select one.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
+        input,
         edit,
     ]
 }
@@ -307,6 +321,17 @@ pub(super) fn call(
     if name == "designer_preview_stage_fixtures" {
         let id = integer(args, "stage")?;
         return Ok(json!({"stage":id,"fixtures":workspace.preview_stage_fixture_options(id)?}));
+    }
+    if name == "designer_preview_stage_input" {
+        if !permissions.allow_input {
+            return Err("Stage keyboard input requires allow_input".into());
+        }
+        let focus = workspace.preview_stage_keyboard(
+            integer(args, "stage")?,
+            integer(args, "expected_epoch")?,
+            decode(args, "input")?,
+        )?;
+        return Ok(json!(focus));
     }
     if name == "designer_preview_image" {
         let id = integer(args, "stage")?;

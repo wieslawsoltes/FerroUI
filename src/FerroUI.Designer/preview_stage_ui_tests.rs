@@ -347,6 +347,55 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
 }
 
 #[test]
+fn stage_keyboard_uses_native_tab_order_and_keeps_text_in_the_target_card() {
+    use crate::PreviewStageKeyboardInput as Input;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let workspace = &f.workspace;
+    let id = f.first();
+    let original = workspace.preview_stage(id).unwrap();
+    assert!(workspace.preview_stage_keyboard(id, original.epoch, Input::Focus).is_err());
+    let mut configuration = original.configuration;
+    configuration.mode = PreviewStageMode::Live;
+    workspace.update_preview_stage(id, configuration).unwrap();
+    let other = workspace.duplicate_preview_stage(id).unwrap();
+    f.layout();
+
+    let epoch = workspace.preview_stage(id).unwrap().epoch;
+    assert!(workspace.preview_stage_keyboard(id, original.epoch, Input::Focus).is_err());
+    let send = |input| workspace.preview_stage_keyboard(id, epoch, input).unwrap().unwrap();
+    let key = |key: &str| Input::Key { key: key.into() };
+    let activations = Rc::new(Cell::new(0));
+    let count = activations.clone();
+    native::<Button>(&workspace.preview_stage_control(id).unwrap(), "Card")
+        .click(move |_, _| count.set(count.get() + 1));
+    assert_eq!(send(Input::Focus).role, "Button");
+    send(key("Enter"));
+    send(key("Space"));
+    assert_eq!(activations.get(), 2);
+    assert_eq!(send(key("Shift+Tab")).role, "Edit");
+    assert_eq!(send(key("Tab")).role, "Button");
+    assert_eq!(send(key("Tab")).role, "Edit");
+    send(key("End"));
+    send(key("Space"));
+    send(Input::Text { text: "東京 🪴".into() });
+    assert_eq!(
+        native::<TextBox>(&workspace.preview_stage_control(id).unwrap(), "Input").text().as_deref(),
+        Some("Edit me 東京 🪴")
+    );
+    assert_eq!(
+        native::<TextBox>(&workspace.preview_stage_control(other).unwrap(), "Input").text().as_deref(),
+        Some("Edit me")
+    );
+    workspace.set_preview_stage_paused(id, true).unwrap();
+    assert!(workspace.preview_stage_keyboard(id, workspace.preview_stage(id).unwrap().epoch, Input::Focus).is_err());
+    let session = workspace.session.borrow();
+    assert_eq!(session.document().source(), SOURCE);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn scaled_stage_pointer_selects_its_authored_control_before_inspector_handoff() {
     let _app = UnitTestApplication::start(services());
     let f = Fixture::new();

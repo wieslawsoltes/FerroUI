@@ -1,5 +1,6 @@
-import type { PrototypeScene, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
+import type { PrototypeScene, StageFocus, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
 import { create, icon, iconButton, labelButton } from './dom';
+import { StageKeyboard } from './stageKeyboard';
 import type { StageField, StageMenu } from './stageMenu';
 
 export class StageCard {
@@ -16,7 +17,11 @@ export class StageCard {
     private readonly pause = iconButton('debug-pause', 'Pause', () => this.edit('pause'));
     private readonly checks = iconButton('check-all', 'Preview checks', () => this.send({ type: 'checks', id: this.stage.id, epoch: this.stage.epoch }));
     private readonly more = iconButton('ellipsis', 'Stage actions', () => this.menu.prepare(this.more, this.stage, field => this.edit(field)));
+    private readonly keyboard: StageKeyboard;
     private displayedEpoch?: number;
+    private pendingImage = 0;
+    private keyboardSupported = false;
+    private keyboardCurrent = false;
 
     constructor(public stage: StageInfo, private readonly menu: StageMenu, private readonly send: (request: StagesRequest) => void,
         private readonly scene: () => PrototypeScene | null) {
@@ -31,7 +36,6 @@ export class StageCard {
         tools.setAttribute('role', 'group');
         tools.setAttribute('aria-label', 'Stage tools');
         this.menu.bind(this.more);
-        tools.append(this.mode, this.pause, this.checks, this.more);
         const settings = create('div');
         settings.className = 'stage-settings';
         for (const [button, field] of [[this.size, 'layout'], [this.fixture, 'designData'], [this.states, 'state']] as const) {
@@ -51,6 +55,9 @@ export class StageCard {
         this.image.hidden = true;
         this.image.onclick = event => this.pointer(event);
         artboard.append(this.placeholder, this.image, this.status);
+        this.keyboard = new StageKeyboard(this.element, artboard, stage.id, this.mode, input =>
+            this.send({ type: 'keyboard', id: this.stage.id, epoch: this.stage.epoch, input }));
+        tools.append(this.mode, this.keyboard.button, this.pause, this.checks, this.more);
         this.element.append(header, artboard);
         this.update(stage);
     }
@@ -90,22 +97,42 @@ export class StageCard {
         if (this.status.textContent !== (message ?? '')) this.status.textContent = message ?? '';
         this.status.hidden = !message || this.image.hidden;
         this.placeholder.textContent = message ?? 'Rendering stage…';
+        this.updateKeyboard();
     }
 
     get imageSource(): string | undefined { return this.image.hidden ? undefined : this.image.src; }
 
+    setKeyboard(supported: boolean, current: boolean): void {
+        this.keyboardSupported = supported;
+        this.keyboardCurrent = current;
+        this.updateKeyboard();
+    }
+
+    keyboardFocus(epoch: number, focus: StageFocus | null): void {
+        if (this.stage.epoch === epoch) this.keyboard.focused(focus);
+    }
+
     async present(epoch: number, image: StageImage): Promise<string | undefined> {
         if (this.stage.epoch !== epoch) return;
+        const version = ++this.pendingImage;
         const next = new Image();
         next.src = `data:image/png;base64,${image.png}`;
         try { await next.decode(); } catch { return; }
-        if (this.stage.epoch !== epoch || !this.element.isConnected) return;
+        if (this.stage.epoch !== epoch || version !== this.pendingImage || !this.element.isConnected) return;
         this.image.src = next.src;
         this.placeholder.hidden = true;
         this.image.hidden = false;
         this.status.hidden = !this.status.textContent;
         this.displayedEpoch = epoch;
+        this.updateKeyboard();
         return next.src;
+    }
+
+    private updateKeyboard(): void {
+        const { configuration, epoch, status } = this.stage;
+        const offered = this.keyboardSupported && !this.scene() && configuration.mode === 'live';
+        const enabled = offered && this.keyboardCurrent && status.state === 'ready' && this.displayedEpoch === epoch;
+        this.keyboard.update(configuration.name, offered, enabled);
     }
 
     private edit(field: StageField): void {
@@ -123,6 +150,7 @@ export class StageCard {
         const bounds = this.image.getBoundingClientRect();
         this.send({ type: 'pointer', id: stage.id, epoch: stage.epoch,
             x: (event.clientX - bounds.left) / bounds.width, y: (event.clientY - bounds.top) / bounds.height });
+        this.keyboard.enter();
     }
 }
 

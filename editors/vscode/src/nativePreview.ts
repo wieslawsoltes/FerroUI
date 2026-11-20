@@ -12,7 +12,7 @@ import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource } from './hostedProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
-import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageImage, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 
 const timelineActions = new Set(['scrub', 'play_program', 'play_range', 'advance_program', 'pause_program', 'stop_program']);
@@ -37,7 +37,7 @@ export class NativePreview implements vscode.Disposable {
     canvasGuides?: GuideCatalog;
     capabilities: {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
-        stages?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
+        stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; itemTemplateAuthoring?: boolean; propertyTrace?: boolean; styleComposition?: boolean;
         projectInventory?: boolean; tokenHandoff?: boolean;
@@ -191,6 +191,10 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesFixtureOptions', target);
     }
     stagePointer(input: StagePointer): Promise<StagePick> { return this.send('stagesPointer', input); }
+    stageKeyboard(input: StageKeyboard): Promise<StageFocus | null> {
+        if (!this.capabilities.stageKeyboard) throw new Error('Update the FerroUI preview helper to use stage keyboard input.');
+        return this.send('stagesKeyboard', input);
+    }
     stagePrototypeElements(target: StageTarget): Promise<PrototypeHotspot[]> {
         if (!this.capabilities.prototypeEditing) throw new Error('Update the FerroUI preview helper to edit prototypes.');
         return this.send('stagesPrototypeElements', target);

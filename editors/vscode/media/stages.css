@@ -72,6 +72,20 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003;
 }
 .stage-card[data-mode="select"][data-state="ready"] img { cursor: crosshair; }
+.stage-card[data-keyboard] .stage-artboard img {
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: 1px;
+}
+.stage-keyboard-capture {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    border: 0;
+    clip-path: inset(50%);
+    overflow: hidden;
+}
+.stage-keyboard-status { pointer-events: none; }
 .stage-placeholder { padding: 22px 6px; color: var(--muted); text-align: center; }
 .stage-frame-status {
     position: absolute;

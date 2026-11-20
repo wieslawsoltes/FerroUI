@@ -57,6 +57,23 @@ impl DesignerWorkspace {
     pub fn preview_stage_control(&self, id: PreviewStageId) -> Option<Ref<Control>> {
         self.preview_stages.board.borrow().control(id)
     }
+
+    /// Send input to a native comparison card without changing authored selection.
+    pub fn preview_stage_keyboard(
+        &self,
+        id: PreviewStageId,
+        epoch: u64,
+        action: crate::PreviewStageKeyboardInput,
+    ) -> Result<Option<crate::PreviewStageFocus>, String> {
+        if !self.preview_stages_visible() || self.preview_prototype_playback().is_some() {
+            return Err("Open the Stages board outside prototype playback to use stage input".into());
+        }
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before using keyboard input".into());
+        }
+        let target = self.preview_stages.board.borrow().keyboard_target(id, epoch)?;
+        target.input(action)
+    }
     pub fn preview_stages_visible(&self) -> bool {
         self.preview_stages.visible.get()
     }

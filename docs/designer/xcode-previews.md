@@ -438,6 +438,7 @@ The MCP tools expose the same workspace board and native graphs:
 | --- | --- |
 | `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
 | `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
+| `designer_preview_stage_input` | Focus or send keyboard input to a visible Live stage. Supply `stage`, `expected_model` and `expected_epoch` from the latest board. Returns the focused control's accessible name and role, or `null`. |
 | `designer_preview_matrix` | Plan the exact combinations and return their configurations, count, available capacity and current model without adding native stages. |
 | `designer_preview_image` | Read a current accepted native stage as a PNG with source, graph and size metadata, using `expected_model` from the latest read. Accepts bounded pixel density; does not refresh the stage, apply drafts or write files. |
 
@@ -457,6 +458,8 @@ stage. The model identifies the current documents, pending source text and board
 an optimistic concurrency guard, not an authorization credential. Stage settings remain
 local presentation state and are available to collaboration viewers with the required
 host permissions.
+
+For stage input, send `input: { kind: "focus" }` to enter the stage, `{ kind: "key", key: "Tab" }` or `"Shift+Tab"` to navigate, or `{ kind: "text", text: "Acme" }` to type into the focused field. This requires both write and input permissions. Use the prototype playback commands when a flow is active.
 
 Matrix planning and image capture are read-only tools and do not require those write or
 input permissions. Image capture returns an MCP image content block plus structured

@@ -47,13 +47,16 @@ export interface PrototypeScene {
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[] }
+export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean }
 export interface StageTarget { id: number; epoch: number }
 export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
 export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }
 export interface StageState { owner: SourceAnchor; group: string; state: string }
 export interface StageStateOptions { owner: SourceAnchor; owner_name: string; group: string; states: string[] }
 export interface StagePointer extends StageTarget { x: number; y: number }
+export type StageInput = { kind: 'focus' } | { kind: 'key'; key: string } | { kind: 'text'; text: string };
+export interface StageKeyboard extends StageTarget { input: StageInput }
+export interface StageFocus { name: string; role: string }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }
 interface AddStage { action: 'add'; name: string; width: number; height: number; dark: boolean; epoch: number }
 type ExistingStageChange = (
@@ -65,10 +68,13 @@ export type StageDocument = Source & { workspaceRoot?: string };
 export type NativeStageChange = ExistingStageChange | (AddStage & { source?: StageDocument; localSources?: PreviewSourceBuffer[] });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
+    | ({ type: 'keyboard' } & StageKeyboard)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand }
     | { type: 'editPrototype'; epoch: number; edit: PrototypeEdit }
     | { type: 'revealTrigger'; epoch: number; index: number };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
+    | ({ type: 'keyboardFocus'; focus: StageFocus | null } & StageTarget)
+    | { type: 'keyboardUnavailable' }
     | { type: 'prototype'; scene: PrototypeScene | null };

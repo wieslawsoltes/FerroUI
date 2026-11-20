@@ -33,6 +33,9 @@ pub use manifest::{PreviewStageDetails, PreviewStageManifest, PreviewStageSet, P
 mod prototype_elements;
 use layout::StageLayoutHost;
 use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
+#[path = "preview_stage_keyboard.rs"]
+mod keyboard;
+pub use keyboard::{PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget};
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;

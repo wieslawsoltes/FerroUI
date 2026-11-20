@@ -193,6 +193,8 @@ fn respond(
             .and_then(|request| serialize(stages.fixture_options(request))),
         "stagesPointer" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| stages.pointer(request, projects)),
+        "stagesKeyboard" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.keyboard(request))),
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.prototype_elements(request, projects))),
         "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
