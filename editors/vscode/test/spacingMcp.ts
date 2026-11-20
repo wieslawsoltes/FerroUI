@@ -44,9 +44,14 @@ export async function verifySpacing({ invoke, content }: McpFixture): Promise<vo
         const draft = (model: Model, args: SpacingChange) => query('designer_spacing_draft', model.selection, args);
         const undo = async () => {
             const version = document.version;
+            const label = `Design · ${path}`;
+            const design = vscode.window.tabGroups.all.find(group => group.activeTab?.label === label);
+            assert.ok(design, `Show ${label} beside the source`);
             content(await invoke('designer_history', { session, expected_version: version, action: 'undo' }));
-            await until(() => document.version === version + 1);
+            await until(() => document.version > version);
             assert.equal(document.getText(), source);
+            assert.equal(vscode.window.tabGroups.all.find(group => group.viewColumn === design.viewColumn)?.activeTab?.label,
+                label, 'Undo keeps the Design tab visible in its group');
         };
         const toggle = async (show: boolean) => content<{ spacingHelpers: boolean }>(await invoke('designer_canvas', {
             session, spacing_helpers: show,
@@ -100,6 +105,9 @@ export async function verifySpacing({ invoke, content }: McpFixture): Promise<vo
     await view.read('Card');
     assert.ok((await view.edit(group, exact(group, 'Spacing', 'Flow', 20))).isError);
     assert.equal(view.document.getText(), xaml);
+    const empty = await invoke('designer_history', { session: view.session, expected_version: view.document.version, action: 'undo' });
+    assert.ok(empty.isError);
+    assert.match(empty.content[0]?.text ?? '', /did not undo an edit/);
 
     const mapped = await open('measured-spacing.rs', rust, 2);
     const model = await mapped.read('Card');

@@ -158,11 +158,14 @@ async function verifyRustReferences({ invoke, content }: McpFixture): Promise<vo
     assert.equal(doc.getText(), editedDraft.replace(`r#"${originalPath}"#`, `r#"${movedPath}"#`));
     const exists = (file: string) => vscode.workspace.fs.stat(uri(file)).then(() => true, () => false);
     assert.ok(await exists(movedPath));
-    await vscode.window.showTextDocument(doc);
-    await vscode.commands.executeCommand('undo');
+    const file = vscode.workspace.asRelativePath(doc.uri, false);
+    const history = async (action: 'undo' | 'redo') => {
+        const buffer = content<{ revision: string }>(await invoke('ferroui_workspace_read', { path: file, include_source: false }));
+        return invoke('ferroui_workspace_file', { path: file, action, expected_revision: buffer.revision });
+    };
+    content(await history('undo'));
     await until(async () => doc.getText() === editedDraft && buildDoc.getText() === build && await exists(originalPath));
-    await vscode.window.showTextDocument(doc);
-    await vscode.commands.executeCommand('redo');
+    content(await history('redo'));
     await until(async () => doc.getText().includes(`r#"${movedPath}"#`) && await exists(movedPath)
         && (await vscode.workspace.openTextDocument(uri('build.rs'))).getText() === buildEdit.after);
     console.log('Reviewed XAML file move updated an unopened Cargo build and an unsaved Rust source, rejected stale drafts, and grouped source history');
