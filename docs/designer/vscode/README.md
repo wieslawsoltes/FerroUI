@@ -35,6 +35,7 @@ When a design changes, the last accepted frame stays visible until the replaceme
 | --- | --- |
 | XAML has no completion or diagnostics | Select **FerroUI XAML** as the file’s language mode. Check that the native language server matches the workspace host, then run **FerroUI: Restart XAML Language Server**. |
 | The renderer fails to start | Check the platform package or set `ferroui.preview.path` to the native executable from the matching checkout. |
+| FerroUI completion or hover is missing inside `rsx!` | Check the **FerroUI Designer** output. Once the preview helper is available, invoke completion or hover again in the same Rust buffer. |
 | The canvas shows an earlier image | Correct the source or a referenced file. The designer retains its last accepted frame while the current buffer is invalid. Source-backed actions become available after the current text renders. |
 | A type, relative include, or binding path is unknown | Keep the file in its authored folder and build the owning project’s schema. Use [App Preview](runtime.md#render-with-your-app-in-app-preview) for types and loaders supplied at application startup. |
 | A Rust preview omits part of the view | Open the preview message to find expressions or dynamic children that require compiled Rust. Use the actual view in an [app-hosted fixture](runtime.md#render-with-your-app-in-app-preview). |

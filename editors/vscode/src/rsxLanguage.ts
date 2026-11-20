@@ -31,7 +31,9 @@ export class RsxLanguage implements vscode.Disposable {
         if (draft?.version !== version || draft.project !== project) {
             const source = document.getText();
             if (token.isCancellationRequested || !/\brsx\s*!/.test(source) || Buffer.byteLength(source) > 1024 * 1024) return;
-            const value = this.read({ source, uri: document.uri.toString(), language: 'rust', caret: { line: 0, character: 0 } }, project).catch(error => {
+            const input: Source = { source, uri: document.uri.toString(), language: 'rust', caret: { line: 0, character: 0 } };
+            const value: Promise<RsxLanguageDocument | undefined> = this.read(input, project).catch(error => {
+                if (this.drafts.get(document)?.value === value) this.drafts.delete(document);
                 this.output.appendLine(`RSX language tools: ${errorMessage(error)}`);
                 return undefined;
             });
@@ -40,7 +42,7 @@ export class RsxLanguage implements vscode.Disposable {
         }
         const model = await draft.value;
         if (!token.isCancellationRequested && !document.isClosed && document.version === version
-            && this.projects.forDocument(document.uri) === project) return model;
+            && this.drafts.get(document) === draft && this.projects.forDocument(document.uri) === project) return model;
     }
 
     private async read(source: Source, project?: BuiltProject) {
