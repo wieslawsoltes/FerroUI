@@ -23,6 +23,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_scaffold_handler"
             | "designer_dictionary_extraction"
             | "designer_extract_dictionary"
+            | "designer_plan_xaml_move"
+            | "designer_move_xaml"
             | "designer_reveal_rsx_animation_issue"
             | "designer_reveal_rsx_state"
     )
@@ -109,6 +111,8 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
         s::tool("designer_dictionary_extraction","Read an inline XAML dictionary size, source range and suggested file. Pass file_name to review the checked patch, new dictionary and review identifier.",s::object(json!({"node":s::id(),"file_name":s::string(),"expected_revision":s::revision()}),&["node","expected_revision"]),false),
         s::tool("designer_extract_dictionary","Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.",s::object(json!({"node":s::id(),"file_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["node","file_name","review","expected_revision"]),true),
+        s::tool("designer_plan_xaml_move","Review a move of the active XAML file. Pass a workspace-relative destination to get the exact before and after edits and review identifier.",s::object(json!({"destination":s::string(),"expected_revision":s::revision()}),&["destination","expected_revision"]),false),
+        s::tool("designer_move_xaml","Move the active XAML file and change its references in one Studio history step. Pass the destination and review identifier from designer_plan_xaml_move.",s::object(json!({"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["destination","review","expected_revision"]),true),
     ];
     tools.extend(canvas_guides::tools());
     tools
@@ -186,6 +190,8 @@ pub(super) fn call(
             let plan = workspace.extract_reviewed_dictionary(super::node_id(args, "node")?, &text(args, "file_name")?, &text(args, "review")?)?;
             Ok(json!(plan))
         }
+        "designer_plan_xaml_move" => Ok(json!(workspace.plan_project_file_move(&text(args, "destination")?)?)),
+        "designer_move_xaml" => Ok(json!(workspace.apply_project_file_move(&text(args, "destination")?, &text(args, "review")?)?)),
         "designer_language_apply" => {
             let edit: WorkspaceEdit = decode(args, "edit")?;
             workspace.apply_language_edits(edit)?;

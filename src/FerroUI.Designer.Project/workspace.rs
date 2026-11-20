@@ -7,8 +7,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 mod created_file;
+mod moved_file;
 mod storage;
 pub use created_file::CreatedSourceFile;
+pub use moved_file::MovedSourceFile;
 use storage::atomic_create;
 pub(crate) use storage::atomic_write;
 
@@ -343,19 +345,22 @@ impl ProjectWorkspace {
         )?;
         std::fs::rename(&old, &destination)?;
         let old_uri = file_uri(&old)?;
-        if let Some(mut buffer) = self.buffers.remove(&old_uri) {
-            buffer.uri = next.clone();
-            buffer.path = Some(destination.clone());
-            self.buffers.insert(next.clone(), buffer);
+        self.rekey_document(&old_uri, &next, &destination)?;
+        Ok(next)
+    }
+    fn rekey_document(&mut self, old_uri: &str, next: &str, destination: &Path) -> Result<()> {
+        if let Some(mut buffer) = self.buffers.remove(old_uri) {
+            buffer.uri = next.into();
+            buffer.path = Some(destination.into());
+            self.buffers.insert(next.into(), buffer);
         }
-        if self.active.as_deref() == Some(&old_uri) {
-            self.active = Some(next.clone());
+        if self.active.as_deref() == Some(old_uri) {
+            self.active = Some(next.into());
         }
         for project in &mut self.solution.projects {
             project.documents.retain(|entry| entry.uri != old_uri);
         }
-        self.add_entry(&next)?;
-        Ok(next)
+        self.add_entry(next)
     }
     /// Register a host-defined embedded-resource key without allowing it to bypass root checks.
     pub fn register_resource(

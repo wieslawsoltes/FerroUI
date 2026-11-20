@@ -283,6 +283,16 @@ impl Document {
     pub fn set_history_limit(&mut self, limit: usize) {
         self.history.set_limit(limit);
     }
+
+    /// Link an external workspace operation to this document's history when its
+    /// source is unchanged, for example when moving a file with no outgoing paths.
+    pub fn record_workspace_operation(&mut self, expected_revision: u64, label: String) -> Result<(), DesignerError> {
+        self.check_revision(Some(expected_revision))?;
+        let revision = self.next_revision()?;
+        self.history.commit(label, self.current.clone(), self.current.clone());
+        self.revision = revision;
+        Ok(())
+    }
     pub fn apply(
         &mut self,
         label: impl Into<String>,

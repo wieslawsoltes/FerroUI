@@ -110,7 +110,9 @@ impl DesignerWorkspace {
             project.selected = 0;
             project.markup = Default::default();
         }
-        self.session.borrow_mut().set_workspace_preview_root(root);
+        let mut session = self.session.borrow_mut();
+        session.set_workspace_preview_buffers(Vec::new());
+        session.set_workspace_preview_root(root);
     }
     pub fn select_project(&self, index: usize) -> Result<(), String> {
         let mut state = self.project.borrow_mut();
@@ -220,7 +222,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let mut tab = {
+        let tab = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 if let Some(tab) = state.linked_history.take_closed(uri) {
@@ -255,11 +257,17 @@ impl DesignerWorkspace {
             }
             state.tabs[uri].clone()
         };
+        self.present_project_tab(uri, tab)
+    }
+    pub(super) fn present_project_tab(self: &Rc<Self>, uri: &str, mut tab: Tab) -> Result<(), String> {
         if let Some(rust) = tab.rust.as_mut() {
             rust.set_catalog(&mut tab.document, self.rust_catalog(uri)).map_err(|error| error.to_string())?;
         }
         #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
+        let buffers = self.project.borrow().tabs.iter().filter(|(_, tab)| tab.rust.is_none() && tab.document.is_dirty())
+            .map(|(uri, tab)| ferroui_designer_project::PreviewSourceBuffer { uri: uri.clone(), source: Some(tab.source().into()) }).collect();
+        self.session.borrow_mut().set_workspace_preview_buffers(buffers);
         self.session
             .borrow_mut()
             .restore_authored_document(tab.document, tab.rust, tab.preview_uri)?;

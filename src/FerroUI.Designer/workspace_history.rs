@@ -1,5 +1,6 @@
 use super::DesignerWorkspace;
 use super::dictionary_extraction::CreatedDictionary;
+use super::file_move::MovedXaml;
 use super::project::{Tab, document_identity};
 use std::collections::BTreeMap;
 use std::rc::Rc;
@@ -11,6 +12,7 @@ pub(super) struct WorkspaceHistory {
     serial: u64,
     pairs: BTreeMap<String, [String; 2]>,
     created: BTreeMap<String, CreatedDictionary>,
+    pub(super) moves: BTreeMap<String, MovedXaml>,
     closed: BTreeMap<String, Tab>,
 }
 
@@ -44,10 +46,8 @@ impl WorkspaceHistory {
 
     pub(super) fn retain_closed(&mut self, uri: &str, tab: Tab) {
         if tab.source() == tab.saved
-            && self
-                .pairs
-                .values()
-                .any(|pair| pair.iter().any(|file| file == uri))
+            && (self.pairs.values().any(|pair| pair.iter().any(|file| file == uri))
+                || self.moves.values().any(|movement| movement.participates(uri)))
         {
             self.closed.insert(uri.into(), tab);
         }
@@ -63,7 +63,7 @@ impl WorkspaceHistory {
 }
 
 impl Tab {
-    fn history_label(&self, redo: bool) -> Option<&str> {
+    pub(super) fn history_label(&self, redo: bool) -> Option<&str> {
         self.rust.as_ref().map_or_else(
             || {
                 if redo {
@@ -76,7 +76,7 @@ impl Tab {
         )
     }
 
-    fn step_history(&mut self, redo: bool) -> Result<(), String> {
+    pub(super) fn step_history(&mut self, redo: bool) -> Result<(), String> {
         if let Some(rust) = self.rust.as_mut() {
             rust.restore_history(&mut self.document, redo)
         } else if redo {
@@ -110,6 +110,12 @@ impl DesignerWorkspace {
         });
         if let Some((label, created)) = created {
             return self.step_dictionary_history(label, created, redo);
+        }
+        let moved = label.as_deref().and_then(|label| {
+            self.project.borrow().linked_history.moves.get(label).cloned().map(|movement| (label, movement))
+        });
+        if let Some((label, movement)) = moved {
+            return self.step_file_move(label, movement, redo);
         }
         let companion = {
             let state = self.project.borrow();

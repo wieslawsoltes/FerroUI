@@ -18,7 +18,7 @@ pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, rela
 mod file_move;
 pub use file_move::{XamlFileMove, relative_file_reference};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
-pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, ProjectWorkspace, SavePolicy};
+pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectError(pub String);

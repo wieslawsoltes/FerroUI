@@ -167,6 +167,9 @@ impl DesignerSession {
     pub(crate) fn set_workspace_preview_root(&mut self, root: std::path::PathBuf) {
         self.preview.set_workspace_root(root, &self.document);
     }
+    pub(crate) fn set_workspace_preview_buffers(&mut self, buffers: Vec<ferroui_designer_project::PreviewSourceBuffer>) {
+        self.preview.set_workspace_buffers(buffers);
+    }
     /// Record a successful write of the current authored buffer.
     pub fn mark_saved(&mut self) {
         self.mark_saved_source(self.authored_source().to_owned());

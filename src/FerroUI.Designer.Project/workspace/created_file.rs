@@ -94,7 +94,7 @@ impl ProjectWorkspace {
     }
 }
 
-fn same_file(left: &fs::Metadata, right: &fs::Metadata) -> bool {
+pub(super) fn same_file(left: &fs::Metadata, right: &fs::Metadata) -> bool {
     #[cfg(unix)]
     {
         use std::os::unix::fs::MetadataExt;

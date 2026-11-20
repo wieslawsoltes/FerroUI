@@ -13,7 +13,7 @@ const MAX_DOCUMENT_BYTES: usize = 1024 * 1024;
 const MAX_GRAPH_BYTES: usize = 8 * MAX_DOCUMENT_BYTES;
 const MAX_INCLUDES: usize = 128;
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct PreviewSourceBuffer {
     pub uri: String,
     pub source: Option<String>,
