@@ -179,6 +179,8 @@ When **Design Data** supplies an array through a simple `ItemsSource` binding, t
 
 The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Open Rust template closures and application-supplied XAML expressions at their source. For a resource defined in another document, use its assignment to locate the definition. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
+![The VS Code item-template actions beside the source and the native customer directory](../images/vscode-item-template-actions.jpg)
+
 ![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
 
 The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
