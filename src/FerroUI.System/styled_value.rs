@@ -265,6 +265,37 @@ styled_value!(
     std::time::Duration,
 );
 
+/// Two or four numbers: the form the property store keeps the small plain structures of
+/// numbers in (a point, a size, a vector; a thickness, a rectangle, the radii of corners), one
+/// storage type for each count. Equal as the structures are equal: number by number.
+macro_rules! shared_number_storage {
+    ($($type_:ty),*) => {
+        $(
+            impl StyledValue for $type_ {
+                type Storage = Self;
+                const SHARED_STORAGE: bool = true;
+
+                #[inline(always)]
+                fn into_storage(self) -> Self {
+                    self
+                }
+
+                #[inline(always)]
+                fn from_storage(storage: Self) -> Self {
+                    storage
+                }
+
+                #[inline(always)]
+                fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
+                    read(storage)
+                }
+            }
+        )*
+    };
+}
+
+shared_number_storage!([f64; 2], [f64; 4]);
+
 // The value types of other crates that properties of FerroUI hold.
 #[cfg(feature = "locale")]
 styled_value!(icu_locale_core::Locale);
