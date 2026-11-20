@@ -4,6 +4,8 @@ use ferroui_designer_core::SourceSpan;
 
 #[path = "item_template_edits.rs"]
 mod edits;
+#[path = "item_template_copy.rs"]
+mod included_copy;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ItemTemplateMember {

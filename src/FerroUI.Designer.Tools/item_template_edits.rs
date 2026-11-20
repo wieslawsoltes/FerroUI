@@ -71,11 +71,11 @@ impl ItemTemplateSlot {
         validated(document, edits)
     }
 
-    fn ensure_editable(&self) -> Result<()> {
+    pub(super) fn ensure_editable(&self) -> Result<()> {
         self.reason.as_ref().map_or(Ok(()), |reason| Err(ToolError(reason.clone())))
     }
 
-    fn clear(&self) -> Vec<Edit> {
+    pub(super) fn clear(&self) -> Vec<Edit> {
         let edit = match &self.declaration {
             ItemTemplateDeclaration::Unset => return Vec::new(),
             ItemTemplateDeclaration::Attribute(name) => Edit::RemoveAttribute {
@@ -116,6 +116,11 @@ fn insert(owner: &Node, property: &str, source: &str) -> Edit {
 
 fn unkeyed_fragment(document: &Document, node: NodeId) -> Result<String> {
     let mut fragment = Document::new(component_fragment(document, node)?).map_err(error)?;
+    strip_template_key(&mut fragment)?;
+    Ok(fragment.valid_source().into())
+}
+
+pub(super) fn strip_template_key(fragment: &mut Document) -> Result<()> {
     let root = element(&fragment, fragment.ast().root())?;
     if let Some(key) = key_attribute(root) {
         let edit = Edit::RemoveAttribute {
@@ -126,7 +131,7 @@ fn unkeyed_fragment(document: &Document, node: NodeId) -> Result<String> {
             .apply("Remove copied template key", vec![edit])
             .map_err(error)?;
     }
-    Ok(fragment.valid_source().into())
+    Ok(())
 }
 
 fn validate_copy(

@@ -11,6 +11,8 @@ pub(crate) mod authoring;
 pub(crate) mod references;
 #[path = "component_resource_graph.rs"]
 mod resource_graph;
+#[path = "component_resource_copy.rs"]
+mod resource_copy;
 #[path = "dictionary_extraction.rs"]
 pub(crate) mod extraction;
 #[path = "item_templates.rs"]
@@ -27,6 +29,7 @@ pub use references::{
 pub use resource_graph::{
     ComponentResourceLocation, ComponentResourceSources, IncludedResourceDocument,
 };
+pub use resource_copy::ResourceCopySources;
 pub use item_templates::{
     ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
     ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template,

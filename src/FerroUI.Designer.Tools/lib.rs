@@ -22,7 +22,7 @@ pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
     ComponentResourceContext, ComponentResourceLocation, ComponentResourceResolution,
     ComponentResourceSources, IncludedResourceDocument, ItemTemplateChange, ItemTemplateDeclaration,
-    ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot, ItemTemplateValue, item_template_resources,
+    ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot, ItemTemplateValue, ResourceCopySources, item_template_resources,
     keyed_item_template,
     component_fragment,
     component_property_attribute, component_property_elements, component_property_extractable,

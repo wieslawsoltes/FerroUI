@@ -1,6 +1,7 @@
 use super::{escape_xml, native_resource_type, Schema};
-use crate::schema::PropertyInfo;
+use crate::{schema::PropertyInfo, Result};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan, TextPatch};
+use ferroui_designer_project::{relative_file_reference, resolve_uri};
 
 struct Part {
     span: SourceSpan,
@@ -29,6 +30,42 @@ impl LiteralPath {
             })
             .collect()
     }
+}
+
+/// Preserve typed document-relative asset and include literals when transplanting
+/// a namespace-complete XAML fragment. No filesystem reads or markup execution.
+pub fn relocate_xaml_fragment(
+    document: &Document,
+    schema: &Schema,
+    from: &str,
+    to: &str,
+) -> Result<String> {
+    if from == to {
+        return Ok(document.source().into());
+    }
+    let mut patches = Vec::new();
+    for site in paths(document, schema) {
+        let split = site.value.find(['?', '#']).unwrap_or(site.value.len());
+        let (path, suffix) = site.value.split_at(split);
+        if path
+            .find(':')
+            .is_some_and(|colon| !path[..colon].contains('/'))
+        {
+            continue;
+        }
+        let resolved = resolve_uri(from, path)?;
+        if resolve_uri(to, path).is_ok_and(|candidate| candidate == resolved) {
+            continue;
+        }
+        let target = if to.starts_with("file:") && resolved.starts_with("file:") {
+            relative_file_reference(to, &resolved)?
+        } else {
+            resolved
+        };
+        let replacement = format!("{target}{suffix}");
+        patches.extend(site.patches(&replacement));
+    }
+    Ok(TextPatch::apply_all(document.source(), patches)?)
 }
 
 pub(super) fn paths(document: &Document, schema: &Schema) -> Vec<LiteralPath> {
@@ -138,4 +175,40 @@ fn trimmed_span(document: &Document, span: SourceSpan) -> SourceSpan {
     let first = raw.trim_start();
     let start = span.start + raw.len() - first.len();
     SourceSpan::new(start, start + first.trim_end().len())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn copied_fragments_keep_file_and_compiled_relative_asset_identities() {
+        let source = "<Grid xmlns='https://github.com/ferroui'>\r\n  <!-- 🖼️ -->\r\n  <Image Source='../Art/Customer%20Icon.png#sample'/>\r\n  <TextBlock Text='../Art/Customer%20Icon.png#sample'/>\r\n</Grid>";
+        let document = Document::new(source).unwrap();
+        let schema = Schema::ferroui();
+        let root = std::env::temp_dir().join("template-copy-assets");
+        let uri = |name: &str| ferroui_designer_project::file_uri(root.join(name)).unwrap();
+        let copied = relocate_xaml_fragment(
+            &document,
+            &schema,
+            &uri("Templates/Rows.xaml"),
+            &uri("View.xaml"),
+        )
+        .unwrap();
+        assert_eq!(
+            copied,
+            source.replacen("../Art/Customer", "Art/Customer", 1)
+        );
+        let compiled = relocate_xaml_fragment(
+            &document,
+            &schema,
+            "ferres://Sample/Templates/Rows.xaml",
+            &uri("View.xaml"),
+        )
+        .unwrap();
+        assert_eq!(
+            compiled,
+            source.replacen("../Art/Customer", "ferres://Sample/Art/Customer", 1)
+        );
+    }
 }

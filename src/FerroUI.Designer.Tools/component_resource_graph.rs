@@ -21,6 +21,8 @@ pub struct IncludedResourceDocument<'a> {
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ComponentResourceLocation<'a> {
     pub uri: Option<&'a str>,
+    /// Logical loader address, including for a compiled alias of a physical file.
+    pub address: &'a str,
     pub node: NodeId,
 }
 
@@ -42,7 +44,11 @@ impl<'a> ResourceScope<'a> {
     }
 
     pub fn location(self, node: NodeId) -> ComponentResourceLocation<'a> {
-        ComponentResourceLocation { uri: self.source_uri, node }
+        ComponentResourceLocation { uri: self.source_uri, address: self.address, node }
+    }
+
+    pub fn authored(source: &IncludedResourceDocument<'a>, sources: &'a dyn ComponentResourceSources) -> Self {
+        Self { document: source.document, address: source.address, source_uri: Some(source.uri), sources: Some(sources) }
     }
 
     pub fn include(self, node: &Node) -> Option<Self> {

@@ -4,6 +4,9 @@ use super::resource_graph::ResourceScope;
 use ferroui_designer_core::design_fixtures::is_fixtures;
 use ferroui_designer_core::{MarkupArgument, MarkupExtension};
 
+#[path = "component_resource_copy_keys.rs"]
+pub(super) mod copy_keys;
+
 /// The runtime's active theme and its inheritance chain, nearest inherited variant
 /// first. `None` (or `Default`) looks only in Default dictionaries before merges.
 /// Keys are decoded string theme keys; custom expression keys remain uncertain.
@@ -32,12 +35,23 @@ impl ComponentResourceResolution {
 }
 
 #[derive(Default)]
-struct Lookup<'a> {
+pub(super) struct Lookup<'a> {
     candidates: BTreeSet<ComponentResourceLocation<'a>>,
     may_be_missing: bool,
     external: bool,
+    /// The authored scope which determines every variant, when it can be proven.
+    provider: Option<ComponentResourceLocation<'a>>,
 }
 impl<'a> Lookup<'a> {
+    pub(super) fn unique(&self) -> Option<ComponentResourceLocation<'a>> {
+        (!self.may_be_missing && !self.external && self.candidates.len() == 1)
+            .then(|| *self.candidates.first().expect("one candidate"))
+    }
+
+    pub(super) fn provider(&self) -> Option<ComponentResourceLocation<'a>> {
+        self.provider.filter(|_| !self.external && !self.may_be_missing)
+    }
+
     fn missing() -> Self {
         Self {
             may_be_missing: true,
@@ -52,6 +66,11 @@ impl<'a> Lookup<'a> {
     }
     /// Join mutually possible theme/provider outcomes.
     fn alternative(&mut self, other: Self) {
+        self.provider = if self.candidates.is_empty() && !self.may_be_missing && !self.external {
+            other.provider()
+        } else {
+            None
+        };
         self.candidates.extend(other.candidates);
         self.may_be_missing |= other.may_be_missing;
         self.external |= other.external;
@@ -59,6 +78,7 @@ impl<'a> Lookup<'a> {
     /// Later scopes are reachable only along lookup paths that can still miss.
     fn fallback(&mut self, other: Self) {
         if self.may_be_missing {
+            self.provider = if self.candidates.is_empty() && !self.external { other.provider() } else { None };
             self.candidates.extend(other.candidates);
             self.may_be_missing = other.may_be_missing;
             self.external |= other.external;
@@ -119,15 +139,12 @@ pub fn component_resource_location<'a>(
     sources: &'a dyn ComponentResourceSources,
 ) -> Result<Option<ComponentResourceLocation<'a>>> {
     let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
-    if result.may_be_missing || result.external || result.candidates.len() != 1 {
-        return Ok(None);
-    }
-    Ok(result.candidates.into_iter().next())
+    Ok(result.unique())
 }
 
 type Visited<'a> = BTreeSet<(&'a str, NodeId)>;
 
-fn resolve<'a>(
+pub(super) fn resolve<'a>(
     scope: ResourceScope<'a>,
     target: NodeId,
     key: &str,
@@ -191,7 +208,10 @@ fn lookup_scope<'a>(
     if !seen.insert(id) {
         return Lookup::external();
     }
-    let result = lookup_owner(scope, owner, key, context, seen);
+    let mut result = lookup_owner(scope, owner, key, context, seen);
+    if result.provider.is_none() && !result.external && !result.may_be_missing && !result.candidates.is_empty() {
+        result.provider = Some(scope.location(owner.id));
+    }
     seen.remove(&id);
     result
 }

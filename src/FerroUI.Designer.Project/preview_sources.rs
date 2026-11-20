@@ -47,6 +47,10 @@ impl PreviewIncludes {
         self.documents.values()
     }
 
+    pub fn authored_sources(&self) -> impl Iterator<Item = (&str, &PreviewInclude)> {
+        self.documents.iter().map(|(address, source)| (address.as_str(), source))
+    }
+
     pub fn resolve(
         &self,
         address: &str,
