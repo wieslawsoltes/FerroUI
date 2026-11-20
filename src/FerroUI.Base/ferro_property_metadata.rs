@@ -1,7 +1,8 @@
 use crate::data::BindingMode;
-use crate::property_store::{EffectiveValue, UncommonFields};
-use crate::{FerroObject, TypeInfo};
-use std::cell::RefCell;
+use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, UncommonFields};
+use crate::{FerroObject, StyledValue, TypeInfo};
+use std::any::Any;
+use std::cell::{OnceCell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
 
@@ -75,11 +76,11 @@ pub(crate) struct DefaultCoercionOperations<T> {
     pub(crate) set_default: fn(&EffectiveValue<T>, &FerroObject, T),
 }
 
-/// The factory borrows the store, owner and typed property. Keeping that
-/// PropertyValue-specific construction outside the algorithm lets public
-/// Clone-only metadata retain its existing bounds.
+/// The factory borrows the store, owner and property. Keeping that
+/// construction outside the algorithm lets public Clone-only metadata retain
+/// its existing bounds. The value it makes is an `EffectiveValue<T>`.
 pub(crate) trait DefaultEffectiveValueFactory<T> {
-    fn create_and_add(&self) -> Rc<EffectiveValue<T>>;
+    fn create_and_add(&self) -> Rc<dyn EffectiveValueDyn>;
 }
 
 // Requests contain only borrows and function pointers: no owned T, Rc or
@@ -223,7 +224,7 @@ impl<T: Clone + 'static> Coercion<T> {
         // Construction reloads current metadata, as it originally did after
         // a potentially reentrant coercer/equality implementation.
         let effective = factory.create_and_add();
-        (operations.set_default)(&effective, owner, coerced);
+        (operations.set_default)(cast_effective_value::<T>(&*effective), owner, coerced);
     }
 }
 
@@ -302,11 +303,20 @@ pub struct StyledPropertyMetadata<T> {
     base: FerroPropertyMetadata,
     default_value: Option<T>,
     coerce: Option<Coercion<T>>,
+    /// The metadata of the storage type of a value type that is not its own storage type
+    /// ([`StyledValue::Storage`]): what the property store reads, made the first time it is
+    /// asked for (`for_storage`). Empty for a type that is its own storage type.
+    storage: OnceCell<Rc<dyn Any>>,
 }
 
 impl<T: Clone> Clone for StyledPropertyMetadata<T> {
     fn clone(&self) -> Self {
-        Self { base: self.base.clone(), default_value: self.default_value.clone(), coerce: self.coerce.clone() }
+        Self {
+            base: self.base.clone(),
+            default_value: self.default_value.clone(),
+            coerce: self.coerce.clone(),
+            storage: OnceCell::new(),
+        }
     }
 }
 
@@ -325,6 +335,7 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
             base: FerroPropertyMetadata::new(BindingMode::Default, Some(false)),
             default_value,
             coerce: None,
+            storage: OnceCell::new(),
         }
     }
 
@@ -366,6 +377,46 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
 
     pub(crate) fn coercion(&self) -> Option<&Coercion<T>> {
         self.coerce.as_ref()
+    }
+}
+
+impl<T: StyledValue> StyledPropertyMetadata<T> {
+    /// The metadata as the property store reads it, of the storage type of `T`: this metadata
+    /// itself for a type that is its own storage type, else a copy with the default value
+    /// converted and the coercion callback wrapped once, made the first time it is asked for.
+    #[inline]
+    pub(crate) fn for_storage(self: Rc<Self>) -> Rc<StyledPropertyMetadata<T::Storage>> {
+        // Decided when the function is compiled: the two types are the same or not.
+        let this: Rc<dyn Any> = self;
+        match this.downcast::<StyledPropertyMetadata<T::Storage>>() {
+            Ok(same) => same,
+            Err(this) => match this.downcast::<Self>() {
+                Ok(this) => this.storage_copy(),
+                Err(_) => unreachable!("the metadata has its own type"),
+            },
+        }
+    }
+
+    #[inline(never)]
+    fn storage_copy(&self) -> Rc<StyledPropertyMetadata<T::Storage>> {
+        let copy = self.storage.get_or_init(|| {
+            let coerce = self.coerce.as_ref().map(|coerce| {
+                let callback = coerce.callback().clone();
+                let wrapped: CoerceValueCallback<T::Storage> =
+                    Rc::new(move |owner, value| T::into_storage(callback(owner, T::from_storage(value))));
+                Coercion::new(wrapped)
+            });
+            Rc::new(StyledPropertyMetadata::<T::Storage> {
+                base: self.base.clone(),
+                default_value: self.default_value.clone().map(T::into_storage),
+                coerce,
+                storage: OnceCell::new(),
+            }) as Rc<dyn Any>
+        });
+        match copy.clone().downcast() {
+            Ok(copy) => copy,
+            Err(_) => unreachable!("the storage metadata has the storage type"),
+        }
     }
 }
 

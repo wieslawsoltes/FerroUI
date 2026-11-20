@@ -1009,7 +1009,7 @@ impl TopLevel {
     /// Calls `on_value` with the value of `property` now and whenever the
     /// property changes, for as long as the top-level has a platform
     /// implementation (private protected upstream: for derived classes).
-    pub fn create_platform_impl_binding<T: ferroui_base::PropertyValue>(
+    pub fn create_platform_impl_binding<T: ferroui_base::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         on_value: impl Fn(T) + 'static,

@@ -13,7 +13,10 @@ use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::ferro_property_metadata::{DefaultCoercionOperations, DefaultEffectiveValueFactory};
 use crate::reactive::{IDisposable, IObservable};
 use crate::utilities::OptionCell;
-use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use crate::{
+    BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty,
+    StyledPropertyMetadata, StyledValue, WeakRef,
+};
 use std::any::Any;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -22,15 +25,17 @@ type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
 
 // Borrowing only references keeps the factory vtable free of owning drop
 // glue. The returned Rc is the original local, with no extra clone.
-struct CoercedDefaultFactory<'a, T: PropertyValue> {
+struct CoercedDefaultFactory<'a> {
     store: &'a ValueStore,
     owner: &'a FerroObject,
-    property: &'static StyledProperty<T>,
+    property: &'static FerroProperty,
 }
 
-impl<T: PropertyValue> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_, T> {
-    fn create_and_add(&self) -> Rc<EffectiveValue<T>> {
-        let effective = self.store.create_effective_value(self.owner, self.property);
+impl<T> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_> {
+    fn create_and_add(&self) -> EffectiveValueRef {
+        // The property makes the value (with its metadata as it is now), as
+        // a value made for a write does.
+        let effective = self.property.routes().create_effective_value(self.owner);
         self.store.add_effective_value(self.owner, self.property, effective.clone());
         // No other owning locals or callable temporaries remain after this
         // result is formed. On insertion unwind, effective still drops before
@@ -227,7 +232,7 @@ impl ValueStore {
     }
 
     /// Adds a binding to a styled property.
-    pub fn add_binding<T: PropertyValue, U: 'static>(
+    pub fn add_binding<T: StyledValue, U: 'static>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
@@ -554,7 +559,7 @@ impl ValueStore {
         }
     }
 
-    pub fn set_value<T: PropertyValue>(
+    pub fn set_value<T: StyledValue>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
@@ -564,7 +569,18 @@ impl ValueStore {
         if !property.is_valid(&value) {
             property.value_not_valid();
         }
+        self.set_stored_value(owner, property.as_property(), value.into_storage(), priority)
+    }
 
+    /// [`set_value`](Self::set_value) of a value that is valid, as the store keeps it: compiled
+    /// once for each storage type.
+    fn set_stored_value<S: StyledValue>(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: S,
+        priority: BindingPriority,
+    ) -> Option<Rc<dyn IDisposable>> {
         if priority != BindingPriority::LocalValue {
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_value(property, value);
@@ -573,34 +589,52 @@ impl ValueStore {
             effective.set_and_raise(owner, &entry, priority);
             Some(result)
         } else {
-            self.set_local_value(owner, property, value);
+            self.set_local_stored_value(owner, property, value);
             None
         }
     }
 
-    pub fn set_current_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_current_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+        self.set_current_stored_value(owner, property.as_property(), value.into_storage());
+    }
+
+    fn set_current_stored_value<S: StyledValue>(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: S,
+    ) {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_current_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
-        cast_effective_value::<T>(&*effective).set_current_value_and_raise(owner, value);
+        cast_effective_value::<S>(&*effective).set_current_value_and_raise(owner, value);
     }
 
-    pub fn set_local_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_local_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+        self.set_local_stored_value(owner, property.as_property(), value.into_storage());
+    }
+
+    fn set_local_stored_value<S: StyledValue>(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: S,
+    ) {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_local_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
-        cast_effective_value::<T>(&*effective).set_local_value_and_raise(owner, value);
+        cast_effective_value::<S>(&*effective).set_local_value_and_raise(owner, value);
     }
 
     /// The value of a styled property: the effective value, else the inherited
     /// value, else the default value.
     #[inline]
-    pub fn get_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
+    pub fn get_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
         // <!> Performance critical method.
         {
             let values = self.effective_values.borrow();
             if let Some(index) = Self::find(&values, property.id()) {
-                return cast_effective_value::<T>(&*values[index].1).value();
+                return T::from_storage(cast_effective_value::<T::Storage>(&*values[index].1).value());
             }
         }
         if property.inherits() {
@@ -610,7 +644,7 @@ impl ValueStore {
         }
     }
 
-    pub fn with_value<T: PropertyValue, R>(
+    pub fn with_value<T: StyledValue, R>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
@@ -622,7 +656,7 @@ impl ValueStore {
             property.inherits().then(|| self.try_get_inherited_value(property)).flatten()
         });
         match value {
-            Some(value) => cast_effective_value::<T>(&*value).with_value(read),
+            Some(value) => cast_effective_value::<T::Storage>(&*value).with_value(|value| T::with_storage(value, read)),
             None => read(property.get_metadata_for(owner).default_value()),
         }
     }
@@ -630,11 +664,16 @@ impl ValueStore {
     // Keep the inherited value's temporary Rc and its unwind cleanup off the
     // hot paths for a local value or the default of a non-inheriting property.
     #[inline(never)]
-    fn inherited_or_default<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
-        match self.try_get_inherited_value(property) {
-            Some(value) => cast_effective_value::<T>(&*value).value(),
+    fn inherited_or_default<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
+        match self.inherited_stored_value::<T::Storage>(property) {
+            Some(value) => T::from_storage(value),
             None => property.get_default_value_for(owner),
         }
+    }
+
+    /// The value of the nearest inheritance ancestor that holds one, as the store keeps it.
+    fn inherited_stored_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
+        self.try_get_inherited_value(property).map(|value| cast_effective_value::<S>(&*value).value())
     }
 
     pub fn is_animating(&self, property: &FerroProperty) -> bool {
@@ -658,27 +697,44 @@ impl ValueStore {
         }
     }
 
-    pub fn coerce_default_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
+    #[inline]
+    pub fn coerce_default_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
         let metadata = property.get_metadata_for(owner);
+        if metadata.coercion().is_none() {
+            return;
+        }
+        self.coerce_default_stored_value(owner, property.as_property(), &metadata.for_storage());
+    }
+
+    fn coerce_default_stored_value<S: StyledValue>(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        metadata: &Rc<StyledPropertyMetadata<S>>,
+    ) {
         let Some(coercion) = metadata.coercion() else { return };
         // Retain this exact metadata Rc through application and cleanup.
         // The factory separately reloads metadata at the original point.
         coercion.coerce_default(
-            &metadata,
+            metadata,
             owner,
             &CoercedDefaultFactory { store: self, owner, property },
             DefaultCoercionOperations {
                 // This route originally used PartialEq, not value_equals:
                 // preserve its distinct NaN behavior.
-                equals: <T as PartialEq>::eq,
-                set_default: EffectiveValue::<T>::set_coerced_default_value_and_raise,
+                equals: <S as PartialEq>::eq,
+                set_default: EffectiveValue::<S>::set_coerced_default_value_and_raise,
             },
         );
     }
 
-    pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+    pub fn get_base_value<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+        self.get_stored_base_value::<T::Storage>(property).map(T::from_storage)
+    }
+
+    fn get_stored_base_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
         let effective = self.get_effective_value(property)?;
-        cast_effective_value::<T>(&*effective).try_get_base_value()
+        cast_effective_value::<S>(&*effective).try_get_base_value()
     }
 
     /// Finds the effective value of an inherited property on the nearest
@@ -722,14 +778,23 @@ impl ValueStore {
         None
     }
 
-    pub fn create_effective_value<T: PropertyValue>(
+    pub fn create_effective_value<T: StyledValue>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
-    ) -> Rc<EffectiveValue<T>> {
+    ) -> Rc<EffectiveValue<T::Storage>> {
+        let metadata = property.get_metadata_for(owner).for_storage();
+        self.create_stored_effective_value(property.as_property(), metadata)
+    }
+
+    fn create_stored_effective_value<S: StyledValue>(
+        &self,
+        property: &'static FerroProperty,
+        metadata: Rc<StyledPropertyMetadata<S>>,
+    ) -> Rc<EffectiveValue<S>> {
         let inherited = if property.inherits() { self.try_get_inherited_value(property) } else { None };
-        let inherited = inherited.as_deref().map(cast_effective_value::<T>);
-        Rc::new(EffectiveValue::new(owner, property, inherited))
+        let inherited = inherited.as_deref().map(cast_effective_value::<S>);
+        Rc::new(EffectiveValue::new(property, metadata, inherited))
     }
 
     /// The ancestor store to use for inherited value lookups starting at

@@ -7,7 +7,7 @@ use crate::type_system::{ChangeHandlerLayer, InheritedReaction};
 use crate::{
     AttachedProperty, DirectProperty, DirectPropertyMetadata, FerroObject, FerroPropertyChangedEventArgs,
     FerroPropertyMetadata, FerroPropertyRegistry, ObjectType, StaticType, StyledProperty, StyledPropertyMetadata,
-    TypeIdentity, TypeInfo,
+    StyledValue, TypeIdentity, TypeInfo,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -303,9 +303,24 @@ pub(crate) trait PropertyRoutes {
     /// The typed property behind the routes, for downcasting.
     fn as_any(&'static self) -> &'static dyn Any;
     /// Clones `value`, which must hold exactly the property's value type `T`,
-    /// into `out`, which must be an `&mut Option<T>`. Returns false if either
-    /// has a different type.
+    /// into `out`, which must be an `&mut Option<S>`: `S` is the type the value
+    /// store keeps values of `T` as ([`StyledValue::Storage`](crate::StyledValue::Storage)),
+    /// `T` itself for a direct property. Returns false if either has a
+    /// different type.
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    /// Calls `f` with `old` and `new`, values of the type the value store
+    /// keeps values of the property as, as values of the property's value
+    /// type: the values of a change notification of a styled property whose
+    /// value type is kept as a value of another type
+    /// ([`StyledValue::SHARED_STORAGE`](crate::StyledValue::SHARED_STORAGE)).
+    fn route_with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        f(old, new)
+    }
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
@@ -961,7 +976,7 @@ impl FerroProperty {
     }
 
     /// Registers a styled property with a default value.
-    pub fn register<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static StyledProperty<TValue> {
@@ -970,7 +985,7 @@ impl FerroProperty {
 
     /// Registers a styled property.
     #[inline]
-    pub fn register_with<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register_with<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
@@ -981,7 +996,7 @@ impl FerroProperty {
     // coercion specialize this installation path; every owner of that value
     // type shares it without changing the typed read/write implementation.
     #[inline(never)]
-    fn register_with_core<TValue: PropertyValue>(
+    fn register_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         name: &str,
         options: StyledPropertyOptions<TValue>,
@@ -1000,7 +1015,7 @@ impl FerroProperty {
     ///
     /// `TOwner` is the class that registers the property and `THost` the class
     /// of objects the property can be set on.
-    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static AttachedProperty<TValue> {
@@ -1009,7 +1024,7 @@ impl FerroProperty {
 
     /// Registers an attached property.
     #[inline]
-    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
@@ -1017,7 +1032,7 @@ impl FerroProperty {
     }
 
     #[inline(never)]
-    fn register_attached_with_core<TValue: PropertyValue>(
+    fn register_attached_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         host_type: &'static TypeInfo,
         name: &str,
@@ -1100,7 +1115,7 @@ pub struct StyledPropertyOptions<T> {
     notifying: Option<NotifyingCallback>,
 }
 
-impl<T: PropertyValue> StyledPropertyOptions<T> {
+impl<T: StyledValue> StyledPropertyOptions<T> {
     pub fn new(default_value: T) -> Self {
         Self {
             default_value,
@@ -1119,7 +1134,7 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
     pub fn inherits(mut self, inherits: bool) -> Self {
         self.inherits = inherits;
         self.inherited_value_changed = if inherits {
-            Some(EffectiveValue::<T>::notify_inherited_value_changed)
+            Some(EffectiveValue::<T::Storage>::notify_inherited_value_changed)
         } else {
             None
         };

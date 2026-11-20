@@ -8,7 +8,7 @@ use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
     BoxedValue, ObjectType, DoNothingType, FerroObject, FerroProperty, FerroPropertyMetadata,
-    FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, TypeInfo, UnsetValueType,
+    FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, StyledValue, TypeInfo, UnsetValueType,
 };
 use std::any::Any;
 use std::cell::RefCell;
@@ -64,24 +64,6 @@ impl<T: PropertyValue> StyledProperty<T> {
             single_default_value: RefCell::new(Some(default_value)),
             validate,
         }
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn create(
-        name: &str,
-        owner_type: &'static TypeInfo,
-        host_type: &'static TypeInfo,
-        metadata: StyledPropertyMetadata<T>,
-        inherits: bool,
-        validate: Option<Box<dyn Fn(&T) -> bool>>,
-        notifying: Option<NotifyingCallback>,
-        is_attached: bool,
-    ) -> &'static Self {
-        let property: &'static Self = Box::leak(Box::new(Self::new(
-            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached,
-        )));
-        property.base.set_routes(property);
-        property
     }
 
     /// The untyped base of the property.
@@ -249,7 +231,36 @@ fn resolve_untyped_binding(
     }
 }
 
-impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
+impl<T: StyledValue> StyledProperty<T> {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn create(
+        name: &str,
+        owner_type: &'static TypeInfo,
+        host_type: &'static TypeInfo,
+        metadata: StyledPropertyMetadata<T>,
+        inherits: bool,
+        validate: Option<Box<dyn Fn(&T) -> bool>>,
+        notifying: Option<NotifyingCallback>,
+        is_attached: bool,
+    ) -> &'static Self {
+        let property: &'static Self = Box::leak(Box::new(Self::new(
+            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached,
+        )));
+        property.base.set_routes(property);
+        property
+    }
+}
+
+/// A stored value of a property whose value type is `T`, as a `T`.
+#[inline]
+fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
+    match value.downcast_ref::<T::Storage>() {
+        Some(value) => T::from_storage(value.clone()),
+        None => panic!("a stored value of a property is not of its storage type"),
+    }
+}
+
+impl<T: StyledValue> PropertyRoutes for StyledProperty<T> {
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
         let this = self;
         o.values().create_effective_value(o, this)
@@ -350,12 +361,33 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
     }
 
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool {
-        match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T>>()) {
+        match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T::Storage>>()) {
             (Some(value), Some(out)) => {
-                *out = Some(value.clone());
+                *out = Some(value.clone().into_storage());
                 true
             }
             _ => false,
+        }
+    }
+
+    fn route_with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        // A type that is its own storage type is never asked (`with_values`): its route stays
+        // the one line it needs (decided when the function is compiled).
+        if !T::Storage::SHARED_STORAGE {
+            return f(old, new);
+        }
+        let new = stored_value::<T>(new);
+        match old {
+            Some(old) => {
+                let old = stored_value::<T>(old);
+                f(Some(&old), &new);
+            }
+            None => f(None, &new),
         }
     }
 
@@ -378,8 +410,6 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
     }
 }
 
-impl<T: PropertyValue> StyledProperty<T> {
-}
 
 /// An attached property: a styled property that is defined by one class and
 /// set on objects of another.
@@ -395,7 +425,7 @@ impl<T: PropertyValue> Deref for AttachedProperty<T> {
     }
 }
 
-impl<T: PropertyValue> AttachedProperty<T> {
+impl<T: StyledValue> AttachedProperty<T> {
     pub(crate) fn create(
         name: &str,
         owner_type: &'static TypeInfo,
@@ -411,7 +441,9 @@ impl<T: PropertyValue> AttachedProperty<T> {
         property.base.base.set_routes(&property.base);
         property
     }
+}
 
+impl<T: PropertyValue> AttachedProperty<T> {
     /// Attaches the property as a non-attached property on class `TOwner`.
     pub fn add_owner<TOwner: ObjectType>(&'static self) -> &'static Self {
         FerroPropertyRegistry::instance().register(TOwner::TYPE, &self.base);

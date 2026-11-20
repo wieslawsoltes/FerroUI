@@ -315,7 +315,7 @@ pub extern "C" fn ferro_clear(object: FerroHandle, property: i64) -> FerroStatus
 
 /// Reads a property whose value type is `T` through its typed getter, `None` for another type.
 #[inline]
-fn get_typed<T: PropertyValue>(object: &FerroObject, property: &'static FerroProperty) -> Option<T> {
+fn get_typed<T: ferroui_base::StyledValue>(object: &FerroObject, property: &'static FerroProperty) -> Option<T> {
     if let Some(styled) = property.as_styled::<T>() {
         Some(object.get_value(styled))
     } else {

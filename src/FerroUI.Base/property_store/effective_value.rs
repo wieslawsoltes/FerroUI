@@ -3,7 +3,7 @@ use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
 use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::utilities::OptionCell;
-use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
+use crate::{BoxedValue, FerroObject, FerroProperty, StyledPropertyMetadata, StyledValue};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -266,9 +266,13 @@ impl dyn EffectiveValueDyn {
 /// The effective (resolved) value of a styled property on an object: the
 /// highest priority value and the highest priority non-animation ("base")
 /// value.
+///
+/// `T` is the storage type of the property's value type
+/// ([`StyledValue::Storage`]): the store is compiled once for each storage
+/// type, not once for each value type (docs/binary-size.md, section 4.25).
 // Keep the representation unbounded so Clone-only public metadata can name
-// its cold algorithm. Construction, store access and notification impls retain
-// their PropertyValue bounds; none of the typed fields is erased or recast.
+// its cold algorithm. Construction, store access and notification impls require
+// a StyledValue storage type; none of the typed fields is erased or recast.
 pub(crate) struct EffectiveValue<T> {
     metadata: Rc<StyledPropertyMetadata<T>>,
     state: EffectiveValueState,
@@ -501,7 +505,43 @@ impl<T: Clone + 'static> EffectiveValue<T> {
     }
 }
 
-impl<T: PropertyValue> EffectiveValue<T> {
+/// Calls `f` with `old` and `new`, values of the storage type `T`, as values of the value type
+/// of `property`: as they are where `T` is the value type itself (decided when the function is
+/// compiled), else converted by the property ([`PropertyRoutes::route_with_values`]), one call
+/// that only a change of a value of a shared storage type makes.
+///
+/// [`PropertyRoutes::route_with_values`]: crate::ferro_property::PropertyRoutes::route_with_values
+#[inline]
+pub(crate) fn with_values<T: StyledValue>(
+    property: &'static FerroProperty,
+    old: Option<&T>,
+    new: &T,
+    f: impl FnOnce(Option<&dyn Any>, &dyn Any),
+) {
+    if T::SHARED_STORAGE {
+        let mut f = Some(f);
+        property.routes().route_with_values(old.map(|old| old as &dyn Any), new, &mut |old, new| {
+            if let Some(f) = f.take() {
+                f(old, new);
+            }
+        });
+    } else {
+        f(old.map(|old| old as &dyn Any), new);
+    }
+}
+
+/// A stored value of `property` in a box of its own, holding the value type of the property.
+pub(crate) fn box_stored<T: StyledValue>(property: &'static FerroProperty, value: &T) -> BoxedValue {
+    if T::SHARED_STORAGE {
+        let mut boxed = None;
+        with_values(property, None, value, |_, value| boxed = property.routes().route_box_value(value));
+        boxed.expect("the property boxes a value of its own type")
+    } else {
+        Rc::new(value.clone())
+    }
+}
+
+impl<T: StyledValue> EffectiveValue<T> {
     // Its address is taken only by an explicit inheritance registration.
     // Keep the original owned-value frame: the selected source's metadata
     // supplies defaults, then old/new clones, equality and notification run
@@ -519,12 +559,25 @@ impl<T: PropertyValue> EffectiveValue<T> {
         let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
         let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
         if !value_equals(&o, &n) {
-            owner.raise_inherited_property_changed(source.state.property, &o, &n, priority);
+            let property = source.state.property;
+            with_values(property, Some(&o), &n, |o, n| {
+                owner.raise_inherited_property_changed(property, o.expect("the old value"), n, priority);
+            });
         }
     }
 
-    pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>, inherited: Option<&EffectiveValue<T>>) -> Self {
-        let metadata = property.get_metadata_for(owner);
+    /// The effective value of `property`, whose value type has the storage type `T`, with the
+    /// metadata of the property for the type of its owner (as the store reads it,
+    /// `StyledPropertyMetadata::for_storage`).
+    pub fn new(
+        property: &'static FerroProperty,
+        metadata: Rc<StyledPropertyMetadata<T>>,
+        inherited: Option<&EffectiveValue<T>>,
+    ) -> Self {
+        debug_assert!(
+            T::SHARED_STORAGE || property.property_type() == std::any::TypeId::of::<T>(),
+            "a storage type that other value types share states it (StyledValue::SHARED_STORAGE)"
+        );
         let value = match inherited {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
@@ -579,8 +632,15 @@ impl<T: PropertyValue> EffectiveValue<T> {
             } else if let Some(boxed) = entry.get_value_boxed() {
                 // An untyped entry (a binding expression): its value is
                 // already converted to the property type, or is the unset
-                // marker.
-                if let Some(v) = boxed.downcast_ref::<T>() {
+                // marker. A value of a type that is not its own storage type
+                // is converted by the property.
+                if T::SHARED_STORAGE {
+                    if self.state.property.routes().route_copy_value(boxed.as_any(), &mut out) {
+                        if let Some(v) = out {
+                            return v;
+                        }
+                    }
+                } else if let Some(v) = boxed.downcast_ref::<T>() {
                     return v.clone();
                 }
             }
@@ -662,14 +722,20 @@ impl<T: PropertyValue> EffectiveValue<T> {
         if let Some(notifying) = notifying {
             notifying(owner, true);
         }
+        let property = self.state.property;
         let new_value = self.value();
-        owner.raise_property_changed(self.state.property, Some(&old_value), &new_value, self.state.priority.get(), true);
-        if self.state.property.inherits() {
+        let priority = self.state.priority.get();
+        with_values(property, Some(&old_value), &new_value, |old, new| {
+            owner.raise_property_changed_values(property, old, new, priority, true);
+        });
+        if property.inherits() {
             // A change handler may have changed the value again: inheritance
             // children are told the value as it is now, not the value that
             // was announced to the handlers of this object.
             let new_value = self.value();
-            owner.values().on_inherited_effective_value_changed(owner, self.state.property, &old_value, &new_value);
+            with_values(property, Some(&old_value), &new_value, |old, new| {
+                owner.values().on_inherited_effective_value_changed(owner, property, old.expect("the old value"), new);
+            });
         }
         if let Some(notifying) = notifying {
             notifying(owner, false);
@@ -679,32 +745,37 @@ impl<T: PropertyValue> EffectiveValue<T> {
     fn notify_base_value_changed(&self, owner: &FerroObject) {
         let base = self.base_value();
         if let Some(base) = base {
-            owner.raise_property_changed(self.state.property, None, &base, self.state.base_priority.get(), false);
+            let (property, priority) = (self.state.property, self.state.base_priority.get());
+            with_values(property, None, &base, |_, base| {
+                owner.raise_property_changed_values(property, None, base, priority, false);
+            });
         }
     }
 }
 
-/// Downcasts an untyped effective value to its typed form.
+/// Downcasts an untyped effective value to its typed form, `T` the storage type of the
+/// property's value type.
 #[inline]
-pub(crate) fn cast_effective_value<T: PropertyValue>(value: &dyn EffectiveValueDyn) -> &EffectiveValue<T> {
+pub(crate) fn cast_effective_value<T: 'static>(value: &dyn EffectiveValueDyn) -> &EffectiveValue<T> {
     debug_assert!((value as &dyn Any).is::<EffectiveValue<T>>());
     // SAFETY: effective values are created exclusively by
-    // `StyledProperty<T>::create_effective_value` and stored under that
-    // property's ID, and a property ID is never shared between properties of
-    // different value types. A value looked up by a `StyledProperty<T>` is
-    // therefore always an `EffectiveValue<T>`. Skipping the checked downcast
+    // `StyledProperty<V>::create_effective_value`, as an
+    // `EffectiveValue<V::Storage>`, and stored under that property's ID, and a
+    // property ID is never shared between properties of different value types.
+    // A value looked up for a `StyledProperty<V>` is therefore always an
+    // `EffectiveValue<V::Storage>`. Skipping the checked downcast
     // matters because reading a property value is the hottest path of the
     // property system.
     unsafe { &*(value as *const dyn EffectiveValueDyn as *const EffectiveValue<T>) }
 }
 
-impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
+impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
     fn state(&self) -> &EffectiveValueState {
         &self.state
     }
 
     fn boxed_value(&self) -> BoxedValue {
-        Rc::new(self.value())
+        box_stored(self.state.property, &self.value())
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {
@@ -757,7 +828,13 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
 
         let old_value = self.value();
         let changed = !value_equals(&new_value, &old_value);
-        self.state.finish_unset(owner, &old_value, &new_value, priority, changed, clear_data_validation);
+        if changed {
+            with_values(self.state.property, Some(&old_value), &new_value, |old, new| {
+                self.state.finish_unset(owner, old.expect("the old value"), new, priority, true, clear_data_validation);
+            });
+        } else {
+            self.state.finish_unset(owner, &old_value, &new_value, priority, false, clear_data_validation);
+        }
     }
 }
 

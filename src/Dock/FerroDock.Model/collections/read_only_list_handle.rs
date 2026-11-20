@@ -31,6 +31,28 @@ pub trait IReadOnlyList<T: Clone + 'static>: Any {
 }
 /// An IReadOnlyList reference preserving identity and live/custom collection behavior.
 pub struct ReadOnlyListHandle<T: Clone + 'static>(Rc<dyn IReadOnlyList<T>>);
+
+impl<T: Clone + 'static> ferroui_system::StyledValue for ReadOnlyListHandle<T>
+where
+    ReadOnlyListHandle<T>: PartialEq,
+{
+    type Storage = Self;
+
+    #[inline(always)]
+    fn into_storage(self) -> Self {
+        self
+    }
+
+    #[inline(always)]
+    fn from_storage(storage: Self) -> Self {
+        storage
+    }
+
+    #[inline(always)]
+    fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
+        read(storage)
+    }
+}
 impl<T: Clone + 'static> Clone for ReadOnlyListHandle<T> {
     fn clone(&self) -> Self {
         Self(self.0.clone())

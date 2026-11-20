@@ -550,7 +550,7 @@ impl FerroObject {
 
     /// Gets a property value.
     #[inline]
-    pub fn get_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> T {
+    pub fn get_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) -> T {
         self.values.get_value(self, property)
     }
 
@@ -558,7 +558,7 @@ impl FerroObject {
     /// may read other properties, but must not change this property's effective
     /// value while it is borrowed. Returning a reference to the value is not
     /// permitted by the callback's lifetime.
-    pub fn with_value<T: PropertyValue, R>(
+    pub fn with_value<T: crate::StyledValue, R>(
         &self,
         property: &'static StyledProperty<T>,
         read: impl FnOnce(&T) -> R,
@@ -568,7 +568,7 @@ impl FerroObject {
 
     /// Gets a property's base value: the value excluding animated values.
     /// Returns `None` if the value comes from inheritance or the default.
-    pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+    pub fn get_base_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
         self.values.get_base_value(property)
     }
 
@@ -593,7 +593,7 @@ impl FerroObject {
 
     /// Sets a property value with local value priority.
     #[inline]
-    pub fn set_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>, value: T) {
         match value_marker(&value) {
             Some(ValueMarker::Unset) => self.clear_value(property),
             Some(ValueMarker::DoNothing) => {}
@@ -605,7 +605,7 @@ impl FerroObject {
 
     /// Sets a property value with the given priority. For priorities other
     /// than local value, disposing the returned handle removes the value.
-    pub fn set_value_with_priority<T: PropertyValue>(
+    pub fn set_value_with_priority<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         value: T,
@@ -631,7 +631,7 @@ impl FerroObject {
     /// use of the property: the effective value changes, but existing
     /// bindings and styles continue to work. The new value has the
     /// property's current priority.
-    pub fn set_current_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_current_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>, value: T) {
         match value_marker(&value) {
             Some(ValueMarker::Unset) => self.clear_value(property),
             Some(ValueMarker::DoNothing) => {}
@@ -712,7 +712,7 @@ impl FerroObject {
     }
 
     /// Binds a property to an observable.
-    pub fn bind<T: PropertyValue>(
+    pub fn bind<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         source: Rc<dyn IObservable<T>>,
@@ -725,7 +725,7 @@ impl FerroObject {
     }
 
     /// Binds a property to an observable of binding values.
-    pub fn bind_value<T: PropertyValue>(
+    pub fn bind_value<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         source: Rc<dyn IObservable<BindingValue<T>>>,
@@ -890,16 +890,18 @@ impl FerroObject {
     }
 
     /// Sets a property whose value type is `T` with local value priority, from the value
-    /// itself: a styled (or attached) property takes it as [`set_value`](Self::set_value)
-    /// does, a direct property as [`set_direct_value`](Self::set_direct_value), with no
-    /// untyped value and no copy of it. The value is given back when `T` is not the value type
-    /// of the property; [`set_value_untyped`](Self::set_value_untyped) converts it then.
+    /// itself: a direct property takes it as [`set_direct_value`](Self::set_direct_value)
+    /// does, with no untyped value and no copy of it; a styled (or attached) property as
+    /// [`set_value_untyped`](Self::set_value_untyped) does, through its routes, with one copy
+    /// (its typed setter needs [`StyledValue`](crate::StyledValue), which `T` need not have).
+    /// The value is given back when `T` is not the value type of the property;
+    /// [`set_value_untyped`](Self::set_value_untyped) converts it then.
     pub fn try_set_value_typed<T: PropertyValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
-        if let Some(styled) = property.as_styled::<T>() {
-            self.set_value(styled, value);
-            Ok(())
-        } else if let Some(direct) = property.as_direct::<T>() {
+        if let Some(direct) = property.as_direct::<T>() {
             self.set_direct_value(direct, value);
+            Ok(())
+        } else if !property.is_direct() && property.property_type() == std::any::TypeId::of::<T>() {
+            property.routes().route_set_value(self, &value, BindingPriority::LocalValue);
             Ok(())
         } else {
             Err(value)
