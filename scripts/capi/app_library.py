@@ -118,7 +118,9 @@ def build(selection, out, options):
     found = re.findall(r"native-static-libs: (.*)", result.stdout)
     if not found:
         raise SystemExit("rustc printed no native-static-libs line")
-    native = found[-1].split()
+    # clang links libSystem by default, and libc and libm are part of it (an SDK need not have
+    # their stubs; size_report.py does the same).
+    native = [item for item in found[-1].split() if item not in ("-lSystem", "-lc", "-lm")]
     target = os.environ.get("CARGO_TARGET_DIR") or os.path.join(ROOT, "target")
     archive = os.path.join(out, "libferroui_capi.a")
     shutil.copy(os.path.join(target, options.profile, "libferroui_capi.a"), archive)
