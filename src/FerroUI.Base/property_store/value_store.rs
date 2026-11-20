@@ -1,4 +1,5 @@
 use super::effective_value::cast_effective_value;
+use super::immediate_value_frame::BorrowedValueEntry;
 use super::{
     entry_ptr_eq, frame_ptr_eq, BindingSource, BoxedLocalValueBindingObserver, DirectBindingObserver,
     DirectBoxedBindingObserver, EffectiveValue, EffectiveValueDyn, FramePriority, FrameType, ImmediateValueFrame,
@@ -35,7 +36,7 @@ impl<T> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_> {
     fn create_and_add(&self) -> EffectiveValueRef {
         // The property makes the value (with its metadata as it is now), as
         // a value made for a write does.
-        let effective = self.property.routes().create_effective_value(self.owner);
+        let effective = self.property.styled_codec().create_effective_value(self.owner);
         self.store.add_effective_value(self.owner, self.property, effective.clone());
         // No other owning locals or callable temporaries remain after this
         // result is formed. On insertion unwind, effective still drops before
@@ -597,6 +598,55 @@ impl ValueStore {
         Some(result)
     }
 
+    /// [`set_value`](Self::set_value) of an untyped value of the value type of `property`, that
+    /// is valid: the write of the routes of every styled property (#997).
+    pub(crate) fn set_untyped_value(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Rc<dyn IDisposable>> {
+        if priority != BindingPriority::LocalValue {
+            let boxed = property.routes().route_box_value(value).expect("a value of the type of the property");
+            let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
+            let result = frame.add_boxed_value(property, boxed);
+            let entry: Rc<dyn IValueEntry> = result.clone();
+            let effective = self.get_or_add_effective_value(owner, property);
+            effective.set_and_raise(owner, &entry, priority);
+            Some(result)
+        } else {
+            self.set_untyped_local_value(owner, property, value);
+            None
+        }
+    }
+
+    /// The local value of `property` from an untyped value of its value type.
+    pub(crate) fn set_untyped_local_value(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: &dyn Any,
+    ) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_local_write(property);
+        let effective = self.get_or_add_effective_value(owner, property);
+        effective.set_local_value_and_raise_entry(owner, &BorrowedValueEntry { property, value });
+    }
+
+    /// The current value of `property` from an untyped value of its value type.
+    pub(crate) fn set_untyped_current_value(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        value: &dyn Any,
+    ) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_current_write(property);
+        let effective = self.get_or_add_effective_value(owner, property);
+        effective.set_current_value_and_raise_entry(owner, &BorrowedValueEntry { property, value });
+    }
+
     pub fn set_current_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
         self.set_current_stored_value(owner, property.as_property(), value.into_storage());
     }
@@ -1143,7 +1193,7 @@ impl ValueStore {
     // The construction route preserves the property's Rust type. Only a miss
     // needs this dispatch; lookup and insertion are the same for every type.
     fn create_and_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
-        let value = property.routes().create_effective_value(owner);
+        let value = property.styled_codec().create_effective_value(owner);
         self.add_effective_value(owner, property, value.clone());
         value
     }

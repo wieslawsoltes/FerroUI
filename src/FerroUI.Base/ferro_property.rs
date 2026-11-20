@@ -667,6 +667,10 @@ pub struct FerroProperty {
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
     routes: OnceCell<&'static dyn PropertyRoutes>,
+    /// The operations of a styled property that depend on its value type
+    /// ([`StyledCodec`](crate::styled_property::StyledCodec)): what its routes and the store ask
+    /// of the typed property. Empty for a direct property.
+    styled_codec: OnceCell<&'static dyn crate::styled_property::StyledCodec>,
     /// The members of the value type when it is an enumeration the store keeps as an
     /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
     /// hands out for a stored member. Empty otherwise.
@@ -719,6 +723,7 @@ impl FerroProperty {
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
             members: &[],
         }
     }
@@ -756,8 +761,21 @@ impl FerroProperty {
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
             members: source.members,
         }
+    }
+
+    pub(crate) fn set_styled_codec(&self, codec: &'static dyn crate::styled_property::StyledCodec) {
+        if self.styled_codec.set(codec).is_err() {
+            panic!("the codec of the property is already set");
+        }
+    }
+
+    /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
+    #[inline]
+    pub(crate) fn styled_codec(&self) -> &'static dyn crate::styled_property::StyledCodec {
+        *self.styled_codec.get().expect("a styled property has a codec")
     }
 
     pub(crate) fn set_routes(&self, routes: &'static dyn PropertyRoutes) {
