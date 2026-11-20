@@ -1703,3 +1703,76 @@ explicit option yet to ship the original text of a consumed document (see the is
 - `tests/GeneratedRustFixture/Library`: `Dictionaries/Part.xaml` is merged into `App.xaml` and its
   directory is embedded. Neither its path nor the canary comment of the file is in `ASSETS`, while
   `Dictionaries/Loose.xaml`, which no document consumes, is.
+
+## 24. Creates edges that hold on some targets (#1002)
+
+`samples/HelloWorld` on macOS kept the theme of `Button`, the caption-button resources of
+`Resources/Generic.xaml`, `Resources/TitleBar_themeresources.xaml`, the caption glyphs of
+`Resources/Glyphs.xaml` and `Controls/PathIcon.xaml`. The reason was the ambient unit:
+`Controls/WindowDrawnDecorations.xaml`, the drawn frame and title bar of a window, was part of it.
+No backend of macOS draws these decorations.
+
+### 24.1 The document of the drawn decorations was ambient
+
+A document is ambient when one of its entries registers a name in the scope of the document
+(`registers_outer_name`). The names inside a framework template are in the scope of the template,
+and the list of templates did not include `WindowDrawnDecorationsTemplate`, whose content has a
+name scope of its own (`WindowDrawnDecorationsTemplate::build`). The `PART_` names of the caption
+buttons therefore made the document opaque. With the template in the list, the document is a unit
+keyed by `WindowDrawnDecorations`, in every theme that has it (WinUI, Fluent, macOS, Material and
+Simple).
+
+### 24.2 The class is live in every application with a window
+
+The type models have the creates edges `TopLevel` to `TopLevelHost` to `WindowDrawnDecorations`
+(and `LayerWrapper` to `WindowDrawnDecorations`). Through them, every application with a window
+makes the new unit live. At run time the class is constructed only by
+`TopLevelHost::update_drawn_decorations`, when the platform window needs managed decorations
+(`IWindowImpl::needs_managed_decorations`):
+
+| Backend | Target | `needs_managed_decorations` |
+|---|---|---|
+| `ferroui-native` | macOS | always `false`: the system draws the decorations |
+| `ferroui-win32` | Windows | while the client area is extended, a setting the application can change at run time |
+| `ferroui-x11` | Linux, BSDs | for managed decorations or `WindowDecorations::BorderOnly` |
+| `ferroui-wayland` | Linux, BSDs | when the compositor asks for client-side decorations, at run time |
+| iOS, Android, browser | | no window backend with decorations |
+
+### 24.3 The condition next to the code that decides it
+
+`TypeModel::not_created_on` states the targets on which no code constructs a class, as `cfg`
+conditions (`target_os = "macos"`, `target_arch = "wasm32"`). The build script of the crate of
+the class states them (`Export::not_created_on`), and the field is written only on such a class.
+
+`ferroui-controls` keeps the table in `chrome/drawn_decorations_targets.rs`: macOS, iOS, Android
+and `wasm32`. Its build script reads the file. The test of the file reads the
+`needs_managed_decorations` of the backends of the repository and checks two things:
+
+- a backend that is always `false` serves only targets of the table, and a backend that can need
+  managed decorations serves none of them;
+- no other crate implements the method.
+
+The application build evaluates the conditions against `CARGO_CFG_TARGET_OS` and
+`CARGO_CFG_TARGET_ARCH` (`BuildTarget::from_env`). `TypeGraph::from_models_for` drops the creates
+edges into a class that is not created on the target. A build without a target, such as a test,
+keeps every edge. Where the application names the class, it is still live.
+
+Windows and Linux keep the unit in every application. A run-time setting the build cannot see
+(the extended client area of Windows, the decoration mode of a Wayland compositor) must not lose
+the theme of the caption buttons. A later option could drop it for Windows when no document or
+source names `ExtendClientAreaToDecorationsHint`, with its own risk note. The designer and the
+previewer build with every unit of the themes (`full-themes`), and are unchanged.
+
+### 24.4 Tests
+
+- `theme_unit_graph_tests.rs`
+  (`names_in_a_template_of_the_drawn_decorations_do_not_make_a_document_ambient`): the document
+  is a unit keyed by `WindowDrawnDecorations` that constructs `Button`, while a name outside a
+  template keeps a document ambient.
+- `export.rs` (`export_writes_the_targets_a_class_is_not_created_on`): the conditions are written
+  on the class, and an unknown class is an error.
+- `theme_roots_tests.rs` (`a_class_not_created_on_the_target_is_not_live_through_its_creates_edges`):
+  the edges into the class hold on Linux, Windows and without a target, and not on macOS and
+  `wasm32`. There the class is live only where it is named.
+- `ferroui-controls` (`chrome::drawn_decorations_targets::tests`): the table is in step with the
+  backends.

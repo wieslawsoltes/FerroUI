@@ -9,6 +9,13 @@
 //! changes (or the model of the base crate, which the scan resolves the names of that crate with); the model is written only when its text changed. What a run cost is in
 //! `$OUT_DIR/xamlmeta-scan.txt`.
 
+// The targets on which no code constructs the drawn decorations of a window (#1002), the table
+// the crate keeps in step with its window backends.
+#[path = "chrome/drawn_decorations_targets.rs"]
+mod drawn_decorations_targets;
+
 fn main() {
-    ferroui_build_scan::export::Export::from_env().run();
+    ferroui_build_scan::export::Export::from_env()
+        .not_created_on(drawn_decorations_targets::CLASS, drawn_decorations_targets::NOT_CREATED_ON)
+        .run();
 }

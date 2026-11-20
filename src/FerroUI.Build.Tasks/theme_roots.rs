@@ -178,7 +178,24 @@ impl TypeGraph {
     /// markup name of the base, found by its Rust path (else by its local Rust name, when only one
     /// type has it); for each type that creates classes, their full names.
     pub fn from_models<'m>(models: impl IntoIterator<Item = &'m AssemblyModel>) -> Self {
+        Self::from_models_for(models, None)
+    }
+
+    /// [`from_models`](Self::from_models) for a build for `target` (#1002): a creates edge into a
+    /// class that no code constructs on the target (`TypeModel::not_created_on`, the drawn
+    /// decorations of a window on macOS) does not hold. Without a target, every edge holds.
+    pub fn from_models_for<'m>(models: impl IntoIterator<Item = &'m AssemblyModel>, target: Option<&BuildTarget>) -> Self {
         let models: Vec<&AssemblyModel> = models.into_iter().collect();
+        // The classes that are not created on the target, by full name.
+        let not_created: BTreeSet<String> = match target {
+            Some(target) => models
+                .iter()
+                .flat_map(|model| model.types.iter())
+                .filter(|type_| type_.not_created_on.iter().any(|condition| target.matches(condition)))
+                .map(|type_| type_.full_name())
+                .collect(),
+            None => BTreeSet::new(),
+        };
         // The full markup name of each type, by its Rust path and by the paths other crates name
         // it by; and the full names of each local Rust name.
         let mut by_path: BTreeMap<String, String> = BTreeMap::new();
@@ -200,9 +217,10 @@ impl TypeGraph {
                 if type_.object_model && type_.kind == TypeKind::Class {
                     graph.classes.insert(full.clone());
                 }
-                if !type_.creates.is_empty() {
-                    let created = graph.creates.entry(full.clone()).or_default();
-                    created.extend(type_.creates.iter().filter(|created| **created != full).cloned());
+                let creates: Vec<&String> =
+                    type_.creates.iter().filter(|created| **created != full && !not_created.contains(*created)).collect();
+                if !creates.is_empty() {
+                    graph.creates.entry(full.clone()).or_default().extend(creates.into_iter().cloned());
                 }
                 let Some(base) = &type_.base else { continue };
                 let local = rust_local_name(&base.text);
@@ -313,6 +331,37 @@ impl TypeGraph {
             pending.extend(self.creates.get(&next).into_iter().flatten().filter(|created| !seen.contains(*created)).cloned());
         }
         live
+    }
+}
+
+/// The target a build compiles for (#1002), from the `cfg` of the build script of the application:
+/// what the conditions of `TypeModel::not_created_on` are evaluated against.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct BuildTarget {
+    /// `target_os` (`macos`, `linux`, `windows`, ..).
+    pub os: String,
+    /// `target_arch` (`aarch64`, `x86_64`, `wasm32`, ..).
+    pub arch: String,
+}
+
+impl BuildTarget {
+    /// The target of the running build script (`CARGO_CFG_TARGET_OS`, `CARGO_CFG_TARGET_ARCH`);
+    /// none outside a build script, where every creates edge holds.
+    pub fn from_env() -> Option<Self> {
+        let os = std::env::var("CARGO_CFG_TARGET_OS").ok()?;
+        Some(Self { os, arch: std::env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default() })
+    }
+
+    /// Whether the condition `target_os = "macos"` or `target_arch = "wasm32"` holds for the
+    /// target. Any other condition does not, so an edge it states keeps holding.
+    pub fn matches(&self, condition: &str) -> bool {
+        let Some((key, value)) = condition.split_once('=') else { return false };
+        let value = value.trim().trim_matches('"');
+        match key.trim() {
+            "target_os" => self.os == value,
+            "target_arch" => self.arch == value,
+            _ => false,
+        }
     }
 }
 

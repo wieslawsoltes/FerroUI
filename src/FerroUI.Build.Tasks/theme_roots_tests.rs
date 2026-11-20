@@ -557,3 +557,33 @@ fn every_kept_unit_has_a_reason() {
     assert!(listing.starts_with(totals), "{listing}");
     assert!(listing.contains("Resources/Accent.xaml\t1 of 2 keys live\texact\tdefines AccentBrush"), "{listing}");
 }
+
+/// A creates edge into a class no code constructs on the target of the build does not hold there
+/// (#1002): the host of a window creates its drawn decorations, which no backend of macOS needs, so
+/// a window keeps them live everywhere but on macOS; named by the application, they are live on
+/// macOS too. Without a target every edge holds.
+#[test]
+fn a_class_not_created_on_the_target_is_not_live_through_its_creates_edges() {
+    let mut model = AssemblyModel::new("Tests", "tests");
+    let mut decorations = class("Decorations", Some("Control"), &["Tests.Controls.CaptionButton"]);
+    decorations.not_created_on = strings(&["target_os = \"macos\"", "target_arch = \"wasm32\""]);
+    model.types = vec![
+        class("Host", Some("Control"), &["Tests.Controls.Decorations", "Tests.Controls.Layer"]),
+        decorations,
+        class("Layer", Some("Control"), &["Tests.Controls.Decorations"]),
+        class("CaptionButton", Some("Control"), &[]),
+    ];
+    let target = |os: &str, arch: &str| BuildTarget { os: os.to_string(), arch: arch.to_string() };
+    let all = set(&["CaptionButton", "Control", "Decorations", "Host", "Layer"]);
+    assert_eq!(TypeGraph::from_models([&model]).live("Host"), all);
+    assert_eq!(TypeGraph::from_models_for([&model], Some(&target("linux", "x86_64"))).live("Host"), all);
+    assert_eq!(TypeGraph::from_models_for([&model], Some(&target("windows", "x86_64"))).live("Host"), all);
+    for (os, arch) in [("macos", "aarch64"), ("emscripten", "wasm32")] {
+        let graph = TypeGraph::from_models_for([&model], Some(&target(os, arch)));
+        assert_eq!(graph.live("Host"), set(&["Control", "Host", "Layer"]), "{os}");
+        assert_eq!(graph.live("Decorations"), set(&["CaptionButton", "Control", "Decorations"]), "{os}");
+    }
+    // A condition that is not one of the target holds for no target.
+    assert!(!target("macos", "aarch64").matches("feature = \"macos\""));
+    assert!(target("macos", "aarch64").matches("target_os=\"macos\""));
+}

@@ -247,7 +247,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
 use crate::theme_roots::{
     binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, parts_constructor,
     parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
-    Roots, ThemeTrimming, TypeGraph,
+    BuildTarget, Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -1259,7 +1259,10 @@ impl Build {
                 roots.types.extend(dependency.references.types.iter().cloned());
                 roots.keys.extend(dependency.references.keys.iter().cloned());
             }
-            let graph = TypeGraph::from_models(&base_models);
+            // The creates edges that hold on the target of the build (#1002): no code constructs
+            // the drawn decorations of a window on macOS, so a window does not make them live there.
+            let target = BuildTarget::from_env();
+            let graph = TypeGraph::from_models_for(&base_models, target.as_ref());
             let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
             let from_sources = source_roots(&source_references, themes, &graph);
             roots.extend(from_sources.clone());

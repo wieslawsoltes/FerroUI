@@ -730,6 +730,11 @@ pub struct TypeModel {
     /// `X::default`; sorted, the class itself left out. They keep the control themes of what a
     /// class creates in code (`ListBox` creates `ListBoxItem` containers). Absent in a file: none.
     pub creates: Vec<String>,
+    /// The targets on which no code constructs the class (#1002), as `cfg` conditions
+    /// (`target_os = "macos"`, `target_arch = "wasm32"`): a build for a matching target drops the
+    /// creates edges into the class, so the class is live there only where something names it.
+    /// Stated by the build script of its crate (`Export::not_created_on`). Absent in a file: none.
+    pub not_created_on: Vec<String>,
 }
 
 impl TypeModel {
@@ -773,6 +778,7 @@ impl TypeModel {
             property_attributes: Vec::new(),
             notify_property_changed: None,
             creates: Vec::new(),
+            not_created_on: Vec::new(),
         }
     }
 
@@ -942,7 +948,8 @@ impl TypeModel {
                     Json::Array(vec![Json::string(name), Json::Array(attributes.iter().map(AttributeModel::to_json).collect())])
                 })
                 .optional("notify_property_changed", optional_type(&self.notify_property_changed))
-                .list("creates", &self.creates, |name| Json::string(name)),
+                .list("creates", &self.creates, |name| Json::string(name))
+                .list("not_created_on", &self.not_created_on, |condition| Json::string(condition)),
         )
     }
 
@@ -998,6 +1005,7 @@ impl TypeModel {
             })?,
             notify_property_changed: fields.optional("notify_property_changed", RustType::from_json)?,
             creates: fields.list("creates", |name| text_of(name, "a class a type creates"))?,
+            not_created_on: fields.list("not_created_on", |condition| text_of(condition, "a target a class is not created on"))?,
         })
     }
 }

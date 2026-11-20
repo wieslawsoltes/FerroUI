@@ -293,7 +293,11 @@ needs. The build computes the table from the roots:
    `.tool_tip("..")` is `ToolTip`): the builders of the declarative layer are named after the
    classes they make;
 5. the creates edges of the type models: the controls a class's code constructs (`ListBox`
-   creates `ListBoxItem`), transitively;
+   creates `ListBoxItem`), transitively. An edge into a class that no code constructs on the
+   target of the build does not hold there (`Export::not_created_on`, #1002): the host of a window
+   creates its drawn decorations (`WindowDrawnDecorations`, with the caption buttons and the title
+   bar resources they need) everywhere but on macOS, iOS, Android and the browser, so applications
+   for those targets keep that theme only when they name it;
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
