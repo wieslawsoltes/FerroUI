@@ -405,6 +405,41 @@ Details are in docs/porting/theme-trimming.md, section 22.
   These are the run-time XAML loader, hot reload, the designer, DevTools, Inspect and
   Diagnostics. Looking types up by name (`type-tables`) does not keep every unit:
   `ferroui-view` and the behaviors only need the lookup, and their applications are trimmed.
+- The tables of types themselves keep every class of the framework they register, units or not.
+  Bounded reflection (#851, an experiment) builds with `--cfg ferroui_bounded_reflection` in
+  `RUSTFLAGS`: `type-tables` then registers no table of the framework and keeps no default
+  constructor, as without the feature, and the application registers what its dynamic use needs
+  one by one (`TypeInfo::register_all` for a type found by name, such as the owner of an
+  attached property a behavior names; `TypeInfo::register_constructor` for a class created by
+  reflection; `MarkupType::register_all`). The members a behavior finds by name on a value
+  (`find_markup_property`, `find_markup_methods`, `find_markup_event`) come from the markup
+  metadata of the value's own type and need no table.
+
+**What the registration of a crate keeps (#857).** `compiled_markup::register()` registers the
+loader table of the crate and its embedded assets. Without a plan the loader table answers
+every public document of every exported group and the asset table holds every embedded asset,
+so a load by URI keeps every build function and every payload. A crate that loads a known set
+of documents by URI and reads a known set of assets states it in its build script:
+
+```rust
+ferroui_build::Build::from_env()
+    .export_plan(
+        ferroui_build::ExportPlan::closed()
+            .document("ferres://myapp/Views/Settings.xaml")
+            .asset("/Assets/logo.png"),
+    )
+    .run();
+```
+
+The loader table then answers only the listed documents, each through its own build function
+(or the loader of its class), after the checked-in tables, with the same comparison without
+regard to case and the same root service provider; the asset table holds only the listed
+assets. A listed URI that is not a public document of an exported group, and a listed asset the
+crate does not embed, fail the build. Code that names a document's build function or class
+still links it. A library whose documents others load by URI keeps the default
+(`ExportPlan::all()`). Either way the build writes `$OUT_DIR/xaml/exports.txt`: every compiled
+document with its build or populate path, whether it is public and whether the loader table
+answers it, and every embedded asset with its size and whether it is registered.
 
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
 name, the first time the control looks for its theme. Release builds do not check.
@@ -662,6 +697,7 @@ section 9).
 | Part | Issue / PR | State |
 |---|---|---|
 | Tables of types trimmed by default | #566 | On `main` |
+| Bounded reflection: `type-tables` without the tables of the framework (`--cfg ferroui_bounded_reflection`, an experiment) | #851 | In review, to be measured |
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
@@ -669,6 +705,7 @@ section 9).
 | `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
 | Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
+| A closed export plan of the documents and assets a crate registers (`Build::export_plan`, opt-in); `exports.txt` | #857 | In review, to be measured |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
@@ -676,6 +713,7 @@ section 9).
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, control documents as units | #568 | In review |
+| Material: the packed installer of the compatibility palette (`PACKED_INSTALLER`, off); the embedded font assets as the feature `embedded-font-assets` (on) | #856 | In review, to be measured |
 | `MergeResourceInclude` inside an inline dictionary; the Material theme's inherited resource documents as units | #633 | In review |
 | Compiled bindings in all themes | #603 | In review |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |

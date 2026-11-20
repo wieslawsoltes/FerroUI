@@ -204,6 +204,8 @@
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
+mod export_plan;
+pub use export_plan::ExportPlan;
 mod diagnostics;
 #[cfg(feature = "shader-effects")]
 pub mod shader_effects;
@@ -381,6 +383,8 @@ pub struct Build {
     theme_roots: Roots,
     /// The themes the Rust code of the crate constructs from their parts ([`Build::theme`]).
     themes: Vec<String>,
+    /// What `compiled_markup::register()` registers ([`Build::export_plan`], #857).
+    export_plan: ExportPlan,
     /// Whether declared properties are resolved at compile time
     /// ([`Build::compile_time_declared_properties`]).
     compile_time_declared_properties: bool,
@@ -437,6 +441,7 @@ impl Build {
             full_themes: false,
             theme_roots: Roots::default(),
             themes: Vec::new(),
+            export_plan: ExportPlan::all(),
             compile_time_declared_properties: false,
         }
     }
@@ -501,6 +506,23 @@ impl Build {
     ///
     /// With the trimming turned off in the manifest (`theme-trimming = false`) the table has
     /// every unit, so the code is the same either way.
+    /// What `compiled_markup::register()` of the crate registers (#857): every public document
+    /// and every embedded asset without the call ([`ExportPlan::all`]), or the closed set an
+    /// application loads by URI and reads ([`ExportPlan::closed`]). A document or an asset the
+    /// closed plan leaves out is not referenced by the registration. The build lists what the
+    /// crate compiles and embeds, and what the plan does with each, in
+    /// `$OUT_DIR/xaml/exports.txt`.
+    ///
+    /// ```ignore
+    /// ferroui_build::Build::from_env()
+    ///     .export_plan(ExportPlan::closed().document("ferres://myapp/Views/Settings.xaml").asset("/Assets/logo.png"))
+    ///     .run();
+    /// ```
+    pub fn export_plan(mut self, plan: ExportPlan) -> Self {
+        self.export_plan = plan;
+        self
+    }
+
     pub fn theme(mut self, class: &str) -> Self {
         if !self.themes.iter().any(|known| known == class) {
             self.themes.push(class.to_string());
@@ -1341,6 +1363,8 @@ impl Build {
             keys: exported_roots.keys.iter().cloned().collect(),
         };
 
+        // The documents for the export plan (#857), before the model takes them.
+        let planned_documents = metadata.documents.clone();
         // 4. The `.xamlmeta` (with the type model of the crate, when it was scanned) and
         // the file the crate includes.
         let metadata_path = self.out_dir.join(format!("{}.xamlmeta", self.crate_name));
@@ -1374,8 +1398,18 @@ impl Build {
         let includes = self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty();
         // A table for a theme a dependency constructs (#846) is written for a crate without markup too.
         if includes || !self.themes.is_empty() || !parts_tables.is_empty() {
-            let text = crate_file(&assembly_name, &modules, &self.loaders, &assets, &parts_tables);
-            write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+            // The export plan (#857): what the registration of the crate refers to.
+            let exported: Vec<String> =
+                modules.iter().filter(|module| module.exported).map(|module| module.name.clone()).collect();
+            match export_plan::apply(&self.export_plan, &self.crate_name, &planned_documents, &exported, &assets) {
+                Ok(applied) => {
+                    let report = export_plan::report(&self.export_plan, &planned_documents, &applied, &assets);
+                    write_if_changed(&xaml_directory.join("exports.txt"), &report, &mut errors);
+                    let text = crate_file_with_plan(&assembly_name, &modules, &self.loaders, &applied, &parts_tables);
+                    write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+                }
+                Err(plan_errors) => errors.extend(plan_errors),
+            }
         }
         if !errors.is_empty() {
             return Outcome { lines, errors };
@@ -1599,7 +1633,22 @@ fn compile_bindings_by_default(manifest: Option<bool>, build_script: Option<bool
     manifest.or(build_script).unwrap_or(true)
 }
 
+#[cfg(test)]
 fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], assets: &[(String, PathBuf)], parts: &[PartsTable]) -> String {
+    let applied = export_plan::Applied { documents: None, assets: assets.to_vec() };
+    crate_file_with_plan(assembly_name, modules, loaders, &applied, parts)
+}
+
+/// The file the crate includes, with the documents and the assets of the export plan
+/// `applied` (#857): the loader table of every exported module and every asset without a plan.
+fn crate_file_with_plan(
+    assembly_name: &str,
+    modules: &[Module],
+    loaders: &[String],
+    applied: &export_plan::Applied,
+    parts: &[PartsTable],
+) -> String {
+    let assets = &applied.assets;
     let mut text = String::new();
     text.push_str("// @generated by ferroui-build (Build::run). Do not edit.\n");
     for Module { name: module, path, file, .. } in modules {
@@ -1664,14 +1713,22 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
     text.push_str("        service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     text.push_str("        uri: &str,\n");
     text.push_str("    ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
-    let tables = loaders
-        .iter()
-        .cloned()
-        .chain(modules.iter().filter(|module| module.exported).map(|module| format!("super::{}::try_load", module.name)));
-    for table in tables {
+    // A closed plan answers its documents only, after the checked-in tables (#857).
+    let module_tables = match &applied.documents {
+        None => modules
+            .iter()
+            .filter(|module| module.exported)
+            .map(|module| format!("super::{}::try_load", module.name))
+            .collect(),
+        Some(_) => Vec::new(),
+    };
+    for table in loaders.iter().cloned().chain(module_tables) {
         text.push_str(&format!("        if let ::core::option::Option::Some(loaded) = {table}(service_provider, uri)? {{\n"));
         text.push_str("            return ::core::result::Result::Ok(::core::option::Option::Some(loaded));\n");
         text.push_str("        }\n");
+    }
+    if let Some(documents) = &applied.documents {
+        text.push_str(&export_plan::loader_branches(documents, rust_string_literal));
     }
     text.push_str("        ::core::result::Result::Ok(::core::option::Option::None)\n");
     text.push_str("    }\n");

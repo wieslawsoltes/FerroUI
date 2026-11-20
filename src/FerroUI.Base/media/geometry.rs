@@ -534,6 +534,8 @@ pub(crate) mod tests {
     pub(crate) struct MockFactory {
         pub created: RefCell<Vec<String>>,
         pub streams: RefCell<Vec<CommandLog>>,
+        /// For each stream builder made, whether it was given a geometry to build on.
+        pub stream_sources: RefCell<Vec<bool>>,
     }
 
     impl crate::platform::IPlatformRenderInterface for MockFactory {
@@ -561,8 +563,12 @@ pub(crate) mod tests {
             self.created.borrow_mut().push(format!("rectangle {rect}"));
             MockGeometryImpl::create()
         }
-        fn create_stream_geometry_builder(&self, _source: Option<&dyn IGeometryImpl>) -> Box<dyn IStreamGeometryBuilder> {
+        fn create_stream_geometry_builder(
+            &self,
+            source: Option<&dyn IGeometryImpl>,
+        ) -> Box<dyn IStreamGeometryBuilder> {
             self.created.borrow_mut().push("stream".to_string());
+            self.stream_sources.borrow_mut().push(source.is_some());
             let log = Arc::new(std::sync::Mutex::new(Vec::new()));
             self.streams.borrow_mut().push(log.clone());
             Box::new(MockStreamGeometryBuilder { log })
