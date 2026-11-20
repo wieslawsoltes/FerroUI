@@ -42,7 +42,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -124,7 +126,7 @@ fn window_theme(theme: &StyleBuilder) -> Result {
     );
     theme.template(window_theme_template);
     // A window with a system backdrop (Mica, desktop acrylic) draws no background of its own:
-    //         the backdrop is drawn behind the content (docs/porting/winui-materials.md).
+    // the backdrop is drawn behind the content (docs/porting/winui-materials.md).
     theme.style(nesting().class(":system-backdrop"), |style| {
         style.set(
             TemplatedControl::background_property(),

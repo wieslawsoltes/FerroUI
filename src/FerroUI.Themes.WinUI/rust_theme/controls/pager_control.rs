@@ -94,7 +94,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -372,11 +374,11 @@ fn pager_control_theme_template(t: &Template<PagerControl>) -> Result<Ref<Contro
         .name("RootGrid")?
         .template_bind(Panel::background_property(), TemplatedControl::background_property())
         .with(|e| {
-            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto,*"))?);
+            e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto,*"))?);
             Ok(())
         })?
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto"))?);
             Ok(())
         })?
         .children([

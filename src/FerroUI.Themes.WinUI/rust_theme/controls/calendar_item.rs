@@ -97,7 +97,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -112,15 +114,15 @@ fn calendar_item_week_day_name_style(theme: &StyleBuilder) -> Result {
     theme.set(Layoutable::vertical_alignment_property(), VerticalAlignment::Center);
     theme.dynamic(TextBlock::font_weight_property(), "CalendarViewWeekDayFontWeight");
     // CalendarViewWeekDayMargin (1); the bottom margin adds the 2 px between the day names and
-    //         the days of the source (the top margin of MonthViewScrollViewer). With the 16 px line of
-    //         the 12 px caption the row of the day names is the 2 + 42 of WinUI's, and the views are
-    //         the 300 px of WinUI's.
+    // the days of the source (the top margin of MonthViewScrollViewer). With the 16 px line of
+    // the 12 px caption the row of the day names is the 2 + 42 of WinUI's, and the views are
+    // the 300 px of WinUI's.
     theme.set(Layoutable::margin_property(), Thickness::new(1.0, 1.0, 1.0, 3.0));
     // CalendarViewWeekDayPadding (12) above and below only: in WinUI the columns of the day
-    //         names are the 42 px of the day items (40 and a margin of 1), and a name with its padding
-    //         of 12 at both sides (44 px for "We") does not widen them; in FerroUI's grid it would widen
-    //         every column, and the calendar by 5 px. The names are centred, so the horizontal padding
-    //         does not move them.
+    // names are the 42 px of the day items (40 and a margin of 1), and a name with its padding
+    // of 12 at both sides (44 px for "We") does not widen them; in FerroUI's grid it would widen
+    // every column, and the calendar by 5 px. The names are centred, so the horizontal padding
+    // does not move them.
     theme.set(TextBlock::padding_property(), Thickness::symmetric(0.0, 12.0));
     Ok(())
 }
@@ -197,7 +199,7 @@ fn calendar_item_header_navigation_button_style_template(t: &Template<Button>) -
 fn calendar_item_header_navigation_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -381,7 +383,7 @@ fn calendar_item_navigation_button_style_template(t: &Template<Button>) -> Resul
 fn calendar_item_navigation_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -423,8 +425,8 @@ fn calendar_item_navigation_button_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(calendar_item_navigation_button_style_template);
     // The states also set the Foreground of the button itself, which the glyph paths of its
-    //         content take (a path does not inherit the foreground of the content presenter as the
-    //         glyph of a FontIcon does), over the foreground the CalendarItem template binds.
+    // content take (a path does not inherit the foreground of the content presenter as the
+    // glyph of a FontIcon does), over the foreground the CalendarItem template binds.
     // PointerOver
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
@@ -533,15 +535,15 @@ fn calendar_item_theme_template(t: &Template<CalendarItem>) -> Result<Ref<Contro
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto,*"))?);
                     Ok(())
                 })?
                 // The views: 300 px high, the height of the month view of the source (2 + 42 + 2 + 6 x 42 + 2),
-                //                 so that the year view keeps the size of the calendar.
+                // so that the year view keeps the size of the calendar.
                 .children([
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
                             Ok(())
                         })?
                         .template_bind(Panel::background_property(), CalendarItem::header_background_property())
@@ -653,7 +655,7 @@ fn calendar_item_theme_template(t: &Template<CalendarItem>) -> Result<Ref<Contro
                         .name("Views")?
                         .set(Grid::row_property(), 2)
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                             Ok(())
                         })?
                         .set(Layoutable::min_height_property(), 300.0)

@@ -88,9 +88,9 @@ use ferroui_media_video_controls::MediaTransportControls;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // AppBarButtonStyle and AppBarToggleButtonStyle of the template: 40 by 40, with the
-    //       CommandBar.Resources of MediaControlsCommandBar (AppBarButtonInnerBorderMargin 5,
-    //       AppBarButtonContentViewboxCollapsedMargin 0,12, AppBarThemeCompactHeight 40) and its
-    //       DefaultLabelPosition Collapsed.
+    // CommandBar.Resources of MediaControlsCommandBar (AppBarButtonInnerBorderMargin 5,
+    // AppBarButtonContentViewboxCollapsedMargin 0,12, AppBarThemeCompactHeight 40) and its
+    // DefaultLabelPosition Collapsed.
     resources.control_theme(
         "MediaTransportControlsAppBarButtonStyle",
         media_transport_controls_app_bar_button_style,
@@ -112,7 +112,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -227,11 +229,11 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                         t.make(Grid::new())
                             .name("ControlPanelGrid")?
                             .with(|e| {
-                                Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                                e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                                 Ok(())
                             })?
                             .with(|e| {
-                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+                                e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
                                 Ok(())
                             })?
                             .children([
@@ -261,7 +263,7 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                                         t.make(Grid::new())
                                             .name("MediaTransportControls_Timeline_Grid")?
                                             .with(|e| {
-                                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto"))?);
+                                                e.set_row_definitions(literal(RowDefinitions::parse("*,Auto"))?);
                                                 Ok(())
                                             })?
                                             .children([
@@ -404,10 +406,9 @@ fn default_media_transport_controls_style_template(t: &Template<MediaTransportCo
                                             .name("MediaControlsCommandBar")?
                                             .set(Layoutable::margin_property(), Thickness::symmetric(0.0, 3.0))
                                             .with(|e| {
-                                                Grid::set_column_definitions(
-                                                    e,
-                                                    literal(ColumnDefinitions::parse("Auto,*,Auto"))?,
-                                                );
+                                                e.set_column_definitions(literal(ColumnDefinitions::parse(
+                                                    "Auto,*,Auto",
+                                                ))?);
                                                 Ok(())
                                             })?
                                             .children([

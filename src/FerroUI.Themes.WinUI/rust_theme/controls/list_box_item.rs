@@ -96,14 +96,16 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("DefaultListBoxItemStyle", default_list_box_item_style);
     resources.control_theme(type_key::<ListBoxItem>(), list_box_item_theme);
     // DefaultListViewItemStyle: the chrome of ListViewItemPresenter drawn with elements. WinUI
-    //       applies the default style of a control beneath an explicit style, so the keyed themes are
-    //       based on the default theme (docs/porting/winui-theme.md, section 4.2).
+    // applies the default style of a control beneath an explicit style, so the keyed themes are
+    // based on the default theme (docs/porting/winui-theme.md, section 4.2).
     resources.control_theme("DefaultListViewItemStyle", default_list_view_item_style);
     resources.control_theme("ListViewItemExpanded", list_view_item_expanded);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -132,7 +134,7 @@ fn default_list_box_item_style_template(t: &Template<ListBoxItem>) -> Result<Ref
             Decorator::child_property(),
             t.make(Panel::new())
                 // BodyContentPresenterStyle (based on BaseContentPresenterStyle) with
-                //                 TextWrapping="NoWrap".
+                // TextWrapping="NoWrap".
                 .children([
                     t.make(Rectangle::new())
                         .name("PressedBackground")?
@@ -173,7 +175,7 @@ fn default_list_box_item_style_template(t: &Template<ListBoxItem>) -> Result<Ref
 fn default_list_box_item_style(theme: &StyleBuilder) -> Result {
     theme.target::<ListBoxItem>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::vertical_content_alignment_property(),
         VerticalAlignment::Center,

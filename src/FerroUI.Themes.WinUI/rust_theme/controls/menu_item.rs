@@ -111,12 +111,12 @@ use ferroui_markup_xaml::rust_theme::type_key;
 
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
-    resources.deferred("MenuItemKeyGestureConverter", |scope| {
+    resources.deferred("MenuItemKeyGestureConverter", |_| {
         Ok(value(::std::rc::Rc::new(PlatformKeyGestureConverter::new())))
     });
     resources.control_theme("DefaultMenuFlyoutItemStyle", default_menu_flyout_item_style);
     // WinUI applies the default style of a control beneath an explicit style, so the keyed
-    //       themes are based on the default theme (docs/porting/winui-theme.md, section 4.2).
+    // themes are based on the default theme (docs/porting/winui-theme.md, section 4.2).
     resources.control_theme(
         "DefaultToggleMenuFlyoutItemStyle",
         default_toggle_menu_flyout_item_style,
@@ -124,13 +124,15 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("DefaultRadioMenuFlyoutItemStyle", default_radio_menu_flyout_item_style);
     resources.control_theme("DefaultMenuFlyoutSubItemStyle", default_menu_flyout_sub_item_style);
     // RadioMenuFlyoutSubItemStyle: a sub item with the radio bullet E915 of its checked state in
-    //       the check column (15 px margin) and the chevron E76C.
+    // the check column (15 px margin) and the chevron E76C.
     resources.control_theme("RadioMenuFlyoutSubItemStyle", radio_menu_flyout_sub_item_style);
     resources.control_theme(type_key::<MenuItem>(), menu_item_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -211,7 +213,7 @@ fn default_menu_flyout_item_style_template(t: &Template<MenuItem>) -> Result<Ref
                         })?
                         // E73E at 12 px in a cell of 12 px, with the margin 0,0,16,0 of the source.
                         // E974 at 12 px in a cell of 12 px, with the margin MenuFlyoutItemChevronMargin
-                        //                   (24,0,0,-1) of the source.
+                        // (24,0,0,-1) of the source.
                         .children([
                             t.make(Path::new())
                                 .name("CheckGlyph")?
@@ -235,9 +237,9 @@ fn default_menu_flyout_item_style_template(t: &Template<MenuItem>) -> Result<Ref
                                 .set(Layoutable::margin_property(), Thickness::new(0.0, 0.0, 12.0, 0.0))
                                 .set(Visual::is_visible_property(), false)
                                 // A path icon is unscaled there, as WinUI's, so that the Viewbox scales its
-                                //                     geometry as WinUI's does: the icon is a logical child of the item, which a
-                                //                     style of this presenter does not reach, so a style of the theme does it for
-                                //                     the path icons of menu items (MenuItem > PathIcon, Controls/WinUIControls.xaml, PI-3).
+                                // geometry as WinUI's does: the icon is a logical child of the item, which a
+                                // style of this presenter does not reach, so a style of the theme does it for
+                                // the path icons of menu items (MenuItem > PathIcon, Controls/WinUIControls.xaml, PI-3).
                                 .child(
                                     Viewbox::child_property(),
                                     t.make(ContentPresenter::new())
@@ -406,8 +408,8 @@ fn default_menu_flyout_item_style(theme: &StyleBuilder) -> Result {
     );
     theme.dynamic(TemplatedControl::foreground_property(), "MenuFlyoutItemForeground");
     // MenuFlyoutItemThemePadding, replaced by NarrowPadding of PaddingSizeStates
-    //         (MenuFlyoutItemThemePaddingNarrow), which applies always: set on the item, as a style of
-    //         the template's LayoutRoot would not override its template binding of the padding.
+    // (MenuFlyoutItemThemePaddingNarrow), which applies always: set on the item, as a style of
+    // the template's LayoutRoot would not override its template binding of the padding.
     theme.static_resource(TemplatedControl::padding_property(), "MenuFlyoutItemThemePaddingNarrow")?;
     theme.dynamic(TemplatedControl::font_size_property(), "ControlContentThemeFontSize");
     theme.dynamic(TemplatedControl::corner_radius_property(), "ControlCornerRadius");
@@ -558,7 +560,7 @@ fn default_menu_flyout_item_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // ToggleMenuFlyoutItem and RadioMenuFlyoutItem: the check glyph column (CheckPlaceholder),
-    //         the radio bullet E915 of RadioMenuFlyoutItem, and the keyboard accelerator text.
+    // the radio bullet E915 of RadioMenuFlyoutItem, and the keyboard accelerator text.
     theme.style(
         Selectors::or([
             nesting().class(":toggle").template().of::<Path>().name("CheckGlyph"),
@@ -863,7 +865,7 @@ fn default_menu_flyout_item_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // ToggleMenuFlyoutItem, RadioMenuFlyoutItem: Disabled (which does not set the background
-    //         of the layout root)
+    // of the layout root)
     theme.style(
         nesting()
             .class(":toggle")

@@ -506,10 +506,16 @@ impl Resources {
     }
 
     /// Adds what `build` makes under `key`, made when the resource is first looked up, with the
-    /// scope of the entry.
-    pub fn deferred(&self, key: impl Into<ResourceKey>, build: impl Fn(&Scope) -> Result<MarkupValue> + 'static) {
+    /// scope of the entry. `build` is a function, not a closure, so that the step is compiled
+    /// once for every resource of a theme.
+    pub fn deferred(&self, key: impl Into<ResourceKey>, build: fn(&Scope) -> Result<MarkupValue>) {
+        self.deferred_with(key.into(), Rc::new(build));
+    }
+
+    /// [`deferred`](Self::deferred) of a build that holds values (the steps of this API).
+    #[inline(never)]
+    fn deferred_with(&self, key: ResourceKey, build: Rc<dyn Fn(&Scope) -> Result<MarkupValue>>) {
         let scope = self.scope.clone();
-        let key = key.into();
         let shown = key.clone();
         self.dictionary.add_deferred_fn(key, move |_| match build(&scope) {
             Ok(value) => value,
@@ -522,46 +528,46 @@ impl Resources {
 
     /// Adds a solid colour brush of the colour `argb` under `key`.
     pub fn color_brush(&self, key: &str, argb: u32) {
-        self.deferred(key, move |_| {
+        self.deferred_with(key.into(), Rc::new(move |_| {
             let brush = ferroui_base::media::SolidColorBrush::new();
             brush.set_value(ferroui_base::media::SolidColorBrush::color_property(), ferroui_base::media::Color::from_uint32(argb));
             Ok(value(brush))
-        });
+        }));
     }
 
     /// Adds a solid colour brush whose colour is the static resource `color_key` under `key`.
     pub fn static_color_brush(&self, key: &str, color_key: &'static str) {
-        self.deferred(key, move |scope| {
+        self.deferred_with(key.into(), Rc::new(move |scope| {
             let brush = ferroui_base::media::SolidColorBrush::new();
             let color = scope.static_resource(color_key, Some(ValueType::of::<ferroui_base::media::Color>()))?;
             assign(brush.upcast_ref::<FerroObject>(), ferroui_base::media::SolidColorBrush::color_property(), color, BindingPriority::LocalValue)?;
             Ok(value(brush))
-        });
+        }));
     }
 
     /// Adds a solid colour brush whose colour is the dynamic resource `color_key` under `key`.
     pub fn dynamic_color_brush(&self, key: &str, color_key: &'static str) {
-        self.deferred(key, move |scope| {
+        self.deferred_with(key.into(), Rc::new(move |scope| {
             let brush = ferroui_base::media::SolidColorBrush::new();
             let binding = dynamic_resource(color_key, scope.anchor(), scope.variant(), BindingPriority::LocalValue);
             let _ = brush.bind_binding(ferroui_base::media::SolidColorBrush::color_property().as_property(), &binding);
             Ok(value(brush))
-        });
+        }));
     }
 
     /// Adds the resource `target` under `key` (`<StaticResource x:Key="key" ResourceKey="target" />`).
     pub fn alias(&self, key: &str, target: &'static str) {
-        self.deferred(key, move |scope| scope.static_resource(target, None));
+        self.deferred_with(key.into(), Rc::new(move |scope| scope.static_resource(target, None)));
     }
 
     /// Adds the control theme `build` makes under `key`, made when it is first looked up.
     pub fn control_theme(&self, key: impl Into<ResourceKey>, build: fn(&StyleBuilder) -> Result) {
-        self.deferred(key, move |scope| {
+        self.deferred_with(key.into(), Rc::new(move |scope| {
             let theme = ControlTheme::new();
             let builder = StyleBuilder::control_theme(&theme, scope);
             build(&builder)?;
             Ok(value(theme))
-        });
+        }));
     }
 
     /// Adds the entries `populate` adds to the theme dictionary of `variant`, which is created
@@ -747,7 +753,15 @@ impl StyleBuilder {
     }
 
     /// A nested style of `selector`, with the setters and styles `populate` adds.
+    #[inline]
     pub fn style(&self, selector: Selector, populate: impl FnOnce(&StyleBuilder) -> Result) -> Result<&Self> {
+        let mut populate = Some(populate);
+        self.nested_style(selector, &mut |builder| (populate.take().expect("populated once"))(builder))
+    }
+
+    /// [`style`](Self::style), compiled once: the closure of each style is called through it.
+    #[inline(never)]
+    fn nested_style(&self, selector: Selector, populate: &mut dyn FnMut(&StyleBuilder) -> Result) -> Result<&Self> {
         let nested = Style::new();
         nested.set_selector(Some(selector));
         nested.enable_selector_index();
@@ -978,8 +992,18 @@ impl<'a, T: ObjectType> Template<'a, T> {
 /// An element being built: its properties, bindings, name and children. A styled element is
 /// initialised between [`start`](Self::start) and [`end`](Self::end), as compiled markup
 /// initialises it.
+///
+/// The steps are functions of [`ElementCore`], which does not depend on the class of the
+/// element: the typed methods here are thin and inlined, so a step is compiled once, not once per
+/// class of element.
 pub struct Element<'a, E: ObjectType> {
     object: Ref<E>,
+    core: ElementCore<'a>,
+}
+
+/// What a step of an [`Element`] needs besides the element: the scope, the name scope, the
+/// priority of its values and the anchor of the bindings of an object that is not an element.
+pub struct ElementCore<'a> {
     scope: &'a Scope,
     names: Option<&'a NameScopeRef>,
     priority: BindingPriority,
@@ -988,19 +1012,161 @@ pub struct Element<'a, E: ObjectType> {
     anchor: Option<Ref<FerroObject>>,
     /// The elements of the template being built.
     elements: Option<&'a RefCell<Vec<Ref<FerroObject>>>>,
+    /// The object as a styled element, if it is one.
+    styled: Option<Ref<StyledElement>>,
+}
+
+impl<'a> ElementCore<'a> {
+    #[inline(never)]
+    fn start(
+        object: &FerroObject,
+        scope: &'a Scope,
+        names: Option<&'a NameScopeRef>,
+        priority: BindingPriority,
+        elements: Option<&'a RefCell<Vec<Ref<FerroObject>>>>,
+    ) -> Self {
+        let styled = object.to_ref().cast::<StyledElement>();
+        let mut core = ElementCore { scope, names, priority, anchor: None, elements, styled };
+        match &core.styled {
+            Some(element) => {
+                element.begin_init();
+                if let Some(elements) = elements {
+                    elements.borrow_mut().push(element.clone().upcast());
+                }
+            }
+            None => core.anchor = elements.and_then(|elements| elements.borrow().last().cloned()),
+        }
+        core
+    }
+
+    #[inline(never)]
+    fn child(&self, object: &FerroObject) -> ElementCore<'a> {
+        let mut child = ElementCore::start(object, self.scope, self.names, self.priority, self.elements);
+        if child.styled.is_none() {
+            child.anchor = match &self.styled {
+                Some(element) => Some(element.clone().upcast()),
+                None => self.anchor.clone(),
+            };
+        }
+        child
+    }
+
+    #[inline(never)]
+    fn template_bind(&self, object: &FerroObject, property: &'static FerroProperty, source: &'static FerroProperty) {
+        let binding = TemplateBinding::default();
+        binding.set_property(Some(source));
+        let _ = object.bind_binding(property, &binding);
+    }
+
+    #[inline(never)]
+    fn dynamic(&self, object: &FerroObject, property: &'static FerroProperty, key: &str) {
+        let anchor = match self.styled {
+            Some(_) => None,
+            None => self.scope.anchor(),
+        };
+        let binding = dynamic_resource(key, anchor, self.scope.variant(), self.priority);
+        let _ = object.bind_binding(property, &binding);
+    }
+
+    #[inline(never)]
+    fn static_resource(&self, object: &FerroObject, property: &'static FerroProperty, key: &str) -> Result {
+        let target = ValueType::new(property.property_type(), property.property_type_name());
+        let variant = self.styled.as_ref().and_then(|element| element.actual_theme_variant()).or_else(|| self.scope.variant());
+        let value = self.scope.static_resource_for(key, Some(target), variant.as_ref())?;
+        assign(object, property, value, self.priority)
+    }
+
+    #[inline(never)]
+    fn bind(&self, object: &FerroObject, property: &'static FerroProperty, binding: Rc<dyn BindingBase>) {
+        let anchor = match self.styled {
+            Some(_) => None,
+            None => self.anchor.as_ref(),
+        };
+        let _ = object.bind_binding_with_anchor(property, &*binding, anchor);
+    }
+
+    #[inline(never)]
+    fn name(&self, name: &str, value: BoxedValue) -> Result {
+        if let Some(element) = &self.styled {
+            element.set_direct_value(StyledElement::name_property(), Some(String::from(name)));
+        }
+        if let Some(names) = self.names {
+            names
+                .try_register_value(name, value)
+                .map_err(|error| XamlLoadError::with_message(error.to_string()))?;
+        }
+        Ok(())
+    }
+
+    #[inline(never)]
+    fn template_bind_with(
+        &self,
+        object: &FerroObject,
+        property: &'static FerroProperty,
+        source: Option<&'static FerroProperty>,
+        converter: Option<Rc<dyn IValueConverter>>,
+        mode: Option<BindingMode>,
+        parameter: Option<BoxedValue>,
+    ) {
+        let binding = TemplateBinding::default();
+        binding.set_property(source);
+        binding.set_converter(converter);
+        if let Some(mode) = mode {
+            binding.set_mode(mode);
+        }
+        binding.set_converter_parameter(parameter);
+        let _ = object.bind_binding(property, &binding);
+    }
+
+    #[inline(never)]
+    fn style(&self, selector: Selector, populate: &mut dyn FnMut(&StyleBuilder) -> Result) -> Result {
+        let nested = Style::new();
+        nested.set_selector(Some(selector));
+        let style = nested.clone().upcast::<StyleBase>();
+        let builder = StyleBuilder { scope: self.scope.with_style(&style), style, theme: None };
+        populate(&builder)?;
+        if let Some(element) = &self.styled {
+            element.styles().add(nested);
+        }
+        Ok(())
+    }
+
+    #[inline(never)]
+    fn class(&self, name: &str) {
+        if let Some(element) = &self.styled {
+            element.classes().add(name);
+        }
+    }
+
+    #[inline(never)]
+    fn children(&self, object: &FerroObject, children: &mut dyn Iterator<Item = Ref<Control>>) {
+        if let Some(panel) = object.to_ref().cast::<Panel>() {
+            let collection = panel.children();
+            for child in children {
+                collection.add(child);
+            }
+        }
+    }
+
+    #[inline(never)]
+    fn end(&self) {
+        if let Some(element) = &self.styled {
+            if let Some(elements) = self.elements {
+                elements.borrow_mut().pop();
+            }
+            element.end_init();
+        }
+    }
 }
 
 impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
     /// Starts `object`, of an element made outside a template (a value of a setter or a
     /// resource): its values are local values.
     pub fn local(object: Ref<E>, scope: &'a Scope) -> Self {
-        Self::start(object, scope, None, BindingPriority::LocalValue)
+        Self::start_in(object, scope, None, BindingPriority::LocalValue, None)
     }
 
-    fn start(object: Ref<E>, scope: &'a Scope, names: Option<&'a NameScopeRef>, priority: BindingPriority) -> Self {
-        Self::start_in(object, scope, names, priority, None)
-    }
-
+    #[inline]
     fn start_in(
         object: Ref<E>,
         scope: &'a Scope,
@@ -1008,108 +1174,76 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
         priority: BindingPriority,
         elements: Option<&'a RefCell<Vec<Ref<FerroObject>>>>,
     ) -> Self {
-        let mut this = Self { object, scope, names, priority, anchor: None, elements };
-        match this.styled() {
-            Some(element) => {
-                element.begin_init();
-                if let Some(elements) = elements {
-                    elements.borrow_mut().push(element.upcast());
-                }
-            }
-            None => this.anchor = elements.and_then(|elements| elements.borrow().last().cloned()),
-        }
-        this
+        let core = ElementCore::start(object.upcast_ref::<FerroObject>(), scope, names, priority, elements);
+        Self { object, core }
     }
 
+    #[inline]
     fn as_object(&self) -> &FerroObject {
         self.object.upcast_ref::<FerroObject>()
     }
 
-    fn styled(&self) -> Option<Ref<StyledElement>> {
-        self.object.upcast_ref::<FerroObject>().cast::<StyledElement>()
-    }
-
     /// Starts the element `object` as a child of this one (with its scope, names and priority).
+    #[inline]
     pub fn make<C: ObjectType + Upcast<FerroObject>>(&self, object: Ref<C>) -> Element<'a, C> {
-        let mut child = Element::start_in(object, self.scope, self.names, self.priority, self.elements);
-        if child.styled().is_none() {
-            child.anchor = match self.styled() {
-                Some(element) => Some(element.upcast()),
-                None => self.anchor.clone(),
-            };
-        }
-        child
+        let core = self.core.child(object.upcast_ref::<FerroObject>());
+        Element { object, core }
     }
 
     /// Sets `property` to `value`.
+    #[inline]
     pub fn set<P: ThemeProperty>(self, property: &'static P, value: P::Value) -> Self {
-        property.set_on(self.as_object(), value, self.priority);
+        property.set_on(self.as_object(), value, self.core.priority);
         self
     }
 
     /// Sets `property` to the markup value `value`.
+    #[inline]
     pub fn set_value(self, property: &'static impl AnyProperty, value: MarkupValue) -> Result<Self> {
-        assign(self.as_object(), property.property(), value, self.priority)?;
+        assign(self.as_object(), property.property(), value, self.core.priority)?;
         Ok(self)
     }
 
     /// Binds `property` to the property `source` of the templated parent (`{TemplateBinding}`).
+    #[inline]
     pub fn template_bind(self, property: &'static impl AnyProperty, source: &'static impl AnyProperty) -> Self {
-        let binding = TemplateBinding::default();
-        binding.set_property(Some(source.property()));
-        let _ = self.as_object().bind_binding(property.property(), &binding);
+        self.core.template_bind(self.as_object(), property.property(), source.property());
         self
     }
 
     /// Binds `property` to the dynamic resource `key` (`{DynamicResource key}`).
+    #[inline]
     pub fn dynamic(self, property: &'static impl AnyProperty, key: &str) -> Self {
-        let property = property.property();
-        let anchor = match self.styled() {
-            Some(_) => None,
-            None => self.scope.anchor(),
-        };
-        let binding = dynamic_resource(key, anchor, self.scope.variant(), self.priority);
-        let _ = self.as_object().bind_binding(property, &binding);
+        self.core.dynamic(self.as_object(), property.property(), key);
         self
     }
 
     /// Sets `property` to the static resource `key` (`{StaticResource key}`), looked up for the
     /// theme variant of the element.
+    #[inline]
     pub fn static_resource(self, property: &'static impl AnyProperty, key: &str) -> Result<Self> {
-        let property = property.property();
-        let target = ValueType::new(property.property_type(), property.property_type_name());
-        let variant = self.styled().and_then(|element| element.actual_theme_variant()).or_else(|| self.scope.variant());
-        let value = self.scope.static_resource_for(key, Some(target), variant.as_ref())?;
-        assign(self.as_object(), property, value, self.priority)?;
+        self.core.static_resource(self.as_object(), property.property(), key)?;
         Ok(self)
     }
 
     /// Binds `property` to `binding`.
+    #[inline]
     pub fn bind(self, property: &'static impl AnyProperty, binding: Rc<dyn BindingBase>) -> Self {
-        let anchor = match self.styled() {
-            Some(_) => None,
-            None => self.anchor.as_ref(),
-        };
-        let _ = self.as_object().bind_binding_with_anchor(property.property(), &*binding, anchor);
+        self.core.bind(self.as_object(), property.property(), binding);
         self
     }
 
     /// Names the element (`x:Name`) and registers it in the name scope of the template.
+    #[inline]
     pub fn name(self, name: &str) -> Result<Self> {
-        if let Some(element) = self.styled() {
-            element.set_direct_value(StyledElement::name_property(), Some(String::from(name)));
-        }
-        if let Some(names) = self.names {
-            names
-                .try_register_value(name, Rc::new(self.object.clone()))
-                .map_err(|error| XamlLoadError::with_message(error.to_string()))?;
-        }
+        self.core.name(name, Rc::new(self.object.clone()))?;
         Ok(self)
     }
 
     /// Binds `property` to a property of the templated parent with a converter, a mode or a
     /// converter parameter (`{TemplateBinding source, Converter=..}`); `source` `None` binds to
     /// the templated parent itself (`{TemplateBinding}`).
+    #[inline]
     pub fn template_bind_with(
         self,
         property: &'static impl AnyProperty,
@@ -1118,18 +1252,12 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
         mode: Option<BindingMode>,
         parameter: Option<BoxedValue>,
     ) -> Self {
-        let binding = TemplateBinding::default();
-        binding.set_property(source);
-        binding.set_converter(converter);
-        if let Some(mode) = mode {
-            binding.set_mode(mode);
-        }
-        binding.set_converter_parameter(parameter);
-        let _ = self.as_object().bind_binding(property.property(), &binding);
+        self.core.template_bind_with(self.as_object(), property.property(), source, converter, mode, parameter);
         self
     }
 
     /// Sets `property` to `child`, an element (`Border.Child`, `Popup.Child`).
+    #[inline]
     pub fn child<P, U, C>(self, property: &'static P, child: Element<'_, C>) -> Self
     where
         P: ThemeProperty<Value = Option<Ref<U>>>,
@@ -1141,6 +1269,7 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
     }
 
     /// Sets `property`, of any value, to `child`, an element (`ContentControl.Content`).
+    #[inline]
     pub fn content<C: ObjectType + Upcast<FerroObject>>(self, property: &'static impl AnyProperty, child: Element<'_, C>) -> Result<Self> {
         let child = child.end();
         self.set_value(property, value(child))
@@ -1148,61 +1277,52 @@ impl<'a, E: ObjectType + Upcast<FerroObject>> Element<'a, E> {
 
     /// A style of the element (`<Border.Styles>`), of `selector`, with the setters and styles
     /// `populate` adds.
+    #[inline]
     pub fn style(self, selector: Selector, populate: impl FnOnce(&StyleBuilder) -> Result) -> Result<Self>
     where
         E: Upcast<StyledElement>,
     {
-        let nested = Style::new();
-        nested.set_selector(Some(selector));
-        let style = nested.clone().upcast::<StyleBase>();
-        let builder = StyleBuilder { scope: self.scope.with_style(&style), style, theme: None };
-        populate(&builder)?;
-        let element: &Ref<StyledElement> = self.object.upcast_ref();
-        element.styles().add(nested);
+        let mut populate = Some(populate);
+        self.core.style(selector, &mut |builder| (populate.take().expect("populated once"))(builder))?;
         Ok(self)
     }
 
     /// Runs `f` with the element (an addition to a collection of it, a call of a method).
+    #[inline]
     pub fn with(self, f: impl FnOnce(&Ref<E>) -> Result) -> Result<Self> {
         f(&self.object)?;
         Ok(self)
     }
 
     /// Adds the style class `name`.
+    #[inline]
     pub fn class(self, name: &str) -> Self
     where
         E: Upcast<StyledElement>,
     {
-        let element: &Ref<StyledElement> = self.object.upcast_ref();
-        element.classes().add(name);
+        self.core.class(name);
         self
     }
 
     /// Adds `children` to the children of the panel.
+    #[inline]
     pub fn children<const N: usize>(self, children: [Ref<Control>; N]) -> Self
     where
         E: Upcast<Panel>,
     {
-        let panel: &Ref<Panel> = self.object.upcast_ref();
-        let collection = panel.children();
-        for child in children {
-            collection.add(child);
-        }
+        self.core.children(self.as_object(), &mut children.into_iter());
         self
     }
 
     /// Ends the initialisation of the element and returns it.
+    #[inline]
     pub fn end(self) -> Ref<E> {
-        if let Some(element) = self.styled() {
-            if let Some(elements) = self.elements {
-                elements.borrow_mut().pop();
-            }
-            element.end_init();
-        }
+        self.core.end();
         self.object
     }
 
     /// [`end`](Self::end) as a control.
+    #[inline]
     pub fn control(self) -> Ref<Control>
     where
         E: Upcast<Control>,

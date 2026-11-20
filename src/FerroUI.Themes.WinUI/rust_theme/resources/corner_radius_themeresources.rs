@@ -27,77 +27,77 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.theme(ThemeVariant::default(), default_theme)?;
     resources.theme(ThemeVariant::light(), light_theme)?;
     resources.theme(WinUITheme::high_contrast(), high_contrast_theme)?;
-    resources.deferred("TopCornerRadiusFilterConverter", |scope| {
+    resources.deferred("TopCornerRadiusFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusFilterConverter::new());
             object.set_filter(Corners::TOP_LEFT | Corners::TOP_RIGHT);
             object
         }))
     });
-    resources.deferred("RightCornerRadiusFilterConverter", |scope| {
+    resources.deferred("RightCornerRadiusFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusFilterConverter::new());
             object.set_filter(Corners::TOP_RIGHT | Corners::BOTTOM_RIGHT);
             object
         }))
     });
-    resources.deferred("BottomCornerRadiusFilterConverter", |scope| {
+    resources.deferred("BottomCornerRadiusFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusFilterConverter::new());
             object.set_filter(Corners::BOTTOM_LEFT | Corners::BOTTOM_RIGHT);
             object
         }))
     });
-    resources.deferred("LeftCornerRadiusFilterConverter", |scope| {
+    resources.deferred("LeftCornerRadiusFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusFilterConverter::new());
             object.set_filter(Corners::TOP_LEFT | Corners::BOTTOM_LEFT);
             object
         }))
     });
-    resources.deferred("TopLeftCornerRadiusDoubleValueConverter", |scope| {
+    resources.deferred("TopLeftCornerRadiusDoubleValueConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToDoubleConverter::new());
             object.set_corner(Corners::TOP_LEFT);
             object
         }))
     });
-    resources.deferred("BottomRightCornerRadiusDoubleValueConverter", |scope| {
+    resources.deferred("BottomRightCornerRadiusDoubleValueConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToDoubleConverter::new());
             object.set_corner(Corners::BOTTOM_RIGHT);
             object
         }))
     });
-    resources.deferred("TopThicknessFilterConverter", |scope| {
+    resources.deferred("TopThicknessFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterLeftAndRightFromTop);
             object
         }))
     });
-    resources.deferred("BottomThicknessFilterConverter", |scope| {
+    resources.deferred("BottomThicknessFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterLeftAndRightFromBottom);
             object
         }))
     });
-    resources.deferred("LeftThicknessFilterConverter", |scope| {
+    resources.deferred("LeftThicknessFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterTopAndBottomFromLeft);
             object
         }))
     });
-    resources.deferred("RightThicknessFilterConverter", |scope| {
+    resources.deferred("RightThicknessFilterConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterTopAndBottomFromRight);
             object
         }))
     });
-    resources.deferred("TabViewLeftInsetCornerConverter", |scope| {
+    resources.deferred("TabViewLeftInsetCornerConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterLeftFromBottomLeft);
@@ -105,7 +105,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
             object
         }))
     });
-    resources.deferred("TabViewRightInsetCornerConverter", |scope| {
+    resources.deferred("TabViewRightInsetCornerConverter", |_| {
         Ok(value({
             let object = ::std::rc::Rc::new(CornerRadiusToThicknessConverter::new());
             object.set_conversion_kind(CornerRadiusToThicknessConverterKind::FilterRightFromBottomRight);
@@ -116,7 +116,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

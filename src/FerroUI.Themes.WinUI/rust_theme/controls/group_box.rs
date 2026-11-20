@@ -63,7 +63,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -75,7 +77,7 @@ fn group_box_theme_template(t: &Template<GroupBox>) -> Result<Ref<Control>> {
     Ok(t.make(Grid::new())
         .name("RootGrid")?
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
             Ok(())
         })?
         .children([

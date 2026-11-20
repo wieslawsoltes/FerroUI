@@ -304,7 +304,7 @@ def comment_lines(node) -> list[str]:
     text = node.text or ""
     lines = [line.rstrip() for line in text.strip("\n").split("\n")]
     # Removes the common indentation.
-    indents = [len(line) - len(line.lstrip()) for line in lines if line.strip()]
+    indents = [len(line) - len(line.lstrip()) for line in lines[1:] if line.strip()]
     cut = min(indents) if indents else 0
     first = lines[0].strip() if lines else ""
     out = [first] + [line[cut:] if len(line) >= cut else line.strip() for line in lines[1:]]
@@ -732,7 +732,8 @@ class Converter:
             dictionary = self.use("::ferroui_base::controls::ResourceDictionary")
             self.functions.insert(0, Function(
                 "build",
-                ["/// The resource dictionary of the document, declared in `scope`."],
+                ["/// The resource dictionary of the document, declared in `scope`: the document included",
+                 "/// (`ResourceInclude`) rather than merged.", "#[allow(dead_code)]"],
                 f"pub(crate) fn build(scope: &Scope) -> Result<Ref<{dictionary}>>",
                 [f"let dictionary = {dictionary}::new();", "merge(&Resources::new(&dictionary, scope))?;", "Ok(dictionary)"],
             ))
@@ -747,7 +748,8 @@ class Converter:
             )
             self.functions.insert(0, Function(
                 "build",
-                ["/// The styles of the document, declared in `scope`."],
+                ["/// The styles of the document, declared in `scope`: the document included (`StyleInclude`).",
+                 "#[allow(dead_code)]"],
                 f"pub(crate) fn build(scope: &Scope) -> Result<Ref<{styles_type}>>",
                 [f"let styles = {styles_type}::new();", "populate(&styles, scope)?;", "Ok(styles)"],
             ))
@@ -931,7 +933,8 @@ class Converter:
         if name in ("DataTemplate", "ItemsPanelTemplate"):
             raise Unsupported(f"a {name} resource")
         expr = self.object(node, Context(None, maker="scope", scope="scope"), "scope")
-        body.add(f"{target}.deferred({rust_str(key)}, |scope| Ok(value({expr})));")
+        closure = "|scope|" if "scope" in expr else "|_|"
+        body.add(f"{target}.deferred({rust_str(key)}, {closure} Ok(value({expr})));")
 
     # --- control themes and styles ---
 
@@ -1170,7 +1173,13 @@ class Converter:
         return function
 
     def template(self, node, context: Context, owner_fn: str) -> str:
-        target = self.type_name(node.attrib["TargetType"]) if "TargetType" in node.attrib else context.template_parent
+        if "TargetType" in node.attrib:
+            target = self.type_name(node.attrib["TargetType"])
+        elif context.target is not None and self.model.is_a(context.target, "TemplatedControl"):
+            # The class the style of the setter selects (`<Style Selector="GridSplitter">`).
+            target = context.target
+        else:
+            target = context.template_parent
         if target is None:
             target = self.model.by_full["FerroUI.Controls.Primitives.TemplatedControl"]
         control = self.use("::ferroui_controls::Control")
@@ -1217,7 +1226,10 @@ class Converter:
                     None,
                 )
                 return f"{self.use('::ferroui_markup_xaml::rust_theme::data_template_for')}::<String>({context.scope}, {function})"
-            typed = self.type_name(node.attrib["DataType"]) if "DataType" in node.attrib else None
+            # `DataType` (and `x:DataType`, which the compiler also sets as the `DataType` of the
+            # template) is the type of the data the template is for.
+            typed_text = node.attrib.get("DataType") or node.attrib.get(f"{{{NS_X}}}DataType")
+            typed = self.type_name(typed_text) if typed_text else None
             function = self.template_function(
                 node, control_entry, owner_fn, "data_template", f"/// A data template of `{owner_fn}`.", control, ".control()",
                 typed or context.data_type,
@@ -1353,7 +1365,8 @@ class Converter:
             if prop.setter is None:
                 raise Unsupported(f"the plain property {name} without a setter")
             literal = self.literal(text, prop.value_type, own)
-            return f".with(|e| {{ {self.use_call(prop.setter)}(e, {literal}); Ok(()) }})?"
+            method = prop.setter.rsplit("::", 1)[1]
+            return f".with(|e| {{ e.{method}({literal}); Ok(()) }})?"
         accessor = self.accessor(prop)
         if isinstance(ext, Ext):
             if ext.name == "TemplateBinding":
@@ -1841,7 +1854,7 @@ class Converter:
                     else:
                         call = snake(name)
                     handle = f"Ref<{this}>" if c.get("object_model") else this
-                    return f".method::<{handle}>({rust_str(name)}, |this| {{ this.{call}(); }})"
+                    return f".method::<{handle}>({rust_str(name)}, |this| {{ let _ = this.{call}(); }})"
         return None
 
 

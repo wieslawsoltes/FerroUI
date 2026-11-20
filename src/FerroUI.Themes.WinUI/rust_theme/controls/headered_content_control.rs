@@ -53,7 +53,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -86,7 +88,7 @@ fn headered_content_control_theme_template(t: &Template<HeaderedContentControl>)
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 .children([

@@ -97,14 +97,14 @@ pub(crate) fn merge(resources: &Resources) -> Result {
         Ok(value(control_template(scope, previous_template_template)))
     });
     // The button of NextTemplate with the CommonStates of the template (a style of the
-    //       pivot cannot reach into the template of its button: one template selector per style).
+    // pivot cannot reach into the template of its button: one template selector per style).
     resources.control_theme("PivotNextButtonStyle", pivot_next_button_style);
     // The button of PreviousTemplate with the CommonStates of the template (a style of the
-    //       pivot cannot reach into the template of its button: one template selector per style).
+    // pivot cannot reach into the template of its button: one template selector per style).
     resources.control_theme("PivotPreviousButtonStyle", pivot_previous_button_style);
     resources.control_theme("TitleContentControlStyle", title_content_control_style);
     // WinUI's top-level PivotTitleContentControlStyle. Its font family, PhoneFontFamilyNormal, is not
-    //       a resource of the WinUI 3 theme (a reference WinUI leaves unresolved), so it is left out.
+    // a resource of the WinUI 3 theme (a reference WinUI leaves unresolved), so it is left out.
     resources.control_theme("PivotTitleContentControlStyle", pivot_title_content_control_style);
     resources.control_theme("DefaultPivotStyle", default_pivot_style);
     resources.control_theme(type_key::<Pivot>(), pivot_theme);
@@ -115,7 +115,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -332,7 +334,7 @@ fn default_pivot_style_template(t: &Template<Pivot>) -> Result<Ref<Control>> {
         )
         .template_bind(Panel::background_property(), TemplatedControl::background_property())
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
             Ok(())
         })?
         .children([
@@ -390,11 +392,11 @@ fn default_pivot_style_template(t: &Template<Pivot>) -> Result<Ref<Control>> {
                                 .make(Grid::new())
                                 .name("PivotLayoutElement")?
                                 .with(|e| {
-                                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                                     Ok(())
                                 })?
                                 .with(|e| {
-                                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                                     Ok(())
                                 })?
                                 .children([
@@ -534,7 +536,7 @@ fn default_pivot_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(default_pivot_style_template);
     // NavigationButtonsVisibility: NavigationButtonsVisible, PreviousButtonVisible,
-    //         NextButtonVisible.
+    // NextButtonVisible.
     theme.style(
         nesting()
             .class(":previous-button-visible")
@@ -742,7 +744,7 @@ fn default_pivot_header_item_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(default_pivot_header_item_style_template);
     // SelectionStates. Unselected, UnselectedPointerOver, UnselectedPressed and Disabled
-    //         collapse the pipe (the default here); Selected and its pointer states show it.
+    // collapse the pipe (the default here); Selected and its pointer states show it.
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
             TemplatedControl::background_property(),
@@ -803,7 +805,7 @@ fn default_pivot_header_item_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // UnselectedLocked: the content moves by PivotHeaderItemLockedTranslation (40, the same in
-    //         every theme dictionary; a transform takes no dynamic resource) and fades out.
+    // every theme dictionary; a transform takes no dynamic resource) and fades out.
     theme.style(
         nesting()
             .class(":locked")

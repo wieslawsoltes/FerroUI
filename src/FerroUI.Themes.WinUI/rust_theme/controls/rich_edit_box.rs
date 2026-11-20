@@ -80,7 +80,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("Cut", |this| {
-                                        this.cut();
+                                        let _ = this.cut();
                                     })
                                     .binding(),
                             )
@@ -113,7 +113,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("Copy", |this| {
-                                        this.copy();
+                                        let _ = this.copy();
                                     })
                                     .binding(),
                             )
@@ -146,7 +146,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("Paste", |this| {
-                                        this.paste();
+                                        let _ = this.paste();
                                     })
                                     .binding(),
                             )
@@ -179,7 +179,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("Undo", |this| {
-                                        this.undo();
+                                        let _ = this.undo();
                                     })
                                     .binding(),
                             )
@@ -211,7 +211,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("Redo", |this| {
-                                        this.redo();
+                                        let _ = this.redo();
                                     })
                                     .binding(),
                             )
@@ -243,7 +243,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("SelectAll", |this| {
-                                        this.select_all();
+                                        let _ = this.select_all();
                                     })
                                     .binding(),
                             )
@@ -269,7 +269,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("ToggleBold", |this| {
-                                        this.toggle_bold();
+                                        let _ = this.toggle_bold();
                                     })
                                     .binding(),
                             )
@@ -303,7 +303,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("ToggleItalic", |this| {
-                                        this.toggle_italic();
+                                        let _ = this.toggle_italic();
                                     })
                                     .binding(),
                             )
@@ -337,7 +337,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<RichEditBox>(0)
                                     .method::<Ref<RichEditBox>>("ToggleUnderline", |this| {
-                                        this.toggle_underline();
+                                        let _ = this.toggle_underline();
                                     })
                                     .binding(),
                             )
@@ -369,7 +369,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -380,7 +382,7 @@ pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
 fn default_rich_edit_box_style_template(t: &Template<RichEditBox>) -> Result<Ref<Control>> {
     Ok(t.make(Grid::new())
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
             Ok(())
         })?
         .children([

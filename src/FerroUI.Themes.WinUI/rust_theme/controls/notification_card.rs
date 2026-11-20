@@ -87,13 +87,15 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // InfoBarCloseButtonStyle (InfoBar_themeresources.xaml), with the AppBarButton brushes the
-    //       InfoBar template gives its close button.
+    // InfoBar template gives its close button.
     resources.control_theme("InfoBarCloseButtonStyle", info_bar_close_button_style);
     resources.control_theme(type_key::<NotificationCard>(), notification_card_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -253,7 +255,7 @@ fn notification_card_theme_template(t: &Template<NotificationCard>) -> Result<Re
                     Decorator::child_property(),
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .children([
@@ -460,7 +462,7 @@ fn notification_card_theme(theme: &StyleBuilder) -> Result {
                                 .scope()
                                 .make(KeyFrame::new())
                                 .with(|e| {
-                                    KeyFrame::set_cue(e, literal(Cue::parse("100%"))?);
+                                    e.set_cue(literal(Cue::parse("100%"))?);
                                     Ok(())
                                 })?
                                 .with(|e| {

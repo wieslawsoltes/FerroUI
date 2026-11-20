@@ -113,14 +113,16 @@ pub(crate) fn merge(resources: &Resources) -> Result {
         slider_vertical_decrease_button_style,
     );
     // The increase button of the track: the part of the track after the thumb, which shows the
-    //       track rectangle behind it.
+    // track rectangle behind it.
     resources.control_theme("SliderIncreaseButtonStyle", slider_increase_button_style);
     resources.control_theme("DefaultSliderStyle", default_slider_style);
     resources.control_theme(type_key::<Slider>(), slider_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -380,7 +382,7 @@ fn default_slider_style_template(t: &Template<Slider>) -> Result<Ref<Control>> {
                             .name("HorizontalTemplate")?
                             .dynamic(Layoutable::min_height_property(), "SliderHorizontalHeight")
                             .with(|e| {
-                                Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,Auto,*"))?);
+                                e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,Auto,*"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -577,7 +579,7 @@ fn default_slider_style_template_2(t: &Template<Slider>) -> Result<Ref<Control>>
                             .name("VerticalTemplate")?
                             .dynamic(Layoutable::min_width_property(), "SliderVerticalWidth")
                             .with(|e| {
-                                Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,Auto,Auto"))?);
+                                e.set_row_definitions(literal(RowDefinitions::parse("*,Auto,Auto"))?);
                                 Ok(())
                             })?
                             .with(|e| {
@@ -961,7 +963,7 @@ fn default_slider_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // Not in WinUI (no input validation): the :error of FerroUI's data validation, as the
-    //         Fluent theme shows it, with the error brush of the WinUI theme.
+    // Fluent theme shows it, with the error brush of the WinUI theme.
     theme.style(nesting().class(":error"), |style| {
         style.dynamic(
             TemplatedControl::foreground_property(),

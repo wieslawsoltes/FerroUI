@@ -93,13 +93,15 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     // The NavigationView with its pane at the top.
     resources.control_theme("TabbedPageTabControlTheme", tabbed_page_tab_control_theme);
     // The items of the top pane (MUX_NavigationViewItemPresenterStyleWhenOnTopPane); at the left
-    //       and at the right the tabs of the base theme draw the items of the left pane.
+    // and at the right the tabs of the base theme draw the items of the left pane.
     resources.control_theme("TabbedPageTabItemTheme", tabbed_page_tab_item_theme);
     resources.control_theme(type_key::<TabbedPage>(), tabbed_page_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -200,8 +202,8 @@ fn tabbed_page_tab_control_theme(theme: &StyleBuilder) -> Result {
     theme.set(TemplatedControl::padding_property(), Thickness::uniform(0.0));
     theme.set(Layoutable::vertical_alignment_property(), VerticalAlignment::Stretch);
     // The items of the top pane are as wide as their content (the horizontal StackLayout of
-    //         TopNavMenuItemsHost), not as wide as each other as the tabs of the base theme; at the left
-    //         and at the right the base theme stacks them vertically.
+    // TopNavMenuItemsHost), not as wide as each other as the tabs of the base theme; at the left
+    // and at the right the base theme stacks them vertically.
     theme.set(
         ItemsControl::items_panel_property(),
         items_panel(theme.scope(), tabbed_page_tab_control_theme_items_panel),
@@ -297,7 +299,7 @@ fn tabbed_page_tab_item_theme_template(t: &Template<TabItem>) -> Result<Ref<Cont
                 t.make(Grid::new())
                     .name("ContentGrid")?
                     .with(|e| {
-                        Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*"))?);
+                        e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*"))?);
                         Ok(())
                     })?
                     .children([

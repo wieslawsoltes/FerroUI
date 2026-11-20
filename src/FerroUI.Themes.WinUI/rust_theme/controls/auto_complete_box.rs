@@ -100,7 +100,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -121,7 +123,7 @@ fn auto_suggest_box_delete_button_style_template(t: &Template<Button>) -> Result
         .static_resource(Layoutable::margin_property(), "AutoSuggestBoxDeleteButtonMargin")?
         .dynamic(Border::corner_radius_property(), "ControlCornerRadius")
         // E894 at AutoSuggestBoxIconFontSize (12 px): the glyph is drawn at the size of its
-        //               ink, as the delete button of TextBox.
+        // ink, as the delete button of TextBox.
         .child(
             Decorator::child_property(),
             t.make(Path::new())
@@ -192,7 +194,7 @@ fn auto_suggest_box_text_box_style_template(t: &Template<TextBox>) -> Result<Ref
             ContentControl::content_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto,4,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto,4,Auto"))?);
                     Ok(())
                 })?
                 // InnerLeftContent of FerroUI's text box.
@@ -388,7 +390,7 @@ fn auto_suggest_box_text_box_style_template(t: &Template<TextBox>) -> Result<Ref
                             path()
                                 .ancestor_of::<TextBox>(0)
                                 .method::<Ref<TextBox>>("Clear", |this| {
-                                    this.clear();
+                                    let _ = this.clear();
                                 })
                                 .binding(),
                         )

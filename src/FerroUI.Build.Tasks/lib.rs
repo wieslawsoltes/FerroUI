@@ -1016,7 +1016,6 @@ impl Build {
                     let units = &units;
                     let mut all = front_end_models.clone().unwrap_or_default();
                     all.extend(model.clone());
-                    rust_theme::set_documents(names);
                     match rust_theme::documents(&directory, names, all, units) {
                         Ok(documents) => {
                             if env::var_os("FERROUI_RUST_THEME_DUMP").is_some() {

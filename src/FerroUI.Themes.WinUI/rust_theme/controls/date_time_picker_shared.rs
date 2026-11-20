@@ -110,7 +110,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -188,7 +190,7 @@ fn date_time_picker_flyout_button_style_template(t: &Template<Button>) -> Result
 fn date_time_picker_flyout_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,
@@ -330,7 +332,7 @@ fn date_time_picker_flyout_looping_selector_navigation_button_style_template(
 fn date_time_picker_flyout_looping_selector_navigation_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<Button>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,

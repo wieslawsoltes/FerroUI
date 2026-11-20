@@ -65,7 +65,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -102,7 +104,7 @@ fn table_view_row_theme_template(t: &Template<TableViewRow>) -> Result<Ref<Contr
                     t.make(Panel::new())
                         // The foreground of the row, inherited, unless a state sets another.
                         // The selection indicator of Fluent: over the leading edge, shown by the Selected
-                        //                   states.
+                        // states.
                         .children([
                             t.make(Panel::new())
                                 .name("PART_CellForegroundPresenter")?
@@ -172,7 +174,7 @@ fn table_view_row_theme_template(t: &Template<TableViewRow>) -> Result<Ref<Contr
 fn table_view_row_theme(theme: &StyleBuilder) -> Result {
     theme.target::<TableViewRow>();
     // CornerRadius (ControlCornerRadius in the source, which its template does not use) is not
-    //         set: the template honours the corner radius of the row.
+    // set: the template honours the corner radius of the row.
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Stretch,

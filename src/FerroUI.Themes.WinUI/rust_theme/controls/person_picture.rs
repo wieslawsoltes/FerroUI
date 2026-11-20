@@ -62,7 +62,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -194,7 +196,7 @@ fn default_person_picture_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(default_person_picture_style_template);
     // The text and the font of the initials, which the states replace: a style, so that the
-    //         setters of the states win over it (WinUI's template binds them).
+    // setters of the states win over it (WinUI's template binds them).
     theme.style(
         nesting().template().of::<TextBlock>().name("InitialsTextBlock"),
         |style| {

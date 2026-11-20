@@ -71,7 +71,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -119,11 +121,11 @@ fn info_bar_theme_template(t: &Template<InfoBar>) -> Result<Ref<Control>> {
                     t.make(Grid::new())
                         .dynamic(Layoutable::min_height_property(), "InfoBarMinHeight")
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .with(|e| {
-                            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,Auto"))?);
+                            e.set_row_definitions(literal(RowDefinitions::parse("Auto,Auto"))?);
                             Ok(())
                         })?
                         .children([

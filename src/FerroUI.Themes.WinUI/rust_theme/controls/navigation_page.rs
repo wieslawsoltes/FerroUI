@@ -95,7 +95,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -217,7 +219,7 @@ fn navigation_back_button_normal_style(theme: &StyleBuilder) -> Result {
     );
     theme.template(navigation_back_button_normal_style_template);
     // PointerOver (the foreground of the state is also the foreground of the button, which
-    //         content such as the default icon of NavigationPage follows)
+    // content such as the default icon of NavigationPage follows)
     theme.style(nesting().class(":pointerover"), |style| {
         style.dynamic(
             TemplatedControl::foreground_property(),
@@ -350,7 +352,7 @@ fn navigation_page_theme_template(t: &Template<NavigationPage>) -> Result<Ref<Co
         // The navigation bar floats above the content.
         // The line under the bar; its top margin is set in code to the height of the bar.
         // The modal pages: ZIndex 99 holds the static layer during transitions, 100 the
-        //               animating one.
+        // animating one.
         .children([
             t.make(DockPanel::new())
                 // Reserves the height of the bar in the inset mode (FerroUI's :nav-bar-inset).
@@ -424,7 +426,7 @@ fn navigation_page_theme_template(t: &Template<NavigationPage>) -> Result<Ref<Co
                     Decorator::child_property(),
                     t.make(Grid::new())
                         .with(|e| {
-                            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
+                            e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto"))?);
                             Ok(())
                         })?
                         .children([

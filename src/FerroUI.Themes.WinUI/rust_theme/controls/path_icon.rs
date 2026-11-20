@@ -33,17 +33,17 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The path icon of WinUI (CPathIcon::ApplyTemplate: a Path with Stretch None, its geometry in
-    //       its own coordinates, the size of the icon the extent of the geometry from its origin), for
-    //       the templates of WinUI that size the icon in a Viewbox (AppBarButton and
-    //       AppBarToggleButton: ContentViewbox of AppBarButtonContentHeight; MenuFlyoutItem: IconRoot
-    //       of 16; NavigationViewItem: IconBox of NavigationViewItemOnLeftIconBoxHeight; TabViewItem:
-    //       IconBox of TabViewItemHeaderIconSize): there the Viewbox scales the geometry as WinUI's does
-    //       (PI-3), where the default theme below scales the bounds of the geometry to 20 by 20 (PI-2).
-    //       Set with Width and Height NaN by a style of the icon presenter of those templates, and for
-    //       the icon of a menu item, a logical child of the item that no style of its template reaches,
-    //       by the style MenuItem > PathIcon of Controls/WinUIControls.xaml (a style of a control theme
-    //       cannot name a parent: the nesting selector ^ stands for the whole selector of the theme,
-    //       and what is written before it is dropped).
+    // its own coordinates, the size of the icon the extent of the geometry from its origin), for
+    // the templates of WinUI that size the icon in a Viewbox (AppBarButton and
+    // AppBarToggleButton: ContentViewbox of AppBarButtonContentHeight; MenuFlyoutItem: IconRoot
+    // of 16; NavigationViewItem: IconBox of NavigationViewItemOnLeftIconBoxHeight; TabViewItem:
+    // IconBox of TabViewItemHeaderIconSize): there the Viewbox scales the geometry as WinUI's does
+    // (PI-3), where the default theme below scales the bounds of the geometry to 20 by 20 (PI-2).
+    // Set with Width and Height NaN by a style of the icon presenter of those templates, and for
+    // the icon of a menu item, a logical child of the item that no style of its template reaches,
+    // by the style MenuItem > PathIcon of Controls/WinUIControls.xaml (a style of a control theme
+    // cannot name a parent: the nesting selector ^ stands for the whole selector of the theme,
+    // and what is written before it is dropped).
     resources.deferred("PathIconUnscaledTemplate", |scope| {
         Ok(value(control_template(scope, path_icon_unscaled_template_template)))
     });
@@ -51,7 +51,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -97,7 +99,7 @@ fn path_icon_theme_template(t: &Template<PathIcon>) -> Result<Ref<Control>> {
 fn path_icon_theme(theme: &StyleBuilder) -> Result {
     theme.target::<PathIcon>();
     // The size and the uniform scaling of the framework's path icons (PI-2): 20 by 20, the
-    //         IconElementThemeWidth and IconElementThemeHeight of its other themes.
+    // IconElementThemeWidth and IconElementThemeHeight of its other themes.
     theme.set(Layoutable::width_property(), 20.0);
     theme.set(Layoutable::height_property(), 20.0);
     theme.template(path_icon_theme_template);

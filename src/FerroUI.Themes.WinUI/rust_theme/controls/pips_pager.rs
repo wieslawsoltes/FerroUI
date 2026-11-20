@@ -93,7 +93,7 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // WinUI applies the default style of Button beneath these keyed styles
-    //       (docs/porting/winui-theme.md, section 4.2).
+    // (docs/porting/winui-theme.md, section 4.2).
     resources.control_theme(
         "PipsPagerNavigationButtonBaseStyle",
         pips_pager_navigation_button_base_style,
@@ -109,9 +109,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     resources.control_theme("PipsPagerSelectedPipButtonStyle", pips_pager_selected_pip_button_style);
     resources.control_theme("PipsPagerNormalPipButtonStyle", pips_pager_normal_pip_button_style);
     // The pips of the pager: PipsPagerButtonBaseStyle with PipsPagerSelectedPipButtonStyle in
-    //       :selected and PipsPagerNormalPipButtonStyle otherwise; the size of RootGrid
-    //       (PipsPagerHorizontalOrientationButtonWidth/Height) is the size of the item, which the pager
-    //       turns in :vertical.
+    // :selected and PipsPagerNormalPipButtonStyle otherwise; the size of RootGrid
+    // (PipsPagerHorizontalOrientationButtonWidth/Height) is the size of the item, which the pager
+    // turns in :vertical.
     resources.control_theme("PipsPagerPipItemStyle", pips_pager_pip_item_style);
     // PipsPagerScrollViewer and its ItemsRepeater: the list of the pips.
     resources.control_theme("PipsPagerListStyle", pips_pager_list_style);
@@ -119,7 +119,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;

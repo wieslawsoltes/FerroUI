@@ -60,7 +60,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -133,7 +135,7 @@ fn default_drop_down_button_style_template(t: &Template<DropDownButton>) -> Resu
             Decorator::child_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 // The AnimatedIcon ChevronIcon (12 x 12) with its fallback glyph E96E at 8 px.
@@ -184,7 +186,7 @@ fn default_drop_down_button_style_template(t: &Template<DropDownButton>) -> Resu
 fn default_drop_down_button_style(theme: &StyleBuilder) -> Result {
     theme.target::<DropDownButton>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ContentControl::horizontal_content_alignment_property(),
         HorizontalAlignment::Center,

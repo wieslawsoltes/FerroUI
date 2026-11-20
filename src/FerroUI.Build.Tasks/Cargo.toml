@@ -55,9 +55,8 @@ naga = { workspace = true, features = ["wgsl-in", "glsl-out"], optional = true }
 ferroui-build-scan = { workspace = true }
 # The front end of themes written in Rust (`rust_theme`, #988): the parser the compiler already
 # builds with (`ferroui-markup-xaml-loader/compiler`).
-syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "clone-impls"] }
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
 quote = { version = "1", default-features = false }
-proc-macro2 = { version = "1", default-features = false }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

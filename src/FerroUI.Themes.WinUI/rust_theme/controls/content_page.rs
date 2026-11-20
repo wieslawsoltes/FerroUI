@@ -35,7 +35,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -46,7 +48,7 @@ pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
 fn content_page_theme_template(t: &Template<ContentPage>) -> Result<Ref<Control>> {
     Ok(t.make(DockPanel::new())
         // The control shows the command bar presenters when it has command bars, and sets the
-        //               padding of the content presenter (its Padding with the safe area).
+        // padding of the content presenter (its Padding with the safe area).
         .children([
             t.make(ContentPresenter::new())
                 .name("PART_TopCommandBar")?

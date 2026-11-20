@@ -107,7 +107,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -266,7 +268,7 @@ fn calendar_date_picker_text_box_style_template(t: &Template<TextBox>) -> Result
 fn calendar_date_picker_text_box_style(theme: &StyleBuilder) -> Result {
     theme.target::<TextBox>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         TextBox::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -394,7 +396,7 @@ fn default_calendar_date_picker_template(t: &Template<CalendarDatePicker>) -> Re
             t.make(Grid::new())
                 .name("Root")?
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,32"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,32"))?);
                     Ok(())
                 })?
                 .children([

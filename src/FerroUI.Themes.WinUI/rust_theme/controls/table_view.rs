@@ -74,13 +74,15 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The scroll viewer of the table: DefaultScrollViewerStyle with the header band of the table
-    //       above the rows.
+    // above the rows.
     resources.control_theme("TableViewScrollViewerStyle", table_view_scroll_viewer_style);
     resources.control_theme(type_key::<TableView>(), table_view_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -108,15 +110,15 @@ fn table_view_scroll_viewer_style_template(t: &Template<ScrollViewer>) -> Result
             t.make(Grid::new())
                 .template_bind(Panel::background_property(), TemplatedControl::background_property())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto"))?);
                     Ok(())
                 })?
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
                     Ok(())
                 })?
                 // Opacity 0: NoIndicator until the pointer is over the table, as the bars of
-                //                 DefaultScrollViewerStyle (its nested styles show them).
+                // DefaultScrollViewerStyle (its nested styles show them).
                 .children([
                     t.make(Border::new())
                         .name("PART_HeaderRow")?
@@ -418,7 +420,7 @@ fn table_view_theme(theme: &StyleBuilder) -> Result {
     theme.set(ScrollViewer::is_scroll_chaining_enabled_property(), true);
     theme.set(ScrollViewer::is_scroll_inertia_enabled_property(), true);
     // The text of the cells and the headers is trimmed (TextTrimming="CharacterEllipsis" of the
-    //         text blocks TableView creates).
+    // text blocks TableView creates).
     theme.set(
         TextBlock::text_trimming_property(),
         <dyn TextTrimming>::character_ellipsis(),

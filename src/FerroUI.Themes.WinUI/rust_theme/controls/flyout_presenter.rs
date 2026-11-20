@@ -54,7 +54,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -129,7 +131,7 @@ fn default_flyout_presenter_style_template(t: &Template<FlyoutPresenter>) -> Res
 fn default_flyout_presenter_style(theme: &StyleBuilder) -> Result {
     theme.target::<FlyoutPresenter>();
     // The shadow is drawn outside the bounds of the control: a templated control clips to its
-    //         bounds unless its theme says otherwise (G-24).
+    // bounds unless its theme says otherwise (G-24).
     theme.set(Visual::clip_to_bounds_property(), false);
     theme.set(
         ContentControl::horizontal_content_alignment_property(),

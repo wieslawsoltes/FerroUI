@@ -119,7 +119,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -365,13 +367,13 @@ fn default_combo_box_style_template(t: &Template<ComboBox>) -> Result<Ref<Contro
             t.make(Grid::new())
                 .name("LayoutRoot")?
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,38"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("*,38"))?);
                     Ok(())
                 })?
                 // The AnimatedIcon DropDownGlyph (12 x 12, AnimatedChevronDownSmallVisualSource): the
-                //                 chevron of its animated visual, which WinUI draws, is the ChevronDownSmall glyph
-                //                 E96E 8 px wide (as the chevron of DropDownButton), not its fallback glyph E70D
-                //                 at 12 px.
+                // chevron of its animated visual, which WinUI draws, is the ChevronDownSmall glyph
+                // E96E 8 px wide (as the chevron of DropDownButton), not its fallback glyph E70D
+                // at 12 px.
                 .children([
                     t.make(Border::new())
                         .name("HighlightBackground")?
@@ -573,7 +575,7 @@ fn default_combo_box_style_template(t: &Template<ComboBox>) -> Result<Ref<Contro
                         .set(Popup::is_light_dismiss_enabled_property(), true)
                         .set(Popup::inherits_transform_property(), true)
                         // The shadow on a border of its own (G-24). Margin: ThemeShadowFlyoutMargin
-                        //                   (16,8,16,24) and the 0,-0.5,0,-1 of the source.
+                        // (16,8,16,24) and the 0,-0.5,0,-1 of the source.
                         .child(
                             Popup::child_property(),
                             t.make(Border::new())
@@ -659,7 +661,7 @@ fn default_combo_box_style_template(t: &Template<ComboBox>) -> Result<Ref<Contro
 fn default_combo_box_style(theme: &StyleBuilder) -> Result {
     theme.target::<ComboBox>();
     // The defaults of a WinUI 3 control, which its style leaves unset and its template binds
-    //         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
+    // (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27).
     theme.set(
         ComboBox::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -906,7 +908,7 @@ fn default_combo_box_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // A validation error (FerroUI's DataValidationErrors, which WinUI 3 does not have): the
-    //         border in the critical fill, as for TextBox.
+    // border in the critical fill, as for TextBox.
     theme.style(
         nesting().class(":error").template().of::<Border>().name("Background"),
         |style| {
@@ -915,7 +917,7 @@ fn default_combo_box_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // An editable combo box is not a tab stop of its own: its text box is (as the other themes
-    //         of FerroUI).
+    // of FerroUI).
     theme.style(nesting().property_is(ComboBox::is_editable_property(), true), |style| {
         style.set(InputElement::is_tab_stop_property(), false);
         style.set(

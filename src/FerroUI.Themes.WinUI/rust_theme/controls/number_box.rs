@@ -90,8 +90,8 @@ use ferroui_markup_xaml::rust_theme::type_key;
 /// Adds the resources of the document to `resources`.
 pub(crate) fn merge(resources: &Resources) -> Result {
     // The popup spin buttons with the RepeatButton brushes that the Grid.Resources of
-    //       PopupContentRoot set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
-    //       TextControlButtonBorderBrush; the other disabled brushes are not overridden).
+    // PopupContentRoot set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
+    // TextControlButtonBorderBrush; the other disabled brushes are not overridden).
     resources.control_theme(
         "NumberBoxPopupContentRootButtonStyle",
         number_box_popup_content_root_button_style,
@@ -101,7 +101,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -202,11 +204,11 @@ fn number_box_theme_template(t: &Template<NumberBox>) -> Result<Ref<Control>> {
     Ok(t.make(Grid::new())
         .template_bind(Layoutable::height_property(), Layoutable::height_property())
         .with(|e| {
-            Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*,Auto"))?);
+            e.set_row_definitions(literal(RowDefinitions::parse("Auto,*,Auto"))?);
             Ok(())
         })?
         .with(|e| {
-            Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
+            e.set_column_definitions(literal(ColumnDefinitions::parse("*,Auto,Auto"))?);
             Ok(())
         })?
         .children([
@@ -314,7 +316,7 @@ fn number_box_theme_template(t: &Template<NumberBox>) -> Result<Ref<Control>> {
                                     Decorator::child_property(),
                                     t.make(Grid::new())
                                         .with(|e| {
-                                            Grid::set_row_definitions(e, literal(RowDefinitions::parse("*,*"))?);
+                                            e.set_row_definitions(literal(RowDefinitions::parse("*,*"))?);
                                             Ok(())
                                         })?
                                         .children([

@@ -63,7 +63,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -92,7 +94,7 @@ fn swipe_item_style_template(t: &Template<CommandBarButton>) -> Result<Ref<Contr
                 .set(Layoutable::vertical_alignment_property(), VerticalAlignment::Center)
                 .set(Layoutable::horizontal_alignment_property(), HorizontalAlignment::Center)
                 .with(|e| {
-                    Grid::set_row_definitions(e, literal(RowDefinitions::parse("Auto,*"))?);
+                    e.set_row_definitions(literal(RowDefinitions::parse("Auto,*"))?);
                     Ok(())
                 })?
                 // Font Size 12pt == 16px in the redlines

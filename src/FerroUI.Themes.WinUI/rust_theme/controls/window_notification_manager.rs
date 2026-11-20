@@ -56,7 +56,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -161,7 +163,7 @@ fn window_notification_manager_theme(theme: &StyleBuilder) -> Result {
     theme.target::<WindowNotificationManager>();
     theme.template(window_notification_manager_theme_template);
     // The cards of the host: the width of a notification card of FerroUI (NotificationCardWidth of
-    //         the Fluent theme); an InfoBar takes the width of its container.
+    // the Fluent theme); an InfoBar takes the width of its container.
     theme.style(
         nesting()
             .template()

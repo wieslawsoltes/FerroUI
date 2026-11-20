@@ -37,7 +37,9 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -66,8 +68,8 @@ fn font_icon_theme(theme: &StyleBuilder) -> Result {
     theme.target::<FontIcon>();
     theme.dynamic(TemplatedControl::font_family_property(), "SymbolThemeFontFamily");
     // FontIcon.FontSize is a property of its own in WinUI, 20 by default and not inherited;
-    //         FerroUI's is the inherited font size of the templated control, so the theme sets 20 over
-    //         the inherited value (FI-3).
+    // FerroUI's is the inherited font size of the templated control, so the theme sets 20 over
+    // the inherited value (FI-3).
     theme.set(TemplatedControl::font_size_property(), 20.0);
     theme.template(font_icon_theme_template);
     Ok(())

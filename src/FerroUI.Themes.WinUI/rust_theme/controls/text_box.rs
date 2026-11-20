@@ -109,7 +109,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     // RevealButtonStyle of the template of DefaultPasswordBoxStyle.
     resources.control_theme("PasswordBoxRevealButtonStyle", password_box_reveal_button_style);
     // The context flyout of a text box: the commands TextCommandBarFlyout shows for a TextBox
-    //       (TextCommandBarFlyout::GetTextBoxButtonsToAdd), each while the text box can do it.
+    // (TextCommandBarFlyout::GetTextBoxButtonsToAdd), each while the text box can do it.
     resources.deferred("TextBoxContextFlyout", |scope| {
         Ok(value(
             scope
@@ -128,7 +128,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Cut", |this| {
-                                        this.cut();
+                                        let _ = this.cut();
                                     })
                                     .binding(),
                             )
@@ -167,7 +167,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Copy", |this| {
-                                        this.copy();
+                                        let _ = this.copy();
                                     })
                                     .binding(),
                             )
@@ -206,7 +206,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Paste", |this| {
-                                        this.paste();
+                                        let _ = this.paste();
                                     })
                                     .binding(),
                             )
@@ -245,7 +245,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Undo", |this| {
-                                        this.undo();
+                                        let _ = this.undo();
                                     })
                                     .binding(),
                             )
@@ -283,7 +283,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Redo", |this| {
-                                        this.redo();
+                                        let _ = this.redo();
                                     })
                                     .binding(),
                             )
@@ -321,7 +321,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("SelectAll", |this| {
-                                        this.select_all();
+                                        let _ = this.select_all();
                                     })
                                     .binding(),
                             )
@@ -359,7 +359,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("Paste", |this| {
-                                        this.paste();
+                                        let _ = this.paste();
                                     })
                                     .binding(),
                             )
@@ -398,7 +398,7 @@ pub(crate) fn merge(resources: &Resources) -> Result {
                                 path()
                                     .ancestor_of::<TextBox>(0)
                                     .method::<Ref<TextBox>>("SelectAll", |this| {
-                                        this.select_all();
+                                        let _ = this.select_all();
                                     })
                                     .binding(),
                             )
@@ -419,15 +419,17 @@ pub(crate) fn merge(resources: &Resources) -> Result {
     });
     resources.control_theme("DefaultTextBoxStyle", default_text_box_style);
     // DefaultPasswordBoxStyle (PasswordBox_themeresources.xaml): a text box with the password
-    //       character of WinUI's PasswordBox, the reveal button instead of the delete button and the
-    //       context flyout of a password box. Its other setters and its states are those of
-    //       DefaultTextBoxStyle, as the source repeats them.
+    // character of WinUI's PasswordBox, the reveal button instead of the delete button and the
+    // context flyout of a password box. Its other setters and its states are those of
+    // DefaultTextBoxStyle, as the source repeats them.
     resources.control_theme("DefaultPasswordBoxStyle", default_password_box_style);
     resources.control_theme(type_key::<TextBox>(), text_box_theme);
     Ok(())
 }
 
-/// The resource dictionary of the document, declared in `scope`.
+/// The resource dictionary of the document, declared in `scope`: the document included
+/// (`ResourceInclude`) rather than merged.
+#[allow(dead_code)]
 pub(crate) fn build(scope: &Scope) -> Result<Ref<ResourceDictionary>> {
     let dictionary = ResourceDictionary::new();
     merge(&Resources::new(&dictionary, scope))?;
@@ -603,12 +605,12 @@ fn default_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Control>
             ContentControl::content_property(),
             t.make(Grid::new())
                 .with(|e| {
-                    Grid::set_column_definitions(e, literal(ColumnDefinitions::parse("Auto,*,Auto,Auto,Auto"))?);
+                    e.set_column_definitions(literal(ColumnDefinitions::parse("Auto,*,Auto,Auto,Auto"))?);
                     Ok(())
                 })?
                 // InnerLeftContent of FerroUI's text box.
                 // RevealButton of DefaultPasswordBoxStyle, also shown by the style class
-                //                 revealPasswordButton.
+                // revealPasswordButton.
                 // InnerRightContent of FerroUI's text box.
                 .children([
                     t.make(Border::new())
@@ -804,7 +806,7 @@ fn default_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Control>
                             path()
                                 .ancestor_of::<TextBox>(0)
                                 .method::<Ref<TextBox>>("Clear", |this| {
-                                    this.clear();
+                                    let _ = this.clear();
                                 })
                                 .binding(),
                         )
@@ -887,9 +889,9 @@ fn default_text_box_style_template(t: &Template<TextBox>) -> Result<Ref<Control>
 fn default_text_box_style(theme: &StyleBuilder) -> Result {
     theme.target::<TextBox>();
     // The line of a single-line box centred in its height. WinUI places it by the padding and
-    //         the line height of Segoe UI, which fill MinHeight; with another font (macOS, Linux) the
-    //         line was higher than the middle. A box of several lines keeps its text at the top (below).
-    //         Deviation (winui-theme/DEVIATIONS.md, G-28).
+    // the line height of Segoe UI, which fill MinHeight; with another font (macOS, Linux) the
+    // line was higher than the middle. A box of several lines keeps its text at the top (below).
+    // Deviation (winui-theme/DEVIATIONS.md, G-28).
     theme.set(
         TextBox::vertical_content_alignment_property(),
         VerticalAlignment::Center,
@@ -1011,7 +1013,7 @@ fn default_text_box_style(theme: &StyleBuilder) -> Result {
         Ok(())
     })?;
     // A validation error (FerroUI's DataValidationErrors, which WinUI 3 does not have): the
-    //         border in the critical fill, as a WinUI application shows an error of a field.
+    // border in the critical fill, as a WinUI application shows an error of a field.
     theme.style(
         nesting()
             .class(":error")
@@ -1040,7 +1042,7 @@ fn default_text_box_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The style class clearButton of FerroUI's text box: the delete button while the box is
-    //         focused and not empty, whether or not its text wraps.
+    // focused and not empty, whether or not its text wraps.
     theme.style(
         nesting()
             .class("clearButton")
@@ -1057,7 +1059,7 @@ fn default_text_box_style(theme: &StyleBuilder) -> Result {
         },
     )?;
     // The style class revealPasswordButton of FerroUI's text box: the reveal button while the
-    //         box is not empty.
+    // box is not empty.
     theme.style(
         nesting()
             .class("revealPasswordButton")
