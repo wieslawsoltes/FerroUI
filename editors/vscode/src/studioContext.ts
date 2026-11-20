@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import type { EditResult, Range } from './protocol';
-import { includedTemplateUri, type IncludedTemplateSource } from './includedTemplate';
+import { includedSourceUri } from './includedSource';
+import type { IncludedTemplateSource } from './includedTemplate';
 import { exactRange } from './textDocument';
 
 export class StudioContext {
@@ -56,7 +57,7 @@ export class StudioContext {
 
     async revealIncludedTemplate(source: IncludedTemplateSource): Promise<void> {
         this.ensure();
-        const uri = await includedTemplateUri(this.panel.document.uri, source);
+        const uri = await includedSourceUri(this.panel.document.uri, source);
         const document = await vscode.workspace.openTextDocument(uri);
         this.ensure();
         const selection = exactRange(document, source.range);

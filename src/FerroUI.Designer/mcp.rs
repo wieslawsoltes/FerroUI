@@ -626,13 +626,22 @@ impl UiToolProvider for DesignerMcp {
                 result["returnToConsumer"].as_str(),
             ) {
                 drop(session);
-                workspace.show_template_consumer(consumer)?;
+                workspace.show_open_document(consumer)?;
                 result["document"] = state(&owner.borrow());
             }
             return Ok(result);
         }
         if style_composition::handles(name) {
-            return style_composition::call(&mut session, name, args);
+            let mut result = style_composition::call(&mut session, name, args)?;
+            if let (Some(workspace), Some(target)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade), result.get("openDefinition"),
+            ) {
+                let target = serde_json::from_value(target.clone()).map_err(|error| error.to_string())?;
+                drop(session);
+                result["editor"] = json!(workspace.open_included_style_source(target)?);
+                result["document"] = state(&owner.borrow());
+            }
+            return Ok(result);
         }
         if events::handles(name) {
             return events::call(&mut session, name, args);

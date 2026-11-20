@@ -1,11 +1,11 @@
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage } from './protocol';
 import { addPaletteColor, addStyleSetter, assignStyleResource, createStyle } from './stylesActions';
-import { StudioContext } from './studioContext';
+import { choose, StudioContext } from './studioContext';
 import { previewDefinition, showResourceReferences } from './studioLibrary';
-import type { FromStyles, PaletteSheet, StyleCatalog, StyleDefinition, StyleScope, StyleSummary, StylesAction, StylesState, ToStyles } from './stylesProtocol';
+import type { FromStyles, PaletteSheet, StyleCatalog, StyleDefinition, StyleEditorLocation, StyleScope, StyleSummary, StylesAction, StylesState, ToStyles } from './stylesProtocol';
 import { stylesHtml } from './view';
 
 export const STYLES_VIEW = 'ferroui.styles';
@@ -16,6 +16,8 @@ interface Selection {
     scope?: StyleScope;
     nextName?: string;
     requestedDefinition?: number;
+    paletteFocus?: StylesState['paletteFocus'];
+    consumer?: WeakRef<DesignerPanel>;
     page?: StylesState['page'];
 }
 
@@ -28,7 +30,7 @@ export class StylesView {
     private stamp = 0;
     private state: StylesState = { stamp: 0 };
 
-    constructor(root: vscode.Uri, visible: () => void) {
+    constructor(root: vscode.Uri, visible: () => void, private readonly returnTo: (panel: DesignerPanel) => Promise<void>) {
         this.view = new DockView(root, stylesHtml, () => {
             if (!this.view.visible) this.key = '';
             visible();
@@ -42,8 +44,18 @@ export class StylesView {
         selection.epoch++;
         selection.requestedDefinition = node;
         selection.page = 'styles';
-        this.key = '';
-        if (panel === this.panel) this.update(panel, this.file);
+        selection.paletteFocus = undefined;
+        this.refresh(panel);
+    }
+
+    openSource(panel: DesignerPanel, editor: StyleEditorLocation, consumer: DesignerPanel): void {
+        const selection = this.selection(panel);
+        selection.epoch++;
+        selection.consumer = new WeakRef(consumer);
+        selection.page = editor.page;
+        selection.requestedDefinition = editor.page === 'styles' ? editor.node : undefined;
+        selection.paletteFocus = editor.page === 'palette' ? editor : undefined;
+        this.refresh(panel);
     }
 
     update(panel: DesignerPanel | undefined, file: string): void {
@@ -88,7 +100,8 @@ export class StylesView {
                 ?? matching(catalog.definitions, selection.definition, (left, right) =>
                     left.name === right.name && left.kind === right.kind && left.scope === right.scope)
                 ?? catalog.definitions.find(entry => entry.node === context.node) ?? catalog.definitions[0];
-            const scope = matching(catalog.palette_scopes, selection.scope, (left, right) => left.label === right.label)
+            const scope = catalog.palette_scopes.find(scope => scope.node === selection.paletteFocus?.owner)
+                ?? matching(catalog.palette_scopes, selection.scope, (left, right) => left.label === right.label)
                 ?? catalog.palette_scopes.find(scope => scope.node === catalog.palette_owner) ?? catalog.palette_scopes[0];
             const [style, palette] = await Promise.all([
                 definition && context.read<StyleDefinition>('designer_style_definition', { node: definition.node }),
@@ -98,10 +111,14 @@ export class StylesView {
             selection.definition = definition;
             selection.scope = scope;
             const page = selection.page;
+            const paletteFocus = selection.paletteFocus;
+            const consumer = selection.consumer?.deref();
             selection.nextName = undefined;
             selection.requestedDefinition = undefined;
+            selection.paletteFocus = undefined;
             selection.page = undefined;
-            this.publish({ stamp, content: { catalog, definition: style, palette }, dark: panel.dimensions.dark, preview: true, page });
+            this.publish({ stamp, content: { catalog, definition: style, palette }, dark: panel.dimensions.dark, preview: true, page, paletteFocus,
+                consumer: consumer && !consumer.isDisposed ? vscode.workspace.asRelativePath(consumer.document.uri) : undefined });
         } catch (error) {
             if (this.stamp === stamp) {
                 this.publish({ ...this.state, busy: false, message: errorMessage(error) });
@@ -125,6 +142,26 @@ export class StylesView {
             const definition = content.definition;
             const palette = content.palette;
             switch (action.type) {
+                case 'included-sources': {
+                    const palettes = action.page === 'palette';
+                    const choices = (content.catalog.included_sources ?? [])
+                        .filter(choice => (choice.source.kind === 'palette') === palettes)
+                        .map(choice => ({ ...choice, description: vscode.workspace.asRelativePath(vscode.Uri.parse(choice.source.uri)) }));
+                    const chosen = await choose(palettes ? 'Open included palette' : 'Open included style or control theme', choices);
+                    if (chosen) await context.present('designer_open_style_source', { source: chosen.source });
+                    return;
+                }
+                case 'included-color': {
+                    const color = palette?.comparison.find(row => row.key === action.key)?.[action.theme];
+                    if (color?.source) await context.present('designer_open_style_source', { source: color.source });
+                    return;
+                }
+                case 'return-to-consumer': {
+                    const consumer = selection.consumer?.deref();
+                    if (!consumer || consumer.isDisposed) throw new Error('The consuming design is closed.');
+                    await this.returnTo(consumer);
+                    return;
+                }
                 case 'definition':
                     selection.epoch++;
                     selection.requestedDefinition = action.node;

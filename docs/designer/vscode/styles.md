@@ -25,12 +25,26 @@ Each accepted action edits the XAML buffer in one Undo step. For a keyed style o
 2. Use **Preview Light theme** or **Preview Dark theme** in the toolbar to switch the native Design preview. The canvas inherits the chosen preview theme. Controls with an explicit theme retain their authored setting.
 3. Choose **Compare Light and Dark colors** to see each key's resolved values side by side. The comparison follows the dictionary's local entries, variant and fallback lookup. Use the filter to find a key. Create a Light and a Dark card in **Stages** to compare the whole native view at once. [Compare stage environments](motion.md)
 4. Return to a layer and edit a color field or choose its swatch. The text field accepts native color names and hex values, including `#AARRGGBB` for alpha. The swatch changes RGB while retaining the existing alpha. Use **Add palette color** to create a `Color` or `SolidColorBrush`. Adding a color to a missing theme layer creates its dictionary in the same Undo step.
-5. Use the source arrow to open the exact declaration, or the references icon to find uses. A computed value opens in the source editor. For a theme backed by a separate include, open that XAML file to change its colors. Author Rust-owned style builders in the Rust source.
+5. Use the source arrow to open the exact declaration, or the references icon to find uses. A computed value opens in the source editor. Author Rust-owned style builders in the Rust source.
 
 On the sample, compare `ActionSurface` in Light and Dark. Change its Dark value and switch the canvas between themes. The **Apply palette** button updates when Dark is active. Undo restores the original color.
 
 ![The palette resolves each color in Light and Dark while the canvas renders in Dark](../images/vscode-palette-comparison.jpg)
 
 [A Dark palette edit with the exact XAML value selected](../images/vscode-dark-palette-edit.jpg)
+
+## Edit styles and palettes in included XAML
+
+Open a consuming view such as [IncludedStylePalette.xaml](../../../editors/vscode/test/fixtures/IncludedStylePalette.xaml). Its shared stylesheet and palette use paths relative to their declaring files.
+
+1. In **Styles**, select the source icon **Open included style or control theme** and choose a definition by name and file. The owner opens in the existing editor split with the definition selected in **Styles & Themes**. Edit the selector or a setter there.
+2. In **Palette**, select **Compare Light and Dark colors**. A source icon beside a resolved included color opens its owning scope and selects the color's layer. Use **Open included palette** in the toolbar to browse a dictionary and add a color. The comparison follows local overrides and merged dictionaries through the accepted preview.
+3. After editing, use the back arrow in **Styles & Themes** to return to the consuming design. The consumer renders from the unsaved XAML. Use **Undo** in the owning buffer to restore the declaration and update its consumers again.
+
+The pickers use the include sources in the current native preview. If an included source changes while you are opening it, reopen the picker after the preview catches up.
+
+![The included-definition picker lists a stylesheet and a control theme with their owning files beside the consuming preview](../images/vscode-included-style-picker.jpg)
+
+![The consuming preview reflects an unsaved stylesheet edit while the palette shows the Light and Dark values and their source actions](../images/vscode-included-palette-compare.jpg)
 
 See [Styles and palettes from MCP](reference.md#edit-styles-and-palettes-with-mcp) and [Studio authoring](../native-controls.md#edit-scoped-styles-and-palettes) for the same source operations.

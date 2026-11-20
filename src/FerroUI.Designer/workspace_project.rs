@@ -269,6 +269,31 @@ impl DesignerWorkspace {
         };
         self.present_project_tab(uri, tab)
     }
+
+    pub(super) fn visit_source_document<T>(
+        self: &Rc<Self>,
+        uri: &str,
+        open: impl FnOnce(&Rc<Self>) -> Result<T, String>,
+    ) -> Result<T, String> {
+        let previous = self.session.borrow().document_uri().to_owned();
+        self.activate_document(uri)?;
+        let result = open(self);
+        if result.is_err() && previous != uri {
+            self.activate_document(&previous)?;
+        }
+        result
+    }
+
+    pub(crate) fn show_open_document(self: &Rc<Self>, uri: &str) -> Result<(), String> {
+        let Ok(uri) = ferroui_designer_project::canonical_file_uri(uri) else {
+            return Ok(());
+        };
+        if self.document_uris().contains(&uri) {
+            self.activate_document(&uri)?;
+        }
+        Ok(())
+    }
+
     pub(super) fn present_project_tab(self: &Rc<Self>, uri: &str, mut tab: Tab) -> Result<(), String> {
         if let Some(rust) = tab.rust.as_mut() {
             rust.set_catalog(&mut tab.document, self.rust_catalog(uri)).map_err(|error| error.to_string())?;

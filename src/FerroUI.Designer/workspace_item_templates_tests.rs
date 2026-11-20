@@ -192,7 +192,7 @@ fn studio_edits_an_included_template_in_its_own_tab_with_the_consumer_fixture() 
             .unwrap()
             .unwrap()
     };
-    assert_eq!(target.source.uri, dictionary_uri);
+    assert_eq!(target.source.location.uri, dictionary_uri);
     let stale = Document::new(DICTIONARY.replace("FontSize=\"16\"", "FontSize=\"17\"")).unwrap();
     assert!(target.source.node_in(&stale, &dictionary_uri).is_err());
     workspace.open_included_template(target).unwrap();

@@ -1,30 +1,25 @@
 //! Navigate from a consuming control to a template in an accepted dictionary.
+use crate::included_source::{IncludedSource, IncludedSourceIndex};
 use crate::item_template_samples::{assigned_fixture, ItemTemplatePreview};
-use crate::{DefinitionPreviewOptions, DesignerSession, PreviewStatus};
+use crate::{DefinitionPreviewOptions, DesignerSession};
 use ferroui_designer_core::{
     design_fixtures::{DesignFixture, DesignFixtures},
     Document, NodeId, SourceSpan,
 };
-use ferroui_designer_language::{LineIndex, Range};
 use ferroui_designer_project::PreviewInclude;
 use ferroui_designer_tools::{
     component_resource_location, keyed_item_template, ComponentResourceContext, ItemTemplateSlot,
     ItemTemplateValue,
 };
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::BTreeSet,
-    hash::{DefaultHasher, Hash, Hasher},
-};
+use std::collections::BTreeSet;
 
 /// A checked source locator, independent of ephemeral node IDs in the consumer.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct IncludedItemTemplate {
-    pub uri: String,
-    pub range: Range,
+    #[serde(flatten)]
+    pub location: IncludedSource,
     pub key: String,
-    source_stamp: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -43,34 +38,11 @@ pub(crate) struct IncludedTemplateChoice {
 
 impl IncludedItemTemplate {
     pub fn node_in(&self, document: &Document, uri: &str) -> Result<(NodeId, SourceSpan), String> {
-        let text = document.source();
-        let source = text.strip_prefix('\u{feff}').unwrap_or(text);
-        if ferroui_designer_project::canonical_file_uri(uri)
-            .ok()
-            .as_ref()
-            != Some(&self.uri)
-            || !document.is_valid()
-            || self.source_stamp != source_stamp(source)
-        {
-            return Err(
-                "The included template source changed. Reopen Item Templates from its consumer."
-                    .into(),
-            );
+        let node = self.location.node_in(document, uri)?;
+        if keyed_item_template(node).as_ref() != Some(&self.key) {
+            return Err("The template declaration changed.".into());
         }
-        let span = LineIndex::new(source)
-            .span(self.range)
-            .map_err(|error| error.to_string())?;
-        let bom = text.len() - source.len();
-        let span = SourceSpan::new(span.start + bom, span.end + bom);
-        let ast = document.ast();
-        let node = ast
-            .element_at(span.start)
-            .and_then(|id| ast.node(id))
-            .filter(|node| {
-                node.name_span == span && keyed_item_template(node).as_ref() == Some(&self.key)
-            })
-            .ok_or("The template declaration changed.")?;
-        Ok((node.id, span))
+        Ok((node.id, node.name_span))
     }
 }
 
@@ -85,12 +57,8 @@ impl DesignerSession {
             return Ok(None);
         };
         Ok(Some(IncludedItemTemplate {
-            uri: source.uri.clone(),
-            range: LineIndex::new(source.document.source())
-                .range(node.name_span)
-                .map_err(|error| error.to_string())?,
+            location: IncludedSourceIndex::new(source).locate(node)?,
             key: key.to_owned(),
-            source_stamp: source_stamp(source.document.source()),
         }))
     }
 
@@ -101,10 +69,9 @@ impl DesignerSession {
         theme: Option<&ComponentResourceContext>,
     ) -> Result<Option<(&PreviewInclude, &ferroui_designer_core::Node)>, String> {
         let document = self.document();
-        if !matches!(self.preview_status(), PreviewStatus::Ready { revision } if *revision == document.revision())
-        {
+        let Some(includes) = self.accepted_preview_includes() else {
             return Ok(None);
-        }
+        };
         let sources = &self.preview.resource_sources;
         let location =
             component_resource_location(document, self.document_uri(), owner, key, theme, sources)
@@ -112,8 +79,7 @@ impl DesignerSession {
         let Some(location) = location.filter(|location| location.uri.is_some()) else {
             return Ok(None);
         };
-        let Some(source) = sources
-            .0
+        let Some(source) = includes
             .documents()
             .find(|source| Some(source.uri.as_str()) == location.uri)
         else {
@@ -145,10 +111,10 @@ impl DesignerSession {
         &self,
         owner: NodeId,
     ) -> Result<Vec<IncludedTemplateChoice>, String> {
-        let keys = self
-            .preview
-            .resource_sources
-            .0
+        let Some(includes) = self.accepted_preview_includes() else {
+            return Ok(Vec::new());
+        };
+        let keys = includes
             .documents()
             .flat_map(|source| {
                 source
@@ -229,10 +195,4 @@ impl DesignerSession {
             ItemTemplatePreview::Assigned { .. } => None,
         }
     }
-}
-
-fn source_stamp(source: &str) -> String {
-    let mut hash = DefaultHasher::new();
-    source.hash(&mut hash);
-    format!("{:016x}", hash.finish())
 }

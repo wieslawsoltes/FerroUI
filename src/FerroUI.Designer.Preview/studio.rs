@@ -57,6 +57,9 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     if query.name == "designer_item_template" && stage.authored_rsx.is_some() {
         return Err("Open Rust template expressions from their source.".into());
     }
+    if query.name == "designer_open_style_source" && stage.authored_rsx.is_some() {
+        return Err("Edit Rust-owned style builders in Rust source.".into());
+    }
     let mut arguments = query.arguments;
     let revision = stage.session.borrow().document().revision();
     arguments.as_object_mut().ok_or("arguments must be an object")?
@@ -89,6 +92,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "enter_included_template" | "exit")),
         "designer_item_template" => action == Some("preview"),
+        "designer_open_style_source" => action.is_none(),
         "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),
         "designer_layer" => action.is_some(),
         _ => false,
@@ -114,7 +118,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     let needs_selection = match query.name.as_str() {
         "designer_style_catalog" => query.arguments.get("target").is_none(),
-        "designer_style_definition" | "designer_style_resources" | "designer_palette" => false,
+        "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette" => false,
         _ => true,
     };
     // Reading one explicit definition must never retire a plan made for another
@@ -140,7 +144,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
         return Ok(json!({"slots":[],"resources":[],"reason":"Edit Rust template expressions in their source."}));
     }
     if stage.authored_rsx.is_some() && matches!(query.name.as_str(),
-        "designer_style_catalog" | "designer_style_definition" | "designer_style_resources" | "designer_palette")
+        "designer_style_catalog" | "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette")
     {
         return Err("Edit Rust-owned style builders in Rust source".into());
     }

@@ -28,6 +28,7 @@ import { verifyGridMcp } from './studioGridMcp';
 import { verifyColumnsMcp } from './studioColumnsMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
 import { verifyIncludedItemTemplatesMcp } from './includedItemTemplatesMcp';
+import { verifyIncludedStylesMcp } from './includedStylesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
@@ -179,6 +180,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyIncludedItemTemplatesMcp({ invoke, content });
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
+        await verifyIncludedStylesMcp({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });
         designData.expected_revision = content<{ revision: number }>(await invoke('designer_wait', { session })).revision;
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /managed FerroUI application/);

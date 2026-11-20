@@ -394,7 +394,8 @@ export class AgentTools {
             }
             case 'designer_studio_present': {
                 const presentation = await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
-                if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source };
+                if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source,
+                    opened_session: presentation.navigationSession };
                 if (presentation?.returnToConsumer) return { ...describe(panel), returned_to: presentation.returnToConsumer };
                 break;
             }

@@ -5,7 +5,7 @@ import { submitValue } from './styleDefinitionEditor';
 
 export function paletteEditor(sheet: PaletteSheet | undefined, layer: PaletteColumn | undefined,
     compare: boolean, filter: string, send: (action: StylesAction) => void): HTMLElement {
-    if (compare && sheet) return comparison(sheet, filter);
+    if (compare && sheet) return comparison(sheet, filter, send);
     const root = create('div');
     if (!layer || layer.unavailable || !layer.colors.length) {
         const empty = create('p');
@@ -64,7 +64,7 @@ function swatch(argb: string | undefined): HTMLElement {
     return result;
 }
 
-function comparison(sheet: PaletteSheet, filter: string): HTMLElement {
+function comparison(sheet: PaletteSheet, filter: string, send: (action: StylesAction) => void): HTMLElement {
     const table = create('table');
     table.className = 'palette-comparison';
     table.setAttribute('aria-label', 'Scoped resource resolution in Light and Dark themes');
@@ -82,18 +82,25 @@ function comparison(sheet: PaletteSheet, filter: string): HTMLElement {
         key.scope = 'row';
         key.textContent = key.title = color.key;
         row.append(key);
-        appendResolved(row.insertCell(), color.light);
-        appendResolved(row.insertCell(), color.dark);
+        for (const theme of ['light', 'dark'] as const) {
+            appendResolved(row.insertCell(), color[theme], color.key, theme, send);
+        }
     }
     return table;
 }
 
-function appendResolved(cell: HTMLTableCellElement, color: ResolvedColor | undefined): void {
+function appendResolved(cell: HTMLTableCellElement, color: ResolvedColor | null | undefined,
+    key: string, theme: 'light' | 'dark', send: (action: StylesAction) => void): void {
     const content = create('div');
     const value = color?.value ?? (color ? 'Expression' : 'Unresolved');
     content.title = [value, color?.scope].filter(Boolean).join(' · ');
     const label = create('span');
     label.textContent = value;
-    content.append(swatch(color?.value), label);
+    content.append(swatch(color?.value ?? undefined), label);
+    if (color?.source) {
+        const name = theme === 'light' ? 'Light' : 'Dark';
+        content.append(actionButton('go-to-file', `Open ${name} declaration for ${key}`,
+            () => send({ type: 'included-color', key, theme })));
+    }
     cell.append(content);
 }

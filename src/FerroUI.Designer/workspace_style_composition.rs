@@ -12,6 +12,9 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
+#[path = "workspace_style_sources.rs"]
+mod sources;
+pub(super) use sources::StyleSourceVisit;
 #[path = "workspace_palette_view.rs"]
 mod palette;
 #[cfg(test)]
@@ -20,6 +23,7 @@ mod tests;
 
 const PALETTE: &str = "F1 M8,1 A7,7 0 1 0 8,15 H9.5 A1.5,1.5 0 0 0 10.5,12.4 A1.2,1.2 0 0 1 11.4,10.3 H13 A2,2 0 0 0 15,8.3 A7,7 0 0 0 8,1 Z M4,6 A1,1 0 1 1 4,8 A1,1 0 1 1 4,6 Z M7,3 A1,1 0 1 1 7,5 A1,1 0 1 1 7,3 Z M11,4 A1,1 0 1 1 11,6 A1,1 0 1 1 11,4 Z";
 const ADD: &str = "M7,2 H9 V7 H14 V9 H9 V14 H7 V9 H2 V7 H7 Z";
+const BACK: &str = "M7,3 L2,8 L7,13 L8,12 L4.75,8.75 H14 V7.25 H4.75 L8,4 Z";
 
 #[derive(Clone)]
 struct Context {
@@ -99,8 +103,16 @@ impl DesignerWorkspace {
             return;
         }
         let document = session.document();
+        let visit = self
+            .components
+            .borrow()
+            .style_source_visit
+            .clone()
+            .filter(|visit| visit.uri == session.document_uri());
+        let requested_palette = visit.as_ref().and_then(|visit| visit.palette());
         let owner = definition
             .map(|entry| entry.node)
+            .or_else(|| requested_palette.map(|(owner, _)| owner))
             .filter(|id| {
                 document
                     .ast()
@@ -120,14 +132,46 @@ impl DesignerWorkspace {
         let actions = StackPanel::new();
         actions.set_orientation(Orientation::Horizontal);
         actions.set_spacing(4.0);
+        if let Some(visit) = visit {
+            let back = tool_button(BACK, "Return to consuming view");
+            back.set_name(Some("DefinitionStyleBack".into()));
+            let context = context.clone();
+            back.click(move |_, _| {
+                let result = context
+                    .workspace
+                    .upgrade()
+                    .ok_or_else(|| "The designer workspace was closed".into())
+                    .and_then(|workspace| workspace.return_from_style_source(&visit));
+                context.report(result);
+            });
+            actions.children().add(back.upcast::<Control>());
+        }
+        if session
+            .accepted_preview_includes()
+            .is_some_and(|sources| sources.documents().next().is_some())
+        {
+            actions.children().add(
+                composition_button(
+                    SOURCE,
+                    "Open included styles and palettes",
+                    "DefinitionStyleSources",
+                    context.clone(),
+                    sources::picker,
+                )
+                .upcast::<Control>(),
+            );
+        }
         if let Some(owner) = owner {
+            let layer = requested_palette
+                .filter(|(id, _)| *id == owner)
+                .map(|(_, layer)| layer);
             actions.children().add(
                 composition_button(
                     PALETTE,
                     "Edit scoped palette",
                     "DefinitionPalette",
                     context.clone(),
-                    move |context| palette::body(context, owner),
+                    move |context| palette::body(context, owner, layer),
                 )
                 .upcast::<Control>(),
             );

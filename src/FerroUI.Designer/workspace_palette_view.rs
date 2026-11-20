@@ -1,5 +1,7 @@
 //! Palette swatches, source navigation, and the native color editor in Studio.
 use super::{text, tool_button, Context, ADD, SOURCE};
+use crate::style_palette_comparison::PaletteComparison;
+use crate::style_sources::StyleSource;
 use crate::{PreviewTheme, PropertyColorEditor};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::{Color, SolidColorBrush};
@@ -11,36 +13,25 @@ use ferroui_controls::{
 };
 use ferroui_designer_core::NodeId;
 use ferroui_designer_tools::component_palette::{
-    palette_layers, resolve_palette_color, PaletteColor, PaletteColorKind, PaletteLayer,
-    PaletteLayerModel,
+    palette_layers, PaletteColor, PaletteColorKind, PaletteLayer, PaletteLayerModel,
 };
-use std::collections::BTreeSet;
 use std::rc::Rc;
 
 const SUN: &str = "M8,1 V3 M8,13 V15 M1,8 H3 M13,8 H15 M3,3 L4.5,4.5 M11.5,11.5 L13,13 M13,3 L11.5,4.5 M4.5,11.5 L3,13 M12,8 A4,4 0 1 1 4,8 A4,4 0 1 1 12,8";
 const MOON: &str = "F1 M14,10.2 A6.8,6.8 0 1 1 5.8,2 A6.1,6.1 0 0 0 14,10.2 Z";
 const COMPARE: &str = "F1 M1,2 H15 V14 H1 Z M2,3 V13 H7 V3 Z M9,3 V13 H14 V3 Z";
 
-pub(super) fn body(context: Context, owner: NodeId) -> Result<Ref<Control>, String> {
+pub(super) fn body(
+    context: Context,
+    owner: NodeId,
+    layer: Option<PaletteLayer>,
+) -> Result<Ref<Control>, String> {
     let workspace = context.workspace()?;
     let session = workspace.session.borrow();
     let document = session.document();
     let model = Rc::new(palette_layers(document, owner).map_err(|error| error.to_string())?);
     let title = super::super::node_title(document, owner);
-    let keys = model
-        .iter()
-        .flat_map(|entry| entry.colors.iter().map(|color| &color.key))
-        .collect::<BTreeSet<_>>();
-    let comparison = keys
-        .into_iter()
-        .map(|key| {
-            let light = resolve_palette_color(document, owner, key, PaletteLayer::Light)
-                .and_then(|color| color.value);
-            let dark = resolve_palette_color(document, owner, key, PaletteLayer::Dark)
-                .and_then(|color| color.value);
-            (key.clone(), light, dark)
-        })
-        .collect::<Vec<_>>();
+    let comparison = session.compare_palette(owner, &model)?;
     drop(session);
 
     let content = StackPanel::new();
@@ -52,10 +43,14 @@ pub(super) fn body(context: Context, owner: NodeId) -> Result<Ref<Control>, Stri
     let bar = StackPanel::new();
     bar.set_orientation(Orientation::Horizontal);
     bar.set_spacing(4.0);
-    let active = match workspace.preview_environment().theme {
-        PreviewTheme::Dark => 3,
-        _ => 2,
-    };
+    let layer = layer.unwrap_or_else(|| match workspace.preview_environment().theme {
+        PreviewTheme::Dark => PaletteLayer::Dark,
+        _ => PaletteLayer::Light,
+    });
+    let active = model
+        .iter()
+        .position(|entry| entry.layer == layer)
+        .unwrap_or(0);
     let chooser = choice(
         "PaletteLayer",
         "Palette layer",
@@ -92,7 +87,7 @@ pub(super) fn body(context: Context, owner: NodeId) -> Result<Ref<Control>, Stri
         button.click(move |_, _| report(error.upgrade().as_ref(), verify.preview(theme)));
         bar.children().add(button.upcast::<Control>());
     }
-    let comparison = compare_panel(&comparison);
+    let comparison = compare_panel(&comparison, &context, &status);
     comparison.set_is_visible(false);
     let toggle = tool_button(COMPARE, "Compare Light and Dark colors");
     toggle.set_name(Some("PaletteCompare".into()));
@@ -254,14 +249,25 @@ fn add_row(
     root.upcast()
 }
 
-fn compare_panel(rows: &[(String, Option<String>, Option<String>)]) -> Ref<Control> {
+fn compare_panel(
+    rows: &[PaletteComparison],
+    context: &Context,
+    status: &Ref<TextBlock>,
+) -> Ref<Control> {
     let content = StackPanel::new();
-    let heading = comparison_row("Color", Some("Light"), Some("Dark"));
+    let heading = comparison_row("Color", [("Light", None), ("Dark", None)], context, status);
     content.children().add(heading);
-    for (key, light, dark) in rows {
+    for row in rows {
+        let cells = [row.light.as_ref(), row.dark.as_ref()].map(|color| match color {
+            Some(color) => (
+                color.value.as_deref().unwrap_or("Expression"),
+                color.source.as_ref(),
+            ),
+            None => ("Unresolved", None),
+        });
         content
             .children()
-            .add(comparison_row(key, light.as_deref(), dark.as_deref()));
+            .add(comparison_row(&row.key, cells, context, status));
     }
     let scroll = ScrollViewer::new();
     scroll.set_max_height(174.0);
@@ -272,16 +278,21 @@ fn compare_panel(rows: &[(String, Option<String>, Option<String>)]) -> Ref<Contr
     scroll.upcast()
 }
 
-fn comparison_row(key: &str, light: Option<&str>, dark: Option<&str>) -> Ref<Control> {
+fn comparison_row(
+    key: &str,
+    colors: [(&str, Option<&StyleSource>); 2],
+    context: &Context,
+    status: &Ref<TextBlock>,
+) -> Ref<Control> {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("*,*,*").unwrap());
     row.set_column_spacing(5.0);
     row.children().add(text(key).upcast::<Control>());
-    for (index, color) in [light, dark].into_iter().enumerate() {
+    for (index, (value, source)) in colors.into_iter().enumerate() {
         let cell = StackPanel::new();
         cell.set_orientation(Orientation::Horizontal);
         cell.set_spacing(3.0);
-        if let Some(color) = color.and_then(|value| Color::try_parse(value.trim())) {
+        if let Some(color) = Color::try_parse(value.trim()) {
             let swatch = Border::new();
             swatch.set_width(12.0);
             swatch.set_height(12.0);
@@ -289,8 +300,20 @@ fn comparison_row(key: &str, light: Option<&str>, dark: Option<&str>) -> Ref<Con
             swatch.set_background(Some(SolidColorBrush::with_color(color).into()));
             cell.children().add(swatch.upcast::<Control>());
         }
-        cell.children()
-            .add(text(color.unwrap_or("Unresolved")).upcast::<Control>());
+        cell.children().add(text(value).upcast::<Control>());
+        if let Some(source) = source.cloned() {
+            let theme = if index == 0 { "Light" } else { "Dark" };
+            let open = tool_button(SOURCE, &format!("Open {theme} declaration for {key}"));
+            let context = context.clone();
+            let status = status.downgrade();
+            open.click(move |_, _| {
+                report(
+                    status.upgrade().as_ref(),
+                    context.open_source(source.clone()),
+                )
+            });
+            cell.children().add(open.upcast::<Control>());
+        }
         Grid::set_column(&cell, index as i32 + 1);
         row.children().add(cell.upcast::<Control>());
     }

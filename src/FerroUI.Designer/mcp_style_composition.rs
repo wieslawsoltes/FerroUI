@@ -4,12 +4,11 @@ use crate::property_literals::setter_target_type;
 use crate::style_composition::{
     argb, compatible_base, setter_metadata, setter_property, supports_palette, supports_styles,
 };
+use crate::style_sources::StyleSource;
 use crate::{DesignerSession, PropertyEditorKind};
 use ferroui_designer_core::{Document, MarkupValue, NodeId, NodeKind};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_tools::component_palette::{
-    palette_layers, resolve_palette_color, PaletteLayer,
-};
+use ferroui_designer_tools::component_palette::palette_layers;
 use ferroui_designer_tools::component_styles::{authored_setters, base_theme, StyleChange};
 use ferroui_designer_tools::{
     component_property_attribute, component_property_elements, ComponentKind,
@@ -24,6 +23,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_style_definition"
             | "designer_style_resources"
             | "designer_style_edit"
+            | "designer_open_style_source"
+            | "designer_style_source"
             | "designer_palette"
             | "designer_palette_edit"
     )
@@ -33,7 +34,7 @@ pub(super) fn tools() -> Vec<Value> {
     vec![
         s::tool(
             "designer_style_catalog",
-            "List XAML styles, control themes, style hosts, and writable palette scopes in the active document.",
+            "List local XAML style and palette scopes and declarations in the accepted include graph.",
             s::object(json!({"target":s::id()}), &[]),
             false,
         ),
@@ -41,6 +42,18 @@ pub(super) fn tools() -> Vec<Value> {
             "designer_style_definition",
             "Read one authored Style or ControlTheme, including known typed setters, available base themes, and precise source locations.",
             s::object(json!({"node":s::id()}), &["node"]),
+            false,
+        ),
+        s::tool(
+            "designer_open_style_source",
+            "Open an included Style, ControlTheme or palette in its owning document. Pass the source from the style catalog or palette comparison and the consuming document revision. Opening changes no source.",
+            s::object(json!({"source": source_schema(), "expected_revision": s::revision()}), &["source", "expected_revision"]),
+            true,
+        ),
+        s::tool(
+            "designer_style_source",
+            "Locate an included style or palette in the current owning document. Pass the original source locator. Returns a local definition or palette scope, layer, and exact source range.",
+            s::object(json!({"source": source_schema()}), &["source"]),
             false,
         ),
         s::tool(
@@ -119,6 +132,14 @@ pub(super) fn tools() -> Vec<Value> {
     ]
 }
 
+fn source_schema() -> Value {
+    let position = s::object(json!({"line":s::revision(),"character":s::revision()}), &["line", "character"]);
+    s::object(json!({
+        "uri":s::string(), "range":s::object(json!({"start":position,"end":position}), &["start", "end"]),
+        "sourceStamp":s::string(),"kind":{"enum":["style", "control_theme", "palette", "color"]}
+    }), &["uri", "range", "sourceStamp", "kind"])
+}
+
 pub(super) fn call(
     session: &mut DesignerSession,
     name: &str,
@@ -128,6 +149,17 @@ pub(super) fn call(
     match name {
         "designer_style_catalog" => return catalog(session, args["target"].as_u64()),
         "designer_style_definition" => return definition(session, node_id(args, "node")?),
+        "designer_open_style_source" => {
+            let navigation = session.open_style_source(decode(args, "source")?)?;
+            return Ok(json!({"document":state(session),"openDefinition":navigation}));
+        }
+        "designer_style_source" => {
+            let source: StyleSource = decode(args, "source")?;
+            let document = session.document();
+            let (editor, span) = source.editor_in(document, session.document_uri())?;
+            let range = LineIndex::new(document.source()).range(span).map_err(|error| error.to_string())?;
+            return Ok(json!({"editor":editor,"range":range}));
+        }
         "designer_style_resources" => {
             return Ok(
                 json!({"resources":session.style_resources(node_id(args, "owner")?, &text(args, "property")?)?}),
@@ -239,6 +271,7 @@ fn catalog(session: &DesignerSession, target: Option<NodeId>) -> Result<Value, S
         }).collect::<Vec<_>>();
     Ok(
         json!({"definitions":definitions,"style_hosts":style_hosts,"palette_scopes":eligible_resources,
+        "included_sources":session.style_source_choices()?,
         "palette_owner":closest_scope,"theme":session.component_resource_context(target).and_then(|value| value.theme)}),
     )
 }
@@ -367,18 +400,7 @@ fn palette(session: &DesignerSession, owner: NodeId) -> Result<Value, String> {
         return Err("Choose an authored resource owner".into());
     }
     let layers = palette_layers(document, owner).map_err(|error| error.to_string())?;
-    let keys = layers
-        .iter()
-        .flat_map(|layer| layer.colors.iter().map(|color| color.key.as_str()))
-        .collect::<BTreeSet<_>>();
-    let comparisons = keys.into_iter().map(|key| {
-        let theme = |layer: PaletteLayer| {
-            resolve_palette_color(document, owner, key, layer)
-                .map(|color| json!({"node":color.node,"value":color.value.as_deref().and_then(|value| argb(value).ok()),
-                    "scope":lexical_style_owner(document,color.node).map(|id|label(document,id))}))
-        };
-        json!({"key":key,"light":theme(PaletteLayer::Light),"dark":theme(PaletteLayer::Dark)})
-    }).collect::<Vec<_>>();
+    let comparisons = session.compare_palette(owner, &layers)?;
     let catalog = session.component_catalog()?;
     let layers = layers.into_iter().map(|layer| {
         let colors = layer.colors.into_iter().map(|color| {

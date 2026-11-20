@@ -29,6 +29,13 @@ impl PaletteLayer {
             Self::Dark => "Dark",
         }
     }
+
+    pub fn resource_context(self) -> ComponentResourceContext {
+        ComponentResourceContext {
+            theme: (self != Self::Shared).then(|| self.title().into()),
+            inherited_themes: Vec::new(),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -118,10 +125,7 @@ pub fn resolve_palette_color(
     key: &str,
     theme: PaletteLayer,
 ) -> Option<PaletteColor> {
-    let context = ComponentResourceContext {
-        theme: (theme != PaletteLayer::Shared).then(|| theme.title().into()),
-        inherited_themes: Vec::new(),
-    };
+    let context = theme.resource_context();
     let node = resolve_component_resource_in_context(document, owner, key, &context)?;
     palette_color(document, node).ok().flatten()
 }

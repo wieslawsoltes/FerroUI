@@ -85,6 +85,19 @@ pub struct ComponentCatalog {
 }
 impl ComponentCatalog {
     pub fn from_document(document: &Document) -> Result<Self> {
+        let mut entries = Self::declarations(document)?;
+        let mut usages = BTreeMap::<NodeId, usize>::new();
+        for (_, _, _, resource) in references::all_references(document)? {
+            *usages.entry(resource).or_default() += 1;
+        }
+        for entry in &mut entries {
+            entry.usages = usages.get(&entry.node).copied().unwrap_or(0);
+        }
+        Ok(Self { entries })
+    }
+
+    /// Authored definitions without a reference scan. Usage counts are zero.
+    pub fn declarations(document: &Document) -> Result<Vec<ComponentEntry>> {
         valid_document(document)?;
         let mut entries = Vec::new();
         for node in document.ast().nodes_in_source_order() {
@@ -148,14 +161,7 @@ impl ComponentCatalog {
                 usages: 0,
             });
         }
-        let mut usages = BTreeMap::<NodeId, usize>::new();
-        for (_, _, _, resource) in references::all_references(document)? {
-            *usages.entry(resource).or_default() += 1;
-        }
-        for entry in &mut entries {
-            entry.usages = usages.get(&entry.node).copied().unwrap_or(0);
-        }
-        Ok(Self { entries })
+        Ok(entries)
     }
 }
 

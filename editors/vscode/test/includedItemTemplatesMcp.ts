@@ -68,11 +68,12 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
     assert.equal(target?.key, 'CustomerRow');
     assert.equal(target?.uri, dictionaryUri.toString());
     const baseline = await image();
-    const opened = content<{ opened_definition: IncludedTemplateSource }>(await apply(directory, { action: 'preview' }, true));
+    const opened = content<{ opened_definition: IncludedTemplateSource; opened_session: number }>(await apply(directory, { action: 'preview' }, true));
     assert.deepEqual(opened.opened_definition, target);
     const { designs } = content<{ designs: { uri: string; session: number }[] }>(await invoke('ferroui_designs'));
     const owner = designs.find(design => design.uri === dictionary.uri.toString())?.session;
     assert.ok(owner && owner !== session);
+    assert.equal(opened.opened_session, owner);
     const accepted = await frame(owner);
     const name = accepted.nodes.find(node => node.name === 'CustomerName');
     assert.ok(name?.bounds);
@@ -96,7 +97,7 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
             source: target, sample: null, consumer: consumer.uri.toString(),
         } } });
     assert.ok(stale.isError);
-    assert.match(stale.content[0]?.text ?? '', /included template source changed/i);
+    assert.match(stale.content[0]?.text ?? '', /included source changed/i);
     await undo(owner, dictionary, draft);
     await frame(session);
     assert.equal(await image(), baseline);

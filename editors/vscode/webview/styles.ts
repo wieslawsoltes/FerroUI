@@ -24,6 +24,9 @@ const dark = element<HTMLButtonElement>('palette-dark');
 const compare = element<HTMLButtonElement>('palette-compare');
 const add = element<HTMLButtonElement>('palette-add');
 const addStyle = element<HTMLButtonElement>('style-new');
+const back = element<HTMLButtonElement>('style-back');
+const includedStyles = element<HTMLButtonElement>('style-includes');
+const includedPalettes = element<HTMLButtonElement>('palette-includes');
 const createTheme = element<HTMLButtonElement>('theme-create');
 const createStyle = element<HTMLButtonElement>('style-create');
 const createMenu = element('style-new-menu');
@@ -63,6 +66,9 @@ compare.addEventListener('click', () => {
     render();
 });
 add.addEventListener('click', () => send({ type: 'palette-add', layer: settings.layer }));
+back.addEventListener('click', () => send({ type: 'return-to-consumer' }));
+includedStyles.addEventListener('click', () => send({ type: 'included-sources', page: 'styles' }));
+includedPalettes.addEventListener('click', () => send({ type: 'included-sources', page: 'palette' }));
 createStyle.addEventListener('click', () => { createMenu.hidePopover(); send({ type: 'new', kind: 'style' }); });
 createTheme.addEventListener('click', () => { createMenu.hidePopover(); send({ type: 'new', kind: 'theme' }); });
 
@@ -79,9 +85,22 @@ window.addEventListener('message', event => {
     state = incoming.state;
     if (!previous.busy && state.busy && fields.contains(document.activeElement)) focusAfterEdit = document.activeElement?.id;
     if (state.stamp !== previous.stamp) error.hidden = true;
-    if (state.page) { settings.page = state.page; vscode.setState(settings); }
+    if (state.page) {
+        settings.page = state.page;
+        if (state.paletteFocus) {
+            settings.layer = state.paletteFocus.layer;
+            settings.compare = false;
+            search.value = '';
+        }
+        vscode.setState(settings);
+    }
     if (previous.content !== state.content) renderData();
     render();
+    if (state.paletteFocus?.color != null) {
+        const value = document.getElementById(`palette-value-${state.paletteFocus.color}`);
+        value?.scrollIntoView({ block: 'nearest' });
+        value?.focus({ preventScroll: true });
+    }
     if (focusAfterEdit && !state.busy) {
         if (document.activeElement === document.body || fields.contains(document.activeElement)) {
             document.getElementById(focusAfterEdit)?.focus({ preventScroll: true });
@@ -95,9 +114,9 @@ function renderData(): void {
     const content = state.content;
     if (!content) return;
     const entries = content.catalog.definitions;
+    definitions.hidden = entries.length === 0;
     definitions.replaceChildren(...entries.map(entry => new Option(
         [entry.name, entry.scope].filter(Boolean).join(' · '), String(entry.node))));
-    if (!entries.length) definitions.append(new Option('No authored definitions', ''));
     definitions.value = content.definition ? String(content.definition.node) : '';
     details.replaceChildren(styleDefinition(content.definition, send));
     scope.replaceChildren(...content.catalog.palette_scopes.map(entry => new Option(entry.label, String(entry.node))));
@@ -123,6 +142,16 @@ function render(): void {
     createStyle.disabled = unavailable || !state.content?.catalog.style_hosts.length;
     createTheme.disabled = unavailable || !state.content?.catalog.palette_scopes.length;
     addStyle.disabled = createStyle.disabled && createTheme.disabled;
+    const sources = state.content?.catalog.included_sources ?? [];
+    includedStyles.hidden = !sources.some(choice => choice.source.kind !== 'palette');
+    includedPalettes.hidden = !sources.some(choice => choice.source.kind === 'palette');
+    includedStyles.disabled = includedPalettes.disabled = unavailable;
+    back.hidden = !state.consumer;
+    back.disabled = unavailable;
+    if (state.consumer) {
+        back.title = `Return to ${state.consumer}`;
+        back.setAttribute('aria-label', back.title);
+    }
     light.disabled = dark.disabled = unavailable || !state.preview;
     light.setAttribute('aria-pressed', String(state.preview && state.dark === false));
     dark.setAttribute('aria-pressed', String(state.preview && state.dark === true));

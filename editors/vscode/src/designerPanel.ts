@@ -102,7 +102,7 @@ export class DesignerPanel implements vscode.Disposable {
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
         private readonly onDefinitionNavigation: (token: number, target: NonNullable<CanvasPresentation['openDefinition']> | string,
-            signal: AbortSignal) => Promise<boolean>,
+            signal: AbortSignal) => Promise<number | undefined>,
         restored?: DesignerCanvasState,
     ) {
         const document = this.document;
@@ -618,8 +618,11 @@ export class DesignerPanel implements vscode.Disposable {
                     || (name === 'designer_state' && (args as { action?: string }).action !== 'advance_preview')) this.animationCatalogEpoch++;
             });
         const navigation = presentation?.openDefinition ?? presentation?.returnToConsumer;
-        if (navigation && presentation && !await this.onDefinitionNavigation(token + 1, navigation, signal)) {
-            return { ...presentation, openDefinition: undefined, returnToConsumer: undefined };
+        if (navigation && presentation) {
+            const navigationSession = await this.onDefinitionNavigation(token + 1, navigation, signal);
+            return navigationSession === undefined
+                ? { ...presentation, openDefinition: undefined, returnToConsumer: undefined }
+                : { ...presentation, navigationSession };
         }
         return presentation;
     }

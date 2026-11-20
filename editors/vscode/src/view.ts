@@ -720,7 +720,9 @@ export function stylesHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <button id="styles-tab" type="button" aria-controls="styles-sheet" aria-pressed="true">Styles</button>
         <button id="palette-tab" type="button" aria-controls="palette-sheet" aria-pressed="false">Palette</button>
     </nav>
+    ${tool('style-back', 'arrow-left', 'Return to consuming view', 'hidden')}
     <div id="styles-toolbar" class="style-tools" aria-label="Style actions">
+        ${tool('style-includes', 'go-to-file', 'Open included style or control theme', 'hidden')}
         ${tool('style-new', 'add', 'New Style or Control Theme', 'popovertarget="style-new-menu"')}
         <div id="style-new-menu" class="popover command-menu" popover role="group" aria-label="New definition">
             <button id="style-create" type="button">${icon('paintcan')}Style…</button>
@@ -728,6 +730,7 @@ export function stylesHtml(webview: vscode.Webview, root: vscode.Uri): string {
         </div>
     </div>
     <div id="palette-toolbar" class="style-tools" aria-label="Palette actions" hidden>
+        ${tool('palette-includes', 'go-to-file', 'Open included palette', 'hidden')}
         ${tool('palette-light', 'lightbulb', 'Preview Light theme', 'aria-pressed="false"')}
         ${tool('palette-dark', 'color-mode', 'Preview Dark theme', 'aria-pressed="false"')}
         ${tool('palette-compare', 'split-horizontal', 'Compare Light and Dark colors', 'aria-pressed="false"')}

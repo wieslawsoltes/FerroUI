@@ -120,6 +120,7 @@ pub(super) struct ComponentUi {
     definitions: BTreeMap<String, DesignerDefinitionAsset>,
     sources: BTreeMap<String, source_import::DefinitionSource>,
     documents: project_sources::ComponentDocumentIndex,
+    style_source_visit: Option<style_composition::StyleSourceVisit>,
 }
 
 impl DesignerWorkspace {
@@ -298,7 +299,7 @@ impl DesignerWorkspace {
             .get_control::<Button>("CloseAuthoring")
             .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
         if let Some(consumer) = consumer {
-            self.show_template_consumer(&consumer)?;
+            self.show_open_document(&consumer)?;
         }
         self.refresh(true);
         Ok(())

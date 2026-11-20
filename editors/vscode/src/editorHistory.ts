@@ -20,7 +20,7 @@ export async function runEditorHistory(
     }
 }
 
-function sourceColumn(document: vscode.TextDocument): vscode.ViewColumn | undefined {
+export function sourceColumn(document: vscode.TextDocument): vscode.ViewColumn | undefined {
     // A Design or diff tab can own the active group while VS Code still reports the last source editor.
     const active = vscode.window.activeTextEditor;
     const visible = active?.document === document ? active : vscode.window.visibleTextEditors.find(editor => editor.document === document);

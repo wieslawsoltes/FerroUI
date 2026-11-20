@@ -77,7 +77,7 @@ Indices start at zero. The move index is the column’s place in the resulting l
 ### Edit item templates with MCP
 
 1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, slot names and ranges, the assigned `includedDefinition` when resolved, and `includedResources` available for assignment.
-2. Open the native definition preview with `designer_studio_present` and `tool: "designer_item_template"`. Pass the current editor frame as `expected_revision` and use `arguments: { action: "preview", node, property: "ItemTemplate", expected_model: model }`. When the result includes `opened_definition`, look up the dictionary's session in `ferroui_designs` and edit the definition in that session. Use `designer_definition` with `action: "exit"` to return to the open consuming view from an included template. The response includes its URI as `returned_to`.
+2. Open the native definition preview with `designer_studio_present` and `tool: "designer_item_template"`. Pass the current editor frame as `expected_revision` and use `arguments: { action: "preview", node, property: "ItemTemplate", expected_model: model }`. When the result includes `opened_definition`, edit the dictionary in the session identified by `opened_session`. Use `designer_definition` with `action: "exit"` to return to the open consuming view from an included template. The response includes its URI as `returned_to`.
 3. Use `designer_studio_edit` with the same tool and model fields. For local assignment, send `action: "assign_resource"` and its `resource` ID. For included assignment, send `action: "assign_included_resource"` and its `key` from `includedResources`. The other actions are `create_inline`, `copy_inline`, and `reset`. Read a fresh model after a source or preview change. Use the same explicit `selection` for query and action.
 
 On Studio’s server, call `designer_item_templates` and `designer_item_template` directly. For `expected_revision`, pass the Studio document revision. [Authoring guide](authoring.md#edit-item-and-cell-templates)
@@ -88,14 +88,16 @@ Use these tools directly in Designer Studio. In VS Code, pass the tool name and 
 
 | Tool | Arguments and result |
 | --- | --- |
-| `designer_style_catalog` | Optional `target`. Lists authored styles and themes, eligible hosts, and named palette scopes. |
+| `designer_style_catalog` | Optional `target`. Lists authored styles and themes, eligible hosts, named palette scopes, and `included_sources` with a checked `source` and label. |
 | `designer_style_definition` | `node`. Reads the selector or base, typed setter choices, authored values, and exact source ranges. |
 | `designer_style_resources` | `owner` and `property`. Lists compatible resources visible from the setter's current native scope. |
 | `designer_style_edit` | `create` uses `owner` and `selector`. `selector` uses `node` and `selector`. `base` uses `node` and a compatible `base` ID or null. `setter` uses `owner`, `property`, and `value` or null to remove. `resource` uses `owner`, `property`, `resource`, and `dynamic`. `remove` uses an unkeyed style's `node`. Use `designer_component create_theme` to create a keyed control theme. |
-| `designer_palette` | `owner`. Returns authored colors by layer and resolution of each key in Light and Dark. |
+| `designer_palette` | `owner`. Returns authored colors by layer and resolution of each key in Light and Dark. An included result has a checked `source` with its file URI. |
 | `designer_palette_edit` | `set` uses a literal color's `node` and a native `color` string. `add` uses `owner`, `layer` (`shared`, `default`, `light`, or `dark`), `key`, `kind` (`color` or `solid_color_brush`), and `color`. |
+| `designer_open_style_source` | Pass `source` from the catalog or comparison. In VS Code use `designer_studio_present` with the consuming preview's `expected_revision`. The result includes `opened_session`. In Studio use the consuming document revision and read `editor` from the result. |
+| `designer_style_source` | Pass the original `source` from the owning session. Returns the checked `editor` location and source `range`. The editor identifies the style node or the palette owner, layer, and selected color. |
 
-Use `designer_view` with `view: "styles"` to focus the dock. Set `dark` to change the canvas environment and wait for the new frame with `designer_wait`. Use `designer_definition enter` through `designer_studio_present` to preview a definition. [Styles & Themes guide](styles.md)
+Use the owning session for edits and Undo. In VS Code, return with `designer_view`, the original session, and `view: "styles"`. In Studio, use `designer_project_edit` with `action: "activate"` and the consumer URI. Set `dark` on `designer_view` to change the canvas environment and wait for the new frame with `designer_wait`. Use `designer_definition enter` through `designer_studio_present` to preview a definition. [Styles & Themes guide](styles.md)
 
 ### Trace property values with MCP
 

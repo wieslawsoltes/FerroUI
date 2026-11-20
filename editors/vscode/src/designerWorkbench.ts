@@ -10,8 +10,9 @@ import { DesignerDrag } from './designerDrag';
 import type { DictionaryExtraction, DictionarySite } from './dictionaryExtraction';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
+import { sourceColumn } from './editorHistory';
 import type { EventHandlers, HandlerEditSite } from './eventHandlers';
-import { includedTemplateUri, type IncludedTemplatePreview } from './includedTemplate';
+import { includedSourceUri } from './includedSource';
 import { LIBRARY_VIEW, LibraryView } from './libraryView';
 import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
@@ -29,10 +30,11 @@ import { promoteResource } from './studioResourcePromotion';
 import { editBrush } from './studioBrush';
 import { editItemTemplates } from './studioItemTemplates';
 import { StudioView } from './studioView';
+import type { LocatedStyleSource } from './stylesProtocol';
 import { STYLES_VIEW, StylesView } from './stylesView';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
-import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
+import { errorMessage, type CanvasPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
 import { asPosition, languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
@@ -41,6 +43,8 @@ const TOOLBOX_VIEW = 'ferroui.toolbox';
 const docks = { outline: OUTLINE_VIEW, properties: PROPERTIES_VIEW, toolbox: TOOLBOX_VIEW,
     assets: ASSETS_VIEW, events: EVENTS_VIEW, resources: RESOURCES_VIEW, studio: 'ferroui.studio', timeline: TIMELINE_VIEW,
     data: DATA_VIEW, library: LIBRARY_VIEW, columns: COLUMNS_VIEW, styles: STYLES_VIEW } as const;
+
+interface DesignerColumns { source?: vscode.ViewColumn; design?: vscode.ViewColumn }
 
 export class DesignerWorkbench implements vscode.Disposable {
     private readonly panels = new Map<string, DesignerPanel>();
@@ -110,7 +114,11 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.timeline = new TimelineView(context.extensionUri, changed);
         this.studio = new StudioView(changed, (context, route) => this.timeline.openTransition(context, route));
         this.data = new DesignDataView(context.extensionUri, changed);
-        this.styles = new StylesView(context.extensionUri, changed);
+        this.styles = new StylesView(context.extensionUri, changed, async panel => {
+            await vscode.window.showTextDocument(panel.document, { viewColumn: this.definitionColumns(panel).source, preserveFocus: true });
+            await this.revealDesign(panel, 'canvas');
+            await this.revealDesign(panel, 'styles');
+        });
         this.library = new LibraryView(changed, async (panel, node) => {
             this.styles.openDefinition(panel, node);
             await this.showDock(STYLES_VIEW, panel.session);
@@ -217,12 +225,12 @@ export class DesignerWorkbench implements vscode.Disposable {
         }
     }
 
-    async openDocument(uri?: vscode.Uri, caret?: vscode.Position): Promise<DesignerPanel> {
+    async openDocument(uri?: vscode.Uri, caret?: vscode.Position, columns?: DesignerColumns): Promise<DesignerPanel> {
         const active = vscode.window.activeTextEditor;
         const document = uri ? await vscode.workspace.openTextDocument(uri) : active?.document;
         const language = document && languageOf(document);
         if (!document || !language) throw new Error('Open a local FerroUI XAML or Rust file.');
-        const source = active?.document === document ? active : await vscode.window.showTextDocument(document);
+        const source = active?.document === document ? active : await vscode.window.showTextDocument(document, { viewColumn: columns?.source });
         const position = caret ? document.validatePosition(caret) : source.selection.active;
         const key = document.uri.toString();
         const previous = this.panels.get(key);
@@ -232,7 +240,7 @@ export class DesignerWorkbench implements vscode.Disposable {
             return previous;
         }
         const panel = vscode.window.createWebviewPanel(DESIGNER_VIEW, `Design · ${path.basename(document.fileName)}`, {
-            viewColumn: vscode.ViewColumn.Beside, preserveFocus: true,
+            viewColumn: columns?.design ?? vscode.ViewColumn.Beside, preserveFocus: true,
         }, { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
         const designer = this.attach(panel, document, language, position);
         this.setActive(designer);
@@ -268,36 +276,62 @@ export class DesignerWorkbench implements vscode.Disposable {
                 this.followFocus();
             }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            }, (token, target, signal) => this.navigateTemplate(designer, token, target, signal), restored);
+            }, (token, target, signal) => this.navigateDefinition(designer, token, target, signal), restored);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
     }
 
-    private async navigateTemplate(consumer: DesignerPanel, token: number, target: IncludedTemplatePreview | string, signal: AbortSignal): Promise<boolean> {
+    private async navigateDefinition(consumer: DesignerPanel, token: number,
+        target: NonNullable<CanvasPresentation['openDefinition']> | string, signal: AbortSignal): Promise<number | undefined> {
         const ensureConsumer = () => {
             signal.throwIfAborted();
-            if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen Item Templates.');
+            if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen the included definition.');
         };
         if (typeof target === 'string') {
             ensureConsumer();
             const previous = this.panels.get(target);
-            if (!previous || previous.isDisposed) return false;
+            if (!previous || previous.isDisposed) return;
             await this.revealDesign(previous, 'canvas');
-            return true;
+            return previous.session;
         }
-        const uri = await includedTemplateUri(consumer.document.uri, target.source);
+        const uri = await includedSourceUri(consumer.document.uri, target.source);
         ensureConsumer();
-        const designer = await this.openDocument(uri, asPosition(target.source.range.start));
-        await designer.waitForSnapshot(signal);
-        ensureConsumer();
-        const current = designer.currentToken;
-        if (current === undefined) throw new Error('Wait for the included XAML preview.');
-        const opened = await designer.studioPresent(current, 'designer_definition', { action: 'enter_included_template', target }, undefined, signal);
-        if (!opened || designer.currentToken === undefined) throw new Error('The dictionary changed while opening the template.');
-        await designer.revealSource({ session: designer.session, token: designer.currentToken }, target.source.range);
-        designer.panel.reveal(undefined, true);
-        return true;
+        const designer = await this.openDocument(uri, asPosition(target.source.range.start), this.definitionColumns(consumer));
+        try {
+            await designer.waitForSnapshot(signal);
+            ensureConsumer();
+            const current = designer.currentToken;
+            if (current === undefined) throw new Error('Wait for the included XAML preview.');
+            if ('sample' in target) {
+                const opened = await designer.studioPresent(current, 'designer_definition', { action: 'enter_included_template', target }, undefined, signal);
+                if (!opened || designer.currentToken === undefined) throw new Error('The dictionary changed while opening the template.');
+                await designer.revealSource({ session: designer.session, token: designer.currentToken }, target.source.range);
+            } else {
+                const { editor, range } = await designer.studioQuery('designer_style_source', { source: target.source }, undefined, signal) as LocatedStyleSource;
+                const ensureOwner = () => {
+                    ensureConsumer();
+                    if (current !== designer.currentToken) throw new Error('The included source changed. Reopen it from the consumer.');
+                };
+                ensureOwner();
+                await designer.revealSource({ session: designer.session, token: current }, range);
+                ensureOwner();
+                this.styles.openSource(designer, editor, consumer);
+                await this.revealDesign(designer, 'styles');
+            }
+            designer.panel.reveal(undefined, true);
+            return designer.session;
+        } catch (error) {
+            if (this.active === designer && !consumer.isDisposed && !signal.aborted) await this.revealDesign(consumer, 'canvas');
+            throw error;
+        }
+    }
+
+    private definitionColumns(panel: DesignerPanel): DesignerColumns {
+        const design = panel.panel.viewColumn;
+        const source = sourceColumn(panel.document);
+        return { design, source: source !== undefined && source !== design ? source
+            : design === vscode.ViewColumn.One ? vscode.ViewColumn.Beside : vscode.ViewColumn.One };
     }
 
     private prepareMove(from: vscode.Uri, to: vscode.Uri): void {

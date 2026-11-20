@@ -68,29 +68,13 @@ impl DesignerWorkspace {
         source: &IncludedItemTemplate,
         action: impl FnOnce(&Rc<Self>, SourceSpan) -> Result<(), String>,
     ) -> Result<(), String> {
-        let previous = self.session.borrow().document_uri().to_owned();
-        self.activate_document(&source.uri)?;
-        let span = {
-            let session = self.session.borrow();
-            source
-                .node_in(session.document(), session.document_uri())
-                .map(|(_, span)| span)
-        };
-        let result = span.and_then(|span| action(self, span));
-        if result.is_err() && previous != source.uri {
-            self.activate_document(&previous)?;
-        }
-        result
-    }
-
-    pub(crate) fn show_template_consumer(self: &Rc<Self>, uri: &str) -> Result<(), String> {
-        let Ok(uri) = ferroui_designer_project::canonical_file_uri(uri) else {
-            return Ok(());
-        };
-        if self.document_uris().contains(&uri) {
-            self.activate_document(&uri)?;
-        }
-        Ok(())
+        self.visit_source_document(&source.location.uri, |workspace| {
+            let (_, span) = {
+                let session = workspace.session.borrow();
+                source.node_in(session.document(), session.document_uri())?
+            };
+            action(workspace, span)
+        })
     }
 }
 

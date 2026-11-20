@@ -7,7 +7,7 @@ export function styleDefinition(sheet: StyleDefinition | undefined, send: (actio
     if (!sheet) {
         const empty = create('p');
         empty.className = 'style-empty';
-        empty.textContent = 'This design has no authored styles or control themes.';
+        empty.textContent = 'No styles or control themes in this file.';
         root.append(empty);
         return root;
     }
