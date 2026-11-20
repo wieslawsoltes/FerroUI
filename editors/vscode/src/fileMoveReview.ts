@@ -10,6 +10,7 @@ interface Review {
     title: string;
     contents: Map<string, string>;
     apply: (validate: () => void) => Promise<vscode.Uri>;
+    origin?: { uri: vscode.Uri; column: vscode.ViewColumn; selection: vscode.Selection };
 }
 
 export class FileMoveReview implements vscode.Disposable {
@@ -22,15 +23,17 @@ export class FileMoveReview implements vscode.Disposable {
         }),
         vscode.window.tabGroups.onDidChangeTabs(() => this.setContext()),
         vscode.window.tabGroups.onDidChangeTabGroups(() => this.setContext()),
-        vscode.commands.registerCommand('ferroui.fileMoveReview.cancel', () => this.run(review => this.close(review))),
+        vscode.commands.registerCommand('ferroui.fileMoveReview.cancel', () => this.run(review => this.cancel(review))),
         vscode.commands.registerCommand('ferroui.fileMoveReview.apply', () => this.run(async review => {
             this.applying = true;
             try {
+                const column = vscode.window.tabGroups.activeTabGroup.viewColumn;
                 const destination = await review.apply(() => {
                     if (this.current !== review) throw new Error('Open the current file move review before applying it.');
                 });
-                await this.close(review);
-                await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(destination), { preview: false });
+                try {
+                    await vscode.window.showTextDocument(destination, { viewColumn: column, preview: false });
+                } finally { await this.close(review); }
             } finally { this.applying = false; }
         })),
     ];
@@ -38,13 +41,16 @@ export class FileMoveReview implements vscode.Disposable {
     async open(plan: FileMovePlan, apply: Review['apply']): Promise<void> {
         if (this.applying) throw new Error('A file move is being applied.');
         const serial = ++this.serial;
-        if (this.current) await this.close(this.current);
+        if (this.current) await this.cancel(this.current);
         if (serial !== this.serial) return;
         const from = vscode.Uri.parse(plan.from, true);
         const to = vscode.Uri.parse(plan.to, true);
         const relative = (uri: vscode.Uri) => vscode.workspace.asRelativePath(uri, false);
         const title = `Move ${relative(from)} → ${relative(to)}`;
-        const review = { id: String(serial), title, contents: new Map<string, string>(), apply };
+        const active = vscode.window.activeTextEditor;
+        const origin = active?.viewColumn && vscode.window.tabGroups.activeTabGroup.activeTab?.isPreview
+            ? { uri: active.document.uri, column: active.viewColumn, selection: active.selection } : undefined;
+        const review = { id: String(serial), title, contents: new Map<string, string>(), apply, origin };
         const documents = [...plan.documents].sort((left, right) => Number(right.edit.uri === plan.from) - Number(left.edit.uri === plan.from));
         const resources = documents.map((document, index) => {
             const source = vscode.Uri.parse(document.edit.uri, true);
@@ -90,6 +96,17 @@ export class FileMoveReview implements vscode.Disposable {
         const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs.filter(tab => isReviewTab(tab, review) || this.isReviewSource(tab, review)));
         if (tabs.length) await vscode.window.tabGroups.close(tabs);
         this.setContext();
+    }
+
+    private async cancel(review: Review): Promise<void> {
+        try {
+            const origin = review.origin;
+            const group = origin && vscode.window.tabGroups.all.find(item => item.viewColumn === origin.column);
+            if (origin && group?.tabs.every(tab => isReviewTab(tab, review) || this.isReviewSource(tab, review))) {
+                // Restore the source when the Changes tab replaced its preview editor.
+                await vscode.window.showTextDocument(origin.uri, { viewColumn: origin.column, selection: origin.selection, preview: true });
+            }
+        } finally { await this.close(review); }
     }
 
     dispose(): void {

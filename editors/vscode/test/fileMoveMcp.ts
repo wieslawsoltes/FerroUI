@@ -141,7 +141,9 @@ async function verifyRustReferences({ invoke, content }: McpFixture): Promise<vo
     const before = content<FileMovePlan>(await plan());
     assert.equal(before.documents.length, 3);
     const buildEdit = before.documents.find(entry => entry.edit.uri.endsWith('/build.rs'))!;
-    assert.equal(buildEdit.after, build.replaceAll(originalPath, movedPath));
+    const compiledKey = movedPath.replaceAll(' ', '%20');
+    assert.equal(buildEdit.after, build.replaceAll(originalPath, movedPath)
+        .replace(`.documents(&[("${movedPath}",`, `.documents(&[("${compiledKey}",`));
     const rustEdit = before.documents.find(entry => entry.edit.uri.endsWith('/lib.rs'))!;
     assert.equal(rustEdit.edit.version, doc.version);
     assert.equal(rustEdit.before, draft);
@@ -159,7 +161,9 @@ async function verifyRustReferences({ invoke, content }: McpFixture): Promise<vo
     await vscode.window.showTextDocument(doc);
     await vscode.commands.executeCommand('undo');
     await until(async () => doc.getText() === editedDraft && buildDoc.getText() === build && await exists(originalPath));
+    await vscode.window.showTextDocument(doc);
     await vscode.commands.executeCommand('redo');
-    await until(async () => doc.getText().includes(`r#"${movedPath}"#`) && buildDoc.getText() === buildEdit.after && await exists(movedPath));
+    await until(async () => doc.getText().includes(`r#"${movedPath}"#`) && await exists(movedPath)
+        && (await vscode.workspace.openTextDocument(uri('build.rs'))).getText() === buildEdit.after);
     console.log('Reviewed XAML file move updated an unopened Cargo build and an unsaved Rust source, rejected stale drafts, and grouped source history');
 }
