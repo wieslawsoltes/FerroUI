@@ -57,7 +57,7 @@ impl MacroSyntax {
         if args.len() != 2 {
             return None;
         }
-        take_literal(args.into_iter().last()?)
+        take_literal(args.into_iter().next_back()?)
     }
 
     pub(super) fn manifest_path(
