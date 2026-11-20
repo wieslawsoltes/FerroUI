@@ -28,6 +28,7 @@ import { verifyGridMcp } from './studioGridMcp';
 import { verifyColumnsMcp } from './studioColumnsMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
 import { verifyIncludedItemTemplatesMcp } from './includedItemTemplatesMcp';
+import { verifyIncludedTemplateCopiesMcp } from './includedTemplateCopiesMcp';
 import { verifyIncludedStylesMcp } from './includedStylesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
@@ -178,6 +179,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyColumnsMcp({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });
+        await verifyIncludedTemplateCopiesMcp({ invoke, content });
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
         await verifyIncludedStylesMcp({ invoke, content });

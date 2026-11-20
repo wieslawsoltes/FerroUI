@@ -100,10 +100,11 @@ impl DesignerSession {
             ItemTemplateChange::AssignIncludedResource { key } => {
                 self.included_template_node(owner, &key, None)?
                     .ok_or("Select an included data template that resolves across themes")?;
-                slot.assign_key(self.document(), &key)
+                slot.assign_key(self.document(), &key).map_err(|error| error.to_string())?
             }
-            change => slot.plan(self.document(), change),
-        }.map_err(|error| error.to_string())?;
+            ItemTemplateChange::CopyInline => self.plan_inline_template_copy(&slot)?,
+            change => slot.plan(self.document(), change).map_err(|error| error.to_string())?,
+        };
         if !edits.is_empty() {
             self.apply(label, edits)
                 .map_err(|error| error.to_string())?;

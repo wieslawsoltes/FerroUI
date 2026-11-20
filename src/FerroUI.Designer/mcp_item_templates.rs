@@ -4,6 +4,7 @@ use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember, item_template_resources};
 use serde_json::{Value, json};
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 const QUERY: &str = "designer_item_templates";
 const ACTION: &str = "designer_item_template";
@@ -89,11 +90,19 @@ fn report(session: &DesignerSession, node: u64) -> Result<Value, String> {
     let slots = slots
         .iter()
         .map(|slot| {
+            let copy = session.inline_template_copy_offer(slot);
+            let copy_stamp = copy.as_ref().and_then(|copy| copy.as_ref().ok()).map(|edits| {
+                let mut hash = DefaultHasher::new();
+                json!(edits).to_string().hash(&mut hash);
+                format!("{:016x}", hash.finish())
+            });
             Ok(json!({
                 "property":slot.property, "value":slot.value, "reason":slot.reason,
                 "range":slot.span.and_then(|span| index.range(span).ok()),
                 "includedDefinition":session.assigned_included_template(slot)?,
-                "canCopyInline":slot.reason.is_none() && slot.can_copy_inline(document),
+                "canCopyInline":copy_stamp.is_some(),
+                "copyStamp":copy_stamp,
+                "copyReason":copy.and_then(Result::err),
                 "canReset":slot.reason.is_none() && slot.can_reset
             }))
         })

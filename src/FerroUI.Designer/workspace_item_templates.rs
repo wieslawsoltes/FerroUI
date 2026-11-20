@@ -9,7 +9,7 @@ use ferroui_base::{Ref, WeakRef};
 use ferroui_controls::{
     Button, ColumnDefinitions, Control, Flyout, Grid, PlacementMode, StackPanel, TextBlock,
 };
-use ferroui_designer_core::{NodeId, SourceSpan};
+use ferroui_designer_core::{Edit, NodeId, SourceSpan};
 use ferroui_designer_tools::{
     item_template_resources, ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot,
     ItemTemplateValue,
@@ -108,11 +108,24 @@ impl TemplateActions {
     }
 
     fn edit(&self, property: ItemTemplateMember, change: ItemTemplateChange) {
+        self.apply(|session| session.edit_item_template(self.owner, property, change));
+    }
+
+    fn copy(&self, property: ItemTemplateMember, reviewed: &[Edit]) {
+        self.apply(|session| {
+            let slot = session.item_template_slot(self.owner, property)?;
+            let edits = session.plan_inline_template_copy(&slot)?;
+            if edits != reviewed {
+                return Err("A template dependency changed. Reopen Item Templates.".into());
+            }
+            session.apply(ItemTemplateChange::CopyInline.label(), edits).map_err(|error| error.to_string())?;
+            Ok(())
+        });
+    }
+
+    fn apply(&self, edit: impl FnOnce(&mut crate::DesignerSession) -> Result<(), String>) {
         self.run(|workspace| {
-            workspace
-                .session
-                .borrow_mut()
-                .edit_item_template(self.owner, property, change)?;
+            edit(&mut workspace.session.borrow_mut())?;
             workspace.refresh(true);
             if let Some(flyout) = self.flyout.upgrade() {
                 render(workspace, &flyout);
@@ -213,14 +226,14 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
             .and_then(|node| session.document().ast().node(node))
             .map(|node| node.name_span)
             .or(slot.span);
-        let can_copy = slot.can_copy_inline(session.document());
+        let copy = session.inline_template_copy_offer(&slot);
         add_slot(
             &body,
             actions.clone(),
             &slot,
             span,
             included,
-            can_copy,
+            copy,
             &resources,
         );
     }
@@ -232,7 +245,7 @@ fn add_slot(
     slot: &ItemTemplateSlot,
     source: Option<SourceSpan>,
     included: Option<IncludedItemTemplate>,
-    can_copy: bool,
+    copy: Option<Result<Vec<Edit>, String>>,
     resources: &[TemplateChoice],
 ) {
     let title = StackPanel::new();
@@ -291,11 +304,17 @@ fn add_slot(
             action.edit(property, ItemTemplateChange::CreateInline)
         });
     }
-    if can_copy {
-        let action = actions.clone();
-        add_button(&tools, COPY, "Make inline copy", move || {
-            action.edit(property, ItemTemplateChange::CopyInline)
-        });
+    match copy {
+        Some(Ok(edits)) => {
+            let action = actions.clone();
+            add_button(&tools, COPY, "Make inline copy", move || action.copy(property, &edits));
+        }
+        Some(Err(reason)) => {
+            let message = text(&reason);
+            message.set_text_wrapping(TextWrapping::Wrap);
+            body.children().add(message.upcast::<Control>());
+        }
+        None => {}
     }
     if slot.can_reset {
         let action = actions.clone();

@@ -297,7 +297,7 @@ Each action updates the unsaved XAML and native preview through one Undo step. M
 | **Edit Template on Canvas** | Open the assigned definition. A template in an included dictionary opens in its owning Design tab. Use the canvas, Outline, and Properties to edit its XAML. |
 | **Create Inline Template** | Add a data template with a bound text control to a slot that uses the default. Open it on the canvas to change its contents. |
 | **Assign Template Resource** | Choose a visible `DataTemplate` or `TreeDataTemplate`. Included choices show their dictionary's filename. Assignments use resources that resolve to the same definition across themes. |
-| **Make Inline Copy** | Give this control its own copy of a local resource template. The shared definition and its other uses stay intact. The resource dependencies must resolve the same way inside the copy. |
+| **Make Inline Copy** | Give this control or column its own copy of an assigned local or included resource template. The shared definition and its other uses stay intact. |
 | **Reset Template** | Remove the local assignment from an optional slot. A `TreeDataGridTemplateColumn` requires a cell template. |
 | **Reveal Template Source** or **Reveal Template Assignment** | Open the authored definition or its assignment in XAML. |
 
@@ -307,7 +307,9 @@ Try [IncludedItemTemplates.xaml](../../../editors/vscode/test/fixtures/IncludedI
 
 ![Customer Rows.xaml beside its native template preview, showing the Alpine and Co. fixture row](../images/vscode-included-item-template.jpg)
 
-The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Included templates need a literal, workspace-local dictionary include that the preview can resolve. **Make Inline Copy** is available for local definitions whose dependencies can be preserved. Open Rust template closures and application-supplied XAML expressions at their source. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+Try **Make Inline Copy** on **Directory** in [IncludedTemplateCopies.xaml](../../../editors/vscode/test/fixtures/IncludedTemplateCopies.xaml). The copy keeps resource links that resolve to the same declarations and theme scope. If a nearer key would shadow a dependency, the designer copies its proven resource and any required dependencies under unique keys in the nearest writable scope. Relative asset and include paths continue to point to their original targets. Edit the private template on the canvas, then return to the consuming preview. The review queue keeps its assignment to the shared template. Undo the copy from **IncludedTemplateCopies.xaml** to restore the assignment and remove the private resources together.
+
+The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Included templates need a literal, workspace-local dictionary include that the preview can resolve. The action picker explains when an authored resource scope cannot be preserved. Open Rust template closures and application-supplied XAML expressions at their source. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![The VS Code item-template actions beside the source and the native customer directory](../images/vscode-item-template-actions.jpg)
 

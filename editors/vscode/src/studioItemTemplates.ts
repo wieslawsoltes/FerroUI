@@ -14,6 +14,7 @@ interface TemplateSlot {
     range: Range | null;
     reason: string | null;
     canCopyInline: boolean;
+    copyReason?: string | null;
     canReset: boolean;
     includedDefinition?: IncludedTemplateSource | null;
 }
@@ -60,11 +61,12 @@ export async function editItemTemplates(context: StudioContext, node: number): P
                 await context.present(tool, { ...args, action: 'preview' });
                 if (!included && !context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
             },
-        }, { label: '$(go-to-file) Reveal Template Source',
+        }, { label: '$(go-to-file) Reveal Template Source', detail: slot.copyReason ?? undefined,
             run: () => included ? context.revealIncludedTemplate(included) : context.reveal(definition!) });
     } else if (slot.range) {
         const range = slot.range;
-        available.push({ label: '$(go-to-file) Reveal Template Assignment', run: () => context.revealRange(range) });
+        available.push({ label: '$(go-to-file) Reveal Template Assignment', detail: slot.copyReason ?? undefined,
+            run: () => context.revealRange(range) });
     }
     if (!slot.reason) {
         if (slot.value.kind === 'unset') {
