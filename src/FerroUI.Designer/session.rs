@@ -163,6 +163,10 @@ impl DesignerSession {
     pub fn document_uri(&self) -> &str {
         self.preview.uri()
     }
+
+    pub(crate) fn set_workspace_preview_root(&mut self, root: std::path::PathBuf) {
+        self.preview.set_workspace_root(root, &self.document);
+    }
     /// Record a successful write of the current authored buffer.
     pub fn mark_saved(&mut self) {
         self.mark_saved_source(self.authored_source().to_owned());
@@ -476,6 +480,24 @@ impl DesignerSession {
             let change = document.apply_text_patches(document.revision(), label, patches)?;
             Ok((change, None))
         })
+    }
+
+    /// Stage a local XAML transaction before publishing its workspace changes.
+    /// The callback completes all fallible work before the session accepts the candidate.
+    pub(crate) fn commit_workspace_xaml<T>(
+        &mut self,
+        edit: impl FnOnce(&mut Document) -> Result<T, String>,
+    ) -> Result<T, String> {
+        self.ensure_writable().map_err(|error| error.to_string())?;
+        if self.uses_rust_source() || self.collaboration.is_some() {
+            return Err("Open local XAML to edit related project files".into());
+        }
+        let mut document = self.document.clone();
+        let result = edit(&mut document)?;
+        self.remember_playback_for_reload();
+        self.document = document;
+        self.changed(true);
+        Ok(result)
     }
 
     fn commit_xaml_candidate(

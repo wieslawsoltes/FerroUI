@@ -1,4 +1,5 @@
 use super::DesignerWorkspace;
+use super::dictionary_extraction::CreatedDictionary;
 use super::project::{Tab, document_identity};
 use std::collections::BTreeMap;
 use std::rc::Rc;
@@ -9,6 +10,7 @@ use std::rc::Rc;
 pub(super) struct WorkspaceHistory {
     serial: u64,
     pairs: BTreeMap<String, [String; 2]>,
+    created: BTreeMap<String, CreatedDictionary>,
     closed: BTreeMap<String, Tab>,
 }
 
@@ -23,6 +25,10 @@ impl WorkspaceHistory {
 
     pub(super) fn link(&mut self, label: String, first: String, second: String) {
         self.pairs.insert(label, [first, second]);
+    }
+
+    pub(super) fn link_created(&mut self, label: String, created: CreatedDictionary) {
+        self.created.insert(label, created);
     }
 
     fn partner(&self, label: &str, active: &str) -> Option<&str> {
@@ -85,7 +91,7 @@ impl Tab {
 
 impl DesignerWorkspace {
     pub(crate) fn source_history(self: &Rc<Self>, redo: bool) -> Result<(), String> {
-        let companion = {
+        let (active, label) = {
             let session = self.session.borrow();
             let active = document_identity(session.document_uri())?;
             let label = if session.collaboration_actor().is_some() {
@@ -97,8 +103,17 @@ impl DesignerWorkspace {
             } else {
                 session.document().undo_label()
             };
+            (active, label.map(str::to_owned))
+        };
+        let created = label.as_deref().and_then(|label| {
+            self.project.borrow().linked_history.created.get(label).cloned().map(|created| (label, created))
+        });
+        if let Some((label, created)) = created {
+            return self.step_dictionary_history(label, created, redo);
+        }
+        let companion = {
             let state = self.project.borrow();
-            if let Some((label, uri)) = label.and_then(|label| {
+            if let Some((label, uri)) = label.as_deref().and_then(|label| {
                 state
                     .linked_history
                     .partner(label, &active)

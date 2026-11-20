@@ -289,6 +289,9 @@
             <Button Name="CreateEventHandler" Classes="icon" AutomationProperties.Name="Create Rust event handler" ToolTip.Tip="Create Rust event handler from the XAML event at the caret">
               <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M9,0 L2,9 7,9 5,16 14,6 9,6 Z" />
             </Button>
+            <Button Name="ExtractResourceDictionary" Classes="icon" AutomationProperties.Name="Extract resource dictionary" ToolTip.Tip="Review extraction of the resource dictionary at the caret">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 1H10L15 6V15H2Z M3.5 2.5V13.5H13.5V7H9V2.5Z M10.5 3.5V5.5H12.5Z M5 8H11V9.4H5Z M5 10.5H11V11.9H5Z" />
+            </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
             <Button Name="FormatSource" Classes="nav" Content="Format" />

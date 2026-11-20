@@ -107,6 +107,7 @@ impl DesignerWorkspace {
     pub(super) fn refresh_source_tools(self: &Rc<Self>) {
         let rust = self.refresh_rust_source_tools();
         self.root.get_control::<Button>("CreateEventHandler").set_is_visible(!rust);
+        self.root.get_control::<Button>("ExtractResourceDictionary").set_is_visible(!rust && self.project.borrow().workspace.is_some());
         if rust {
             return;
         }

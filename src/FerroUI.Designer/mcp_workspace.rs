@@ -21,6 +21,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_language_apply"
             | "designer_event_handler"
             | "designer_scaffold_handler"
+            | "designer_dictionary_extraction"
+            | "designer_extract_dictionary"
             | "designer_reveal_rsx_animation_issue"
             | "designer_reveal_rsx_state"
     )
@@ -105,6 +107,8 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_language_apply","Apply a prepared multi-document language WorkspaceEdit atomically through retained editor tabs and the project version guards. The active document also requires expected_revision; no files are saved automatically.",s::object(json!({"expected_revision":s::revision(),"edit":s::workspace_edit()}),&["expected_revision","edit"]),true),
         s::tool("designer_event_handler","Read the Rust owner, signature, current Rust version and existing declaration for an authored XAML event. Pass handler to preview the checked two-file edits.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision()}),&["node","event","expected_revision"]),false),
         s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
+        s::tool("designer_dictionary_extraction","Read an inline XAML dictionary size, source range and suggested file. Pass file_name to review the checked patch, new dictionary and review identifier.",s::object(json!({"node":s::id(),"file_name":s::string(),"expected_revision":s::revision()}),&["node","expected_revision"]),false),
+        s::tool("designer_extract_dictionary","Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.",s::object(json!({"node":s::id(),"file_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["node","file_name","review","expected_revision"]),true),
     ];
     tools.extend(canvas_guides::tools());
     tools
@@ -175,6 +179,11 @@ pub(super) fn call(
         "designer_scaffold_handler" => {
             let version = i64::try_from(integer(args, "expected_rust_version")?).map_err(|_| "Rust version is out of range")?;
             let plan = workspace.scaffold_event_handler(super::node_id(args, "node")?, &text(args, "event")?, &text(args, "handler")?, version)?;
+            Ok(json!(plan))
+        }
+        "designer_dictionary_extraction" => workspace.inspect_dictionary_extraction(super::node_id(args, "node")?, args["file_name"].as_str()),
+        "designer_extract_dictionary" => {
+            let plan = workspace.extract_reviewed_dictionary(super::node_id(args, "node")?, &text(args, "file_name")?, &text(args, "review")?)?;
             Ok(json!(plan))
         }
         "designer_language_apply" => {

@@ -53,6 +53,7 @@ pub(crate) struct RuntimePreview {
     fixture: Option<String>,
     options_epoch: u64,
     isolated: bool,
+    workspace_root: Option<std::path::PathBuf>,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
@@ -66,6 +67,11 @@ pub(crate) struct RuntimePreview {
     animation_values: Vec<Subscription>,
     #[cfg(debug_assertions)]
     reload_driver: Option<ReloadDriver>,
+}
+
+enum SourceMode {
+    Authored(Option<std::path::PathBuf>),
+    Isolated(Option<crate::DefinitionScope>),
 }
 
 impl RuntimePreview {
@@ -86,7 +92,7 @@ impl RuntimePreview {
         options: crate::preview_host::PreviewHostOptions,
         fixture: Option<String>,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, fixture, None, false)
+        Self::construct(host, uri, document, options, fixture, SourceMode::Authored(None))
     }
 
     /// Independent secondary previews never publish a competing source overlay for
@@ -107,7 +113,7 @@ impl RuntimePreview {
         host: Ref<ContentControl>, uri: String, document: &Document,
         options: crate::preview_host::PreviewHostOptions, fixture: Option<String>, scope: Option<crate::DefinitionScope>,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, fixture, scope, true)
+        Self::construct(host, uri, document, options, fixture, SourceMode::Isolated(scope))
     }
 
     fn construct(
@@ -116,9 +122,12 @@ impl RuntimePreview {
         document: &Document,
         mut options: crate::preview_host::PreviewHostOptions,
         fixture: Option<String>,
-        scope: Option<crate::DefinitionScope>,
-        isolated: bool,
+        mode: SourceMode,
     ) -> Result<Self, String> {
+        let (isolated, scope, workspace_root) = match mode {
+            SourceMode::Authored(root) => (false, None, root),
+            SourceMode::Isolated(scope) => (true, scope, None),
+        };
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
         ferroui_controls_treedatagrid::register_types();
@@ -164,6 +173,7 @@ impl RuntimePreview {
             fixture,
             options_epoch: NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed),
             isolated,
+            workspace_root,
             native_window: None,
             window_projection: false,
             definition_scope: scope,
@@ -250,8 +260,8 @@ impl RuntimePreview {
             self.definition_projection = None;
             self.reload_document(document, true);
         } else {
-            let mut preview =
-                Self::new_with_fixture(self.host.clone(), uri, document, self.options.clone(), self.fixture.clone())?;
+            let mut preview = Self::construct(self.host.clone(), uri, document, self.options.clone(),
+                self.fixture.clone(), SourceMode::Authored(self.workspace_root.clone()))?;
             preview.options_epoch = self.options_epoch;
             *self = preview;
         }
@@ -328,7 +338,29 @@ impl RuntimePreview {
         Ok(())
     }
 
+    pub(crate) fn set_workspace_root(&mut self, root: std::path::PathBuf, document: &Document) {
+        self.workspace_root = Some(root);
+        if let Some(snapshot) = self.workspace_snapshot(document) {
+            snapshot.run(|| self.reload_with_sources(document, true));
+        }
+    }
+
     fn reload_document(&mut self, document: &Document, initialize: bool) {
+        if let Some(snapshot) = self.workspace_snapshot(document) {
+            snapshot.run(|| self.reload_with_sources(document, initialize));
+        } else {
+            self.reload_with_sources(document, initialize);
+        }
+    }
+
+    fn workspace_snapshot(&self, document: &Document) -> Option<ferroui_markup_xaml::source_overlay::SourceSnapshot> {
+        let root = self.workspace_root.as_deref()?;
+        let sources = ferroui_designer_project::local_preview_sources(Some(root), &self.uri, document, &[]);
+        (!sources.accepted.is_empty() || !sources.unavailable.is_empty()).then(||
+            ferroui_markup_xaml::source_overlay::SourceSnapshot::new(sources.accepted, sources.unavailable))
+    }
+
+    fn reload_with_sources(&mut self, document: &Document, initialize: bool) {
         let _design_mode =
             crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         self.clear_animation();

@@ -8,14 +8,18 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
 
 pub(super) fn atomic_create(path: &Path, source: &str) -> Result<()> {
+    atomic_create_with_metadata(path, source).map(|_| ())
+}
+
+pub(super) fn atomic_create_with_metadata(path: &Path, source: &str) -> Result<fs::Metadata> {
     publish(path, source, false)
 }
 
 pub(crate) fn atomic_write(path: &Path, source: &str) -> Result<()> {
-    publish(path, source, true)
+    publish(path, source, true).map(|_| ())
 }
 
-fn publish(path: &Path, source: &str, replace: bool) -> Result<()> {
+fn publish(path: &Path, source: &str, replace: bool) -> Result<fs::Metadata> {
     let parent = path
         .parent()
         .ok_or_else(|| ProjectError("File has no parent".into()))?;
@@ -29,7 +33,7 @@ fn publish(path: &Path, source: &str, replace: bool) -> Result<()> {
     let (temporary, mut file) = reserve_candidate(candidates)?;
     // Only the successfully reserved candidate belongs to us. In particular a
     // stale PID/counter collision must never delete another candidate's bytes.
-    let result = (|| -> io::Result<()> {
+    let result = (|| -> io::Result<fs::Metadata> {
         file.write_all(source.as_bytes())?;
         if replace {
             if let Ok(metadata) = fs::metadata(path) {
@@ -37,15 +41,17 @@ fn publish(path: &Path, source: &str, replace: bool) -> Result<()> {
             }
         }
         file.sync_all()?;
+        let metadata = file.metadata()?;
         drop(file);
         if replace {
-            fs::rename(&temporary, path)
+            fs::rename(&temporary, path)?;
         } else {
             // A new pathname is published atomically only if it is still absent.
             // Unlike rename(), a hard link cannot clobber a file created after
             // the destination check. Unsupported filesystems fail without loss.
-            fs::hard_link(&temporary, path)
+            fs::hard_link(&temporary, path)?;
         }
+        Ok(metadata)
     })();
     let _ = fs::remove_file(&temporary);
     result.map_err(Into::into)

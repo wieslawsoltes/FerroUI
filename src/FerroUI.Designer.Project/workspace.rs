@@ -6,7 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
+mod created_file;
 mod storage;
+pub use created_file::CreatedSourceFile;
 use storage::atomic_create;
 pub(crate) use storage::atomic_write;
 

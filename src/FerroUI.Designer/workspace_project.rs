@@ -94,17 +94,23 @@ impl DesignerWorkspace {
             .service
             .index_solution(&solution)
             .map_err(|e| e.to_string())?;
+        self.assign_solution(solution);
+        self.refresh_project_toolbox();
+        self.refresh_rust_catalog();
+        self.rebuild_project_tree();
+        self.refresh_components();
+        Ok(())
+    }
+
+    fn assign_solution(&self, solution: Solution) {
+        let root = solution.root.clone();
         {
             let mut project = self.project.borrow_mut();
             project.workspace = Some(ProjectWorkspace::new(solution));
             project.selected = 0;
             project.markup = Default::default();
         }
-        self.refresh_project_toolbox();
-        self.refresh_rust_catalog();
-        self.rebuild_project_tree();
-        self.refresh_components();
-        Ok(())
+        self.session.borrow_mut().set_workspace_preview_root(root);
     }
     pub fn select_project(&self, index: usize) -> Result<(), String> {
         let mut state = self.project.borrow_mut();
@@ -625,9 +631,7 @@ impl DesignerWorkspace {
                         }
                     }
                     self.source_tools.borrow_mut().service = language;
-                    self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
-                    self.project.borrow_mut().selected = 0;
-                    self.project.borrow_mut().markup = Default::default();
+                    self.assign_solution(solution);
                     self.refresh_project_toolbox();
                     self.refresh_rust_catalog();
                     self.rebuild_project_tree();
@@ -680,7 +684,7 @@ impl DesignerWorkspace {
             if let Err(error) = result { self.status.set_text(Some(&error)); }
         }
     }
-    fn rebuild_project_tree(self: &Rc<Self>) {
+    pub(super) fn rebuild_project_tree(self: &Rc<Self>) {
         use ferroui_designer_project::DocumentKind;
         let projects = self
             .project

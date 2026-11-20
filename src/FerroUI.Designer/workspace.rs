@@ -291,6 +291,7 @@ impl DesignerWorkspace {
         self.connect_project();
         self.connect_source_tools();
         self.connect_event_handlers();
+        self.connect_dictionary_extraction();
         self.connect_rust_source();
         self.connect_authoring();
         self.connect_timeline_curves();
@@ -975,6 +976,8 @@ mod project;
 mod history;
 #[path = "workspace_event_handlers.rs"]
 mod event_handlers;
+#[path = "workspace_dictionary_extraction.rs"]
+mod dictionary_extraction;
 #[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;

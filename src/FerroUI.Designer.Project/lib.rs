@@ -16,7 +16,7 @@ pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskS
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
 pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
-pub use workspace::{Buffer, BufferUpdate, ProjectWorkspace, SavePolicy};
+pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, ProjectWorkspace, SavePolicy};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectError(pub String);
