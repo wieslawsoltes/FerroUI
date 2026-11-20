@@ -135,6 +135,20 @@ fn main() {
         })
         .collect();
     let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    // The theme in Rust (#988): no markup is compiled; the checked-in description of the units
+    // of the theme is exported with the type model of the crate, so that the applications that
+    // trim the theme name the same units.
+    if env::var_os("CARGO_FEATURE_RUST_THEME").is_some() {
+        ferroui_build::Build::from_env()
+            .type_system(ferroui_build::TypeSystem::Model)
+            .export_metadata()
+            .checked_in_metadata("compiled_xaml.xamlmeta")
+            .run();
+        if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
+            fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
+        }
+        return;
+    }
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
         .compile_group(

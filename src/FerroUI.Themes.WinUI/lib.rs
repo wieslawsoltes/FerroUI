@@ -47,7 +47,16 @@ pub mod primitives;
 // is the reference `tests/compiled_xaml_tests.rs` compares the output of the build with, byte
 // for byte; it is not a module of the crate. (`compiled_markup`, which the same file declares,
 // is not used: the theme registers its assets and its loader table itself.)
+#[cfg(not(feature = "rust-theme"))]
 ferroui_markup_xaml::include_compiled_xaml!();
+// The theme in Rust (#988): the documents as Rust modules, and their units in place of the
+// module of the compiled markup.
+#[cfg(feature = "rust-theme")]
+mod rust_theme;
+#[cfg(feature = "rust-theme")]
+pub mod compiled_xaml {
+    pub use crate::rust_theme::units::*;
+}
 mod register_types;
 mod rust_paths;
 mod winui_theme;

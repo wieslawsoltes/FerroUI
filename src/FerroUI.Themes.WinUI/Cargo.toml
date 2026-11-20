@@ -28,6 +28,10 @@ path = "lib.rs"
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
 designer-sources = []
+# The theme built from its Rust form (`rust_theme/`, converted from the documents by
+# `scripts/themes/xaml_to_rust.py`) instead of the compiled markup: #988, a prototype; the build
+# script compiles no markup (docs/xaml-themes.md, section 10).
+rust-theme = []
 
 [dependencies]
 # The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared

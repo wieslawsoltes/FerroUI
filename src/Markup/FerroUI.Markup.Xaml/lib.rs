@@ -10,6 +10,7 @@ pub mod data;
 pub mod diagnostics;
 pub mod markup_extensions;
 pub mod parsers;
+pub mod rust_theme;
 pub mod styling;
 pub mod templates;
 pub mod xaml_il;
