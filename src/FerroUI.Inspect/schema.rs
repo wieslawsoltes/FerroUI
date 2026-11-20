@@ -32,6 +32,13 @@ pub fn tools() -> Vec<Value> {
         &["node_id"],
         false,
     );
+    add(
+        "get_property_trace",
+        "Explain the effective value of one live property using its native precedence, current override, animation base, and applied style, theme and inherited contributors.",
+        json!({"node_id":id,"property":{"type":"string","minLength":1,"maxLength":256}}),
+        &["node_id", "property"],
+        false,
+    );
     add("set_property", "Set a local property value using the framework converters, or clear it. Requires allow_property_writes.", json!({"node_id":id,"property":string,"value":{"type":["boolean","number","string","null"]},"clear":{"type":"boolean"}}), &["node_id","property"], true);
     add(
         "get_styles",

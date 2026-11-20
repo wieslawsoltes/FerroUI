@@ -10,6 +10,9 @@ use ferroui_skia::SkiaApplicationExtensions;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::Cell;
 
+#[path = "property_trace_tests.rs"]
+mod property_trace_tests;
+
 fn app() -> AppBuilder {
     AppBuilder::configure::<Application>()
         .use_skia()
@@ -287,7 +290,7 @@ fn resources_styles_screenshots_waits_and_stats() {
 }
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
-    assert_eq!(tools().len(), 18);
+    assert_eq!(tools().len(), 19);
     for args in [
         json!({"node_id":0}),
         json!({"node_id":-1}),
@@ -297,6 +300,7 @@ fn schemas_reject_invalid_input_before_mutating() {
         assert!(validate("click", &args).is_err());
     }
     assert!(validate("get_tree", &json!({"depth":100})).is_err());
+    assert!(validate("get_property_trace", &json!({"node_id":1,"property":false})).is_err());
     assert!(validate("screenshot", &json!({"scale":0})).is_err());
     assert!(validate("unknown", &json!({})).is_err());
 }

@@ -142,6 +142,7 @@ Hot Reload output.
 | `get_tree` | Visual, logical or automation snapshot; optional root, depth and property filters |
 | `find_elements` | Combined type, Name, automation ID, text substring and parsed FerroUI selector filters |
 | `get_properties` | Registered and attached properties, values, types, read-only flags, binding presence, effective priorities |
+| `get_property_trace` | The effective value of one property, its ordered contributors, and available authored source locations. Pass `node_id` and `property`. |
 | `set_property` | Validated local value or clear; booleans, numbers, null, and strings through framework converters |
 | `get_styles` | Applied style/theme/template/local value frames, selectors, active state, priority and setters |
 | `get_resources` | Scoped lookup of specified string keys, or local dictionary keys including type keys |

@@ -10,6 +10,7 @@ mod input;
 mod layout_overflow;
 mod layout_values;
 mod logs;
+mod property_trace;
 mod schema;
 mod source;
 pub mod target;
@@ -37,6 +38,7 @@ use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorS
 pub use layout_overflow::MeasuredOverflow;
 pub use layout_values::{LayoutValueFinding, check_layout_values};
 pub use logs::{LogCapture, LogEntry, LogGuard};
+pub use property_trace::{InspectedPropertyTrace, PropertyContributor, display_property_value};
 pub use schema::{tools, validate};
 pub use visual_checks::{VisualChecks, VisualFinding, check_visual, check_visual_with_layout};
 use serde_json::{json, Value};
@@ -770,6 +772,12 @@ impl Inspector {
                 &Self::visual_object(&self.object(args)?),
                 args.get("properties"),
             )),
+            "get_property_trace" => {
+                let object = Self::visual_object(&self.object(args)?);
+                let name = args["property"].as_str().ok_or("property required")?;
+                let trace = Self::property_trace(&object, name)?;
+                Ok(trace.json(|_, entry| entry.source_location()))
+            }
             "get_element_at" => {
                 let root = Self::visual_object(&self.object(args)?)
                     .cast::<Visual>().ok_or("The selected object has no visual surface")?;
