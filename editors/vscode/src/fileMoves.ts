@@ -46,7 +46,13 @@ export class FileMoves implements vscode.Disposable {
 
     private async plan(from: vscode.Uri, to: vscode.Uri): Promise<FileMovePlan> {
         await requireXaml(from);
-        return this.server.planFileMove(from, to);
+        const open = vscode.workspace.textDocuments.filter(document => document.uri.path.toLowerCase().endsWith('.rs'));
+        const projectFiles = await Promise.all(open.map(document => isWorkspaceFile(document.uri)));
+        const drafts = open.filter((document, index) => projectFiles[index] && !document.isClosed).map(document => ({
+            uri: document.uri.toString(), version: document.version, source: document.getText(),
+        }));
+        if (Buffer.byteLength(JSON.stringify(drafts)) > 12 * 1024 * 1024) throw new Error('Close unused Rust buffers before reviewing this move.');
+        return this.server.planFileMove(from, to, drafts);
     }
 
     private async apply(from: vscode.Uri, to: vscode.Uri, review: string, signal?: AbortSignal, validate?: () => void): Promise<FileMovePlan> {

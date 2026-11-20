@@ -162,6 +162,65 @@ fn studio_mcp_moves_unopened_references_and_replays_the_physical_file_from_a_con
 }
 
 #[test]
+fn studio_moves_a_view_and_undoes_its_rust_reference_from_the_code_tab() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let xaml = format!("<Border {NS}><TextBlock Text='Customer card'/></Border>");
+    let (files, workspace) = Files::open("View.xaml", &xaml);
+    let rust = "pub const LABEL: &str = \"View.xaml\";\r\npub const VIEW: &str = { /* 🎨 */ include_str!(r#\"View.xaml\"#) };\r\n";
+    let rust_uri = files.uri("compiled_view.rs");
+    fs::write(files.0.join("compiled_view.rs"), rust).unwrap();
+    let plan = workspace
+        .plan_project_file_move("Archive/Customer card.xaml")
+        .unwrap();
+    let edited = plan
+        .documents
+        .iter()
+        .find(|item| item.edit.uri == rust_uri)
+        .unwrap();
+    assert_eq!(
+        edited.after,
+        rust.replace("r#\"View.xaml\"#", "r#\"Archive/Customer card.xaml\"#")
+    );
+    workspace
+        .apply_project_file_move("Archive/Customer card.xaml", &plan.review)
+        .unwrap();
+    workspace.activate_document(&rust_uri).unwrap();
+    let session = workspace.session();
+    assert_eq!(session.borrow().authored_source(), edited.after);
+    workspace.save_all_documents().unwrap();
+    assert_eq!(
+        fs::read_to_string(files.0.join("compiled_view.rs")).unwrap(),
+        edited.after
+    );
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let writes = Permissions {
+        allow_property_writes: true,
+        allow_input: false,
+    };
+    let revision = session.borrow().document().revision();
+    provider
+        .call(
+            "designer_undo",
+            &json!({"expected_revision":revision}),
+            writes,
+        )
+        .unwrap();
+    assert_eq!(session.borrow().authored_source(), rust);
+    assert!(files.0.join("View.xaml").is_file());
+    assert!(!files.0.join("Archive/Customer card.xaml").exists());
+    let revision = session.borrow().document().revision();
+    provider
+        .call(
+            "designer_redo",
+            &json!({"expected_revision":revision}),
+            writes,
+        )
+        .unwrap();
+    assert_eq!(session.borrow().authored_source(), edited.after);
+    assert!(files.0.join("Archive/Customer card.xaml").is_file());
+}
+
+#[test]
 fn studio_toolbar_reviews_and_records_history_for_a_move_with_no_source_edits() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = format!("<Border {NS}><TextBlock Text='Customer accounts'/></Border>");

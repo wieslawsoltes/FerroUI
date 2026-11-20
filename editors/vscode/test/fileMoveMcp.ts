@@ -115,4 +115,51 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
     await vscode.commands.executeCommand('undo');
     await until(async () => await missing(renamedView) && titled('Customers.xaml'));
     console.log('Reviewed XAML file move updated closed and open consumers, retained the native preview, and undid the move with its patches');
+    await verifyRustReferences({ invoke, content });
+}
+
+async function verifyRustReferences({ invoke, content }: McpFixture): Promise<void> {
+    const root = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, 'Rust XAML move');
+    const uri = (file: string) => vscode.Uri.joinPath(root, file);
+    const write = (file: string, source: string) => vscode.workspace.fs.writeFile(uri(file), Buffer.from(source));
+    const originalPath = 'Views/Palette.xaml';
+    const movedPath = 'Views/Archive/Customer palette.xaml';
+    const build = `use ferroui_build::{Build, XamlGroup};\nfn main() {\n    println!("cargo:rerun-if-changed=${originalPath}");\n    Build::from_env().input("${originalPath}").compile_group(XamlGroup::new("compiled_xaml").documents(&[("${originalPath}", include_str!("${originalPath}"))])).run();\n}\n`;
+    const disk = 'pub const TEXT: &str = "Views/Palette.xaml";\r\n';
+    const draft = `${disk}pub const SOURCE: &str = { /* 🎨 */ include_str!(r#"${originalPath}"#) };\r\n`;
+    await vscode.workspace.fs.createDirectory(uri('Views/Archive'));
+    await Promise.all([
+        write('Cargo.toml', '[package]\nname="rust-xaml-move"\nversion="0.1.0"\nedition="2021"\n[lib]\npath="lib.rs"\n'),
+        write('build.rs', build), write('lib.rs', disk), write(originalPath, '<ResourceDictionary xmlns="https://github.com/ferroui" />'),
+    ]);
+    const doc = await vscode.workspace.openTextDocument(uri('lib.rs'));
+    const editor = await vscode.window.showTextDocument(doc);
+    await editor.edit(edit => edit.insert(doc.positionAt(doc.getText().length), draft.slice(disk.length)));
+    const path = vscode.workspace.asRelativePath(uri(originalPath), false).replaceAll('\\', '/');
+    const destination = vscode.workspace.asRelativePath(uri(movedPath), false).replaceAll('\\', '/');
+    const plan = () => invoke('ferroui_workspace_plan_xaml_move', { path, destination });
+    const before = content<FileMovePlan>(await plan());
+    assert.equal(before.documents.length, 3);
+    const buildEdit = before.documents.find(entry => entry.edit.uri.endsWith('/build.rs'))!;
+    assert.equal(buildEdit.after, build.replaceAll(originalPath, movedPath));
+    const rustEdit = before.documents.find(entry => entry.edit.uri.endsWith('/lib.rs'))!;
+    assert.equal(rustEdit.edit.version, doc.version);
+    assert.equal(rustEdit.before, draft);
+    assert.equal(rustEdit.after, draft.replace(`r#"${originalPath}"#`, `r#"${movedPath}"#`));
+    await editor.edit(edit => edit.insert(doc.positionAt(doc.getText().length), '// Keep this unsaved line too.\r\n'));
+    const apply = (review: string) => invoke('ferroui_workspace_move_xaml', { path, destination, review });
+    assert.ok((await apply(before.review)).isError);
+    const editedDraft = doc.getText();
+    content<FileMovePlan>(await apply(content<FileMovePlan>(await plan()).review));
+    const buildDoc = await vscode.workspace.openTextDocument(uri('build.rs'));
+    assert.equal(buildDoc.getText(), buildEdit.after);
+    assert.equal(doc.getText(), editedDraft.replace(`r#"${originalPath}"#`, `r#"${movedPath}"#`));
+    const exists = (file: string) => vscode.workspace.fs.stat(uri(file)).then(() => true, () => false);
+    assert.ok(await exists(movedPath));
+    await vscode.window.showTextDocument(doc);
+    await vscode.commands.executeCommand('undo');
+    await until(async () => doc.getText() === editedDraft && buildDoc.getText() === build && await exists(originalPath));
+    await vscode.commands.executeCommand('redo');
+    await until(async () => doc.getText().includes(`r#"${movedPath}"#`) && buildDoc.getText() === buildEdit.after && await exists(movedPath));
+    console.log('Reviewed XAML file move updated an unopened Cargo build and an unsaved Rust source, rejected stale drafts, and grouped source history');
 }

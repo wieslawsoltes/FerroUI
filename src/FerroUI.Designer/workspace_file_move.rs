@@ -2,8 +2,11 @@ use super::{
     project::{document_identity, Tab},
     DesignerWorkspace,
 };
+use crate::rsx_document::RustDocument;
 use ferroui_designer_core::TextPatch;
-use ferroui_designer_language::{FileMoveDocument, FileMovePlan, LanguageService, LineIndex};
+use ferroui_designer_language::{
+    FileMoveDocument, FileMoveDraft, FileMovePlan, LanguageService, LineIndex,
+};
 use ferroui_designer_project::{file_uri, MovedSourceFile, ProjectWorkspace};
 use std::{collections::BTreeMap, path::Path, rc::Rc};
 
@@ -49,8 +52,19 @@ impl DesignerWorkspace {
         let to = file_uri(workspace.solution.root.join(Path::new(destination)))
             .map_err(|e| e.to_string())?;
         let mut language = self.try_language_service()?;
+        let mut rust_drafts = Vec::new();
         for (uri, tab) in &state.tabs {
-            if uri != &from && tab.rust.is_none() && uri.starts_with("file://") {
+            if !uri.starts_with("file://") || uri == &from {
+                continue;
+            }
+            if tab.rust.is_some() {
+                rust_drafts.push(FileMoveDraft {
+                    uri: uri.clone(),
+                    version: i64::try_from(tab.document.revision())
+                        .map_err(|_| "Rust document revision exhausted")?,
+                    source: tab.source().to_owned(),
+                });
+            } else {
                 sync(&mut language, uri, tab.source())?;
             }
         }
@@ -60,7 +74,7 @@ impl DesignerWorkspace {
             self.session.borrow().document().source(),
         )?;
         language
-            .plan_file_move(&from, &to)
+            .plan_file_move_with_drafts(&from, &to, &rust_drafts)
             .map_err(|e| e.to_string())
     }
 
@@ -84,7 +98,7 @@ impl DesignerWorkspace {
             .linked_history
             .label("Move XAML file")?;
         for change in &plan.documents {
-            let tab = staged.tab(&change.edit.uri)?;
+            let tab = staged.tab(self, &change.edit.uri)?;
             check_saved(&staged.workspace, &change.edit.uri, &tab)?;
             staged
                 .tabs
@@ -189,7 +203,7 @@ impl DesignerWorkspace {
     }
 
     fn stage_file_move(&self) -> Result<MoveState, String> {
-        let active = self.current_xaml_file()?;
+        let active = document_identity(self.session.borrow().document_uri())?;
         self.capture_tab();
         let project = self.project.borrow();
         Ok(MoveState {
@@ -230,19 +244,34 @@ impl DesignerWorkspace {
 }
 
 impl MoveState {
-    fn tab(&mut self, uri: &str) -> Result<Tab, String> {
+    fn tab(&mut self, editor: &DesignerWorkspace, uri: &str) -> Result<Tab, String> {
         if let Some(tab) = self.tabs.get(uri) {
             return Ok(tab.clone());
         }
-        let buffer = self
-            .workspace
-            .open(uri)
-            .map_err(|error| error.to_string())?;
+        let (document, rust, saved) = if RustDocument::for_uri(uri) {
+            let saved = self
+                .workspace
+                .read_source(uri)
+                .map_err(|error| error.to_string())?;
+            let (document, rust) = RustDocument::open(saved.clone(), editor.rust_catalog(uri))
+                .map_err(|error| error.to_string())?;
+            (document, Some(rust), saved)
+        } else {
+            let buffer = self
+                .workspace
+                .open(uri)
+                .map_err(|error| error.to_string())?;
+            (
+                buffer.document().clone(),
+                None,
+                buffer.saved_source().unwrap_or_default().into(),
+            )
+        };
         Ok(Tab {
             preview_uri: uri.into(),
-            document: buffer.document().clone(),
-            rust: None,
-            saved: buffer.saved_source().unwrap_or_default().into(),
+            document,
+            rust,
+            saved,
             file: None,
             layers: None,
             viewport: None,
@@ -256,6 +285,9 @@ impl MoveState {
         }
         for uri in participants {
             let tab = &self.tabs[uri];
+            if tab.rust.is_some() {
+                continue;
+            }
             sync(&mut self.language, uri, tab.source())?;
             if let Some(buffer) = self.workspace.buffer(uri) {
                 self.workspace
@@ -287,11 +319,14 @@ fn check_saved(workspace: &ProjectWorkspace, uri: &str, tab: &Tab) -> Result<(),
 }
 
 fn patched(mut tab: Tab, change: &FileMoveDocument, label: &str) -> Result<Tab, String> {
-    if tab.rust.is_some() || tab.source() != change.before {
+    if tab.source() != change.before {
         return Err("A participating file changed before applying the move".into());
     }
     let revision = tab.document.revision();
-    if change.edit.edits.is_empty() {
+    if let Some(rust) = tab.rust.as_mut() {
+        rust.update(&mut tab.document, change.after.clone().into(), label, false)
+            .map_err(|error| error.to_string())?;
+    } else if change.edit.edits.is_empty() {
         tab.document
             .record_workspace_operation(revision, label.into())
             .map_err(|e| e.to_string())?;
