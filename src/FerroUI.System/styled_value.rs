@@ -2,11 +2,11 @@
 //!
 //! The property store of FerroUI (`ferroui_base`) is compiled once for each type it keeps values
 //! as, the storage type of a value type, and not once for each value type of a property: the
-//! members of every enumeration are kept as one [`EnumValue`], an optional member as an
-//! `Option<EnumValue>`, and the small structures of numbers as their numbers. Every
-//! other type is its own storage type. The trait is here, beside the other items without a user
-//! interface, so that a library that has no user interface (a model of the application) states
-//! it for its own types; `ferroui_base` re-exports it with the impls of its own types.
+//! members of every enumeration are kept as one [`EnumValue`] and an optional member as an
+//! `Option<EnumValue>`. Every other type is its own storage type. The trait is here, beside the
+//! other items without a user interface, so that a library that has no user interface (a model
+//! of the application) states it for its own types; `ferroui_base` re-exports it with the
+//! impls of its own types.
 //!
 //! What a property hands out is always a value of its value type: a read converts the stored
 //! value back ([`StyledValue::from_storage`]), and a boxed value, a binding value or a change
@@ -39,7 +39,7 @@ pub trait StyledValue: Clone + PartialEq + 'static {
     type Storage: StyledValue;
 
     /// Whether values of other types are kept as values of this type: `true` for the shared
-    /// storage types ([`EnumValue`], `Option<EnumValue>`, the arrays of numbers), whose values
+    /// storage types ([`EnumValue`], `Option<EnumValue>`), whose values
     /// the store converts back to the value type of the property before it hands them to a
     /// change notification. A type that is only its own storage type keeps `false`.
     #[doc(hidden)]
@@ -295,37 +295,6 @@ styled_value!(
     bool, char, f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, (), String,
     std::time::Duration,
 );
-
-/// Two or four numbers: the form the property store keeps the small plain structures of
-/// numbers in (a point, a size, a vector; a thickness, a rectangle, the radii of corners), one
-/// storage type for each count. Equal as the structures are equal: number by number.
-macro_rules! shared_number_storage {
-    ($($type_:ty),*) => {
-        $(
-            impl StyledValue for $type_ {
-                type Storage = Self;
-                const SHARED_STORAGE: bool = true;
-
-                #[inline(always)]
-                fn into_storage(self) -> Self {
-                    self
-                }
-
-                #[inline(always)]
-                fn from_storage(storage: Self) -> Self {
-                    storage
-                }
-
-                #[inline(always)]
-                fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
-                    read(storage)
-                }
-            }
-        )*
-    };
-}
-
-shared_number_storage!([f64; 2], [f64; 4]);
 
 // The value types of other crates that properties of FerroUI hold.
 #[cfg(feature = "locale")]

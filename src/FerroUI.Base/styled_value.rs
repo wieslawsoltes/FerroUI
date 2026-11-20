@@ -32,43 +32,9 @@ impl<T: ObjectType> StyledValue for Ref<T> {
     }
 }
 
-/// The small plain structures of numbers are kept as their numbers: two for a point, a size and
-/// a vector, four for a thickness, a rectangle and the radii of corners, each count one storage
-/// type (`[f64; 2]`, `[f64; 4]`), as the members of the enumerations share one.
-macro_rules! kept_as_numbers {
-    ($($type_:ty => [$($field:ident),*];)*) => {
-        $(
-            impl StyledValue for $type_ {
-                type Storage = [f64; kept_as_numbers!(@count $($field)*)];
-
-                #[inline(always)]
-                fn into_storage(self) -> Self::Storage {
-                    [$(self.$field),*]
-                }
-
-                #[inline(always)]
-                fn from_storage(storage: Self::Storage) -> Self {
-                    let [$($field),*] = storage;
-                    Self { $($field),* }
-                }
-            }
-        )*
-    };
-    (@count $($field:ident)*) => { 0 $(+ kept_as_numbers!(@one $field))* };
-    (@one $field:ident) => { 1 };
-}
-
-kept_as_numbers! {
-    crate::Point => [x, y];
-    crate::Size => [width, height];
-    crate::Vector => [x, y];
-    crate::Thickness => [left, top, right, bottom];
-    crate::Rect => [x, y, width, height];
-    crate::CornerRadius => [top_left, top_right, bottom_right, bottom_left];
-}
-
 // The value types of this crate that are their own storage type.
 styled_value!(
+    crate::Point, crate::Rect, crate::Size, crate::Vector, crate::Thickness, crate::CornerRadius,
     crate::Matrix, crate::PixelRect, crate::RelativePoint, crate::RelativeRect, crate::RelativeScalar,
     crate::media::Color, crate::media::BoxShadow, crate::media::BoxShadows, crate::input::KeyGesture,
     crate::animation::Transitions, crate::controls::NameScopeRef, crate::styling::ThemeVariant,
