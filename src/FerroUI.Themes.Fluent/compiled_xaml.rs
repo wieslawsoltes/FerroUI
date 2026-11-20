@@ -5003,11 +5003,11 @@ pub fn build_controls_fluentcontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 1, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 2, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 3, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 4, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 5, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_0)?;
@@ -5105,28 +5105,28 @@ pub fn build_controls_fluentcontrols_xaml(
     let namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
     rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_11);
-    rt::apply_theme_unit(active_theme_units(), 0, 5, &context, &resource_dictionary_0)?;
-    let namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_12);
-    rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
     rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_13);
+    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
     rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::mem::drop(namespace_scope_13);
     rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_14);
     rt::apply_theme_unit(active_theme_units(), 68, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::mem::drop(namespace_scope_14);
     rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_15);
     let namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8);
-    rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_16);
     rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_16);
+    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 75, 0, &context, &resource_dictionary_0)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 7, 10)?), 7, 10)?;
     context.pop_parent();
@@ -6257,7 +6257,7 @@ fn build_controls_fluentcontrols_xaml_unit_67(
     ::core::result::Result::Ok(())
 }
 
-/// Run 68 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+/// Run 68 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_unit_68(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
@@ -42011,7 +42011,7 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_15, build_controls_fluentcontrols_xaml_unit_25, build_controls_fluentcontrols_xaml_unit_27, build_controls_fluentcontrols_xaml_unit_29, build_controls_fluentcontrols_xaml_unit_31, build_controls_fluentcontrols_xaml_unit_68] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_15, build_controls_fluentcontrols_xaml_unit_25, build_controls_fluentcontrols_xaml_unit_27, build_controls_fluentcontrols_xaml_unit_29, build_controls_fluentcontrols_xaml_unit_31] };
 
 /// The unit `Accents/BaseResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/BaseResources.xaml", index: 1, runs: &[populate_fluenttheme_xaml_unit_0, populate_fluenttheme_xaml_unit_2, populate_fluenttheme_xaml_unit_4] };
@@ -42193,51 +42193,54 @@ pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeVi
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24] };
 
+/// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_68] };
+
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_26] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_26] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_28] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_28] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_30] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_30] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
+pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 75, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
-pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74];
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75];
 
 /// The ambient unit alone: what a load by URI applies when the application registered no
 /// parts and constructed no full theme (#568, step 3).
@@ -42271,7 +42274,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "ThemeVariantScope", "Window", "WindowDrawnDecorations"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["PathIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["PathIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["WindowDrawnDecorations"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
