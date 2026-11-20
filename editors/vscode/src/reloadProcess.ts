@@ -1,9 +1,10 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
-import { copyFile, rm } from 'node:fs/promises';
+import { copyFile, unlink } from 'node:fs/promises';
 import * as path from 'node:path';
 import { createInterface } from 'node:readline';
-import { randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { CargoTarget } from './cargoTarget';
 import type { ProcessOutput } from './reloadLog';
 import { mcpEndpointPrefix, parseMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
@@ -30,18 +31,22 @@ export class ReloadProcess {
     private stopping = false;
     private escalation?: ReturnType<typeof setTimeout>;
 
-    constructor(private readonly child: ChildProcess) {
-        this.closed = new Promise((resolve, reject) => {
-            child.once('error', reject);
+    constructor(private readonly child: ChildProcess, cleanup?: () => Promise<void>) {
+        const closed = new Promise<number | null>((resolve, reject) => {
+            let failure: Error | undefined;
+            child.on('error', error => { failure ??= error; });
             child.once('close', code => {
                 this.exited = true;
                 clearTimeout(this.escalation);
-                resolve(code);
+                if (failure) reject(failure);
+                else resolve(code);
             });
         });
+        this.closed = cleanup ? closed.finally(cleanup) : closed;
     }
 
     get pid(): number | undefined { return this.child.pid; }
+    get hasExited(): boolean { return this.exited || this.child.exitCode !== null || this.child.signalCode !== null; }
 
     stop(): Promise<void> {
         const stopped = this.closed.then(() => undefined, () => undefined);
@@ -101,9 +106,16 @@ export async function launchArtifact(artifact: string, target: CargoTarget, outp
     // Keep the live executable side by side with Cargo's output. Native libraries keep their
     // relative lookup path, and Windows lets Cargo replace its own executable on rebuild.
     const executable = path.join(path.dirname(artifact), `.ferroui-${randomUUID()}-${path.basename(artifact)}`);
-    await copyFile(artifact, executable, constants.COPYFILE_FICLONE);
-    const child = spawn(executable, target.args, { ...options(target), env: { ...process.env, FERROUI_EDITOR_RELOAD: '1' } });
-    const proc = new ReloadProcess(child);
+    await copyFile(artifact, executable, constants.COPYFILE_FICLONE | constants.COPYFILE_EXCL);
+    const cleanup = () => removeLaunchCopy(executable, output);
+    let child: ChildProcess;
+    try {
+        child = spawn(executable, target.args, { ...options(target), env: { ...process.env, FERROUI_EDITOR_RELOAD: '1' } });
+    } catch (error) {
+        await cleanup();
+        throw error;
+    }
+    const proc = new ReloadProcess(child, cleanup);
     let acknowledge: () => void;
     const ready = new Promise<void>(resolve => { acknowledge = resolve; });
     lines(child.stdout, line => output.appendLine(line));
@@ -119,9 +131,25 @@ export async function launchArtifact(artifact: string, target: CargoTarget, outp
         if (event.status === 'ready') acknowledge();
         onEvent(event);
     });
-    const cleanup = () => rm(executable, { force: true, maxRetries: 3 }).catch(error => output.appendLine(String(error)));
-    void proc.closed.then(cleanup, cleanup);
     return { process: proc, ready };
+}
+
+async function removeLaunchCopy(file: string, output: ProcessOutput): Promise<void> {
+    for (let retry = 0; ; retry++) {
+        try {
+            await unlink(file);
+            return;
+        } catch (error) {
+            const code = (error as NodeJS.ErrnoException).code;
+            if (code === 'ENOENT') return;
+            if (retry === 3 || (code !== 'EBUSY' && code !== 'EPERM' && code !== 'EACCES')) {
+                output.appendLine(`Could not remove retired launch copy ${path.basename(file)}. ${String(error)}`);
+                return;
+            }
+            // Windows can retain the executable briefly after the child process exits.
+            await delay(100 * (retry + 1));
+        }
+    }
 }
 
 function options(target: CargoTarget) {

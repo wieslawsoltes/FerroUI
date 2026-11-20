@@ -273,6 +273,8 @@ async function awaitStartup(child: ReloadProcess, acknowledged: Promise<void>): 
         await Promise.race([opened, exited, new Promise<never>((_, reject) => {
             timer = setTimeout(() => reject(new Error('No FerroUI runtime acknowledgement. Enable hot reload in the selected Cargo binary.')), 15_000);
         })]);
+        // The process may exit while its executable copy is still being released.
+        if (child.hasExited) throw new Error('Candidate exited during startup.');
     } finally {
         clearTimeout(timer);
     }
