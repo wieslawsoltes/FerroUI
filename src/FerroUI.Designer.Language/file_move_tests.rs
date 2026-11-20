@@ -237,11 +237,11 @@ fn main() {
         .unwrap();
     assert_eq!(script.edit.edits.len(), 5);
     assert!(script.after.contains(
-        r#"("Archive/Customer 🎨.xaml", include_str!("../Views/Archive/Customer 🎨.xaml"))"#
+        r#"("Archive/Customer%20%F0%9F%8E%A8.xaml", include_str!("../Views/Archive/Customer 🎨.xaml"))"#
     ));
     assert!(script
         .after
-        .contains(r#".class_document("Archive/Customer 🎨.xaml")"#));
+        .contains(r#".class_document("Archive/Customer%20%F0%9F%8E%A8.xaml")"#));
     assert!(script
         .after
         .contains(r#".input("./Views/Archive/Customer 🎨.xaml")"#));

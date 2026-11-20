@@ -236,13 +236,10 @@ impl RustMove<'_> {
                 ))
             })?;
             let relative = native_spelling(relative)?;
-            let relative = if site.path.contains('%') || relative.contains(['#', '?', '%']) {
-                relative_asset_uri(&relative).ok_or_else(|| {
-                    LanguageError("The new compiled XAML key cannot be encoded".into())
-                })?
-            } else {
-                relative
-            };
+            // The compiled loader compares the requested URI with the registered key.
+            let relative = relative_asset_uri(&relative).ok_or_else(|| {
+                LanguageError("The new compiled XAML key cannot be encoded".into())
+            })?;
             return Ok(Some(if site.path.starts_with('/') {
                 format!("/{relative}")
             } else {
