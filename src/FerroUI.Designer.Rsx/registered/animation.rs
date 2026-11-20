@@ -1,6 +1,5 @@
-use super::assembly_path;
 use crate::animation::{Property, TargetType, ValueShape};
-use ferroui_designer_project::MarkupCatalog;
+use ferroui_designer_project::{rsx_mapping::assembly_path, MarkupCatalog};
 use std::collections::BTreeMap;
 
 const KEY: &str = "FerroUI.Designer.RsxAnimation.v1:";

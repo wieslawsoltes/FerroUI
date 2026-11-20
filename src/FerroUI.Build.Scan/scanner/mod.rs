@@ -395,6 +395,7 @@ pub struct Scan {
     /// ([`ScanOptions::source_references`]).
     pub references: SourceReferences,
     authored_definitions: Vec<crate::authored_symbols::AuthoredDefinition>,
+    authored_assembly: Option<crate::authored_symbols::AuthoredAssembly>,
     modules: Modules,
 }
 
@@ -539,6 +540,7 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
         index: BTreeMap::new(),
         files: Vec::new(),
         authored_definitions: Vec::new(),
+        authored_assembly: None,
         capture_definitions: options.authored_symbols,
         reported: BTreeSet::new(),
         statistics: Statistics::default(),
@@ -613,6 +615,7 @@ struct Builder {
     /// The file each type of the model is declared in, by the index of the type.
     files: Vec<usize>,
     authored_definitions: Vec<crate::authored_symbols::AuthoredDefinition>,
+    authored_assembly: Option<crate::authored_symbols::AuthoredAssembly>,
     capture_definitions: bool,
     /// The unresolved paths already reported, by file, line and path.
     reported: BTreeSet<(usize, usize, String)>,
@@ -1289,6 +1292,9 @@ impl Builder {
         let prefixes = self.text_pairs(&assembly.xmlns_prefixes, &assembly.site, "the xmlns prefixes of the assembly");
         self.model.xmlns_prefixes = prefixes.into_iter().map(|(xml_namespace, prefix)| XmlnsPrefixModel { xml_namespace, prefix }).collect();
         self.model.metadata = self.text_pairs(&assembly.metadata, &assembly.site, "the metadata of the assembly");
+        if self.capture_definitions {
+            self.authored_assembly = self.assembly_source(assembly);
+        }
     }
 
     /// What the models of the crates the crate is built on give the model: every type
@@ -1532,6 +1538,7 @@ impl Builder {
         let mut diagnostics = self.source.diagnostics;
         diagnostics.sort_by(|left, right| (&left.file, left.line, left.severity).cmp(&(&right.file, right.line, right.severity)));
         Scan { model: self.model, diagnostics, files: self.source.files, functions, statistics, references,
-            authored_definitions: self.authored_definitions, modules: self.source.modules }
+            authored_definitions: self.authored_definitions, authored_assembly: self.authored_assembly,
+            modules: self.source.modules }
     }
 }

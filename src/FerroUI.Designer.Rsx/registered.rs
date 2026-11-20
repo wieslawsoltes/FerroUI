@@ -3,8 +3,9 @@
 //! MarkupAssembly metadata. Ordinary Rust name resolution remains rust-analyzer's.
 use crate::{catalog, literal::Literal};
 use ferroui_designer_language::Schema;
-use ferroui_designer_project::{MarkupCatalog, MarkupControl};
-use serde::Deserialize;
+use ferroui_designer_project::{
+    rsx_mapping::{assembly_path, RsxBuilderMapping, PREFIX}, MarkupCatalog, MarkupControl,
+};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, OnceLock};
 use syn::ext::IdentExt;
@@ -14,8 +15,6 @@ mod animation;
 #[path = "registered/control.rs"]
 mod control;
 pub(crate) use control::Class;
-
-const KEY: &str = "FerroUI.Designer.Rsx.v1:";
 
 #[derive(Clone, Default)]
 pub struct RsxCatalog {
@@ -40,16 +39,6 @@ struct MappedProperty {
     codec: Literal,
 }
 
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Declaration {
-    path: String,
-    #[serde(default)]
-    inherit: bool,
-    #[serde(default)]
-    properties: BTreeMap<String, String>,
-}
-
 impl RsxCatalog {
     pub fn built_in() -> &'static Self {
         static BUILTIN: OnceLock<RsxCatalog> = OnceLock::new();
@@ -60,7 +49,7 @@ impl RsxCatalog {
         let package = package.map(|name| name.replace('-', "_"));
         let mut candidates = BTreeMap::new();
         for control in catalog.controls() {
-            let key = format!("{KEY}{}", control.class.full_name());
+            let key = format!("{PREFIX}{}", control.class.full_name());
             let Some(value) = unique(
                 control
                     .assembly
@@ -70,7 +59,7 @@ impl RsxCatalog {
             ) else {
                 continue;
             };
-            let Ok(declaration) = serde_json::from_str::<Declaration>(&value.1) else {
+            let Ok(declaration) = RsxBuilderMapping::parse(&value.1) else {
                 continue;
             };
             if let Some(class) =
@@ -164,7 +153,7 @@ fn registered(
     schema: &Schema,
     control: MarkupControl<'_>,
     package: Option<&str>,
-    declaration: Declaration,
+    declaration: RsxBuilderMapping,
 ) -> Option<Arc<RegisteredClass>> {
     let rust_path = assembly_path(&declaration.path, &control.assembly.crate_name, package)?;
     let namespace = control.namespace();
@@ -223,23 +212,6 @@ fn registered(
         base,
         properties,
     }))
-}
-
-fn assembly_path(source: &str, crate_name: &str, package: Option<&str>) -> Option<String> {
-    let path = syn::parse_str::<syn::Path>(source).ok()?;
-    if path.segments.len() < 2 || path.segments.iter().any(|segment| !segment.arguments.is_empty()) {
-        return None;
-    }
-    let mut parts = path.segments.iter().map(|segment| segment.ident.to_string());
-    let owner = parts.next()?;
-    let tail = parts.collect::<Vec<_>>().join("::");
-    if package == Some(crate_name) && (owner == "crate" || owner == crate_name) {
-        Some(format!("crate::{tail}"))
-    } else if owner == crate_name {
-        Some(format!("::{owner}::{tail}"))
-    } else {
-        None
-    }
 }
 
 fn inherited_control(catalog: &MarkupCatalog, control: &MarkupControl<'_>) -> Option<String> {

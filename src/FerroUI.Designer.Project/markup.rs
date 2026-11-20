@@ -16,7 +16,7 @@ pub use events::MarkupEventSignature;
 
 #[path = "markup_sources.rs"]
 mod sources;
-pub use sources::MarkupSource;
+pub use sources::{MarkupAssemblySource, MarkupSource};
 
 pub(crate) const MAX_DIRECTORIES: usize = 1024;
 const MAX_FILES: usize = 256;

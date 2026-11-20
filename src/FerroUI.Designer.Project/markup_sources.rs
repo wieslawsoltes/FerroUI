@@ -1,7 +1,10 @@
 //! Build-scoped Rust definitions and their validated physical source files.
 use super::MarkupCatalog;
 use ferroui_build_scan::{
-    authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind, TypeNameEdit},
+    authored_symbols::{
+        AuthoredAssembly, AuthoredDefinition, AuthoredMetadata, AuthoredSymbols, DeclarationKind,
+        TypeNameEdit,
+    },
     model::{AssemblyModel, TypeModel},
 };
 use std::{
@@ -21,22 +24,27 @@ pub struct MarkupSource {
     definition: AuthoredDefinition,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MarkupAssemblySource {
+    package: PathBuf,
+    declaration: AuthoredAssembly,
+}
+
+impl MarkupAssemblySource {
+    pub fn file(&self) -> Option<PathBuf> {
+        resolve_rust_file(&self.package, &self.declaration.file)
+    }
+
+    pub fn metadata_in(&self, source: &str) -> Option<Vec<AuthoredMetadata>> {
+        self.declaration.metadata_in(source)
+    }
+}
+
 impl MarkupSource {
     /// Resolve the source each time so a moved file or a replacement symlink
     /// cannot supply the range for a different declaration.
     pub fn file(&self) -> Option<PathBuf> {
-        self.resolve_file(&self.definition.file)
-    }
-
-    fn resolve_file(&self, relative: &Path) -> Option<PathBuf> {
-        if !relative_rust_path(relative) {
-            return None;
-        }
-        let file = self.package.join(relative).canonicalize().ok()?;
-        (file.starts_with(&self.package)
-            && file.extension().is_some_and(|extension| extension == "rs")
-            && file.is_file())
-        .then_some(file)
+        resolve_rust_file(&self.package, &self.definition.file)
     }
 
     pub fn range_in(&self, text: &str) -> Option<Range<usize>> {
@@ -52,7 +60,10 @@ impl MarkupSource {
     }
 
     pub fn type_file(&self) -> Option<PathBuf> {
-        self.resolve_file(&self.definition.type_declaration.as_ref()?.file)
+        resolve_rust_file(
+            &self.package,
+            &self.definition.type_declaration.as_ref()?.file,
+        )
     }
 
     pub fn type_range_in(&self, source: &str) -> Option<Range<usize>> {
@@ -61,6 +72,10 @@ impl MarkupSource {
 
     pub fn package(&self) -> &Path {
         &self.package
+    }
+
+    pub fn rust_type(&self) -> &str {
+        &self.definition.rust_type
     }
 
     pub fn is_class(&self) -> bool {
@@ -94,6 +109,7 @@ struct Symbol {
 #[derive(Default)]
 pub(super) struct MarkupSources {
     definitions: BTreeMap<Symbol, Option<Arc<MarkupSource>>>,
+    assemblies: BTreeMap<(String, String), Option<MarkupAssemblySource>>,
 }
 
 impl MarkupSources {
@@ -101,6 +117,25 @@ impl MarkupSources {
         let Some((index, package)) = load(directory, model, remaining) else {
             return;
         };
+        if let Some(declaration) = index
+            .assembly_source
+            .filter(|source| relative_rust_path(&source.file))
+        {
+            let source = MarkupAssemblySource {
+                package: package.clone(),
+                declaration,
+            };
+            let key = (model.name.clone(), model.crate_name.clone());
+            match self.assemblies.entry(key) {
+                Entry::Vacant(entry) => {
+                    entry.insert(Some(source));
+                }
+                Entry::Occupied(mut entry) if entry.get().as_ref() != Some(&source) => {
+                    entry.insert(None);
+                }
+                Entry::Occupied(_) => {}
+            }
+        }
         for definition in index.definitions {
             if !relative_rust_path(&definition.file) {
                 continue;
@@ -149,6 +184,14 @@ impl MarkupSources {
 }
 
 impl MarkupCatalog {
+    /// The physical assembly selected by the build, when its source is unambiguous.
+    pub fn authored_assembly(&self, assembly: &AssemblyModel) -> Option<&MarkupAssemblySource> {
+        self.sources
+            .assemblies
+            .get(&(assembly.name.clone(), assembly.crate_name.clone()))?
+            .as_ref()
+    }
+
     /// A definition in this build's selected assembly, or no result on ambiguity.
     pub fn authored_definition(
         &self,
@@ -205,4 +248,15 @@ fn relative_rust_path(path: &Path) -> bool {
         && path
             .components()
             .all(|part| matches!(part, Component::Normal(_)))
+}
+
+fn resolve_rust_file(package: &Path, relative: &Path) -> Option<PathBuf> {
+    if !relative_rust_path(relative) {
+        return None;
+    }
+    let file = package.join(relative).canonicalize().ok()?;
+    (file.starts_with(package)
+        && file.extension().is_some_and(|extension| extension == "rs")
+        && file.is_file())
+    .then_some(file)
 }

@@ -3,21 +3,38 @@ use super::{
     declarations::{
         read_declaration, read_property, read_registration, Accessor, Declaration, MarkupBody,
     },
+    source::RawAssembly,
     tokens::{text_of, tokens_of, Cursor},
     Builder, Scan, Site,
 };
-use crate::authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind};
+use crate::authored_symbols::{
+    AuthoredAssembly, AuthoredDefinition, AuthoredSymbols, DeclarationKind,
+};
 use std::{
     ops::Range,
-    path::{Component, Path},
+    path::{Component, Path, PathBuf},
 };
 use syn::spanned::Spanned;
 use syn::{ImplItem, Item, Macro, Type};
 
+#[path = "authored_assembly.rs"]
+mod assembly;
 #[path = "authored_types.rs"]
 mod type_names;
 
 impl Builder {
+    pub(super) fn assembly_source(&self, assembly: &RawAssembly) -> Option<AuthoredAssembly> {
+        if assembly.site.expanded {
+            return None;
+        }
+        let (file, modules) = self.authored_file(&assembly.site)?;
+        Some(AuthoredAssembly {
+            file,
+            modules,
+            item: assembly.item.clone(),
+        })
+    }
+
     pub(super) fn record_definition(
         &mut self,
         index: usize,
@@ -30,27 +47,37 @@ impl Builder {
         if !self.capture_definitions || site.expanded {
             return;
         }
-        let file = &self.source.files[site.file];
-        let module = self.source.modules.module_path(site.module);
-        let Some(inline) = module.strip_prefix(&file.module) else {
+        let Some((file, modules)) = self.authored_file(site) else {
             return;
         };
         let model = &self.model.types[index];
         self.authored_definitions.push(AuthoredDefinition {
             rust_type: model.rust_path.text.clone(),
             type_name: model.name.clone(),
-            file: file.path.clone(),
-            modules: inline
-                .split("::")
-                .filter(|part| !part.is_empty())
-                .map(str::to_owned)
-                .collect(),
+            file,
+            modules,
             kind,
             owner: owner.to_owned(),
             member: member.map(str::to_owned),
             registered_name: registered_name.map(str::to_owned),
             type_declaration: None,
         });
+    }
+
+    fn authored_file(&self, site: &Site) -> Option<(PathBuf, Vec<String>)> {
+        let file = &self.source.files[site.file];
+        let module = self.source.modules.module_path(site.module);
+        let inline = if module == file.module {
+            ""
+        } else {
+            module.strip_prefix(&file.module)?.strip_prefix("::")?
+        };
+        let modules = inline
+            .split("::")
+            .filter(|part| !part.is_empty())
+            .map(str::to_owned)
+            .collect();
+        Some((file.path.clone(), modules))
     }
 }
 
@@ -62,15 +89,9 @@ impl Scan {
             .authored_definitions
             .iter()
             .filter_map(|definition| {
-                let file = definition.file.strip_prefix(package?).ok()?;
-                if !file
-                    .components()
-                    .all(|part| matches!(part, Component::Normal(_)))
-                {
-                    return None;
-                }
+                let file = relative_file(&definition.file, package?)?;
                 Some(AuthoredDefinition {
-                    file: file.to_owned(),
+                    file,
                     type_declaration: definition
                         .member
                         .is_none()
@@ -87,8 +108,21 @@ impl Scan {
             assembly: self.model.name.clone(),
             crate_name: self.model.crate_name.clone(),
             definitions,
+            assembly_source: self.authored_assembly.as_ref().and_then(|source| {
+                Some(AuthoredAssembly {
+                    file: relative_file(&source.file, package?)?,
+                    ..source.clone()
+                })
+            }),
         }
     }
+}
+
+fn relative_file(file: &Path, package: &Path) -> Option<PathBuf> {
+    let file = file.strip_prefix(package).ok()?;
+    file.components()
+        .all(|part| matches!(part, Component::Normal(_)))
+        .then(|| file.to_owned())
 }
 
 impl AuthoredDefinition {

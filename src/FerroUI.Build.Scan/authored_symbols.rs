@@ -10,6 +10,30 @@ pub struct AuthoredSymbols {
     pub assembly: String,
     pub crate_name: String,
     pub definitions: Vec<AuthoredDefinition>,
+    pub assembly_source: Option<AuthoredAssembly>,
+}
+
+/// The selected, physical `MarkupAssembly` declaration in this Cargo build.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthoredAssembly {
+    pub file: PathBuf,
+    pub modules: Vec<String>,
+    pub item: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthoredMetadata {
+    pub key: Option<AuthoredText>,
+    pub value: Option<AuthoredText>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthoredText {
+    pub value: String,
+    /// The literal or immutable constant reference at this tuple's use site.
+    pub range: std::ops::Range<usize>,
+    /// The source spelling of the literal that supplied this value.
+    pub literal: std::ops::Range<usize>,
 }
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -93,6 +117,7 @@ impl AuthoredSymbols {
             assembly: root.text("assembly")?,
             crate_name: root.text("crate_name")?,
             definitions: root.list("definitions", AuthoredDefinition::parse)?,
+            assembly_source: root.optional("assembly_source", AuthoredAssembly::parse)?,
         })
     }
 
@@ -107,6 +132,10 @@ impl AuthoredSymbols {
                     "definitions",
                     &self.definitions,
                     AuthoredDefinition::to_json,
+                )
+                .optional(
+                    "assembly_source",
+                    self.assembly_source.as_ref().map(AuthoredAssembly::to_json),
                 ),
         )
         .to_text()
@@ -116,6 +145,26 @@ impl AuthoredSymbols {
     pub fn write(&self, out: &Path) -> Result<(), String> {
         crate::export::write_if_changed(&out.join(Self::FILE_NAME), &self.to_json())?;
         Ok(())
+    }
+}
+
+impl AuthoredAssembly {
+    fn parse(value: &Json) -> Result<Self, String> {
+        let entry = Fields::of(value, "Rust markup assembly source")?;
+        Ok(Self {
+            file: entry.text("file")?.into(),
+            modules: entry.list("modules", |value| text_of(value, "inline module"))?,
+            item: entry.text("item")?,
+        })
+    }
+
+    fn to_json(&self) -> Json {
+        Json::object(
+            Members::new()
+                .text("file", &self.file.to_string_lossy())
+                .list("modules", &self.modules, |name| Json::string(name))
+                .text("item", &self.item),
+        )
     }
 }
 
