@@ -1,10 +1,10 @@
 //! Resolve build-identified declarations against a current Rust file.
 use super::{
-    declarations::{
-        read_declaration, read_property, read_registration, Accessor, Declaration, MarkupBody,
-    },
-    tokens::{text_of, tokens_of, Cursor},
     Builder, Scan, Site,
+    declarations::{
+        Accessor, Declaration, MarkupBody, read_declaration, read_property, read_registration,
+    },
+    tokens::{Cursor, text_of, tokens_of},
 };
 use crate::authored_symbols::{AuthoredDefinition, AuthoredSymbols, DeclarationKind};
 use std::{
@@ -84,6 +84,24 @@ impl Scan {
 impl AuthoredDefinition {
     /// Re-locate the same symbol after unrelated edits within its Rust file.
     pub fn range_in(&self, source: &str) -> Option<Range<usize>> {
+        self.locate(source, false)
+    }
+
+    /// Spell the new public name without disturbing the Rust accessor or string delimiters.
+    pub fn property_name_range(&self, source: &str, new_name: &str) -> Option<Range<usize>> {
+        self.member.as_ref()?;
+        if self.kind != DeclarationKind::Registered {
+            syn::parse_str::<syn::Ident>(new_name).ok()?;
+        }
+        let range = self.locate(source, true)?;
+        if self.kind != DeclarationKind::Registered {
+            return Some(range);
+        }
+        let literal = source.get(range.clone())?;
+        Some(range.start + literal.find('"')? + 1..range.start + literal.rfind('"')?)
+    }
+
+    fn locate(&self, source: &str, public_name: bool) -> Option<Range<usize>> {
         let body = rust_body(source);
         let offset = source.len() - body.len();
         let parsed = syn::parse_str::<syn::File>(body).ok()?;
@@ -102,7 +120,9 @@ impl AuthoredDefinition {
         let mut matches = Vec::new();
         for item in items {
             match item {
-                Item::Macro(item) => matches.extend(self.macro_ranges(&item.mac, None)),
+                Item::Macro(item) => {
+                    matches.extend(self.macro_ranges(&item.mac, None, public_name))
+                }
                 Item::Impl(item)
                     if self.kind == DeclarationKind::Registered && item.trait_.is_none() =>
                 {
@@ -115,7 +135,11 @@ impl AuthoredDefinition {
                     let owner = owner.ident.to_string();
                     for member in &item.items {
                         if let ImplItem::Macro(member) = member {
-                            matches.extend(self.macro_ranges(&member.mac, Some(&owner)));
+                            matches.extend(self.macro_ranges(
+                                &member.mac,
+                                Some(&owner),
+                                public_name,
+                            ));
                         }
                     }
                 }
@@ -128,7 +152,12 @@ impl AuthoredDefinition {
         (found.start < found.end).then_some(offset + found.start..offset + found.end)
     }
 
-    fn macro_ranges(&self, item: &Macro, impl_owner: Option<&str>) -> Vec<Range<usize>> {
+    fn macro_ranges(
+        &self,
+        item: &Macro,
+        impl_owner: Option<&str>,
+        public_name: bool,
+    ) -> Vec<Range<usize>> {
         let Some(macro_name) = item.path.segments.last().map(|part| part.ident.to_string()) else {
             return Vec::new();
         };
@@ -143,11 +172,8 @@ impl AuthoredDefinition {
                 let mut cursor = Cursor::new(&tokens, item.span().start().line);
                 return read_property(&mut cursor)
                     .ok()
-                    .filter(|(owner, property)| {
-                        owner.as_deref().or(impl_owner) == Some(&self.owner)
-                            && self.matches_accessor(property)
-                    })
-                    .map(|(_, property)| property.name_range)
+                    .filter(|(owner, _)| owner.as_deref().or(impl_owner) == Some(&self.owner))
+                    .and_then(|(_, property)| self.accessor_range(property, public_name))
                     .into_iter()
                     .collect();
             }
@@ -210,19 +236,28 @@ impl AuthoredDefinition {
                 owner, accessors, ..
             } if owner == self.owner => accessors
                 .into_iter()
-                .filter(|accessor| self.matches_accessor(accessor))
-                .map(|accessor| accessor.name_range)
+                .filter_map(|accessor| self.accessor_range(accessor, public_name))
                 .collect(),
             _ => Vec::new(),
         }
     }
 
-    fn matches_accessor(&self, property: &Accessor) -> bool {
-        self.member.as_deref() == Some(&property.name)
-            && self
-                .registered_name
-                .as_ref()
-                .is_none_or(|name| read_registration(&property.body).name.as_ref() == Some(name))
+    fn accessor_range(&self, property: Accessor, public_name: bool) -> Option<Range<usize>> {
+        if self.member.as_deref() != Some(&property.name) {
+            return None;
+        }
+        if self.registered_name.is_none() {
+            return (!public_name).then_some(property.name_range);
+        }
+        let registration = read_registration(&property.body);
+        if registration.name != self.registered_name {
+            return None;
+        }
+        if public_name {
+            registration.name_range
+        } else {
+            Some(property.name_range)
+        }
     }
 
     fn property_ranges(&self, body: MarkupBody) -> Vec<Range<usize>> {

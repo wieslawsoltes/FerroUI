@@ -1,6 +1,8 @@
 //! Plan a workspace file move against the same source snapshots used for navigation.
 use super::{LanguageService, State, file_move_literals};
-use crate::{DocumentEdits, LanguageError, LineIndex, Result, TextEdit, require};
+use super::source_review::reviewed_document as move_document;
+pub use super::source_review::ReviewedDocument as FileMoveDocument;
+use crate::{LanguageError, Result, require};
 use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_project::{
     XamlFileMove, canonical_file_uri, file_path, relative_asset_uri, relative_file_reference,
@@ -32,13 +34,6 @@ pub struct FileMoveDraft {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-pub struct FileMoveDocument {
-    pub edit: DocumentEdits,
-    pub before: String,
-    pub after: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct FileMovePlan {
     pub from: String,
     pub to: String,
@@ -66,38 +61,12 @@ impl LanguageService {
             LanguageError("Open the source in its workspace before moving it".into())
         })?;
         let movement = self.workspaces[&root].plan_xaml_move(from, to)?;
-        self.refresh_move_projects()?;
+        self.refresh_project_index()?;
         require(
             self.workspaces[&root].plan_xaml_move(from, to)? == movement,
             "The file or destination moved while planning",
         )?;
         self.review_file_move(movement, drafts)
-    }
-
-    fn refresh_move_projects(&mut self) -> Result<()> {
-        let solutions = self
-            .workspaces
-            .values()
-            .map(|workspace| workspace.solution.clone())
-            .collect::<Vec<_>>();
-        for mut solution in solutions {
-            solution.refresh()?;
-            self.index_solution(&solution)?;
-        }
-        let missing = self
-            .documents
-            .iter()
-            .filter(|(uri, state)| {
-                !state.opened
-                    && uri.starts_with("file://")
-                    && file_path(uri).is_ok_and(|path| !path.is_file())
-            })
-            .map(|(uri, _)| uri.clone())
-            .collect::<Vec<_>>();
-        for uri in missing {
-            self.set_state(uri, None);
-        }
-        Ok(())
     }
 
     fn review_file_move(
@@ -264,34 +233,6 @@ fn move_drafts(drafts: &[FileMoveDraft]) -> Result<BTreeMap<String, &FileMoveDra
         )?;
     }
     Ok(snapshots)
-}
-
-fn move_document(
-    uri: &str,
-    version: i64,
-    index: &LineIndex,
-    patches: Vec<TextPatch>,
-) -> Result<FileMoveDocument> {
-    let before = index.source();
-    let edits = patches
-        .iter()
-        .map(|patch| {
-            Ok(TextEdit {
-                range: index.range(patch.span)?,
-                new_text: patch.replacement.clone(),
-            })
-        })
-        .collect::<Result<_>>()?;
-    let after = TextPatch::apply_all(before, patches)?;
-    Ok(FileMoveDocument {
-        edit: DocumentEdits {
-            uri: uri.to_owned(),
-            version,
-            edits,
-        },
-        before: before.to_owned(),
-        after,
-    })
 }
 
 fn check_incomplete_source(uri: &str, state: &State, movement: &XamlFileMove) -> Result<()> {

@@ -39,6 +39,10 @@ impl MarkupSource {
     pub fn range_in(&self, text: &str) -> Option<Range<usize>> {
         self.definition.range_in(text)
     }
+
+    pub fn property_name_range(&self, text: &str, new_name: &str) -> Option<Range<usize>> {
+        self.definition.property_name_range(text, new_name)
+    }
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]

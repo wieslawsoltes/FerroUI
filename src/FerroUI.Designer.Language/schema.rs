@@ -312,6 +312,21 @@ impl Schema {
             .or_else(|| self.type_info(base, None))
     }
 
+    fn member(&self, owner: &str, namespace: Option<&str>, name: &str) -> Option<&PropertyInfo> {
+        let mut next = self.type_info(owner, namespace);
+        let mut seen = BTreeSet::new();
+        while let Some(info) = next {
+            if !seen.insert((&info.namespace, &info.name)) {
+                break;
+            }
+            if let Some(property) = info.properties.get(name) {
+                return Some(property);
+            }
+            next = self.base_type(info);
+        }
+        None
+    }
+
     pub fn attribute_property(
         &self,
         document: &ferroui_designer_core::Document,
@@ -390,10 +405,7 @@ impl Schema {
         }
         if let Some((declaring, property)) = name.rsplit_once('.') {
             let declaring = self.type_info(declaring, member_namespace)?;
-            let property = self
-                .properties(&declaring.name, Some(&declaring.namespace))
-                .get(property)?
-                .clone();
+            let property = self.member(&declaring.name, Some(&declaring.namespace), property)?;
             let mut next = self.type_info(owner, owner_namespace);
             let mut seen = BTreeSet::new();
             while let Some(info) = next {
@@ -402,13 +414,14 @@ impl Schema {
                 }
                 if property.attached
                     || (declaring.namespace == info.namespace && declaring.name == info.name)
+                    || (declaring.authored.is_some() && declaring.authored == info.authored)
                 {
-                    return Some(property);
+                    return Some(property.clone());
                 }
                 next = self.base_type(info);
             }
             // Attached properties also apply to controls with unregistered metadata.
-            property.attached.then_some(property)
+            property.attached.then(|| property.clone())
         } else {
             if name.contains(':') {
                 let member_owner = self.type_info(owner, member_namespace)?;
@@ -417,8 +430,7 @@ impl Schema {
                     return None;
                 }
             }
-            self.properties(owner, owner_namespace)
-                .get(name.rsplit(':').next().unwrap_or(name))
+            self.member(owner, owner_namespace, name.rsplit(':').next().unwrap_or(name))
                 .cloned()
         }
     }

@@ -47,6 +47,12 @@ File documents use canonical filesystem identity, including symlink and `localho
 
 Clients can discover the requests through `experimental.ferrouiEventHandlers`. `ferroui/eventHandlerTarget` returns the code-behind URI and signature. `ferroui/planEventHandler` accepts the current Rust text and version and returns a two-document `WorkspaceEdit` plus the new declaration range. `ferroui/eventHandlerDefinition` accepts the Rust buffer for navigation before save. A client that sets `initializationOptions.ferrouiHandlerCommands` gets a Quick Fix using its `ferroui.createEventHandler` command. The host checks both versions again before applying the patch atomically. [User guide](../../docs/designer/vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+## Registered property rename
+
+Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and a `rust` draft with `uri`, `version`, and `source`, or `null`, to `ferroui/planRegisteredPropertyRename`.
+
+The service resolves the property through the consuming package's build schema, refreshes unopened XAML, and validates each patch against the proposed name. The review contains each affected document's original text, versioned patches, proposed text, and any potential XAML references with unmapped targets. Hosts recompute the plan and compare its review identifier before staging a single undoable transaction. Studio calls the same planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-registered-xaml-property)
+
 ## Resource dictionary extraction
 
 Clients that set `initializationOptions.ferrouiExtractionCommands` receive the `refactor.extract` action for an authored dictionary. `ferroui/dictionaryExtractionTarget` resolves the caret and version to an inline scope. `ferroui/planDictionaryExtraction` adds a sibling `fileName` and returns the replacement, the proposed file, and a review identifier. The host asks for a fresh plan and matches the identifier before committing the edits. Studio uses the same service directly. [User guide](../../docs/designer/vscode/authoring.md#extract-a-resource-dictionary)

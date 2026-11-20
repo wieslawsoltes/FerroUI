@@ -10,7 +10,9 @@ use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 mod definitions;
+mod registered_rename;
 mod refactoring;
+mod source_review;
 #[path = "handler_service.rs"]
 mod handlers;
 #[path = "dictionary_extraction.rs"]
@@ -22,6 +24,8 @@ mod file_move_literals;
 pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
+pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
+pub use source_review::ReviewedDocument;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {

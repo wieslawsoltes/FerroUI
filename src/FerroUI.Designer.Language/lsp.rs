@@ -215,6 +215,17 @@ impl LspServer {
                 })?;
                 Ok(self.locations(locations))
             }
+            "ferroui/registeredPropertyTarget" | "ferroui/planRegisteredPropertyRename" => {
+                let uri = uri(params)?;
+                let request = decode(&params["request"])?;
+                if method == "ferroui/registeredPropertyTarget" {
+                    return Ok(json!(self.service.registered_property_target(uri, &request)?));
+                }
+                let draft: Option<crate::HandlerDraft> = decode(&params["rust"])?;
+                Ok(json!(self.service.plan_registered_property_rename(
+                    uri, &request, text(params, "newName")?, draft.as_ref(),
+                )?))
+            }
             "textDocument/references" => {
                 let (uri, offset) = self.position(params)?;
                 let include = params["context"]["includeDeclaration"]
@@ -480,7 +491,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiRegisteredPropertyRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

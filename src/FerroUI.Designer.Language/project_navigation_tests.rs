@@ -1,9 +1,9 @@
-use crate::{LanguageService, LineIndex, Location};
+use crate::{HandlerDraft, LanguageService, LineIndex, Location, RegisteredPropertyRequest};
 use ferroui_build_scan::{
     model::AssemblyModel,
-    scanner::{scan_crate, ScanOptions},
+    scanner::{ScanOptions, scan_crate},
 };
-use ferroui_designer_project::{file_uri, BuildMetadata, Solution};
+use ferroui_designer_project::{BuildMetadata, Solution, file_uri};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -31,6 +31,9 @@ mod cards {
     ferro_class_info!(Card {
         markup: { namespace: "Customer.Views", properties: [Title: String { get: get_title }] },
     });
+    pub struct FeaturedCard;
+    ferro_class!(FeaturedCard: Card);
+    ferro_class_info!(FeaturedCard { markup: { namespace: "Customer.Views" } });
     ferro_properties! {
         impl Card {
             pub fn tone_property() -> StyledProperty<String> {
@@ -176,12 +179,14 @@ fn definitions_follow_build_scoped_controls_and_cross_crate_binding_types() {
         "tone_property",
     );
     let tone = VIEW.find("Tone=").unwrap() + 1;
-    assert!(service
-        .definitions_with_source(&uri, tone, |_| {
-            Some(control_source.replace("\"Tone\"", "\"Tint\""))
-        })
-        .unwrap()
-        .is_empty());
+    assert!(
+        service
+            .definitions_with_source(&uri, tone, |_| {
+                Some(control_source.replace("\"Tone\"", "\"Tint\""))
+            })
+            .unwrap()
+            .is_empty()
+    );
     assert_location(
         definitions("local:Customer"),
         &fixture.0.join("app/lib.rs"),
@@ -224,10 +229,12 @@ fn definitions_follow_build_scoped_controls_and_cross_crate_binding_types() {
     }
     let foreign = view.replace("CompiledBinding Street", "local:CompiledBinding Street");
     service.open(&uri, &foreign, 2).unwrap();
-    assert!(service
-        .definitions(&uri, foreign.find("dep:PostalAddress").unwrap() + 2)
-        .unwrap()
-        .is_empty());
+    assert!(
+        service
+            .definitions(&uri, foreign.find("dep:PostalAddress").unwrap() + 2)
+            .unwrap()
+            .is_empty()
+    );
     let code_behind = r#"<Border xmlns="https://github.com/ferroui"
         xmlns:q="http://schemas.microsoft.com/winfx/2006/xaml" q:Class="Customer.Views.Card"/>"#;
     service.open(&uri, code_behind, 3).unwrap();
@@ -277,4 +284,195 @@ fn definitions_revalidate_the_authored_file_and_an_open_rust_draft() {
         .definitions_with_source(&uri, offset, |_| Some(draft.replace("Street:", "Changed:")))
         .unwrap();
     assert!(definitions.is_empty());
+}
+
+#[test]
+fn reviewed_rename_changes_the_registration_and_only_its_known_xaml_uses() {
+    let fixture = CatalogFixture::create();
+    let metadata = fixture.build();
+    let origin = VIEW.replace("Title=\"Home\" ", "").replace('\n', "\r\n");
+    let unopened = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:local="using:Customer.Views">
+        <!-- Tone is ordinary text here 🧭 -->
+        <local:Card><local:Card.Tone>Green</local:Card.Tone></local:Card>
+        <local:FeaturedCard Tone="Inherited" />
+        <local:FeaturedCard><local:Card.Tone>Inherited</local:Card.Tone></local:FeaturedCard>
+        <TextBlock Text="{Binding Tone}" />
+        <ControlTheme TargetType="local:Card">
+            <Setter Property="Tone" Value="Pink" />
+            <Setter Property="local:Card.Tone" Value="Red" />
+        </ControlTheme>
+    </StackPanel>"#;
+    fixture.write("app/Unopened.xaml", unopened);
+    let other = CatalogFixture::create();
+    let other_build = other.build();
+    let mut service = LanguageService::default();
+    for (folder, build) in [(&fixture.0, &metadata), (&other.0, &other_build)] {
+        service
+            .index_solution(&Solution::discover(folder).unwrap())
+            .unwrap();
+        service.set_build_metadata(build).unwrap();
+    }
+    let uri = file_uri(fixture.0.join("app/View.xaml")).unwrap();
+    service.open(&uri, &origin, 1).unwrap();
+    let request = RegisteredPropertyRequest {
+        version: 1,
+        position: LineIndex::new(&origin)
+            .position(origin.find("Tone=").unwrap() + 1)
+            .unwrap(),
+    };
+    let target = service.registered_property_target(&uri, &request).unwrap();
+    assert_eq!(target.name, "Tone");
+    let saved = fs::read_to_string(fixture.0.join("app/rust/controls.rs")).unwrap();
+    let draft = HandlerDraft {
+        uri: target.rust_uri.clone(),
+        version: 9,
+        source: format!(
+            "// unsaved line 🧭\r\n{}",
+            saved.replace("\"Tone\"", "r#\"Tone\"#")
+        ),
+    };
+    let plan = service
+        .plan_registered_property_rename(&uri, &request, "Accent", Some(&draft))
+        .unwrap();
+    assert_eq!(plan.documents.len(), 3);
+    let rust = plan
+        .documents
+        .iter()
+        .find(|change| change.edit.uri == target.rust_uri)
+        .unwrap();
+    assert_eq!(
+        rust.after,
+        draft.source.replace("r#\"Tone\"#", "r#\"Accent\"#")
+    );
+    assert_eq!(rust.edit.version, 9);
+    let view = plan
+        .documents
+        .iter()
+        .find(|change| change.edit.uri == uri)
+        .unwrap();
+    assert_eq!(view.after, origin.replace("Tone=", "Accent="));
+    let consumer = plan
+        .documents
+        .iter()
+        .find(|change| change.edit.uri.ends_with("/Unopened.xaml"))
+        .unwrap();
+    assert_eq!(
+        consumer.after,
+        unopened
+            .replace("Card.Tone", "Card.Accent")
+            .replace("Property=\"Tone\"", "Property=\"Accent\"")
+            .replace(" Tone=", " Accent=")
+    );
+    assert_eq!(plan.unmapped.len(), 1);
+    assert!(plan.unmapped[0].uri.ends_with("/Unopened.xaml"));
+    assert_eq!(
+        plan.review,
+        service
+            .plan_registered_property_rename(&uri, &request, "Accent", Some(&draft))
+            .unwrap()
+            .review
+    );
+    fixture.write("app/Unopened.xaml", &unopened.replace("Green", "Orange"));
+    assert_ne!(
+        plan.review,
+        service
+            .plan_registered_property_rename(&uri, &request, "Accent", Some(&draft))
+            .unwrap()
+            .review
+    );
+    assert!(
+        service
+            .plan_registered_property_rename(&uri, &request, "Title", Some(&draft))
+            .unwrap_err()
+            .0
+            .contains("already resolves")
+    );
+    let duplicate = HandlerDraft {
+        source: draft.source.replace(
+            "FerroProperty::register::<Card, String>(r#\"Tone\"#, StyledPropertyMetadata::default())",
+            "if condition() { FerroProperty::register::<Card, String>(r#\"Tone\"#, meta()) } else { FerroProperty::register::<Card, String>(r#\"Tone\"#, meta()) }",
+        ),
+        ..draft
+    };
+    assert!(
+        service
+            .plan_registered_property_rename(&uri, &request, "Accent", Some(&duplicate))
+            .unwrap_err()
+            .0
+            .contains("unique direct registration")
+    );
+}
+
+#[test]
+fn reviewed_binding_member_rename_follows_explicit_types_and_rejects_capture() {
+    let fixture = CatalogFixture::create();
+    let build = fixture.build();
+    let mut service = LanguageService::default();
+    let uri = file_uri(fixture.0.join("app/View.xaml")).unwrap();
+    let mut explicit = r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="using:Customer.Data" Text="{CompiledBinding Street, DataType={x:Type d:PostalAddress}}"/>"#.to_owned();
+    fixture.write("app/Explicit.xaml", &explicit);
+    service
+        .index_solution(&Solution::discover(&fixture.0).unwrap())
+        .unwrap();
+    service.set_build_metadata(&build).unwrap();
+    service.open(&uri, VIEW, 1).unwrap();
+    let request = RegisteredPropertyRequest {
+        version: 1,
+        position: LineIndex::new(VIEW)
+            .position(VIEW.find("Street}").unwrap() + 2)
+            .unwrap(),
+    };
+    let plan = service
+        .plan_registered_property_rename(&uri, &request, "Line1", None)
+        .unwrap();
+    assert!(plan.unmapped.is_empty());
+    assert_eq!(plan.documents.len(), 3);
+    assert!(
+        plan.documents
+            .iter()
+            .any(|change| change.after == PLACE.replace("Street:", "Line1:"))
+    );
+    assert!(
+        plan.documents
+            .iter()
+            .any(|change| change.after == explicit.replace("Binding Street,", "Binding Line1,"))
+    );
+    assert!(
+        plan.documents
+            .iter()
+            .any(|change| change.after == VIEW.replace("Address.Street", "Address.Line1"))
+    );
+    explicit = explicit.replace("Binding Street", "Binding Line1");
+    fixture.write("app/Capture.xaml", &explicit);
+    assert!(
+        service
+            .plan_registered_property_rename(&uri, &request, "Line1", None)
+            .unwrap_err()
+            .0
+            .contains("would capture")
+    );
+    fs::remove_file(fixture.0.join("app/Capture.xaml")).unwrap();
+    let explicit_uri = file_uri(fixture.0.join("app/Explicit.xaml")).unwrap();
+    service
+        .open(&explicit_uri, "<TextBlock Text=\"", 1)
+        .unwrap();
+    assert!(
+        service
+            .plan_registered_property_rename(&uri, &request, "Line1", None)
+            .unwrap_err()
+            .0
+            .contains("incomplete XAML")
+    );
+    let stale = RegisteredPropertyRequest {
+        version: 0,
+        ..request
+    };
+    assert!(
+        service
+            .plan_registered_property_rename(&uri, &stale, "Line1", None)
+            .unwrap_err()
+            .0
+            .contains("source changed")
+    );
 }

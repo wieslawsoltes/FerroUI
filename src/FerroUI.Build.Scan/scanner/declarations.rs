@@ -704,6 +704,7 @@ pub(crate) struct Registration {
     pub kind: RegistrationModel,
     /// The text of the first argument of `FerroProperty::register*`.
     pub name: Option<String>,
+    pub name_range: Option<Range<usize>>,
     /// The type arguments of `FerroProperty::register*::<..>`.
     pub type_arguments: Vec<Tokens>,
     /// The accessor the body calls (`Decorator::child_property`), for an added owner and
@@ -723,6 +724,7 @@ pub(crate) fn read_registration(body: &[TokenTree]) -> Registration {
     let mut registration = Registration {
         kind: RegistrationModel::Unknown,
         name: None,
+        name_range: None,
         type_arguments: Vec::new(),
         source: None,
         added_owner: None,
@@ -730,9 +732,15 @@ pub(crate) fn read_registration(body: &[TokenTree]) -> Registration {
         inherits: calls_with_true(body, &["inherits"]),
         read_only: states_no_setter(body),
     };
-    if let Some((name, type_arguments)) = find_register(body) {
+    let mut calls = Vec::new();
+    read_register_calls(body, &mut calls);
+    let unique = calls.len() == 1;
+    if let Some((name, type_arguments)) = calls.into_iter().next() {
         registration.kind = RegistrationModel::Declared;
-        registration.name = name;
+        if let Some((text, range)) = name {
+            registration.name = Some(text);
+            registration.name_range = unique.then_some(range);
+        }
         registration.type_arguments = type_arguments;
     } else if let Some((source, added_owner)) = find_add_owner(body) {
         registration.kind = RegistrationModel::AddedOwner;
@@ -826,14 +834,16 @@ fn angle_group(tokens: &[TokenTree], index: usize) -> Option<(&[TokenTree], usiz
     None
 }
 
-/// `FerroProperty::register*::<A, B>("Name", ..)`, at any depth: the name (when the first
-/// argument is a string literal) and the type arguments.
-fn find_register(tokens: &[TokenTree]) -> Option<(Option<String>, Vec<Tokens>)> {
+type RegisterCall = (Option<(String, Range<usize>)>, Vec<Tokens>);
+
+/// `FerroProperty::register*::<A, B>("Name", ..)`, at any depth.
+fn read_register_calls(tokens: &[TokenTree], calls: &mut Vec<RegisterCall>) {
     for index in 0..tokens.len() {
+        if calls.len() == 2 {
+            return;
+        }
         if let TokenTree::Group(group) = &tokens[index] {
-            if let Some(found) = find_register(&tokens_of(group.stream())) {
-                return Some(found);
-            }
+            read_register_calls(&tokens_of(group.stream()), calls);
             continue;
         }
         let is_register = ident_of(&tokens[index]).as_deref() == Some("FerroProperty")
@@ -845,16 +855,16 @@ fn find_register(tokens: &[TokenTree]) -> Option<(Option<String>, Vec<Tokens>)> 
         }
         let Some((arguments, after)) = angle_group(tokens, index + 6) else { continue };
         let Some(call) = tokens.get(after).and_then(|token| group_of(token, Delimiter::Parenthesis)) else { continue };
-        let name = match tokens_of(call.stream()).first() {
-            Some(TokenTree::Literal(literal)) => match syn::Lit::new(literal.clone()) {
-                syn::Lit::Str(text) => Some(text.value()),
+        let call = tokens_of(call.stream());
+        let name = match call.as_slice() {
+            [TokenTree::Literal(literal), rest @ ..] if rest.first().is_none_or(|next| is_punct(next, ',')) => match syn::Lit::new(literal.clone()) {
+                syn::Lit::Str(text) => Some((text.value(), text.span().byte_range())),
                 _ => None,
             },
             _ => None,
         };
-        return Some((name, split_types(arguments, 0).unwrap_or_default()));
+        calls.push((name, split_types(arguments, 0).unwrap_or_default()));
     }
-    None
 }
 
 /// `Type::accessor().add_owner*::<Owner>(..)`, at any depth: the path of the accessor and

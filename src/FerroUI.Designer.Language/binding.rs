@@ -6,7 +6,9 @@ use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, SourceSpan};
 use std::collections::BTreeMap;
 
 mod fixes;
+mod property_references;
 pub(crate) use fixes::case_mismatch;
+pub(crate) use property_references::property_references;
 
 impl LanguageService {
     /// Locate the ends of typed binding paths visible in the requested source range.
@@ -66,16 +68,7 @@ pub(crate) fn members(
         expression,
         &arguments,
         &mut path,
-        |name| {
-            let scope = crate::name_scope(document, node);
-            let mut targets = crate::name_occurrences(document)
-                .into_iter()
-                .filter(|occurrence| {
-                    occurrence.declaration && occurrence.scope == scope && occurrence.name == name
-                });
-            let node = targets.next()?.node;
-            targets.next().is_none().then_some(node)
-        },
+        |name| named_target(document, node, name),
     ) else {
         return BTreeMap::new();
     };
@@ -85,24 +78,34 @@ pub(crate) fn members(
             else {
                 return BTreeMap::new();
             };
-            let next = if let Some(type_) = &property.model_type {
-                schema.type_info(&type_.name, Some(&type_.namespace))
-            } else {
-                property_type(
-                    schema,
-                    &property.type_name,
-                    &owner.namespace,
-                    document,
-                    node,
-                )
-            };
-            let Some(next) = next else {
+            let Some(next) = member_type(schema, document, node, owner, &property) else {
                 return BTreeMap::new();
             };
             owner = next;
         }
     }
     schema.properties(&owner.name, Some(&owner.namespace))
+}
+
+fn named_target(document: &Document, anchor: NodeId, name: &str) -> Option<NodeId> {
+    let scope = crate::name_scope(document, anchor);
+    let mut targets = crate::name_occurrences(document)
+        .into_iter()
+        .filter(|occurrence| {
+            occurrence.declaration && occurrence.scope == scope && occurrence.name == name
+        });
+    let node = targets.next()?.node;
+    targets.next().is_none().then_some(node)
+}
+
+fn member_type<'a>(
+    schema: &'a Schema, document: &Document, node: NodeId, owner: &TypeInfo, property: &PropertyInfo,
+) -> Option<&'a TypeInfo> {
+    if let Some(type_) = &property.model_type {
+        schema.type_info(&type_.name, Some(&type_.namespace))
+    } else {
+        property_type(schema, &property.type_name, &owner.namespace, document, node)
+    }
 }
 
 /// A type named by an authored XAML type value, including a local binding override.
@@ -327,7 +330,7 @@ fn source_type<'a>(
     }
     None
 }
-fn type_reference<'a>(
+pub(crate) fn type_reference<'a>(
     schema: &'a Schema,
     document: &Document,
     node: NodeId,

@@ -1,7 +1,7 @@
 use crate::{PropertyInfo, Schema, TypeInfo};
 use crate::schema::ModelType;
-use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeModel};
-use ferroui_designer_project::{CompiledResources, MarkupCatalog};
+use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, RegisteredModel, RegistrationModel, TypeModel};
+use ferroui_designer_project::{CompiledResources, MarkupCatalog, MarkupSource};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
@@ -146,7 +146,7 @@ fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel
         properties.insert(member.name.clone(), info);
     }
     for member in &item.registered {
-        if let Some(name) = &member.name {
+        if let Some(name) = catalog.models().name_of(member) {
             let mut info = property(
                     name,
                     &member.value_type.text,
@@ -154,8 +154,10 @@ fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel
                     member.kind == RegisteredKind::Attached,
                     false,
                 );
-            info.authored = catalog.authored_definition(assembly, item, Some((true, &member.accessor)));
-            properties.insert(name.clone(), info);
+            info.authored = registered_origin(catalog, member).or_else(|| {
+                catalog.authored_definition(assembly, item, Some((true, &member.accessor)))
+            });
+            properties.insert(name.into(), info);
         }
     }
     for event in &item.events {
@@ -184,6 +186,18 @@ fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel
                     .any(|constructor| constructor.parameters.is_empty())),
         ..Default::default()
     }
+}
+
+fn registered_origin(catalog: &MarkupCatalog, member: &RegisteredModel) -> Option<Arc<MarkupSource>> {
+    if member.registration == RegistrationModel::Declared {
+        return None;
+    }
+    let declaration = catalog.models().declaration_of(member)?;
+    let (assembly, owner) = catalog.models().find_rust_type(&declaration.owner.as_ref()?.text)?;
+    if !owner.registered.iter().any(|candidate| std::ptr::eq(candidate, declaration)) {
+        return None;
+    }
+    catalog.authored_definition(assembly, owner, Some((true, &declaration.accessor)))
 }
 
 fn model_type(catalog: &MarkupCatalog, text: &str) -> Option<ModelType> {
