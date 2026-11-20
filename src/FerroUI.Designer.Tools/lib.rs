@@ -18,7 +18,9 @@ pub use canvas_guide_edit::{CanvasGuideDraft, CanvasGuideEdit, CanvasGuideUpdate
 pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideAxis, CanvasGuideSettings, CanvasRuler, CanvasSnapPreferences, ruler_ticks};
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
-    ComponentResourceContext, ComponentResourceResolution, component_fragment,
+    ComponentResourceContext, ComponentResourceResolution, ItemTemplateChange, ItemTemplateDeclaration,
+    ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot, ItemTemplateValue, item_template_resources,
+    component_fragment,
     component_property_attribute, component_property_elements, component_property_extractable,
     component_property_object, component_property_resource_owners,
     component_resource_expression, component_resource_references, component_resource_resolution,

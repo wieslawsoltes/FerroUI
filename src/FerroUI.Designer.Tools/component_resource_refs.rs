@@ -488,7 +488,7 @@ fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, 
     Ok(result)
 }
 
-fn object_resource_key(document: &Document, node: &Node) -> Result<Option<(String, String)>> {
+pub(super) fn object_resource_key(document: &Document, node: &Node) -> Result<Option<(String, String)>> {
     let Some(attribute) = component_property_attribute(document, node.id, "ResourceKey")? else {
         return Ok(None);
     };
@@ -557,7 +557,7 @@ pub(crate) fn validate_copied_references(
     Ok(())
 }
 
-fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
+pub(super) fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
     let (prefix, local) = name.rsplit_once(':').unwrap_or(("", name));
     if !document
         .ast()
@@ -574,7 +574,7 @@ fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool>
     }
 }
 
-fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
+pub(super) fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
     extension
         .arguments
         .iter()
