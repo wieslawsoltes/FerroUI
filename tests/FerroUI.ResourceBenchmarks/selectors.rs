@@ -4,7 +4,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::diagnostics::perf_counters::{self, PerfCounter};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::styling::{ControlTheme, Style};
-use ferroui_base::{FerroProperty, Ref};
+use ferroui_base::{FerroProperty, ObjectType, Ref};
 use ferroui_controls::{Border, Button};
 use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
 use serde_json::{json, Value};
@@ -50,9 +50,9 @@ fn main() {
         let mut steps = vec![rt::SelectorStep::Nesting, rt::SelectorStep::Template];
         if mode != "fallback" {
             steps.push(rt::SelectorStep::OfType(if matches {
-                Border::TYPE
+                <Border as ObjectType>::IDENTITY
             } else {
-                Button::TYPE
+                <Button as ObjectType>::IDENTITY
             }));
         }
         if mode != "typed" {
@@ -143,7 +143,7 @@ fn main() {
             rt::build_selector(&[
                 rt::SelectorStep::Nesting,
                 rt::SelectorStep::Template,
-                rt::SelectorStep::OfType(Border::TYPE),
+                rt::SelectorStep::OfType(<Border as ObjectType>::IDENTITY),
             ]),
         );
         let changed = make();

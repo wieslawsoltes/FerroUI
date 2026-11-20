@@ -557,3 +557,58 @@ fn every_kept_unit_has_a_reason() {
     assert!(listing.starts_with(totals), "{listing}");
     assert!(listing.contains("Resources/Accent.xaml\t1 of 2 keys live\texact\tdefines AccentBrush"), "{listing}");
 }
+
+/// What the documents of an ordinary class of a dependency name (#1002): it roots nothing where
+/// nothing constructs the class, and roots the themes where the application names the class (by
+/// the type or its builder, which the scan records in the case of the type), where a live type
+/// creates it, or where the document of another live class constructs it.
+#[test]
+fn the_references_of_an_ordinary_class_root_only_where_the_class_is_live() {
+    use ferroui_build_scan::xaml_metadata::ClassReferencesModel;
+    let class = |class: &str, types: &[&str], keys: &[&str]| ClassReferencesModel {
+        class: class.to_string(),
+        types: strings(types),
+        keys: strings(keys),
+    };
+    let about = class("Lib.About", &["Button", "Window"], &["AboutTitle"]);
+    let credits = class("Lib.Credits", &["Expander"], &[]);
+    let host = class("Lib.Host", &["Credits"], &[]);
+    let classes = [&about, &credits, &host];
+    let graph = TypeGraph::from_pairs(&[("Lib.About", "Window"), ("Lib.Credits", "UserControl"), ("Lib.Host", "Window")])
+        .with_creates(&[("Lib.Shell", "Lib.Host")]);
+    let names = |classes: &[&ClassReferencesModel]| -> Vec<String> { classes.iter().map(|class| class.class.clone()).collect() };
+    let roots = Roots { types: set(&["Window", "TextBlock"]), ..Roots::default() };
+
+    // Nothing constructs a class: a base class of it being live does not make it live.
+    assert!(live_class_references(&classes, &roots, &BTreeSet::new(), &graph).is_empty());
+    // The application names the class (`About::new()`, or `about()`, recorded as `About`).
+    let named = live_class_references(&classes, &roots, &set(&["About"]), &graph);
+    assert_eq!(names(&named), ["Lib.About"]);
+    // A live type creates the class, and the document of the created class constructs another.
+    let with_shell = Roots { types: set(&["Shell"]), ..Roots::default() };
+    let created = live_class_references(&classes, &with_shell, &BTreeSet::new(), &graph);
+    assert_eq!(names(&created), ["Lib.Credits", "Lib.Host"]);
+    // A full name of the sources names the class too.
+    let full = live_class_references(&classes, &Roots::default(), &set(&["Lib.Credits"]), &graph);
+    assert_eq!(names(&full), ["Lib.Credits"]);
+}
+
+/// The reason a unit is kept for a live class names the class (#1002).
+#[test]
+fn a_unit_kept_for_a_live_class_says_which_class() {
+    let graph = TypeGraph::default();
+    let theme = ThemeUnitsModel {
+        class: "Tests.Theme".to_string(),
+        table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![unit(0, "ambient", &[], &[], &[], &[]), unit(1, "Controls/Button.xaml", &[], &["Button"], &[], &[])],
+    };
+    let class_roots = Roots { types: set(&["Button"]), ..Roots::default() };
+    let sources: [(&str, &Roots); 1] = [("referenced by the document of the live class Lib.About", &class_roots)];
+    let explained = explain_kept_units(&theme, &sources, &graph, false);
+    let button = explained.iter().find(|unit| unit.index == 1).expect("the unit of Button is kept");
+    assert_eq!(
+        button.reason,
+        "defines the theme of Button: the type Button, referenced by the document of the live class Lib.About"
+    );
+    assert!(button.conservative);
+}

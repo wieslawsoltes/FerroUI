@@ -155,7 +155,11 @@ fn main() {
         build = build.input(path).compile_group(
             ferroui_build::XamlGroup::new(module)
                 .documents(&views)
-                .class_document(path),
+                .class_document(path)
+                // The crate constructs its views itself (the inspector of
+                // `root_dock_debug_extensions` and the views it shows): what their documents name
+                // roots the themes of every application that links the crate (#1002).
+                .constructed_by_its_crate(),
         );
     }
     build.run();

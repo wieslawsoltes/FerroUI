@@ -36,6 +36,9 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
 - **Direct3D 12 is not used.** On Windows Skia draws with OpenGL ES through ANGLE, which runs on
   Direct3D 11 (as upstream does), with software rendering as the fallback; ANGLE is linked into the
   executable instead of being shipped as a DLL beside it, and is about 4 % of it (section 7).
+- **A C program** linked statically against the C ABI is 36.7 MB with the full library and
+  20.4 MB with the library built by use, which links only the classes it registers (macOS,
+  release, the C hello world; section 3.7).
 
 No functionality was removed, no executable packer is used, and the panic strategy is unchanged.
 
@@ -251,6 +254,48 @@ What the numbers say:
   `ferroui_themes_winui` 15.6, `treedatagrid_demo` 7.4, the colour picker 5.2, Skia 5.1, the
   TreeDataGrid 5.0, ANGLE 6.6 (`libGLESv2` 4.6, `libmozangle` 2.0), the runtime library of
   markup 2.0, the dialogs 1.9, the Windows backend 1.4, HarfBuzz 0.8.
+
+### 3.7 The C ABI: the C samples
+
+A program in another language links `ferroui-capi` (docs/c-abi.md). Its size depends on the mode
+of the library and on the link: the full library (the default features) has the tables of types,
+so every class and the whole Fluent theme are reachable from it; the library built by use
+(`--no-default-features --features desktop`, docs/c-abi.md, section 16) links the classes the
+program registers with their entries and the theme units they need. Linked statically with dead
+stripping, a program keeps what it reaches; a dynamic library keeps every export.
+
+The workflow `Performance` measures `samples/CApi/hello_world.c` and `gauge.c` when it is
+dispatched with `capi` (and a `baseline` to compare with):
+`scripts/capi/size_report.py` builds the library of the tree with `cargo rustc --lib` (all its
+crate types, as `cargo build` writes them) in each mode, links each sample statically
+(`libferroui_capi.a`, the native libraries of `--print native-static-libs`, `-Wl,-dead_strip`, a
+link map) and dynamically, and records the sizes as written and stripped, `size -m` of the static
+program, the stripped dynamic library, and the static program by crate from the link map
+(`scripts/capi/size_by_crate.py`). A tree without the by-use mode is measured in the full mode.
+
+macOS arm64, release, stripped, MB (`size_report.py` on the branch of #978; a library built as a
+static library alone, as in docs/c-abi.md section 16.3, gives programs within 1.5 % of these):
+
+| Program | Static, full | Static, by use | `__TEXT`, full / by use | Dynamic program + library, full / by use |
+| --- | ---: | ---: | ---: | ---: |
+| `hello_world.c` | 36.69 | 20.35 | 31.39 / 17.65 | 36.04 / 31.75 |
+| `gauge.c` | 36.71 | 20.37 | 31.41 / 17.66 | 36.04 / 31.75 |
+| a Rust hello world on main (the range #976 targets) | 16.7 to 20.4 | | | |
+
+`hello_world.c` linked statically, by crate (MB of symbols), full against by use: `ferroui_base`
+14.70 / 8.11, `ferroui_controls` 5.87 / 1.58, native (Skia, HarfBuzz, codecs) 4.65 / 4.65, `core`
+3.74 / 1.79, `ferroui_themes_fluent` 2.01 / 0.38, `ferroui_markup_xaml` 0.54 / 0.27; total 34.44 /
+19.05.
+
+- **By use halves a static program**: the tables of types keep every class (with its metadata and
+  its markup support), and the whole theme keeps every control theme; without them the program
+  keeps the four classes of the hello world, the window, and the units of the theme they root.
+- **A dynamic library does not shrink with the program**: it exports every entry and every call,
+  so it keeps every class; the by-use library is smaller only by the tables (36.00 to 31.72 MB
+  stripped). An application that ships a dynamic library ships one built for it, with the exports
+  of its selection (#977).
+- **The static flags of each toolchain** (`-dead_strip`, `--gc-sections`, `/OPT:REF /OPT:ICF`,
+  SwiftPM, cgo) are in docs/c-abi-languages.md, section 7.
 
 ## 4. The changes
 

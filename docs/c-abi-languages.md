@@ -195,11 +195,77 @@ render, pointer) and `samples/CApi/osprey-bindings/gauge_control` the same contr
 which keeps its state in its registered property instead of instance data. The cost of the calls
 against the same control in Rust is in docs/c-abi.md, section 15.4.
 
-## 7. Checklist
+## 7. Linking statically
+
+A program that links the static library (`libferroui_capi.a`, `ferroui_capi.lib`) keeps only what
+it reaches, if the linker is told to drop the rest, and if the library leaves something to drop:
+build it by use (`--no-default-features --features desktop`, docs/c-abi.md, section 16) and
+register the classes the program uses with their entries. The C hello world is 36.97 MB linked
+statically against the full library and 20.12 MB against the library built by use (macOS,
+release, stripped; docs/binary-size.md, section 3.7). A dynamic library exports every entry and so
+keeps every class: the per-application library with the exports of a selection is #977.
+
+The native libraries the static library needs (Skia's C++ runtime, the frameworks or system
+libraries of the platform) are the ones rustc prints for it:
+
+```sh
+cargo rustc -p ferroui-capi --release --lib --no-default-features --features desktop \
+    -- --print native-static-libs
+```
+
+The flags that drop what a program does not reach, per toolchain:
+
+| Toolchain | Dead code | Notes |
+| --- | --- | --- |
+| clang or GCC on macOS (ld64) | `-Wl,-dead_strip` | then `strip` the program; `-Wl,-map,<file>` writes the map that `scripts/capi/size_by_crate.py` sums by crate |
+| GCC or clang on Linux (GNU ld, lld, gold) | `-Wl,--gc-sections` | Rust objects have a section per function, so the collection reaches into the library; `-s` or `strip` for the symbols |
+| MSVC (`link.exe`) | `/OPT:REF /OPT:ICF` | the default of a release link without `/DEBUG`; with `/DEBUG` state them, since the symbols go to the PDB |
+| MinGW | `-Wl,--gc-sections` | as on Linux |
+| SwiftPM | on by default on Apple platforms (`swift build --disable-dead-strip` turns it off) | add the library with `linkerSettings: [.linkedLibrary("ferroui_capi"), .unsafeFlags(["-L<dir>"])]` and each framework of the native libraries with `.linkedFramework` |
+| Go (cgo) | `go build -ldflags='-s -w -extldflags=-Wl,-dead_strip'` (macOS) or `-extldflags=-Wl,--gc-sections` (Linux) | `#cgo LDFLAGS: -L${SRCDIR}/lib -lferroui_capi` and the native libraries; cgo links with the external linker, which does the collection |
+| Rust (a Rust launcher) | none: link the `rlib` and let cargo link | the application is then a Rust application (docs/binary-size.md) |
+
+Link-time optimisation across the C program and the library (clang with `-flto=thin` and lld of
+the LLVM version of rustc) is docs/c-abi.md, section 13.4: it inlines the small functions of the
+ABI into the program; it is not needed for the size, which dead stripping gives.
+
+## 8. Shipping a library for your application
+
+A dynamic library of every class is 36.4 MB (macOS, release, stripped). Build one for your
+application from the manifest of its bindings (docs/c-abi.md, section 17):
+
+```sh
+python3 scripts/capi/app_library.py app/ferroui.json --out app/ferroui-library --build
+```
+
+It exports the calls and the class entries of the manifest only (19.8 MB for a window with a
+stack panel, a text block and a button), and `ferro_selection_fingerprint()` tells your bindings
+which manifest it was built for. Per language:
+
+| Language | Ship | Notes |
+| --- | --- | --- |
+| C, C++ | statically linked (section 7), or the library for the application beside the program | include `ferroui_app.h` of the generator: `ferro_app_check()` at start, `ferro_app_register_types()` before `ferro_app_run` |
+| Swift | the static library in an XCFramework (`xcodebuild -create-xcframework -library libferroui_capi.a -headers include`), linked with dead stripping | or the library for the application as a dynamic framework; the module map exposes `ferroui.h` |
+| Rust | the crates themselves | a Rust application links what it uses with no C ABI (docs/binary-size.md) |
+| Go | the static library with cgo (section 7) | one executable; `-ldflags='-s -w'` |
+| Zig | the static library (`exe.linkSystemLibrary`, or `addObjectFile` with the archive) | `-dead_strip` / `--gc-sections` as for C |
+| Python (`ctypes`, `cffi`) | the library for the application inside the wheel, beside the module | load it by path; check the fingerprint at import |
+| C# (P/Invoke, `LibraryImport`) | the library for the application in `runtimes/<rid>/native/` of the package | NativeAOT can link the static library instead (`<DirectPInvoke Include="ferroui_capi" />` and `<NativeLibrary Include="libferroui_capi.a" />`) |
+| Java (FFM), Kotlin/JVM | the library for the application in the JAR, extracted and loaded at start, or beside the launcher | `SymbolLookup.libraryLookup` by path |
+| Dart, Flutter (`dart:ffi`) | the library for the application in the native assets of the package (or the plugin) | one per platform and architecture |
+| JavaScript (Node, Bun, Deno FFI) | the library for the application in the platform package (`optionalDependencies` per platform) | |
+| Osprey | the library for the application beside the executable (`LIBRARY_PATH` when building) | the generated runtime checks the fingerprint in `checkApi()` |
+
+A library for one application serves the bindings of its manifest and nothing else: a binding of
+another manifest stops at start with both fingerprints. The full library (fingerprint `0`) serves
+every binding, for development.
+
+## 9. Checklist
 
 - Generated binding, or constant IDs looked up once.
 - Version and fingerprint checked at start.
 - The entries of the classes you use called before `ferro_app_run`.
+- A library built for your application from your manifest, or a static link with dead stripping.
 - Views as frames, memo elements for subtrees that rarely change.
 - Values that change bound to signal slots; values the user changes watched and read with
   loads.

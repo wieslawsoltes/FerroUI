@@ -58,7 +58,12 @@
 //!     }
 //!   ],
 //!   "referenced_types": ["Border", "Button"],         only for a crate without units whose
-//!   "referenced_keys": ["ButtonBackground"]            documents name something (#568)
+//!   "referenced_keys": ["ButtonBackground"],           documents name something (#568)
+//!   "class_references": [                              only when an ordinary class's documents
+//!     {"class": "Fixture.About",                       name something (#1002): roots only where
+//!      "referenced_types": ["Button"],                 the class is live
+//!      "referenced_keys": []}
+//!   ]
 //! }
 //! ```
 //!
@@ -129,12 +134,37 @@ pub struct MarkupReferencesModel {
     pub types: Vec<String>,
     /// What may name a key: keys and the identifier tokens of the documents.
     pub keys: Vec<String>,
+    /// What the documents of each ordinary class of the crate name (#1002): the roots of an
+    /// application only when the class is live in it (constructed by the application, or created
+    /// by a live class), not whenever the crate is linked. In the order of the compilation.
+    pub classes: Vec<ClassReferencesModel>,
+}
+
+/// What the documents of an ordinary class name (#1002): the class (a class whose documents are
+/// not partitioned into units constructed from selected ones), by its full markup name, and the
+/// types and the keys of its documents, as [`MarkupReferencesModel`] has them.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ClassReferencesModel {
+    /// The full markup name of the class (`FerroUI.Dialogs.AboutFerroDialog`).
+    pub class: String,
+    /// The local names of the types its documents construct or select.
+    pub types: Vec<String>,
+    /// What may name a key in its documents.
+    pub keys: Vec<String>,
 }
 
 impl MarkupReferencesModel {
     /// Whether the documents name nothing.
     pub fn is_empty(&self) -> bool {
-        self.types.is_empty() && self.keys.is_empty()
+        self.types.is_empty() && self.keys.is_empty() && self.classes.is_empty()
+    }
+
+    /// Whether the documents name the type `name` (a full or a local name), those of the classes
+    /// included: what a direct dependency's documents may construct (#846).
+    pub fn names_type(&self, name: &str) -> bool {
+        let local = name.rsplit('.').next().unwrap_or(name);
+        let named = |types: &[String]| types.iter().any(|known| known == name || known == local);
+        named(&self.types) || self.classes.iter().any(|class| named(&class.types))
     }
 }
 
@@ -208,6 +238,20 @@ impl XamlMetadata {
                 text.push_str(&format!(",\n  \"{name}\": [{}]", items.join(", ")));
             }
         }
+        if !self.references.classes.is_empty() {
+            let list = |items: &[String]| items.iter().map(|item| json_string(item)).collect::<Vec<_>>().join(", ");
+            text.push_str(",\n  \"class_references\": [");
+            for (index, class) in self.references.classes.iter().enumerate() {
+                text.push_str(if index == 0 { "\n" } else { ",\n" });
+                text.push_str(&format!(
+                    "    {{\"class\": {}, \"referenced_types\": [{}], \"referenced_keys\": [{}]}}",
+                    json_string(&class.class),
+                    list(&class.types),
+                    list(&class.keys)
+                ));
+            }
+            text.push_str("\n  ]");
+        }
         text.push_str("\n}\n");
         text
     }
@@ -246,7 +290,26 @@ impl XamlMetadata {
                 None => Ok(Vec::new()),
             }
         };
-        let references = MarkupReferencesModel { types: strings("referenced_types")?, keys: strings("referenced_keys")? };
+        let classes = match object.iter().find(|(key, _)| key == "class_references") {
+            Some((_, value)) => value
+                .array("class_references")?
+                .iter()
+                .map(|item| {
+                    let item = item.object("the references of a class")?;
+                    let strings = |name: &str| -> Result<Vec<String>, String> {
+                        field(item, name)?.array(name)?.iter().map(|text| text.string(name).map(str::to_string)).collect()
+                    };
+                    Ok(ClassReferencesModel {
+                        class: field(item, "class")?.string("class")?.to_string(),
+                        types: strings("referenced_types")?,
+                        keys: strings("referenced_keys")?,
+                    })
+                })
+                .collect::<Result<Vec<_>, String>>()?,
+            None => Vec::new(),
+        };
+        let references =
+            MarkupReferencesModel { types: strings("referenced_types")?, keys: strings("referenced_keys")?, classes };
         Ok(Self {
             name: field(object, "name")?.string("name")?.to_string(),
             crate_name: field(object, "crate_name")?.string("crate_name")?.to_string(),
@@ -678,6 +741,7 @@ mod tests {
             references: MarkupReferencesModel {
                 types: vec!["Border".to_string(), "ThicknessTransition".to_string()],
                 keys: vec!["SplitViewPaneAnimationEasing".to_string(), "Key \"quoted\"".to_string()],
+                classes: Vec::new(),
             },
         };
         let text = metadata.to_json();
@@ -685,6 +749,38 @@ mod tests {
         assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
         let plain = XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": []}"#).expect("a file without references");
         assert!(plain.references.is_empty());
+    }
+
+    /// Not from upstream (#1002): what the documents of an ordinary class name is read back as it
+    /// was written, by class, and a file without it has none; the types of a class count for
+    /// [`MarkupReferencesModel::names_type`].
+    #[test]
+    fn class_references_round_trip_through_the_text() {
+        let metadata = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel {
+                types: Vec::new(),
+                keys: Vec::new(),
+                classes: vec![ClassReferencesModel {
+                    class: "Library.About".to_string(),
+                    types: vec!["Button".to_string(), "Window".to_string()],
+                    keys: vec!["AboutTitle".to_string()],
+                }],
+            },
+        };
+        let text = metadata.to_json();
+        assert!(text.contains("\"class_references\""), "{text}");
+        assert!(!text.contains("\n  \"referenced_types\""), "no list of the whole crate: {text}");
+        assert_eq!(XamlMetadata::parse(&text), Ok(metadata.clone()));
+        assert!(metadata.references.names_type("Button"));
+        assert!(metadata.references.names_type("FerroUI.Controls.Window"));
+        assert!(!metadata.references.names_type("Border"));
+        let plain = XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": []}"#).expect("a file without references");
+        assert!(plain.references.classes.is_empty());
     }
 
     /// Not from upstream: escapes and errors of the reader.
