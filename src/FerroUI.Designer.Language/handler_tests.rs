@@ -120,6 +120,34 @@ fn existing_literal_is_preserved_and_unknown_or_stale_edits_are_rejected() {
     );
 }
 
+#[test]
+fn a_qualified_routed_event_keeps_its_handler_and_blocks_duplicate_scaffolds() {
+    let source = XAML.replace(
+        "Content='Keep me'",
+        "Button.Click='OnQualified' Content='Keep me'",
+    );
+    let (fixture, service) = Fixture::open(&source, RUST);
+    let duplicate = fixture.request(&source, "Button x:Name", Some("Click"));
+    assert!(
+        service
+            .handler_target(&fixture.xaml, &duplicate)
+            .unwrap_err()
+            .0
+            .contains("already has")
+    );
+    let qualified = fixture.request(&source, "OnQualified", None);
+    let edit = service
+        .plan_handler(
+            &fixture.xaml,
+            &qualified,
+            &fixture.draft(RUST),
+            "OnQualified",
+        )
+        .unwrap();
+    assert!(edit.edit.document_changes[0].edits.is_empty());
+    assert!(apply(RUST, &edit.edit.document_changes[1].edits).contains("fn OnQualified("));
+}
+
 fn apply(source: &str, edits: &[crate::TextEdit]) -> String {
     let index = LineIndex::new(source);
     TextPatch::apply_all(

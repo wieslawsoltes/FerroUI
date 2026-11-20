@@ -121,6 +121,19 @@ impl LanguageService {
             event_object_span(&state.document, node, member).is_none(),
             "Edit the existing event object in source",
         )?;
+        if existing.is_none() {
+            require(
+                !node.attributes.iter().any(|attribute| {
+                    attribute.name != event
+                        && attribute.name.rsplit([':', '.']).next() == Some(member)
+                        && project
+                            .effective
+                            .attribute_property(&state.document, node, attribute)
+                            .is_some_and(|property| property.event)
+                }),
+                "This event already has a qualified or unqualified declaration",
+            )?;
+        }
         let crate_name = owner.assembly.crate_name.clone();
         let signature = catalog
             .event_signature(target.class, declaring, member, &crate_name)

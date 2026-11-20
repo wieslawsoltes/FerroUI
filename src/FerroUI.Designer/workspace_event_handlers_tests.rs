@@ -111,7 +111,7 @@ fn studio_mcp_checks_both_revisions_and_undoes_the_paired_buffers() {
     let inspection = provider
         .call("designer_event_handler", &input, Permissions::default())
         .unwrap();
-    assert_eq!(inspection["target"]["suggestedName"], "OnApplyClick");
+    assert_eq!(inspection["suggestedName"], "OnApplyClick");
     assert_eq!(
         inspection["plan"]["edit"]["document_changes"]
             .as_array()

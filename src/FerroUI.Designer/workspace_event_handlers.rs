@@ -65,12 +65,18 @@ impl DesignerWorkspace {
             .map(|name| service.plan_handler(&context.uri, &context.request, &draft, name))
             .transpose()
             .map_err(|e| e.to_string())?;
-        let declaration = service
-            .handler_definition(&context.uri, &context.request, Some(&draft))
-            .map_err(|e| e.to_string())?;
-        Ok(
-            json!({"target":context.target,"rustVersion":draft.version,"declaration":declaration,"plan":plan}),
-        )
+        let mut result = json!(context.target);
+        result["rustVersion"] = json!(draft.version);
+        if let Some(plan) = plan {
+            result["plan"] = json!(plan);
+        } else {
+            result["declaration"] = json!(
+                service
+                    .handler_definition(&context.uri, &context.request, Some(&draft))
+                    .map_err(|e| e.to_string())?
+            );
+        }
+        Ok(result)
     }
 
     #[cfg(feature = "mcp")]
