@@ -38,13 +38,19 @@ pub fn documents(
 ) -> Result<Vec<(String, String)>, String> {
     let models = ModelSet::new(models);
     let mut out = Vec::with_capacity(documents.len());
+    let mut errors = Vec::new();
     for document in documents {
         let path = directory.join(format!("{}.rs", module_of(document).replace("::", "/")));
         let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
         let file = syn::parse_file(&text).map_err(|error| format!("{}: {error}", path.display()))?;
         let mut reader = Reader::new(&models, &file, units, document);
-        let xaml = reader.document().map_err(|error| format!("{}: {error}", path.display()))?;
-        out.push((document.clone(), xaml));
+        match reader.document() {
+            Ok(xaml) => out.push((document.clone(), xaml)),
+            Err(error) => errors.push(format!("{document}: {error}")),
+        }
+    }
+    if !errors.is_empty() {
+        return Err(errors.join("; "));
     }
     Ok(out)
 }
@@ -267,6 +273,16 @@ fn closure_body(expr: &Expr) -> Option<&Expr> {
     }
 }
 
+/// The value of a block that is one expression (`{ Ok(value(..)) }`), else the expression.
+fn single(expr: &Expr) -> &Expr {
+    if let Expr::Block(block) = expr {
+        if let [Stmt::Expr(inner, None)] = block.block.stmts.as_slice() {
+            return single(inner);
+        }
+    }
+    expr
+}
+
 fn block_statements(expr: &Expr) -> Vec<&Stmt> {
     match expr {
         Expr::Block(block) => block.block.stmts.iter().collect(),
@@ -316,8 +332,15 @@ impl<'a> Reader<'a> {
         match self.imports.get(&first) {
             Some(imported) => {
                 let rest: Vec<String> = path.segments.iter().skip(1).map(|s| s.ident.to_string()).collect();
+                let imported = match imported.strip_prefix("crate::") {
+                    Some(inner) => {
+                        let crate_name = self.models.models().last().map(|m| m.crate_name.clone()).unwrap_or_default();
+                        format!("::{crate_name}::{inner}")
+                    }
+                    None => imported.clone(),
+                };
                 if rest.is_empty() {
-                    imported.clone()
+                    imported
                 } else {
                     format!("{imported}::{}", rest.join("::"))
                 }
@@ -331,6 +354,7 @@ impl<'a> Reader<'a> {
         self.models
             .find_rust_type(&canonical)
             .or_else(|| self.models.find_rust_type(path))
+            .or_else(|| self.models.find_rust_type(&format!("dyn {canonical}")))
             .map(|(_, type_)| type_)
             .ok_or_else(|| format!("the type `{path}` is in no type model"))
     }
@@ -413,14 +437,26 @@ impl<'a> Reader<'a> {
     /// element has it, else `Owner.Name`.
     fn attribute_name(&mut self, element: &'a TypeModel, expr: &Expr) -> R<String> {
         let (owner, name, kind) = self.property(expr)?;
-        let has = self.chain_of_types(element).iter().any(|type_| {
+        let chain = self.chain_of_types(element);
+        let listed = chain.iter().any(|type_| std::ptr::eq(*type_, owner));
+        let has = chain.iter().any(|type_| {
             type_.registered.iter().any(|registered| self.models.name_of(registered) == Some(name.as_str()))
         });
-        if has && kind != RegisteredKind::Attached {
+        if (listed || has) && kind != RegisteredKind::Attached && (listed || !owner_has_attached(owner, &name, self.models)) {
             return Ok(name);
         }
         let owner_type = self.xaml_type(owner);
         Ok(format!("{}.{name}", owner_type.name))
+    }
+
+    /// The name of the source of a template binding: `Owner.Name` for an attached property.
+    fn source_name(&mut self, expr: &Expr) -> R<String> {
+        let (owner, name, kind) = self.property(expr)?;
+        if kind == RegisteredKind::Attached {
+            let owner = self.xaml_type(owner);
+            return Ok(format!("{}.{name}", owner.name));
+        }
+        Ok(name)
     }
 
     fn property_name_on(&mut self, element: Option<&'a TypeModel>, expr: &Expr) -> R<String> {
@@ -488,6 +524,8 @@ impl<'a> Reader<'a> {
                     dictionary = Some(Node::new("ResourceDictionary"));
                 }
                 Expr::Call(call) if path_of_call(call).ends_with("with_styles") => {}
+                Expr::Reference(_) => {}
+                Expr::Call(call) if path_of_call(call) == "Ok" => {}
                 Expr::MethodCall(call) if call.method == "with_styles" => {}
                 Expr::MethodCall(call) if call.method == "add" && expr_text(&call.receiver) == "styles" => {
                     let argument = strip_try(&call.args[0]);
@@ -596,7 +634,7 @@ impl<'a> Reader<'a> {
             "deferred" => {
                 let key = key()?;
                 let body = closure_body(args[1]).ok_or_else(|| at(args[1], "a closure was expected"))?;
-                let value = unwrap_call(body, &["Ok", "value"]);
+                let value = unwrap_call(single(body), &["Ok", "value"]);
                 let mut resource = self.deferred_value(value, &key)?;
                 resource.attributes.insert(0, ("x:Key".to_string(), key));
                 node.child(resource);
@@ -669,15 +707,20 @@ impl<'a> Reader<'a> {
         }
     }
 
-    fn variant_key(&self, expr: &Expr) -> R<String> {
+    fn variant_key(&mut self, expr: &Expr) -> R<String> {
         let text = expr_text(expr);
         Ok(match text.as_str() {
             "ThemeVariant::default()" => "Default".to_string(),
             "ThemeVariant::light()" => "Light".to_string(),
             "ThemeVariant::dark()" => "Dark".to_string(),
-            "crate::WinUITheme::high_contrast()" => "HighContrast".to_string(),
-            other if other.ends_with("WinUITheme::high_contrast()") => "{x:Static winui:WinUITheme.HighContrast}".to_string(),
-            other => return Err(at(expr, format!("the theme variant `{other}`"))),
+            _ => {
+                // A field of a class (`WinUITheme::high_contrast()`): `{x:Static Class.Field}`.
+                let Expr::Call(call) = strip_try(expr) else { return Err(at(expr, format!("the theme variant `{text}`"))) };
+                match self.static_member_text(call)? {
+                    Some(text) => text,
+                    None => return Err(at(expr, format!("the theme variant `{text}`"))),
+                }
+            }
         })
     }
 
@@ -737,7 +780,9 @@ impl<'a> Reader<'a> {
             owner.segments.pop_punct();
             let (xaml, _) = self.type_of_path(&owner)?;
             let text = self.value_text(value, None)?;
-            return Ok((xaml.name, text));
+            // The named colours are members of `Colors`, values of `Color`.
+            let tag = if xaml.name == "Colors" { "Color".to_string() } else { xaml.name };
+            return Ok((tag, text));
         }
         Err(at(value, "a typed value was expected"))
     }
@@ -853,7 +898,7 @@ impl<'a> Reader<'a> {
                         "dynamic" => setter.attribute("Value", format!("{{DynamicResource {}}}", string_literal(args[1]).unwrap_or_default())),
                         "static_resource" => setter.attribute("Value", format!("{{StaticResource {}}}", string_literal(args[1]).unwrap_or_default())),
                         "template_bind" => {
-                            let (_, source, _) = self.property(args[1])?;
+                            let source = self.source_name(args[1])?;
                             setter.attribute("Value", format!("{{TemplateBinding {source}}}"));
                         }
                         "bind" => {
@@ -1033,7 +1078,11 @@ fn nth_text(step: &str, offset: &str) -> String {
 fn collect_uses(tree: &syn::UseTree, prefix: String, imports: &mut HashMap<String, String>) {
     match tree {
         syn::UseTree::Path(path) => {
-            let prefix = if prefix.is_empty() { format!("::{}", path.ident) } else { format!("{prefix}::{}", path.ident) };
+            let prefix = if prefix.is_empty() {
+                if path.ident == "crate" { "crate".to_string() } else { format!("::{}", path.ident) }
+            } else {
+                format!("{prefix}::{}", path.ident)
+            };
             collect_uses(&path.tree, prefix, imports);
         }
         syn::UseTree::Name(name) => {
@@ -1188,7 +1237,7 @@ impl<'a> Reader<'a> {
     /// An element: `t.make(Border::new()).set(..)..control()`.
     fn element(&mut self, expr: &Expr, template_parent: Option<&'a TypeModel>) -> R<Node> {
         let (_, calls) = chain(expr);
-        let mut calls = calls.into_iter();
+        let mut calls = calls.into_iter().skip_while(|call| call.method == "scope").peekable();
         let make = calls.next().ok_or_else(|| at(expr, "an element was expected"))?;
         if make.method != "make" {
             return Err(at(make, format!("`make` was expected, not `{}`", make.method)));
@@ -1239,7 +1288,7 @@ impl<'a> Reader<'a> {
                 }
                 "template_bind" => {
                     let property = self.attribute_name(model, args[0])?;
-                    let (_, source, _) = self.property(args[1])?;
+                    let source = self.source_name(args[1])?;
                     node.attribute(property, format!("{{TemplateBinding {source}}}"));
                 }
                 "template_bind_with" => {
@@ -1248,7 +1297,7 @@ impl<'a> Reader<'a> {
                     let mut parts = Vec::new();
                     if !is_none(args[1]) {
                         let source = unwrap_call(args[1], &["Some"]);
-                        let (_, source, _) = self.property(source)?;
+                        let source = self.source_name(source)?;
                         parts.push(source);
                     }
                     if !is_none(args[2]) {
@@ -1393,6 +1442,10 @@ impl<'a> Reader<'a> {
         if let Some(node) = self.object_value(expr, template_parent)? {
             return Ok(node);
         }
+        // A binding of a multi binding: the element form of its markup extension.
+        if let Ok(BindingValue::Text(text)) = self.binding_value(expr, template_parent) {
+            return Ok(extension_element(&text));
+        }
         Err(at(expr, "an item was expected"))
     }
 
@@ -1409,7 +1462,7 @@ impl<'a> Reader<'a> {
             Expr::Block(_) => return Ok(Some(self.object_node(stripped, template_parent)?)),
             Expr::MethodCall(_) => {
                 let (root, calls) = chain(stripped);
-                if calls.first().is_some_and(|call| call.method == "make") {
+                if calls.iter().find(|call| call.method != "scope").is_some_and(|call| call.method == "make") {
                     let _ = root;
                     return Ok(Some(self.element(stripped, template_parent)?));
                 }
@@ -1478,7 +1531,7 @@ impl<'a> Reader<'a> {
                     }
                     "template_binding" => {
                         let mut node = Node::new("TemplateBinding");
-                        let (_, source, _) = self.property(&call.args[0])?;
+                        let source = self.source_name(&call.args[0])?;
                         node.attribute("Property", source);
                         Ok(node)
                     }
@@ -1667,7 +1720,7 @@ impl<'a> Reader<'a> {
         if let Expr::Call(call) = expr {
             let function = path_of_call(call);
             if function.ends_with("template_binding") {
-                let (_, source, _) = self.property(&call.args[0])?;
+                let source = self.source_name(&call.args[0])?;
                 return Ok(BindingValue::Text(format!("{{TemplateBinding {source}}}")));
             }
             if function.ends_with("dynamic_resource_binding") {
@@ -1679,7 +1732,7 @@ impl<'a> Reader<'a> {
         if let Expr::Call(call) = root {
             let function = path_of_call(call);
             if function.ends_with("TemplateBinding::new") {
-                let (_, source, _) = self.property(&call.args[0])?;
+                let source = self.source_name(&call.args[0])?;
                 let mut parts = vec![source];
                 for option in calls {
                     match option.method.to_string().as_str() {
@@ -1890,6 +1943,7 @@ impl<'a> Reader<'a> {
                 }
             }
             Expr::MethodCall(call) if call.method == "element_ref" => Ok(string_literal(&call.args[0]).unwrap_or_default()),
+            Expr::MethodCall(call) if call.method == "expect" => self.value_text(&call.receiver, property),
             Expr::MethodCall(call) if call.method == "to_string" => Ok(string_literal(&call.receiver).unwrap_or_default()),
             Expr::MethodCall(call) if call.method == "property" => {
                 let (_, name, _) = self.property(expr)?;
@@ -1938,4 +1992,43 @@ fn time_span_text(milliseconds: f64) -> String {
     let seconds = format!("{seconds:.7}");
     let seconds = seconds.trim_end_matches('0').trim_end_matches('.');
     format!("{}:{}:{}", hours as i64, minutes as i64, if seconds.is_empty() { "0" } else { seconds })
+}
+
+/// The element form of a markup extension (`{Binding A, Mode=B}` is `<Binding Path="A" Mode="B" />`).
+fn extension_element(text: &str) -> Node {
+    let text = text.trim();
+    let body = text.strip_prefix('{').and_then(|body| body.strip_suffix('}')).unwrap_or(text);
+    let (name, rest) = body.split_once(' ').unwrap_or((body, ""));
+    let mut node = Node::new(name);
+    let mut parts = Vec::new();
+    let mut depth = 0;
+    let mut current = String::new();
+    for c in rest.chars() {
+        match c {
+            '{' => depth += 1,
+            '}' => depth -= 1,
+            _ => {}
+        }
+        if c == ',' && depth == 0 {
+            parts.push(std::mem::take(&mut current));
+        } else {
+            current.push(c);
+        }
+    }
+    if !current.trim().is_empty() {
+        parts.push(current);
+    }
+    for part in parts {
+        let part = part.trim();
+        match part.split_once('=') {
+            Some((key, value)) if !key.contains('{') => node.attribute(key.trim(), value.trim().trim_matches('\'')),
+            _ => node.attribute(if name == "TemplateBinding" { "Property" } else { "Path" }, part),
+        }
+    }
+    node
+}
+
+/// Whether the property `name` of `owner` is attached (`ScrollViewer.IsDeferredScrollingEnabled`).
+fn owner_has_attached(owner: &TypeModel, name: &str, models: &ModelSet) -> bool {
+    owner.registered.iter().any(|registered| registered.kind == RegisteredKind::Attached && models.name_of(registered) == Some(name))
 }
