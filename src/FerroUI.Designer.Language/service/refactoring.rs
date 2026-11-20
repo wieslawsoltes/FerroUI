@@ -1,16 +1,27 @@
 use super::{
     escape_xml, require, resource_scope, DeclarationIndex, DocumentEdits, LanguageError,
-    LanguageService, Occurrence, ResourceLookup, Result, SourceSpan, SymbolKind, TextEdit,
-    WorkspaceEdit,
+    LanguageService, Occurrence, OccurrenceSpelling, ResourceLookup, Result, SourceSpan,
+    SymbolKind, TextEdit, WorkspaceEdit,
 };
 use std::collections::BTreeMap;
+
+#[path = "resource_rename.rs"]
+pub(super) mod resource_rename;
 
 impl LanguageService {
     pub fn rename(&self, uri: &str, offset: usize, new_name: &str) -> Result<WorkspaceEdit> {
         let target = self
             .target(uri, offset)?
             .ok_or_else(|| LanguageError("No unambiguous symbol at the caret".into()))?;
-        let (target_uri, declaration) = &target;
+        self.rename_declaration(&target, new_name)
+    }
+
+    fn rename_declaration(
+        &self,
+        target: &(String, Occurrence),
+        new_name: &str,
+    ) -> Result<WorkspaceEdit> {
+        let (target_uri, declaration) = target;
         let resource = declaration.kind == SymbolKind::Resource;
         require(
             if resource {
@@ -43,7 +54,7 @@ impl LanguageService {
         // Keep syntax identities and the dictionary graph fixed while testing the
         // proposed spelling through the same resolver that powers navigation.
         let mut old_entries = self.declarations[&declaration.name].clone();
-        old_entries.retain(|entry| !same_declaration(entry, &target));
+        old_entries.retain(|entry| !same_declaration(entry, target));
         let mut renamed = target.clone();
         renamed.1.name = new_name.into();
         new_entries.push(renamed);
@@ -68,7 +79,8 @@ impl LanguageService {
                     && (symbol.name == declaration.name || symbol.name == new_name)
             }) {
                 let before = self.resolve_with_context(uri, reference);
-                let rewrite = matches!(before.matches.as_slice(), [entry] if same_declaration(entry, &target));
+                let rewrite =
+                    matches!(before.matches.as_slice(), [entry] if same_declaration(entry, target));
                 let mut proposed = reference.clone();
                 if rewrite {
                     proposed.name = new_name.into();
@@ -81,6 +93,10 @@ impl LanguageService {
                     )));
                 }
                 if rewrite {
+                    require(
+                        can_spell(reference, new_name),
+                        format!("The new key cannot be written in the resource reference in {uri}"),
+                    )?;
                     grouped.entry(uri.clone()).or_default().push(TextEdit {
                         range: state.index.range(reference.span)?,
                         new_text: replacement(reference, new_name),
@@ -114,7 +130,10 @@ impl LanguageService {
         };
         let mut candidate = reference.clone();
         let mut matches = self.declarations.keys().filter(|name| {
-            if name.as_str() == reference.name || !name.eq_ignore_ascii_case(&reference.name) {
+            if name.as_str() == reference.name
+                || !name.eq_ignore_ascii_case(&reference.name)
+                || !can_spell(reference, name)
+            {
                 return false;
             }
             candidate.name.clone_from(name);
@@ -147,23 +166,50 @@ fn same_declaration(a: &(String, Occurrence), b: &(String, Occurrence)) -> bool 
 }
 
 fn replacement(occurrence: &Occurrence, name: &str) -> String {
-    if occurrence.kind == SymbolKind::Resource && !occurrence.declaration {
-        let quote = occurrence.quote.or_else(|| {
-            name.chars()
-                .any(|c| {
-                    c.is_whitespace() || matches!(c, '{' | '}' | ',' | '=' | '\'' | '"' | '\\')
-                })
-                .then_some('\'')
-        });
-        if let Some(quote) = quote {
-            let value = name
+    match occurrence.spelling {
+        OccurrenceSpelling::Attribute if occurrence.kind == SymbolKind::Resource => {
+            escape_xml(&literal_key(name))
+        }
+        OccurrenceSpelling::Attribute => escape_xml(name),
+        OccurrenceSpelling::Text => escape_xml(name).replace('>', "&gt;"),
+        OccurrenceSpelling::CData => name.into(),
+        OccurrenceSpelling::MarkupArgument(authored_quote) => {
+            let quote = authored_quote.or_else(|| {
+                name.chars()
+                    .any(|c| {
+                        c.is_whitespace() || matches!(c, '{' | '}' | ',' | '=' | '\'' | '"' | '\\')
+                    })
+                    .then_some('\'')
+            });
+            let Some(quote) = quote else {
+                return escape_xml(name);
+            };
+            let value = literal_key(name)
                 .replace('\\', "\\\\")
                 .replace(quote, &format!("\\{quote}"));
-            if occurrence.quote.is_some() {
-                return escape_xml(&value);
+            if authored_quote.is_some() {
+                escape_xml(&value)
+            } else {
+                escape_xml(&format!("{quote}{value}{quote}"))
             }
-            return escape_xml(&format!("{quote}{value}{quote}"));
         }
     }
-    escape_xml(name)
+}
+
+fn literal_key(name: &str) -> std::borrow::Cow<'_, str> {
+    if name.starts_with('{') {
+        format!("{{}}{name}").into()
+    } else {
+        name.into()
+    }
+}
+
+fn can_spell(occurrence: &Occurrence, name: &str) -> bool {
+    match occurrence.spelling {
+        OccurrenceSpelling::Text => name.trim() == name,
+        OccurrenceSpelling::CData => {
+            name.trim() == name && !name.contains("]]>") && !name.contains('\r')
+        }
+        _ => true,
+    }
 }

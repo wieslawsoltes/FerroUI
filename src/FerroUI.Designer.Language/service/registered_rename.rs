@@ -5,26 +5,20 @@ mod sites;
 use super::{
     file_moves::move_drafts,
     registered_rsx::{MappingRename, RenameKind},
-    source_review::{reviewed_document, RustSnapshot},
+    source_review::{self, reviewed_document, RustSnapshot},
     FileMoveDraft, HandlerDraft, LanguageService, Location, ReviewedDocument, State,
 };
-use crate::{require, LanguageError, Position, Range, Result};
+use crate::{require, LanguageError, Range, Result};
 use ferroui_designer_core::{Document, SourceSpan, TextPatch};
-use ferroui_designer_project::{canonical_file_uri, file_path, file_uri, MarkupSource};
-use serde::{Deserialize, Serialize};
+use ferroui_designer_project::{canonical_file_uri, file_uri, MarkupSource};
+use serde::Serialize;
 use std::{
     collections::BTreeMap,
     hash::{DefaultHasher, Hash, Hasher},
-    path::Path,
     sync::Arc,
 };
 pub use super::source_review::RegisteredRenamePlan as RegisteredPropertyPlan;
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-pub struct RegisteredPropertyRequest {
-    pub version: i64,
-    pub position: Position,
-}
+pub use super::source_review::SourceReviewRequest as RegisteredPropertyRequest;
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -238,34 +232,9 @@ fn rust_document(
 }
 
 pub(super) fn check_incomplete(uri: &str, state: &State, names: &[&str]) -> Result<()> {
-    let mentions = |source: &str| names.iter().any(|name| sites::mentions(source, name));
-    let relevant = |source: &str| {
-        mentions(source)
-            || source.contains('&')
-                && ferroui_designer_core::XmlText::text_node(source, SourceSpan::new(0, source.len()))
-                    .is_some_and(|text| mentions(text.value()))
-    };
-    let path = file_path(uri)?;
-    let draft_mentions = relevant(state.document.source()) || relevant(state.document.valid_source());
-    let disk_mentions = !draft_mentions
-        && state.opened
-        && path.is_file()
-        && read_xaml(&path).map(|source| relevant(&source))?;
-    require(
-        !draft_mentions && !disk_mentions,
-        format!("Repair the incomplete XAML that may use the name before reviewing: {uri}"),
-    )
-}
-
-fn read_xaml(path: &Path) -> Result<String> {
-    use std::io::Read;
-    const MAX: u64 = 16 * 1024 * 1024;
-    let mut source = String::new();
-    std::fs::File::open(path)
-        .and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
-        .map_err(|error| LanguageError(error.to_string()))?;
-    require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
-    Ok(source)
+    source_review::check_incomplete(uri, state, |source| {
+        names.iter().any(|name| sites::mentions(source, name))
+    })
 }
 
 fn review_id(

@@ -1,11 +1,19 @@
 use super::{
-    handlers::read_rust, DocumentEdits, LanguageService, LineIndex, Location, Result, TextEdit,
+    handlers::read_rust, DocumentEdits, LanguageService, LineIndex, Location, Result, State,
+    TextEdit,
 };
-use crate::require;
-use ferroui_designer_core::TextPatch;
+use crate::{require, LanguageError};
+use ferroui_designer_core::{SourceSpan, TextPatch, XmlText};
 use ferroui_designer_project::file_path;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, collections::BTreeMap};
+
+/// A source review starts from an exact open buffer and a UTF-16 position.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct SourceReviewRequest {
+    pub version: i64,
+    pub position: crate::Position,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct SourceDraft {
@@ -31,7 +39,7 @@ pub struct RustRenameResolution {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RegisteredRenamePlan {
+pub struct SourceRenamePlan {
     pub name: String,
     pub new_name: String,
     pub review: String,
@@ -42,11 +50,45 @@ pub struct RegisteredRenamePlan {
     pub rust_rename: Option<RustSymbolRename>,
 }
 
+pub use SourceRenamePlan as RegisteredRenamePlan;
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct ReviewedDocument {
     pub edit: DocumentEdits,
     pub before: String,
     pub after: String,
+}
+
+/// An incomplete draft can conceal a use that still exists in its saved source.
+pub(super) fn check_incomplete(
+    uri: &str,
+    state: &State,
+    mentions: impl Fn(&str) -> bool,
+) -> Result<()> {
+    let relevant = |source: &str| {
+        mentions(source)
+            || source.contains('&')
+                && XmlText::text_node(source, SourceSpan::new(0, source.len()))
+                    .is_some_and(|text| mentions(text.value()))
+    };
+    let draft = relevant(state.document.source()) || relevant(state.document.valid_source());
+    let path = file_path(uri)?;
+    let disk = if !draft && state.opened && path.is_file() {
+        use std::io::Read;
+        const MAX: u64 = 16 * 1024 * 1024;
+        let mut source = String::new();
+        std::fs::File::open(path)
+            .and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
+            .map_err(|error| LanguageError(error.to_string()))?;
+        require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
+        relevant(&source)
+    } else {
+        false
+    };
+    require(
+        !draft && !disk,
+        format!("Repair the incomplete XAML that may use the name before reviewing: {uri}"),
+    )
 }
 
 pub(super) fn reviewed_document(

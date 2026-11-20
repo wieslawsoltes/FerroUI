@@ -47,6 +47,12 @@ File documents use canonical filesystem identity, including symlink and `localho
 
 Clients can discover the requests through `experimental.ferrouiEventHandlers`. `ferroui/eventHandlerTarget` returns the code-behind URI and signature. `ferroui/planEventHandler` accepts the current Rust text and version and returns a two-document `WorkspaceEdit` plus the new declaration range. `ferroui/eventHandlerDefinition` accepts the Rust buffer for navigation before save. A client that sets `initializationOptions.ferrouiHandlerCommands` gets a Quick Fix using its `ferroui.createEventHandler` command. The host checks both versions again before applying the patch atomically. [User guide](../../docs/designer/vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+## Reviewed resource rename
+
+The `ferrouiResourceRename` capability advertises `ferroui/resourceRenameTarget` and `ferroui/planResourceRename`. Send `textDocument.uri` and a `request` with the current `version` and UTF-16 `position` on the key, declaration tag, or reference operand. The target returns its name and declaration location. The plan also takes `newName`, refreshes the project index, and validates the same scope semantics as standard XAML rename.
+
+The plan retains each file’s version, original text, exact changes, and proposed text. Qualified resource extensions, XML escapes, and object-form key operands have source spans. Hosts replan on Apply, compare the review identifier, and stage a single source transaction. Studio calls the planner directly. [User guide](../../docs/designer/vscode/authoring.md#rename-a-resource-across-xaml-files)
+
 ## Registered property rename
 
 Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and the relevant open Rust `sourceDrafts` to `ferroui/planRegisteredPropertyRename`. Each draft supplies `uri`, `version`, and `source`. The single `rust` draft argument remains supported for clients that supply only the registration source.

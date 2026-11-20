@@ -15,6 +15,7 @@ mod registered_rsx;
 mod registered_types;
 mod style_selectors;
 mod refactoring;
+mod resource_occurrences;
 mod source_review;
 #[path = "handler_service.rs"]
 mod handlers;
@@ -30,7 +31,8 @@ pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRust
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
-pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename};
+pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget};
+pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename, SourceRenamePlan, SourceReviewRequest};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {
@@ -209,7 +211,14 @@ struct Occurrence {
     kind: SymbolKind,
     declaration: bool,
     node: u64,
-    quote: Option<char>,
+    spelling: OccurrenceSpelling,
+}
+#[derive(Clone, Copy)]
+enum OccurrenceSpelling {
+    Attribute,
+    MarkupArgument(Option<char>),
+    Text,
+    CData,
 }
 impl LanguageService {
     pub fn new(schema: Schema) -> Self {
@@ -2005,53 +2014,10 @@ fn occurrences(document: &Document) -> Vec<Occurrence> {
             kind: SymbolKind::Name(o.scope),
             declaration: o.declaration,
             node: o.node,
-            quote: None,
+            spelling: OccurrenceSpelling::Attribute,
         })
         .collect();
-    for node in document.ast().elements() {
-        for attribute in &node.attributes {
-            if attribute.name.rsplit(':').next() == Some("Key")
-                && attribute.namespace_uri.as_deref()
-                    == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                && !theme_provider(document, node)
-            {
-                out.push(Occurrence {
-                    name: attribute.value.clone(),
-                    span: attribute.value_span,
-                    kind: SymbolKind::Resource,
-                    declaration: true,
-                    node: node.id,
-                    quote: None,
-                });
-            }
-            let raw = &document.source()[attribute.value_span.range()];
-            if raw.starts_with("{}") {
-                continue;
-            }
-            for argument in crate::references::markup_arguments(raw) {
-                if matches!(
-                    argument.extension.as_str(),
-                    "StaticResource" | "DynamicResource"
-                ) && argument
-                    .name
-                    .as_deref()
-                    .is_none_or(|name| name == "ResourceKey")
-                {
-                    out.push(Occurrence {
-                        name: argument.value,
-                        span: SourceSpan::new(
-                            attribute.value_span.start + argument.span.start,
-                            attribute.value_span.start + argument.span.end,
-                        ),
-                        kind: SymbolKind::Resource,
-                        declaration: false,
-                        node: node.id,
-                        quote: argument.quote,
-                    });
-                }
-            }
-        }
-    }
+    resource_occurrences::collect(document, &mut out);
     out
 }
 fn resource_scope(document: &Document, node: u64) -> u64 {
