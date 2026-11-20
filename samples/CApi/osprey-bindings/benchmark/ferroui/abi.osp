@@ -245,6 +245,14 @@ extern fn ferro_focus(object: int) -> int32
 // handled. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status.
 // UI thread only.
 extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+// [`ferro_subscribe`] to the one dispatcher of the thread
+// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls
+// it with `tag`, the sender and the argument, as an event bound in a frame does (the event
+// text and number are empty). For a binding with one dispatcher, which then needs no
+// trampoline of its own between the library and its dispatcher: one indirect call per event.
+// Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI
+// thread only.
+extern fn ferro_subscribe_dispatch(object: int, event: int, tag: int) -> int
 // Removes the handler of the subscription `subscription` ([`ferro_subscribe`]); its user data
 // is released ([`ferro_subscribe_data`]). [`FERRO_NOT_FOUND`] for an ID that is not a live
 // subscription. UI thread only.
@@ -281,6 +289,22 @@ extern fn ferro_frame_bool(property: int, value: int8) -> int32
 // `value_property` (`0` for none), whose text and number [`ferro_frame_event_text`] and
 // [`ferro_frame_event_f64`] give. Any thread.
 extern fn ferro_frame_on(event: int, tag: int, valueProperty: int) -> int32
+// Makes the open element a memo element: its subtree is what `version` says it is (a revision
+// of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets
+// that the version fixes. While the element keeps its key and its version, a commit does not
+// look into its subtree (a new `tag_base` moves its tags), and with an integer key the next
+// frame can reuse it whole ([`ferro_frame_reuse`]). A different subtree under the same key and
+// version is the caller's error: the commit keeps the old one. Any thread.
+extern fn ferro_frame_memo(version: int, tagBase: int) -> int32
+// Writes the memo element with the integer key `key` and the version `version` of the last
+// frame committed under `root` ([`ferro_frame_memo`]) into the frame of the calling thread as
+// one record, in place of its whole subtree, with its tags moved to start at `tag_base`.
+// Returns the number of tags the subtree uses (`0` or more: the next tag of the caller is
+// `tag_base` plus it), or a negative status, and then writes nothing: [`FERRO_NOT_FOUND`] when
+// the root has no such element (nothing is recorded; the caller writes the element in full),
+// or [`FERRO_WRONG_THREAD`](crate::FERRO_WRONG_THREAD) off the UI thread. Commit the frame
+// under the same root, before another commit under it. UI thread only.
+extern fn ferro_frame_reuse(root: int, key: int, version: int, tagBase: int) -> int
 // Commits the frame of the scalar writer of the calling thread under `root` (see
 // [`ferro_frame_commit_bytes`]) and empties the buffer. UI thread only.
 extern fn ferro_frame_commit(root: int) -> int32
@@ -293,9 +317,9 @@ extern fn ferro_frame_commit(root: int) -> int32
 extern fn ferro_frame_dispatcher(function: fn(int, int, int) -> int) -> int32
 // Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and
 // `arg` as an event would, and returns its result: a binding starts its loop with it (the tag
-// `0` asks for the first frame) and a test drives a message without an event. The event text
-// and number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher.
-// UI thread only.
+// `0` asks for the first frame), its one trampoline forwards the events of its subscriptions
+// with it, and a test drives a message without an event. The event text and number are empty.
+// [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI thread only.
 extern fn ferro_frame_dispatch(tag: int, sender: int, arg: int) -> int
 // The text of the value property of the event being dispatched, NUL-terminated and owned by
 // the library until the next event; empty for a binding without a value property or outside a

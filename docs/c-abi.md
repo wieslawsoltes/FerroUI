@@ -331,7 +331,7 @@ machine: the numbers say how large the overhead is, not its exact value.
 - No typed per-control functions in C: bindings generate them from the API model (section 12;
   Osprey first), and a selection trims them in phase 2.
 - No batch of writes (`ferro_set_values`): each scalar write is one direct call, which also
-  serves languages without arrays across their FFI (#950).
+  serves languages without arrays across their FFI (#950); a frame is the batch (section 13).
 - Mobile and the browser start through their hosts, not `ferro_app_run`.
 
 ## 11. Phase 2 and later
@@ -367,10 +367,13 @@ every update and reconciled by the library into the retained tree of a root.
 | `ferro_frame_key_str(text, length)` | a text key for the open element |
 | `ferro_frame_str`, `_str16`, `_f64`, `_i64`, `_bool` | a property value of the open element, as the setters of section 4 write it |
 | `ferro_frame_on(event, tag, value_property)` | binds an event to a message tag; `value_property` is read as the value of the event |
+| `ferro_frame_memo(version, tag_base)` | makes the open element a memo element: not looked into while its key and version stay |
+| `ferro_frame_reuse(root, key, version, tag_base)` | writes one reuse record for the memo element of the last frame under `root`; the number of its tags, or a negative status (write it in full) |
 | `ferro_frame_commit(root)` | reconciles the frame into the children of `root` (`0`: windows, shown and closed) |
 | `ferro_frame_commit_bytes(root, data, length)` | the same for a buffer the caller wrote in the layout of the model |
 | `ferro_frame_dispatcher(function)` | the one dispatcher of the process (any thread): `function(tag, sender, value)` |
 | `ferro_frame_dispatch(tag, sender, arg)` | calls the dispatcher (the start of a loop, a test) |
+| `ferro_subscribe_dispatch(object, event, tag)` | subscribes the dispatcher itself to an event of an object, with a tag |
 | `ferro_frame_event_text()`, `ferro_frame_event_f64()` | the value of the event being dispatched |
 | `ferro_frame_find(root, key)` | the handle of a keyed element of the retained tree |
 | `ferro_frame_clear(root)` | takes the frames of `root` out and frees them |
@@ -379,11 +382,144 @@ The writer functions append records to a buffer of the calling thread (any threa
 records are the byte layout of the model (`frame`), so a language that writes memory commits
 a buffer of its own with one call. A commit writes only what changed, never writes back a
 text the object already shows, binds events once and changes their tags in place, and does
-not dispatch what it caused itself. The tests are `src/FerroUI.CApi/tests/frame_tests.rs` and
+not dispatch what it caused itself. What a frame costs, and memo elements, are in section 13.
+The tests are `src/FerroUI.CApi/tests/frame_tests.rs` and
 the frame part of `samples/CApi/abi_test.c`.
 
-- **Osprey (#950):** shape 1 works: Osprey executables over the dynamic library with
-  named-function callbacks (`samples/CApi/osprey`). Next: generated `extern fn` declarations and
-  ID constants from the same source as the header, then FerroUI owning the process with Osprey
-  as a library (shape 2).
-- **Values:** a `FerroValue` tagged union and `ferro_set_values` beside the scalar family.
+
+## 13. Performance
+
+What a call through the ABI costs, what was made cheaper and what was left out (#968
+follow-up). Measured on one Apple silicon Mac (2026-11-19) with the benchmark of the crate
+(`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`, the `bench`
+profile) and its C twin (`samples/CApi/call_overhead.c`, `make -C samples/CApi bench`): the
+median over five runs of the median of 9 samples. The machine was not idle (other builds ran
+on other cores); single numbers moved by up to 10 % from run to run, the differences below are
+far larger than that except where the text says otherwise.
+
+| Operation | Rust | ABI before | ABI after |
+| --- | ---: | ---: | ---: |
+| write `FontSize` (`ferro_set_f64`) | 28.5 ns | 36.6 ns | 34.8 ns |
+| write `Text` with a length (`ferro_set_str`) | 73.6 ns | 92.9 ns | 101.4 ns |
+| read `FontSize` (`ferro_get_f64`) | 3.4 ns | 8.3 ns | 7.3 ns |
+| the check of the thread (`ferro_is_ui_thread`) | | 1.4 ns | 0.6 ns |
+| the handle table (`ferro_retain` and `ferro_release`) | | 6.7 ns | 4.6 ns |
+| reset the error (`ferro_clear_error`) | | 15.9 ns | 0.4 ns |
+| raise `Click` (`ferro_raise`, the whole call) | 44.3 ns | 55.2 ns | 53.4 ns |
+| call the frame dispatcher (`ferro_frame_dispatch`) | | 27.0 ns | 5.0 ns |
+| frame: one text block, its text changes | 73.6 ns | 510 ns | 204 ns |
+| frame: 100 text blocks, one changes | 73.6 ns | 21.6 us | 3.18 us |
+| frame: 100 text blocks, none changes | | 21.2 us | 2.97 us |
+| frame: 100 text blocks, the scalar writer alone | | 2.79 us | 1.26 us |
+| frame: 100 text blocks, the commit of a buffer alone | | 18.6 us | 1.89 us |
+| frame: 1000 text blocks, one changes | | 211 us | 30.2 us |
+| frame: 100 memo text blocks, one changes | | | 1.81 us |
+| frame: 1000 memo text blocks, one changes | | | 17.8 us |
+
+The Rust column of the frames is the one `set_text` a frame comes down to. From C (the
+dynamic library): a frame of 100 text blocks of which one changes 19.9 us before, 3.2 us
+after, 1.72 us as memo elements; the frame dispatcher 28.0 ns before, 4.6 ns after.
+
+### 13.1 Where a call goes
+
+Each line of the benchmark was broken down with a sampling profiler before it was changed:
+
+- **A scalar call** (a write, a read) is the boundary that catches a panic (free unless one
+  is raised), the check of the thread, the lookup of the handle, the resolution of the
+  property ID for the class, and the typed setter or getter of the framework, which is most
+  of a write. A read in Rust is an inlined field access; through the ABI about 4 ns are the
+  call itself and its checks.
+- **A frame** cost what the whole tree costs, not what changed: the decoder built a tree of
+  elements (vectors and a string per element), the reconcile built a hash map per list of
+  siblings, and the writer appended each field with a separate copy. about 87 % of the
+  100-element frame was the commit, 13 % the writer.
+- **A read with a `Result`** (the getters of a binding that reports errors as values) cleared
+  the error of the thread first, which allocated a new empty C string every time.
+- **An event to a binding with one dispatcher** went through a trampoline of the binding and
+  `ferro_frame_dispatch`, which took a mutex and allocated an empty C string for the event text.
+
+### 13.2 What was made cheaper
+
+1. **Frames cost what changed** (`frame.rs`). The frame is indexed in one pass over its
+   record headers into a flat list of elements that is kept from one commit to the next (no
+   allocation per element); each element of the retained tree keeps the bytes of its
+   attribute records, and an element whose bytes did not change costs one short comparison
+   of bytes, with no decoding, no lookup and no write. Siblings whose keys and classes are the
+   ones of the last frame, in the same order, are matched by position in place, with no table
+   (the fast path of the keyed reconcilers of Inferno and ivi); only a reordered list builds the
+   keyed map. The text of a value is checked for UTF-8 when it is written: an unchanged value
+   was checked when it was first written (a text that is not UTF-8 fails its write like any
+   other value; a key that is not UTF-8 still refuses the frame). The commit of a buffer of 100
+   elements went from 18.6 us to 1.9 us, about 19 ns per element.
+2. **Memo elements and reuse records** (`ferro_frame_memo`, `ferro_frame_reuse`; records 10
+   and 11 of the layout). The idea of `Html.Lazy` and `React.memo` with an explicit version in
+   place of a comparison of arguments: an element with a memo record is not looked into while
+   its key and version stay, and a binding that asks `ferro_frame_reuse` first writes one
+   record in place of the whole subtree, and need not build it. The library keeps the bytes of
+   every memo element with an integer key, so a reuse record also works for an element that
+   moved to another parent, and a new tag base only moves the tags of its events (positional
+   tags of an Elm-like binding shift when an earlier element gains an event). From C, a reused
+   text block costs about 17 ns, about half of writing and comparing it; the gain grows with
+   the size of the subtree. In Osprey, building the view is most of a frame now (section 6 of
+   docs/osprey.md), which a memo element does not skip yet.
+3. **The writer appends words** (`Vec<u64>`), one store per field, in place of byte copies of
+   variable length: 2.79 us to 1.26 us for the 302 writer calls of 100 elements (with step 5).
+4. **No allocation on the paths of every call.** The error of the thread is a buffer that is
+   cleared, not a new C string (`ferro_clear_error` 15.9 ns to 0.4 ns); `ferro_get_cstr` reads
+   a text property in place into a kept buffer; the event text of a frame dispatch is a kept
+   buffer; the dispatcher is an atomic pointer, not a mutex (27.0 ns to 5.0 ns).
+5. **The UI thread is checked with one comparison** (`thread.rs`). The UI thread is remembered
+   as a token that the calling thread reads without a call where the platform allows: the
+   thread register on Apple arm64 (`TPIDRRO_EL0`), `pthread_self` on other Unix systems,
+   `GetCurrentThreadId` on Windows. The handle table, the resolved property and event IDs and
+   the state of the frames are statics behind `UiCell`, which checks that token and a busy flag
+   on every access (the same guarantees as a thread-local `RefCell`: no access from another
+   thread, no second access inside one), so a call reads no thread-local variable (a call into
+   the dynamic loader on macOS, a table of keys on Android). The check went from 1.4 ns to
+   0.6 ns, a retain and a release from 6.7 ns to 4.6 ns, a read from 8.3 ns to 7.3 ns. Every
+   guarantee of section 5 stays: a status for every failure, `FERRO_WRONG_THREAD` from another
+   thread, `FERRO_BAD_HANDLE` for a stale handle (handles keep their generation), nothing
+   unwinds.
+6. **One indirect call per event** for a binding with one dispatcher
+   (`ferro_subscribe_dispatch(object, event, tag)`): the library calls the dispatcher of
+   `ferro_frame_dispatcher` with the tag, with no function of the binding in between.
+
+The write of `Text` measured 5 to 9 ns slower after step 5 in these runs (the write of a
+number, the read and every other line got faster); the profile puts the difference at the end
+of the lookup of the handle and the property, where the code is the same for both writes, and
+no cause was found. It is left to a follow-up measurement on a quiet machine.
+
+### 13.3 What was left out, and why
+
+- **Subtree hashes** (Merkle hashing of each subtree, to skip an unchanged subtree with one
+  comparison): a frame is checked record by record anyway (every commit validates the layout
+  of what it is given), so an unchanged subtree still costs the walk over its headers, and
+  the exact comparison of attribute bytes costs about as much as hashing them. A hash would
+  also make a collision a missed update. Memo elements skip subtrees exactly, by the version
+  the binding gives.
+- **A batch scope** (check the thread and the handle once for several writes): after step 5
+  the check of the thread is a comparison and the handle lookup an index, about 2 ns of a
+  write of 35 ns; a frame is already the batch for many writes (one check of the thread and
+  one lookup of the root per commit).
+- **Fine-grained bound values for layer 1** (bind a value once, update it alone): layer 1 is
+  already fine-grained, one setter call per changed value.
+- **Borrowing the object for the length of a call** in place of counting a reference: a
+  setter can run code of the caller (a handler of a property change) that releases the very
+  handle, so the counted reference stays.
+- **Lazy elements in Osprey** (a function that builds a subtree only when its version changed):
+  Osprey 0.29 does not call a function held in a value whose effects it cannot track; the
+  `memo(version)` attribute skips writing and reconciling, not building.
+
+### 13.4 Link-time optimisation across C and Rust
+
+A C or C++ application that links the static library can let the linker optimise across the
+two languages: build the library with `RUSTFLAGS="-Clinker-plugin-lto"` (and `lto = false` in
+the profile, the linker does it) for the target alone (`--target`, so that build scripts are
+linked normally), and link with `clang -flto=thin` and `lld`, with a clang and an lld of the
+same LLVM version as rustc (`rustc -vV`; for example Rust 1.93 with LLVM 21.1.8 and clang
+21.1.8). The small functions of the ABI can then be inlined into the C program. Measured with
+`call_overhead.c` (three runs each): a read 8.0 ns dynamic, 8.0 ns static, 7.4 ns with LTO;
+a write and a frame within the noise of the three. The call itself is not where the cost of a
+call is (section 13.1), and the link of the 100-element benchmark took 52 s on 6 cores, so
+it is an option for an application that wants the last half nanosecond, not the default.
+It does not apply to Osprey, which calls the dynamic library.

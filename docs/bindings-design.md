@@ -51,11 +51,14 @@ part of it; section 7 says what is done and what is next.
    struct` in C#, a `struct` in Swift, a `value class` in Kotlin, an inline class in C++. No
    allocation per wrapper; the handle table of the library counts references
    (`ferro_retain`, `ferro_release`), and the framework owns its tree.
-5. **One callback trampoline per binding.** A binding exports one function to the library and
+5. **One callback per binding, no trampoline.** A binding gives the library one function and
    keeps its handlers in a table on its side: the token (or the frame tag) is the index. No
-   native thunk per handler. Osprey does this with `dispatchEvent` and the one dispatcher of
-   the application; a language with closures uses `ferro_subscribe` with one function and the
-   token as the index of its table.
+   native thunk per handler. A binding whose events all go to one dispatcher (Osprey, an
+   Elm-like binding) subscribes with `ferro_subscribe_dispatch(object, event, tag)`, which
+   calls the dispatcher of `ferro_frame_dispatcher` directly: one indirect call per event and
+   no function of the binding in between; a language with closures uses `ferro_subscribe`
+   with one function and the token as the index of its table. Nothing is allocated per
+   event (the event text of a frame event lives in a buffer the library keeps).
 6. **Selection trims both sides.** A manifest of what an application uses (`ferroui.json`:
    classes, whose bases come with them, and layers) selects the part of the model a backend
    generates; the Osprey backend does this for every sample. Trimming the exports and tables of
@@ -63,6 +66,26 @@ part of it; section 7 says what is done and what is next.
 7. **A benchmark per backend.** Each backend ships the same operations as the Rust benchmark
    of the ABI (`src/FerroUI.CApi/benches/call_overhead.rs`): a property write, a read, an
    event dispatch, frame commits. Section 6 of docs/osprey.md has the numbers of Osprey.
+8. **Frames cost what changed.** A commit compares the attribute bytes of every element with
+   the ones the retained tree keeps from the last frame and matches siblings by position
+   while their keys stay, so an unchanged element costs one short comparison
+   (docs/c-abi.md, section 13). A view layer that knows what a subtree depends on makes it a
+   memo element (`ferro_frame_memo(version, tag_base)` after its open record) and asks
+   `ferro_frame_reuse(root, key, version, tag_base)` before building it: when the last frame
+   under the root has it, one reuse record replaces the subtree and the binding does not build
+   or write it (the idea of `Html.Lazy` and `React.memo`, with the version as the
+   comparison). The version is the binding's promise: a new version whenever anything in the
+   subtree changes.
+9. **Getters return plain values.** A getter is one call that returns the value, or the
+   fallback of its kind when the read fails (`ferro_get_f64_or`, `ferro_get_cstr_or`, ...);
+   the failure is recorded, and the binding reports it the way it reports a failed setter
+   (Osprey's `failure()`, an exception thrown from the code of the last error in C#), never
+   by allocating a result object per read. `ferro_clear_error` and the error buffer allocate
+   nothing.
+10. **The UI thread is cheap to be on.** The state of the ABI that belongs to the UI thread
+   (handles, resolved IDs, frames) is in statics checked with one comparison of the thread
+   (docs/c-abi.md, section 13), so a binding gains nothing by caching handles or IDs on its
+   side.
 
 ## 3. Idiom
 
@@ -99,16 +122,21 @@ retained tree of a root. The layout (also `frame` in the model):
 - `open` (1): type ID, key. `close` (2). `text` (3): property, length, UTF-8 bytes padded to 8.
   `number` (4): property, the bits of an `f64`. `integer` (5): property, value. `bool` (6):
   property, 0 or 1. `on` (7): event, tag, value property. `text16` (8): property, code units,
-  UTF-16 padded to 8. `key_text` (9): a text key for the open element.
+  UTF-16 padded to 8. `key_text` (9): a text key for the open element. `memo` (10): version,
+  tag base of the open element. `reuse` (11): key, version, tag base, in place of an element.
 
 The commit: an element keeps its object while its class and its key stay (without a key, its
 position among the siblings without one); a value is written when it changed since the last
 frame, and a text not even then when the object already shows it (what the user typed into a
 text box is never written back); a value the frame no longer sets is cleared; event bindings
 stay and take their new tags in place; elements that went away are taken out and released.
-Writes go through the setters of the ABI, so a frame converts and validates as they do. With
-the root `0` the elements at the top are windows, shown when they come and closed when they
-go.
+Writes go through the setters of the ABI, so a frame converts and validates as they do (the
+text of a value is checked for UTF-8 when it is written: an unchanged value is not looked at
+again). With the root `0` the elements at the top are windows, shown when they come and
+closed when they go. A memo element whose key and version stay is not looked into; a new tag
+base only moves the tags of its events. A reuse record stands for the memo element of its
+key and version in the last frame under the root, also when it moved to another parent (the
+library keeps the bytes of every memo element with an integer key).
 
 Events of a frame call one dispatcher (`ferro_frame_dispatcher`) with the tag, the sender and
 the value of the value property (`ferro_frame_event_text`, `ferro_frame_event_f64`). What a
@@ -140,9 +168,11 @@ documentation from the model.
 
 Done in the Osprey MVP: the model and its tests, stable IDs compiled into the library and the
 fingerprint, the frame layout with the scalar writer and the buffer commit, UTF-16 entry
-points, getters with a fallback and `ferro_clear_error` for `Result` values, one trampoline,
-both layers of Osprey for every class, selections from a manifest (each sample builds in one
-to two seconds), five samples and a benchmark.
+points, getters with a fallback, both layers of Osprey for every class, selections from a
+manifest (each sample builds in one to two seconds), five samples and a benchmark. Then the
+performance work of docs/c-abi.md, section 13: frames proportional to what changed, memo
+elements and reuse records (the `memo(version)` attribute of Osprey), plain getters, events
+subscribed to the dispatcher, and the cheaper calls.
 
 Next:
 

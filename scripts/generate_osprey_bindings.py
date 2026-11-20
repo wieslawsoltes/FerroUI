@@ -413,7 +413,7 @@ def signature(name, params, returns, text):
 def generate_objects(model, names, selection):
     lines = [HEADER, "//", "// Layer 1 of the Osprey bindings (docs/osprey.md): the fluent object model. A constructor per",
              "// class that can be created, a setter per property that takes the handle and returns it (setters",
-             "// chain with the pipe), a getter per property that returns a Result, and a helper per event",
+             "// chain with the pipe), a getter per property that returns a plain value, and a helper per event",
              "// that dispatches a tag to the one dispatcher of the application (core.osp).",
              "// A failed write is recorded by the library: `failure()` (core.osp) reads and clears it.",
              "", "namespace ferroobjects;", "", "import ferroui::*", ""]
@@ -500,12 +500,9 @@ def generate_objects(model, names, selection):
                 else:
                     read = f"ferro_get_f64_or(object: object, property: {prop['id']}, fallback: 0.0)"
                     type_ = "float"
-                lines += signature(name, "object: int", f"Result<{type_}, string>", f"reads {prop['name']} ({owners}).")
-                lines.append(f"fn {name}(object) = {{")
-                lines.append("    ferro_clear_error()")
-                lines.append(f"    let value = {read}")
-                lines.append("    readResult(value: value)")
-                lines.append("}")
+                lines += signature(name, "object: int", type_, f"reads {prop['name']} ({owners}); the fallback of"
+                                   " its kind when the read fails (`failure()` tells): a plain value, no Result.")
+                lines.append(f"fn {name}(object) = {read}")
                 counts["getters"] += 1
     lines.append("")
     lines.append("// ---- events --------------------------------------------------------------------------------")
@@ -522,7 +519,7 @@ def generate_objects(model, names, selection):
         lines += signature(name, "object: int, tag: int", "int", f"dispatches `tag` to the dispatcher of the"
                            f" application on every {event['name']} ({owners}). {doc}")
         lines.append(f"fn {name}(object, tag) = {{")
-        lines.append(f"    let _ = ferro_subscribe(object: object, event: {event['id']}, function: dispatchEvent, token: tag)")
+        lines.append(f"    let _ = ferro_subscribe_dispatch(object: object, event: {event['id']}, tag: tag)")
         lines.append("    object")
         lines.append("}")
         lines += signature(f"raise{pascal(event['words'])}", "object: int", "int", f"raises {event['name']} on the"

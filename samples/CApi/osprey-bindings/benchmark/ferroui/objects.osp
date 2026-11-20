@@ -3,7 +3,7 @@
 //
 // Layer 1 of the Osprey bindings (docs/osprey.md): the fluent object model. A constructor per
 // class that can be created, a setter per property that takes the handle and returns it (setters
-// chain with the pipe), a getter per property that returns a Result, and a helper per event
+// chain with the pipe), a getter per property that returns a plain value, and a helper per event
 // that dispatches a tag to the one dispatcher of the application (core.osp).
 // A failed write is recorded by the library: `failure()` (core.osp) reads and clears it.
 
@@ -33,13 +33,10 @@ fn actualThemeVariant(object, value) = {
     let _ = ferro_set_str(object: object, property: 9, text: value, length: -1)
     object
 }
-// getActualThemeVariant(object: int) -> Result<string, string>: reads ActualThemeVariant
-// (Application, StyledElement).
-fn getActualThemeVariant(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 9, fallback: "")}"
-    readResult(value: value)
-}
+// getActualThemeVariant(object: int) -> string: reads ActualThemeVariant (Application,
+// StyledElement); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getActualThemeVariant(object) = "${ferro_get_cstr_or(object: object, property: 9, fallback: "")}"
 // allowFocusOnInteraction(object: int, value: bool) -> int: sets AllowFocusOnInteraction
 // (InputElement). Whether pointer-origin focus changes may focus this element. Inherited;
 // programmatic, tab and directional focus remain controlled by Focusable/IsTabStop as before.
@@ -47,13 +44,10 @@ fn allowFocusOnInteraction(object, value) = {
     let _ = ferro_set_bool(object: object, property: 20, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getAllowFocusOnInteraction(object: int) -> Result<bool, string>: reads
-// AllowFocusOnInteraction (InputElement).
-fn getAllowFocusOnInteraction(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 20, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getAllowFocusOnInteraction(object: int) -> bool: reads AllowFocusOnInteraction
+// (InputElement); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getAllowFocusOnInteraction(object) = ferro_get_bool_or(object: object, property: 20, fallback: toInt8(0)) != toInt8(0)
 // areHorizontalSnapPointsRegular(object: int, value: bool) -> int: sets
 // AreHorizontalSnapPointsRegular (StackPanel, VirtualizingStackPanel). Defines the
 // `AreHorizontalSnapPointsRegular` property.
@@ -61,13 +55,10 @@ fn areHorizontalSnapPointsRegular(object, value) = {
     let _ = ferro_set_bool(object: object, property: 30, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getAreHorizontalSnapPointsRegular(object: int) -> Result<bool, string>: reads
-// AreHorizontalSnapPointsRegular (StackPanel, VirtualizingStackPanel).
-fn getAreHorizontalSnapPointsRegular(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 30, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getAreHorizontalSnapPointsRegular(object: int) -> bool: reads AreHorizontalSnapPointsRegular
+// (StackPanel, VirtualizingStackPanel); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getAreHorizontalSnapPointsRegular(object) = ferro_get_bool_or(object: object, property: 30, fallback: toInt8(0)) != toInt8(0)
 // areVerticalSnapPointsRegular(object: int, value: bool) -> int: sets
 // AreVerticalSnapPointsRegular (StackPanel, VirtualizingStackPanel). Defines the
 // `AreVerticalSnapPointsRegular` property.
@@ -75,13 +66,10 @@ fn areVerticalSnapPointsRegular(object, value) = {
     let _ = ferro_set_bool(object: object, property: 32, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getAreVerticalSnapPointsRegular(object: int) -> Result<bool, string>: reads
-// AreVerticalSnapPointsRegular (StackPanel, VirtualizingStackPanel).
-fn getAreVerticalSnapPointsRegular(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 32, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getAreVerticalSnapPointsRegular(object: int) -> bool: reads AreVerticalSnapPointsRegular
+// (StackPanel, VirtualizingStackPanel); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getAreVerticalSnapPointsRegular(object) = ferro_get_bool_or(object: object, property: 32, fallback: toInt8(0)) != toInt8(0)
 // background(object: int, value: string) -> int: sets Background (Border, ContentPresenter,
 // Panel, RichTextBlock, SwipeItem, TemplatedControl, TextBlock, TextElement, TextHighlighter,
 // TextPresenter). Defines the `Background` property.
@@ -89,14 +77,11 @@ fn background(object, value) = {
     let _ = ferro_set_str(object: object, property: 64, text: value, length: -1)
     object
 }
-// getBackground(object: int) -> Result<string, string>: reads Background (Border,
-// ContentPresenter, Panel, RichTextBlock, SwipeItem, TemplatedControl, TextBlock, TextElement,
-// TextHighlighter, TextPresenter).
-fn getBackground(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 64, fallback: "")}"
-    readResult(value: value)
-}
+// getBackground(object: int) -> string: reads Background (Border, ContentPresenter, Panel,
+// RichTextBlock, SwipeItem, TemplatedControl, TextBlock, TextElement, TextHighlighter,
+// TextPresenter); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getBackground(object) = "${ferro_get_cstr_or(object: object, property: 64, fallback: "")}"
 // backgroundSizing(object: int, value: BackgroundSizing) -> int: sets BackgroundSizing
 // (Border, ContentPresenter, TemplatedControl). Defines the `BackgroundSizing` property.
 fn backgroundSizing(object, value) = {
@@ -109,45 +94,32 @@ fn borderBrush(object, value) = {
     let _ = ferro_set_str(object: object, property: 81, text: value, length: -1)
     object
 }
-// getBorderBrush(object: int) -> Result<string, string>: reads BorderBrush (Border,
-// ContentPresenter, TemplatedControl).
-fn getBorderBrush(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 81, fallback: "")}"
-    readResult(value: value)
-}
+// getBorderBrush(object: int) -> string: reads BorderBrush (Border, ContentPresenter,
+// TemplatedControl); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getBorderBrush(object) = "${ferro_get_cstr_or(object: object, property: 81, fallback: "")}"
 // borderThickness(object: int, value: string) -> int: sets BorderThickness (Border,
 // ContentPresenter, TemplatedControl). Defines the `BorderThickness` property.
 fn borderThickness(object, value) = {
     let _ = ferro_set_str(object: object, property: 82, text: value, length: -1)
     object
 }
-// getBorderThickness(object: int) -> Result<string, string>: reads BorderThickness (Border,
-// ContentPresenter, TemplatedControl).
-fn getBorderThickness(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 82, fallback: "")}"
-    readResult(value: value)
-}
-// getBounds(object: int) -> Result<string, string>: reads Bounds (Visual).
-fn getBounds(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 87, fallback: "")}"
-    readResult(value: value)
-}
+// getBorderThickness(object: int) -> string: reads BorderThickness (Border, ContentPresenter,
+// TemplatedControl); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getBorderThickness(object) = "${ferro_get_cstr_or(object: object, property: 82, fallback: "")}"
+// getBounds(object: int) -> string: reads Bounds (Visual); the fallback of its kind when the
+// read fails (`failure()` tells): a plain value, no Result.
+fn getBounds(object) = "${ferro_get_cstr_or(object: object, property: 87, fallback: "")}"
 // boxShadow(object: int, value: string) -> int: sets BoxShadow (Border, ContentPresenter).
 // Defines the `BoxShadow` property.
 fn boxShadow(object, value) = {
     let _ = ferro_set_str(object: object, property: 88, text: value, length: -1)
     object
 }
-// getBoxShadow(object: int) -> Result<string, string>: reads BoxShadow (Border,
-// ContentPresenter).
-fn getBoxShadow(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 88, fallback: "")}"
-    readResult(value: value)
-}
+// getBoxShadow(object: int) -> string: reads BoxShadow (Border, ContentPresenter); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getBoxShadow(object) = "${ferro_get_cstr_or(object: object, property: 88, fallback: "")}"
 // cacheModeObject(object: int, value: int) -> int: sets CacheMode (Visual) to an object; 0 is
 // null.
 fn cacheModeObject(object, value) = {
@@ -177,12 +149,9 @@ fn clipToBounds(object, value) = {
     let _ = ferro_set_bool(object: object, property: 138, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getClipToBounds(object: int) -> Result<bool, string>: reads ClipToBounds (Visual).
-fn getClipToBounds(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 138, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getClipToBounds(object: int) -> bool: reads ClipToBounds (Visual); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getClipToBounds(object) = ferro_get_bool_or(object: object, property: 138, fallback: toInt8(0)) != toInt8(0)
 // commandParameter(object: int, value: string) -> int: sets CommandParameter (Button,
 // KeyBinding, MenuItem, NativeMenuItem, SplitButton, SwipeItem, TrayIcon). Defines the
 // `CommandParameter` property.
@@ -197,13 +166,10 @@ fn commandParameterObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 154, value: value)
     object
 }
-// getCommandParameter(object: int) -> Result<string, string>: reads CommandParameter (Button,
-// KeyBinding, MenuItem, NativeMenuItem, SplitButton, SwipeItem, TrayIcon).
-fn getCommandParameter(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 154, fallback: "")}"
-    readResult(value: value)
-}
+// getCommandParameter(object: int) -> string: reads CommandParameter (Button, KeyBinding,
+// MenuItem, NativeMenuItem, SplitButton, SwipeItem, TrayIcon); the fallback of its kind when
+// the read fails (`failure()` tells): a plain value, no Result.
+fn getCommandParameter(object) = "${ferro_get_cstr_or(object: object, property: 154, fallback: "")}"
 // content(object: int, value: string) -> int: sets Content (CommandBar, ContentControl,
 // ContentPage, ContentPresenter, DrawerPage, Flyout, NavigationPage, TitleBar). Defines the
 // `Content` property.
@@ -218,14 +184,10 @@ fn contentObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 167, value: value)
     object
 }
-// getContent(object: int) -> Result<string, string>: reads Content (CommandBar,
-// ContentControl, ContentPage, ContentPresenter, DrawerPage, Flyout, NavigationPage,
-// TitleBar).
-fn getContent(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 167, fallback: "")}"
-    readResult(value: value)
-}
+// getContent(object: int) -> string: reads Content (CommandBar, ContentControl, ContentPage,
+// ContentPresenter, DrawerPage, Flyout, NavigationPage, TitleBar); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getContent(object) = "${ferro_get_cstr_or(object: object, property: 167, fallback: "")}"
 // contextFlyoutObject(object: int, value: int) -> int: sets ContextFlyout (Control) to an
 // object; 0 is null.
 fn contextFlyoutObject(object, value) = {
@@ -245,13 +207,10 @@ fn cornerRadius(object, value) = {
     let _ = ferro_set_str(object: object, property: 174, text: value, length: -1)
     object
 }
-// getCornerRadius(object: int) -> Result<string, string>: reads CornerRadius (Border,
-// ContentPresenter, ExperimentalAcrylicBorder, TemplatedControl).
-fn getCornerRadius(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 174, fallback: "")}"
-    readResult(value: value)
-}
+// getCornerRadius(object: int) -> string: reads CornerRadius (Border, ContentPresenter,
+// ExperimentalAcrylicBorder, TemplatedControl); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getCornerRadius(object) = "${ferro_get_cstr_or(object: object, property: 174, fallback: "")}"
 // dataContext(object: int, value: string) -> int: sets DataContext (Application,
 // StyledElement). Defines the `DataContext` property.
 fn dataContext(object, value) = {
@@ -264,31 +223,21 @@ fn dataContextObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 184, value: value)
     object
 }
-// getDataContext(object: int) -> Result<string, string>: reads DataContext (Application,
-// StyledElement).
-fn getDataContext(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 184, fallback: "")}"
-    readResult(value: value)
-}
-// getDesiredSize(object: int) -> Result<string, string>: reads DesiredSize (Layoutable).
-fn getDesiredSize(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 210, fallback: "")}"
-    readResult(value: value)
-}
+// getDataContext(object: int) -> string: reads DataContext (Application, StyledElement); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getDataContext(object) = "${ferro_get_cstr_or(object: object, property: 184, fallback: "")}"
+// getDesiredSize(object: int) -> string: reads DesiredSize (Layoutable); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getDesiredSize(object) = "${ferro_get_cstr_or(object: object, property: 210, fallback: "")}"
 // effectOf(object: int, value: string) -> int: sets Effect (DrawingGroup, Visual). Defines the
 // `Effect` property.
 fn effectOf(object, value) = {
     let _ = ferro_set_str(object: object, property: 252, text: value, length: -1)
     object
 }
-// getEffectOf(object: int) -> Result<string, string>: reads Effect (DrawingGroup, Visual).
-fn getEffectOf(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 252, fallback: "")}"
-    readResult(value: value)
-}
+// getEffectOf(object: int) -> string: reads Effect (DrawingGroup, Visual); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getEffectOf(object) = "${ferro_get_cstr_or(object: object, property: 252, fallback: "")}"
 // flyoutObject(object: int, value: int) -> int: sets Flyout (Button, SplitButton) to an
 // object; 0 is null.
 fn flyoutObject(object, value) = {
@@ -301,12 +250,9 @@ fn focusable(object, value) = {
     let _ = ferro_set_bool(object: object, property: 289, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getFocusable(object: int) -> Result<bool, string>: reads Focusable (InputElement).
-fn getFocusable(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 289, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getFocusable(object: int) -> bool: reads Focusable (InputElement); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getFocusable(object) = ferro_get_bool_or(object: object, property: 289, fallback: toInt8(0)) != toInt8(0)
 // fontFamily(object: int, value: string) -> int: sets FontFamily (ContentPresenter,
 // FontIconSource, RichTextBlock, TemplatedControl, TextBlock). Defines the `FontFamily`
 // property.
@@ -314,39 +260,30 @@ fn fontFamily(object, value) = {
     let _ = ferro_set_str(object: object, property: 290, text: value, length: -1)
     object
 }
-// getFontFamily(object: int) -> Result<string, string>: reads FontFamily (ContentPresenter,
-// FontIconSource, RichTextBlock, TemplatedControl, TextBlock).
-fn getFontFamily(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 290, fallback: "")}"
-    readResult(value: value)
-}
+// getFontFamily(object: int) -> string: reads FontFamily (ContentPresenter, FontIconSource,
+// RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getFontFamily(object) = "${ferro_get_cstr_or(object: object, property: 290, fallback: "")}"
 // fontFeatures(object: int, value: string) -> int: sets FontFeatures (RichTextBlock,
 // TemplatedControl, TextBlock). Defines the `FontFeatures` property.
 fn fontFeatures(object, value) = {
     let _ = ferro_set_str(object: object, property: 291, text: value, length: -1)
     object
 }
-// getFontFeatures(object: int) -> Result<string, string>: reads FontFeatures (RichTextBlock,
-// TemplatedControl, TextBlock).
-fn getFontFeatures(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 291, fallback: "")}"
-    readResult(value: value)
-}
+// getFontFeatures(object: int) -> string: reads FontFeatures (RichTextBlock, TemplatedControl,
+// TextBlock); the fallback of its kind when the read fails (`failure()` tells): a plain value,
+// no Result.
+fn getFontFeatures(object) = "${ferro_get_cstr_or(object: object, property: 291, fallback: "")}"
 // fontSize(object: int, value: float) -> int: sets FontSize (ContentPresenter, FontIconSource,
 // RichTextBlock, TemplatedControl, TextBlock). Defines the `FontSize` property.
 fn fontSize(object, value) = {
     let _ = ferro_set_f64(object: object, property: 292, value: value)
     object
 }
-// getFontSize(object: int) -> Result<float, string>: reads FontSize (ContentPresenter,
-// FontIconSource, RichTextBlock, TemplatedControl, TextBlock).
-fn getFontSize(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 292, fallback: 0.0)
-    readResult(value: value)
-}
+// getFontSize(object: int) -> float: reads FontSize (ContentPresenter, FontIconSource,
+// RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getFontSize(object) = ferro_get_f64_or(object: object, property: 292, fallback: 0.0)
 // fontStretch(object: int, value: FontStretch) -> int: sets FontStretch (ContentPresenter,
 // RichTextBlock, TemplatedControl, TextBlock). Defines the `FontStretch` property.
 fn fontStretch(object, value) = {
@@ -367,13 +304,10 @@ fn fontWeight(object, value) = {
     let _ = ferro_set_str(object: object, property: 295, text: value, length: -1)
     object
 }
-// getFontWeight(object: int) -> Result<string, string>: reads FontWeight (ContentPresenter,
-// FontIconSource, RichTextBlock, TemplatedControl, TextBlock).
-fn getFontWeight(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 295, fallback: "")}"
-    readResult(value: value)
-}
+// getFontWeight(object: int) -> string: reads FontWeight (ContentPresenter, FontIconSource,
+// RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getFontWeight(object) = "${ferro_get_cstr_or(object: object, property: 295, fallback: "")}"
 // foreground(object: int, value: string) -> int: sets Foreground (ContentPresenter,
 // GlyphRunDrawing, IconSource, RichTextBlock, SwipeItem, TemplatedControl, TextBlock,
 // TextHighlighter). Defines the `Foreground` property.
@@ -381,21 +315,13 @@ fn foreground(object, value) = {
     let _ = ferro_set_str(object: object, property: 301, text: value, length: -1)
     object
 }
-// getForeground(object: int) -> Result<string, string>: reads Foreground (ContentPresenter,
-// GlyphRunDrawing, IconSource, RichTextBlock, SwipeItem, TemplatedControl, TextBlock,
-// TextHighlighter).
-fn getForeground(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 301, fallback: "")}"
-    readResult(value: value)
-}
-// getHasMirrorTransform(object: int) -> Result<bool, string>: reads HasMirrorTransform
-// (Visual).
-fn getHasMirrorTransform(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 325, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getForeground(object: int) -> string: reads Foreground (ContentPresenter, GlyphRunDrawing,
+// IconSource, RichTextBlock, SwipeItem, TemplatedControl, TextBlock, TextHighlighter); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getForeground(object) = "${ferro_get_cstr_or(object: object, property: 301, fallback: "")}"
+// getHasMirrorTransform(object: int) -> bool: reads HasMirrorTransform (Visual); the fallback
+// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getHasMirrorTransform(object) = ferro_get_bool_or(object: object, property: 325, fallback: toInt8(0)) != toInt8(0)
 // height(object: int, value: float) -> int: sets Height (Layoutable, RowDefinition). Defines
 // the `Height` property.
 fn height(object, value) = {
@@ -408,12 +334,9 @@ fn heightText(object, value) = {
     let _ = ferro_set_str(object: object, property: 336, text: value, length: -1)
     object
 }
-// getHeight(object: int) -> Result<float, string>: reads Height (Layoutable, RowDefinition).
-fn getHeight(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 336, fallback: 0.0)
-    readResult(value: value)
-}
+// getHeight(object: int) -> float: reads Height (Layoutable, RowDefinition); the fallback of
+// its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getHeight(object) = ferro_get_f64_or(object: object, property: 336, fallback: 0.0)
 // horizontalAlignment(object: int, value: HorizontalAlignment) -> int: sets
 // HorizontalAlignment (Layoutable). Defines the `HorizontalAlignment` property.
 fn horizontalAlignment(object, value) = {
@@ -434,133 +357,89 @@ fn hotKey(object, value) = {
     let _ = ferro_set_str(object: object, property: 344, text: value, length: -1)
     object
 }
-// getHotKey(object: int) -> Result<string, string>: reads HotKey (Button, MenuItem,
-// SplitButton).
-fn getHotKey(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 344, fallback: "")}"
-    readResult(value: value)
-}
+// getHotKey(object: int) -> string: reads HotKey (Button, MenuItem, SplitButton); the fallback
+// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getHotKey(object) = "${ferro_get_cstr_or(object: object, property: 344, fallback: "")}"
 // inlines(object: int, value: string) -> int: sets Inlines (Span, TextBlock). Defines the
 // `Inlines` property.
 fn inlines(object, value) = {
     let _ = ferro_set_str(object: object, property: 369, text: value, length: -1)
     object
 }
-// getInlines(object: int) -> Result<string, string>: reads Inlines (Span, TextBlock).
-fn getInlines(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 369, fallback: "")}"
-    readResult(value: value)
-}
+// getInlines(object: int) -> string: reads Inlines (Span, TextBlock); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getInlines(object) = "${ferro_get_cstr_or(object: object, property: 369, fallback: "")}"
 // isCancel(object: int, value: bool) -> int: sets IsCancel (Button). Defines the `IsCancel`
 // property.
 fn isCancel(object, value) = {
     let _ = ferro_set_bool(object: object, property: 383, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsCancel(object: int) -> Result<bool, string>: reads IsCancel (Button).
-fn getIsCancel(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 383, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsCancel(object: int) -> bool: reads IsCancel (Button); the fallback of its kind when the
+// read fails (`failure()` tells): a plain value, no Result.
+fn getIsCancel(object) = ferro_get_bool_or(object: object, property: 383, fallback: toInt8(0)) != toInt8(0)
 // isDefault(object: int, value: bool) -> int: sets IsDefault (Button). Defines the `IsDefault`
 // property.
 fn isDefault(object, value) = {
     let _ = ferro_set_bool(object: object, property: 391, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsDefault(object: int) -> Result<bool, string>: reads IsDefault (Button).
-fn getIsDefault(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 391, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
-// getIsEffectivelyEnabled(object: int) -> Result<bool, string>: reads IsEffectivelyEnabled
-// (InputElement).
-fn getIsEffectivelyEnabled(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 396, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsDefault(object: int) -> bool: reads IsDefault (Button); the fallback of its kind when
+// the read fails (`failure()` tells): a plain value, no Result.
+fn getIsDefault(object) = ferro_get_bool_or(object: object, property: 391, fallback: toInt8(0)) != toInt8(0)
+// getIsEffectivelyEnabled(object: int) -> bool: reads IsEffectivelyEnabled (InputElement); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsEffectivelyEnabled(object) = ferro_get_bool_or(object: object, property: 396, fallback: toInt8(0)) != toInt8(0)
 // isEnabled(object: int, value: bool) -> int: sets IsEnabled (Hyperlink, InputElement,
 // NativeMenuItem, SwipeGestureRecognizer). Defines the `IsEnabled` property.
 fn isEnabled(object, value) = {
     let _ = ferro_set_bool(object: object, property: 397, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsEnabled(object: int) -> Result<bool, string>: reads IsEnabled (Hyperlink, InputElement,
-// NativeMenuItem, SwipeGestureRecognizer).
-fn getIsEnabled(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 397, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
-// getIsFocused(object: int) -> Result<bool, string>: reads IsFocused (InputElement).
-fn getIsFocused(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 401, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsEnabled(object: int) -> bool: reads IsEnabled (Hyperlink, InputElement, NativeMenuItem,
+// SwipeGestureRecognizer); the fallback of its kind when the read fails (`failure()` tells): a
+// plain value, no Result.
+fn getIsEnabled(object) = ferro_get_bool_or(object: object, property: 397, fallback: toInt8(0)) != toInt8(0)
+// getIsFocused(object: int) -> bool: reads IsFocused (InputElement); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsFocused(object) = ferro_get_bool_or(object: object, property: 401, fallback: toInt8(0)) != toInt8(0)
 // isHitTestVisible(object: int, value: bool) -> int: sets IsHitTestVisible (InputElement).
 // Defines the `IsHitTestVisible` property.
 fn isHitTestVisible(object, value) = {
     let _ = ferro_set_bool(object: object, property: 405, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsHitTestVisible(object: int) -> Result<bool, string>: reads IsHitTestVisible
-// (InputElement).
-fn getIsHitTestVisible(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 405, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
-// getIsKeyboardFocusWithin(object: int) -> Result<bool, string>: reads IsKeyboardFocusWithin
-// (InputElement).
-fn getIsKeyboardFocusWithin(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 414, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
-// getIsPointerOver(object: int) -> Result<bool, string>: reads IsPointerOver (InputElement).
-fn getIsPointerOver(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 429, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
-// getIsPressed(object: int) -> Result<bool, string>: reads IsPressed (Button).
-fn getIsPressed(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 430, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsHitTestVisible(object: int) -> bool: reads IsHitTestVisible (InputElement); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsHitTestVisible(object) = ferro_get_bool_or(object: object, property: 405, fallback: toInt8(0)) != toInt8(0)
+// getIsKeyboardFocusWithin(object: int) -> bool: reads IsKeyboardFocusWithin (InputElement);
+// the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsKeyboardFocusWithin(object) = ferro_get_bool_or(object: object, property: 414, fallback: toInt8(0)) != toInt8(0)
+// getIsPointerOver(object: int) -> bool: reads IsPointerOver (InputElement); the fallback of
+// its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsPointerOver(object) = ferro_get_bool_or(object: object, property: 429, fallback: toInt8(0)) != toInt8(0)
+// getIsPressed(object: int) -> bool: reads IsPressed (Button); the fallback of its kind when
+// the read fails (`failure()` tells): a plain value, no Result.
+fn getIsPressed(object) = ferro_get_bool_or(object: object, property: 430, fallback: toInt8(0)) != toInt8(0)
 // isTabStop(object: int, value: bool) -> int: sets IsTabStop (Hyperlink, InputElement).
 // Defines the `IsTabStop` property.
 fn isTabStop(object, value) = {
     let _ = ferro_set_bool(object: object, property: 443, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsTabStop(object: int) -> Result<bool, string>: reads IsTabStop (Hyperlink,
-// InputElement).
-fn getIsTabStop(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 443, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsTabStop(object: int) -> bool: reads IsTabStop (Hyperlink, InputElement); the fallback
+// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsTabStop(object) = ferro_get_bool_or(object: object, property: 443, fallback: toInt8(0)) != toInt8(0)
 // isVisible(object: int, value: bool) -> int: sets IsVisible (NativeMenuItem, TableViewColumn,
 // TrayIcon, Visual). Defines the `IsVisible` property.
 fn isVisible(object, value) = {
     let _ = ferro_set_bool(object: object, property: 455, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getIsVisible(object: int) -> Result<bool, string>: reads IsVisible (NativeMenuItem,
-// TableViewColumn, TrayIcon, Visual).
-fn getIsVisible(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 455, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getIsVisible(object: int) -> bool: reads IsVisible (NativeMenuItem, TableViewColumn,
+// TrayIcon, Visual); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getIsVisible(object) = ferro_get_bool_or(object: object, property: 455, fallback: toInt8(0)) != toInt8(0)
 // letterSpacing(object: int, value: float) -> int: sets LetterSpacing (ContentPresenter,
 // RichEditBox, RichTextBlock, TemplatedControl, TextBlock). Defines the `LetterSpacing`
 // property.
@@ -568,115 +447,83 @@ fn letterSpacing(object, value) = {
     let _ = ferro_set_f64(object: object, property: 503, value: value)
     object
 }
-// getLetterSpacing(object: int) -> Result<float, string>: reads LetterSpacing
-// (ContentPresenter, RichEditBox, RichTextBlock, TemplatedControl, TextBlock).
-fn getLetterSpacing(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 503, fallback: 0.0)
-    readResult(value: value)
-}
+// getLetterSpacing(object: int) -> float: reads LetterSpacing (ContentPresenter, RichEditBox,
+// RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getLetterSpacing(object) = ferro_get_f64_or(object: object, property: 503, fallback: 0.0)
 // margin(object: int, value: string) -> int: sets Margin (Block, Layoutable). Defines the
 // `Margin` property.
 fn margin(object, value) = {
     let _ = ferro_set_str(object: object, property: 513, text: value, length: -1)
     object
 }
-// getMargin(object: int) -> Result<string, string>: reads Margin (Block, Layoutable).
-fn getMargin(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 513, fallback: "")}"
-    readResult(value: value)
-}
+// getMargin(object: int) -> string: reads Margin (Block, Layoutable); the fallback of its kind
+// when the read fails (`failure()` tells): a plain value, no Result.
+fn getMargin(object) = "${ferro_get_cstr_or(object: object, property: 513, fallback: "")}"
 // maxHeight(object: int, value: float) -> int: sets MaxHeight (Layoutable, RowDefinition).
 // Defines the `MaxHeight` property.
 fn maxHeight(object, value) = {
     let _ = ferro_set_f64(object: object, property: 522, value: value)
     object
 }
-// getMaxHeight(object: int) -> Result<float, string>: reads MaxHeight (Layoutable,
-// RowDefinition).
-fn getMaxHeight(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 522, fallback: 0.0)
-    readResult(value: value)
-}
+// getMaxHeight(object: int) -> float: reads MaxHeight (Layoutable, RowDefinition); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getMaxHeight(object) = ferro_get_f64_or(object: object, property: 522, fallback: 0.0)
 // maxWidth(object: int, value: float) -> int: sets MaxWidth (ColumnDefinition, Layoutable).
 // Defines the `MaxWidth` property.
 fn maxWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 530, value: value)
     object
 }
-// getMaxWidth(object: int) -> Result<float, string>: reads MaxWidth (ColumnDefinition,
-// Layoutable).
-fn getMaxWidth(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 530, fallback: 0.0)
-    readResult(value: value)
-}
+// getMaxWidth(object: int) -> float: reads MaxWidth (ColumnDefinition, Layoutable); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getMaxWidth(object) = ferro_get_f64_or(object: object, property: 530, fallback: 0.0)
 // minHeight(object: int, value: float) -> int: sets MinHeight (Layoutable, RowDefinition).
 // Defines the `MinHeight` property.
 fn minHeight(object, value) = {
     let _ = ferro_set_f64(object: object, property: 541, value: value)
     object
 }
-// getMinHeight(object: int) -> Result<float, string>: reads MinHeight (Layoutable,
-// RowDefinition).
-fn getMinHeight(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 541, fallback: 0.0)
-    readResult(value: value)
-}
+// getMinHeight(object: int) -> float: reads MinHeight (Layoutable, RowDefinition); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getMinHeight(object) = ferro_get_f64_or(object: object, property: 541, fallback: 0.0)
 // minWidth(object: int, value: float) -> int: sets MinWidth (ColumnDefinition, Layoutable).
 // Defines the `MinWidth` property.
 fn minWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 543, value: value)
     object
 }
-// getMinWidth(object: int) -> Result<float, string>: reads MinWidth (ColumnDefinition,
-// Layoutable).
-fn getMinWidth(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 543, fallback: 0.0)
-    readResult(value: value)
-}
+// getMinWidth(object: int) -> float: reads MinWidth (ColumnDefinition, Layoutable); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getMinWidth(object) = ferro_get_f64_or(object: object, property: 543, fallback: 0.0)
 // name(object: int, value: string) -> int: sets Name (Application, StyledElement). Defines the
 // `Name` property.
 fn name(object, value) = {
     let _ = ferro_set_str(object: object, property: 558, text: value, length: -1)
     object
 }
-// getName(object: int) -> Result<string, string>: reads Name (Application, StyledElement).
-fn getName(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 558, fallback: "")}"
-    readResult(value: value)
-}
+// getName(object: int) -> string: reads Name (Application, StyledElement); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getName(object) = "${ferro_get_cstr_or(object: object, property: 558, fallback: "")}"
 // opacity(object: int, value: float) -> int: sets Opacity (Brush, DrawingGroup,
 // DropShadowEffectBase, Visual). Defines the `Opacity` property.
 fn opacity(object, value) = {
     let _ = ferro_set_f64(object: object, property: 595, value: value)
     object
 }
-// getOpacity(object: int) -> Result<float, string>: reads Opacity (Brush, DrawingGroup,
-// DropShadowEffectBase, Visual).
-fn getOpacity(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 595, fallback: 0.0)
-    readResult(value: value)
-}
+// getOpacity(object: int) -> float: reads Opacity (Brush, DrawingGroup, DropShadowEffectBase,
+// Visual); the fallback of its kind when the read fails (`failure()` tells): a plain value, no
+// Result.
+fn getOpacity(object) = ferro_get_f64_or(object: object, property: 595, fallback: 0.0)
 // opacityMask(object: int, value: string) -> int: sets OpacityMask (DrawingGroup, Visual).
 // Defines the `OpacityMask` property.
 fn opacityMask(object, value) = {
     let _ = ferro_set_str(object: object, property: 596, text: value, length: -1)
     object
 }
-// getOpacityMask(object: int) -> Result<string, string>: reads OpacityMask (DrawingGroup,
-// Visual).
-fn getOpacityMask(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 596, fallback: "")}"
-    readResult(value: value)
-}
+// getOpacityMask(object: int) -> string: reads OpacityMask (DrawingGroup, Visual); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getOpacityMask(object) = "${ferro_get_cstr_or(object: object, property: 596, fallback: "")}"
 // orientation(object: int, value: Orientation) -> int: sets Orientation (PipsPager,
 // ProgressBar, RefreshVisualizer, ScrollBar, Slider, StackPanel, TickBar, Track,
 // VirtualizingStackPanel, WrapPanel). Defines the `Orientation` property.
@@ -698,38 +545,28 @@ fn padding(object, value) = {
     let _ = ferro_set_str(object: object, property: 605, text: value, length: -1)
     object
 }
-// getPadding(object: int) -> Result<string, string>: reads Padding (ContentPresenter,
-// Decorator, RichTextBlock, TemplatedControl, TextBlock).
-fn getPadding(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 605, fallback: "")}"
-    readResult(value: value)
-}
+// getPadding(object: int) -> string: reads Padding (ContentPresenter, Decorator,
+// RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getPadding(object) = "${ferro_get_cstr_or(object: object, property: 605, fallback: "")}"
 // renderTransform(object: int, value: string) -> int: sets RenderTransform (Visual). Defines
 // the `RenderTransform` property.
 fn renderTransform(object, value) = {
     let _ = ferro_set_str(object: object, property: 700, text: value, length: -1)
     object
 }
-// getRenderTransform(object: int) -> Result<string, string>: reads RenderTransform (Visual).
-fn getRenderTransform(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 700, fallback: "")}"
-    readResult(value: value)
-}
+// getRenderTransform(object: int) -> string: reads RenderTransform (Visual); the fallback of
+// its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getRenderTransform(object) = "${ferro_get_cstr_or(object: object, property: 700, fallback: "")}"
 // renderTransformOrigin(object: int, value: string) -> int: sets RenderTransformOrigin
 // (Visual). Defines the `RenderTransformOrigin` property.
 fn renderTransformOrigin(object, value) = {
     let _ = ferro_set_str(object: object, property: 701, text: value, length: -1)
     object
 }
-// getRenderTransformOrigin(object: int) -> Result<string, string>: reads RenderTransformOrigin
-// (Visual).
-fn getRenderTransformOrigin(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 701, fallback: "")}"
-    readResult(value: value)
-}
+// getRenderTransformOrigin(object: int) -> string: reads RenderTransformOrigin (Visual); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getRenderTransformOrigin(object) = "${ferro_get_cstr_or(object: object, property: 701, fallback: "")}"
 // requestedThemeVariant(object: int, value: string) -> int: sets RequestedThemeVariant
 // (Application, StyledElement). Defines the `RequestedThemeVariant` property: the UI theme
 // variant that is requested for the application.
@@ -737,37 +574,28 @@ fn requestedThemeVariant(object, value) = {
     let _ = ferro_set_str(object: object, property: 704, text: value, length: -1)
     object
 }
-// getRequestedThemeVariant(object: int) -> Result<string, string>: reads RequestedThemeVariant
-// (Application, StyledElement).
-fn getRequestedThemeVariant(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 704, fallback: "")}"
-    readResult(value: value)
-}
+// getRequestedThemeVariant(object: int) -> string: reads RequestedThemeVariant (Application,
+// StyledElement); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getRequestedThemeVariant(object) = "${ferro_get_cstr_or(object: object, property: 704, fallback: "")}"
 // spacing(object: int, value: float) -> int: sets Spacing (StackPanel). Defines the `Spacing`
 // property.
 fn spacing(object, value) = {
     let _ = ferro_set_f64(object: object, property: 802, value: value)
     object
 }
-// getSpacing(object: int) -> Result<float, string>: reads Spacing (StackPanel).
-fn getSpacing(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 802, fallback: 0.0)
-    readResult(value: value)
-}
+// getSpacing(object: int) -> float: reads Spacing (StackPanel); the fallback of its kind when
+// the read fails (`failure()` tells): a plain value, no Result.
+fn getSpacing(object) = ferro_get_f64_or(object: object, property: 802, fallback: 0.0)
 // tabIndex(object: int, value: int) -> int: sets TabIndex (Hyperlink, InputElement). Defines
 // the `TabIndex` property.
 fn tabIndex(object, value) = {
     let _ = ferro_set_i64(object: object, property: 830, value: value)
     object
 }
-// getTabIndex(object: int) -> Result<int, string>: reads TabIndex (Hyperlink, InputElement).
-fn getTabIndex(object) = {
-    ferro_clear_error()
-    let value = ferro_get_i64_or(object: object, property: 830, fallback: 0)
-    readResult(value: value)
-}
+// getTabIndex(object: int) -> int: reads TabIndex (Hyperlink, InputElement); the fallback of
+// its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getTabIndex(object) = ferro_get_i64_or(object: object, property: 830, fallback: 0)
 // tag(object: int, value: string) -> int: sets Tag (Control). Defines the `Tag` property.
 fn tag(object, value) = {
     let _ = ferro_set_str(object: object, property: 836, text: value, length: -1)
@@ -778,12 +606,9 @@ fn tagObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 836, value: value)
     object
 }
-// getTag(object: int) -> Result<string, string>: reads Tag (Control).
-fn getTag(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 836, fallback: "")}"
-    readResult(value: value)
-}
+// getTag(object: int) -> string: reads Tag (Control); the fallback of its kind when the read
+// fails (`failure()` tells): a plain value, no Result.
+fn getTag(object) = "${ferro_get_cstr_or(object: object, property: 836, fallback: "")}"
 // templatedControlIsTemplateFocusTarget(object: int, value: bool) -> int: sets
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl). Defines the
 // `IsTemplateFocusTarget` attached property.
@@ -791,13 +616,10 @@ fn templatedControlIsTemplateFocusTarget(object, value) = {
     let _ = ferro_set_bool(object: object, property: 842, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getTemplatedControlIsTemplateFocusTarget(object: int) -> Result<bool, string>: reads
-// TemplatedControl.IsTemplateFocusTarget (TemplatedControl).
-fn getTemplatedControlIsTemplateFocusTarget(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 842, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getTemplatedControlIsTemplateFocusTarget(object: int) -> bool: reads
+// TemplatedControl.IsTemplateFocusTarget (TemplatedControl); the fallback of its kind when the
+// read fails (`failure()` tells): a plain value, no Result.
+fn getTemplatedControlIsTemplateFocusTarget(object) = ferro_get_bool_or(object: object, property: 842, fallback: toInt8(0)) != toInt8(0)
 // text(object: int, value: string) -> int: sets Text (AutoCompleteBox, AutoSuggestBox,
 // CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
 // TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
@@ -805,27 +627,21 @@ fn text(object, value) = {
     let _ = ferro_set_str(object: object, property: 844, text: value, length: -1)
     object
 }
-// getText(object: int) -> Result<string, string>: reads Text (AutoCompleteBox, AutoSuggestBox,
+// getText(object: int) -> string: reads Text (AutoCompleteBox, AutoSuggestBox,
 // CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter).
-fn getText(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 844, fallback: "")}"
-    readResult(value: value)
-}
+// TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
+fn getText(object) = "${ferro_get_cstr_or(object: object, property: 844, fallback: "")}"
 // textBlockBaselineOffset(object: int, value: float) -> int: sets TextBlock.BaselineOffset
 // (TextBlock). Defines the `BaselineOffset` attached property.
 fn textBlockBaselineOffset(object, value) = {
     let _ = ferro_set_f64(object: object, property: 846, value: value)
     object
 }
-// getTextBlockBaselineOffset(object: int) -> Result<float, string>: reads
-// TextBlock.BaselineOffset (TextBlock).
-fn getTextBlockBaselineOffset(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 846, fallback: 0.0)
-    readResult(value: value)
-}
+// getTextBlockBaselineOffset(object: int) -> float: reads TextBlock.BaselineOffset
+// (TextBlock); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
+fn getTextBlockBaselineOffset(object) = ferro_get_f64_or(object: object, property: 846, fallback: 0.0)
 // textBlockLayoutRoundingPlacement(object: int, value: TextLayoutRoundingPlacement) -> int:
 // sets TextBlock.LayoutRoundingPlacement (TextBlock). Defines the `LayoutRoundingPlacement`
 // attached property: where a text block puts the height layout rounding adds to it (a FerroUI
@@ -840,39 +656,27 @@ fn textBlockLineHeight(object, value) = {
     let _ = ferro_set_f64(object: object, property: 848, value: value)
     object
 }
-// getTextBlockLineHeight(object: int) -> Result<float, string>: reads TextBlock.LineHeight
-// (TextBlock).
-fn getTextBlockLineHeight(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 848, fallback: 0.0)
-    readResult(value: value)
-}
+// getTextBlockLineHeight(object: int) -> float: reads TextBlock.LineHeight (TextBlock); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getTextBlockLineHeight(object) = ferro_get_f64_or(object: object, property: 848, fallback: 0.0)
 // textBlockLineSpacing(object: int, value: float) -> int: sets TextBlock.LineSpacing
 // (TextBlock). Defines the `LineSpacing` property.
 fn textBlockLineSpacing(object, value) = {
     let _ = ferro_set_f64(object: object, property: 849, value: value)
     object
 }
-// getTextBlockLineSpacing(object: int) -> Result<float, string>: reads TextBlock.LineSpacing
-// (TextBlock).
-fn getTextBlockLineSpacing(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 849, fallback: 0.0)
-    readResult(value: value)
-}
+// getTextBlockLineSpacing(object: int) -> float: reads TextBlock.LineSpacing (TextBlock); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getTextBlockLineSpacing(object) = ferro_get_f64_or(object: object, property: 849, fallback: 0.0)
 // textBlockMaxLines(object: int, value: int) -> int: sets TextBlock.MaxLines (TextBlock).
 // Defines the `MaxLines` property.
 fn textBlockMaxLines(object, value) = {
     let _ = ferro_set_i64(object: object, property: 850, value: value)
     object
 }
-// getTextBlockMaxLines(object: int) -> Result<int, string>: reads TextBlock.MaxLines
-// (TextBlock).
-fn getTextBlockMaxLines(object) = {
-    ferro_clear_error()
-    let value = ferro_get_i64_or(object: object, property: 850, fallback: 0)
-    readResult(value: value)
-}
+// getTextBlockMaxLines(object: int) -> int: reads TextBlock.MaxLines (TextBlock); the fallback
+// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getTextBlockMaxLines(object) = ferro_get_i64_or(object: object, property: 850, fallback: 0)
 // textBlockTextAlignment(object: int, value: TextAlignment) -> int: sets
 // TextBlock.TextAlignment (TextBlock). Defines the `TextAlignment` property.
 fn textBlockTextAlignment(object, value) = {
@@ -900,13 +704,10 @@ fn textDecorations(object, value) = {
     let _ = ferro_set_str(object: object, property: 859, text: value, length: -1)
     object
 }
-// getTextDecorations(object: int) -> Result<string, string>: reads TextDecorations
-// (RichEditBox, RichTextBlock, TextBlock).
-fn getTextDecorations(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 859, fallback: "")}"
-    readResult(value: value)
-}
+// getTextDecorations(object: int) -> string: reads TextDecorations (RichEditBox,
+// RichTextBlock, TextBlock); the fallback of its kind when the read fails (`failure()` tells):
+// a plain value, no Result.
+fn getTextDecorations(object) = "${ferro_get_cstr_or(object: object, property: 859, fallback: "")}"
 // themeObject(object: int, value: int) -> int: sets Theme (StyledElement) to an object; 0 is
 // null.
 fn themeObject(object, value) = {
@@ -919,25 +720,18 @@ fn transitions(object, value) = {
     let _ = ferro_set_str(object: object, property: 937, text: value, length: -1)
     object
 }
-// getTransitions(object: int) -> Result<string, string>: reads Transitions (Animatable).
-fn getTransitions(object) = {
-    ferro_clear_error()
-    let value = "${ferro_get_cstr_or(object: object, property: 937, fallback: "")}"
-    readResult(value: value)
-}
+// getTransitions(object: int) -> string: reads Transitions (Animatable); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getTransitions(object) = "${ferro_get_cstr_or(object: object, property: 937, fallback: "")}"
 // useLayoutRounding(object: int, value: bool) -> int: sets UseLayoutRounding (Layoutable).
 // Defines the `UseLayoutRounding` property.
 fn useLayoutRounding(object, value) = {
     let _ = ferro_set_bool(object: object, property: 992, value: value ? toInt8(1) : toInt8(0))
     object
 }
-// getUseLayoutRounding(object: int) -> Result<bool, string>: reads UseLayoutRounding
-// (Layoutable).
-fn getUseLayoutRounding(object) = {
-    ferro_clear_error()
-    let value = ferro_get_bool_or(object: object, property: 992, fallback: toInt8(0)) != toInt8(0)
-    readResult(value: value)
-}
+// getUseLayoutRounding(object: int) -> bool: reads UseLayoutRounding (Layoutable); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getUseLayoutRounding(object) = ferro_get_bool_or(object: object, property: 992, fallback: toInt8(0)) != toInt8(0)
 // verticalAlignment(object: int, value: VerticalAlignment) -> int: sets VerticalAlignment
 // (Layoutable). Defines the `VerticalAlignment` property.
 fn verticalAlignment(object, value) = {
@@ -970,31 +764,24 @@ fn widthText(object, value) = {
     let _ = ferro_set_str(object: object, property: 1018, text: value, length: -1)
     object
 }
-// getWidth(object: int) -> Result<float, string>: reads Width (ColumnDefinition, Layoutable,
-// TableViewColumn).
-fn getWidth(object) = {
-    ferro_clear_error()
-    let value = ferro_get_f64_or(object: object, property: 1018, fallback: 0.0)
-    readResult(value: value)
-}
+// getWidth(object: int) -> float: reads Width (ColumnDefinition, Layoutable, TableViewColumn);
+// the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getWidth(object) = ferro_get_f64_or(object: object, property: 1018, fallback: 0.0)
 // zIndex(object: int, value: int) -> int: sets ZIndex (Visual). Defines the `ZIndex` property.
 fn zIndex(object, value) = {
     let _ = ferro_set_i64(object: object, property: 1040, value: value)
     object
 }
-// getZIndex(object: int) -> Result<int, string>: reads ZIndex (Visual).
-fn getZIndex(object) = {
-    ferro_clear_error()
-    let value = ferro_get_i64_or(object: object, property: 1040, fallback: 0)
-    readResult(value: value)
-}
+// getZIndex(object: int) -> int: reads ZIndex (Visual); the fallback of its kind when the read
+// fails (`failure()` tells): a plain value, no Result.
+fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1040, fallback: 0)
 
 // ---- events --------------------------------------------------------------------------------
 
 // onClick(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the application
 // on every Click (Button, MenuItem, SplitButton). Defines the `Click` event.
 fn onClick(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 4, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 4, tag: tag)
     object
 }
 // raiseClick(object: int) -> int: raises Click on the object, as the control does (for tests
@@ -1007,7 +794,7 @@ fn raiseClick(object) = {
 // application on every ContextCanceled (InputElement). Provides event data for the
 // `ContextCanceled` event.
 fn onContextCanceled(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 9, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 9, tag: tag)
     object
 }
 // raiseContextCanceled(object: int) -> int: raises ContextCanceled on the object, as the
@@ -1020,7 +807,7 @@ fn raiseContextCanceled(object) = {
 // application on every ContextRequested (InputElement). Provides event data for the
 // `ContextRequested` event.
 fn onContextRequested(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 11, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 11, tag: tag)
     object
 }
 // raiseContextRequested(object: int) -> int: raises ContextRequested on the object, as the
@@ -1032,7 +819,7 @@ fn raiseContextRequested(object) = {
 // onDoubleTapped(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every DoubleTapped (InputElement). Defines the `DoubleTapped` event.
 fn onDoubleTapped(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 14, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 14, tag: tag)
     object
 }
 // raiseDoubleTapped(object: int) -> int: raises DoubleTapped on the object, as the control
@@ -1044,7 +831,7 @@ fn raiseDoubleTapped(object) = {
 // onGettingFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every GettingFocus (InputElement). Defines the `GettingFocus` event.
 fn onGettingFocus(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 24, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 24, tag: tag)
     object
 }
 // raiseGettingFocus(object: int) -> int: raises GettingFocus on the object, as the control
@@ -1056,7 +843,7 @@ fn raiseGettingFocus(object) = {
 // onGotFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every GotFocus (InputElement). Defines the `GotFocus` event.
 fn onGotFocus(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 25, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 25, tag: tag)
     object
 }
 // raiseGotFocus(object: int) -> int: raises GotFocus on the object, as the control does (for
@@ -1068,7 +855,7 @@ fn raiseGotFocus(object) = {
 // onHolding(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Holding (InputElement). Defines the `Holding` event.
 fn onHolding(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 26, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 26, tag: tag)
     object
 }
 // raiseHolding(object: int) -> int: raises Holding on the object, as the control does (for
@@ -1081,7 +868,7 @@ fn raiseHolding(object) = {
 // dispatcher of the application on every HorizontalSnapPointsChanged (PivotPanel, StackPanel,
 // VirtualizingStackPanel). Defines the `HorizontalSnapPointsChanged` event.
 fn onHorizontalSnapPointsChanged(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 27, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 27, tag: tag)
     object
 }
 // raiseHorizontalSnapPointsChanged(object: int) -> int: raises HorizontalSnapPointsChanged on
@@ -1093,7 +880,7 @@ fn raiseHorizontalSnapPointsChanged(object) = {
 // onKeyDown(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every KeyDown (InputElement). Defines the `KeyDown` event.
 fn onKeyDown(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 31, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 31, tag: tag)
     object
 }
 // raiseKeyDown(object: int) -> int: raises KeyDown on the object, as the control does (for
@@ -1105,7 +892,7 @@ fn raiseKeyDown(object) = {
 // onKeyUp(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the application
 // on every KeyUp (InputElement). Defines the `KeyUp` event.
 fn onKeyUp(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 32, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 32, tag: tag)
     object
 }
 // raiseKeyUp(object: int) -> int: raises KeyUp on the object, as the control does (for tests
@@ -1117,7 +904,7 @@ fn raiseKeyUp(object) = {
 // onLoaded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Loaded (Control). Defines the `Loaded` event.
 fn onLoaded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 33, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 33, tag: tag)
     object
 }
 // raiseLoaded(object: int) -> int: raises Loaded on the object, as the control does (for tests
@@ -1129,7 +916,7 @@ fn raiseLoaded(object) = {
 // onLosingFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every LosingFocus (InputElement). Defines the `LosingFocus` event.
 fn onLosingFocus(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 34, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 34, tag: tag)
     object
 }
 // raiseLosingFocus(object: int) -> int: raises LosingFocus on the object, as the control does
@@ -1141,7 +928,7 @@ fn raiseLosingFocus(object) = {
 // onLostFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every LostFocus (InputElement). Defines the `LostFocus` event.
 fn onLostFocus(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 35, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 35, tag: tag)
     object
 }
 // raiseLostFocus(object: int) -> int: raises LostFocus on the object, as the control does (for
@@ -1153,7 +940,7 @@ fn raiseLostFocus(object) = {
 // onPinch(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the application
 // on every Pinch (InputElement). Defines the `Pinch` event.
 fn onPinch(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 45, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 45, tag: tag)
     object
 }
 // raisePinch(object: int) -> int: raises Pinch on the object, as the control does (for tests
@@ -1165,7 +952,7 @@ fn raisePinch(object) = {
 // onPinchEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PinchEnded (InputElement). Defines the `PinchEnded` event.
 fn onPinchEnded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 46, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 46, tag: tag)
     object
 }
 // raisePinchEnded(object: int) -> int: raises PinchEnded on the object, as the control does
@@ -1178,7 +965,7 @@ fn raisePinchEnded(object) = {
 // of the application on every PointerCaptureChanging (InputElement). Defines the
 // `PointerCaptureChanging` routed event.
 fn onPointerCaptureChanging(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 47, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 47, tag: tag)
     object
 }
 // raisePointerCaptureChanging(object: int) -> int: raises PointerCaptureChanging on the
@@ -1191,7 +978,7 @@ fn raisePointerCaptureChanging(object) = {
 // the application on every PointerCaptureLost (InputElement). Defines the `PointerCaptureLost`
 // routed event.
 fn onPointerCaptureLost(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 48, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 48, tag: tag)
     object
 }
 // raisePointerCaptureLost(object: int) -> int: raises PointerCaptureLost on the object, as the
@@ -1203,7 +990,7 @@ fn raisePointerCaptureLost(object) = {
 // onPointerEntered(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerEntered (InputElement). Defines the `PointerEntered` event.
 fn onPointerEntered(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 49, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 49, tag: tag)
     object
 }
 // raisePointerEntered(object: int) -> int: raises PointerEntered on the object, as the control
@@ -1215,7 +1002,7 @@ fn raisePointerEntered(object) = {
 // onPointerExited(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerExited (InputElement). Defines the `PointerExited` event.
 fn onPointerExited(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 51, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 51, tag: tag)
     object
 }
 // raisePointerExited(object: int) -> int: raises PointerExited on the object, as the control
@@ -1227,7 +1014,7 @@ fn raisePointerExited(object) = {
 // onPointerMoved(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerMoved (InputElement). Defines the `PointerMoved` event.
 fn onPointerMoved(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 53, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 53, tag: tag)
     object
 }
 // raisePointerMoved(object: int) -> int: raises PointerMoved on the object, as the control
@@ -1239,7 +1026,7 @@ fn raisePointerMoved(object) = {
 // onPointerPressed(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerPressed (InputElement). Defines the `PointerPressed` event.
 fn onPointerPressed(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 54, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 54, tag: tag)
     object
 }
 // raisePointerPressed(object: int) -> int: raises PointerPressed on the object, as the control
@@ -1251,7 +1038,7 @@ fn raisePointerPressed(object) = {
 // onPointerReleased(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerReleased (InputElement). Defines the `PointerReleased` event.
 fn onPointerReleased(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 55, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 55, tag: tag)
     object
 }
 // raisePointerReleased(object: int) -> int: raises PointerReleased on the object, as the
@@ -1264,7 +1051,7 @@ fn raisePointerReleased(object) = {
 // dispatcher of the application on every PointerTouchPadGestureMagnify (InputElement). Defines
 // the `PointerTouchPadGestureMagnify` event.
 fn onPointerTouchPadGestureMagnify(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 56, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 56, tag: tag)
     object
 }
 // raisePointerTouchPadGestureMagnify(object: int) -> int: raises PointerTouchPadGestureMagnify
@@ -1277,7 +1064,7 @@ fn raisePointerTouchPadGestureMagnify(object) = {
 // dispatcher of the application on every PointerTouchPadGestureRotate (InputElement). Defines
 // the `PointerTouchPadGestureRotate` event.
 fn onPointerTouchPadGestureRotate(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 57, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 57, tag: tag)
     object
 }
 // raisePointerTouchPadGestureRotate(object: int) -> int: raises PointerTouchPadGestureRotate
@@ -1290,7 +1077,7 @@ fn raisePointerTouchPadGestureRotate(object) = {
 // dispatcher of the application on every PointerTouchPadGestureSwipe (InputElement). Defines
 // the `PointerTouchPadGestureSwipe` event.
 fn onPointerTouchPadGestureSwipe(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 58, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 58, tag: tag)
     object
 }
 // raisePointerTouchPadGestureSwipe(object: int) -> int: raises PointerTouchPadGestureSwipe on
@@ -1303,7 +1090,7 @@ fn raisePointerTouchPadGestureSwipe(object) = {
 // the application on every PointerWheelChanged (InputElement). Defines the
 // `PointerWheelChanged` event.
 fn onPointerWheelChanged(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 59, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 59, tag: tag)
     object
 }
 // raisePointerWheelChanged(object: int) -> int: raises PointerWheelChanged on the object, as
@@ -1315,7 +1102,7 @@ fn raisePointerWheelChanged(object) = {
 // onPullGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PullGesture (InputElement). Defines the `PullGesture` event.
 fn onPullGesture(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 60, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 60, tag: tag)
     object
 }
 // raisePullGesture(object: int) -> int: raises PullGesture on the object, as the control does
@@ -1327,7 +1114,7 @@ fn raisePullGesture(object) = {
 // onPullGestureEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PullGestureEnded (InputElement). Defines the `PullGestureEnded` event.
 fn onPullGestureEnded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 61, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 61, tag: tag)
     object
 }
 // raisePullGestureEnded(object: int) -> int: raises PullGestureEnded on the object, as the
@@ -1340,7 +1127,7 @@ fn raisePullGestureEnded(object) = {
 // the application on every RequestBringIntoView (Control). Event raised when an element wishes
 // to be scrolled into view.
 fn onRequestBringIntoView(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 66, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 66, tag: tag)
     object
 }
 // raiseRequestBringIntoView(object: int) -> int: raises RequestBringIntoView on the object, as
@@ -1352,7 +1139,7 @@ fn raiseRequestBringIntoView(object) = {
 // onRightTapped(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every RightTapped (InputElement). Defines the `RightTapped` event.
 fn onRightTapped(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 67, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 67, tag: tag)
     object
 }
 // raiseRightTapped(object: int) -> int: raises RightTapped on the object, as the control does
@@ -1364,7 +1151,7 @@ fn raiseRightTapped(object) = {
 // onScrollGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every ScrollGesture (InputElement). Defines the `ScrollGesture` event.
 fn onScrollGesture(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 69, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 69, tag: tag)
     object
 }
 // raiseScrollGesture(object: int) -> int: raises ScrollGesture on the object, as the control
@@ -1377,7 +1164,7 @@ fn raiseScrollGesture(object) = {
 // the application on every ScrollGestureEnded (InputElement). Defines the `ScrollGestureEnded`
 // event.
 fn onScrollGestureEnded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 70, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 70, tag: tag)
     object
 }
 // raiseScrollGestureEnded(object: int) -> int: raises ScrollGestureEnded on the object, as the
@@ -1390,7 +1177,7 @@ fn raiseScrollGestureEnded(object) = {
 // dispatcher of the application on every ScrollGestureInertiaStarting (InputElement). Defines
 // the `ScrollGestureInertiaStarting` event.
 fn onScrollGestureInertiaStarting(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 71, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 71, tag: tag)
     object
 }
 // raiseScrollGestureInertiaStarting(object: int) -> int: raises ScrollGestureInertiaStarting
@@ -1402,7 +1189,7 @@ fn raiseScrollGestureInertiaStarting(object) = {
 // onSizeChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every SizeChanged (Control). Defines the `SizeChanged` event.
 fn onSizeChanged(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 75, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 75, tag: tag)
     object
 }
 // raiseSizeChanged(object: int) -> int: raises SizeChanged on the object, as the control does
@@ -1414,7 +1201,7 @@ fn raiseSizeChanged(object) = {
 // onSwipeGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every SwipeGesture (InputElement). Defines the `SwipeGesture` event.
 fn onSwipeGesture(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 78, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 78, tag: tag)
     object
 }
 // raiseSwipeGesture(object: int) -> int: raises SwipeGesture on the object, as the control
@@ -1427,7 +1214,7 @@ fn raiseSwipeGesture(object) = {
 // application on every SwipeGestureEnded (InputElement). Defines the `SwipeGestureEnded`
 // event.
 fn onSwipeGestureEnded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 79, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 79, tag: tag)
     object
 }
 // raiseSwipeGestureEnded(object: int) -> int: raises SwipeGestureEnded on the object, as the
@@ -1439,7 +1226,7 @@ fn raiseSwipeGestureEnded(object) = {
 // onTapped(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Tapped (InputElement). Defines the `Tapped` event.
 fn onTapped(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 80, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 80, tag: tag)
     object
 }
 // raiseTapped(object: int) -> int: raises Tapped on the object, as the control does (for tests
@@ -1452,7 +1239,7 @@ fn raiseTapped(object) = {
 // application on every TemplateApplied (TemplatedControl). Defines the `TemplateApplied`
 // routed event.
 fn onTemplateApplied(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 81, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 81, tag: tag)
     object
 }
 // raiseTemplateApplied(object: int) -> int: raises TemplateApplied on the object, as the
@@ -1464,7 +1251,7 @@ fn raiseTemplateApplied(object) = {
 // onTextInput(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every TextInput (InputElement). Defines the `TextInput` event.
 fn onTextInput(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 87, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 87, tag: tag)
     object
 }
 // raiseTextInput(object: int) -> int: raises TextInput on the object, as the control does (for
@@ -1477,7 +1264,7 @@ fn raiseTextInput(object) = {
 // dispatcher of the application on every TextInputMethodClientRequested (InputElement).
 // Defines the `TextInputMethodClientRequested` event.
 fn onTextInputMethodClientRequested(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 88, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 88, tag: tag)
     object
 }
 // raiseTextInputMethodClientRequested(object: int) -> int: raises
@@ -1489,7 +1276,7 @@ fn raiseTextInputMethodClientRequested(object) = {
 // onUnloaded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Unloaded (Control). Defines the `Unloaded` event.
 fn onUnloaded(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 92, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 92, tag: tag)
     object
 }
 // raiseUnloaded(object: int) -> int: raises Unloaded on the object, as the control does (for
@@ -1502,7 +1289,7 @@ fn raiseUnloaded(object) = {
 // dispatcher of the application on every VerticalSnapPointsChanged (PivotPanel, StackPanel,
 // VirtualizingStackPanel). Defines the `VerticalSnapPointsChanged` event.
 fn onVerticalSnapPointsChanged(object, tag) = {
-    let _ = ferro_subscribe(object: object, event: 94, function: dispatchEvent, token: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 94, tag: tag)
     object
 }
 // raiseVerticalSnapPointsChanged(object: int) -> int: raises VerticalSnapPointsChanged on the

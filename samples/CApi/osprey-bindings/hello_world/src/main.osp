@@ -29,8 +29,9 @@ fn build() -> int = {
 // Clicks the button as a click does and prints the content it shows then.
 fn script(button: int) -> Unit = {
     let _ = raiseClick(button)
-    match getContent(button) {
-        Success { value } => print("script: the button shows '${value}': ${value == "Clicked from Osprey" ? "ok" : "FAILED"}")
+    let shown = getContent(button)
+    match failure() {
+        Success { value } => print("script: the button shows '${shown}': ${shown == "Clicked from Osprey" ? "ok" : "FAILED"}")
         Error { message } => print("script: FAILED: ${message}")
     }
 }

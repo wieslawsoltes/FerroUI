@@ -195,6 +195,14 @@ FerroStatus ferro_focus(FerroHandle object);
 // only.
 int64_t ferro_subscribe(FerroHandle object, int64_t event, FerroEventFn function, int64_t token);
 
+// [`ferro_subscribe`] to the one dispatcher of the thread
+// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it
+// with `tag`, the sender and the argument, as an event bound in a frame does (the event text
+// and number are empty). For a binding with one dispatcher, which then needs no trampoline of
+// its own between the library and its dispatcher: one indirect call per event. Returns a
+// positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only.
+int64_t ferro_subscribe_dispatch(FerroHandle object, int64_t event, int64_t tag);
+
 // [`ferro_subscribe`] with a `void *` in place of the token: `function` is called with
 // `user_data`, and `release` (which may be `NULL`) is called with it once the handler is gone,
 // removed by [`ferro_unsubscribe`] or dropped with its object. If the subscription fails,
@@ -255,6 +263,24 @@ FerroStatus ferro_frame_bool(int64_t property, bool value);
 // and number [`ferro_frame_event_text`] and [`ferro_frame_event_f64`] give. Any thread.
 FerroStatus ferro_frame_on(int64_t event, int64_t tag, int64_t value_property);
 
+// Makes the open element a memo element: its subtree is what `version` says it is (a revision
+// of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets
+// that the version fixes. While the element keeps its key and its version, a commit does not
+// look into its subtree (a new `tag_base` moves its tags), and with an integer key the next
+// frame can reuse it whole ([`ferro_frame_reuse`]). A different subtree under the same key and
+// version is the caller's error: the commit keeps the old one. Any thread.
+FerroStatus ferro_frame_memo(int64_t version, int64_t tag_base);
+
+// Writes the memo element with the integer key `key` and the version `version` of the last
+// frame committed under `root` ([`ferro_frame_memo`]) into the frame of the calling thread as one
+// record, in place of its whole subtree, with its tags moved to start at `tag_base`. Returns the
+// number of tags the subtree uses (`0` or more: the next tag of the caller is `tag_base` plus
+// it), or a negative status, and then writes nothing: [`FERRO_NOT_FOUND`] when the root has no
+// such element (nothing is recorded; the caller writes the element in full), or
+// [`FERRO_WRONG_THREAD`](crate::FERRO_WRONG_THREAD) off the UI thread. Commit the frame under
+// the same root, before another commit under it. UI thread only.
+int64_t ferro_frame_reuse(FerroHandle root, int64_t key, int64_t version, int64_t tag_base);
+
 // Commits the frame of the scalar writer of the calling thread under `root` (see
 // [`ferro_frame_commit_bytes`]) and empties the buffer. UI thread only.
 FerroStatus ferro_frame_commit(FerroHandle root);
@@ -279,9 +305,9 @@ FerroStatus ferro_frame_dispatcher(FerroEventFn function);
 
 // Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and `arg`
 // as an event would, and returns its result: a binding starts its loop with it (the tag `0`
-// asks for the first frame) and a test drives a message without an event. The event text and
-// number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI
-// thread only.
+// asks for the first frame), its one trampoline forwards the events of its subscriptions with
+// it, and a test drives a message without an event. The event text and number are empty.
+// [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI thread only.
 int64_t ferro_frame_dispatch(int64_t tag, FerroHandle sender, int64_t arg);
 
 // The text of the value property of the event being dispatched, NUL-terminated and owned by the

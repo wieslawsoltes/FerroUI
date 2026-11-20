@@ -2,7 +2,9 @@
 //! dispatcher of message tags, and the stable IDs of the API model.
 
 use super::support::*;
-use crate::frame::{decode, write_record, Key, Value, OP_CLOSE, OP_NUMBER, OP_ON, OP_OPEN, OP_TEXT};
+use crate::frame::{
+    decode, write_record, writer_bytes, Key, Value, OP_CLOSE, OP_KEY_TEXT, OP_MEMO, OP_NUMBER, OP_ON, OP_OPEN, OP_TEXT,
+};
 use crate::*;
 use std::sync::Mutex;
 
@@ -67,6 +69,27 @@ fn records_have_the_layout_of_the_model() {
     assert_eq!((element.type_id, &element.key), (3, &Key::Int(9)));
     assert_eq!(element.props, vec![(5, Value::Text("abc".into())), (6, Value::Number(2.5f64.to_bits()))]);
     assert_eq!(element.events, vec![(4, 11, 5)]);
+}
+
+#[test]
+fn the_writer_writes_the_records_of_the_layout() {
+    let mut bytes = Vec::new();
+    write_record(&mut bytes, OP_OPEN, &[3, 9], &[]);
+    write_record(&mut bytes, OP_MEMO, &[12, 4], &[]);
+    write_record(&mut bytes, OP_TEXT, &[5, 9], b"the label");
+    write_record(&mut bytes, OP_NUMBER, &[6, 2.5f64.to_bits() as i64], &[]);
+    write_record(&mut bytes, OP_ON, &[4, 11, 5], &[]);
+    write_record(&mut bytes, OP_CLOSE, &[], &[]);
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
+    assert_eq!(ferro_frame_open(3, 9), FERRO_OK);
+    assert_eq!(ferro_frame_memo(12, 4), FERRO_OK);
+    // SAFETY: a NUL-terminated literal.
+    assert_eq!(unsafe { ferro_frame_str(5, c"the label".as_ptr(), -1) }, FERRO_OK);
+    assert_eq!(ferro_frame_f64(6, 2.5), FERRO_OK);
+    assert_eq!(ferro_frame_on(4, 11, 5), FERRO_OK);
+    assert_eq!(ferro_frame_close(), FERRO_OK);
+    assert_eq!(writer_bytes(), bytes);
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
 }
 
 #[test]
@@ -342,5 +365,204 @@ fn getters_with_a_fallback_and_utf16_text() {
         let read = ferro_get_cstr_or(text_block, property_id("NoSuchProperty"), fallback.as_ptr());
         assert_eq!(read, fallback.as_ptr());
         assert_eq!(ferro_release(text_block), FERRO_OK);
+    });
+}
+
+#[test]
+fn values_after_a_child_belong_to_the_open_element() {
+    ui(|| {
+        let root = create("Border");
+        let frame = |spacing: f64| {
+            assert_eq!(ferro_frame_begin(), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("StackPanel"), 1), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("TextBlock"), 2), FERRO_OK);
+            text("Text", "child");
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            // A value of the panel after its child, and one more after a second child.
+            assert_eq!(ferro_frame_f64(property_id("Spacing"), spacing), FERRO_OK);
+            assert_eq!(ferro_frame_open(type_id("TextBlock"), 3), FERRO_OK);
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            assert_eq!(ferro_frame_f64(property_id("Width"), 100.0 + spacing), FERRO_OK);
+            assert_eq!(ferro_frame_close(), FERRO_OK);
+            assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+        };
+        frame(4.0);
+        let panel = find(root, 1);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(4.0));
+        assert_eq!(get_f64(panel, "Width"), Ok(104.0));
+        frame(4.0);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(4.0));
+        frame(6.0);
+        assert_eq!(get_f64(panel, "Spacing"), Ok(6.0));
+        assert_eq!(get_f64(panel, "Width"), Ok(106.0));
+        assert_eq!(get_str(find(root, 2), "Text").as_deref(), Ok("child"));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+/// A frame of a stack panel with a memo element (key 5) of a button whose Click carries the
+/// tag `tag_base`, unless `reuse` and the root has it.
+fn memo_frame(root: FerroHandle, version: i64, tag_base: i64, label: &str, reuse: bool) -> i64 {
+    assert_eq!(ferro_frame_begin(), FERRO_OK);
+    assert_eq!(ferro_frame_open(type_id("StackPanel"), 1), FERRO_OK);
+    let reused = if reuse { ferro_frame_reuse(root, 5, version, tag_base) } else { i64::from(FERRO_NOT_FOUND) };
+    if reused < 0 {
+        assert_eq!(ferro_frame_open(type_id("Button"), 5), FERRO_OK);
+        assert_eq!(ferro_frame_memo(version, tag_base), FERRO_OK);
+        text("Content", label);
+        assert_eq!(ferro_frame_on(event_id("Click"), tag_base, 0), FERRO_OK);
+        assert_eq!(ferro_frame_close(), FERRO_OK);
+    }
+    assert_eq!(ferro_frame_close(), FERRO_OK);
+    assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+    reused
+}
+
+#[test]
+fn a_memo_element_is_not_looked_into_while_its_version_stays() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let root = create("Border");
+        memo_frame(root, 1, 3, "first", false);
+        let button = find(root, 5);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("first"));
+        // The same version with another label: the subtree is the one of the version.
+        memo_frame(root, 1, 3, "second", false);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("first"));
+        // A new tag base moves the tags of the element.
+        memo_frame(root, 1, 8, "second", false);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(8, button, 0, String::new())]);
+        // A new version is written.
+        memo_frame(root, 2, 8, "second", false);
+        assert_eq!(find(root, 5), button);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("second"));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_reuse_record_stands_for_the_memo_element_of_the_last_frame() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let root = create("Border");
+        assert_eq!(ferro_frame_reuse(root, 5, 1, 3), i64::from(FERRO_NOT_FOUND), "nothing is committed yet");
+        assert_eq!(memo_frame(root, 1, 3, "kept", true), i64::from(FERRO_NOT_FOUND));
+        let button = find(root, 5);
+        // One tag: the Click of the button.
+        assert_eq!(memo_frame(root, 1, 3, "unused", true), 1);
+        assert_eq!(find(root, 5), button);
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("kept"));
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(3, button, 0, String::new())]);
+        // Reused with its tags moved.
+        assert_eq!(memo_frame(root, 1, 20, "unused", true), 1);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(20, button, 0, String::new())]);
+        // Another version is not there to reuse: written in full.
+        assert_eq!(memo_frame(root, 2, 20, "new", true), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(get_str(button, "Content").as_deref(), Ok("new"));
+        assert_eq!(ferro_frame_reuse(root, 5, 1, 0), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(ferro_frame_begin(), FERRO_OK);
+        // A frame without it: its bytes go with it.
+        assert_eq!(ferro_frame_commit(root), FERRO_OK);
+        assert_eq!(ferro_frame_reuse(root, 5, 2, 0), i64::from(FERRO_NOT_FOUND));
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_reused_element_can_move_to_another_parent() {
+    ui(|| {
+        let root = create("StackPanel");
+        let frame = |parent: i64, reuse: bool| {
+            assert_eq!(ferro_frame_begin(), FERRO_OK);
+            for key in [1, 2] {
+                assert_eq!(ferro_frame_open(type_id("StackPanel"), key), FERRO_OK);
+                if key == parent {
+                    if !reuse || ferro_frame_reuse(root, 5, 7, 0) < 0 {
+                        assert_eq!(ferro_frame_open(type_id("TextBlock"), 5), FERRO_OK);
+                        assert_eq!(ferro_frame_memo(7, 0), FERRO_OK);
+                        text("Text", "moving");
+                        assert_eq!(ferro_frame_close(), FERRO_OK);
+                    }
+                }
+                assert_eq!(ferro_frame_close(), FERRO_OK);
+            }
+            assert_eq!(ferro_frame_commit(root), FERRO_OK, "{}", last_error());
+        };
+        frame(1, false);
+        let first = find(root, 1);
+        assert_eq!(get_str(find(root, 5), "Text").as_deref(), Ok("moving"));
+        frame(2, true);
+        assert_eq!(get_str(find(root, 5), "Text").as_deref(), Ok("moving"));
+        let second = find(root, 2);
+        let child = find(root, 5);
+        assert_ne!(child, 0);
+        assert_ne!(first, second);
+        // Reused again where it is now.
+        frame(2, true);
+        assert_eq!(find(root, 5), child);
+        // The element is a child of the second panel, not of the first.
+        assert_eq!(ferro_remove_child(first, child), FERRO_NOT_FOUND);
+        assert_eq!(ferro_remove_child(second, child), FERRO_OK, "{}", last_error());
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_text_that_is_not_utf8_fails_its_write_and_a_key_the_frame() {
+    ui(|| {
+        let root = create("Border");
+        let mut bytes = Vec::new();
+        write_record(&mut bytes, OP_OPEN, &[type_id("StackPanel"), 0], &[]);
+        write_record(&mut bytes, OP_OPEN, &[type_id("TextBlock"), 1], &[]);
+        write_record(&mut bytes, OP_TEXT, &[property_id("Text"), 2], &[0xff, 0xfe]);
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        write_record(&mut bytes, OP_OPEN, &[type_id("TextBlock"), 2], &[]);
+        write_record(&mut bytes, OP_TEXT, &[property_id("Text"), 2], b"ok");
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        write_record(&mut bytes, OP_CLOSE, &[], &[]);
+        // SAFETY: the pointer and the length of a vector.
+        let committed = unsafe { ferro_frame_commit_bytes(root, bytes.as_ptr(), bytes.len() as i64) };
+        assert_eq!(committed, FERRO_INVALID_UTF8);
+        assert_eq!(get_str(find(root, 2), "Text").as_deref(), Ok("ok"), "the rest of the frame is committed");
+        let mut keyed = Vec::new();
+        write_record(&mut keyed, OP_OPEN, &[type_id("TextBlock"), 0], &[]);
+        write_record(&mut keyed, OP_KEY_TEXT, &[1], &[0xff]);
+        write_record(&mut keyed, OP_CLOSE, &[], &[]);
+        // SAFETY: the pointer and the length of a vector.
+        let committed = unsafe { ferro_frame_commit_bytes(root, keyed.as_ptr(), keyed.len() as i64) };
+        assert_eq!(committed, FERRO_INVALID_UTF8);
+        assert_eq!(find(root, 2), find(root, 2), "a refused frame changes nothing");
+        assert_ne!(find(root, 2), 0);
+        assert_eq!(ferro_frame_clear(root), FERRO_OK);
+        assert_eq!(ferro_release(root), FERRO_OK);
+    });
+}
+
+#[test]
+fn an_event_subscribed_to_the_dispatcher_calls_it_with_its_tag() {
+    ui(|| {
+        assert_eq!(ferro_frame_dispatcher(Some(dispatcher)), FERRO_OK);
+        dispatched();
+        let button = create("Button");
+        let subscription = ferro_subscribe_dispatch(button, event_id("Click"), 42);
+        assert!(subscription > 0, "{}", last_error());
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![(42, button, 0, String::new())]);
+        assert_eq!(ferro_unsubscribe(subscription), FERRO_OK);
+        assert_eq!(ferro_raise(button, event_id("Click")), FERRO_OK);
+        assert_eq!(dispatched(), vec![]);
+        assert_eq!(ferro_release(button), FERRO_OK);
+        assert_eq!(ferro_frame_dispatcher(None), FERRO_OK);
     });
 }
