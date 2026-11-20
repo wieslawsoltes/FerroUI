@@ -55,10 +55,13 @@
 //!   of the scan (the signatures of the handlers of an `x:Class` type).
 
 mod constants;
+mod class_registration;
 mod declarations;
 mod modules;
 mod source;
 mod tokens;
+
+pub use class_registration::{ClassRegistration, DeclarationList, RegisteredMethod, class_registration, rust_identifier};
 
 #[cfg(test)]
 mod tests;

@@ -6,6 +6,10 @@ use std::collections::BTreeSet;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+#[path = "markup_events.rs"]
+mod events;
+pub use events::MarkupEventSignature;
+
 pub(crate) const MAX_DIRECTORIES: usize = 1024;
 const MAX_FILES: usize = 256;
 const MAX_BYTES: u64 = 64 * 1024 * 1024;

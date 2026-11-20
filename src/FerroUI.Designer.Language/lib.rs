@@ -3,6 +3,10 @@ mod binding;
 mod design_support;
 mod editing;
 mod formatting;
+mod handler_edit;
+mod handler_project;
+#[cfg(test)]
+mod handler_tests;
 mod line_index;
 pub mod lsp;
 mod project_schema;

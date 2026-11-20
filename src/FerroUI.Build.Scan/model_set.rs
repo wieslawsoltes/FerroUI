@@ -146,6 +146,19 @@ impl ModelSet {
         self.map_paths(text, &|path| self.canonical_path(path))
     }
 
+    /// Spell a build-model type from authored Rust in `crate_name`. Prefer exported
+    /// paths for dependencies and use `crate` for types declared in the application.
+    pub fn source_type(&self, text: &str, crate_name: &str) -> String {
+        let local = format!("::{crate_name}::");
+        self.map_paths(&self.expanded(text), &|path| {
+            if let Some(relative) = path.strip_prefix(&local) {
+                format!("crate::{relative}")
+            } else {
+                self.exported_path(path).unwrap_or(path).to_owned()
+            }
+        })
+    }
+
     /// The normalised type text `text` as the one text of its Rust type: canonical
     /// ([`canonical`](Self::canonical)), with every type alias of the models replaced by
     /// the type it stands for (`PageList` by `FerroList<Ref<Page>>`). Two spellings of one

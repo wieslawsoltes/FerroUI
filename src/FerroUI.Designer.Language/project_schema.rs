@@ -1,19 +1,22 @@
 use crate::{PropertyInfo, Schema, TypeInfo};
-use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeModel};
+use ferroui_build_scan::model::{RegisteredKind, TypeModel};
 use ferroui_designer_project::MarkupCatalog;
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub(crate) struct ProjectSchema {
     types: Vec<TypeInfo>,
     pub(crate) effective: Schema,
+    pub(crate) catalog: Arc<MarkupCatalog>,
 }
 
 impl ProjectSchema {
-    pub(crate) fn new(base: &Schema, overrides: &[TypeInfo], catalog: &MarkupCatalog) -> Self {
+    pub(crate) fn new(base: &Schema, overrides: &[TypeInfo], catalog: Arc<MarkupCatalog>) -> Self {
         let mut configured = Self {
-            types: types_from_models(catalog.models().models()),
+            types: types_from_models(&catalog),
             effective: base.clone(),
+            catalog,
         };
         configured.refresh(base, overrides);
         configured
@@ -35,7 +38,7 @@ impl ProjectSchema {
 impl Schema {
     /// Add types exported by the selected Cargo package and its dependencies.
     pub fn register_project(&mut self, catalog: &MarkupCatalog) {
-        for info in types_from_models(catalog.models().models()) {
+        for info in types_from_models(catalog) {
             if self.type_info(&info.name, Some(&info.namespace)).is_none() {
                 self.register(info);
             }
@@ -43,7 +46,8 @@ impl Schema {
     }
 }
 
-fn types_from_models(assemblies: &[AssemblyModel]) -> Vec<TypeInfo> {
+fn types_from_models(catalog: &MarkupCatalog) -> Vec<TypeInfo> {
+    let assemblies = catalog.models().models();
     let enums: BTreeMap<_, _> = assemblies
         .iter()
         .flat_map(|assembly| &assembly.types)
@@ -81,14 +85,14 @@ fn types_from_models(assemblies: &[AssemblyModel]) -> Vec<TypeInfo> {
                     }
                     namespaces
                         .into_iter()
-                        .map(|namespace| type_info(item, namespace, &enums))
+                        .map(|namespace| type_info(catalog, item, namespace, &enums))
                         .collect::<Vec<_>>()
                 })
         })
         .collect()
 }
 
-fn type_info(item: &TypeModel, namespace: String, enums: &BTreeMap<&str, Vec<String>>) -> TypeInfo {
+fn type_info(catalog: &MarkupCatalog, item: &TypeModel, namespace: String, enums: &BTreeMap<&str, Vec<String>>) -> TypeInfo {
     let property = |name: &str, value: &str, read_only, attached, event| PropertyInfo {
         name: name.into(),
         type_name: local_type(value).into(),
@@ -131,6 +135,11 @@ fn type_info(item: &TypeModel, namespace: String, enums: &BTreeMap<&str, Vec<Str
             property(&event.name, "Event", false, false, true),
         );
     }
+    for field in &item.fields {
+        if let (Some(name), Some(argument)) = (field.name.strip_suffix("Event"), catalog.routed_event_argument(field)) {
+            properties.insert(name.into(), property(name, &argument, false, false, true));
+        }
+    }
     TypeInfo {
         name: item.name.clone(),
         namespace,
@@ -169,7 +178,7 @@ mod tests {
     use super::*;
     use crate::LanguageService;
     use ferroui_build_scan::model::{
-        AccessorModel, PropertyModel, RustType, TypeKind, XmlnsDefinitionModel,
+        AccessorModel, AssemblyModel, PropertyModel, RustType, TypeKind, XmlnsDefinitionModel,
     };
     use ferroui_designer_project::{Solution, file_uri};
 

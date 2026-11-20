@@ -1,7 +1,7 @@
 //! Framed JSON-RPC over stdio. Only this adapter uses LSP wire types; native callers use the
 //! same portable service directly. No network listener or external language process is started.
 use crate::{
-    FormattingOptions, LanguageError, LanguageService, Location, Position, Result, TextChange,
+    FormattingOptions, HandlerRequest, LanguageError, LanguageService, Location, Position, Range, Result, TextChange,
     WorkspaceEdit,
 };
 use serde_json::{Value, json};
@@ -18,6 +18,7 @@ pub struct LspServer {
     shutdown: bool,
     exit: bool,
     open_uris: BTreeMap<String, String>,
+    handler_commands: bool,
     cancelled: Arc<Mutex<BTreeSet<String>>>,
     tokens: tokens::TokenResults,
 }
@@ -29,6 +30,7 @@ impl Default for LspServer {
             shutdown: false,
             exit: false,
             open_uris: BTreeMap::new(),
+            handler_commands: false,
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
             tokens: tokens::TokenResults::default(),
         }
@@ -253,13 +255,24 @@ impl LspServer {
                 }) {
                     return Ok(json!([]));
                 }
-                let fixes = self
-                    .service
-                    .quick_fixes(uri(params)?, decode(&params["range"])?)?;
-                Ok(json!(fixes.into_iter().map(|fix| json!({
+                let uri = uri(params)?;
+                let range: Range = decode(&params["range"])?;
+                let fixes = self.service.quick_fixes(uri, range)?;
+                let mut actions = fixes.into_iter().map(|fix| json!({
                     "title": fix.title, "kind": "quickfix",
                     "edit": self.workspace_edit(WorkspaceEdit { document_changes: vec![fix.edits] })
-                })).collect::<Vec<_>>()))
+                })).collect::<Vec<_>>();
+                if self.handler_commands {
+                    if let Some(version) = self.service.version(uri) {
+                        let request = HandlerRequest { version, position: range.start, event: None };
+                        if self.service.offer_handler_fix(uri, &request) {
+                            actions.push(json!({"title":"Create Rust event handler…", "kind":"quickfix",
+                                "command":{"title":"Create Rust event handler…","command":"ferroui.createEventHandler",
+                                    "arguments":[{"uri":uri,"request":request}]}}));
+                        }
+                    }
+                }
+                Ok(json!(actions))
             }
             "textDocument/documentSymbol" => Ok(json!(self.service.symbols(uri(params)?)?)),
             "textDocument/foldingRange" => Ok(json!(self.service.folding(uri(params)?)?)),
@@ -301,6 +314,13 @@ impl LspServer {
                 }
                 Ok(Value::Null)
             }
+            "ferroui/eventHandlerTarget" => Ok(json!(self.service.handler_target(
+                text(params, "uri")?, &decode(&params["request"])?)?)),
+            "ferroui/planEventHandler" => Ok(json!(self.service.plan_handler(
+                text(params, "uri")?, &decode(&params["request"])?, &decode(&params["rust"])?,
+                text(params, "name")?)?)),
+            "ferroui/eventHandlerDefinition" => Ok(json!(self.service.handler_definition(
+                text(params, "uri")?, &decode(&params["request"])?, Some(&decode(&params["rust"])?))?)),
             "workspace/didChangeWorkspaceFolders" => {
                 if let Some(folders) = params["event"]["removed"].as_array() {
                     for folder in folders {
@@ -376,6 +396,7 @@ impl LspServer {
             return Err(LanguageError("Already initialized".into()));
         }
         self.initialized = true;
+        self.handler_commands = params["initializationOptions"]["ferrouiHandlerCommands"] == true;
         let roots: Vec<String> = params["workspaceFolders"]
             .as_array()
             .map(|folders| {
@@ -413,7 +434,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": ["quickfix"] },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

@@ -10,6 +10,9 @@ use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 mod refactoring;
+#[path = "handler_service.rs"]
+mod handlers;
+pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {
@@ -210,24 +213,18 @@ impl LanguageService {
         &mut self.schema
     }
     pub fn schema_for(&self, uri: &str) -> &Schema {
-        if !self.package_schemas.is_empty() {
-            if let Ok(path) = self
-                .document_uri(uri)
-                .and_then(|uri| ferroui_designer_project::file_path(&uri).map_err(Into::into))
-            {
-                if let Some(schema) = path
-                    .ancestors()
-                    .skip(1)
-                    .find(|root| {
-                        self.package_schemas.contains_key(*root) || root.join("Cargo.toml").is_file()
-                    })
-                    .and_then(|root| self.package_schemas.get(root))
-                {
-                    return &schema.effective;
-                }
-            }
-        }
-        self.configured_schema.as_ref().unwrap_or(&self.schema)
+        self.project_schema_for(uri).map_or_else(
+            || self.configured_schema.as_ref().unwrap_or(&self.schema),
+            |(_, project)| &project.effective,
+        )
+    }
+    fn project_schema_for(&self, uri: &str) -> Option<(&std::path::Path, &ProjectSchema)> {
+        if self.package_schemas.is_empty() { return None; }
+        let path = ferroui_designer_project::file_path(&self.document_uri(uri).ok()?).ok()?;
+        let root = path.ancestors().skip(1).find(|root| {
+            self.package_schemas.contains_key(*root) || root.join("Cargo.toml").is_file()
+        })?;
+        self.package_schemas.get_key_value(root).map(|(root, schema)| (root.as_path(), schema))
     }
     pub fn set_type_overrides(&mut self, overrides: Vec<TypeInfo>) {
         self.overrides = overrides;
@@ -256,16 +253,27 @@ impl LanguageService {
 
     pub fn set_build_metadata(&mut self, metadata: &BuildMetadata) -> Result<()> {
         let root = metadata.package_root()?;
+        self.require_package_root(&root)?;
+        self.publish_project_catalog(root, std::sync::Arc::new(metadata.catalog()?));
+        Ok(())
+    }
+
+    pub fn set_project_catalog(&mut self, root: std::path::PathBuf, catalog: std::sync::Arc<ferroui_designer_project::MarkupCatalog>) -> Result<()> {
+        self.require_package_root(&root)?;
+        self.publish_project_catalog(root, catalog);
+        Ok(())
+    }
+    fn require_package_root(&self, root: &std::path::Path) -> Result<()> {
         require(
             self.workspaces
                 .values()
-                .any(|workspace| workspace.solution.owns_package_root(&root)),
+                .any(|workspace| workspace.solution.owns_package_root(root)),
             "Cargo metadata must belong to an indexed workspace",
-        )?;
-        let catalog = metadata.catalog()?;
-        let schema = ProjectSchema::new(&self.schema, &self.overrides, &catalog);
+        )
+    }
+    fn publish_project_catalog(&mut self, root: std::path::PathBuf, catalog: std::sync::Arc<ferroui_designer_project::MarkupCatalog>) {
+        let schema = ProjectSchema::new(&self.schema, &self.overrides, catalog);
         self.package_schemas.insert(root, schema);
-        Ok(())
     }
     pub fn document(&self, uri: &str) -> Option<&Document> {
         self.state(uri).ok().map(|s| &s.document)
@@ -1310,6 +1318,13 @@ impl LanguageService {
         if state.document.is_valid() {
             if let Some((property, _)) = crate::binding::at(schema, &state.document, offset) {
                 return Ok(property.definition.into_iter().collect());
+            }
+            let position = state.index.position(offset)?;
+            if self.is_handler_attribute(uri, position) {
+                let request = HandlerRequest { version: state.version, position, event: None };
+                if let Ok(Some(location)) = self.handler_definition(uri, &request, None) {
+                    return Ok(vec![location]);
+                }
             }
             if let Some(node) = state
                 .document
