@@ -26,7 +26,7 @@ pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_
 mod rust_xaml;
 pub use rust_xaml::{
     check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
-    RustXamlRegistration,
+    RustXamlRegistration, rust_string_like,
 };
 pub use preview_sources::{
     hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,

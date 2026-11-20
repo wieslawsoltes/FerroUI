@@ -39,16 +39,18 @@ pub struct RustXamlPath {
 impl RustXamlPath {
     pub fn replacement(&self, source: &str, path: &str) -> String {
         let value = format!("{}{path}", self.prefix);
-        if let Some((hashes, _)) = source[self.range.clone()]
-            .strip_prefix('r')
-            .and_then(|raw| raw.split_once('"'))
-        {
-            if !value.contains(&format!("\"{hashes}")) {
-                return format!("r{hashes}\"{value}\"{hashes}");
-            }
-        }
-        LitStr::new(&value, Span::call_site()).token().to_string()
+        rust_string_like(&source[self.range.clone()], &value)
     }
+}
+
+/// Retain the authored raw string delimiters when they can hold the new value.
+pub fn rust_string_like(token: &str, value: &str) -> String {
+    if let Some((hashes, _)) = token.strip_prefix('r').and_then(|raw| raw.split_once('"')) {
+        if !value.contains(&format!("\"{hashes}")) {
+            return format!("r{hashes}\"{value}\"{hashes}");
+        }
+    }
+    LitStr::new(value, Span::call_site()).token().to_string()
 }
 
 #[derive(Debug, Default)]

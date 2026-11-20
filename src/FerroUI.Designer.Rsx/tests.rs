@@ -133,6 +133,15 @@ fn embedded_image_paths_round_trip_and_keep_unrelated_rust() {
         apply(&rust, vec![replacement]),
         rust.replace("Łódź #%.png", "Summer palette.png")
     );
+    let annotated = r###"fn view() { let _ = rsx! { Image {
+        source: ::ferroui_view::embedded_image(
+            /* keep the attribution 🎨 */ ::core::include_bytes!(r#"../Assets/Łódź #%.png"#),
+        ),
+    } }; }"###;
+    let projected_image = project_rust(annotated, annotated.find("include_bytes").unwrap()).unwrap();
+    assert!(projected_image.nodes[0].can_set_image_source());
+    let patch = projected_image.set_property(0, "Source", "../Assets/Summer%20palette.png").unwrap();
+    assert_eq!(apply(annotated, vec![patch]), annotated.replace("Łódź #%.png", "Summer palette.png"));
     for value in [
         "../Assets/foo%2Fbar.png",
         "%2Fetc/hosts",
@@ -147,6 +156,7 @@ fn embedded_image_paths_round_trip_and_keep_unrelated_rust() {
 
     let runtime = r#"rsx! { Image { source: load_thumbnail() } }"#;
     let projected = project_rust(runtime, 0).unwrap();
+    assert!(!projected.nodes[0].can_set_image_source());
     assert!(projected
         .edit_property(0, "Source", Some("icon.png"))
         .is_err());

@@ -42,8 +42,12 @@ export class AssetsView {
                 if (this.cache === query) this.changed();
             });
         }
+        const accepted = panel?.snapshot?.image ? frame : undefined;
+        const selected = panel?.selectedNode;
         this.view.show({
-            frame: canPlace && panel?.snapshot?.image ? frame : undefined,
+            frame: accepted,
+            imageTarget: accepted && selected?.canSetImageSource && panel?.selectedIds.length === 1
+                ? { ...accepted, node: selected.id, selection: [selected.id] } : undefined,
             assets: this.cache.assets ?? [], canInsert, folder: folder.uri.toString(),
             message: this.cache.error ?? (this.cache.assets ? undefined : 'Finding project assets…'),
         }, folder.name);

@@ -1,7 +1,22 @@
-use ferroui_designer_project::{relative_asset_path, relative_asset_uri};
+use ferroui_designer_core::{SourceSpan, TextPatch};
+use ferroui_designer_project::{relative_asset_path, relative_asset_uri, rust_string_like};
 use syn::{Expr, LitStr, Path};
 
 pub(crate) fn read(expression: &Expr) -> Option<String> {
+    relative_asset_uri(&path_literal(expression)?.value())
+}
+
+pub(crate) fn edit(source: &str, value: SourceSpan, reference: &str) -> Option<TextPatch> {
+    let path = relative_asset_path(reference)?;
+    let authored = source.get(value.start..value.end)?;
+    let expression = syn::parse_str(authored).ok()?;
+    let token = path_literal(&expression)?.span().byte_range();
+    let replacement = rust_string_like(authored.get(token.clone())?, &path);
+    let span = SourceSpan::new(value.start + token.start, value.start + token.end);
+    Some(TextPatch { span, replacement })
+}
+
+fn path_literal(expression: &Expr) -> Option<LitStr> {
     let Expr::Call(call) = expression else {
         return None;
     };
@@ -20,7 +35,7 @@ pub(crate) fn read(expression: &Expr) -> Option<String> {
     if !qualified(&image.mac.path, &["core", "include_bytes"]) {
         return None;
     }
-    relative_asset_uri(&image.mac.parse_body::<LitStr>().ok()?.value())
+    image.mac.parse_body().ok()
 }
 
 pub(crate) fn rust(reference: &str) -> Option<String> {

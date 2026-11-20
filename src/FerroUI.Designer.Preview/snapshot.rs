@@ -96,6 +96,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
                 can_insert: design.editable_children(node.id) && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_insert_outline_child(node.id)),
                 can_remove: can_remove(&design, node),
                 can_move: node.parent.is_some_and(|parent| design.editable_children(parent)) && renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_move_outline_node(node.id)),
+                can_set_image_source: crate::asset_source::can_set_image_source(&design, node),
                 selectable: renderer.stage.as_ref().is_some_and(|stage| stage.session.borrow().can_canvas_select(node.id)),
             })
         })

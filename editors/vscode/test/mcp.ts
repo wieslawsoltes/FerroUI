@@ -44,6 +44,7 @@ import { verifyRsxAnimation } from './rsxAnimationMcp';
 import { verifyRsxPrograms } from './rsxProgramsMcp';
 import { verifyRsxStates } from './rsxStatesMcp';
 import { verifyRsxControlRename } from './rsxRenameMcp';
+import { verifyProjectImageSource } from './projectImageSourceMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -177,6 +178,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
         await verifyRsxControlRename({ invoke, content });
+        await verifyProjectImageSource({ invoke, content });
         await verifyColumnsMcp({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });

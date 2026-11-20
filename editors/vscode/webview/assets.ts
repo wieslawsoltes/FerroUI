@@ -12,6 +12,7 @@ const details = element('project-asset-preview');
 const thumbnail = element<HTMLImageElement>('asset-thumbnail');
 const insert = element<HTMLButtonElement>('asset-insert');
 const place = element<HTMLButtonElement>('asset-place');
+const useSource = element<HTMLButtonElement>('asset-use-source');
 const more = element<HTMLButtonElement>('assets-more');
 const pageSize = 120;
 let limit = pageSize;
@@ -79,6 +80,9 @@ more.addEventListener('click', () => {
 });
 element('asset-open').addEventListener('click', () => { if (selected) vscode.postMessage({ type: 'open', id: selected.id }); });
 element('asset-copy').addEventListener('click', () => { if (selected) vscode.postMessage({ type: 'copy', id: selected.id }); });
+useSource.addEventListener('click', () => {
+    if (selected?.source && state.imageTarget) vscode.postMessage({ type: 'setImageSource', id: selected.id, target: state.imageTarget });
+});
 insert.addEventListener('click', () => {
     if (selected?.source && state.frame) vscode.postMessage({ type: 'insert', id: selected.id, frame: state.frame });
 });
@@ -139,6 +143,7 @@ function showPreviewButtons(): void {
     insert.disabled = !state.frame || !state.canInsert;
     place.hidden = !selected?.source;
     place.disabled = !state.frame;
+    useSource.hidden = !selected?.source || !state.imageTarget;
     insert.title = insert.disabled ? 'Select a panel that accepts children or drag onto the artboard' : '';
 }
 

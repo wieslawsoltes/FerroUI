@@ -105,6 +105,8 @@ export const agentCatalog = {
         { ...session, node }, ['session']),
     designer_assets: tool('Browse project image, font, media and markup files from the Assets view.',
         { ...session, offset: integer(0), limit: integer(1, 200) }, ['session']),
+    designer_set_image_source: tool('Use a raster asset from the project Assets view as the Source of an authored image in XAML or mapped RSX. Use the current node and preview revision.',
+        { ...frame, node, project_asset: text }, ['session', 'expected_revision', 'node', 'project_asset'], true),
     designer_rename_rsx_control: tool('Rename a mapped RSX control and its authored style selectors and visual-state targets in one source edit.',
         { ...frame, node, value: { type: 'string', maxLength: 128 } }, ['session', 'expected_revision', 'node', 'value'], true),
     designer_preview_image: tool('Capture the current native artboard as PNG with viewport and source revision metadata.', session, ['session']),

@@ -191,6 +191,7 @@ pub(crate) struct OutlineNode {
     pub(crate) can_insert: bool,
     pub(crate) can_remove: bool,
     pub(crate) can_move: bool,
+    pub(crate) can_set_image_source: bool,
     pub(crate) selectable: bool,
 }
 

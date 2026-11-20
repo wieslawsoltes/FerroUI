@@ -409,6 +409,14 @@ export class DesignerWorkbench implements vscode.Disposable {
         return { type: 'image', source: await this.assets.library.imageSource(panel.document.uri, id) };
     }
 
+    async projectImageSource(panel: DesignerPanel, target: NodeTarget, id: string): Promise<Extract<NodeOperation, { type: 'setProperty' }>> {
+        if (!panel.canUse(target) || !panel.nodes.some(node => node.id === target.node && node.canSetImageSource)) {
+            throw new Error('Choose an editable image source in the current design.');
+        }
+        const image = await this.projectImage(panel, id);
+        return { type: 'setProperty', node: target.node, name: 'Source', value: image.source };
+    }
+
     private followFocus(): void {
         if (this.disposed) return;
         const editor = vscode.window.activeTextEditor;
@@ -609,6 +617,10 @@ export class DesignerWorkbench implements vscode.Disposable {
         try {
             if (message.type === 'preview' || message.type === 'open' || message.type === 'copy') {
                 await this.assets.browse(message.type, message.id);
+            } else if (message.type === 'setImageSource') {
+                const panel = this.panelFor(message.target);
+                const operation = await this.projectImageSource(panel, message.target, message.id);
+                await this.edit(message.target, operation);
             } else if (message.type === 'insert') {
                 const panel = this.panelFor(message.frame);
                 const origin = await this.projectImage(panel, message.id);

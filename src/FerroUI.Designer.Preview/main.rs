@@ -1,5 +1,6 @@
 //! A private stdio renderer process. The extension owns the authored buffer and
 //! applies returned UTF-16 edits through the editor's undo/redo transaction.
+mod asset_source;
 mod capabilities;
 mod document;
 mod canvas_guides;

@@ -39,6 +39,11 @@ impl RsxNode {
         self.class.literal(name).is_some()
     }
 
+    pub fn can_set_image_source(&self) -> bool {
+        self.class.literal("Source") == Some(literal::Literal::EmbeddedImage)
+            && !self.expressions.contains_key("Source")
+    }
+
     pub fn supports_events(&self) -> bool {
         self.class.mapped_events()
     }
@@ -101,11 +106,12 @@ impl RsxProjection<'_> {
             .properties
             .get(name)
             .ok_or("Edit an authored literal property")?;
-        let replacement = node
-            .class
-            .literal(name)
-            .and_then(|kind| kind.rust(value))
-            .ok_or_else(|| format!("{value:?} is outside the static RSX values for {name}"))?;
+        let outside_static_values = || format!("{value:?} is outside the static RSX values for {name}");
+        let codec = node.class.literal(name).ok_or_else(outside_static_values)?;
+        if codec == literal::Literal::EmbeddedImage {
+            return crate::image_source::edit(self.source, span, value).ok_or_else(outside_static_values);
+        }
+        let replacement = codec.rust(value).ok_or_else(outside_static_values)?;
         Ok(TextPatch { span, replacement })
     }
 

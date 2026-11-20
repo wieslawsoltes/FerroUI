@@ -334,6 +334,12 @@ export class AgentTools {
             case 'designer_remove':
                 await panel.agentEdit(args.expected_revision, { type: 'removeNode', node: args.node! }, signal);
                 break;
+            case 'designer_set_image_source': {
+                const target = { session: panel.session, token: args.expected_revision, node: args.node! };
+                const operation = await this.workbench.projectImageSource(panel, target, args.project_asset!);
+                await panel.agentEdit(target.token, operation, signal);
+                break;
+            }
             case 'designer_resize_hint':
                 return panel.previewResize({ session: panel.session, token: args.expected_revision },
                     { node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy!, snap: args.snap });

@@ -268,6 +268,7 @@ export function assetsHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <div class="asset-actions tool-group" role="group" aria-label="Asset actions">
             ${tool('asset-open', 'go-to-file', 'Open asset')}
             ${tool('asset-copy', 'copy', 'Copy asset path')}
+            ${tool('asset-use-source', 'replace', 'Use as image source', 'hidden')}
             ${tool('asset-place', 'insert', 'Choose image placement…', 'hidden')}
             <button id="asset-insert" class="primary" type="button" hidden>Insert image</button>
         </div>

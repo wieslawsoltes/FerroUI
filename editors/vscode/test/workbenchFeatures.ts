@@ -52,7 +52,7 @@ export async function verifyWorkbenchFeatures(preview: NativePreview, xamlUri: s
     assert.match(xaml.source, /Source="Assets\/Preview%20Image.png"/);
     const withAsset = await preview.render(xaml, viewport, 11);
     assert.ok(withAsset.image, withAsset.renderError ?? 'Relative assets load in the artboard');
-    assert.ok(withAsset.nodes.some(node => node.label === 'Image' && node.bounds?.height));
+    assert.ok(withAsset.nodes.some(node => node.label === 'Image' && node.bounds?.height && node.canSetImageSource));
 
     let rust: Source = { language: 'rust', uri: rustUri, caret, source: `
 fn view() { rsx! {
@@ -97,7 +97,18 @@ fn view() { rsx! {
     assert.match(withImage, /move \|\| title\(\)/);
     const rustAssetFrame = await preview.render({ ...rust, source: withImage }, viewport, 16);
     assert.ok(rustAssetFrame.image, rustAssetFrame.renderError ?? 'Embedded Rust asset renders in the artboard');
-    assert.ok(rustAssetFrame.nodes.some(node => node.label === 'Image' && node.bounds?.height));
+    const authoredImage = rustAssetFrame.nodes.find(node => node.label === 'Image' && node.bounds?.height);
+    assert.ok(authoredImage?.canSetImageSource);
+    const annotated = withImage.replace('::core::include_bytes!("Assets/Preview Image.png")',
+        '/* asset credit 🎨 */ ::core::include_bytes!(r#"Assets/Preview Image.png"#)');
+    const annotatedFrame = await preview.render({ ...rust, source: annotated }, viewport, 17);
+    assert.ok(annotatedFrame.nodes.find(node => node.id === authoredImage.id)?.canSetImageSource);
+    const replacement = await preview.edit({ ...rust, source: annotated }, {
+        type: 'setProperty', node: authoredImage.id, name: 'Source', value: 'Assets/Other%20Image.png',
+    });
+    assert.equal(apply(annotated, replacement.edits), annotated.replace('Preview Image.png', 'Other Image.png'));
+    const bound = await preview.render({ ...xaml, source: '<Image xmlns="https://github.com/ferroui" Source="{ReflectionBinding Photo}"/>' }, viewport, 18);
+    assert.equal(bound.nodes[0]?.canSetImageSource, false);
     console.log('VS Code native hierarchy, grouped properties, resources, image drops in XAML and RSX, and expression-preserving placement passed');
 }
 

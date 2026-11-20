@@ -146,6 +146,7 @@ export interface OutlineNode {
     canInsert: boolean;
     canRemove: boolean;
     canMove: boolean;
+    canSetImageSource?: boolean;
     selectable?: boolean;
 }
 export interface Snapshot {
@@ -219,10 +220,12 @@ export interface AssetsState {
     folder?: string;
     assets: ProjectAsset[];
     canInsert: boolean;
+    imageTarget?: NodeTarget;
     message?: string;
 }
 export type FromAssets = { type: 'ready' } | DragMessage
     | { type: 'preview' | 'open' | 'copy'; id: string }
+    | { type: 'setImageSource'; target: NodeTarget; id: string }
     | { type: 'insert'; frame: FrameTarget; id: string; choosePlacement?: boolean };
 export type ToAssets = DragUpdate | { type: 'state'; state: AssetsState }
     | { type: 'thumbnail'; id: string; uri?: string }
