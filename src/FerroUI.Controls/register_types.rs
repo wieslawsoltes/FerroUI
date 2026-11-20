@@ -252,6 +252,12 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::image::Image,
     crate::info_badge::InfoBadge,
     crate::info_bar::InfoBar,
+    // --- pivot (WinUI, docs/porting/winui-calculator-gaps.md, PV-1) ---
+    crate::pivot::Pivot,
+    crate::pivot::PivotItem,
+    crate::pivot::PivotPanel,
+    crate::pivot::PivotHeaderItem,
+    crate::pivot::PivotHeaderPanel,
     crate::title_bar::TitleBar,
     crate::items_control::ItemsControl,
     crate::label::Label,
@@ -259,6 +265,16 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::layout_transform_control::LayoutTransformControl,
     crate::list_box::ListBox,
     crate::list_box_item::ListBoxItem,
+    // --- list view (WinUI, docs/porting/winui-calculator-gaps.md, LV-1) ---
+    crate::list_view::ListViewBase,
+    crate::list_view::ListView,
+    crate::list_view::ListViewBaseItem,
+    crate::list_view::ListViewItem,
+    crate::list_view::ItemsStackPanel,
+    // --- grid view (WinUI, docs/porting/winui-calculator-gaps.md, LV-2) ---
+    crate::list_view::GridView,
+    crate::list_view::GridViewItem,
+    crate::list_view::ItemsWrapGrid,
     crate::platform::MacOSProperties,
     crate::masked_text_box::MaskedTextBox,
     crate::menu::Menu,
@@ -496,6 +512,10 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- swipe (WinUI, docs/porting/winui-calculator-gaps.md, SW-1) ---
+    crate::swipe_control::SwipeControl,
+    crate::swipe_control::SwipeItems,
+    crate::swipe_control::SwipeItem,
     // --- visualstates (WinUI, docs/porting/winui-calculator-gaps.md) ---
     crate::visual_state::VisualStateManager,
     crate::visual_state::VisualStateGroup,

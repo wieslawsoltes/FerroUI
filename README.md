@@ -507,6 +507,10 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 |---|---|
 | ![ReactiveDemo, the getting-started sample of ReactiveUI as a crate browser, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
 
+### C and other languages
+
+The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
+
 ### Developer tools
 
 AI agents can inspect and drive a running application through the optional [MCP server](docs/mcp.md): visual, logical and automation trees, properties, styles, resources, input, screenshots and condition waits. ControlCatalog supports `--features mcp` with stdio or authenticated loopback HTTP, including headless runs.
@@ -561,6 +565,7 @@ Using the framework:
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
 - [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
+- [The C ABI](docs/c-abi.md): `ferroui-capi` and its generated header, the rules of handles, IDs, values, errors, threads and callbacks, and a hello world in C.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the developer tools attached with F12, member by member.
 - [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.

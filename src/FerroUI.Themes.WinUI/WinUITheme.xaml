@@ -41,6 +41,7 @@
         <MergeResourceInclude Source="/Resources/ListBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleSwitch_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CommandBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/GridViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ListViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources_v2.5.xaml" />
@@ -48,6 +49,7 @@
         <MergeResourceInclude Source="/Resources/Button_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CornerRadius_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/MediaTransportControls_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RepeatButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarDatePicker_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarView_themeresources.xaml" />
@@ -57,6 +59,7 @@
         <MergeResourceInclude Source="/Resources/DateTimePickerFlyout_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipViewItem_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Pivot_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollViewer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Slider_themeresources.xaml" />
@@ -71,6 +74,7 @@
         <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />

@@ -1,4 +1,132 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <WrapPanel Width="360" HorizontalAlignment="Left" ItemSpacing="8" LineSpacing="8"><Button Content="Alpha"/><Button Content="Beta item"/><Button Content="Gamma"/><Button Content="Delta item"/><Button Content="Epsilon"/><Button Content="Zeta item"/><Button Content="Eta"/><Button Content="Theta item"/><Button Content="Iota"/><Button Content="Kappa item"/></WrapPanel>
+<!-- Ported from the two pinned WrapPanel examples of WinUI Gallery (14061eea) and the handlers of
+     WrapPanelPage.xaml.cs (layout_samples.rs); see ../NOTICE.md. ThemeResource is DynamicResource
+     and ControlCornerRadius is its value, 4. The Headers of the sliders are composed; SnapsTo Ticks
+     with StepFrequency 2 is IsSnapToTickEnabled with TickFrequency 2; WinUI's IsOn is IsChecked and
+     the ToggleSwitch's Header is its Content. FerroUI's WrapPanel has no Padding: the panel's
+     padding is the Padding of its host Border, which the Padding slider sets, with the same layout.
+     FerroUI's WrapPanel has no ItemsStretch, so the final item of the second example does not
+     stretch and the ItemsStretch switch changes nothing: the page is partial. The option groups
+     keep the source's RadioButton items with their Tags; IsChecked is the SelectedIndex. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Wrap items and adjust the layout" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <Border x:Name="LayoutHost" Width="360" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top"
+              Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+              BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4"
+              Padding="12">
+        <WrapPanel x:Name="Control1" ItemSpacing="8" LineSpacing="8">
+          <Border MinWidth="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Alpha" />
+          </Border>
+          <Border MinWidth="112" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Beta item" />
+          </Border>
+          <Border MinWidth="88" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Gamma" />
+          </Border>
+          <Border MinWidth="128" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Delta item" />
+          </Border>
+          <Border MinWidth="80" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Epsilon" />
+          </Border>
+          <Border MinWidth="104" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Zeta item" />
+          </Border>
+          <Border MinWidth="76" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Eta" />
+          </Border>
+          <Border MinWidth="120" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Theta item" />
+          </Border>
+          <Border MinWidth="92" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Iota" />
+          </Border>
+          <Border MinWidth="132" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Kappa item" />
+          </Border>
+        </WrapPanel>
+      </Border>
+      <StackPanel Grid.Column="1" Spacing="12">
+        <RadioButtons x:Name="OrientationGroup" AutomationProperties.AutomationId="WrapPanelOrientation"
+                      AutomationProperties.Name="WrapPanel orientation" Header="Orientation" SelectedIndex="0">
+          <RadioButton AutomationProperties.AutomationId="WrapPanelHorizontalOrientation"
+                       AutomationProperties.Name="Horizontal orientation" Content="Horizontal" Tag="Horizontal" />
+          <RadioButton AutomationProperties.AutomationId="WrapPanelVerticalOrientation"
+                       AutomationProperties.Name="Vertical orientation" Content="Vertical" Tag="Vertical" />
+        </RadioButtons>
+        <StackPanel>
+          <TextBlock Text="Item spacing" />
+          <Slider x:Name="ItemSpacingSlider" AutomationProperties.AutomationId="WrapPanelItemSpacing"
+                  AutomationProperties.Name="Item spacing"
+                  IsSnapToTickEnabled="True" Maximum="24" Minimum="0" TickFrequency="2" Value="8" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Text="Line spacing" />
+          <Slider x:Name="LineSpacingSlider" AutomationProperties.AutomationId="WrapPanelLineSpacing"
+                  AutomationProperties.Name="Line spacing"
+                  IsSnapToTickEnabled="True" Maximum="24" Minimum="0" TickFrequency="2" Value="8" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Text="Padding" />
+          <Slider x:Name="PaddingSlider" AutomationProperties.AutomationId="WrapPanelPadding"
+                  AutomationProperties.Name="Uniform padding"
+                  IsSnapToTickEnabled="True" Maximum="24" Minimum="0" TickFrequency="2" Value="12" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Stretch the final item to fill the line" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <Border Width="360" HorizontalAlignment="Left" VerticalAlignment="Top"
+              Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+              BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4"
+              Padding="12">
+        <WrapPanel x:Name="Control2" ItemSpacing="8">
+          <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="One" />
+          </Border>
+          <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Two" />
+          </Border>
+          <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Three" />
+          </Border>
+          <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Four" />
+          </Border>
+          <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="Five" />
+          </Border>
+          <Border x:Name="FinalItem" Padding="12,8" Background="{DynamicResource AccentFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+            <TextBlock Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" Text="Final item" />
+          </Border>
+        </WrapPanel>
+      </Border>
+      <ToggleSwitch x:Name="StretchLastItemToggle" Grid.Column="1" VerticalAlignment="Top"
+                    AutomationProperties.AutomationId="WrapPanelStretchLastItem"
+                    AutomationProperties.Name="Stretch final item" Content="ItemsStretch" IsChecked="True"
+                    OffContent="None" OnContent="Last" />
+    </Grid>
+  </StackPanel>
 </StackPanel>

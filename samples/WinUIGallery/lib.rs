@@ -6,8 +6,10 @@
 
 #![forbid(unsafe_code)]
 
+mod accessibility_samples;
 mod assets;
 mod assets_data;
+mod binding_samples;
 mod brush_samples;
 mod button_samples;
 mod cat_data;
@@ -19,6 +21,7 @@ pub mod catalog;
 mod catalog_data;
 pub mod contrast;
 mod control_samples;
+mod custom_controls;
 mod date_samples;
 pub mod examples;
 mod feedback_samples;
@@ -60,6 +63,12 @@ pub use app::App;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod accessibility_samples_tests;
+
+#[cfg(test)]
+mod custom_controls_tests;
 
 #[cfg(test)]
 mod feedback_samples_tests;
@@ -135,3 +144,6 @@ mod scroll_samples_tests;
 
 #[cfg(test)]
 mod brush_samples_tests;
+
+#[cfg(test)]
+mod binding_samples_tests;

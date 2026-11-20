@@ -53,6 +53,7 @@ pub use size_animator::SizeAnimator;
 pub use solid_color_brush_animator::ISolidColorBrushAnimator;
 pub use thickness_animator::ThicknessAnimator;
 pub use transform_animator::TransformAnimator;
+pub(crate) use transform_animator::not_a_visual_message;
 pub use transform_operations_animator::TransformOperationsAnimator;
 pub use uint16_animator::UInt16Animator;
 pub use uint32_animator::UInt32Animator;

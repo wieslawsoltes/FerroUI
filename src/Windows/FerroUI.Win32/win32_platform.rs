@@ -13,7 +13,7 @@ use crate::screen_impl::ScreenImpl;
 use crate::win32_dispatcher_impl::{Win32DispatcherImpl, SIGNAL_L, SIGNAL_W};
 use crate::win32_gl_manager::Win32GlManager;
 use crate::win32_platform_options::{Win32DpiAwareness, Win32PlatformOptions};
-use crate::win32_platform_settings::{setting_change, SettingChange, Win32PlatformSettings};
+use crate::win32_platform_settings::{setting_change_of, SettingChange, Win32PlatformSettings};
 use crate::win_screen::WinScreen;
 use crate::window_impl::WindowImpl;
 use crate::wnd_proc_guard;
@@ -367,7 +367,7 @@ impl Win32Platform {
                 // SAFETY: the second parameter of this message names the
                 // setting that changed, or is null.
                 let changed_setting = unsafe { read_setting_name(l_param) };
-                match setting_change(changed_setting.as_deref()) {
+                match setting_change_of(w_param, changed_setting.as_deref()) {
                     Some(SettingChange::ColorValues) => {
                         win32_platform_settings.on_color_values_changed();
                         // The transparency effects setting is announced with the colours.
@@ -383,6 +383,15 @@ impl Win32Platform {
                 if let Some(screen) = self.screen.borrow().clone() {
                     screen.on_changed();
                 }
+            }
+        }
+
+        if msg == WindowsMessage::WM_SYSCOLORCHANGE {
+            // The system colours changed (a contrast theme was edited or switched, #560): the
+            // colour values carry them while high contrast is on.
+            let win32_platform_settings = self.win32_platform_settings.borrow().clone();
+            if let Some(win32_platform_settings) = win32_platform_settings {
+                win32_platform_settings.on_color_values_changed();
             }
         }
 
