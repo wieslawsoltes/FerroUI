@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { action, choose, editText, type StudioContext, type StudioItem } from './studioContext';
 
 export interface Component {
@@ -36,9 +37,20 @@ export function componentActions(context: StudioContext, component: Component, e
     }
     if (context.writable && key) items.push(
         action(`${id}:rename`, 'Rename resource and references…', async () => {
+            context.ensure();
+            const document = context.panel.document;
+            if (vscode.workspace.isTrusted && vscode.workspace.getWorkspaceFolder(document.uri)) {
+                const target = context.panel.nodes.find(entry => entry.id === node);
+                if (!target) throw new Error('The declaration is unavailable in the current design.');
+                await vscode.commands.executeCommand('ferroui.renameResource', {
+                    uri: document.uri.toString(),
+                    request: { version: document.version, position: target.nameRange.start },
+                });
+                return;
+            }
             const next = await editText('New resource key', key);
             if (next?.trim() && next !== key) await context.edit('designer_component', { action: 'rename_resource', resource: node, key: next });
-        }, 'edit'),
+        }, 'rename'),
         action(`${id}:duplicate`, 'Duplicate resource…', async () => {
             const next = await editText('Key for the new definition', `${key}Copy`);
             if (next?.trim()) await context.edit('designer_component', { action: 'duplicate_resource', resource: node, key: next });

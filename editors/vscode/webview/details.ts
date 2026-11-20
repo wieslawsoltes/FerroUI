@@ -37,7 +37,7 @@ function render(): void {
     title.textContent = state.label ?? '';
     title.hidden = !state.label;
     const fields = view === 'events' ? state.events : state.resources;
-    const key = JSON.stringify([state.frame?.session, state.target?.node, state.codeBehind, state.extractDictionary, fields]);
+    const key = JSON.stringify([state.frame?.session, state.target?.node, state.codeBehind, state.reviewResources, fields]);
     if (fields && key !== contentKey) {
         contentKey = key;
         list.replaceChildren(...(view === 'events'
@@ -126,7 +126,10 @@ function resourceRow(resource: ResourceRow): HTMLElement {
     const heading = create('div');
     heading.className = 'detail-heading';
     heading.append(name);
-    if (state.extractDictionary) heading.append(actionButton('file-code', `Extract the dictionary containing ${resource.name}`, () => extract(resource.id)));
+    if (state.reviewResources) {
+        if (resource.key) heading.append(actionButton('rename', `Rename ${resource.name} and references`, () => review('renameResource', resource)));
+        heading.append(actionButton('file-code', `Extract the dictionary containing ${resource.name}`, () => review('extractDictionary', resource)));
+    }
     heading.append(actionButton('go-to-file', `Reveal ${resource.name} declaration`, () => reveal(resource.range)));
     const meta = create('p', [resource.typeName, resource.scope,
         resource.usages ? `${resource.usages} ${resource.usages === 1 ? 'use' : 'uses'}` : ''].filter(Boolean).join(' · '));
@@ -190,10 +193,12 @@ function reveal(range: Range): void {
     if (state.frame) vscode.postMessage({ type: 'reveal', frame: state.frame, range });
 }
 
-function extract(resource: number): void {
+function review(type: 'extractDictionary' | 'renameResource', resource: ResourceRow): void {
     if (!state.frame || pending !== undefined) return;
     pending = ++request;
     error = undefined;
-    vscode.postMessage({ type: 'extractDictionary', request: pending, frame: state.frame, resource });
+    const message = { request: pending, frame: state.frame };
+    vscode.postMessage(type === 'renameResource' ? { ...message, type, range: resource.range }
+        : { ...message, type, resource: resource.id });
     applyFilter();
 }

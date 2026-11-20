@@ -29,6 +29,7 @@ import { verifyColumnsMcp } from './studioColumnsMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
 import { verifyIncludedItemTemplatesMcp } from './includedItemTemplatesMcp';
 import { verifyIncludedTemplateCopiesMcp } from './includedTemplateCopiesMcp';
+import { verifyResourceRename } from './resourceRename';
 import { verifyIncludedStylesMcp } from './includedStylesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
@@ -180,6 +181,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });
         await verifyIncludedTemplateCopiesMcp({ invoke, content });
+        await verifyResourceRename({ invoke, content });
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
         await verifyIncludedStylesMcp({ invoke, content });

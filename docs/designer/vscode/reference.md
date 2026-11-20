@@ -111,6 +111,12 @@ Build the package’s XAML schema. Call `designer_event_handler` with the curren
 
 Call `designer_scaffold_handler` with the same target, `handler`, and `expected_rust_version` from the read. The request requires write access. It updates the workspace buffers as one edit and returns the declaration location. Use `designer_history` in VS Code or `designer_undo` in Studio to undo the change. Save and rebuild when the handler is ready to run. [Events workflow](authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+### Review a resource rename with MCP
+
+In VS Code, call `ferroui_workspace_plan_resource_rename` with `path`, a zero-based UTF-16 `position` at the key or resource reference, and `new_name`. Use `folder` to select the project in a multi-root window. Inspect each returned document’s `before`, versioned `edit`, and `after` source, including any unopened consumers.
+
+Call `ferroui_workspace_rename_resource` with the same fields and the returned `review`. The write requires `ferroui.mcp.allowWrites` and applies all changes in one editor Undo step. In Studio, use `designer_plan_resource_rename` and `designer_rename_resource` with the active XAML UTF-8 byte `offset`, `new_name`, and `expected_revision`. Pass the `review` on apply. Use Undo from a participating tab to restore all buffers. [Authoring workflow](authoring.md#rename-a-resource-across-xaml-files)
+
 ### Extract a resource dictionary with MCP
 
 Call `designer_dictionary_extraction` with an authored `node` and the current `expected_revision`. Use the `session` from `designer_open` in VS Code. The result includes the source range, entry count, and suggested sibling filename. Pass `file_name` to preview the versioned `edit`, the `file` to create, and the `review` identifier.

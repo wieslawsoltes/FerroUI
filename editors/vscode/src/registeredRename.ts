@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
-import type { Position } from './protocol';
 import { planRegisteredType, registeredRustDrafts, type RegisteredRenamePlan, type RenameLocation, type RenamePosition, type RenameTarget } from './registeredTypePlan';
-import { checkedSources, reviewedSourceUri } from './reviewedSources';
+import { checkedSources, reviewedSourceUri, type SourceRenameAgentRequest } from './reviewedSources';
 import { SourceChangeReview } from './sourceChangeReview';
 import { asRange, exactRange } from './textDocument';
 import { isWorkspaceFile, resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
 import type { XamlServer } from './xamlServer';
-
-export interface RegisteredRenameAgentRequest { path: string; folder?: string; position: Position; new_name: string; review?: string }
 
 export class RegisteredRename implements vscode.Disposable {
     private readonly review: SourceChangeReview;
@@ -47,7 +44,7 @@ export class RegisteredRename implements vscode.Disposable {
         });
     }
 
-    async agent(input: RegisteredRenameAgentRequest, signal: AbortSignal): Promise<RegisteredRenamePlan> {
+    async agent(input: SourceRenameAgentRequest, signal: AbortSignal): Promise<RegisteredRenamePlan> {
         const uri = await resolveWorkspaceFile(input.path, input.folder);
         const document = await vscode.workspace.openTextDocument(uri);
         const position = exactRange(document, { start: input.position, end: input.position }).start;

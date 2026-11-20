@@ -8,7 +8,9 @@ import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
 import { runEditorHistory } from './editorHistory';
 import type { FileMoveRequest, FileMoves } from './fileMoves';
-import type { RegisteredRenameAgentRequest, RegisteredRename } from './registeredRename';
+import type { RegisteredRename } from './registeredRename';
+import type { ResourceRename } from './resourceRename';
+import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
@@ -100,7 +102,9 @@ export class AgentTools {
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
         private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
-        private readonly registeredRenames: Record<'property' | 'type', RegisteredRename>) {}
+        private readonly renames: {
+            property: RegisteredRename; type: RegisteredRename; resource: ResourceRename;
+        }) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -123,10 +127,13 @@ export class AgentTools {
             return this.fileMoves.agent(request, signal, request.review);
         }
         if (tool === 'ferroui_workspace_plan_property_rename' || tool === 'ferroui_workspace_rename_property') {
-            return this.registeredRenames.property.agent(input as RegisteredRenameAgentRequest, signal);
+            return this.renames.property.agent(input as SourceRenameAgentRequest, signal);
         }
         if (tool === 'ferroui_workspace_plan_type_rename' || tool === 'ferroui_workspace_rename_type') {
-            return this.registeredRenames.type.agent(input as RegisteredRenameAgentRequest, signal);
+            return this.renames.type.agent(input as SourceRenameAgentRequest, signal);
+        }
+        if (tool === 'ferroui_workspace_plan_resource_rename' || tool === 'ferroui_workspace_rename_resource') {
+            return this.renames.resource.agent(input as SourceRenameAgentRequest, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
         const args = input as Arguments;

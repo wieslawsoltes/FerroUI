@@ -1,7 +1,7 @@
 import { readFile, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import type { TextEdit } from './protocol';
+import type { Position, TextEdit } from './protocol';
 import { asRange } from './textDocument';
 import { workspaceSourceUri } from './workspacePaths';
 
@@ -9,6 +9,14 @@ export interface ReviewedDocument {
     edit: { uri: string; version: number; edits: TextEdit[] };
     before: string;
     after: string;
+}
+
+export interface SourceRenameAgentRequest {
+    path: string;
+    folder?: string;
+    position: Position;
+    new_name: string;
+    review?: string;
 }
 
 async function openSources() {

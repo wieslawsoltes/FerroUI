@@ -99,6 +99,15 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<T>(`ferroui/${method}`, params);
     }
 
+    async resourceRenameRequest<T>(method: 'resourceRenameTarget' | 'planResourceRename', params: object): Promise<T> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiResourceRename !== true) {
+            throw new Error('Use a FerroUI XAML language server that supports reviewed resource renames.');
+        }
+        return client.sendRequest<T>(`ferroui/${method}`, params);
+    }
+
     async registeredPropertyRequest<T>(method: 'registeredPropertyTarget' | 'planRegisteredPropertyRename', params: object): Promise<T> {
         await this.start();
         const client = this.client;

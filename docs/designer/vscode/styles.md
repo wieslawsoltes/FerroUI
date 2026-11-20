@@ -13,7 +13,7 @@ Open an XAML view in **Design** and run **FerroUI: Show Styles & Themes**. You c
 4. Choose **Add setter** and select a property. Edit existing literal values in the setter rows. Use the link icon to choose a visible resource for a compatible property. A **Dynamic Resource** follows theme changes. A **Static Resource** resolves when the definition loads. Use the source arrow to open a binding, object value, or setter declaration.
 5. Use **Preview definition on canvas** to sample the definition. Return to the document to see it applied to its authored controls. In **Properties**, use **Trace value** to see the actual winning setter or resource on a selected control. [Trace a value](authoring.md#trace-an-effective-property-value)
 
-Each accepted action edits the XAML buffer in one Undo step. For a keyed style or control theme, use the resource actions in **Library** to rename, duplicate, or manage its references.
+Each accepted action takes one Undo step. For a keyed style or control theme, use the resource actions in **Library** to duplicate the definition or review a rename across consuming XAML files. [Resource rename](authoring.md#rename-a-resource-across-xaml-files)
 
 ![VS Code shows an edited Padding setter beside the authored XAML value and the updated native card](../images/vscode-scoped-styles.jpg)
 

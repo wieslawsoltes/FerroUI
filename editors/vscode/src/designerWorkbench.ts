@@ -8,6 +8,7 @@ import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import type { DictionaryExtraction, DictionarySite } from './dictionaryExtraction';
+import type { ResourceRename } from './resourceRename';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import { sourceColumn } from './editorHistory';
@@ -80,7 +81,7 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers,
-        readonly dictionaryExtraction: DictionaryExtraction) {
+        readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -538,10 +539,15 @@ export class DesignerWorkbench implements vscode.Disposable {
         }
         if (message.type === 'ready') return;
         try {
-            if (message.type === 'extractDictionary') {
-                if (view !== 'resources') throw new Error('Use the Resources view to extract a dictionary.');
+            if (message.type === 'extractDictionary' || message.type === 'renameResource') {
+                if (view !== 'resources') throw new Error('Use the Resources view to review project resources.');
                 const panel = this.panelFor(message.frame);
-                await this.dictionaryExtraction.openReview(await this.dictionarySite(panel, message.frame, message.resource));
+                if (message.type === 'extractDictionary') {
+                    await this.dictionaryExtraction.openReview(await this.dictionarySite(panel, message.frame, message.resource));
+                } else {
+                    const document = panel.document;
+                    await this.resourceRename.open({ document, request: { version: document.version, position: message.range.start } });
+                }
                 this.details.resources.post({ type: 'edit', request: message.request });
                 return;
             }

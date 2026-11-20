@@ -153,7 +153,7 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | --- | --- |
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
-| **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Extract the dictionary containing a resource when you want a separate reusable file. **Promote to resource** creates an entry and replaces a literal in one undo step. |
+| **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
 | **Library** | Filter authored components, templates, themes, styles, and dictionaries by kind. **Find Definition in Designer** searches them and opens a scoped native preview. Use the definition’s actions to reveal its declaration and references. XAML authors can create a data or control template and duplicate or rename applicable resources. |
 | **Assets** | Browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. In **Behaviors**, attach routed-event or data-condition triggers and configure their actions in supported XAML. |
@@ -175,6 +175,14 @@ You can also put the cursor on an XAML event attribute and choose **Create Rust 
 The XAML and Rust updates form one Undo step. Both source buffers stay open for review and save. The action checks revisions and preserves existing event expressions and objects. If the type’s registration has moved, build the Cargo schema again. [Studio source action](../native-controls.md#create-an-xaml-event-handler) · [MCP workflow](reference.md#create-an-event-handler-with-mcp)
 
 ![The Events dock reveals the unsaved Rust registration while the native canvas stays visible](../images/vscode-event-handler-source.jpg)
+
+## Rename a resource across XAML files
+
+1. Open the containing project in a trusted workspace. In **Resources**, use the rename icon beside the key. In **Library**, choose **Rename resource and references…** on a keyed definition. From XAML, place the caret on a resource declaration or reference and run **FerroUI: Rename Resource and References…**.
+2. Enter the new key and inspect the files in **Changes**. The review includes the owning dictionary and references from open drafts and unopened views. A local resource that shadows the same key keeps its own references.
+3. Choose **Apply Resource Rename** using the check icon, or **Cancel Resource Rename** using the close icon. Undo or Redo in a participating editor restores the whole change. Save the buffers when you are ready for the running app to load them.
+
+The planner renames authored string keys. It follows includes, static and dynamic resource operands, and the same scopes used for XAML navigation. It asks you to reopen the review when a participating buffer or file changes. Resolve ambiguous theme providers and repair relevant incomplete drafts before applying the rename. Try the workflow on the included palette in [AccountCard.xaml](../../../editors/vscode/test/fixtures/ResourceRename/AccountCard.xaml). [Studio workflow](../native-controls.md#review-a-resource-rename) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
 
 ## Extract a resource dictionary
 

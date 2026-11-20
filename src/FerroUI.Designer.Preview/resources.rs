@@ -24,6 +24,7 @@ pub(crate) struct ResourceRequest {
 pub(crate) struct ResourceRow {
     id: NodeId,
     name: String,
+    key: Option<String>,
     type_name: String,
     scope: String,
     range: Range,
@@ -85,6 +86,7 @@ pub(crate) fn list(
             Ok(ResourceRow {
                 id: entry.node,
                 name: entry.display_name,
+                key: entry.key,
                 type_name: node.local_name().into(),
                 scope: owner
                     .map_or("Document", |owner| {

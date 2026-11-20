@@ -37,7 +37,7 @@ export class DetailsViews {
             message: state.message ?? inspection.message }, file);
         const resources = this.resources.visible ? this.readResources(panel, frame) : {};
         this.resources.show({ ...state, resources: resources.data,
-            extractDictionary: !!panel && workspace.isTrusted && !!workspace.getWorkspaceFolder(panel.document.uri),
+            reviewResources: !!panel && workspace.isTrusted && !!workspace.getWorkspaceFolder(panel.document.uri),
             message: state.message ?? resources.message }, file);
     }
 
