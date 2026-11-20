@@ -10,6 +10,7 @@
 !dist/stages.js
 !dist/timeline.js
 !dist/designData.js
+!dist/styles.js
 !dist/icons/*
 !dist/extension.js
 !dist/THIRD-PARTY-NOTICES.txt

@@ -37,7 +37,7 @@ export async function run(): Promise<void> {
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');
     await Promise.all([
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
-        ...['timeline.js', 'designData.js', 'hosted.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        ...['timeline.js', 'designData.js', 'hosted.js', 'styles.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'table.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
