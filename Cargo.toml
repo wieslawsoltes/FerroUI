@@ -106,6 +106,8 @@ members = [
     "src/FerroUI.View.Macros",
     # The universal C ABI (#636, docs/c-abi.md).
     "src/FerroUI.CApi",
+    # An Osprey Native host on FerroUI (docs/osprey-native-host.md).
+    "src/FerroUI.OspreyNative",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",
