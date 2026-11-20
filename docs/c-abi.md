@@ -855,4 +855,7 @@ By crate (`scripts/capi/size_by_crate.py` over the link map, MB of symbols):
 
 A dynamic library exports every entry, so it keeps every class whatever the program calls: the
 by-use mode pays off where the program is linked statically, or with a library built for one
-application with the exports of its selection only (#977).
+application with the exports of its selection only (#977). The workflow `Performance` measures
+the C samples in both modes, statically and dynamically, against a baseline (`capi`,
+docs/binary-size.md, section 3.7); the flags of each toolchain for a static link are in
+docs/c-abi-languages.md, section 7.

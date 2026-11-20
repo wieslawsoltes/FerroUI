@@ -195,7 +195,41 @@ render, pointer) and `samples/CApi/osprey-bindings/gauge_control` the same contr
 which keeps its state in its registered property instead of instance data. The cost of the calls
 against the same control in Rust is in docs/c-abi.md, section 15.4.
 
-## 7. Checklist
+## 7. Linking statically
+
+A program that links the static library (`libferroui_capi.a`, `ferroui_capi.lib`) keeps only what
+it reaches, if the linker is told to drop the rest, and if the library leaves something to drop:
+build it by use (`--no-default-features --features desktop`, docs/c-abi.md, section 16) and
+register the classes the program uses with their entries. The C hello world is 36.97 MB linked
+statically against the full library and 20.12 MB against the library built by use (macOS,
+release, stripped; docs/binary-size.md, section 3.7). A dynamic library exports every entry and so
+keeps every class: the per-application library with the exports of a selection is #977.
+
+The native libraries the static library needs (Skia's C++ runtime, the frameworks or system
+libraries of the platform) are the ones rustc prints for it:
+
+```sh
+cargo rustc -p ferroui-capi --release --lib --no-default-features --features desktop \
+    -- --print native-static-libs
+```
+
+The flags that drop what a program does not reach, per toolchain:
+
+| Toolchain | Dead code | Notes |
+| --- | --- | --- |
+| clang or GCC on macOS (ld64) | `-Wl,-dead_strip` | then `strip` the program; `-Wl,-map,<file>` writes the map that `scripts/capi/size_by_crate.py` sums by crate |
+| GCC or clang on Linux (GNU ld, lld, gold) | `-Wl,--gc-sections` | Rust objects have a section per function, so the collection reaches into the library; `-s` or `strip` for the symbols |
+| MSVC (`link.exe`) | `/OPT:REF /OPT:ICF` | the default of a release link without `/DEBUG`; with `/DEBUG` state them, since the symbols go to the PDB |
+| MinGW | `-Wl,--gc-sections` | as on Linux |
+| SwiftPM | on by default on Apple platforms (`swift build --disable-dead-strip` turns it off) | add the library with `linkerSettings: [.linkedLibrary("ferroui_capi"), .unsafeFlags(["-L<dir>"])]` and each framework of the native libraries with `.linkedFramework` |
+| Go (cgo) | `go build -ldflags='-s -w -extldflags=-Wl,-dead_strip'` (macOS) or `-extldflags=-Wl,--gc-sections` (Linux) | `#cgo LDFLAGS: -L${SRCDIR}/lib -lferroui_capi` and the native libraries; cgo links with the external linker, which does the collection |
+| Rust (a Rust launcher) | none: link the `rlib` and let cargo link | the application is then a Rust application (docs/binary-size.md) |
+
+Link-time optimisation across the C program and the library (clang with `-flto=thin` and lld of
+the LLVM version of rustc) is docs/c-abi.md, section 13.4: it inlines the small functions of the
+ABI into the program; it is not needed for the size, which dead stripping gives.
+
+## 8. Checklist
 
 - Generated binding, or constant IDs looked up once.
 - Version and fingerprint checked at start.

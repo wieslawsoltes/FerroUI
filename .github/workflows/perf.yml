@@ -29,6 +29,11 @@ on:
         type: boolean
         required: false
         default: false
+      capi:
+        description: Measure the C samples of the C ABI (hello_world.c, gauge.c) on macOS, full and by use, static with dead stripping and dynamic, with the release and the dist profile, by crate, against the baseline (docs/binary-size.md, section 3.7)
+        type: boolean
+        required: false
+        default: false
       windows:
         description: Also build the ControlCatalog and the WinUI theme gallery on Windows (x86-64) with the release and the dist profile, and report the sizes of their executables (docs/binary-size.md)
         type: boolean
@@ -359,3 +364,81 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # The C samples of the C ABI (docs/binary-size.md, section 3.7; #978): `hello_world.c` and
+  # `gauge.c` linked against `ferroui-capi` in the full mode and, where the tree has it, by use
+  # (docs/c-abi.md, section 16), statically with dead stripping and dynamically, with the release
+  # and the dist profile, of the ref and of the baseline: one job per tree and profile
+  # (`scripts/capi/size_report.py` of the workflow's own commit, so that a tree from before the
+  # script is measured too), then one table of the ref against the baseline.
+  capi-size:
+    name: C samples (macOS, ${{ matrix.tree }}, ${{ matrix.profile }})
+    if: inputs.capi
+    runs-on: macos-15
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        tree: [measured, baseline]
+        profile: [release, dist]
+    steps:
+      - name: Check out the report scripts
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/capi/size_report.py
+            scripts/capi/size_by_crate.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the tree
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+      - name: Build and measure
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          TREE: ${{ matrix.tree }}
+          PROFILE: ${{ matrix.profile }}
+          REF: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+        run: |
+          python3 tools/scripts/capi/size_report.py --source tree --profile "$PROFILE" --label "$REF" \
+            --work capi-size --json "capi-size-$TREE-$PROFILE.json" --markdown "$GITHUB_STEP_SUMMARY"
+      - name: Keep the numbers
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: capi-size-${{ matrix.tree }}-${{ matrix.profile }}
+          path: capi-size-*.json
+          if-no-files-found: ignore
+
+  capi-size-compare:
+    name: C samples against the baseline
+    if: inputs.capi && inputs.baseline != ''
+    needs: capi-size
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the report scripts
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/capi/size_report.py
+            scripts/capi/size_by_crate.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: capi-size-*
+          merge-multiple: true
+      - name: Compare
+        run: |
+          for profile in release dist; do
+            if [ -f "capi-size-measured-$profile.json" ] && [ -f "capi-size-baseline-$profile.json" ]; then
+              python3 tools/scripts/capi/size_report.py --compare "capi-size-measured-$profile.json" \
+                "capi-size-baseline-$profile.json" --markdown "$GITHUB_STEP_SUMMARY"
+            fi
+          done
