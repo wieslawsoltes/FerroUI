@@ -46,7 +46,7 @@ For an explicit `as "Name"` registration, the review edits the public alias. Whe
 
 The Changes editor includes mapped start and end tags, qualified property owners, `x:Class`, type arguments, and explicit type values such as `{x:Type local:Customer}`. It also includes resolved type names in `Selector` attributes and single-text `Style.Selector` elements, including `:is`, `:not`, and attached property owners. Class names, control names, and comparison values keep their original spelling. Use **Show Locations** to inspect uncertain references, then apply with the check icon. Undo restores the group.
 
-The review also renames the public type key in explicit RSX builder metadata. For a Rust-backed name, builder paths that resolve to the renamed declaration follow the Rust rename. A named re-export retains its alias. Open the assembly source as part of the workspace, and rebuild the Cargo schema after saving the review. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
+The review also renames the public type key in explicit RSX builder metadata. For a Rust-backed name, the metadata follows the renamed declaration and its implicit public re-exports. An explicit re-export such as `pub use controls::Card as Card` retains its alias. Keep the assembly source in the workspace, and rebuild the Cargo schema after changing Rust imports or saving the reviewed rename. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
 
 ### Rename an RSX control
 

@@ -250,6 +250,7 @@ mod tests {
         framework.exports.push(ExportModel {
             path: CONTROL.into(),
             declared: control.rust_path.text.clone(),
+            explicit_alias: false,
         });
         framework.types.push(control);
 

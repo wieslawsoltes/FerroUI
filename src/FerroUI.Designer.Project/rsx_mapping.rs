@@ -51,7 +51,9 @@ impl RsxBuilderMapping {
             .collect::<Vec<_>>()
             .join("::");
         let absolute = format!("::{assembly_crate}::{tail}");
-        if models.canonical_path(&absolute) != models.canonical_path(rust_type) {
+        if models.is_explicit_export_alias(&absolute)
+            || models.canonical_path(&absolute) != models.canonical_path(rust_type)
+        {
             return None;
         }
         let mut new_path = self.path.clone();
@@ -159,10 +161,15 @@ mod tests {
     fn updates_the_renamed_reexport_and_preserves_named_aliases() {
         let original = "::example::controls::Card";
         let mut model = AssemblyModel::new("Example", "example");
-        for path in ["::example::Card", "::example::PreviewCard"] {
+        for (path, explicit_alias) in [
+            ("::example::Card", false),
+            ("::example::PreviewCard", true),
+            ("::example::public_api::Card", true),
+        ] {
             model.exports.push(ExportModel {
                 path: path.into(),
                 declared: original.into(),
+                explicit_alias,
             });
         }
         let models = ModelSet::new(vec![model]);
@@ -180,6 +187,7 @@ mod tests {
             Some("::example::controls :: Overview")
         );
         assert_eq!(rename("crate::PreviewCard"), None);
+        assert_eq!(rename("crate::public_api::Card"), None);
         assert_eq!(rename("crate::wrappers::Card"), None);
     }
 }

@@ -74,7 +74,7 @@ use std::path::PathBuf;
 use proc_macro2::TokenTree;
 
 use crate::model::{
-    AccessorModel, AliasModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, CastModel, EnumMemberModel, ExportModel, GenericModel,
+    AccessorModel, AliasModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, CastModel, EnumMemberModel, GenericModel,
     HandleModel, MacroModel, MemberModel, ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel,
     ValueTypeModel, XmlnsDefinitionModel, XmlnsPrefixModel,
 };
@@ -1436,7 +1436,7 @@ impl Builder {
                 declared.stated_path = Some(format!("::{}", path.trim_start_matches("::")));
             }
         }
-        self.model.exports = self.source.modules.export_table().into_iter().map(|(path, declared)| ExportModel { path, declared }).collect();
+        self.model.exports = self.source.modules.export_table();
         self.aliases_and_handles();
         self.exported_macros();
         self.link_dependencies(dependencies);

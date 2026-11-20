@@ -293,7 +293,12 @@ impl Source {
             source.modules.extern_crates.insert(dependency.crate_name.clone());
             source.modules.external_crates.insert(dependency.crate_name.clone());
             for export in &dependency.exports {
-                source.modules.externals.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
+                if let std::collections::btree_map::Entry::Vacant(entry) = source.modules.externals.entry(export.path.clone()) {
+                    entry.insert(export.declared.clone());
+                    if export.explicit_alias {
+                        source.modules.external_aliases.insert(export.path.clone());
+                    }
+                }
             }
             for exported in &dependency.macros {
                 let rules: Option<Vec<(Tokens, Tokens)>> = exported
@@ -521,7 +526,7 @@ impl Source {
                     path.push(name.clone());
                     name
                 };
-                self.modules.modules[module].imports.push(Import { name, path, public });
+                self.modules.modules[module].imports.push(Import { name, path, public, explicit_alias: false });
             }
             syn::UseTree::Rename(rename) => {
                 if rename.rename == "_" {
@@ -532,7 +537,7 @@ impl Source {
                     path.push(rename.ident.to_string());
                 }
                 if !path.is_empty() {
-                    self.modules.modules[module].imports.push(Import { name: rename.rename.to_string(), path, public });
+                    self.modules.modules[module].imports.push(Import { name: rename.rename.to_string(), path, public, explicit_alias: true });
                 }
             }
             syn::UseTree::Glob(_) => {

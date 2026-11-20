@@ -44,9 +44,19 @@ fn fixture(same_file: bool) -> (CatalogFixture, LanguageService, String, String)
     let fixture = CatalogFixture::create();
     let metadata = fixture.build();
     let source = if same_file {
+        let lib = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
+        fixture.write("app/lib.rs", &(lib + "\npub use controls::Card;\n"));
         let path = "app/rust/controls.rs";
-        let controls = fs::read_to_string(fixture.0.join(path)).unwrap();
-        fixture.write(path, &(controls + &ASSEMBLY.replace('\n', "\r\n")));
+        let controls = fs::read_to_string(fixture.0.join(path))
+            .unwrap()
+            .replace("mod cards", "pub mod cards");
+        let exports =
+            "\npub mod stable { pub use super::cards::Card as Card; }\npub use stable::*;\n";
+        let assembly = ASSEMBLY.replace("crate::builders::Card", "crate::Card");
+        fixture.write(
+            path,
+            &(controls + &(exports.to_owned() + &assembly).replace('\n', "\r\n")),
+        );
         path
     } else {
         let lib = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
@@ -168,6 +178,10 @@ fn type_review_merges_builder_literals_with_semantic_rust_patches_in_the_same_fi
         ("impl Card {", "impl "),
         ("register::<Card,", "register::<"),
         ("register_attached::<Card,", "register_attached::<"),
+        (
+            "pub use super::cards::Card as Card",
+            "pub use super::cards::",
+        ),
     ]
     .into_iter()
     .map(|(text, prefix)| {
@@ -203,7 +217,10 @@ fn type_review_merges_builder_literals_with_semantic_rust_patches_in_the_same_fi
     assert!(rust
         .after
         .contains(r#""path": "crate::controls::cards::OverviewCard""#));
-    assert!(rust.after.contains(r#"\"crate::builders::Card\""#));
+    assert!(rust.after.contains(r#"\"crate::Card\""#));
+    assert!(rust
+        .after
+        .contains("pub use super::cards::OverviewCard as Card;"));
     assert!(rust.after.contains(r#"("Unrelated", "Tone Card")"#));
     assert!(complete
         .documents
@@ -212,6 +229,16 @@ fn type_review_merges_builder_literals_with_semantic_rust_patches_in_the_same_fi
     fs::write(file_path(&rust_uri).unwrap(), &rust.after).unwrap();
     let rebuilt = rebuild(&fixture);
     assert!(rebuilt.types.iter().any(|class| class.name == new));
+    let public_alias = rebuilt
+        .exports
+        .iter()
+        .find(|export| export.path == "::customer_app::Card")
+        .unwrap();
+    assert!(public_alias.explicit_alias);
+    assert_eq!(
+        public_alias.declared,
+        "::customer_app::controls::cards::OverviewCard"
+    );
     let (_, descriptor) = rebuilt
         .metadata
         .iter()

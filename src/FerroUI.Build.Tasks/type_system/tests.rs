@@ -469,7 +469,7 @@ const DESIGN: &str = "::ferroui_base::design::Design";
 /// type and a static owner type with metadata declared next to it; and a crate built on it
 /// that names the types of the first through its exports.
 fn two_crates() -> Rc<ModelTypeSystem> {
-    let export = |path: &str, declared: &str| ExportModel { path: path.to_string(), declared: declared.to_string() };
+    let export = |path: &str, declared: &str| ExportModel { path: path.to_string(), declared: declared.to_string(), explicit_alias: false };
     let mut base = AssemblyModel::new("FerroUI.Base", "ferroui_base");
     base.exports = vec![
         export("::ferroui_base::Ref", "::ferroui_base::type_system::Ref"),
