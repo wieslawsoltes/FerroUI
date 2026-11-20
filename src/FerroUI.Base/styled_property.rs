@@ -405,16 +405,6 @@ impl<T: StyledValue> PropertyRoutes for StyledProperty<T> {
         unpack_binding_value::<T>(value)
     }
 
-    fn route_take_value(&'static self, o: &FerroObject, slot: &mut dyn Any) -> bool {
-        match slot.downcast_mut::<Option<T>>().and_then(Option::take) {
-            Some(value) => {
-                o.set_value(self, value);
-                true
-            }
-            None => false,
-        }
-    }
-
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
         if let Some(value) = take_boxed_value::<T>(value) {
             o.values().set_local_value(o, self, value);

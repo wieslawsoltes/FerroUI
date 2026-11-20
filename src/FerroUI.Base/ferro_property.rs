@@ -337,14 +337,6 @@ pub(crate) trait PropertyRoutes {
     fn route_set_local_value(&'static self, _o: &FerroObject, _value: BoxedValue) {
         panic!("not supported for direct properties");
     }
-    /// Sets the local value of a styled property from `slot`, an `&mut Option<T>` of the
-    /// property's value type `T`, taking the value out of it: the typed setter of
-    /// [`FerroObject::try_set_value_typed`](crate::FerroObject::try_set_value_typed). False,
-    /// with the slot as it was, when the slot has another type. Only supported by styled
-    /// properties.
-    fn route_take_value(&'static self, _o: &FerroObject, _slot: &mut dyn Any) -> bool {
-        false
-    }
     /// Sets a direct property from an untyped binding value whose value, if
     /// any, holds exactly the property's value type: the typed
     /// `set_direct_value_unchecked` of an untyped direct binding. Only

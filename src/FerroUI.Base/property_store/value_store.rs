@@ -569,29 +569,32 @@ impl ValueStore {
         if !property.is_valid(&value) {
             property.value_not_valid();
         }
-        self.set_stored_value(owner, property.as_property(), value.into_storage(), priority)
+        // A local value takes the path it took when the store was compiled for every value type
+        // (the write of the value itself is compiled once for each storage type); a value with
+        // another priority is an entry of a frame, compiled once for each storage type.
+        if priority != BindingPriority::LocalValue {
+            self.set_frame_value(owner, property.as_property(), value.into_storage(), priority)
+        } else {
+            self.set_local_stored_value(owner, property.as_property(), value.into_storage());
+            None
+        }
     }
 
-    /// [`set_value`](Self::set_value) of a value that is valid, as the store keeps it: compiled
-    /// once for each storage type.
-    fn set_stored_value<S: StyledValue>(
+    /// The value of `property` with a priority other than the local value, as the store keeps
+    /// it: an entry of the immediate value frame of the priority.
+    fn set_frame_value<S: StyledValue>(
         &self,
         owner: &FerroObject,
         property: &'static FerroProperty,
         value: S,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        if priority != BindingPriority::LocalValue {
-            let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
-            let result = frame.add_value(property, value);
-            let entry: Rc<dyn IValueEntry> = result.clone();
-            let effective = self.get_or_add_effective_value(owner, property);
-            effective.set_and_raise(owner, &entry, priority);
-            Some(result)
-        } else {
-            self.set_local_stored_value(owner, property, value);
-            None
-        }
+        let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
+        let result = frame.add_value(property, value);
+        let entry: Rc<dyn IValueEntry> = result.clone();
+        let effective = self.get_or_add_effective_value(owner, property);
+        effective.set_and_raise(owner, &entry, priority);
+        Some(result)
     }
 
     pub fn set_current_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
@@ -614,6 +617,7 @@ impl ValueStore {
         self.set_local_stored_value(owner, property.as_property(), value.into_storage());
     }
 
+    #[inline]
     fn set_local_stored_value<S: StyledValue>(
         &self,
         owner: &FerroObject,

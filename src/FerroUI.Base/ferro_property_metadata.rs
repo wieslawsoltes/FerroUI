@@ -387,19 +387,27 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
     #[inline]
     pub(crate) fn for_storage(self: Rc<Self>) -> Rc<StyledPropertyMetadata<T::Storage>> {
         // Decided when the function is compiled: the two types are the same or not.
-        let this: Rc<dyn Any> = self;
-        match this.downcast::<StyledPropertyMetadata<T::Storage>>() {
-            Ok(same) => same,
-            Err(this) => match this.downcast::<Self>() {
-                Ok(this) => this.storage_copy(),
-                Err(_) => unreachable!("the metadata has its own type"),
-            },
+        if std::any::TypeId::of::<T>() == std::any::TypeId::of::<T::Storage>() {
+            let this: Rc<dyn Any> = self;
+            return match this.downcast::<StyledPropertyMetadata<T::Storage>>() {
+                Ok(same) => same,
+                Err(_) => unreachable!("a type that is its own storage type"),
+            };
+        }
+        let copy = match self.storage.get() {
+            Some(copy) => copy,
+            None => self.make_storage_copy(),
+        };
+        match copy.clone().downcast() {
+            Ok(copy) => copy,
+            Err(_) => unreachable!("the storage metadata has the storage type"),
         }
     }
 
+    #[cold]
     #[inline(never)]
-    fn storage_copy(&self) -> Rc<StyledPropertyMetadata<T::Storage>> {
-        let copy = self.storage.get_or_init(|| {
+    fn make_storage_copy(&self) -> &Rc<dyn Any> {
+        self.storage.get_or_init(|| {
             let coerce = self.coerce.as_ref().map(|coerce| {
                 let callback = coerce.callback().clone();
                 let wrapped: CoerceValueCallback<T::Storage> =
@@ -412,11 +420,7 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
                 coerce,
                 storage: OnceCell::new(),
             }) as Rc<dyn Any>
-        });
-        match copy.clone().downcast() {
-            Ok(copy) => copy,
-            Err(_) => unreachable!("the storage metadata has the storage type"),
-        }
+        })
     }
 }
 
