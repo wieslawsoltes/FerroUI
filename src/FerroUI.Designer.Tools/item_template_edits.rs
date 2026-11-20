@@ -121,7 +121,7 @@ fn unkeyed_fragment(document: &Document, node: NodeId) -> Result<String> {
 }
 
 pub(super) fn strip_template_key(fragment: &mut Document) -> Result<()> {
-    let root = element(&fragment, fragment.ast().root())?;
+    let root = element(fragment, fragment.ast().root())?;
     if let Some(key) = key_attribute(root) {
         let edit = Edit::RemoveAttribute {
             node: root.id,
