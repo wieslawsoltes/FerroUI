@@ -90,3 +90,72 @@ fn measure_first_templates() {
         second_time.as_micros()
     );
 }
+
+/// A loop for a sampling profiler and for counted instructions (#994): the start of the theme, or
+/// the start of the theme and the first templates of the controls of
+/// [`measure_first_templates`], repeated with a new theme each time, so that every iteration
+/// builds its control themes and applies its templates for the first time.
+///
+/// `FERROUI_PROFILE_PHASE` is `theme` (construct the theme and add it to the application) or
+/// `templates` (the same, then show a window of the controls); `FERROUI_PROFILE_ITERATIONS` is
+/// the number of iterations (200 by default). Prints the median of an iteration.
+///
+/// ```text
+/// FERROUI_PROFILE_PHASE=theme cargo test --release -p ferroui-themes-winui --lib tests::load_time::profile_theme_start -- --ignored --nocapture
+/// ```
+#[test]
+#[ignore = "a measurement: a loop of the start of the theme for a profiler"]
+fn profile_theme_start() {
+    use ferroui_base::TypeInfo;
+    use ferroui_controls::{Application, Control, StackPanel, Window};
+
+    const CONTROLS: &[&str] = &[
+        "Button", "CheckBox", "RadioButton", "ToggleSwitch", "TextBox", "ComboBox", "Slider", "ProgressBar", "ListBox",
+        "Expander", "ToggleButton", "HyperlinkButton", "ScrollViewer", "TabControl", "CalendarDatePicker", "NumericUpDown",
+    ];
+    let templates = std::env::var("FERROUI_PROFILE_PHASE").as_deref() == Ok("templates");
+    let iterations: usize =
+        std::env::var("FERROUI_PROFILE_ITERATIONS").ok().and_then(|text| text.parse().ok()).unwrap_or(200);
+    let _app = start_application();
+    crate::register_types();
+    let types: Vec<&'static TypeInfo> = CONTROLS
+        .iter()
+        .map(|name| {
+            TypeInfo::registered_types()
+                .into_iter()
+                .find(|type_| type_.name() == *name && type_.module_path().starts_with("ferroui_controls"))
+                .unwrap_or_else(|| panic!("{name}"))
+        })
+        .collect();
+    let application = Application::current().expect("an application");
+    let mut times = Vec::with_capacity(iterations);
+    for _ in 0..iterations {
+        let start = Instant::now();
+        let theme = WinUITheme::new();
+        let style = theme.as_style();
+        application.styles().add(style.clone());
+        let window = templates.then(|| {
+            let panel = StackPanel::new();
+            for type_ in &types {
+                let control = type_.create_instance().and_then(|instance| instance.cast::<Control>()).expect("a control");
+                panel.children().add(control);
+            }
+            let window = Window::new();
+            window.set_content(Some(Control::boxed(&panel.upcast::<Control>())));
+            window.show();
+            window
+        });
+        times.push(start.elapsed());
+        if let Some(window) = window {
+            window.close();
+        }
+        application.styles().remove(style);
+        drop(theme);
+    }
+    times.sort();
+    println!(
+        "phase {} iterations {iterations} median-us {}",
+        if templates { "templates" } else { "theme" },
+        times[times.len() / 2].as_micros()
+    );
+}
