@@ -23,6 +23,7 @@
 //! The typed bytecode backend instead emits a `TypedResourceProgram` for every recognized
 //! run, including singleton values, with the same unit boundaries and declaration order.
 
+use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 
 #[path = "theme_row_program.rs"]
@@ -31,6 +32,37 @@ mod bytecode;
 use super::super::emit_types::{EmitTypes, FrameworkType};
 use super::theme_units::unit_marker;
 use super::{absolute, identifiers, is_identifier, is_string_literal, static_resource_alias};
+
+/// Whether the build and the reference tests of the themes write the runs of the deferred
+/// shapes as packed tables (#855, `rt::PackedRows`). On by default: the measurement kept it (the
+/// stripped executables are smaller and start-up is not slower, docs/xaml-themes.md). Turning it
+/// off ([`with_packed_theme_rows`]) gives the slices of row structs of before.
+pub const DEFAULT_PACKED_THEME_ROWS: bool = true;
+
+ferroui_base::ferro_thread_local! {
+    /// The choice [`with_packed_theme_rows`] made for the emission on this thread.
+    static PACKED: Cell<Option<bool>> = const { Cell::new(None) };
+}
+
+/// Whether the emission on this thread writes packed tables (#855): the choice of
+/// [`with_packed_theme_rows`], else [`DEFAULT_PACKED_THEME_ROWS`].
+pub fn packed_theme_rows() -> bool {
+    PACKED.with(Cell::get).unwrap_or(DEFAULT_PACKED_THEME_ROWS)
+}
+
+/// Runs `emit` with packed tables of theme rows on or off (#855) on this thread, and restores the
+/// choice before it afterwards, also when `emit` panics.
+pub fn with_packed_theme_rows<R>(packed: bool, emit: impl FnOnce() -> R) -> R {
+    struct Restore(Option<bool>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let before = self.0;
+            PACKED.with(|packed| packed.set(before));
+        }
+    }
+    let _restore = Restore(PACKED.with(|current| current.replace(Some(packed))));
+    emit()
+}
 
 /// The shortest run of plain values that is written as a row table. A deferred row is written
 /// as a row even alone, since its row replaces a build function of its own; a single plain value
@@ -109,6 +141,17 @@ impl RowKind {
         }
     }
 
+    /// The builder of a packed table of the shape in `rt` (#855), for the deferred shapes.
+    fn packed_builder(self) -> Option<&'static str> {
+        match self {
+            Self::ResourceAlias => Some("rt::add_packed_resource_aliases"),
+            Self::LiteralBrush => Some("rt::add_packed_literal_brushes"),
+            Self::DynamicBrush => Some("rt::add_packed_dynamic_brushes"),
+            Self::StaticBrush => Some("rt::add_packed_static_brushes"),
+            _ => None,
+        }
+    }
+
     /// Whether a row of the shape is deferred content (its builder takes the context and the
     /// document of the declaration).
     fn is_deferred(self) -> bool {
@@ -183,6 +226,136 @@ pub(super) struct RowStatement {
     pub(super) prefix: Option<(String, String)>,
     /// The slot of the build function of a deferred row, which is not emitted when the row is.
     pub(super) slot: Option<usize>,
+    /// The fields of a deferred row, for a packed table (#855).
+    pub(super) fields: Option<RowFields>,
+}
+
+/// The fields of a deferred row as values (#855): the key, the target or colour key (or the
+/// ARGB value of a literal brush), the namespace table of the declaration and the positions.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct RowFields {
+    key: String,
+    operand: Operand,
+    namespaces: Option<String>,
+    positions: [i32; 4],
+}
+
+/// The operand of a deferred row: a string (target or colour key) or an ARGB value.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Operand {
+    Text(String),
+    Argb(u32),
+}
+
+/// The text of the Rust string literal `literal` as [`super::rust_string_literal`] writes it,
+/// or `None` for any other form.
+fn string_value(literal: &str) -> Option<String> {
+    let inner = literal.strip_prefix('"')?.strip_suffix('"')?;
+    let mut text = String::with_capacity(inner.len());
+    let mut characters = inner.chars();
+    while let Some(character) = characters.next() {
+        if character != '\\' {
+            text.push(character);
+            continue;
+        }
+        match characters.next()? {
+            '"' => text.push('"'),
+            '\\' => text.push('\\'),
+            'n' => text.push('\n'),
+            'r' => text.push('\r'),
+            't' => text.push('\t'),
+            '0' => text.push('\0'),
+            'u' => {
+                let rest: String = characters.by_ref().take_while(|&c| c != '}').collect();
+                let digits = rest.strip_prefix('{')?;
+                text.push(char::from_u32(u32::from_str_radix(digits, 16).ok()?)?);
+            }
+            _ => return None,
+        }
+    }
+    Some(text)
+}
+
+/// The fields of the deferred row `row` added as `addition`, if its key and operand are literals
+/// the emitter writes.
+fn row_fields(addition: &DeferredAddition<'_>, row: &DeferredRow) -> Option<RowFields> {
+    let operand = match row.kind {
+        RowKind::LiteralBrush => Operand::Argb(row.operand.strip_suffix("_u32")?.parse().ok()?),
+        _ => Operand::Text(string_value(&row.operand)?),
+    };
+    let (line, position) = addition.position;
+    let (value_line, value_position) = row.value_position;
+    Some(RowFields {
+        key: string_value(addition.key)?,
+        operand,
+        namespaces: row.namespaces.clone(),
+        positions: [line, position, value_line, value_position],
+    })
+}
+
+/// The packed table of the rows `fields` of the shape `kind` (#855), as the initializer of an
+/// `rt::PackedRows`: one pool of the strings of the table, each written once (a string that is
+/// part of one already in the pool is found there), the namespace tables the rows name, and one
+/// record of 16-bit fields for each row. `None` when a row has no fields, when an offset, a
+/// length, a position or the number of namespace tables does not fit 16 bits, or when a position
+/// is negative: the run keeps its slice of rows.
+fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
+    let mut pool = String::new();
+    let mut namespaces: Vec<&str> = Vec::new();
+    let mut records: Vec<String> = Vec::with_capacity(fields.len());
+    let narrow = |value: usize| u16::try_from(value).ok();
+    let intern = |pool: &mut String, text: &str| -> Option<[u16; 2]> {
+        let offset = match pool.find(text) {
+            Some(offset) if !text.is_empty() => offset,
+            _ => {
+                pool.push_str(text);
+                pool.len() - text.len()
+            }
+        };
+        Some([narrow(offset)?, narrow(text.len())?])
+    };
+    for row in fields {
+        let mut record: Vec<u16> = Vec::with_capacity(9);
+        record.extend(intern(&mut pool, &row.key)?);
+        match (&row.operand, kind) {
+            (Operand::Argb(argb), RowKind::LiteralBrush) => {
+                record.extend([(*argb & 0xFFFF) as u16, (*argb >> 16) as u16]);
+            }
+            (Operand::Text(text), RowKind::ResourceAlias | RowKind::DynamicBrush | RowKind::StaticBrush) => {
+                record.extend(intern(&mut pool, text)?);
+            }
+            _ => return None,
+        }
+        record.push(match &row.namespaces {
+            None => 0,
+            Some(table) => match namespaces.iter().position(|known| *known == table.as_str()) {
+                Some(index) => narrow(index + 1)?,
+                None => {
+                    namespaces.push(table.as_str());
+                    narrow(namespaces.len())?
+                }
+            },
+        });
+        let positions = match kind {
+            RowKind::LiteralBrush => &row.positions[..2],
+            _ => &row.positions[..],
+        };
+        for position in positions {
+            record.push(u16::try_from(*position).ok()?);
+        }
+        records.push(record.iter().map(u16::to_string).collect::<Vec<_>>().join(", "));
+    }
+    // The pool is read by byte offsets: it must fit them as a whole.
+    narrow(pool.len())?;
+    let mut text = String::from("rt::PackedRows {\n");
+    text.push_str(&format!("    strings: {},\n", super::rust_string_literal(&pool)));
+    text.push_str(&format!("    namespaces: &[{}],\n", namespaces.join(", ")));
+    text.push_str("    records: &[\n");
+    for record in &records {
+        text.push_str(&format!("        {record},\n"));
+    }
+    text.push_str("    ],\n}");
+    Some(text)
 }
 
 /// The statements of a body without the indentation and the position markers.
@@ -381,8 +554,14 @@ pub(super) fn deferred_row_statement(addition: &DeferredAddition<'_>, row: &Defe
             kind.row_type()
         ),
     };
+    let fields = row_fields(addition, row);
     RowStatement {
-        kind: row.kind, dictionary: dictionary.to_string(), row: text, prefix: None, slot: Some(slot),
+        kind: row.kind,
+        dictionary: dictionary.to_string(),
+        row: text,
+        prefix: None,
+        slot: Some(slot),
+        fields,
         encoded: bytecode::OperandRow {
             key: key.to_string(), value: operand.clone(), declaration: (*line, *position),
             value_position: row.value_position, namespaces: row.namespaces.clone(),
@@ -445,6 +624,7 @@ pub(super) fn value_row_statement(paths: &RowPaths, call: &str, previous: Option
         row: format!("rt::ValueRow {{ key: {key}, value: {value}, line: {line}, position: {position} }}"),
         prefix,
         slot: None,
+        fields: None,
     })
 }
 
@@ -455,6 +635,10 @@ pub(super) struct RowRun {
     pub(super) rows: Vec<String>,
     /// The slots of the build functions the rows replace.
     pub(super) slots: Vec<usize>,
+    /// The initializer of the packed table of the run (#855), when it is written as one (the
+    /// native backend only).
+    pub(super) packed: Option<String>,
+    /// The program of the run, with the typed bytecode backend.
     program: Option<bytecode::Program>,
 }
 
@@ -522,19 +706,30 @@ fn flush(
     let name = table_name();
     body.extend(lines[first.start..first.code].iter().cloned());
     let dictionary = &first.entry.dictionary;
+    // The typed backend encodes the run as a program; otherwise a packed table (#855) when the
+    // experiment is on and every row of the run fits one. A run is encoded by one of them only.
     let program = typed.then(|| bytecode::Program::encode(kind, run.iter().map(|found| &found.entry.encoded)));
+    let packed = match (program.is_none() && packed_theme_rows(), kind.packed_builder()) {
+        (true, Some(_)) => run
+            .iter()
+            .map(|found| found.entry.fields.as_ref())
+            .collect::<Option<Vec<_>>>()
+            .and_then(|fields| packed_table(kind, &fields)),
+        _ => None,
+    };
     if program.is_some() {
         let arguments = if kind.is_deferred() { format!("&{dictionary}, &context, &{document}") } else { format!("&{dictionary}") };
         body.push(format!("{indent}{name}.{}({arguments})?;", bytecode::method(kind)));
     } else {
-        body.push(match kind.is_deferred() {
-            true => format!("{indent}{}(&{dictionary}, &context, &{document}, {name})?;", kind.builder()),
-            false => format!("{indent}{}(&{dictionary}, {name})?;", kind.builder()),
+        body.push(match (kind.is_deferred(), &packed, kind.packed_builder()) {
+            (true, Some(_), Some(builder)) => format!("{indent}{builder}(&{dictionary}, &context, &{document}, &{name})?;"),
+            (true, _, _) => format!("{indent}{}(&{dictionary}, &context, &{document}, {name})?;", kind.builder()),
+            (false, _, _) => format!("{indent}{}(&{dictionary}, {name})?;", kind.builder()),
         });
     }
     let rows = if typed { Vec::new() } else { run.iter().map(|found| found.entry.row.clone()).collect() };
     let slots = run.iter().filter_map(|found| found.entry.slot).collect();
-    tables.push((name, RowRun { kind, rows, slots, program }));
+    tables.push((name, RowRun { kind, rows, slots, packed, program }));
     run.clear();
 }
 
@@ -631,6 +826,13 @@ pub(super) fn row_table(name: &str, document_text: &str, run: &RowRun) -> String
 pub(super) fn row_table_in(name: &str, document_text: &str, run: &RowRun, image: &super::BytecodeImage) -> String {
     if let Some(program) = &run.program {
         return program.source(name, run.kind, image);
+    }
+    if let (Some(packed), Some(builder)) = (&run.packed, run.kind.packed_builder()) {
+        return format!(
+            "/// {} of a run of `{document_text}`, packed, added in order by `{builder}` (#855).\n\
+             static {name}: rt::PackedRows = {packed};\n",
+            run.kind.description()
+        );
     }
     let mut text = format!(
         "/// {} of a run of `{document_text}`, added in order by `{}` (#568).\n",

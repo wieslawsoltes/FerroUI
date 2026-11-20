@@ -341,10 +341,10 @@ impl IDeferredContent for DeferredContent {
     ) -> Result<Option<BoxedValue>, DeferredContentFailed> {
         match self.try_build_with(service_provider) {
             Ok(built) => Ok(built.result),
-            Err(error) => match crate::xaml_error_scope::report(error) {
-                Ok(()) => Err(DeferredContentFailed),
-                Err(error) => crate::xaml_error_scope::throw(error),
-            },
+            Err(error) => {
+                crate::xaml_error_scope::report_or_raise(error);
+                Err(DeferredContentFailed)
+            }
         }
     }
 }
@@ -539,10 +539,12 @@ impl XamlIlRuntimeHelpers {
     }
 
     /// Creates the deferred content of a template whose result is a control.
+    ///
+    /// A provider without a parent stack or root object service is an error (#567).
     pub fn deferred_transformation_factory_v1(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
         Self::deferred_transformation_factory_v2::<ferroui_base::Ref<ferroui_controls::Control>>(builder, provider)
     }
 
@@ -550,41 +552,30 @@ impl XamlIlRuntimeHelpers {
     ///
     /// The managed original returns the build function as a delegate; a
     /// function cannot be an untyped value here, so the deferred content
-    /// object stands for it.
+    /// object stands for it. A provider without a parent stack or root object
+    /// service is an error (#567).
     pub fn deferred_transformation_factory_v2<T: 'static>(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        Self::deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
+        Self::try_deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
     }
 
     /// Creates deferred content whose result is a `T`: captures the
     /// resource nodes above the declaration, the root object and the name
-    /// scope from `provider`.
-    ///
-    /// # Panics
-    /// Panics if `provider` has no parent stack or root object service.
+    /// scope from `provider`. A provider without a parent stack or root object
+    /// service is an error (#567).
     pub fn deferred_transformation_factory_v3<T: 'static>(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        Self::deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
+        Self::try_deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
     }
 
     /// The factory with the result type given as a value: what untyped
-    /// callers use in place of the type argument. The "any value" type
-    /// ([`ValueType::object`]) accepts every result.
-    pub fn deferred_transformation_factory_for(
-        result_type: ValueType,
-        builder: DeferredContentBuilder,
-        provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        crate::throw(Self::try_deferred_transformation_factory_for(result_type, builder, provider))
-    }
-
-    /// [`deferred_transformation_factory_for`](Self::deferred_transformation_factory_for)
-    /// without panics: a provider without a parent stack or root object
-    /// service is an error. This is what untyped (metadata) callers use.
+    /// callers (the loader, metadata) use in place of the type argument. The
+    /// "any value" type ([`ValueType::object`]) accepts every result. A
+    /// provider without a parent stack or root object service is an error.
     pub fn try_deferred_transformation_factory_for(
         result_type: ValueType,
         builder: DeferredContentBuilder,
