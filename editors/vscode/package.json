@@ -203,6 +203,30 @@
         "icon": "$(new-file)"
       },
       {
+        "command": "ferroui.extractResourceDictionary",
+        "title": "Extract Resource Dictionary…",
+        "category": "FerroUI",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.showFile",
+        "title": "Review New Dictionary",
+        "category": "FerroUI",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.apply",
+        "title": "Apply Extraction",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.cancel",
+        "title": "Cancel Extraction",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
         "command": "ferroui.showResources",
         "title": "Show Resources",
         "category": "FerroUI",
@@ -347,6 +371,22 @@
           "when": "editorLangId == ferroui-xaml"
         },
         {
+          "command": "ferroui.extractResourceDictionary",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.dictionaryReview.showFile",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
+          "command": "ferroui.dictionaryReview.apply",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
+          "command": "ferroui.dictionaryReview.cancel",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
           "command": "ferroui.openDesigner",
           "when": "editorLangId == ferroui-xaml || editorLangId == rust"
         },
@@ -390,8 +430,23 @@
       "editor/title": [
         {
           "command": "ferroui.openDesigner",
-          "when": "editorLangId == ferroui-xaml || editorLangId == rust",
+          "when": "resourceScheme == file && (editorLangId == ferroui-xaml || editorLangId == rust)",
           "group": "navigation"
+        },
+        {
+          "command": "ferroui.dictionaryReview.showFile",
+          "when": "resourceScheme == ferroui-dictionary-review && resourcePath =~ /^\\/(before|after)\\//",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.dictionaryReview.apply",
+          "when": "resourceScheme == ferroui-dictionary-review",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.dictionaryReview.cancel",
+          "when": "resourceScheme == ferroui-dictionary-review",
+          "group": "navigation@3"
         }
       ],
       "explorer/context": [

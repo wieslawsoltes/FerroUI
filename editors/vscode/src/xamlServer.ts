@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
+import type { DictionaryMethod } from './dictionaryProtocol';
 import type { HandlerMethod } from './eventHandlerProtocol';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
@@ -27,7 +28,7 @@ export class XamlServer implements vscode.Disposable {
                 command, transport: TransportKind.stdio,
             }, {
                 documentSelector: [{ language: xamlLanguage, scheme: 'file' }],
-                initializationOptions: { ferrouiHandlerCommands: true },
+                initializationOptions: { ferrouiHandlerCommands: true, ferrouiExtractionCommands: vscode.workspace.isTrusted },
                 middleware: {
                     provideDefinition: async (document, position, token, next) => {
                         const declaration = await this.eventDefinition?.(document, position, token);
@@ -65,6 +66,15 @@ export class XamlServer implements vscode.Disposable {
         const client = this.client;
         if (client?.initializeResult?.capabilities.experimental?.ferrouiEventHandlers !== true) {
             throw new Error('Use a FerroUI XAML language server that supports event handlers.');
+        }
+        return client.sendRequest<T>(`ferroui/${method}`, params);
+    }
+
+    async dictionaryRequest<T>(method: DictionaryMethod, params: object): Promise<T> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiDictionaryExtraction !== true) {
+            throw new Error('Use a FerroUI XAML language server that supports resource extraction.');
         }
         return client.sendRequest<T>(`ferroui/${method}`, params);
     }

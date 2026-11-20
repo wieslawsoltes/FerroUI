@@ -7,6 +7,7 @@ import { DATA_VIEW, DesignDataView } from './designDataView';
 import { DetailsViews, EVENTS_VIEW, RESOURCES_VIEW } from './detailsViews';
 import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
+import type { DictionaryExtraction, DictionarySite } from './dictionaryExtraction';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import type { EventHandlers, HandlerEditSite } from './eventHandlers';
@@ -72,7 +73,8 @@ export class DesignerWorkbench implements vscode.Disposable {
     private previewKey?: string;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
-        private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers) {
+        private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers,
+        readonly dictionaryExtraction: DictionaryExtraction) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
         this.outline = new OutlineView(context.extensionUri, changed, message => { void this.outlineMessage(message); });
@@ -423,8 +425,15 @@ export class DesignerWorkbench implements vscode.Disposable {
             await this.active?.revealSource(message.frame, message.range);
             return;
         }
-        if (message.type !== 'edit' && message.type !== 'handler') return;
+        if (message.type === 'ready') return;
         try {
+            if (message.type === 'extractDictionary') {
+                if (view !== 'resources') throw new Error('Use the Resources view to extract a dictionary.');
+                const panel = this.panelFor(message.frame);
+                await this.dictionaryExtraction.openReview(await this.dictionarySite(panel, message.frame, message.resource));
+                this.details.resources.post({ type: 'edit', request: message.request });
+                return;
+            }
             if (message.type === 'handler') {
                 if (view !== 'events') throw new Error('Use the Events view for code-behind.');
                 const panel = this.panelFor(message.target);
@@ -465,6 +474,18 @@ export class DesignerWorkbench implements vscode.Disposable {
         };
         validate();
         return { document: panel.document, request: { version: panel.document.version, position: control.nameRange.start, event }, validate };
+    }
+
+    async dictionarySite(panel: DesignerPanel, frame: FrameTarget, node: number): Promise<DictionarySite> {
+        const validate = () => {
+            if (panel.language !== 'xaml' || !panel.canUse(frame)) throw new Error('Read the current XAML design before extracting its resources.');
+        };
+        validate();
+        const position = panel.nodes.find(control => control.id === node)?.nameRange.start
+            ?? (await panel.resources(frame)).find(resource => resource.id === node)?.range.start;
+        validate();
+        if (!position) throw new Error('Choose an authored resource or its owner.');
+        return { document: panel.document, request: { version: panel.document.version, position }, validate };
     }
 
     private async assetsMessage(message: FromAssets): Promise<void> {

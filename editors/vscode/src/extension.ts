@@ -3,6 +3,8 @@ import { AgentTools } from './agentTools';
 import { BuiltProjects } from './builtProjects';
 import { DesignTokenCommands } from './designTokenCommands';
 import { DesignerWorkbench } from './designerWorkbench';
+import { DictionaryExtraction } from './dictionaryExtraction';
+import type { DictionaryRequest } from './dictionaryProtocol';
 import { DiagnosticsView } from './diagnosticsView';
 import { EventHandlers } from './eventHandlers';
 import type { HandlerRequest } from './eventHandlerProtocol';
@@ -44,9 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
     const designTokens = new DesignTokenCommands(inventory);
     const scaffolds = new ProjectScaffold();
     const handlers = new EventHandlers(server);
+    const extraction = new DictionaryExtraction(server);
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
-    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers);
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction);
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
@@ -62,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, extraction, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -70,6 +73,17 @@ export function activate(context: vscode.ExtensionContext) {
                 && vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true);
         }),
         vscode.commands.registerCommand('ferroui.restartLanguageServer', () => server.start(true)),
+        vscode.workspace.onDidGrantWorkspaceTrust(() => { if (vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true); }),
+        vscode.commands.registerCommand('ferroui.extractResourceDictionary', async (action?: { uri: string; request: DictionaryRequest }) => {
+            try {
+                if (action) {
+                    await extraction.openReview({ document: await vscode.workspace.openTextDocument(vscode.Uri.parse(action.uri)), request: action.request });
+                } else if (vscode.window.activeTextEditor) {
+                    const { document, selection } = vscode.window.activeTextEditor;
+                    await extraction.openReview({ document, request: { version: document.version, position: selection.active } });
+                }
+            } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
         vscode.commands.registerCommand('ferroui.createEventHandler', async (action?: { uri: string; request: HandlerRequest }) => {
             try {
                 if (action) {

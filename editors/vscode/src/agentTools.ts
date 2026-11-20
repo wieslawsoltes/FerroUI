@@ -60,6 +60,8 @@ interface Arguments extends CanvasAction, CargoSelection {
     property: string;
     event: string;
     handler?: string;
+    file_name?: string;
+    review?: string;
     value?: string;
     resource: number;
     dynamic?: boolean;
@@ -334,6 +336,13 @@ export class AgentTools {
                 return tool === 'designer_event_handler'
                     ? this.workbench.handlers.inspect(site, args.handler, signal)
                     : this.workbench.handlers.scaffold(site, args.handler!, args.expected_rust_version, signal);
+            }
+            case 'designer_dictionary_extraction': case 'designer_extract_dictionary': {
+                const site = await this.workbench.dictionarySite(panel, { session: panel.session, token: args.expected_revision }, args.node!);
+                const extraction = this.workbench.dictionaryExtraction;
+                return tool === 'designer_dictionary_extraction'
+                    ? extraction.inspect(site, args.file_name, signal)
+                    : extraction.apply(site, args.file_name!, args.review!, signal);
             }
             case 'designer_apply_resource':
                 await panel.agentEdit(args.expected_revision, { type: 'applyResource', frame: args.expected_revision,

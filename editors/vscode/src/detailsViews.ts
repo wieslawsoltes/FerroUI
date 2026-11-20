@@ -1,4 +1,4 @@
-import type { Uri } from 'vscode';
+import { workspace, type Uri } from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, type DetailsState, type DetailsView, type FrameTarget, type FromDetails, type Inspection, type ResourceRow, type ToDetails } from './protocol';
@@ -36,7 +36,9 @@ export class DetailsViews {
         this.events.show({ ...state, events: inspection.data?.events, codeBehind,
             message: state.message ?? inspection.message }, file);
         const resources = this.resources.visible ? this.readResources(panel, frame) : {};
-        this.resources.show({ ...state, resources: resources.data, message: state.message ?? resources.message }, file);
+        this.resources.show({ ...state, resources: resources.data,
+            extractDictionary: !!panel && workspace.isTrusted && !!workspace.getWorkspaceFolder(panel.document.uri),
+            message: state.message ?? resources.message }, file);
     }
 
     private readResources(panel?: DesignerPanel, target?: FrameTarget): { data?: ResourceRow[]; message?: string } {

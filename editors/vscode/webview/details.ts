@@ -37,7 +37,7 @@ function render(): void {
     title.textContent = state.label ?? '';
     title.hidden = !state.label;
     const fields = view === 'events' ? state.events : state.resources;
-    const key = JSON.stringify([state.frame?.session, state.target?.node, state.codeBehind, fields]);
+    const key = JSON.stringify([state.frame?.session, state.target?.node, state.codeBehind, state.extractDictionary, fields]);
     if (fields && key !== contentKey) {
         contentKey = key;
         list.replaceChildren(...(view === 'events'
@@ -125,7 +125,9 @@ function resourceRow(resource: ResourceRow): HTMLElement {
     const name = create('strong', resource.name);
     const heading = create('div');
     heading.className = 'detail-heading';
-    heading.append(name, actionButton('go-to-file', `Reveal ${resource.name} declaration`, () => reveal(resource.range)));
+    heading.append(name);
+    if (state.extractDictionary) heading.append(actionButton('file-code', `Extract the dictionary containing ${resource.name}`, () => extract(resource.id)));
+    heading.append(actionButton('go-to-file', `Reveal ${resource.name} declaration`, () => reveal(resource.range)));
     const meta = create('p', [resource.typeName, resource.scope,
         resource.usages ? `${resource.usages} ${resource.usages === 1 ? 'use' : 'uses'}` : ''].filter(Boolean).join(' · '));
     meta.className = 'detail-meta';
@@ -186,4 +188,12 @@ function handler(action: 'create' | 'reveal', event: string, range?: Range): voi
 
 function reveal(range: Range): void {
     if (state.frame) vscode.postMessage({ type: 'reveal', frame: state.frame, range });
+}
+
+function extract(resource: number): void {
+    if (!state.frame || pending !== undefined) return;
+    pending = ++request;
+    error = undefined;
+    vscode.postMessage({ type: 'extractDictionary', request: pending, frame: state.frame, resource });
+    applyFilter();
 }
