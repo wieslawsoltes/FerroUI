@@ -161,6 +161,10 @@ When **Design Data** supplies an array through a simple `ItemsSource` binding, t
 
 The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Open Rust template closures and application-supplied XAML expressions at their source. For a resource defined in another document, use its assignment to locate the definition. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
+![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
+
+The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
+
 ## Reuse snippets and design tokens
 
 Save a reusable, single-root XAML fragment under `.ferroui/toolbox` in the workspace or Cargo package. Select the package view to see its snippets and registered **Project controls** and **Dependency controls**. A package snippet takes precedence over a workspace snippet with the same filename. RSX offers entries with a supported source mapping.
