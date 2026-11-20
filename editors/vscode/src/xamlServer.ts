@@ -12,7 +12,7 @@ export class XamlServer implements vscode.Disposable {
     private client?: LanguageClient;
     private transition = Promise.resolve();
     private disposed = false;
-    private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.xaml');
+    private readonly watch = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
     private readonly projects = new Map<string, ProjectMetadata>();
     eventDefinition?: (document: vscode.TextDocument, at: vscode.Position, token: vscode.CancellationToken) => Promise<vscode.Location | undefined>;
 

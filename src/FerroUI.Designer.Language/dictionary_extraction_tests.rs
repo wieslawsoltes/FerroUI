@@ -105,6 +105,33 @@ fn replaces_a_merged_dictionary_in_its_original_slot_and_keeps_relative_sources(
 }
 
 #[test]
+fn carries_inherited_xaml_and_markup_compatibility_into_the_new_document() {
+    let source = format!(
+        "<Grid {NS} xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006' xmlns:d='urn:design' mc:Ignorable='d' xml:space='preserve' x:CompileBindings='False' x:DataType='x:String'><Grid.Resources><ResourceDictionary xmlns:e='urn:more-design' mc:Ignorable='e'><DataTemplate x:Key='Card'><TextBlock Text='  Keep spaces  ' d:Placement='1' e:Placement='2'/></DataTemplate></ResourceDictionary></Grid.Resources></Grid>"
+    );
+    let fixture = Fixture::new(&source);
+    let service = fixture.service(&source);
+    let plan = service
+        .plan_dictionary_extraction(
+            &fixture.uri,
+            request(&source, "DataTemplate"),
+            "Resources.xaml",
+        )
+        .unwrap();
+    let dictionary = ferroui_designer_core::Document::new(&plan.file.source).unwrap();
+    let root = dictionary.ast().node(dictionary.ast().root()).unwrap();
+    assert_eq!(root.attribute("xml:space"), Some("preserve"));
+    assert_eq!(root.attribute("x:DataType"), Some("x:String"));
+    assert_eq!(root.attribute("x:CompileBindings"), Some("False"));
+    assert_eq!(root.attribute("mc:Ignorable"), Some("d e"));
+    assert!(
+        plan.file
+            .source
+            .contains("Text='  Keep spaces  ' d:Placement='1' e:Placement='2'")
+    );
+}
+
+#[test]
 fn rejects_stale_or_occupied_destinations_and_scope_dependent_definitions() {
     let source = format!(
         "<Grid {NS}><Grid.Resources><Color x:Key='Outer'>Red</Color></Grid.Resources><Border><Border.Resources><SolidColorBrush x:Key='Inner' Color='{{StaticResource Outer}}'/></Border.Resources></Border></Grid>"

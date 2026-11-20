@@ -7,6 +7,9 @@ use crate::{Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Node, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 
+#[path = "dictionary_context.rs"]
+mod context;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DictionarySite {
     pub node: NodeId,
@@ -226,7 +229,13 @@ pub fn plan_dictionary_extraction(
     };
     Document::new(TextPatch::apply_all(source, vec![patch.clone()]).map_err(error)?)
         .map_err(error)?;
-    let dictionary = Document::new(format!("{extracted}{newline}")).map_err(error)?;
+    let mut dictionary = Document::new(format!("{extracted}{newline}")).map_err(error)?;
+    context::inherit(
+        document,
+        node,
+        target.kind != SiteKind::Shorthand,
+        &mut dictionary,
+    )?;
     let mut static_resources = Vec::new();
     for child in dictionary.ast().elements() {
         static_resources.extend(
