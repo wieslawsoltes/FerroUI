@@ -9,6 +9,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub(crate) mod authoring;
 #[path = "component_resource_refs.rs"]
 pub(crate) mod references;
+#[path = "dictionary_extraction.rs"]
+pub(crate) mod extraction;
 #[path = "item_templates.rs"]
 mod item_templates;
 pub use authoring::{
@@ -250,17 +252,17 @@ pub fn component_fragment(document: &Document, node: NodeId) -> Result<String> {
         if prefix == "xml" {
             continue;
         }
-        let name = if prefix.is_empty() {
-            "xmlns".to_owned()
-        } else {
-            format!("xmlns:{prefix}")
-        };
+        let name = namespace_attribute(&prefix);
         if element.attribute(&name).is_none() {
             declarations.push_str(&format!(" {name}=\"{}\"", escape(&uri)));
         }
     }
     source.insert_str(element.name_span.end - element.span.start, &declarations);
     Ok(source)
+}
+
+fn namespace_attribute(prefix: &str) -> String {
+    if prefix.is_empty() { "xmlns".into() } else { format!("xmlns:{prefix}") }
 }
 
 /// Export a property's object/collection content with independent namespace closure.

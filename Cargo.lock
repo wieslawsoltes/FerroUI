@@ -1981,6 +1981,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-designer-core",
  "ferroui-designer-project",
+ "ferroui-designer-tools",
  "serde",
  "serde_json",
 ]

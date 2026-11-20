@@ -1,7 +1,7 @@
 //! Framed JSON-RPC over stdio. Only this adapter uses LSP wire types; native callers use the
 //! same portable service directly. No network listener or external language process is started.
 use crate::{
-    FormattingOptions, HandlerRequest, LanguageError, LanguageService, Location, Position, Range, Result, TextChange,
+    DictionaryExtractionRequest, FormattingOptions, HandlerRequest, LanguageError, LanguageService, Location, Position, Range, Result, TextChange,
     WorkspaceEdit,
 };
 use serde_json::{Value, json};
@@ -19,6 +19,7 @@ pub struct LspServer {
     exit: bool,
     open_uris: BTreeMap<String, String>,
     handler_commands: bool,
+    extraction_commands: bool,
     cancelled: Arc<Mutex<BTreeSet<String>>>,
     tokens: tokens::TokenResults,
 }
@@ -31,6 +32,7 @@ impl Default for LspServer {
             exit: false,
             open_uris: BTreeMap::new(),
             handler_commands: false,
+            extraction_commands: false,
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
             tokens: tokens::TokenResults::default(),
         }
@@ -250,24 +252,32 @@ impl LspServer {
                 ))
             }
             "textDocument/codeAction" => {
-                if params["context"]["only"].as_array().is_some_and(|kinds| {
-                    !kinds.iter().any(|kind| kind.as_str() == Some("quickfix"))
-                }) {
+                let quick_fix = accepts_action(params, "quickfix");
+                let extraction = self.extraction_commands && accepts_action(params, "refactor.extract");
+                if !quick_fix && !extraction {
                     return Ok(json!([]));
                 }
                 let uri = uri(params)?;
                 let range: Range = decode(&params["range"])?;
-                let fixes = self.service.quick_fixes(uri, range)?;
+                let fixes = if quick_fix { self.service.quick_fixes(uri, range)? } else { Vec::new() };
                 let mut actions = fixes.into_iter().map(|fix| json!({
                     "title": fix.title, "kind": "quickfix",
                     "edit": self.workspace_edit(WorkspaceEdit { document_changes: vec![fix.edits] })
                 })).collect::<Vec<_>>();
-                if self.handler_commands {
-                    if let Some(version) = self.service.version(uri) {
+                if let Some(version) = self.service.version(uri) {
+                    if quick_fix && self.handler_commands {
                         let request = HandlerRequest { version, position: range.start, event: None };
                         if self.service.offer_handler_fix(uri, &request) {
                             actions.push(json!({"title":"Create Rust event handler…", "kind":"quickfix",
                                 "command":{"title":"Create Rust event handler…","command":"ferroui.createEventHandler",
+                                    "arguments":[{"uri":uri,"request":request}]}}));
+                        }
+                    }
+                    if extraction {
+                        let request = DictionaryExtractionRequest { version, position: range.start };
+                        if self.service.dictionary_extraction_target(uri, request).is_ok() {
+                            actions.push(json!({"title":"Extract Resource Dictionary…", "kind":"refactor.extract",
+                                "command":{"title":"Extract Resource Dictionary…","command":"ferroui.extractResourceDictionary",
                                     "arguments":[{"uri":uri,"request":request}]}}));
                         }
                     }
@@ -321,6 +331,10 @@ impl LspServer {
                 text(params, "name")?)?)),
             "ferroui/eventHandlerDefinition" => Ok(json!(self.service.handler_definition(
                 text(params, "uri")?, &decode(&params["request"])?, Some(&decode(&params["rust"])?))?)),
+            "ferroui/dictionaryExtractionTarget" => Ok(json!(self.service.dictionary_extraction_target(
+                text(params, "uri")?, decode(&params["request"])?)?)),
+            "ferroui/planDictionaryExtraction" => Ok(json!(self.service.plan_dictionary_extraction(
+                text(params, "uri")?, decode(&params["request"])?, text(params, "fileName")?)?)),
             "workspace/didChangeWorkspaceFolders" => {
                 if let Some(folders) = params["event"]["removed"].as_array() {
                     for folder in folders {
@@ -397,6 +411,7 @@ impl LspServer {
         }
         self.initialized = true;
         self.handler_commands = params["initializationOptions"]["ferrouiHandlerCommands"] == true;
+        self.extraction_commands = params["initializationOptions"]["ferrouiExtractionCommands"] == true;
         let roots: Vec<String> = params["workspaceFolders"]
             .as_array()
             .map(|folders| {
@@ -431,10 +446,10 @@ impl LspServer {
                 "hoverProvider": true, "definitionProvider": true, "referencesProvider": true,
                 "renameProvider": { "prepareProvider": true }, "documentFormattingProvider": true,
                 "documentRangeFormattingProvider": true, "linkedEditingRangeProvider": true, "inlayHintProvider": true,
-                "codeActionProvider": { "codeActionKinds": ["quickfix"] },
+                "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }
@@ -515,6 +530,10 @@ impl LspServer {
         out.push(json!({"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":uri,"version":self.service.version(uri),"diagnostics":self.service.diagnostics(uri)?.into_iter().map(|d|json!({"range":d.range,"severity":d.severity,"code":d.code,"source":"FerroUI","message":d.message})).collect::<Vec<_>>()}}));
         Ok(())
     }
+}
+fn accepts_action(params: &Value, kind: &str) -> bool {
+    params["context"]["only"].as_array().is_none_or(|kinds| kinds.iter().filter_map(Value::as_str)
+        .any(|candidate| candidate == kind || kind.strip_prefix(candidate).is_some_and(|rest| rest.starts_with('.'))))
 }
 fn text<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
     value[key]

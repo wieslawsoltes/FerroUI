@@ -455,7 +455,7 @@ pub(crate) fn all_references(document: &Document) -> Result<Vec<(NodeId, String,
 
 /// Keep unresolved uses as well as resolved ones: moving/copying a definition can
 /// capture a previously unknown key in its new lexical resource scope.
-fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, String)>> {
+pub(super) fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, String)>> {
     let mut result = Vec::new();
     if framework(node)
         && matches!(

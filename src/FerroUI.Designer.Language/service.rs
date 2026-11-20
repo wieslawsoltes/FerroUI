@@ -12,6 +12,9 @@ use std::collections::{BTreeMap, BTreeSet};
 mod refactoring;
 #[path = "handler_service.rs"]
 mod handlers;
+#[path = "dictionary_extraction.rs"]
+mod extraction;
+pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -82,7 +85,7 @@ pub struct SignatureHelp {
     pub active_signature: u32,
     pub active_parameter: u32,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DocumentEdits {
     pub uri: String,
     pub version: i64,

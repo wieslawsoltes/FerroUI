@@ -30,6 +30,7 @@ pub use components::{
     resolve_component_resource, resolve_component_resource_in_context, visible_component_resources,
     visible_component_resources_in_context,
 };
+pub use components::extraction::{DictionaryExtraction, DictionarySite, dictionary_extraction_site, plan_dictionary_extraction};
 pub use geometry::{
     Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult, SnapSettings, align,
     distribute,

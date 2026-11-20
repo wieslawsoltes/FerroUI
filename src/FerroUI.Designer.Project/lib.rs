@@ -1,5 +1,6 @@
 //! Project discovery, transactional document buffers and process tasks without a UI dependency.
 mod discovery;
+mod dictionary_file;
 mod markup;
 mod preview_sources;
 mod tasks;
@@ -8,6 +9,7 @@ mod uri;
 mod workspace;
 
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
+pub use dictionary_file::{DictionaryDestination, dictionary_destination, suggested_dictionary_name};
 use std::fmt;
 pub use markup::{BuildMetadata, MarkupAnimationProperty, MarkupCatalog, MarkupControl, MarkupEventSignature};
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
