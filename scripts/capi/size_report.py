@@ -90,7 +90,16 @@ def build(source, profile, mode, options):
     found = re.findall(r"native-static-libs: (.*)", output)
     if not found:
         raise SystemExit("rustc printed no native-static-libs line")
-    return found[-1].split()
+    return system_libraries_dropped(found[-1].split())
+
+
+def system_libraries_dropped(native):
+    """The native libraries without `-lSystem`, `-lc` and `-lm` on macOS: clang links libSystem by
+    default, and libc and libm are part of it (an SDK need not have their stubs: the macOS runner
+    failed with `library 'm' not found`)."""
+    if sys.platform != "darwin":
+        return native
+    return [item for item in native if item not in ("-lSystem", "-lc", "-lm")]
 
 
 def text_sizes(path):
