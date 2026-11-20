@@ -131,4 +131,5 @@ def main():
         for f, v in fam.most_common(a.families):
             print(f'{v/1e6:8.3f} MB {famn[f]:6d}x  {f[:170]}')
 
-main()
+if __name__ == '__main__':
+    main()
