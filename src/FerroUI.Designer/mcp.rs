@@ -20,6 +20,8 @@ mod brush;
 mod automation_tests;
 #[path = "mcp_components.rs"]
 mod components;
+#[path = "mcp_style_composition.rs"]
+mod style_composition;
 #[path = "mcp_events.rs"]
 mod events;
 #[path = "mcp_grid.rs"]
@@ -307,6 +309,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(columns::tools());
         tools.extend(item_templates::tools());
         tools.extend(components::tools());
+        tools.extend(style_composition::tools());
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
@@ -338,6 +341,7 @@ impl UiToolProvider for DesignerMcp {
             || item_templates::handles(name)
             || name == "designer_property_trace"
             || components::handles(name)
+            || style_composition::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
@@ -602,6 +606,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if components::handles(name) {
             return components::call(&mut session, name, args);
+        }
+        if style_composition::handles(name) {
+            return style_composition::call(&mut session, name, args);
         }
         if events::handles(name) {
             return events::call(&mut session, name, args);

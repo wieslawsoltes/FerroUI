@@ -72,6 +72,7 @@ mod preview_source_anchor;
 #[cfg(feature = "mcp")]
 mod property_binding_session;
 mod property_color_editor;
+mod style_composition;
 mod property_controls;
 mod property_inspector_view;
 mod property_literals;

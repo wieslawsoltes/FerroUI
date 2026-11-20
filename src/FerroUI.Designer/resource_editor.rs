@@ -169,6 +169,9 @@ impl ResourceDefinitionEditor {
     pub fn control(&self) -> Ref<Control> {
         self.root.clone().upcast::<Control>()
     }
+    pub(crate) fn add_composition_tools(&self, control: Ref<Control>) {
+        self.panel.children().insert(1, control);
+    }
     pub fn on_command(
         &self,
         callback: impl Fn(DefinitionEditorCommand) -> Result<(), String> + 'static,

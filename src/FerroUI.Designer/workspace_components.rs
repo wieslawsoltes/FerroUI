@@ -30,6 +30,8 @@ mod control_types;
 mod project_sources;
 #[path = "workspace_component_import.rs"]
 mod source_import;
+#[path = "workspace_style_composition.rs"]
+mod style_composition;
 
 /// Exact XAML supplied by a library or a project. The designer does not reconstruct
 /// a compiled template from live visuals. The source is copied through an AST edit.
@@ -616,7 +618,10 @@ impl DesignerWorkspace {
                         if let Some(entry) = catalog.entries.iter().find(|entry| entry.node == node)
                         {
                             match self.definition_model(entry, writable, &context) {
-                                Ok(model) => editor.configure(model),
+                                Ok(model) => {
+                                    editor.configure(model);
+                                    self.add_style_composition_tools(&editor, &context, Some(entry), writable);
+                                }
                                 Err(error) => editor.show_error(Some(&error)),
                             }
                         }
@@ -648,6 +653,9 @@ impl DesignerWorkspace {
                     }
                     None => editor.configure_create(owners, writable),
                 }
+            }
+            if create {
+                self.add_style_composition_tools(&editor, &context, None, writable);
             }
         }
         let bar = self.root.get_control::<Control>("ComponentScopeBar");
@@ -747,7 +755,7 @@ impl DesignerWorkspace {
             ComponentKind::ControlTheme | ComponentKind::Style
         );
         let definition_names: &[&str] = match entry.kind {
-            ComponentKind::ControlTheme => &["TargetType", "BasedOn"],
+            ComponentKind::ControlTheme => &["TargetType"],
             ComponentKind::ControlTemplate => &["TargetType"],
             ComponentKind::DataTemplate => &["DataType"],
             ComponentKind::Style => &["Selector"],
@@ -768,30 +776,14 @@ impl DesignerWorkspace {
             .collect::<Result<Vec<_>, String>>()?;
         let mut fields = Vec::new();
         if is_setter {
-            for child in document.ast().element_children(entry.node) {
-                let Some(setter) = document.ast().node(child) else {
-                    continue;
-                };
-                if setter.local_name() != "Setter" {
-                    continue;
-                }
-                let Some(property) = ferroui_designer_tools::component_property_attribute(
-                    document, child, "Property",
-                )
+            for setter in ferroui_designer_tools::component_styles::authored_setters(document, entry.node)
                 .map_err(|error| error.to_string())?
-                .map(|attribute| attribute.value.as_str()) else {
-                    continue;
-                };
-                let object =
-                    ferroui_designer_tools::component_property_object(document, child, "Value")
-                        .map_err(|error| error.to_string())?;
+            {
                 fields.push((
-                    property.to_owned(),
-                    ferroui_designer_tools::component_property_attribute(document, child, "Value")
-                        .map_err(|error| error.to_string())?
-                        .map(|attribute| attribute.value.clone()),
-                    object,
-                    child,
+                    setter.property,
+                    setter.value,
+                    setter.object,
+                    setter.node,
                 ));
             }
         } else {
@@ -981,6 +973,20 @@ impl DesignerWorkspace {
         let commit: crate::PropertyValueCommit = Rc::new(move |edit| {
             let this = weak.upgrade().ok_or("The designer workspace was closed")?;
             guard.check(&this)?;
+            if let PropertyValueEdit::Literal(value) = &edit {
+                if setter {
+                    this.session.borrow_mut().set_style_value(owner, &name, Some(value))?;
+                    this.refresh(true);
+                    return Ok(());
+                }
+                if name == "Selector" {
+                    this.session.borrow_mut().change_style(ferroui_designer_tools::component_styles::StyleChange::SetSelector {
+                        node: owner, selector: value.trim(),
+                    })?;
+                    this.refresh(true);
+                    return Ok(());
+                }
+            }
             let action = match edit {
                 PropertyValueEdit::Literal(value) | PropertyValueEdit::Expression(value) => {
                     if setter {
@@ -1371,11 +1377,9 @@ impl DesignerWorkspace {
                         }
                     }
                     DefinitionEditorCommand::SetSetter { property, value } => {
-                        ComponentAction::SetSetter {
-                            owner: node,
-                            property,
-                            value: Some(value),
-                        }
+                        self.session.borrow_mut().set_style_value(node, &property, Some(&value))?;
+                        self.refresh(true);
+                        return Ok(());
                     }
                     DefinitionEditorCommand::SetResourceValue(value) => {
                         ComponentAction::SetResourceValue {
@@ -1902,15 +1906,10 @@ fn preview_target_type(entry: &ComponentEntry) -> Option<String> {
 }
 fn definition_type(document: &Document, entry: &ComponentEntry) -> Option<&'static TypeInfo> {
     let node = document.ast().node(entry.node)?;
-    let token = if matches!(
-        entry.kind,
-        ComponentKind::ControlTheme | ComponentKind::Style
-    ) {
-        preview_target_type(entry)?
-    } else {
-        node.name.clone()
-    };
-    control_types::registered_type(document, entry.node, &token)
+    if matches!(entry.kind, ComponentKind::ControlTheme | ComponentKind::Style) {
+        return crate::property_literals::setter_target_type(document, entry.node);
+    }
+    control_types::registered_type(document, entry.node, &node.name)
 }
 
 #[cfg(test)]

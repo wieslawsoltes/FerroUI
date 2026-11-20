@@ -20,6 +20,7 @@ pub(crate) fn initialize() -> Value {
         "columnAuthoring",
         "itemTemplateAuthoring",
         "propertyTrace",
+        "styleComposition",
         "projectInventory",
         "tokenHandoff",
         "designFixtures",

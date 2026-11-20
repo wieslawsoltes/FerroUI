@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="AppearanceSettings">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="SharedAccent" Color="#FF316DD2" />
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+          <SolidColorBrush x:Key="DetailInk" Color="#FF4C5A74" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="WorkspaceSurface" Color="#FFF0F4FB" />
+          <SolidColorBrush x:Key="PanelSurface" Color="#FFFFFFFF" />
+          <SolidColorBrush x:Key="HeadlineInk" Color="#FF182C48" />
+          <SolidColorBrush x:Key="ActionSurface" Color="#FF295DC0" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="WorkspaceSurface" Color="#FF131D2C" />
+          <SolidColorBrush x:Key="PanelSurface" Color="#FF202F45" />
+          <SolidColorBrush x:Key="HeadlineInk" Color="#FFF2F6FF" />
+          <SolidColorBrush x:Key="DetailInk" Color="#FFA8BCDA" />
+          <!-- Each theme keeps its own authored surface. -->
+          <SolidColorBrush x:Key="ActionSurface" Color="#FF537BE1" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <ControlTheme x:Key="WorkspaceAction" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ActionSurface}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="18,11" />
+        <Setter Property="Template">
+          <ControlTemplate TargetType="Button">
+            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="7">
+              <ContentPresenter Content="{TemplateBinding Content}" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+      <ControlTheme x:Key="PrimaryAction" TargetType="Button" BasedOn="{StaticResource WorkspaceAction}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+      </ControlTheme>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource PanelSurface}" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Padding" Value="26" />
+    </Style>
+  </UserControl.Styles>
+  <Border Background="{DynamicResource WorkspaceSurface}" Padding="32">
+    <StackPanel MaxWidth="520" Spacing="20" VerticalAlignment="Center">
+      <StackPanel Spacing="7">
+        <TextBlock Text="Workspace appearance" Foreground="{DynamicResource HeadlineInk}" FontSize="29" FontWeight="SemiBold" />
+        <TextBlock Text="Choose the colors your team sees across the workspace." Foreground="{DynamicResource DetailInk}" TextWrapping="Wrap" />
+      </StackPanel>
+      <Border x:Name="ThemeCard" Classes="card">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+          <StackPanel Spacing="7" VerticalAlignment="Center">
+            <TextBlock Text="Team palette" Foreground="{DynamicResource HeadlineInk}" FontSize="18" FontWeight="SemiBold" />
+            <TextBlock Text="Light and dark surfaces share resource keys." Foreground="{DynamicResource DetailInk}" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="1" x:Name="ApplyPalette" Theme="{StaticResource PrimaryAction}"
+                  VerticalAlignment="Center" Content="Apply palette" />
+        </Grid>
+      </Border>
+    </StackPanel>
+  </Border>
+</UserControl>

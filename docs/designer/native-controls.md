@@ -59,6 +59,12 @@ Use a source arrow to reveal an authored property, setter, or resource. The popu
 
 ![Designer Studio traces a card background to its local resource and shows the inactive style and type default](images/designer-property-value-trace.png)
 
+### Edit scoped styles and palettes
+
+Select a style or theme in **Library** to edit its selector, setters, or base theme in the definition inspector. Choose **New style in this scope** to add a style to the selected host. Use **Edit scoped palette** from a resource owner or dictionary to inspect Shared, Default, Light, and Dark declarations. The sun and moon buttons change the native preview theme. **Compare Light and Dark colors** shows how the current dictionary resolves keys in both variants.
+
+Choose a palette swatch to open the native color editor. Enter a literal or choose a color and apply it. To add a token, choose the layer, fill in the key and color, and use the plus button. An accepted color or style edit takes one Undo step. Use the source arrow beside a swatch to open its exact declaration. [VS Code guide](vscode/styles.md) · [MCP arguments](vscode/reference.md#edit-styles-and-palettes-with-mcp)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

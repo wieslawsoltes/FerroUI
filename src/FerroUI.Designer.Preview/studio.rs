@@ -110,7 +110,14 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
             "Use the corresponding editor action or the attached Designer Studio MCP server".into(),
         );
     }
-    if let Some(selection) = &query.selection {
+    let needs_selection = match query.name.as_str() {
+        "designer_style_catalog" => query.arguments.get("target").is_none(),
+        "designer_style_definition" | "designer_style_resources" | "designer_palette" => false,
+        _ => true,
+    };
+    // Reading one explicit definition must never retire a plan made for another
+    // selection while the Styles & Themes dock refreshes its rows.
+    if let (true, Some(selection)) = (needs_selection, &query.selection) {
         select(stage, selection)?;
     }
     if query.name == "designer_preview_checks" {
@@ -129,6 +136,11 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     if query.name == "designer_item_templates" && stage.authored_rsx.is_some() {
         return Ok(json!({"slots":[],"resources":[],"reason":"Edit Rust template expressions in their source."}));
+    }
+    if stage.authored_rsx.is_some() && matches!(query.name.as_str(),
+        "designer_style_catalog" | "designer_style_definition" | "designer_style_resources" | "designer_palette")
+    {
+        return Err("Edit Rust-owned style builders in Rust source".into());
     }
     if query.name == "designer_wrap_selection" {
         let rsx = stage.authored_rsx.as_ref().map(crate::rsx_animation::AuthoredRsxFrame::projection).transpose()?;
@@ -314,6 +326,8 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_item_template" => matches!(action, Some("create_inline" | "copy_inline" | "reset" | "assign_resource")),
         // All actions for these schemas are source-backed.
         "designer_component"
+        | "designer_style_edit"
+        | "designer_palette_edit"
         | "designer_property"
         | "designer_record_property"
         | "designer_record_geometry"
