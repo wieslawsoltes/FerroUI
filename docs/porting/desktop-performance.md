@@ -551,11 +551,20 @@ python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
 python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
+python3 scripts/perf/gate.py --only frames,framework --frames-filter 'startup*,cards' \
+    --framework-filter styling_subsystem:: --rounds 3     # a narrow change: only what it can move
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
+
+**Reduced and full gates.** A change that can only move one area is gated on that area: the frame
+scenes it can affect (`--frames-filter`, scene names or prefixes ending in `*`; a filter that names
+no scene stops the gate) and the framework classes of its subsystem (`--framework-filter`), with
+three rounds. That takes 20 to 35 minutes instead of the 60 to 90 of every scene and class. The
+full gate (every scene and class, four rounds) runs once on the top of a stack or a batch of
+changes, before it is merged, so a regression that a reduced gate did not look for is still found.
 
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to

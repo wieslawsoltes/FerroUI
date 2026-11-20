@@ -759,6 +759,23 @@ def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[
     return sorted(names)
 
 
+def filtered_scenes(tests: list[str], spec: str | None) -> list[str]:
+    """The scenes of `tests` that `spec` (`--frames-filter`) names, in their order; all without one.
+    A pattern is a scene name, or a prefix ending in `*`. A filter that names no scene is an error,
+    so that a typing mistake does not pass a gate that measured nothing."""
+    if not spec:
+        return tests
+    patterns = [pattern.strip() for pattern in spec.split(",") if pattern.strip()]
+
+    def named(test: str) -> bool:
+        return any(test.startswith(p[:-1]) if p.endswith("*") else test == p for p in patterns)
+
+    kept = [test for test in tests if named(test)]
+    if not kept:
+        sys.exit(f"gate: --frames-filter {spec!r} names none of the scenes: {', '.join(tests)}")
+    return kept
+
+
 def run_frames(side: Side, tests: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
     """Each test of the frame benchmarks in a process of its own."""
     output = ""
@@ -1478,6 +1495,11 @@ def main() -> int:
         "--tdg-min-iteration-ms", type=int, default=250, help="FERROUI_BENCH_MIN_ITERATION_MS of the TreeDataGrid run (default 250)"
     )
     parser.add_argument("--frames", type=int, help="GATE_FRAMES of the frame gate (its default: 240)")
+    parser.add_argument(
+        "--frames-filter",
+        help="comma-separated scenes of the frame gate to measure (a name, or a prefix ending in *: "
+        "startup*,cards); default: every scene. For a narrow change; a full gate runs every scene",
+    )
     parser.add_argument("--warmup", type=int, help="GATE_WARMUP of the frame gate (its default: 60)")
     parser.add_argument("--scratch", help="the folder of the base worktree, the target folders and the logs (default: ../ferroui-gate-scratch)")
     parser.add_argument("--copy-gate", action="store_true", help="copy the candidate's frame gate into the base even when the base has one")
@@ -1658,7 +1680,10 @@ def gate(options: argparse.Namespace) -> int:
     frames: dict[str, list[str]] = {}
     if "frames" in suites:
         for side in (base, candidate):
-            frames[side.name] = frame_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
+            frames[side.name] = filtered_scenes(
+                frame_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose),
+                options.frames_filter,
+            )
 
     # The classes of the benchmarks of each harness suite, a side: each runs in a process of its
     # own, when the harness of both sides can run one class (else both run all in one process,
