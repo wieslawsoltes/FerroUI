@@ -6,6 +6,8 @@ mod dictionary_extraction_tests;
 mod editing;
 mod formatting;
 mod handler_edit;
+#[cfg(test)]
+mod file_move_tests;
 mod handler_project;
 #[cfg(test)]
 mod handler_tests;
