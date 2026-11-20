@@ -568,3 +568,63 @@ pub extern "C" fn ferro_get_bool_or(object: FerroHandle, property: i64, fallback
         ferro_get_bool(object, property, result)
     })
 }
+
+/// Reads the text of `property` of `object` as [`ferro_get_cstr`] does, and returns `fallback`
+/// (the caller's own string, returned as it is) in place of `NULL` when the read fails (the failure
+/// is recorded): for a language whose strings cannot be `NULL`. UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_get_cstr_or(object: FerroHandle, property: i64, fallback: *const c_char) -> *const c_char {
+    let text = ferro_get_cstr(object, property);
+    if text.is_null() {
+        fallback
+    } else {
+        text
+    }
+}
+
+/// Writes UTF-16 text (`units` code units) to `property` of `object`, as [`ferro_set_str`] does
+/// with UTF-8: for a language whose strings are UTF-16 (C#, Java, JavaScript), so that it passes
+/// its string without converting it. UI thread only.
+#[no_mangle]
+pub unsafe extern "C" fn ferro_set_str16(
+    object: FerroHandle,
+    property: i64,
+    text: *const u16,
+    units: i64,
+) -> FerroStatus {
+    let decoded = (|| -> Result<String> {
+        let units = usize::try_from(units).map_err(|_| Error::new(FERRO_INVALID_ARGUMENT, "the length is negative"))?;
+        if units == 0 {
+            return Ok(String::new());
+        }
+        if text.is_null() {
+            return Err(Error::new(FERRO_NULL_POINTER, "the string is NULL"));
+        }
+        // SAFETY: the caller passes `units` readable code units.
+        let slice = unsafe { std::slice::from_raw_parts(text, units) };
+        String::from_utf16(slice).map_err(|_| Error::new(crate::FERRO_INVALID_UTF8, "the string is not UTF-16"))
+    })();
+    match decoded {
+        // SAFETY: a pointer and the length of a Rust string.
+        Ok(text) => unsafe { ferro_set_str(object, property, text.as_ptr().cast(), text.len() as i64) },
+        Err(error) => error.record(),
+    }
+}
+
+/// The text of `property` of `object`, `None` when it has none or cannot be read; nothing is
+/// recorded (the frames compare what an object shows with what a frame sets).
+pub(crate) fn peek_text(object: FerroHandle, property: i64) -> Option<String> {
+    let (object, property) = target(object, property).ok()?;
+    text_of(&object, property).ok()
+}
+
+/// The value of `property` of `object` as a number (a boolean as `0` or `1`), `None` when it is
+/// none; nothing is recorded.
+pub(crate) fn peek_number(object: FerroHandle, property: i64) -> Option<f64> {
+    let (object, property) = target(object, property).ok()?;
+    let value = get_untyped(&object, property).ok()??;
+    if let Some(flag) = value.downcast_ref::<bool>() {
+        return Some(if *flag { 1.0 } else { 0.0 });
+    }
+    number_of(&value)
+}

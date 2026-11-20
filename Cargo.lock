@@ -2753,7 +2753,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-osprey-native"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",

@@ -1,0 +1,172 @@
+// The hand-written runtime of layer 2 of the Osprey bindings of FerroUI (docs/osprey.md): the
+// element tree a view returns, its writing as a frame (ferro_frame_*), and the view/update loop.
+//
+// An application has a model, a message union, `update(message, model) -> model` and
+// `view(model) -> Element<Message>`. Every event attribute of the view gets a tag, its place
+// among the event attributes of the tree; the frame binds the event to that tag, and when the
+// event fires the library calls the one dispatcher of the application with it. The dispatcher
+// finds the message of the tag in the view of the current model (`messageAt`), runs `update`,
+// keeps the next model and commits its view (`render`), which the library reconciles into the
+// windows (keyed by `key(n)`, else by position). Controls carry messages, never callbacks: the
+// value of a value event (the text of `onTextChanged`) is read with `eventText()` in `update`.
+//
+// Record fields are named apart from each other (an Osprey code generator restriction of
+// 0.29: field names unique across records).
+
+namespace ferroviews;
+
+import ferroui::*
+
+// An attribute of an element: a property value, a key, or an event and its message.
+type Attr<M> = AttrText { attrTextProperty: int, attrTextValue: string }
+    | AttrNumber { attrNumberProperty: int, attrNumberValue: float }
+    | AttrInteger { attrIntegerProperty: int, attrIntegerValue: int }
+    | AttrBool { attrBoolProperty: int, attrBoolValue: bool }
+    | AttrKey { attrKeyValue: int }
+    | AttrOn { attrOnEvent: int, attrOnMessage: M }
+    | AttrOnValue { attrValueEvent: int, attrValueProperty: int, attrValueMessage: M }
+
+// An element: a class (its type ID), attributes and children.
+type Element<M> = { elementType: int, elementAttrs: List<Attr<M>>, elementChildren: List<Element<M>> }
+
+// The key of an element among its siblings: an element keeps its control while its key stays.
+fn key<M>(value: int) -> Attr<M> = AttrKey { attrKeyValue: value }
+
+// ---- writing a frame ------------------------------------------------------------------------
+
+fn keyOf<M>(attrs: List<Attr<M>>) -> int = match attrs {
+    [] => 0
+    [first, ...rest] => match first {
+        AttrKey { attrKeyValue } => attrKeyValue
+        _ => keyOf(attrs: rest)
+    }
+}
+
+// Writes an attribute; the tag of the next event attribute.
+fn writeAttr<M>(attr: Attr<M>, tag: int) -> int = match attr {
+    AttrText { attrTextProperty, attrTextValue } => {
+        let _ = ferro_frame_str(property: attrTextProperty, text: attrTextValue, length: -1)
+        tag
+    }
+    AttrNumber { attrNumberProperty, attrNumberValue } => {
+        let _ = ferro_frame_f64(property: attrNumberProperty, value: attrNumberValue)
+        tag
+    }
+    AttrInteger { attrIntegerProperty, attrIntegerValue } => {
+        let _ = ferro_frame_i64(property: attrIntegerProperty, value: attrIntegerValue)
+        tag
+    }
+    AttrBool { attrBoolProperty, attrBoolValue } => {
+        let _ = ferro_frame_bool(property: attrBoolProperty, value: attrBoolValue ? toInt8(1) : toInt8(0))
+        tag
+    }
+    AttrKey { attrKeyValue } => tag
+    AttrOn { attrOnEvent, attrOnMessage } => {
+        let _ = ferro_frame_on(event: attrOnEvent, tag: tag, valueProperty: 0)
+        tag + 1
+    }
+    AttrOnValue { attrValueEvent, attrValueProperty, attrValueMessage } => {
+        let _ = ferro_frame_on(event: attrValueEvent, tag: tag, valueProperty: attrValueProperty)
+        tag + 1
+    }
+}
+
+fn writeAttrs<M>(attrs: List<Attr<M>>, tag: int) -> int = match attrs {
+    [] => tag
+    [first, ...rest] => writeAttrs(attrs: rest, tag: writeAttr(attr: first, tag: tag))
+}
+
+fn writeElement<M>(element: Element<M>, tag: int) -> int = {
+    let _ = ferro_frame_open(typeId: element.elementType, key: keyOf(attrs: element.elementAttrs))
+    let next = writeAttrs(attrs: element.elementAttrs, tag: tag)
+    let after = writeChildren(children: element.elementChildren, tag: next)
+    let _ = ferro_frame_close()
+    after
+}
+
+fn writeChildren<M>(children: List<Element<M>>, tag: int) -> int = match children {
+    [] => tag
+    [first, ...rest] => writeChildren(children: rest, tag: writeElement(element: first, tag: tag))
+}
+
+// Commits `window` (a window element) as the frame of the application: shown the first time,
+// patched afterwards. The failure of a write, if one failed.
+fn render<M>(window: Element<M>) -> Result<string, string> = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let _ = ferro_frame_begin()
+    let _ = writeElement(element: window, tag: 1)
+    let status = ferro_frame_commit(root: 0)
+    if toInt(status) == 0 { Success { value: "ok" } } else { failure() }
+}
+
+// ---- messages -------------------------------------------------------------------------------
+
+// The search for the message of a tag: the next tag, or the message.
+type Seek<M> = SeekNext { seekTag: int } | SeekFound { seekMessage: M }
+
+// The value of the event being dispatched as text (the text of a text box for TextChanged):
+// what `update` reads for a message of a value event (`onTextChanged(CelsiusChanged)`).
+fn eventText() -> string = "${ferro_frame_event_text()}"
+
+fn seekAttrs<M>(attrs: List<Attr<M>>, target: int, tag: int) -> Seek<M> = match attrs {
+    [] => SeekNext { seekTag: tag }
+    [first, ...rest] => match first {
+        AttrOn { attrOnEvent, attrOnMessage } =>
+            if tag == target { SeekFound { seekMessage: attrOnMessage } } else { seekAttrs(attrs: rest, target: target, tag: tag + 1) }
+        AttrOnValue { attrValueEvent, attrValueProperty, attrValueMessage } =>
+            if tag == target { SeekFound { seekMessage: attrValueMessage } } else { seekAttrs(attrs: rest, target: target, tag: tag + 1) }
+        _ => seekAttrs(attrs: rest, target: target, tag: tag)
+    }
+}
+
+fn seekElement<M>(element: Element<M>, target: int, tag: int) -> Seek<M> =
+    match seekAttrs(attrs: element.elementAttrs, target: target, tag: tag) {
+        SeekFound { seekMessage } => SeekFound { seekMessage: seekMessage }
+        SeekNext { seekTag } => seekChildren(children: element.elementChildren, target: target, tag: seekTag)
+    }
+
+fn seekChildren<M>(children: List<Element<M>>, target: int, tag: int) -> Seek<M> = match children {
+    [] => SeekNext { seekTag: tag }
+    [first, ...rest] => match seekElement(element: first, target: target, tag: tag) {
+        SeekFound { seekMessage } => SeekFound { seekMessage: seekMessage }
+        SeekNext { seekTag } => seekChildren(children: rest, target: target, tag: seekTag)
+    }
+}
+
+// The message of the event attribute with the tag `tag` in `view`.
+fn messageAt<M>(view: Element<M>, tag: int) -> Result<M, string> = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    match seekElement(element: view, target: tag, tag: 1) {
+        SeekFound { seekMessage } => Success { value: seekMessage }
+        SeekNext { seekTag } => Error { message: "no event attribute has the tag ${tag}" }
+    }
+}
+
+// ---- the loop -------------------------------------------------------------------------------
+
+// ---- driving an interface from a script -----------------------------------------------------
+
+// The control of the element with the key `key` in the windows of the frames (0 when none).
+fn findKey(key: int) -> int = {
+    let found = ferro_frame_find(root: 0, key: key)
+    let _ = ferro_release(object: found)
+    found
+}
+
+// The text of the control of the element with the key `key` (a text box, a text block).
+fn textAt(key: int) -> string = "${ferro_get_cstr_or(object: findKey(key: key), property: textPropertyId(), fallback: "")}"
+
+// Writes `text` into the control of the element with the key `key`, as typing does: its events
+// go to the dispatcher (a text box posts TextChanged; `ferro_run_jobs` runs it at once).
+fn typeAt(key: int, text: string) -> Unit = {
+    let _ = ferro_set_str(object: findKey(key: key), property: textPropertyId(), text: text, length: -1)
+    let _ = ferro_run_jobs()
+}

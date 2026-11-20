@@ -6,7 +6,10 @@
 //!   `font_size`;
 //! - event dispatch: a raise of `Click` to a handler subscribed through the ABI
 //!   (`ferro_subscribe`: a C function and a token) against the same raise to a Rust handler, and
-//!   the whole `ferro_raise` call against the raise in Rust.
+//!   the whole `ferro_raise` call against the raise in Rust;
+//! - frames (`ferro_frame_*`): a frame of one text block whose text changes, committed under a
+//!   root, against `set_text` of the text block; and a frame of 100 text blocks of which one
+//!   changes, against the one `set_text` that changes the same text (what the reconcile costs).
 //!
 //! `cargo bench -p ferroui-capi --no-default-features --bench call_overhead`. No window and no
 //! renderer: the thread is the UI thread through `ferro_init`. Each case alternates between two
@@ -29,17 +32,22 @@ const SAMPLES: usize = 9;
 
 /// The median time of one operation in nanoseconds: `operation(i)` runs `ITERATIONS` times per
 /// sample, after one sample of warm-up.
-fn measure(mut operation: impl FnMut(u32)) -> f64 {
-    for i in 0..ITERATIONS {
+fn measure(operation: impl FnMut(u32)) -> f64 {
+    measure_n(ITERATIONS, operation)
+}
+
+/// [`measure`] with `iterations` operations per sample.
+fn measure_n(iterations: u32, mut operation: impl FnMut(u32)) -> f64 {
+    for i in 0..iterations {
         operation(i);
     }
     let mut samples: Vec<f64> = (0..SAMPLES)
         .map(|_| {
             let start = Instant::now();
-            for i in 0..ITERATIONS {
+            for i in 0..iterations {
                 operation(black_box(i));
             }
-            start.elapsed().as_nanos() as f64 / f64::from(ITERATIONS)
+            start.elapsed().as_nanos() as f64 / f64::from(iterations)
         })
         .collect();
     samples.sort_by(f64::total_cmp);
@@ -135,4 +143,39 @@ fn main() {
     report("raise Click (ferro_raise, whole call)", rust, abi);
 
     assert_eq!(rust_clicks.get(), ABI_CLICKS.load(Ordering::Relaxed) / 2, "every raise reached its handler");
+
+    // Frames: the scalar writer and a commit under a root, against the write it comes down to.
+    let border_type = id(ferro_type_id, c"Border");
+    let panel_type = id(ferro_type_id, c"StackPanel");
+    let root = ferro_create(border_type);
+    let one = measure(|i| {
+        ferro_frame_begin();
+        ferro_frame_open(text_type, 1);
+        let value = texts[(i & 1) as usize];
+        // SAFETY: a pointer and the length of a Rust string.
+        unsafe { ferro_frame_str(text, value.as_ptr().cast(), value.len() as i64) };
+        ferro_frame_close();
+        let code = ferro_frame_commit(root);
+        debug_assert_eq!(code, FERRO_OK);
+    });
+    let rust = measure(|i| rust_text.set_text(Some(texts[(i & 1) as usize])));
+    report("frame: one text block, its text changes", rust, one);
+
+    let labels: Vec<String> = (0..100).map(|n| format!("Item {n}")).collect();
+    let many = measure_n(ITERATIONS / 100, |i| {
+        ferro_frame_begin();
+        ferro_frame_open(panel_type, 0);
+        for (n, label) in labels.iter().enumerate() {
+            ferro_frame_open(text_type, n as i64 + 1);
+            let value = if n == 0 { texts[(i & 1) as usize] } else { label.as_str() };
+            // SAFETY: a pointer and the length of a Rust string.
+            unsafe { ferro_frame_str(text, value.as_ptr().cast(), value.len() as i64) };
+            ferro_frame_close();
+        }
+        ferro_frame_close();
+        let code = ferro_frame_commit(root);
+        debug_assert_eq!(code, FERRO_OK);
+    });
+    report("frame: 100 text blocks, one changes", rust, many);
+    assert_eq!(ferro_frame_clear(root), FERRO_OK);
 }
