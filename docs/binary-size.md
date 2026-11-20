@@ -1232,6 +1232,68 @@ trimmed already (the kept units of eight samples, docs/porting/theme-trimming.md
 Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
 `a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call` (`ferroui-build`).
 
+### 4.25 The initialisation of a class is reached through the class's own use (#612)
+
+A `TypeInfo` names the static initialisation of its class (`class_init`, which registers the
+properties of the class and runs its static constructor). #612 estimated in 2026-11 that this
+pointer kept about 1.5 MB in the bare window: every `TypeInfo` an application reaches would link
+the initialisation of its class. The estimate was measured again on main (`bf8e5e2f5`,
+`samples/HelloWorld`, release, macOS) before anything was changed.
+
+**What the pointer keeps today.** Hello world links the initialisation of 173 classes and types
+(`register_class::init` and `TYPE::class_init` in the symbol table); a smoke run
+(`FERROUI_SMOKE_EXIT_MS=1` under `lldb`, a breakpoint on each) runs 42 of them. On the
+whole-program module of section 2, `scripts/ircut.py --edges` with the references from every
+`TYPE` static to its initialiser removed loses 11.6 kB and no class: the initialisers themselves
+in their outer form. Every class whose initialisation never runs is reached by its own code
+(a property accessor, a constructor, a method) from a path that is linked but not taken. The
+gain the estimate described was taken by the earlier steps (sections 4.12, 4.13, 4.15 and 4.18
+to 4.21), which removed the references that reached a `TypeInfo` without its class.
+
+Taking the pointer out without the tables of types would not be free either: a compiled binding
+path to an attached property (`(local:Owner.Property)`) resolves the owner by its `TypeInfo` and
+looks the property up by name, which initialises an owner that nothing else initialised. That
+needs the generated code to initialise the owner itself, a change of the markup compiler, for
+about 12 kB. The pointer is left as it is.
+
+**What keeps the classes that never run.** Cutting the initialisers of the 130 classes that
+hello world links and its smoke run does not initialise loses at most 674 kB of the module (an
+initialiser inlined into its caller is not seen by the breakpoints, so the root class and the
+focus manager, which always run, are left out of the 130). One root kept most of it:
+
+- **The visual state mappers.** `TemplatedControl::apply_template` asks for the state mapper of
+  the control (the ports of WinUI's `ChangeVisualState`), which was found by downcasts to the six
+  families: button, toggle button, check box, radio button, list box item and text box. The
+  mappers name their classes' properties (`ListBoxItem::is_selected_property`,
+  `TextBox::text_property`), and an accessor initialises its class: every application with a
+  templated control linked the list box item and its selecting items control, the items
+  control, the text box and its presenter, the toggle button, and the panels their
+  initialisations name. Each class of a family now states its mapper from its static
+  constructor (`state_mappers::register`), and a control takes the mapper of its class or of its
+  nearest base class: the answers of the downcasts, as a control of a class exists only after
+  the class is initialised on its thread. `ircut.py` predicted 443 kB and 9 classes from the 5
+  references; the build gives:
+
+| `samples/HelloWorld`, release, macOS | main | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 20,529,288 bytes | 19,949,824 bytes | -579,464 bytes (-2.8 %) |
+| `__TEXT,__text` | 16,257,332 bytes | 15,784,532 bytes | -472,800 bytes (-2.9 %) |
+| Class initialisers linked | 173 | 164 | -9 |
+| Fat LTO `__text` (the build of the trace) | 14,888,284 bytes | 14,477,240 bytes | -411,044 bytes |
+
+What is left after the change, by what each initialiser keeps alone (`ircut.py`, the
+candidate's module): 363 kB over 121 classes, none above 93 kB. The largest are real uses on
+paths hello world does not take: the key-frame animation (93 kB), the adorner layer of the focus
+adorner (34 kB), the visual state manager (33 kB; the button's mapper, which the class of the
+caption buttons states, names it), the data validation errors (24 kB) and the page (24 kB). Two roots of another kind, for later: the cast of
+`BorderGapMaskConverter` that `ferroui-controls` registers at start-up (section 4.16) keeps the
+grid it builds in its conversion (125 kB), and the tool tip service, created at start-up as
+upstream does, initialises the tool tip class to follow `ToolTip.Tip` (57 kB).
+
+Tests: `a_class_with_no_mapper_of_its_own_takes_the_one_of_its_family`,
+`a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread`
+(`visual_state/state_mapper_tests.rs`), with the mapper tests of every family.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
