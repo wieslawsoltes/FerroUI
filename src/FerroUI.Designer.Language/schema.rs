@@ -318,6 +318,20 @@ impl Schema {
         )
     }
 
+    /// Resolve a property element using its own namespace and the target's type.
+    pub fn element_property(
+        &self,
+        owner: &ferroui_designer_core::Node,
+        property: &ferroui_designer_core::Node,
+    ) -> Option<PropertyInfo> {
+        self.property_in_context(
+            &owner.name,
+            owner.namespace_uri.as_deref(),
+            &property.name,
+            property.namespace_uri.as_deref(),
+        )
+    }
+
     /// An attached or owner-qualified member can use a different XML namespace
     /// from the target object, especially on a prefixed custom control.
     pub(crate) fn property_in_context(

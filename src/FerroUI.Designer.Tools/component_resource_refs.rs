@@ -1,5 +1,6 @@
 //! Lexical resource lookup and structured markup references shared by catalog and edits.
 use super::*;
+use ferroui_designer_core::design_fixtures::is_fixtures;
 use ferroui_designer_core::{MarkupArgument, MarkupExtension};
 
 /// The runtime's active theme and its inheritance chain, nearest inherited variant
@@ -477,7 +478,7 @@ fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, 
         }
     }
     for attribute in &node.attributes {
-        if attribute.is_namespace() || !attribute.value.starts_with('{') {
+        if attribute.is_namespace() || is_fixtures(attribute) || !attribute.value.starts_with('{') {
             continue;
         }
         let value = attribute.markup().map_err(ToolError)?;
@@ -657,7 +658,7 @@ pub(crate) fn rename_resource(
             }
         }
         for attribute in &element.attributes {
-            if attribute.is_namespace() || !attribute.value.starts_with('{') {
+            if attribute.is_namespace() || is_fixtures(attribute) || !attribute.value.starts_with('{') {
                 continue;
             }
             let mut value = attribute.markup().map_err(ToolError)?;

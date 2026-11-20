@@ -7,7 +7,7 @@ use ferroui_designer_project::local_preview_sources;
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 
 pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&Project>) -> Result<Snapshot, String> {
-    renderer.stage = None;
+    renderer.retire_frame(input);
     let design = DesignDocument::parse(&input.document, project)?;
     let counterpart = design.counterpart();
     let mut notices = Vec::new();
@@ -104,6 +104,12 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
             rsx.can_create_animation(ordinal).then_some(node.id)
         }).collect()
     });
+    let (definition_scope, definition_selection) = renderer.stage.as_ref().map_or((None, Vec::new()), |stage| {
+        let session = stage.session.borrow();
+        let scope = session.definition_scope().map(|scope| scope.node);
+        let selection = if scope.is_some() { session.selection().to_vec() } else { Vec::new() };
+        (scope, selection)
+    });
     Ok(Snapshot {
         nodes,
         blocks,
@@ -117,6 +123,8 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         mapped_rust_animations: !design.rsx_animations.is_empty(),
         rust_animation_owners,
         timeline_pose,
+        definition_scope,
+        definition_selection,
     })
 }
 

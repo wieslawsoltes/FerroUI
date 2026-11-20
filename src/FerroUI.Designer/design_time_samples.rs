@@ -243,7 +243,7 @@ fn inherits_fixture(document: &Document, element: &Node, root: NodeId) -> bool {
     true
 }
 
-fn simple_path(path: &str) -> bool {
+pub(crate) fn simple_path(path: &str) -> bool {
     path.len() <= 1024
         && path.split('.').count() <= MAX_PATH_DEPTH
         && path.split('.').all(|part| {

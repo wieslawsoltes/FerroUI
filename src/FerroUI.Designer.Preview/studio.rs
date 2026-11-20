@@ -54,6 +54,9 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
         return Err("Choose a current Studio presentation action".into());
     }
     let stage = renderer.stage(query.frame)?;
+    if query.name == "designer_item_template" && stage.authored_rsx.is_some() {
+        return Err("Open Rust template expressions from their source.".into());
+    }
     let mut arguments = query.arguments;
     let revision = stage.session.borrow().document().revision();
     arguments.as_object_mut().ok_or("arguments must be an object")?
@@ -83,6 +86,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
         ),
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "exit")),
+        "designer_item_template" => action == Some("preview"),
         "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),
         "designer_layer" => action.is_some(),
         _ => false,
@@ -114,6 +118,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     if query.name == "designer_columns" && stage.authored_rsx.is_some() {
         return Ok(json!({"table":null,"reason":"Edit Rust-owned column collections in the authored Rust source."}));
+    }
+    if query.name == "designer_item_templates" && stage.authored_rsx.is_some() {
+        return Ok(json!({"slots":[],"resources":[],"reason":"Edit Rust template expressions in their source."}));
     }
     if query.name == "designer_wrap_selection" {
         let rsx = stage.authored_rsx.as_ref().map(crate::rsx_animation::AuthoredRsxFrame::projection).transpose()?;
@@ -226,7 +233,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     // Retire the frame before touching the native session. VS Code owns the undo
     // transaction and renders a new frame from its buffer even on rejection.
-    let stage = renderer.stage.take().expect("frame checked above");
+    let stage = renderer.take_stage().expect("frame checked above");
     let operation = stage.sources.run(|| stage.studio.call(
         &query.name,
         &arguments,
@@ -296,6 +303,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }
+        "designer_item_template" => matches!(action, Some("create_inline" | "copy_inline" | "reset" | "assign_resource")),
         // All actions for these schemas are source-backed.
         "designer_component"
         | "designer_property"

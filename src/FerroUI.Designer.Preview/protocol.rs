@@ -170,6 +170,10 @@ pub(crate) struct Snapshot {
     pub(crate) rust_animation_owners: Vec<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) timeline_pose: Option<ferroui_designer::TimelinePreviewPose>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) definition_scope: Option<u64>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) definition_selection: Vec<u64>,
 }
 
 #[derive(Serialize)]

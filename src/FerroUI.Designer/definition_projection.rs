@@ -1,6 +1,7 @@
 //! A design-only native host for one authored definition. The projection is never
 //! committed; every copied element retains an explicit identity in the original AST.
 use ferroui_designer_core::{Document, Edit, MarkupValue, Node, NodeId, NodeKind};
+use ferroui_designer_core::design_fixtures::{DESIGN_NAMESPACE, DesignFixture};
 use ferroui_designer_tools::{component_fragment, ComponentCatalog, ComponentKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -50,6 +51,7 @@ pub struct DefinitionScope {
     pub kind: ComponentKind,
     pub options: DefinitionPreviewOptions,
     pub(crate) return_selection: Vec<NodeId>,
+    pub(crate) item_template: Option<crate::item_template_samples::ItemTemplatePreview>,
 }
 
 pub(crate) struct DefinitionProjection {
@@ -77,19 +79,21 @@ pub(crate) fn scope_for(
         kind: entry.kind,
         options,
         return_selection,
+        item_template: None,
     })
 }
 
 pub(crate) fn project(
     document: &Document,
     scope: &DefinitionScope,
+    sample: Option<&DesignFixture>,
 ) -> Result<DefinitionProjection, String> {
     scope.options.validate()?;
     let selected = document
         .ast()
         .node(scope.node)
         .ok_or("The definition was removed")?;
-    let mut builder = Builder::new(document, scope.node, &scope.options);
+    let mut builder = Builder::new(document, scope.node, &scope.options, sample);
     // Keep resource lookup layered. Flattening visible keys would change the meaning of
     // an outer resource that depends on a key shadowed by the selected inner scope.
     let mut ancestors = Vec::new();
@@ -167,9 +171,14 @@ pub(crate) fn project(
                     builder.sample_control(selected, &scope.options, Some(("Template", &key)))?
                 }
                 ComponentKind::DataTemplate => {
+                    let content = if sample.is_some() {
+                        "{fd:ReflectionBinding Item}".into()
+                    } else {
+                        escape(&scope.options.sample_content)
+                    };
                     builder.source.push_str(&format!(
                         "<fd:ContentControl Width=\"{}\" Height=\"{}\" Content=\"{}\" ContentTemplate=\"{{fd:StaticResource {key}}}\" />\n",
-                        scope.options.width, scope.options.height, escape(&scope.options.sample_content)));
+                        scope.options.width, scope.options.height, content));
                 }
                 _ => builder.resource_sample(selected, &key, &scope.options),
             }
@@ -180,10 +189,14 @@ pub(crate) fn project(
         builder.source.push_str("</fd:Border>\n");
     }
     builder.source.push_str("</fd:Border>");
-    builder.finish(format!(
+    let mut projection = builder.finish(format!(
         "Editing definition: {}. Changes author the original document.",
         scope.title
-    ))
+    ))?;
+    if let Some(sample) = sample {
+        projection.notices.push(format!("Previewing the first item from the {} fixture.", sample.name));
+    }
+    Ok(projection)
 }
 
 struct Builder<'a> {
@@ -194,14 +207,18 @@ struct Builder<'a> {
     offsets: BTreeMap<usize, NodeId>,
 }
 impl<'a> Builder<'a> {
-    fn new(original: &'a Document, scope: NodeId, options: &'a DefinitionPreviewOptions) -> Self {
+    fn new(original: &'a Document, scope: NodeId, options: &'a DefinitionPreviewOptions, sample: Option<&DesignFixture>) -> Self {
+        let fixture = sample.map_or_else(String::new, |sample| {
+            let data = serde_json::json!({"default":sample.name,"fixtures":[sample]});
+            format!(" xmlns:design=\"{DESIGN_NAMESPACE}\" design:Fixtures=\"{}\"", escape(&data.to_string()))
+        });
         Self {
             original,
             scope,
             options,
             offsets: BTreeMap::new(),
             source: format!(
-                "<fd:Border xmlns:fd=\"{FRAMEWORK}\" xmlns:fx=\"{XAML}\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Top\">\n"
+                "<fd:Border xmlns:fd=\"{FRAMEWORK}\" xmlns:fx=\"{XAML}\"{fixture} HorizontalAlignment=\"Left\" VerticalAlignment=\"Top\">\n"
             ),
         }
     }

@@ -275,13 +275,17 @@ impl DesignerWorkspace {
         self.session
             .borrow_mut()
             .enter_definition_scope_with_options(node, options)?;
+        self.focus_definition_canvas();
+        Ok(())
+    }
+
+    pub(super) fn focus_definition_canvas(self: &Rc<Self>) {
         self.components.borrow_mut().editor_open = false;
         self.root
             .get_control::<Button>("CloseAuthoring")
             .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
         self.set_view_mode(crate::WorkspaceViewMode::Design);
         self.refresh(true);
-        Ok(())
     }
 
     pub fn return_to_document(self: &Rc<Self>) -> Result<(), String> {

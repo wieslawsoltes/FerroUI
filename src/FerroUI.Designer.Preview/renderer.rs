@@ -23,6 +23,13 @@ use std::rc::Rc;
 pub(crate) struct Renderer {
     app: Ref<Application>,
     pub(crate) stage: Option<Stage>,
+    item_template_scope: Option<RetainedItemTemplate>,
+}
+
+struct RetainedItemTemplate {
+    uri: String,
+    project: Option<u64>,
+    scope: ferroui_designer::ItemTemplateScopeSnapshot,
 }
 
 pub(crate) struct Stage {
@@ -98,11 +105,40 @@ impl Renderer {
                 .expect("built-in TreeDataGrid style URI"),
         ));
         app.styles().add(table_styles.as_style());
-        Self { app, stage: None }
+        Self {
+            app,
+            stage: None,
+            item_template_scope: None,
+        }
+    }
+
+    pub(crate) fn take_stage(&mut self) -> Option<Stage> {
+        let stage = self.stage.take()?;
+        {
+            let session = stage.session.borrow();
+            self.item_template_scope = session.item_template_scope_snapshot().map(|scope| {
+                RetainedItemTemplate {
+                    uri: session.document_uri().into(),
+                    project: stage.project,
+                    scope,
+                }
+            });
+        }
+        Some(stage)
+    }
+
+    pub(crate) fn retire_frame(&mut self, input: &Render) {
+        self.take_stage();
+        if self.item_template_scope.as_ref().is_some_and(|saved| {
+            saved.uri != input.document.uri
+                || saved.project != input.document.project
+                || input.document.language != crate::protocol::Language::Xaml
+        }) {
+            self.item_template_scope = None;
+        }
     }
 
     pub(crate) fn render(&mut self, input: &Render, source: &str, sources: SourceSnapshot, layers: Option<&LayerViewState>) -> Result<Frame, String> {
-        self.stage = None;
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
         }
@@ -139,11 +175,18 @@ impl Renderer {
         if let Some(layers) = layers.filter(|layers| !layers.is_empty()) {
             session.restore_persisted_layer_view(layers);
         }
+        let item_template_error = self
+            .item_template_scope
+            .as_ref()
+            .and_then(|saved| session.restore_item_template_scope(&saved.scope).err());
         if let Some(targets) = &input.timeline_targets {
             session.restore_timeline_targets(targets);
         }
         let pose = input.timeline_pose.as_ref().map(|pose| session.restore_timeline_preview_pose(pose));
         let mut frame = capture(&mut session)?;
+        if let Some(error) = item_template_error {
+            frame.notices.push(format!("Item template preview: {error}"));
+        }
         match pose {
             Some(Ok(pose)) => frame.timeline_pose = pose,
             Some(Err(error)) => frame.notices.push(format!("Animation preview: {error}")),
@@ -165,6 +208,7 @@ impl Renderer {
             canvas_snap: RefCell::new(None),
             _window: window,
         });
+        self.item_template_scope = None;
         Ok(frame)
     }
 

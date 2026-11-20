@@ -319,7 +319,7 @@
             </StackPanel>
           </Grid>
           <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
-          <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4" Margin="12,3,12,8">
+          <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="4" Margin="12,3,12,8">
             <TextBox Name="PropertySearch" PlaceholderText="Search properties" ToolTip.Tip="Filter properties · @modified @binding @resource @object @mixed @default @expression">
               <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
             </TextBox>
@@ -361,6 +361,9 @@
             </Button>
             <Button Name="EditColumns" Grid.Column="3" Classes="nav" IsVisible="False" Padding="5,3" ToolTip.Tip="Edit columns" AutomationProperties.Name="Edit columns">
               <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M1 1H15V15H1Z M2.5 5V13.5H5V5Z M6.5 5V13.5H9.5V5Z M11 5V13.5H13.5V5Z" />
+            </Button>
+            <Button Name="EditItemTemplates" Grid.Column="4" Classes="nav" IsVisible="False" Padding="5,3" ToolTip.Tip="Edit item templates" AutomationProperties.Name="Edit item templates">
+              <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M1 2H7V7H1Z M9 2H15V7H9Z M1 9H7V14H1Z M9 9H15V14H9Z M2.5 3.5V5.5H5.5V3.5Z M10.5 3.5V5.5H13.5V3.5Z M2.5 10.5V12.5H5.5V10.5Z M10.5 10.5V12.5H13.5V10.5Z" />
             </Button>
           </Grid>
           <ContentControl Name="LayoutHost" Grid.Row="3" HorizontalContentAlignment="Stretch" Margin="8,0,8,6" />

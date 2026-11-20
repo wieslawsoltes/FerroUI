@@ -1,5 +1,7 @@
 use super::*;
+use ferroui_base::Ref;
 use ferroui_base::interactivity::RoutedEventArgs;
+use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{TableView, Window};
 use ferroui_markup_xaml::FromXamlObject;

@@ -1,12 +1,12 @@
 //! Studio inspector for the same checked column actions used by VS Code and MCP.
 use super::DesignerWorkspace;
+use super::inspector_actions::{COPY, RESET, SOURCE, add_button, icon_button, picker, text};
 use crate::icons;
-use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
-use ferroui_base::{Ref, WeakRef};
-use ferroui_controls::automation::AutomationProperties;
+use ferroui_base::layout::{HorizontalAlignment, Orientation};
+use ferroui_base::WeakRef;
 use ferroui_controls::{
-    Button, ColumnDefinitions, ComboBox, ContentControl, Control, Flyout, Grid, PlacementMode,
-    ScrollViewer, StackPanel, TextBlock, TextBox, ToolTip,
+    Button, ColumnDefinitions, ContentControl, Control, Flyout, Grid, PlacementMode,
+    ScrollViewer, StackPanel, TextBlock,
 };
 use ferroui_designer_core::{NodeId, SourceSpan};
 use ferroui_designer_tools::{AuthoredColumn, ColumnChange, TableColumns, nearest_table};
@@ -293,49 +293,4 @@ fn add_reorder_buttons(
     add_button(panel, icons::REMOVE, "Remove column", move || {
         remove.apply(ColumnChange::Remove { column: id }, current);
     });
-}
-
-fn picker<'a>(
-    label: &str,
-    values: impl IntoIterator<Item = &'a str>,
-    index: usize,
-) -> Ref<ComboBox> {
-    let control = ComboBox::new();
-    control.classes().add("designer-field");
-    control.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    for value in values {
-        control.items().add(Some(Rc::new(value.to_owned())));
-    }
-    control.set_selected_index(index as i32);
-    AutomationProperties::set_name(&control, Some(label));
-    control
-}
-
-fn text(value: &str) -> Ref<TextBlock> {
-    let label = TextBlock::new();
-    label.set_text(Some(value));
-    label.set_vertical_alignment(VerticalAlignment::Center);
-    label
-}
-
-const SOURCE: &str = "F1 M1 2H15V14H1Z M2.5 4V12.5H13.5V4Z M5 7H11V8.4H5Z M5 10H9V11.4H5Z";
-const COPY: &str = "F1 M5 1H15V11H13.5V2.5H5Z M1 5H11V15H1Z M2.5 6.5V13.5H9.5V6.5Z";
-const RESET: &str = "F1 M1 2L2.2 3.2A6 6 0 1 1 4.2 13.8L5 12.4A4.4 4.4 0 1 0 3.4 4.4L5 6H1Z";
-
-fn icon_button(icon: &str, label: &str, action: impl Fn() + 'static) -> Ref<Button> {
-    let button = Button::new();
-    button.classes().add("nav");
-    button.set_min_width(26.0);
-    button.set_min_height(24.0);
-    button.set_content(Some(Control::boxed(icons::vector_icon(icon, 13.0))));
-    AutomationProperties::set_name(&button, Some(label));
-    ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
-    button.click(move |_, _| action());
-    button
-}
-
-fn add_button(panel: &StackPanel, icon: &str, label: &str, action: impl Fn() + 'static) {
-    panel
-        .children()
-        .add(icon_button(icon, label, action).upcast::<Control>());
 }

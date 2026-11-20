@@ -184,6 +184,7 @@ impl DesignerWorkspace {
         this.connect_focus_order_commands();
         this.connect_preview_checks();
         this.connect_columns();
+        this.connect_item_templates();
         this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
@@ -779,6 +780,7 @@ impl DesignerWorkspace {
         self.refresh_selection_layout();
         self.refresh_property_transfer_commands();
         self.refresh_columns_command();
+        self.refresh_item_template_command();
         self.refresh_file_title();
         if changed || generation_changed {
             self.rebuild_outline();
@@ -940,6 +942,10 @@ mod focus_order;
 mod preview_checks;
 #[path = "workspace_columns.rs"]
 mod columns;
+#[path = "inspector_actions.rs"]
+mod inspector_actions;
+#[path = "workspace_item_templates.rs"]
+mod item_templates;
 #[path = "inspector_drag.rs"]
 mod inspector_drag;
 #[path = "inspector_controls.rs"]

@@ -29,6 +29,8 @@ pub(crate) enum InspectionTarget {
 pub(crate) struct Inspection {
     pub(crate) properties: Vec<PropertyField>,
     pub(crate) events: Vec<EventField>,
+    #[serde(rename = "itemTemplates")]
+    pub(crate) item_templates: bool,
 }
 
 pub(crate) fn inspect(
@@ -51,6 +53,8 @@ pub(crate) fn inspect(
                 properties: property_fields(&design, element, effective,
                     |property| session.as_ref().is_some_and(|session| session.can_record_property(node, property))),
                 events: event_fields(&design, element)?,
+                item_templates: design.rsx.is_none() && session.as_ref()
+                    .is_some_and(|session| !session.item_template_members(node).is_empty()),
             })
         }
         InspectionTarget::Selection { ref nodes } => {
@@ -69,7 +73,7 @@ pub(crate) fn inspect(
             for fields in fields {
                 crate::property_fields::intersect(&mut properties, fields?);
             }
-            Ok(Inspection { properties, events: Vec::new() })
+            Ok(Inspection { properties, events: Vec::new(), item_templates: false })
         }
         InspectionTarget::Runtime { id } => {
             let properties = stage
@@ -80,6 +84,7 @@ pub(crate) fn inspect(
             Ok(Inspection {
                 properties: properties.iter().map(runtime_property).collect(),
                 events: Vec::new(),
+                item_templates: false,
             })
         }
     }

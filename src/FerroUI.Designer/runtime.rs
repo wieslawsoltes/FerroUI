@@ -398,7 +398,14 @@ impl RuntimePreview {
         let mut candidate_design = None;
         let result = if let Some(scope) = self.definition_scope.as_ref().filter(|_| synthetic_scope)
         {
-            crate::definition_projection::project(document, scope).and_then(|projection| {
+            let projection = crate::item_template_samples::definition_fixture(
+                document,
+                scope,
+                self.options.design_time_data,
+                self.design_fixture(),
+            )
+            .and_then(|sample| crate::definition_projection::project(document, scope, sample.as_ref()));
+            projection.and_then(|projection| {
                 let design = crate::design_time::project(
                     &projection.document,
                     projection.document.valid_source(),

@@ -26,6 +26,8 @@ mod events;
 mod grid;
 #[path = "mcp_columns.rs"]
 mod columns;
+#[path = "mcp_item_templates.rs"]
+mod item_templates;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
@@ -293,6 +295,7 @@ impl UiToolProvider for DesignerMcp {
         tools.push(brush::tool());
         tools.extend(grid::tools());
         tools.extend(columns::tools());
+        tools.extend(item_templates::tools());
         tools.extend(components::tools());
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
@@ -322,6 +325,7 @@ impl UiToolProvider for DesignerMcp {
             || name == brush::NAME
             || grid::handles(name)
             || columns::handles(name)
+            || item_templates::handles(name)
             || components::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
@@ -581,6 +585,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if columns::handles(name) {
             return columns::call(&mut session, name, args);
+        }
+        if item_templates::handles(name) {
+            return item_templates::call(&mut session, name, args);
         }
         if components::handles(name) {
             return components::call(&mut session, name, args);

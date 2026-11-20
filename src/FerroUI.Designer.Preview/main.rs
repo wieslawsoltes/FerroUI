@@ -118,6 +118,7 @@ fn respond(
                 "spacingHelpers": true,
                 "selectionWrapping": true,
                 "columnAuthoring": true,
+                "itemTemplateAuthoring": true,
                 "projectInventory": true,
                 "tokenHandoff": true,
                 "designFixtures": true,

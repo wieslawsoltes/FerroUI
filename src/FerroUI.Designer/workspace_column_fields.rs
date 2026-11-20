@@ -1,5 +1,7 @@
 use super::*;
 use ferroui_base::input::Key;
+use ferroui_controls::{TextBox, ToolTip};
+use ferroui_controls::automation::AutomationProperties;
 use ferroui_designer_tools::ColumnField;
 
 pub(super) fn add_fields(panel: &StackPanel, column: &AuthoredColumn, scope: &ColumnScope) {

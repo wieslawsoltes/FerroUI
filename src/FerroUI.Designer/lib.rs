@@ -45,6 +45,9 @@ mod layer_state;
 mod layout_helper_renderer;
 mod preview_checks;
 mod column_authoring;
+mod item_template_authoring;
+mod item_template_samples;
+mod item_template_scope;
 mod preview_environment;
 mod preview_host;
 mod preview_prototype;
@@ -93,6 +96,7 @@ pub use asset_toolbox::{
     project_designer_assets,
 };
 pub use project_controls::registered_designer_assets;
+pub use item_template_scope::ItemTemplateScopeSnapshot;
 pub use chrome::designer_chrome_style;
 pub use animation_keyframe_authoring::SampledKeyframe;
 pub use animation_rsx_programs::validate_rsx_animation_selector;
