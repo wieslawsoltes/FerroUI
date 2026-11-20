@@ -1,0 +1,49 @@
+// Hello, World! with layer 1 of the generated Osprey bindings of FerroUI (docs/osprey.md): a
+// window with a text and a button. The button's click sends the tag 1 to the one dispatcher of
+// the application, which changes the text of the button.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program clicks the button itself and prints what it shows.
+
+import ferroui::*
+import ferroobjects::*
+
+// The tags of the dispatcher: 0 is the start.
+fn clickedTag() -> int = 1
+
+fn build() -> int = {
+    let button = button() |> content("Click me") |> fontSize(16.0) |> onClick(clickedTag())
+    let panel = stackPanel() |> spacing(12.0) |> margin("24")
+        |> add(textBlock() |> text("Hello, World!"))
+        |> add(button)
+    let window = window() |> title("Hello from Osprey") |> width(400.0) |> height(240.0)
+        |> add(panel)
+        |> showWindow
+    report("build", failure())
+    match envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script(button)
+        false => nothing()
+    }
+    0
+}
+
+// Clicks the button as a click does and prints the content it shows then.
+fn script(button: int) -> Unit = {
+    let _ = raiseClick(button)
+    match getContent(button) {
+        Success { value } => print("script: the button shows '${value}': ${value == "Clicked from Osprey" ? "ok" : "FAILED"}")
+        Error { message } => print("script: FAILED: ${message}")
+    }
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = match tag {
+    0 => build()
+    _ => {
+        let _ = sender |> content("Clicked from Osprey")
+        0
+    }
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

@@ -1111,6 +1111,41 @@ Statement sequences that recur at thousands of sites are calls of one helper of 
 - **`{TemplateBinding source}` as the value of a registered property** (2026-10-23): `rt::bind_template_binding(target, property, rt::property(source), line, position)?` in place of `TemplateBinding::__markup_new_1`, its `ProvideValue` and `rt::bind` of the provided binding (1,400 sites in the control themes of the WinUI theme).
 - **Deferred content that is `{StaticResource key}` alone** (2026-10-23; a resource of a dictionary that names another one, 3,435 of the 5,850 deferred builds of the WinUI theme): the build function is one call, `rt::static_resource_content(service_provider, &DOCUMENT, key, line, position)`, which creates the context, creates the extension with `__markup_new_0`, sets `ResourceKey` and calls `ProvideValue` with the error of an invoked member at the position, as the statements did.
 - **A deferred resource added to a dictionary under a text key** (2026-10-23): `rt::add_deferred_resource(dictionary, key, type, &context, build, line, position)?` in place of `let deferred = rt::defer(..)?` and `rt::invoked(ResourceDictionary::__markup_AddDeferred_1(..))?` at the same position. The deferred content is moved into the dictionary instead of cloned, so the handle of the function is dropped when the helper returns, which only reference counting observes.
+- **The statements of a styled element** (2026-11-19, #568): for an element of a template or a
+  document that is a styled element held in a local, the statements that are the same at every
+  element are calls of helpers. `rt::push_parent(&context, &x)` and
+  `rt::set_intermediate_root(&context, &x)` stand for `context.push_parent(rt::to_value(x.clone()))`
+  and `context.set_intermediate_root_object(rt::to_value(x.clone()))`;
+  `rt::pop_parent_end_init(&context, &x, line, position)?` and `rt::end_init(&x, line, position)?`
+  for `context.pop_parent()` (when the element is on the parent stack) and
+  `rt::invoked(x.try_end_init(), line, position)?`; `rt::name_element(name_scope.as_ref(), &x, &x,
+  name, line, position)?` for the set of `StyledElement.Name` followed by
+  `rt::register_name_value(..)` with the same name. The helpers of the parent stack and of the
+  name are generic over the class of the element (one instance per class, not per site), so that
+  the value they box is the handle the statements boxed; the others are not generic. Objects that
+  are no styled element (setters, brushes, control themes, whose statements the theme tables read)
+  and the construction programs of the bytecode backend keep the statements.
+- **`{CompiledBinding path}` as the value of a registered property** (2026-11-19, #568):
+  `rt::bind_compiled_binding(&context, target, property, path, line, position)?` in place of
+  `CompiledBindingExtension::__markup_new_1` with the path, the target property set with
+  `rt::property_value(property)`, `ProvideValue` with the context, the target property cleared and
+  `rt::bind` of the provided binding, when no other member of the extension is set. The extension
+  is dropped when the helper returns instead of at the end of the function, which only reference
+  counting observes.
+- **A run of `{DynamicResource key}` values on one object** (2026-11-19, #568): two or more
+  consecutive `rt::bind_dynamic_resource(..)?` on the same object of the body of deferred content
+  (with only position markers between them) are one call of `rt::bind_dynamic_resources(&context,
+  target, TABLE)?` over a static table of `rt::DynamicResourceRow` (the accessor of the property,
+  shared in the function, the key, the position), as the runs of template bindings are
+  (`rt::bind_template_bindings`). The rows are bound in order with the same function, the property
+  read before each, and the first failure is the error. A dynamic resource alone keeps its call.
+- **The value of `{StaticResource key}` for a registered property** in the body of deferred
+  content written as native code (2026-11-19, #568): the extension created with the key,
+  `rt::provide_value_invoked` with `rt::property_value(property)` and the provided value held as
+  the value of a node are `let value = rt::static_resource_value(&context, property, key, line,
+  position)?;`; the assignment that follows (the setter chosen at run time,
+  `rt::assign_resource_value`) stays. The pass runs after the shapes of the row tables and of the
+  control themes were read, so they read the statements as they were.
 - **The description of `Setter.Value`** as the provide-value target property is `rt::setter_value_property()`. `rt::clr_property_info` keeps one description per declared property and thread, created on first use, as upstream keeps one per property in a static field of the generated helper type of the assembly (`XamlIlClrPropertyInfoEmitter`, `<Type>.<Name>!Field`). The interpreter creates one per evaluation; nothing compares descriptions by identity.
 - **The document of a context**: each document has `static <FUNCTION>_DOCUMENT: rt::DocumentInfo` with its base URI and its XML namespace table; `rt::populate_context` and `rt::deferred_context` take a reference to it.
 - **Split functions**: a build or populate function with more than 1,024 top-level statements is split into functions `<function>_part_<n>` of at most 256 statements each, called in place, with the locals of the function that a part uses passed to it as cloned handles, in the order the part first names them (the output does not depend on hashing; the drift tests compare it byte for byte). A part never declares a local a later statement uses; a statement that names a local whose Rust type the emitter does not state (the `let` of an object created with its default constructor, a `let` with a type, `context`, `name_scope`, `root`) stays in the function. The statements run in the same order with the same errors; a local of a part is dropped when the part returns instead of at the end of the function, which reference counting only observes as an earlier decrement of a handle that the object tree still holds (upstream has no deterministic destruction to compare with). Only the populate function of the Fluent theme is that large.

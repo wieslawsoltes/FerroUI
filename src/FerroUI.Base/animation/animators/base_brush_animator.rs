@@ -160,7 +160,7 @@ impl Animator for BaseBrushAnimator {
         match_: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>> {
+    ) -> Result<Option<Rc<dyn IDisposable>>, crate::animation::AnimationError> {
         if let Some(animator) = this.specialized_animator() {
             return animator.apply(animation, control, clock, match_, on_complete, should_pause_on_invisible);
         }
@@ -170,7 +170,7 @@ impl Animator for BaseBrushAnimator {
         }
 
         let visual_target = control.downcast_ref::<crate::Visual>().map(crate::Visual::to_ref);
-        Some(crate::animation::animators::apply_with_visual(
+        Ok(Some(crate::animation::animators::apply_with_visual(
             this,
             animation,
             control,
@@ -179,7 +179,7 @@ impl Animator for BaseBrushAnimator {
             on_complete,
             should_pause_on_invisible,
             visual_target,
-        ))
+        )))
     }
 
     fn interpolate(&self, progress: f64, old_value: &Self::Value, new_value: &Self::Value) -> Self::Value {

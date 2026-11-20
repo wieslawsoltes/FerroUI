@@ -143,6 +143,15 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The API model of the bindings and the stable ID table of ferroui-capi, written from the
+      # sources of the framework and the C header, and the Osprey bindings written from the model
+      # (bindings/README.md, docs/osprey.md).
+      - name: Generated API model and bindings are up to date
+        run: |
+          python3 scripts/generate_api_model.py --check
+          python3 scripts/generate_osprey_bindings.py --check
+      - name: Tests of the binding generators
+        run: python3 scripts/test_generate_bindings.py
       # The XAML schema of the designer's language service, read from the markup metadata of the
       # framework crates: a new control or property changes it (#345, D3).
       - name: The designer's language schema is up to date

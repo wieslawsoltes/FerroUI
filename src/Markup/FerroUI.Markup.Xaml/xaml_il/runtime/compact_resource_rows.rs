@@ -75,10 +75,10 @@ mod indexed {
             let built = context.try_build(provider, |provider| self.rows.row(index)?.build(provider, self.document));
             match built {
                 Ok(value) => Ok(value),
-                Err(error) => match crate::xaml_error_scope::report(error) {
-                    Ok(()) => Err(DeferredContentFailed),
-                    Err(error) => crate::xaml_error_scope::throw(error),
-                },
+                Err(error) => {
+                    crate::xaml_error_scope::report_or_raise(error);
+                    Err(DeferredContentFailed)
+                }
             }
         }
 

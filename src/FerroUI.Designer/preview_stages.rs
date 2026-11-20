@@ -1506,10 +1506,11 @@ impl PreviewStageBoard {
         // Application factories and registered constructors are extension points.
         // Match the main development reload driver's panic containment so a bad
         // candidate cannot strand its hidden host or tear down the entire board.
-        // Boundary (#567): the errors of the edited document reach this as `Err` (the reload
-        // session of the candidate and `with_runtime_errors`); what is caught is a panic of the
-        // application's code, which needs a build that unwinds (`dev`, `fast-release`,
-        // `release-unwind` or `dist-unwind` profile).
+        // Boundary (#567): the errors of the edited document and those the application's code
+        // raises on the dispatcher reach this as `Err` (the reload session of the candidate and
+        // `with_runtime_errors`); what is caught is a panic of the application's code, a bug,
+        // which only a build that unwinds (`dev`, `fast-release`, `release-unwind` or
+        // `dist-unwind` profile) survives.
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             source_snapshot.run(|| {
                 let mut options = self.options.clone();
@@ -1606,9 +1607,10 @@ impl PreviewStageBoard {
         let stage = &mut self.stages[index];
         let config = &stage.spec.configuration;
         // Boundary (#567): the templates, deferred resources and includes the new layout
-        // builds report their errors to `with_runtime_errors`, without unwinding; what is
-        // caught is a panic of a layout callback of the application, which needs a build that
-        // unwinds (`dev`, `fast-release`, `release-unwind` or `dist-unwind` profile).
+        // builds, and the layout callbacks of the application that raise their errors on the
+        // dispatcher, report to `with_runtime_errors`, without unwinding; what is caught is a
+        // panic of a layout callback, a bug, which only a build that unwinds (`dev`,
+        // `fast-release`, `release-unwind` or `dist-unwind` profile) survives.
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             with_runtime_errors("layout", || {
                 stage.control.configure(config.layout, config.environment);
@@ -1683,14 +1685,23 @@ impl Drop for PreviewStageBoard {
 /// of the XAML runtime (#567): a template, deferred resource or include of the edited document
 /// that fails reports its error and builds nothing, and the first error reported is the error
 /// of the stage, `"Native preview {stage} failed: {error}"`, the message its throw panicked with
-/// before. Without one, the result of `work`.
+/// before. The errors the code of the previewed application raises on the dispatcher (a
+/// handler, a layout or property changed callback that returns its error, a markup delegate,
+/// an animation an animator rejects) fail the stage the same way, before those of the
+/// document. Without one, the result of `work`.
 fn with_runtime_errors<T>(stage: &str, work: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
     let mut outcome = None;
-    ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
-        outcome = Some(work());
-        Ok(())
-    })
-    .map_err(|error| format!("Native preview {stage} failed: {error}"))?;
+    let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
+    dispatcher
+        .capture_unhandled_exceptions(|| {
+            ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+                outcome = Some(work());
+                Ok(())
+            })
+            .map_err(|error| error.to_string())
+        })
+        .and_then(|document| document)
+        .map_err(|error| format!("Native preview {stage} failed: {error}"))?;
     outcome.expect("the work of a scope that returned ran")
 }
 

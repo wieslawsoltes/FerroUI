@@ -1637,7 +1637,16 @@ fn delegates_of_declared_methods_know_their_method_and_target() {
     assert_eq!(unbox::<i32>(&delegate.invoke(&[])), 2);
     assert_eq!(delegate.to_string(), "System.Func`1[System.Int32]");
     assert_eq!(delegate.try_invoke(&[boxed(1)]), Err(MarkupInvokeError::ArgumentCount { expected: 1, actual: 2 }));
+    // `invoke` raises the failure on the dispatcher, without a panic (#567).
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let raised = Rc::new(RefCell::new(None::<MarkupInvokeError>));
+    let seen = raised.clone();
+    let _handler = crate::threading::Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.error().and_then(|error| error.downcast_ref::<MarkupInvokeError>()).cloned();
+        args.set_handled(true);
+    });
     assert_eq!(delegate.invoke(&[boxed(1)]), None);
+    assert_eq!(raised.take(), Some(MarkupInvokeError::ArgumentCount { expected: 1, actual: 2 }));
 
     // A static method has no target.
     let create = markup.find_methods("Create").next().unwrap();

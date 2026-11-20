@@ -124,8 +124,8 @@ impl MarkupDelegate {
     /// `method`. The delegate keeps the target alive.
     ///
     /// [`invoke`](Self::invoke) calls the method with the arguments given
-    /// (after the instance) and discards a failure;
-    /// [`try_invoke`](Self::try_invoke) reports it.
+    /// (after the instance) and raises a failure on the dispatcher;
+    /// [`try_invoke`](Self::try_invoke) returns it.
     pub fn for_method(target: MarkupValue, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
         let target = DelegateTarget::Strong(if method.is_static { None } else { target });
         Self::bound(target, declaring_type, method)
@@ -161,14 +161,27 @@ impl MarkupDelegate {
         let bound = target.clone();
         Self {
             call: Rc::new(move |arguments| match bound.get() {
-                Ok(target) => invoke_method(method, &target, arguments).ok().flatten(),
+                Ok(target) => match invoke_method(method, &target, arguments) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        // The exception of the delegate of the reference: a handler named in
+                        // markup that fails (a `try fn`) reaches the dispatcher (#567).
+                        crate::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+                        None
+                    }
+                },
                 Err(()) => None,
             }),
             method: Some(Rc::new(MarkupDelegateMethod { target, declaring_type, method })),
         }
     }
 
-    /// Calls the callback.
+    /// Calls the callback. For the delegate of a declared method
+    /// ([`for_method`](Self::for_method)) a failure of the call (wrong
+    /// arguments, a failing `try fn` member, such as the handler of a markup
+    /// event) goes to
+    /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
+    /// and the result is `None`; [`try_invoke`](Self::try_invoke) returns it.
     pub fn invoke(&self, arguments: &[MarkupValue]) -> MarkupValue {
         (self.call)(arguments)
     }

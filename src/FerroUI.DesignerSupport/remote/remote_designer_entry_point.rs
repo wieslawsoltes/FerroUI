@@ -415,32 +415,50 @@ impl RemoteDesignerEntryPoint {
             // fails (also one the layout of the show builds) reports its error, which is the
             // `Err` of the load, without unwinding. The window of a failed load is not kept, as
             // when the throw unwound out of it.
+            // The errors the previewed application's code raises on the dispatcher while the
+            // window is built and shown (a handler or callback that returns its error, a markup
+            // delegate, an animation an animator rejects) are captured and answered the same
+            // way, as an `Exception`.
             // Boundary (#567): what is caught is a panic of the previewed application's code
-            // (its constructors, handlers and layout overrides) and of the members of the
-            // runtime that keep the fatal throw; isolating them needs a build that unwinds
-            // (`dev`, `fast-release`, `release-unwind` or `dist-unwind` profile).
+            // (its constructors, handlers and layout overrides), a bug, which only a build that
+            // unwinds (`dev`, `fast-release`, `release-unwind` or `dist-unwind` profile)
+            // survives.
+            let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
             let loaded = catch_unwind(AssertUnwindSafe(|| {
-                with_xaml_errors(|| {
-                    DesignWindowLoader::load_with_fixture(
-                        xaml.xaml.as_deref().unwrap_or(""),
-                        xaml.assembly_path.as_deref(),
-                        xaml.xaml_file_project_path.as_deref(),
-                        LAST_RENDER_SCALING.get(),
-                        versioned.and_then(|update| update.fixture.as_deref()),
-                        animations.as_ref().map(|source| source.identity.as_str()),
-                        animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
-                    )
+                dispatcher.capture_unhandled_exceptions(|| {
+                    with_xaml_errors(|| {
+                        DesignWindowLoader::load_with_fixture(
+                            xaml.xaml.as_deref().unwrap_or(""),
+                            xaml.assembly_path.as_deref(),
+                            xaml.xaml_file_project_path.as_deref(),
+                            LAST_RENDER_SCALING.get(),
+                            versioned.and_then(|update| update.fixture.as_deref()),
+                            animations.as_ref().map(|source| source.identity.as_str()),
+                            animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
+                        )
+                    })
                 })
             }));
             let result = match loaded {
-                Ok(Ok(design)) => {
+                Ok(Err(message)) => UpdateXamlResultMessage {
+                    error: Some(message.clone()),
+                    exception: Some(ExceptionDetails {
+                        exception_type: Some("Exception".to_string()),
+                        message: Some(message),
+                        line_number: None,
+                        line_position: None,
+                    }),
+                    ..UpdateXamlResultMessage::default()
+                },
+                Ok(Ok(Ok(design))) => {
                     let catalog = hosted_animation::accept(revision, animations, &design);
                     let window = design.window;
                     if let Some(previous) = current_window {
                         // Boundary (#567): closing the previous preview runs the closing and
                         // closed handlers of the previewed application; a panic of one must
-                        // not lose the new preview. Isolating them needs a build that unwinds
-                        // (`dev`, `release` or `dist-unwind` profile).
+                        // not lose the new preview. Their errors returned as values go to the
+                        // dispatcher; isolating a panic needs a build that unwinds (`dev`,
+                        // `fast-release`, `release-unwind` or `dist-unwind` profile).
                         let _ = catch_unwind(AssertUnwindSafe(|| previous.close()));
                     }
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
@@ -454,7 +472,7 @@ impl RemoteDesignerEntryPoint {
                         ..UpdateXamlResultMessage::default()
                     }
                 }
-                Ok(Err(e)) => UpdateXamlResultMessage {
+                Ok(Ok(Err(e))) => UpdateXamlResultMessage {
                     error: Some(e.to_string()),
                     exception: Some(exception_details(&e)),
                     ..UpdateXamlResultMessage::default()
@@ -782,6 +800,25 @@ mod tests {
 
         let result = session.update_xaml(&format!("<Border {XMLNS}/>"));
         assert_eq!(None, result.error);
+        session.end();
+    }
+
+    #[test]
+    fn an_error_the_previewed_code_raises_on_the_dispatcher_is_answered_without_unwinding() {
+        let session = Session::start();
+        // The style animation of the document has a timing the animators reject: applying it
+        // raises the error on the dispatcher (#567) while the window is shown.
+        let result = session.update_xaml(&format!(
+            "<Window {XMLNS}><Window.Styles><Style Selector='Border'><Style.Animations>\
+             <Animation Duration='0:0:1' SpeedRatio='-1'><KeyFrame Cue='100%'>\
+             <Setter Property='Opacity' Value='0'/></KeyFrame></Animation>\
+             </Style.Animations></Style></Window.Styles><Border/></Window>"
+        ));
+        let error = result.error.expect("the error of the previewed code");
+        assert!(error.contains("SpeedRatio value cannot be negative."), "{error}");
+        let details = result.exception.expect("the details of the error");
+        assert_eq!(details.exception_type.as_deref(), Some("Exception"));
+        assert!(CURRENT_WINDOW.with(|slot| slot.borrow().is_none()));
         session.end();
     }
 

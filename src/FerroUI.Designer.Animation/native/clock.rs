@@ -1,6 +1,7 @@
 use crate::{Repeat, Timeline};
 use ferroui_base::animation::{Animatable, Animation, IClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
+use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use std::cell::Cell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -115,23 +116,21 @@ impl NativeRun {
         let clock = Rc::new(NativeClock::default());
         let complete = Rc::new(Cell::new(false));
         let completed = complete.clone();
-        // Framework validation returns errors. Application animators and property
-        // observers can still unwind, so keep them inside the preview boundary.
-        let subscription = catch_unwind(AssertUnwindSafe(|| {
-            animation.try_apply_for_preview(
-                target,
-                Some(clock.clone()),
-                Some(Rc::new(move || completed.set(true))),
-            )
-        }))
-        .map_err(panic_message)
-        .and_then(|applied| applied.map_err(|error| error.to_string()))
-        .map_err(|message| format!("Native animation rejected the program: {message}"))?;
-        Ok(Self {
-            clock,
-            subscription,
-            complete,
+        capture_preview_errors(|| {
+            let subscription = animation
+                .try_apply_for_preview(
+                    target,
+                    Some(clock.clone()),
+                    Some(Rc::new(move || completed.set(true))),
+                )
+                .map_err(|error| error.to_string())?;
+            Ok(Self {
+                clock,
+                subscription,
+                complete,
+            })
         })
+        .map_err(|message| format!("Native animation rejected the program: {message}"))
     }
 }
 
@@ -143,16 +142,21 @@ impl Drop for NativeRun {
 }
 
 fn pulse(runs: &[NativeRun], seconds: f64) -> Result<(), String> {
-    // Interpolation and property notification execute application code. An unwinding
-    // build returns a failed preview instead of keeping a partially sampled run.
-    catch_unwind(AssertUnwindSafe(|| {
+    capture_preview_errors(|| {
         for run in runs {
             run.clock
                 .subject
                 .on_next(SignedDuration::from_seconds(seconds));
         }
-    }))
-    .map_err(|payload| format!("Native animation frame failed: {}", panic_message(payload)))
+        Ok(())
+    })
+    .map_err(|message| format!("Native animation frame failed: {message}"))
+}
+
+fn capture_preview_errors<T>(work: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
+    let dispatcher = Dispatcher::current_dispatcher();
+    catch_unwind(AssertUnwindSafe(|| dispatcher.capture_unhandled_exceptions(work)))
+        .map_err(panic_message)??
 }
 
 fn validate_time(value: f64) -> Result<(), String> {

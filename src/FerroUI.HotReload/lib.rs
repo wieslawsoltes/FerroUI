@@ -62,6 +62,17 @@ pub enum ReloadError {
     Failed(String),
     RestartRequired(String),
 }
+
+impl std::fmt::Display for ReloadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Failed(message) => write!(f, "The reload failed: {message}"),
+            Self::RestartRequired(message) => write!(f, "The reload requires a restart: {message}"),
+        }
+    }
+}
+
+impl std::error::Error for ReloadError {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReloadStatus {
     Applied,
@@ -644,7 +655,10 @@ impl Drop for ReloadScope {
 /// lookup returns a value) records why the reload cannot go on and returns its fallback, and
 /// the reload fails with the error when the action ends. An error raised after the XAML
 /// runtime reported one in the step is left out: that error ends the step, as its throw did
-/// when it unwound. Outside a scope the error is raised as a panic, as before.
+/// when it unwound. Outside a scope (nothing reaches that in correct operation) the error goes
+/// to the dispatcher of the thread ([`Dispatcher::raise_unhandled_exception`]), without a panic.
+///
+/// [`Dispatcher::raise_unhandled_exception`]: ferroui_base::threading::Dispatcher::raise_unhandled_exception
 pub(crate) fn raise_reload_error(error: ReloadError) {
     let unraised = RELOAD_SCOPES.with(|scopes| match scopes.borrow_mut().last_mut() {
         Some((xaml_depth, scope)) => {
@@ -656,13 +670,18 @@ pub(crate) fn raise_reload_error(error: ReloadError) {
         None => Some(error),
     });
     if let Some(error) = unraised {
-        std::panic::panic_any(error);
+        ferroui_base::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
     }
 }
 
 /// Runs a step of a reload: its error, else the first error raised in it
-/// ([`raise_reload_error`]), else the first error the XAML runtime reported in it, else the
-/// error of a panic of an adapter or of an application callback.
+/// ([`raise_reload_error`]), else the first error the code of the application raised on the
+/// dispatcher in it ([`Dispatcher::capture_unhandled_exceptions`]: a handler or callback that
+/// returns its error, a markup delegate, an animation an animator rejects), else the first
+/// error the XAML runtime reported in it, else the error of a panic of an adapter or of an
+/// application callback (a bug, which only a build that unwinds survives).
+///
+/// [`Dispatcher::capture_unhandled_exceptions`]: ferroui_base::threading::Dispatcher::capture_unhandled_exceptions
 ///
 /// The step runs in an error scope of the XAML runtime
 /// ([`with_xaml_errors`](xaml_error_scope::with_xaml_errors), #567): a deferred resource,
@@ -672,22 +691,26 @@ pub(crate) fn raise_reload_error(error: ReloadError) {
 fn catch_reload<T>(action: impl FnOnce() -> Result<T, ReloadError>) -> Result<T, ReloadError> {
     let scope = ReloadScope::open(xaml_error_scope::depth());
     let mut outcome = None;
+    let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
     // Boundary (#567): adapters and application callbacks run here, and the contract of
-    // `apply_pending_with` names their panics; the members of the XAML runtime that keep the
-    // fatal throw (`xaml_error_scope::throw`) panic too. With `panic = "abort"` these end the
-    // process.
+    // `apply_pending_with` names their panics. Their errors reach the step as values (the
+    // capture of the dispatcher); a panic is a bug, which ends the process with
+    // `panic = "abort"`.
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        xaml_error_scope::with_xaml_errors(|| {
-            outcome = Some(action());
-            Ok(())
+        dispatcher.capture_unhandled_exceptions(|| {
+            xaml_error_scope::with_xaml_errors(|| {
+                outcome = Some(action());
+                Ok(())
+            })
         })
     }));
     if let Some(error) = scope.close() {
         return Err(error);
     }
     match result {
-        Ok(Err(error)) => Err(ReloadError::Failed(error.to_string())),
-        Ok(Ok(())) => outcome.expect("the action of a step that returned ran"),
+        Ok(Err(message)) => Err(ReloadError::Failed(message)),
+        Ok(Ok(Err(error))) => Err(ReloadError::Failed(error.to_string())),
+        Ok(Ok(Ok(()))) => outcome.expect("the action of a step that returned ran"),
         Err(payload) => {
             if let Some(error) = payload.downcast_ref::<ReloadError>() {
                 return Err(error.clone());

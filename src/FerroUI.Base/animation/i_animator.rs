@@ -1,4 +1,4 @@
-use crate::animation::{Animatable, Animation, AnimatorKeyFrame, IClock};
+use crate::animation::{Animatable, Animation, AnimationError, AnimatorKeyFrame, IClock};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{BoxedValue, FerroProperty, Ref};
 use std::any::TypeId;
@@ -32,6 +32,10 @@ pub trait IAnimator: 'static {
 
     /// Applies the animation to a control: the animation runs while
     /// `match_` is true.
+    ///
+    /// A program the animator cannot play on `control` (a property of another
+    /// value type, a target it cannot animate, a timing an instance refuses) is
+    /// an error, returned before anything is applied (#567).
     fn apply(
         self: Rc<Self>,
         animation: &Animation,
@@ -40,5 +44,5 @@ pub trait IAnimator: 'static {
         match_: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>>;
+    ) -> Result<Option<Rc<dyn IDisposable>>, AnimationError>;
 }

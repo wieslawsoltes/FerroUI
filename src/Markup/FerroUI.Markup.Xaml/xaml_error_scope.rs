@@ -121,13 +121,17 @@ pub fn has_error_at(depth: usize) -> bool {
     SCOPES.with(|scopes| scopes.borrow().get(depth).is_some_and(Option::is_some))
 }
 
-/// Throws `error`: panics with its message. The fatal fallback of a member without an error
-/// channel and without a value to go on with; members that a scoped load reaches report to the
-/// scope instead ([`report`], [`crate::throw_or`]). Public for the members of
-/// `ferroui-markup-xaml-winui`, which throw as the runtime does.
+/// Reports `error` to the innermost open scope ([`report`]); when no scope is open, gives it to
+/// the dispatcher of the thread
+/// ([`Dispatcher::raise_unhandled_exception`](ferroui_base::threading::Dispatcher::raise_unhandled_exception)),
+/// as an exception thrown out of a member without an error channel reaches the dispatcher in the
+/// reference (#567). The member then goes on with what it has for nothing. The error is given as
+/// its message: its inner error is not `Send`.
 #[doc(hidden)]
-pub fn throw(error: XamlLoadError) -> ! {
-    panic!("{error}")
+pub fn report_or_raise(error: XamlLoadError) {
+    if let Err(error) = report(error) {
+        ferroui_base::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error.to_string());
+    }
 }
 
 #[cfg(test)]
@@ -223,12 +227,22 @@ mod tests {
     }
 
     #[test]
-    fn without_a_scope_a_failing_member_panics_with_its_message() {
+    fn without_a_scope_a_failing_member_raises_its_error_on_the_dispatcher() {
+        use ferroui_base::threading::Dispatcher;
         assert!(!has_error());
         assert_eq!(report(XamlLoadError::with_message("returned")).unwrap_err().message(), "returned");
+        // No handler handles it: the error is fatal, and unwinds here with its message.
+        let _scope = Dispatcher::unit_test_scope();
         let result = catch_unwind(AssertUnwindSafe(|| crate::throw_or(fail("ordinary"), || 0)));
         assert_eq!(result.unwrap_err().downcast_ref::<String>().map(String::as_str), Some("ordinary"));
-        let result = catch_unwind(AssertUnwindSafe(|| crate::throw::<()>(Err(XamlLoadError::with_message("fatal")))));
-        assert_eq!(result.unwrap_err().downcast_ref::<String>().map(String::as_str), Some("fatal"));
+        // A handler of the dispatcher handles it: the member goes on with its fallback (#567).
+        let raised = std::rc::Rc::new(std::cell::RefCell::new(None::<String>));
+        let seen = raised.clone();
+        let _handler = Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+            *seen.borrow_mut() = args.exception_message().map(str::to_owned);
+            args.set_handled(true);
+        });
+        assert_eq!(crate::throw_or(fail("handled"), || 7), 7);
+        assert_eq!(raised.take().as_deref(), Some("handled"));
     }
 }

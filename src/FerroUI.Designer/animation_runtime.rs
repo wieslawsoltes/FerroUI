@@ -199,3 +199,39 @@ impl NativeAnimations {
         Ok(complete)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ferroui_base::animation::{Animation, FillMode, KeyFrame, SignedDuration};
+    use ferroui_base::styling::Setter;
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_base::Visual;
+    use std::rc::Rc;
+
+    #[test]
+    fn rejected_native_animation_tick_removes_the_preview_values() {
+        let target = Visual::new();
+        let opacity = Visual::opacity_property();
+        target.add_property_changed_handler(Rc::new(move |event| {
+            if event.property() == opacity.as_property() && event.new_value().downcast_ref::<f64>() == Some(&0.5) {
+                Dispatcher::current_dispatcher().raise_unhandled_exception(std::io::Error::other("Rejected preview opacity"));
+            }
+        }));
+        let animation = Animation::new();
+        animation.set_duration(SignedDuration::from_seconds(1.0));
+        animation.set_fill_mode(FillMode::Both);
+        for (time, value) in [(0.0, 1.0), (1.0, 0.0)] {
+            animation.children().add(KeyFrame::with_key_time(
+                SignedDuration::from_seconds(time),
+                [Setter::new(opacity, value) as _],
+            ));
+        }
+        let mut playback = NativePlayback::default();
+        playback.seek(vec![(animation, target.clone().upcast())], 0.0).unwrap();
+        let error = playback.advance_to(0.5).unwrap_err();
+        assert!(error.contains("Rejected preview opacity"));
+        assert!(!playback.is_active());
+        assert_eq!(target.opacity(), 1.0);
+    }
+}

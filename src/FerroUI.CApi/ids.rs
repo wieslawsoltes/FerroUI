@@ -11,7 +11,14 @@
 //!
 //! The lookups work on any thread: the names are interned in a table behind a lock, which only a
 //! lookup and the first use of an ID with a class take.
+//!
+//! **Stable IDs.** The tables start with the names of the API model (`api_ids.rs`, written
+//! with `bindings/model/ferroui-api.json` by `scripts/generate_api_model.py`) in its
+//! order, so the ID of a name of the model is the constant the model gives it: a generated
+//! binding calls the ABI with constants and looks nothing up. It checks
+//! [`ferro_api_fingerprint`] at start. Names the model does not have get the next IDs, as before.
 
+use crate::api_ids;
 use crate::error::{status_or_value, Error, Result};
 use crate::strings;
 use crate::{FERRO_INVALID_ARGUMENT, FERRO_NOT_FOUND};
@@ -31,6 +38,16 @@ struct Names {
 }
 
 impl Names {
+    /// The table with the names of the model, in its order: the ID of `names[i]` is `i + 1`.
+    fn of_model(names: &'static [&'static str]) -> Self {
+        let mut table = Names { list: Vec::with_capacity(names.len()), map: HashMap::with_capacity(names.len()) };
+        for &name in names {
+            table.list.push(name);
+            table.map.insert(name, table.list.len() as u32);
+        }
+        table
+    }
+
     fn intern(&mut self, name: &str) -> Result<i64> {
         if let Some(&id) = self.map.get(name) {
             return Ok(i64::from(id));
@@ -49,15 +66,33 @@ impl Names {
     }
 }
 
-#[derive(Default)]
+/// Type IDs: the classes of the model first (found by name the first time their ID is used),
+/// then the other classes in the order they were met.
 struct Types {
-    list: Vec<&'static TypeInfo>,
+    list: Vec<Option<&'static TypeInfo>>,
     map: HashMap<usize, u32>,
+    /// The IDs of the classes of the model, by name.
+    model: HashMap<&'static str, u32>,
 }
 
-static PROPERTY_NAMES: LazyLock<Mutex<Names>> = LazyLock::new(Mutex::default);
-static EVENT_NAMES: LazyLock<Mutex<Names>> = LazyLock::new(Mutex::default);
-static TYPES: LazyLock<Mutex<Types>> = LazyLock::new(Mutex::default);
+impl Types {
+    fn of_model() -> Self {
+        let names = &api_ids::TYPE_NAMES;
+        let model = names.iter().enumerate().map(|(index, &name)| (name, index as u32 + 1)).collect();
+        Types { list: vec![None; names.len()], map: HashMap::new(), model }
+    }
+
+    fn fill(&mut self, id: u32, type_: &'static TypeInfo) {
+        if let Some(slot) = self.list.get_mut(id as usize - 1) {
+            *slot = Some(type_);
+            self.map.insert(type_ as *const TypeInfo as usize, id);
+        }
+    }
+}
+
+static PROPERTY_NAMES: LazyLock<Mutex<Names>> = LazyLock::new(|| Mutex::new(Names::of_model(&api_ids::PROPERTY_NAMES)));
+static EVENT_NAMES: LazyLock<Mutex<Names>> = LazyLock::new(|| Mutex::new(Names::of_model(&api_ids::EVENT_NAMES)));
+static TYPES: LazyLock<Mutex<Types>> = LazyLock::new(|| Mutex::new(Types::of_model()));
 
 fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
@@ -73,27 +108,63 @@ unsafe fn name_argument<'a>(name: *const c_char, length: i64) -> Result<&'a str>
     Ok(name)
 }
 
-/// The ID of `type_`, interning it.
+/// The ID of `type_`, interning it: the ID of the model for a class of the model.
 pub(crate) fn intern_type(type_: &'static TypeInfo) -> Option<i64> {
-    let mut types = lock(&TYPES);
     let key = type_ as *const TypeInfo as usize;
+    let reserved = {
+        let types = lock(&TYPES);
+        if let Some(&id) = types.map.get(&key) {
+            return Some(i64::from(id));
+        }
+        types.model.get(type_.name()).copied().filter(|&id| types.list[id as usize - 1].is_none())
+    };
+    // The class of the model of that name, found with no lock held (finding registers the types):
+    // another class of the same name in another namespace gets an ID of its own.
+    if let Some(id) = reserved {
+        if find_type(type_.name()).is_ok_and(|found| std::ptr::eq(found, type_)) {
+            lock(&TYPES).fill(id, type_);
+            return Some(i64::from(id));
+        }
+    }
+    let mut types = lock(&TYPES);
     if let Some(&id) = types.map.get(&key) {
         return Some(i64::from(id));
     }
     let id = u32::try_from(types.list.len() + 1).ok()?;
-    types.list.push(type_);
+    types.list.push(Some(type_));
     types.map.insert(key, id);
     Some(i64::from(id))
 }
 
 /// The class of a type ID.
 pub(crate) fn type_info(id: i64) -> Result<&'static TypeInfo> {
-    let types = lock(&TYPES);
-    usize::try_from(id)
-        .ok()
-        .and_then(|id| id.checked_sub(1))
-        .and_then(|index| types.list.get(index).copied())
-        .ok_or_else(|| Error::new(FERRO_NOT_FOUND, format!("{id} is not a type ID")))
+    let not_found = || Error::new(FERRO_NOT_FOUND, format!("{id} is not a type ID"));
+    let index = usize::try_from(id).ok().and_then(|id| id.checked_sub(1)).ok_or_else(not_found)?;
+    let slot = lock(&TYPES).list.get(index).copied().ok_or_else(not_found)?;
+    if let Some(type_) = slot {
+        return Ok(type_);
+    }
+    // A class of the model used by its ID for the first time.
+    let name = api_ids::TYPE_NAMES[index];
+    let type_ = find_type(name)?;
+    let mut types = lock(&TYPES);
+    match types.map.get(&(type_ as *const TypeInfo as usize)) {
+        // Interned under another ID before (a namespace that made the name ambiguous): that one.
+        Some(&other) if other as usize != index + 1 => Ok(type_),
+        _ => {
+            types.fill(index as u32 + 1, type_);
+            Ok(type_)
+        }
+    }
+}
+
+/// The fingerprint of the stable IDs of this library: the one of the API model it was built with
+/// (`bindings/model/ferroui-api.json`). A binding generated from the model compares it with its
+/// own at start; a different value means its ID constants are not the IDs of this library. Any
+/// thread.
+#[no_mangle]
+pub extern "C" fn ferro_api_fingerprint() -> i64 {
+    api_ids::API_FINGERPRINT
 }
 
 /// Finds a class by its name (`Button`) or by its namespace and name (`FerroUI.Controls.Button`).

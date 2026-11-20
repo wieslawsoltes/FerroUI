@@ -1,6 +1,6 @@
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use super::Layoutable;
-use crate::utilities::ReleaseExcess;
+use crate::utilities::ReleaseAtRest;
 use crate::Ref;
 use std::any::Any;
 use rustc_hash::FxHashMap;
@@ -71,13 +71,20 @@ impl<T: Clone + Eq + Hash> LoopQueueInfo<T> {
         }
     }
 
-    fn clear(&mut self) {
+    /// Empties the entries, and tells whether a pass over a large tree filled them (their storage
+    /// beyond what an emptied buffer keeps was given back).
+    fn clear(&mut self) -> bool {
         self.entries.clear();
         self.index.clear();
         // A pass over a large tree (its first layout, or the layout that follows its removal)
         // has an entry for every element of it; no later pass comes near.
-        self.entries.release_excess();
-        self.index.release_excess();
+        let entries = self.entries.release_burst();
+        self.index.release_burst() | entries
+    }
+
+    fn release_at_rest(&mut self) {
+        self.entries.release_at_rest();
+        self.index.release_at_rest();
     }
 }
 
@@ -141,14 +148,21 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
         self.max_enqueue_count_per_loop = max_enqueue_count_per_loop;
     }
 
-    pub fn end_loop(&mut self) {
+    /// Ends a layout loop, and tells whether a pass over a large tree filled the queue (its
+    /// storage beyond what an emptied buffer keeps was given back; `utilities::resting`, #836).
+    pub fn end_loop(&mut self) -> bool {
+        // A loop that queued nothing (an idle pass) has nothing to clear or give back: what a
+        // pass over a large tree filled was given back at the end of that pass.
+        if self.loop_queue_info.entries.is_empty() && self.not_finalized_buffer.is_empty() && self.inner.is_empty() {
+            return false;
+        }
         for (item, info) in &self.loop_queue_info.entries {
             if info.count >= self.max_enqueue_count_per_loop {
                 self.not_finalized_buffer.push((item.clone(), *info));
             }
         }
 
-        self.loop_queue_info.clear();
+        let mut burst = self.loop_queue_info.clear();
 
         // Prevent layout cycle but add to next layout the non arranged/measured
         // items that might have caused cycle one more time as a final attempt.
@@ -164,8 +178,20 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
         self.not_finalized_buffer = not_finalized_buffer;
         if self.inner.is_empty() {
             // As the entries of the loop: the queue of a pass over a large tree.
-            self.inner.release_excess();
+            burst |= self.inner.release_burst();
         }
+        burst
+    }
+
+    /// Gives back what the emptied queue keeps beyond what a buffer keeps at rest, once the
+    /// burst that filled it is over (`utilities::resting`, #836). A queue with items is left alone.
+    pub(crate) fn release_at_rest(&mut self) {
+        if !self.inner.is_empty() {
+            return;
+        }
+        self.inner.release_at_rest();
+        self.loop_queue_info.release_at_rest();
+        self.not_finalized_buffer.release_at_rest();
     }
 
     pub fn dispose(&mut self) {

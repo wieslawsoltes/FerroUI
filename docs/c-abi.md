@@ -71,6 +71,11 @@ how the tests and the benchmark run.
   (`FERRO_NOT_FOUND`), and what it stands for is then kept per thread and class: later writes
   are an index into a table and a short scan, with no string and no allocation.
 - The lookups work on any thread.
+- **Stable IDs.** The library starts its tables with the names of the API model of the
+  bindings (`bindings/model/ferroui-api.json`, compiled in as `api_ids.rs`), in the order of
+  the model: the ID of a name of the model is the constant the model gives it, and generated
+  bindings pass constants instead of looking names up. `ferro_api_fingerprint()` returns the
+  fingerprint of those tables; a binding compares it with its own at start (section 12).
 
 ## 4. Values
 
@@ -100,10 +105,12 @@ control:
   asks for the length.
 - `ferro_get_cstr(object, property)` returns a NUL-terminated string the library owns, valid
   until the next `ferro_get_cstr` on the thread: for a language that cannot pass a buffer.
-- `ferro_get_f64_or(object, property, fallback)`, `ferro_get_i64_or` and `ferro_get_bool_or`
-  return the value itself, and `fallback` when the read fails (the failure is recorded as for
-  every call): for a language that cannot pass a pointer to a result (Osprey has no address-of
-  operator and its pointer cells hold pointers, not numbers; #950).
+- For a language that cannot pass a pointer to a result, `ferro_get_f64_or`,
+  `ferro_get_i64_or` and `ferro_get_bool_or` return the value, or the fallback given when the
+  read fails (recorded as every failure), and `ferro_get_cstr_or` returns the caller's fallback
+  string in place of `NULL`.
+- `ferro_set_str16(object, property, text, units)` writes UTF-16 text (C#, Java, JavaScript),
+  as `ferro_set_str` writes UTF-8.
 
 Children go where the parent holds them, as the builders of `ferroui-view` place them:
 `ferro_add_child(parent, child)` adds to the `Children` of a panel or the `Items` of an items
@@ -117,7 +124,8 @@ already holds one). `ferro_remove_child` takes it out again.
 positive ID or token, or a handle (`0` on a failure). `ferro_last_error()` is the message of
 the last call that failed on the calling thread and `ferro_last_error_code()` its code; a
 successful call leaves both as they are (as `errno`). The message stays valid until the next
-failure on the thread.
+failure on the thread. `ferro_clear_error()` forgets it, for a binding that reports errors as
+values (a getter with a fallback is checked by clearing before and reading the code after).
 
 **Nothing unwinds across the boundary.** Every exported function catches a panic and returns
 `FERRO_PANIC` with the panic message; the shipped profiles (`release`, `dist`) abort on a panic
@@ -320,8 +328,8 @@ machine: the numbers say how large the overhead is, not its exact value.
 
 - No markup: controls are created and composed through the calls above. XAML through the C
   API is step 7 of #636.
-- No typed per-control functions: they are generated from the selection in phase 2 and in
-  the C++ wrapper.
+- No typed per-control functions in C: bindings generate them from the API model (section 12;
+  Osprey first), and a selection trims them in phase 2.
 - No batch of writes (`ferro_set_values`): each scalar write is one direct call, which also
   serves languages without arrays across their FFI (#950).
 - Mobile and the browser start through their hosts, not `ferro_app_run`.
@@ -336,6 +344,44 @@ machine: the numbers say how large the overhead is, not its exact value.
 - **Bindings:** a header-only C++ wrapper with RAII handles and typed accessors generated from
   the selection; Go (cgo, `runtime.LockOSThread` for the UI thread); Dart and Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
+- **Osprey (#950):** the generated bindings of section 12 (shape 1: an Osprey executable over
+  the dynamic library with named-function callbacks); FerroUI owning the process with Osprey as
+  a library is shape 2.
+- **Values:** a `FerroValue` tagged union and `ferro_set_values` beside the scalar family, and
+  event-specific arguments (`arg`) for pointer and key events.
+
+## 12. Frames and generated bindings
+
+Bindings are generated in two stages (bindings/README.md): a language-neutral API model
+(`scripts/generate_api_model.py`) and a backend per language that reads it (Osprey:
+`scripts/generate_osprey_bindings.py`, docs/osprey.md). The design they follow, for the
+fastest FFI path and the idiom of each language, is docs/bindings-design.md.
+
+For Elm-like and React-like bindings the ABI has **frames**: an interface described again on
+every update and reconciled by the library into the retained tree of a root.
+
+| Function | What it does |
+| --- | --- |
+| `ferro_frame_begin()` | empties the frame of the calling thread |
+| `ferro_frame_open(type, key)`, `ferro_frame_close()` | an element of a class; `key` keeps it across frames (`0`: by position) |
+| `ferro_frame_key_str(text, length)` | a text key for the open element |
+| `ferro_frame_str`, `_str16`, `_f64`, `_i64`, `_bool` | a property value of the open element, as the setters of section 4 write it |
+| `ferro_frame_on(event, tag, value_property)` | binds an event to a message tag; `value_property` is read as the value of the event |
+| `ferro_frame_commit(root)` | reconciles the frame into the children of `root` (`0`: windows, shown and closed) |
+| `ferro_frame_commit_bytes(root, data, length)` | the same for a buffer the caller wrote in the layout of the model |
+| `ferro_frame_dispatcher(function)` | the one dispatcher of the process (any thread): `function(tag, sender, value)` |
+| `ferro_frame_dispatch(tag, sender, arg)` | calls the dispatcher (the start of a loop, a test) |
+| `ferro_frame_event_text()`, `ferro_frame_event_f64()` | the value of the event being dispatched |
+| `ferro_frame_find(root, key)` | the handle of a keyed element of the retained tree |
+| `ferro_frame_clear(root)` | takes the frames of `root` out and frees them |
+
+The writer functions append records to a buffer of the calling thread (any thread); the
+records are the byte layout of the model (`frame`), so a language that writes memory commits
+a buffer of its own with one call. A commit writes only what changed, never writes back a
+text the object already shows, binds events once and changes their tags in place, and does
+not dispatch what it caused itself. The tests are `src/FerroUI.CApi/tests/frame_tests.rs` and
+the frame part of `samples/CApi/abi_test.c`.
+
 - **Osprey (#950):** shape 1 works: Osprey executables over the dynamic library with
   named-function callbacks (`samples/CApi/osprey`). Next: generated `extern fn` declarations and
   ID constants from the same source as the header, then FerroUI owning the process with Osprey
