@@ -653,7 +653,7 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     private async assetsMessage(message: FromAssets): Promise<void> {
         try {
-            if (message.type === 'preview' || message.type === 'open' || message.type === 'copy') {
+            if (message.type === 'preview' || message.type === 'open' || message.type === 'copy' || message.type === 'move') {
                 await this.assets.browse(message.type, message.id);
             } else if (message.type === 'setImageSource') {
                 const panel = this.panelFor(message.target);

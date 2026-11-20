@@ -160,6 +160,15 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<FileMovePlan>('ferroui/planFileMove', { from: from.toString(), to: to.toString(), sourceDrafts });
     }
 
+    async planAssetMove(from: vscode.Uri, to: vscode.Uri, sourceDrafts: readonly FileMoveDraft[]): Promise<FileMovePlan> {
+        await this.start();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiAssetMove !== true) {
+            throw new Error('Update the FerroUI XAML language server to review asset moves.');
+        }
+        return client.sendRequest<FileMovePlan>('ferroui/planAssetMove', { from: from.toString(), to: to.toString(), sourceDrafts });
+    }
+
     async completeFileMove(from: vscode.Uri, to: vscode.Uri, sourceDrafts: readonly FileMoveDraft[], review: string, resolutions: FileMoveRustResolution[]): Promise<FileMovePlan> {
         const client = this.client;
         if (client?.initializeResult?.capabilities.experimental?.ferrouiFileMoveRustSymbols !== true) {

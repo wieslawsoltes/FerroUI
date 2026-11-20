@@ -145,6 +145,10 @@ export class AgentTools {
             const request = input as AssetImportRequest & { review?: string };
             return this.project.assetImport.agent(request, request.review, signal);
         }
+        if (tool === 'ferroui_project_plan_asset_move' || tool === 'ferroui_project_move_asset') {
+            const request = input as FileMoveRequest & { review?: string };
+            return this.project.assetMoves.agent(request, request.review, signal);
+        }
         const args = input as Arguments;
         if (tool === 'ferroui_designs') {
             const panels = [];

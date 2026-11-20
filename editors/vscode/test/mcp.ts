@@ -47,6 +47,7 @@ import { verifyRsxControlRename } from './rsxRenameMcp';
 import { verifyProjectImageSource } from './projectImageSourceMcp';
 import { verifyProjectLibrary } from './projectLibraryMcp';
 import { verifyAssetImport } from './assetImportMcp';
+import { verifyAssetMove } from './assetMoveMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -183,6 +184,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyProjectImageSource({ invoke, content });
         await verifyProjectLibrary({ invoke, content });
         await verifyAssetImport({ invoke, content });
+        await verifyAssetMove({ invoke, content });
         await verifyColumnsMcp({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });

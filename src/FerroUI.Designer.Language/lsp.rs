@@ -206,6 +206,10 @@ impl LspServer {
                 self.service.resolve_project_library(&decode(params)?)?;
                 Ok(Value::Null)
             }
+            "ferroui/planAssetMove" => {
+                let drafts: Vec<crate::FileMoveDraft> = decode(&params["sourceDrafts"])?;
+                Ok(json!(self.service.plan_asset_move(text(params, "from")?, text(params, "to")?, &drafts)?))
+            }
             "ferroui/projectDefinitionTarget" | "ferroui/projectDefinition" => {
                 let (uri, offset) = self.position(params)?;
                 crate::require(
@@ -537,7 +541,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiProjectLibrary": true, "ferrouiResourceRename": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiProjectLibrary": true, "ferrouiAssetMove": true, "ferrouiResourceRename": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

@@ -1,5 +1,5 @@
 use crate::{
-    file_path, file_uri, relative_asset_uri, require, ProjectError, ProjectWorkspace, Result,
+    ProjectError, ProjectWorkspace, Result, file_path, file_uri, relative_asset_uri, require,
 };
 use std::{
     io,
@@ -7,11 +7,13 @@ use std::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct XamlFileMove {
+pub struct ProjectFileMove {
     pub from: String,
     pub to: String,
     pub package_root: PathBuf,
 }
+
+pub type XamlFileMove = ProjectFileMove;
 
 /// Project JSON that may refer to an authored view in a reviewed move.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -40,21 +42,46 @@ impl ProjectWorkspace {
     /// Plan a physical move within one authored package. Open buffers can still
     /// use aliases to the workspace directory.
     pub fn plan_xaml_move(&self, from: &str, to: &str) -> Result<XamlFileMove> {
+        self.plan_file_move(
+            from,
+            to,
+            |source, target| is_xaml(source) && is_xaml(target),
+            "Choose a .xaml filename",
+        )
+    }
+
+    /// Assets retain their file format and are moved inside their authored project.
+    pub fn plan_asset_move(&self, from: &str, to: &str) -> Result<ProjectFileMove> {
+        self.plan_file_move(
+            from,
+            to,
+            |source, target| {
+                asset_extension(source)
+                    .is_some_and(|ext| asset_extension(target).as_ref() == Some(&ext))
+            },
+            "Choose an image, font, or media destination with the source file extension",
+        )
+    }
+
+    fn plan_file_move(
+        &self,
+        from: &str,
+        to: &str,
+        file_type: impl FnOnce(&Path, &Path) -> bool,
+        invalid_type: &str,
+    ) -> Result<ProjectFileMove> {
         let input = file_path(from)?;
         let source = self.resolve_path(from)?;
         require(
             std::fs::symlink_metadata(&input)?.is_file(),
-            "Choose the original XAML file, rather than a file alias",
+            "Choose the original project file, rather than a file alias",
         )?;
         let target = self.resolve_path(to)?;
         require(
             target.parent().is_some_and(Path::is_dir),
             "Choose an existing destination directory",
         )?;
-        require(
-            is_xaml(&source) && is_xaml(&target),
-            "Choose a .xaml filename",
-        )?;
+        require(file_type(&source, &target), invalid_type)?;
         match std::fs::symlink_metadata(&target) {
             Ok(_) => return Err(ProjectError("The move destination already exists".into())),
             Err(error) if error.kind() == io::ErrorKind::NotFound => {}
@@ -68,7 +95,7 @@ impl ProjectWorkspace {
                 .max_by_key(|project| project.root.components().count())
         };
         let owner =
-            package(&source).ok_or_else(|| ProjectError("Choose a project XAML file".into()))?;
+            package(&source).ok_or_else(|| ProjectError("Choose a project source file".into()))?;
         let root = owner.authored_package_root(&source).to_path_buf();
         require(
             package(&target)
@@ -88,7 +115,7 @@ impl ProjectWorkspace {
                 }),
             "Choose a destination in the authored project tree",
         )?;
-        Ok(XamlFileMove {
+        Ok(ProjectFileMove {
             from: file_uri(source)?,
             to: file_uri(target)?,
             package_root: root,
@@ -99,6 +126,31 @@ impl ProjectWorkspace {
 fn is_xaml(path: &Path) -> bool {
     path.extension()
         .is_some_and(|suffix| suffix.eq_ignore_ascii_case("xaml"))
+}
+
+fn asset_extension(path: &Path) -> Option<String> {
+    let suffix = path.extension()?.to_str()?.to_ascii_lowercase();
+    matches!(
+        suffix.as_str(),
+        "png"
+            | "jpeg"
+            | "jpg"
+            | "webp"
+            | "gif"
+            | "bmp"
+            | "ico"
+            | "svg"
+            | "ttf"
+            | "otf"
+            | "woff"
+            | "woff2"
+            | "wav"
+            | "mp3"
+            | "ogg"
+            | "mp4"
+            | "webm"
+    )
+    .then_some(suffix)
 }
 
 /// Encode an existing lexical file identity relative to a document's directory.

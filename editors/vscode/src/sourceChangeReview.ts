@@ -10,7 +10,12 @@ interface Review {
     origin?: { uri: vscode.Uri; column: vscode.ViewColumn; selection: vscode.Selection };
 }
 
-interface ReviewActions { scheme: string; context: string; command: string }
+interface ReviewActions {
+    scheme: string;
+    context: string;
+    command: string;
+    reveal?: (destination: vscode.Uri, column: vscode.ViewColumn) => Thenable<unknown>;
+}
 
 export class SourceChangeReview implements vscode.Disposable {
     private current?: Review;
@@ -35,7 +40,8 @@ export class SourceChangeReview implements vscode.Disposable {
                     });
                     if (!destination) return;
                     try {
-                        await vscode.window.showTextDocument(destination, { viewColumn: column, preview: false });
+                        if (actions.reveal) await actions.reveal(destination, column);
+                        else await vscode.window.showTextDocument(destination, { viewColumn: column, preview: false });
                     } finally { await this.close(review); }
                 } finally { this.applying = false; }
             })),

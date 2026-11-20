@@ -15,6 +15,7 @@ mod project_library;
 mod registered_rename;
 mod registered_rsx;
 mod registered_types;
+mod setter_properties;
 mod style_selectors;
 mod refactoring;
 mod resource_occurrences;
@@ -27,6 +28,8 @@ mod extraction;
 mod file_moves;
 #[path = "file_move_literals.rs"]
 mod file_move_literals;
+#[path = "asset_move.rs"]
+mod asset_moves;
 pub use file_move_literals::relocate_xaml_fragment;
 pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};

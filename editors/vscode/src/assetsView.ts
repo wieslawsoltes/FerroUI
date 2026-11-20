@@ -57,7 +57,7 @@ export class AssetsView {
         return this.cache?.assets?.some(asset => asset.id === origin.asset && asset.source === origin.source) ?? false;
     }
 
-    async browse(action: 'preview' | 'copy' | 'open', id: string): Promise<void> {
+    async browse(action: 'preview' | 'copy' | 'open' | 'move', id: string): Promise<void> {
         const folder = this.folder;
         if (!folder) return;
         if (action === 'preview') {
@@ -70,7 +70,11 @@ export class AssetsView {
             this.view.post({ type: 'assetStatus', message: 'Copied relative path.' });
         } else {
             const asset = await this.library.resolve(folder, id);
-            await vscode.commands.executeCommand('vscode.open', asset.uri);
+            if (action === 'move') {
+                const source = vscode.Uri.joinPath(folder.uri, ...asset.path.split('/'));
+                const command = asset.kind === 'XAML' ? 'ferroui.moveXamlFile' : 'ferroui.moveAsset';
+                await vscode.commands.executeCommand(command, source);
+            } else await vscode.commands.executeCommand('vscode.open', asset.uri);
         }
     }
 

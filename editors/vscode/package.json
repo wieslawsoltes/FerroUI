@@ -251,6 +251,18 @@
         "icon": "$(close)"
       },
       {
+        "command": "ferroui.assetMoveReview.apply",
+        "title": "Apply Asset Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.assetMoveReview.cancel",
+        "title": "Cancel Asset Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
         "command": "ferroui.renameResource",
         "title": "Rename Resource and References…",
         "category": "FerroUI",
@@ -321,6 +333,12 @@
         "title": "Import Asset…",
         "category": "FerroUI",
         "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.moveAsset",
+        "title": "Move or Rename Asset…",
+        "category": "FerroUI",
+        "icon": "$(rename)"
       },
       {
         "command": "ferroui.showStudio",
@@ -487,6 +505,18 @@
           "when": "ferroui.reviewingFileMove"
         },
         {
+          "command": "ferroui.moveAsset",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.assetMoveReview.apply",
+          "when": "ferroui.reviewingAssetMove"
+        },
+        {
+          "command": "ferroui.assetMoveReview.cancel",
+          "when": "ferroui.reviewingAssetMove"
+        },
+        {
           "command": "ferroui.renameResource",
           "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
         },
@@ -592,6 +622,16 @@
         {
           "command": "ferroui.fileMoveReview.cancel",
           "when": "ferroui.reviewingFileMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-file-move-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.assetMoveReview.apply",
+          "when": "ferroui.reviewingAssetMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-asset-move-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.assetMoveReview.cancel",
+          "when": "ferroui.reviewingAssetMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-asset-move-review)",
           "group": "navigation@2"
         },
         {

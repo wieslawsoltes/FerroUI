@@ -13,6 +13,7 @@ const thumbnail = element<HTMLImageElement>('asset-thumbnail');
 const insert = element<HTMLButtonElement>('asset-insert');
 const place = element<HTMLButtonElement>('asset-place');
 const useSource = element<HTMLButtonElement>('asset-use-source');
+const move = element<HTMLButtonElement>('asset-move');
 const more = element<HTMLButtonElement>('assets-more');
 const pageSize = 120;
 let limit = pageSize;
@@ -80,6 +81,7 @@ more.addEventListener('click', () => {
 });
 element('asset-open').addEventListener('click', () => { if (selected) vscode.postMessage({ type: 'open', id: selected.id }); });
 element('asset-copy').addEventListener('click', () => { if (selected) vscode.postMessage({ type: 'copy', id: selected.id }); });
+move.addEventListener('click', () => { if (selected) vscode.postMessage({ type: 'move', id: selected.id }); });
 useSource.addEventListener('click', () => {
     if (selected?.source && state.imageTarget) vscode.postMessage({ type: 'setImageSource', id: selected.id, target: state.imageTarget });
 });
@@ -144,6 +146,7 @@ function showPreviewButtons(): void {
     place.hidden = !selected?.source;
     place.disabled = !state.frame;
     useSource.hidden = !selected?.source || !state.imageTarget;
+    move.hidden = !selected || (selected.kind === 'XAML' && !selected.path.toLowerCase().endsWith('.xaml'));
     insert.title = insert.disabled ? 'Select a panel that accepts children or drag onto the artboard' : '';
 }
 

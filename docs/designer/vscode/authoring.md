@@ -174,9 +174,17 @@ The Library follows unsaved XAML drafts and updates when files change on disk. R
 
 1. Open **Assets** and use the import icon, or run **FerroUI: Import Asset…**.
 2. Choose a local image, font, media file, or XAML asset. Enter a destination relative to the active workspace folder. The default is `Assets/` followed by the source filename. Use the source file's extension.
-3. Review the source, destination, type, and byte count. Confirm **Import** to add the copy. The original stays at its source path. If the destination exists or the source changes during review, choose a new destination or review the current file.
+3. Review the source, destination, type, and byte count. Confirm **Import** to create a copy. If the destination exists or the source changes during review, choose a new destination or review the current file.
 
 The copy appears under **Assets**. To use a raster import, drag it onto the canvas or use **Use as image source** for a selected authored image. MCP agents can review and copy assets already inside the workspace. [MCP reference](reference.md#drive-an-editor-workflow)
+
+### Move an asset and update its references
+
+1. Select an image, font, or media file in **Assets** and use **Move or rename asset…**. Enter a path in an existing directory in the same Cargo package or loose-file project. Keep the file extension.
+2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, and supported literal Rust includes there. A move with no indexed references shows a file confirmation.
+3. Choose **Apply Asset Move** to move the file and update the displayed references in one VS Code edit. Undo from an edited reference to restore the file and those source changes together. Use **Cancel Asset Move** to return to the editor. If a file or draft changes, prepare a new review.
+
+The review reflects the indexed XAML and Rust code, including open drafts. Inspect dynamically constructed paths and externally managed asset mappings before applying. In RSX, the editor can update the literal in a supported `include_bytes!` call while preserving the surrounding Rust. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ## Create a Rust handler for an XAML event
 

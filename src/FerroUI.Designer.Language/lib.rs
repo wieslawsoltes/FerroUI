@@ -1,5 +1,7 @@
 //! Schema-aware XAML text editing, navigation, refactoring and stdio LSP.
 mod binding;
+#[cfg(test)]
+mod asset_move_tests;
 mod design_support;
 #[cfg(test)]
 mod dictionary_extraction_tests;

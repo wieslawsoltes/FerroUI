@@ -1,7 +1,9 @@
 //! Source ranges for Rust literals whose XAML path has a known base.
 mod build_script;
+mod includes;
 mod macros;
 mod tokens;
+pub use includes::rust_file_includes;
 pub use tokens::check_rust_rename_tokens;
 
 use self::build_script::{BuildScript, DocumentInput, DocumentKey, Site};
@@ -24,7 +26,7 @@ pub enum RustPathAnchor {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct RustXamlPath {
+pub struct RustFilePath {
     pub range: Range<usize>,
     pub path: String,
     pub anchor: RustPathAnchor,
@@ -36,10 +38,22 @@ pub struct RustXamlPath {
     prefix: String,
 }
 
-impl RustXamlPath {
+pub type RustXamlPath = RustFilePath;
+
+impl RustFilePath {
     pub fn replacement(&self, source: &str, path: &str) -> String {
         let value = format!("{}{path}", self.prefix);
         rust_string_like(&source[self.range.clone()], &value)
+    }
+
+    fn from_literal(literal: &LitStr, anchor: RustPathAnchor, prefix: &str, offset: usize) -> Option<Self> {
+        let value = literal.value();
+        let path = value.strip_prefix(prefix)?;
+        let range = literal.span().byte_range();
+        Some(Self {
+            range: offset + range.start..offset + range.end, path: path.into(), anchor,
+            input: None, shares_input_path: false, prefix: prefix.into(),
+        })
     }
 }
 
@@ -194,15 +208,9 @@ impl Collector<'_> {
         if !filename.to_ascii_lowercase().ends_with(".xaml") {
             return None;
         }
-        let range = literal.span().byte_range();
-        Some(RustXamlPath {
-            range: self.offset + range.start..self.offset + range.end,
-            path: path.to_owned(),
-            anchor,
-            input,
-            shares_input_path: false,
-            prefix: prefix.to_owned(),
-        })
+        let mut site = RustFilePath::from_literal(literal, anchor, prefix, self.offset)?;
+        site.input = input;
+        Some(site)
     }
 }
 

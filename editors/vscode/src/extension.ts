@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { AssetMoves } from './assetMoves';
 import { AgentTools } from './agentTools';
 import { FileMoves } from './fileMoves';
 import { BuiltProjects } from './builtProjects';
@@ -46,7 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
     const scenarios = new ScenarioRunner(context);
     const scenarioTesting = new ScenarioTesting(scenarios);
     const assets = new ProjectAssets();
-    const inventory = new ProjectInventory(context, previewOutput, assets);
+    const assetMoves = new AssetMoves(server);
+    const inventory = new ProjectInventory(context, previewOutput, assets, assetMoves);
     const designTokens = new DesignTokenCommands(inventory);
     const scaffolds = new ProjectScaffold();
     const handlers = new EventHandlers(server);
@@ -75,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -88,6 +90,10 @@ export function activate(context: vscode.ExtensionContext) {
                 const uri = designer.activeDesign?.document.uri ?? vscode.window.activeTextEditor?.document.uri;
                 await inventory.assetImport.choose(uri && vscode.workspace.getWorkspaceFolder(uri));
             } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
+        vscode.commands.registerCommand('ferroui.moveAsset', async (uri?: vscode.Uri) => {
+            try { await assetMoves.open(uri); }
+            catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
         }),
         vscode.commands.registerCommand('ferroui.moveXamlFile', async (uri?: vscode.Uri) => {
             try { await fileMoves.open(uri ?? vscode.window.activeTextEditor?.document.uri); }

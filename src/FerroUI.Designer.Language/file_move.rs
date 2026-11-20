@@ -248,7 +248,7 @@ fn check_incomplete_source(uri: &str, state: &State, movement: &XamlFileMove) ->
     )
 }
 
-fn new_reference(path: &str, owner: &str, target: &str, movement: &XamlFileMove) -> Result<String> {
+pub(super) fn new_reference(path: &str, owner: &str, target: &str, movement: &XamlFileMove) -> Result<String> {
     if let Some(resource) = path.strip_prefix("ferres://") {
         let assembly = resource.split('/').next().unwrap_or_default();
         return Ok(format!(

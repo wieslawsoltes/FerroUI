@@ -1,10 +1,9 @@
-import { lstat, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { FileMovePlan } from './fileMoveProtocol';
 import { recoverFileMove } from './fileMoveRecovery';
 import { isCompiledXamlRust, resolveFileMoveRust } from './fileMoveRust';
-import { checkedSources } from './reviewedSources';
+import { checkedFileMove, fileMoveDrafts } from './fileMoveSources';
 import { SourceChangeReview } from './sourceChangeReview';
 import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
 import type { XamlServer } from './xamlServer';
@@ -59,30 +58,16 @@ export class FileMoves implements vscode.Disposable {
     }
 
     private async drafts() {
-        const open = vscode.workspace.textDocuments.filter(document => {
+        return fileMoveDrafts(document => {
             const extension = path.extname(document.uri.path).toLowerCase();
             return (extension === '.rs' && !isCompiledXamlRust(document)) || (document.isDirty && (extension === '.json' || extension === '.ferrostages'));
         });
-        const projectFiles = await Promise.all(open.map(document => isWorkspaceFile(document.uri)));
-        const drafts = open.filter((document, index) => projectFiles[index] && !document.isClosed).map(document => ({
-            uri: document.uri.toString(), version: document.version, source: document.getText(),
-        }));
-        if (Buffer.byteLength(JSON.stringify(drafts)) > 12 * 1024 * 1024) throw new Error('Save larger drafts before reviewing this move.');
-        return drafts;
     }
 
     private async apply(from: vscode.Uri, to: vscode.Uri, review: string, signal?: AbortSignal, validate?: () => void): Promise<FileMovePlan> {
         const plan = await this.plan(from, to, signal);
         if (plan.review !== review) throw new Error('The file move changed. Review the current source patches before applying it.');
-        const [actual, parent, identity] = await Promise.all([
-            realpath(from.fsPath), realpath(path.dirname(to.fsPath)), lstat(from.fsPath, { bigint: true }),
-        ]);
-        if (!samePath(actual, vscode.Uri.parse(plan.from, true).fsPath)
-            || !samePath(path.join(parent, path.basename(to.fsPath)), vscode.Uri.parse(plan.to, true).fsPath)) {
-            throw new Error('The file or destination moved. Prepare the review again.');
-        }
-        const sources = await checkedSources(plan.documents, { from: plan.from, source: from });
-        for (const source of sources) source.validate();
+        const { identity, sources } = await checkedFileMove(from, to, plan);
         validate?.();
         signal?.throwIfAborted();
         const edit = new vscode.WorkspaceEdit();
@@ -119,5 +104,3 @@ async function requireXaml(uri: vscode.Uri): Promise<vscode.WorkspaceFolder> {
     }
     return folder;
 }
-
-function samePath(first: string, second: string): boolean { return path.relative(first, second) === ''; }

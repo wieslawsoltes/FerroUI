@@ -224,7 +224,7 @@ export interface AssetsState {
     message?: string;
 }
 export type FromAssets = { type: 'ready' } | DragMessage
-    | { type: 'preview' | 'open' | 'copy'; id: string }
+    | { type: 'preview' | 'open' | 'copy' | 'move'; id: string }
     | { type: 'setImageSource'; target: NodeTarget; id: string }
     | { type: 'insert'; frame: FrameTarget; id: string; choosePlacement?: boolean };
 export type ToAssets = DragUpdate | { type: 'state'; state: AssetsState }

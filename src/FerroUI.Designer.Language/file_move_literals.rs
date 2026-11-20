@@ -1,6 +1,9 @@
-use super::{escape_xml, native_resource_type, Schema};
-use crate::{schema::PropertyInfo, Result};
-use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan, TextPatch};
+use super::setter_properties::setter_value_property;
+use super::{Schema, escape_xml, native_resource_type};
+use crate::{Result, schema::PropertyInfo};
+use ferroui_designer_core::{
+    Document, MarkupValue, Node, NodeKind, SourceSpan, TextPatch, XmlText,
+};
 use ferroui_designer_project::{relative_file_reference, resolve_uri};
 
 struct Part {
@@ -11,10 +14,18 @@ struct Part {
 pub(super) struct LiteralPath {
     pub value: String,
     parts: Vec<Part>,
+    font_source: bool,
 }
 
 impl LiteralPath {
     pub fn patches(self, replacement: &str) -> Vec<TextPatch> {
+        let relative_font;
+        let replacement = if self.font_source && !replacement.contains(['/', ':']) {
+            relative_font = format!("./{replacement}");
+            &relative_font
+        } else {
+            replacement
+        };
         self.parts
             .into_iter()
             .enumerate()
@@ -73,7 +84,23 @@ pub(super) fn paths(document: &Document, schema: &Schema) -> Vec<LiteralPath> {
     for node in document.ast().elements() {
         for attribute in &node.attributes {
             let member = attribute.name.rsplit(':').next().unwrap_or_default();
-            let info = schema.attribute_property(document, node, attribute);
+            let info = (attribute.name == "Value")
+                .then(|| setter_value_property(schema, document, node, member))
+                .flatten()
+                .or_else(|| schema.attribute_property(document, node, attribute));
+            if info
+                .as_ref()
+                .is_some_and(|info| property_type(info) == "FontFamily")
+            {
+                if let Some(text) = XmlText::attribute(document.source(), attribute.value_span) {
+                    paths.extend(font_sources(
+                        text.value(),
+                        |range| text.source_span(range),
+                        false,
+                    ));
+                }
+                continue;
+            }
             if !is_path(node, member, info.as_ref()) {
                 continue;
             }
@@ -82,20 +109,33 @@ pub(super) fn paths(document: &Document, schema: &Schema) -> Vec<LiteralPath> {
                 paths.push(LiteralPath {
                     value,
                     parts: vec![Part { span, cdata: false }],
+                    font_source: false,
                 });
             }
         }
         let path_content = if node.kind == NodeKind::PropertyElement {
-            node.parent
-                .and_then(|parent| document.ast().node(parent))
-                .is_some_and(|owner| {
-                    is_path(
-                        owner,
-                        node.local_name(),
-                        schema.element_property(owner, node).as_ref(),
-                    )
-                })
+            let Some(owner) = node.parent.and_then(|parent| document.ast().node(parent)) else {
+                continue;
+            };
+            let info = (node.namespace_uri == owner.namespace_uri)
+                .then(|| setter_value_property(schema, document, owner, node.local_name()))
+                .flatten()
+                .or_else(|| schema.element_property(owner, node));
+            if info
+                .as_ref()
+                .is_some_and(|info| property_type(info) == "FontFamily")
+            {
+                paths.extend(font_text_paths(document, node));
+                continue;
+            }
+            is_path(owner, node.local_name(), info.as_ref())
         } else {
+            if node.local_name() == "FontFamily"
+                && native_resource_type("FontFamily", node.namespace_uri.as_deref())
+            {
+                paths.extend(font_text_paths(document, node));
+                continue;
+            }
             matches!(node.local_name(), "Bitmap" | "WindowIcon" | "Uri")
                 && native_resource_type(node.local_name(), node.namespace_uri.as_deref())
         };
@@ -104,6 +144,76 @@ pub(super) fn paths(document: &Document, schema: &Schema) -> Vec<LiteralPath> {
         }
     }
     paths
+}
+
+fn font_text_paths(document: &Document, node: &Node) -> Vec<LiteralPath> {
+    let mut text = node
+        .children
+        .iter()
+        .filter_map(|node| document.ast().node(*node))
+        .filter(|node| {
+            node.kind != NodeKind::Comment
+                && !node
+                    .text
+                    .as_deref()
+                    .is_some_and(|text| text.trim().is_empty())
+        });
+    let (Some(body), None) = (text.next(), text.next()) else {
+        return Vec::new();
+    };
+    match body.kind {
+        NodeKind::Text => XmlText::text_node(document.source(), body.span)
+            .map_or_else(Vec::new, |text| {
+                font_sources(text.value(), |range| text.source_span(range), false)
+            }),
+        NodeKind::CData => {
+            let start = body.span.start + 9;
+            let text = &document.source()[start..body.span.end - 3];
+            font_sources(
+                text,
+                |range| Some(SourceSpan::new(start + range.start, start + range.end)),
+                true,
+            )
+        }
+        _ => Vec::new(),
+    }
+}
+
+fn font_sources(
+    value: &str,
+    span: impl Fn(std::ops::Range<usize>) -> Option<SourceSpan>,
+    cdata: bool,
+) -> Vec<LiteralPath> {
+    if value.trim_start().starts_with('{') {
+        return Vec::new();
+    }
+    let mut offset = 0;
+    let mut paths = Vec::new();
+    for entry in value.split(',') {
+        if let Some((source, name)) = entry.split_once('#') {
+            let path = source.trim();
+            if !name.contains('#') && path.contains(['/', ':']) {
+                let start = offset + source.len() - source.trim_start().len();
+                if let Some(span) = span(start..start + path.len()) {
+                    paths.push(LiteralPath {
+                        value: path.to_owned(),
+                        parts: vec![Part { span, cdata }],
+                        font_source: true,
+                    });
+                }
+            }
+        }
+        offset += entry.len() + 1;
+    }
+    paths
+}
+
+fn property_type(property: &PropertyInfo) -> &str {
+    property
+        .type_name
+        .strip_prefix("Option<")
+        .and_then(|kind| kind.strip_suffix('>'))
+        .unwrap_or(&property.type_name)
 }
 
 fn is_path(owner: &Node, member: &str, property: Option<&PropertyInfo>) -> bool {
@@ -116,14 +226,9 @@ fn is_path(owner: &Node, member: &str, property: Option<&PropertyInfo>) -> bool 
         && native_resource_type(owner.local_name(), owner.namespace_uri.as_deref());
     native_source
         || property.is_some_and(|property| {
-            let kind = property
-                .type_name
-                .strip_prefix("Option<")
-                .and_then(|kind| kind.strip_suffix('>'))
-                .unwrap_or(&property.type_name);
             !property.event
                 && matches!(
-                    kind,
+                    property_type(property),
                     "Uri"
                         | "UriRef"
                         | "Rc<dyn IImage>"
@@ -160,6 +265,7 @@ fn text_path(document: &Document, node: &Node) -> Option<LiteralPath> {
     Some(LiteralPath {
         value: literal(&text)?,
         parts,
+        font_source: false,
     })
 }
 

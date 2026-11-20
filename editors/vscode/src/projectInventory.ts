@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { AssetImport } from './assetImport';
+import type { AssetMoves } from './assetMoves';
 import type { TokenRequest } from './designTokenProtocol';
 import { NativePreview } from './nativePreview';
 import type { ProjectAssets } from './projectAssets';
@@ -22,7 +23,7 @@ export class ProjectInventory implements vscode.Disposable {
     private timer?: ReturnType<typeof setTimeout>;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
-        private readonly assets: ProjectAssets) {
+        private readonly assets: ProjectAssets, readonly assetMoves: AssetMoves) {
         const watcher = vscode.workspace.createFileSystemWatcher('**/{Cargo.toml,*.rs,*.xaml,*.XAML,*.ferrostages,*.ferroui-scenario.json}');
         const invalidate = (uri: vscode.Uri) => {
             const folder = vscode.workspace.getWorkspaceFolder(uri);

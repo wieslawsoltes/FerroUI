@@ -7,6 +7,7 @@ const frame = { ...session, expected_revision: integer(0) };
 const buffer = { ...session, expected_version: integer(1) };
 const workspacePath = { type: 'string', maxLength: 4096 };
 const assetImport = { source: workspacePath, destination: workspacePath, folder: workspacePath };
+const assetMove = { path: workspacePath, destination: workspacePath, folder: workspacePath };
 const lspPosition = { type: 'object', additionalProperties: false, required: ['line', 'character'],
     properties: { line: integer(0), character: integer(0) } };
 const libraryAddress = { type: 'object', additionalProperties: false, required: ['folder', 'path', 'definition'], properties: {
@@ -106,6 +107,10 @@ export const agentCatalog = {
         assetImport, ['source', 'destination']),
     ferroui_project_import_asset: tool('Create a reviewed asset copy and retain the original. Pass source, destination, and the review value from ferroui_project_plan_asset_import.',
         { ...assetImport, review: { type: 'string', maxLength: 64 } }, ['source', 'destination', 'review'], true, false),
+    ferroui_project_plan_asset_move: tool('Review a move of an image, font, or media asset. Read the proposed XAML and Rust path edits before applying it.',
+        assetMove, ['path', 'destination']),
+    ferroui_project_move_asset: tool('Move the asset and apply its reviewed source edits in one transaction. Pass the exact path, destination, and review from ferroui_project_plan_asset_move.',
+        { ...assetMove, review: { type: 'string', maxLength: 64 } }, ['path', 'destination', 'review'], true, false),
     designer_open_project_definition: tool('Open a current project Library entry in its source or scoped native preview. Pass an entry returned by ferroui_project_library.',
         { entry: libraryAddress, destination: choice('preview', 'source') }, ['entry'], true, false),
     ferroui_project_scaffold: tool('Create a FerroUI XAML or RSX view or reusable component as a new editor file. A Rust module can import the generated view after review.',

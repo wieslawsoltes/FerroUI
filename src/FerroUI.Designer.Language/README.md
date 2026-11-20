@@ -47,6 +47,10 @@ The `ferrouiProjectLibrary` capability advertises `ferroui/projectLibrary` and `
 
 Open the source buffer before resolving a result. Send its `uri` and synchronized `version` together with the entry’s fields. The language service checks the folder, current definition and buffer version. Clients can set `initializationOptions.ferrouiProjectLibrary` to receive `ferroui/projectLibraryChanged` when the underlying index changes. [Browse the Library in VS Code](../../docs/designer/vscode/authoring.md#find-reusable-xaml-definitions)
 
+## Asset moves
+
+The `ferrouiAssetMove` capability advertises `ferroui/planAssetMove`. Pass local `from` and `to` file URIs and a `sourceDrafts` array with the current Rust buffer versions and text. The service uses synchronized XAML buffers and indexed files to return the move, text patches, and a review identifier. Hosts replan before applying the checked edits and file rename in their editor transaction. [Move an asset in VS Code](../../docs/designer/vscode/authoring.md#move-an-asset-and-update-its-references)
+
 ## Project event handlers
 
 `ferroui/projectMetadata` supplies the selected package’s build registry. The handler service resolves `x:Class` in that package, reads the event contract from the control’s exported type or its bases, and finds the authored `ferro_class_info!` registration through Cargo sources. The Rust and XAML snapshots use independent versions. The Rust grammar validates the original registration and reparses the proposed callback before returning the source changes.

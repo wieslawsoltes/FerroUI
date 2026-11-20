@@ -22,11 +22,11 @@ mod file_move;
 mod process;
 pub use process::{spawn_project_process, stop_project_process};
 pub use tasks::CargoBuildConfiguration;
-pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
+pub use file_move::{ProjectFileMove, SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
 mod rust_xaml;
 pub use rust_xaml::{
     check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
-    RustXamlRegistration, rust_string_like,
+    RustFilePath, RustXamlRegistration, rust_file_includes, rust_string_like,
 };
 pub use preview_sources::{
     hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
