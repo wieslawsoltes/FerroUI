@@ -276,7 +276,33 @@ FRAME_LAYOUT = {
          "doc": "Stands for the memo element with the integer key `key` and the version `version` of the"
                 " last frame under the root, with its tags moved to start at `tag_base`, in place of an"
                 " element. `ferro_frame_reuse` writes it when the root has that element."},
+        {"op": 12, "name": "bind", "writer": "ferro_frame_bind",
+         "fields": [{"field": "property", "type": "i64"}, {"field": "slot", "type": "i64"}],
+         "doc": "Binds a property of the open element to a slot of the signal table: a write of the slot"
+                " updates the property at the next apply, with no new frame."},
     ],
+}
+
+# The signal table shared through memory (docs/c-abi.md, section 14): what a binding that can
+# read and write memory needs to use it with loads and stores; the others call
+# `ferro_signal_set_*` and `ferro_signal_get_*`.
+SIGNAL_LAYOUT = {
+    "table": "ferro_signal_table",
+    "layout_version": 1,
+    "kinds": [
+        {"value": 1, "name": "i64"}, {"value": 2, "name": "f64", "doc": "the bits of the number"},
+        {"value": 3, "name": "bool", "doc": "0 or 1"}, {"value": 4, "name": "handle"},
+        {"value": 5, "name": "text", "doc": "the text is in the library; the value is its length in bytes"},
+    ],
+    "fields": [
+        {"field": "layout", "type": "u32"}, {"field": "capacity", "type": "u32", "doc": "a multiple of 64"},
+        {"field": "values", "type": "u64[capacity]", "writer": "the language (bound slots), the library (watched)"},
+        {"field": "versions", "type": "u64[capacity]", "writer": "the library"},
+        {"field": "dirty", "type": "u64[capacity / 64]", "writer": "the language, an atomic OR with release order"},
+        {"field": "changed", "type": "u64[capacity / 64]", "writer": "the library sets, the language clears"},
+        {"field": "kinds", "type": "u32[capacity]", "writer": "the library"},
+    ],
+    "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch",
 }
 
 
@@ -403,6 +429,7 @@ def build():
                   " each backend to apply the casing of its language.",
         "abi": {"functions": functions, "callbacks": callbacks, "statuses": statuses},
         "frame": FRAME_LAYOUT,
+        "signals": SIGNAL_LAYOUT,
         "classes": out_classes,
         "properties": out_properties,
         "events": out_events,

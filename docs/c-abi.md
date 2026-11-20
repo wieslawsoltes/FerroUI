@@ -523,3 +523,134 @@ a write and a frame within the noise of the three. The call itself is not where 
 call is (section 13.1), and the link of the 100-element benchmark took 52 s on 6 cores, so
 it is an option for an application that wants the last half nanosecond, not the default.
 It does not apply to Osprey, which calls the dynamic library.
+
+## 14. Signals shared through memory
+
+A signal is a value both sides of the bridge read and write directly: a slot of a table the
+library allocates once. A write of a signal from the language is a store, a read of a value
+the user changed is a load, and the library learns what changed from a bitset, with no call
+per value (#969 follow-up).
+
+### 14.1 What others do
+
+- **Seqlocks and versioned slots** (the Linux kernel, the shared-memory transports of trading
+  and robotics systems): a writer bumps a version around a write so that a reader of a
+  multi-word value can tell a torn read and retry. A value that fits one aligned word needs no
+  seqlock: the store is atomic. A version per slot still tells a reader what changed.
+- **Dirty bitsets and change rings**: game engines keep a changed bit per component (or per
+  chunk of an ECS component buffer) that a system scans and clears; replication layers and
+  audio engines pass parameter changes through a single-producer ring. A bitset holds one bit
+  per slot whatever the number of writes; a ring holds one record per write.
+- **React Native JSI / Hermes**: JavaScript holds host objects and calls C++ through them
+  synchronously; shared state is a C++ object both sides reach, not a copy, but every access is
+  still a call through the host object. Reanimated's shared values keep a value on the UI
+  thread that worklets read without going through the bridge.
+- **Flutter `dart:ffi`**: `Pointer<T>` and `asTypedList` give Dart direct loads and stores into
+  native memory; leaf calls are cheap, but memory is cheaper still.
+- **Godot GDExtension**: the engine hands the extension a table of function pointers and
+  variants are copied per call; it has no shared value table.
+- **WebAssembly and `SharedArrayBuffer`**: a UI on the main thread and a worker share a
+  buffer and use `Atomics.store`/`Atomics.load`/`Atomics.or` and a change counter, which is the
+  protocol below.
+- **FerroUI's declarative signals** (`ferroui-view`, `reactive.rs`): a `Signal<T>` handle into
+  a runtime of the thread, effects that run when a signal they read changes, and `batch` for
+  a group of writes. A slot can feed such a signal at the apply point (the apply sets it and
+  its effects run); the C ABI binds slots to properties directly instead, so the library does
+  not depend on `ferroui-view`.
+
+### 14.2 The table
+
+`ferro_signal_table(capacity)` returns a `FerroSignalTable` that stays at its address until the
+process ends (`ferro_signals_init` for a language that only calls):
+
+| Field | Words | Written by |
+| --- | --- | --- |
+| `values` | one 8-byte word per slot: `int64_t`, the bits of a `double`, `0`/`1`, a handle; for text the length | the language (slots it binds), the library (slots it watches) |
+| `versions` | one per slot, raised every time the value changes | the library |
+| `dirty` | one bit per slot | the language sets, the library takes |
+| `changed` | one bit per slot | the library sets, the language clears |
+| `kinds` | one `uint32_t` per slot (`FERRO_SIGNAL_I64` .. `FERRO_SIGNAL_TEXT`, `0` free) | the library |
+
+`ferro_signal_new(kind)` takes a slot; `ferro_signal_free` gives it back.
+
+- **Language to UI.** The language stores the value (a relaxed atomic store, or a plain store
+  on the UI thread), then sets bit `slot % 64` of `dirty[slot / 64]` (an atomic OR with release
+  order; a plain read-modify-write when only the UI thread writes). Any thread may write a
+  numeric slot this way. `ferro_signal_bind(slot, object, property)` binds a property to the
+  slot; a frame does the same with the `bind` record (12: property, slot,
+  `ferro_frame_bind`), and keeps the binding while its frames keep the record.
+- **The apply** runs on the UI thread at defined points: `ferro_signals_apply()`, the start of
+  every frame commit and the end of every dispatch. It takes each non-zero dirty word (an
+  atomic swap with acquire order), raises the version of each slot and writes the value to
+  every bound property through the typed setter of the property, resolved when the binding was
+  made (no handle or ID lookup per write), converted and validated as `ferro_set_f64` does.
+- **UI to language.** `ferro_signal_watch(slot, object, property)` subscribes to the changes of
+  a registered property: on every change the library writes the value (release order), raises
+  the version and sets the `changed` bit. The language reads with a load when it wants; the
+  version or the bit says whether anything changed. A text slot keeps the text in the library
+  (`ferro_signal_set_str`, `ferro_signal_get_cstr` when the version moved); its value word is
+  the length. What an apply writes into a property is not watched back into the same slot, so
+  a slot that is bound and watched (a text box) does not echo.
+- **Safety.** Every call checks the slot against the capacity and its kind; the apply ignores
+  bits of free slots, and `dirty` has exactly `capacity / 64` words, so no index is out of
+  bounds by construction. A binding holds a counted reference to its object and is checked
+  when it is made; a stale handle is `FERRO_BAD_HANDLE` there as everywhere. Direct stores and
+  loads are the language's own memory accesses inside arrays of the length the table states.
+
+### 14.3 What it costs
+
+Measured as section 13 (the same Mac, the median of five runs; the machine was not idle:
+other builds ran, load between 8 and 25, single numbers moved up to 30 % on the store line).
+
+| Operation | Through a call | Through the table |
+| --- | ---: | ---: |
+| Rust: write `FontSize` (setter) / a store and an apply | 34.4 ns | 52.7 ns |
+| Rust: 100 writes (100 setters / 100 stores and one apply) | 3.89 us | 4.48 us |
+| Rust: read `FontSize` (getter with a fallback / a load of a watched slot) | 7.3 ns | 0.6 ns |
+| Rust: one value of a frame of 100 elements (the frame written again / a bound value: a store and an apply) | 3.05 us | 52.5 ns |
+| C: write `FontSize` / a store and an apply | 35.8 ns | 47.5 ns |
+| C: 100 writes | 4.08 us | 4.28 us |
+| C: read `FontSize` / a load | 7.4 ns | 0.3 ns |
+| Osprey: 100 writes (100 setters / 100 `signalSetNumber` calls and one apply) | 3.60 us | 3.91 us |
+| Osprey: read `FontSize` (getter / `signalReadNumber`) | 11.9 ns | 6.7 ns |
+
+- **Reads pay**: a load of a watched value costs a tenth to a twentieth of a getter call, and
+  the language learns what changed from the versions and bits, with no event per value.
+- **Bound values in frames pay**: changing one value of a view through a bound slot costs
+  the write of that one property, not the description of the view again (58 times less for
+  100 elements). This is the fine-grained update that layer 2 lacked.
+- **Writes do not pay by themselves**: the property write of the framework is most of a
+  setter, and the apply adds the pass over the dirty words and its own bookkeeping, 5 to 15 %
+  more for 100 writes. A write through the table is still the way to batch writes from another
+  thread (any thread may store a numeric slot; a setter needs the UI thread and `ferro_post`)
+  and to update bound frame values; it is not a faster setter.
+
+### 14.4 What was left out
+
+- **An event ring** (events appended to a single-producer ring in shared memory that the
+  language drains with loads, next to the callback): implemented and measured, then removed.
+  From C a raise into the ring and its drain cost 51.3 ns against 49.7 ns to a C callback, from
+  Rust 42.8 against 40.7 ns; a language that cannot read memory (Osprey) drains it with a call
+  per event, which is what the callback costs. It may pay where a callback into the language
+  is expensive (a managed runtime's upcall); that is to be measured with such a binding.
+- **A shared string arena**: a text crosses as a copy into the language's own string either
+  way; the version tells when to read it, so a text slot costs one call per change, not per
+  read. An arena would add allocation and reuse rules on both sides for no fewer copies.
+- **The frame buffer in library memory**: `ferro_frame_commit_bytes` reads the caller's buffer
+  in place already; there is no copy at commit to remove.
+- **Seqlocks per slot**: every value is one aligned word, so a store is never torn; the text
+  of a text slot is read through a call on the UI thread.
+- **Feeding `ferroui-view` signals from slots**: possible at the apply point, but it would make
+  the C ABI depend on the declarative crate; bindings bind slots to properties directly.
+
+### 14.5 Which path to use
+
+Frames for structure, the signal table for values that change, direct calls for the rest: a
+view is built and restructured with frames, a value that changes after that is a bound slot
+written with a store, a value the user changes is a watched slot read with a load, and setters
+and getters serve setup, one-off writes and reads, and properties frames do not model. The
+table of cases, what not to do and what generated bindings do by default are in
+docs/bindings-design.md, section 2.1.
+
+The tests are `src/FerroUI.CApi/tests/signals_tests.rs` and `test_signals` of
+`samples/CApi/abi_test.c`; the Osprey sample is `samples/CApi/osprey-bindings/temperature_signals`.

@@ -14,7 +14,7 @@ property and event, in two layers:
 
 Both share the namespace `ferroui`: the `extern fn` declarations, the ID constants, the
 enumerations as unions, the fingerprint check and the start of an application. This is the
-MVP of the Osprey bindings (#950): it works end to end and is extended later (section 7).
+MVP of the Osprey bindings (#950): it works end to end and is extended later (section 8).
 
 ## 1. The files and the selection of an application
 
@@ -141,7 +141,7 @@ fn main() = {
 - **Children.** `add(parent, child)` returns the parent: children of a panel, the content of a
   window or a button, the child of a border.
 - **Handles** are plain integers. The framework holds the tree; the bindings do not release
-  the handles they return (section 7).
+  the handles they return (section 8).
 
 ## 4. Layer 2: frames
 
@@ -317,9 +317,36 @@ without the desktop platform; the Rust columns from docs/c-abi.md, section 13):
   Osprey string). Memo elements save the writing of the 99 unchanged elements but not their
   building and not the walk of their attributes that finds the key and the version (48.3 us);
   they pay off for subtrees larger than one text block, and fully once Osprey can skip
-  building a subtree (section 7).
+  building a subtree (section 8).
 
-## 7. Limits of the MVP
+## 7. Signals
+
+Signals are slots of the signal table of the library (docs/c-abi.md, section 14), named by an
+`int` like a handle (`core.osp`): `signalsInit(capacity)`, `signalText(text)`,
+`signalNumber(value)`, `signalInteger(value)`, `signalBool(value)`; `signalSetText(signal,
+text)` and the others write one; `signalReadText(signal)` and the others read one;
+`signalVersion(signal)` moves on every change. `signalBind(object, property, signal)` binds a
+property to a signal (layer 1, for the pipe), `signalWatch(object, property, signal)` watches a
+property into one, and in a view `bound(text(""), signal)` binds the property of a value
+attribute. A bound property follows every write at the next apply, which the library makes at
+the end of every dispatch and at the start of every frame commit; a watched one is written into
+its signal by the library when it changes, so the dispatcher reads it with no call to the
+control.
+
+```osprey
+fn signalBox(signal: int, tag: int) -> int =
+    textBox() |> width(80.0) |> signalBind(textPropertyId(), signal) |> signalWatch(textPropertyId(), signal)
+        |> onTextChanged(tag)
+```
+
+`samples/CApi/osprey-bindings/temperature_signals` is the temperature converter this way: each
+box is bound to a text signal and watched into it, and the dispatcher reads the typed text from
+the signal and writes the converted text into the other signal. Osprey cannot read or write
+memory, so a read and a write are one small call each: a read of a watched value costs 6.7 ns
+against 11.9 ns for the getter of the control, 100 writes and one apply 3.91 us against 3.60 us
+for 100 setter calls (section 14.3 of docs/c-abi.md).
+
+## 8. Limits of the MVP
 
 - **Handles are not released** by layer 1: a control removed from its parent lives while its
   handle does. Layer 2 releases what it removes.

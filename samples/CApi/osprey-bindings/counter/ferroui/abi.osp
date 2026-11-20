@@ -349,6 +349,11 @@ extern fn ferro_frame_bool(property: int, value: int8) -> int32
 // `value_property` (`0` for none), whose text and number [`ferro_frame_event_text`] and
 // [`ferro_frame_event_f64`] give. Any thread.
 extern fn ferro_frame_on(event: int, tag: int, valueProperty: int) -> int32
+// Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14):
+// the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding
+// while the frames keep the record, so a write of the slot updates the property with no new
+// frame. Any thread.
+extern fn ferro_frame_bind(property: int, slot: int) -> int32
 // Makes the open element a memo element: its subtree is what `version` says it is (a revision
 // of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets
 // that the version fixes. While the element keeps its key and its version, a commit does not
@@ -431,6 +436,64 @@ extern fn ferro_property_id(name: string, length: int) -> int
 // [`ferro_property_id`], the ID is the name, checked when it is first used with a class. Any
 // thread.
 extern fn ferro_event_id(name: string, length: int) -> int
+// [`ferro_signal_table`] for a language that cannot read memory (it calls `ferro_signal_set_*`
+// and `ferro_signal_get_*`): creates the table, or keeps the one that exists, and returns a
+// status. UI thread only.
+extern fn ferro_signals_init(capacity: int) -> int32
+// Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the
+// value `0` (the empty text), and returns its index, or a negative status
+// ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only.
+extern fn ferro_signal_new(kind: int32) -> int
+// Frees the slot `slot`: its bindings are removed and its kind is `FERRO_SIGNAL_FREE` until
+// [`ferro_signal_new`] takes it again. UI thread only.
+extern fn ferro_signal_free(slot: int) -> int32
+// Writes an integer into the slot and marks it dirty (the store and the bit of section 14, for
+// a language that cannot write memory). Any thread.
+extern fn ferro_signal_set_i64(slot: int, value: int) -> int32
+// Writes a number into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_f64(slot: int, value: float) -> int32
+// Writes a boolean into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_bool(slot: int, value: int8) -> int32
+// Writes a handle (`0` for null) into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_handle(slot: int, value: int) -> int32
+// Writes UTF-8 text (`length` bytes, negative for NUL-terminated) into a text slot and marks
+// it dirty; the slot value becomes the length. UI thread only.
+extern fn ferro_signal_set_str(slot: int, text: string, length: int) -> int32
+// The integer of the slot (the load of section 14, for a language that cannot read memory);
+// `0` when the slot is not an integer slot (recorded). Any thread.
+extern fn ferro_signal_get_i64(slot: int) -> int
+// The number of the slot; `0` when the slot is not a number slot (recorded). Any thread.
+extern fn ferro_signal_get_f64(slot: int) -> float
+// The boolean of the slot; `false` when the slot is not a boolean slot (recorded). Any thread.
+extern fn ferro_signal_get_bool(slot: int) -> int8
+// The version of the slot (raised every time its value changes); `-1` for a slot that is not
+// in the table (recorded). Any thread.
+extern fn ferro_signal_version(slot: int) -> int
+// The text of a text slot as NUL-terminated UTF-8 owned by the library until the next call on
+// the thread; the empty text when the slot is not a text slot (recorded), never `NULL`. A
+// language reads it when the version of the slot changed. UI thread only.
+extern fn ferro_signal_get_cstr(slot: int) -> string
+// Binds `property` of `object` to the slot: the property takes the value of the slot now and
+// every time an apply finds the slot dirty, with no frame and no call of the language. Returns
+// a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only.
+extern fn ferro_signal_bind(slot: int, object: int, property: int) -> int
+// Watches `property` of `object` into the slot: the library writes the value of the property
+// into the slot now and every time it changes (the value, then the version, then the changed
+// bit), so the language reads it with a load and no call. A text property goes into a text
+// slot (read with [`ferro_signal_get_cstr`] when the version changed). Returns a positive
+// binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only.
+extern fn ferro_signal_watch(slot: int, object: int, property: int) -> int
+// Removes a binding of [`ferro_signal_bind`] or [`ferro_signal_watch`]. UI thread only.
+extern fn ferro_signal_unbind(binding: int) -> int32
+// Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its
+// value written to every property bound to it. Returns the number of slots applied, or a
+// negative status (the first failed write; the others are still made). The library applies by
+// itself at the start of every frame commit and at the end of every dispatch; a language calls
+// this after writing slots outside them (a timer of its own). UI thread only.
+extern fn ferro_signals_apply() -> int
+// Clears `changed` bits of the slot for a language that cannot write memory, and returns
+// whether it was set. Any thread.
+extern fn ferro_signal_take_changed(slot: int) -> int8
 // Makes the calling thread the UI thread: UI objects can be created and used on it from now
 // on, and on no other thread. Registers the tables of types, so that every type, property and
 // event of the framework can be found by name. Calling it again on the UI thread does nothing;
@@ -503,7 +566,7 @@ extern fn ferro_get_cstr_or(object: int, property: int, fallback: string) -> str
 extern fn osprey_ffi_null() -> Ptr
 
 // Not declared, because Osprey cannot pass what they take (a pointer to a result, a buffer,
-// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_post_data, ferro_timer_start, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
+// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_signal_table, ferro_post_data, ferro_timer_start, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
 
 // ---- enumerations ----------------------------------------------------------------------------
 

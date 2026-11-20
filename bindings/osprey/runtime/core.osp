@@ -106,3 +106,84 @@ fn run(registered: int32) -> int = match checkApi() {
         true => toInt(ferro_app_run(options: osprey_ffi_null(), onStart: dispatchStart, token: 0))
     }
 }
+
+// ---- signals (docs/osprey.md, section 7) ------------------------------------------------------
+//
+// A signal is a slot of the signal table of the library (docs/c-abi.md, section 14), named by
+// its index like a handle. A property bound to a signal (`signalBind`, or `bound(attr, signal)`
+// in a view) follows every write of the signal at the next apply, which the library makes at
+// the end of every dispatch and at the start of every frame commit, with no call per property;
+// a property watched into a signal (`signalWatch`) is written into it by the library, and
+// `signalReadText` (`signalReadNumber`, ...) reads it, no call to the control. Osprey cannot
+// read or write memory, so a write and a read are one small call each.
+
+// Creates the signal table (once per process; later calls keep the first capacity).
+fn signalsInit(capacity: int) -> int = toInt(ferro_signals_init(capacity: capacity))
+
+fn signalText(text: string) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(5))
+    let _ = ferro_signal_set_str(slot: signal, text: text, length: -1)
+    signal
+}
+
+fn signalNumber(value: float) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(2))
+    let _ = ferro_signal_set_f64(slot: signal, value: value)
+    signal
+}
+
+fn signalInteger(value: int) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(1))
+    let _ = ferro_signal_set_i64(slot: signal, value: value)
+    signal
+}
+
+fn signalBool(value: bool) -> int = {
+    let signal = ferro_signal_new(kind: toInt32(3))
+    let _ = ferro_signal_set_bool(slot: signal, value: value ? toInt8(1) : toInt8(0))
+    signal
+}
+
+// Writes a signal; the bound properties follow at the next apply.
+fn signalSetText(signal: int, text: string) -> Unit = {
+    let _ = ferro_signal_set_str(slot: signal, text: text, length: -1)
+}
+
+fn signalSetNumber(signal: int, value: float) -> Unit = {
+    let _ = ferro_signal_set_f64(slot: signal, value: value)
+}
+
+fn signalSetInteger(signal: int, value: int) -> Unit = {
+    let _ = ferro_signal_set_i64(slot: signal, value: value)
+}
+
+fn signalSetBool(signal: int, value: bool) -> Unit = {
+    let _ = ferro_signal_set_bool(slot: signal, value: value ? toInt8(1) : toInt8(0))
+}
+
+// Reads a signal: what the language wrote, or what the library wrote into a watched one.
+fn signalReadText(signal: int) -> string = "${ferro_signal_get_cstr(slot: signal)}"
+
+fn signalReadNumber(signal: int) -> float = ferro_signal_get_f64(slot: signal)
+
+fn signalReadInteger(signal: int) -> int = ferro_signal_get_i64(slot: signal)
+
+fn signalReadBool(signal: int) -> bool = ferro_signal_get_bool(slot: signal) != toInt8(0)
+
+// The version of a signal: it moves every time the value changes.
+fn signalVersion(signal: int) -> int = ferro_signal_version(slot: signal)
+
+// Binds `property` of `object` to `signal` and returns `object`, for the pipe.
+fn signalBind(object: int, property: int, signal: int) -> int = {
+    let _ = ferro_signal_bind(slot: signal, object: object, property: property)
+    object
+}
+
+// Watches `property` of `object` into `signal` and returns `object`, for the pipe.
+fn signalWatch(object: int, property: int, signal: int) -> int = {
+    let _ = ferro_signal_watch(slot: signal, object: object, property: property)
+    object
+}
+
+// Applies the written signals now (outside a dispatch: a timer of the application).
+fn signalsApply() -> int = ferro_signals_apply()

@@ -26,6 +26,7 @@ type Attr<M> = AttrText { attrTextProperty: int, attrTextValue: string }
     | AttrOn { attrOnEvent: int, attrOnMessage: M }
     | AttrOnValue { attrValueEvent: int, attrValueProperty: int, attrValueMessage: M }
     | AttrMemo { attrMemoVersion: int }
+    | AttrBind { attrBindProperty: int, attrBindSignal: int }
 
 // An element: a class (its type ID), attributes and children.
 type Element<M> = { elementType: int, elementAttrs: List<Attr<M>>, elementChildren: List<Element<M>> }
@@ -38,6 +39,17 @@ fn key<M>(value: int) -> Attr<M> = AttrKey { attrKeyValue: value }
 // one reuse record in place of the subtree and the library does not look into it; a new
 // version writes it again. Give a new version whenever anything in the subtree changes.
 fn memo<M>(version: int) -> Attr<M> = AttrMemo { attrMemoVersion: version }
+
+// The property of a value attribute bound to a signal (`bound(text(""), celsius)`): the element
+// takes the value of the signal, and follows its writes with no new frame (core.osp, signals).
+// The value of the attribute itself is not written.
+fn bound<M>(attr: Attr<M>, signal: int) -> Attr<M> = match attr {
+    AttrText { attrTextProperty, attrTextValue } => AttrBind { attrBindProperty: attrTextProperty, attrBindSignal: signal }
+    AttrNumber { attrNumberProperty, attrNumberValue } => AttrBind { attrBindProperty: attrNumberProperty, attrBindSignal: signal }
+    AttrInteger { attrIntegerProperty, attrIntegerValue } => AttrBind { attrBindProperty: attrIntegerProperty, attrBindSignal: signal }
+    AttrBool { attrBoolProperty, attrBoolValue } => AttrBind { attrBindProperty: attrBoolProperty, attrBindSignal: signal }
+    _ => attr
+}
 
 // ---- writing a frame ------------------------------------------------------------------------
 
@@ -80,6 +92,10 @@ fn writeAttr<M>(attr: Attr<M>, tag: int) -> int = match attr {
     }
     AttrKey { attrKeyValue } => tag
     AttrMemo { attrMemoVersion } => tag
+    AttrBind { attrBindProperty, attrBindSignal } => {
+        let _ = ferro_frame_bind(property: attrBindProperty, slot: attrBindSignal)
+        tag
+    }
     AttrOn { attrOnEvent, attrOnMessage } => {
         let _ = ferro_frame_on(event: attrOnEvent, tag: tag, valueProperty: 0)
         tag + 1

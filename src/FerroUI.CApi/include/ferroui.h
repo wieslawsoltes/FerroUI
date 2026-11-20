@@ -14,6 +14,27 @@
 // version; a change that breaks a binding raises it.
 #define FERRO_ABI_VERSION 1
 
+// A free slot.
+#define FERRO_SIGNAL_FREE 0
+
+// A slot of an `int64_t` (an enumeration as its value).
+#define FERRO_SIGNAL_I64 1
+
+// A slot of a `double`, stored as its bits.
+#define FERRO_SIGNAL_F64 2
+
+// A slot of a boolean, stored as `0` or `1`.
+#define FERRO_SIGNAL_BOOL 3
+
+// A slot of a handle (`0` for null).
+#define FERRO_SIGNAL_HANDLE 4
+
+// A slot of a text: the text is in the library, the slot value is its length in bytes.
+#define FERRO_SIGNAL_TEXT 5
+
+// The version of the layout of [`FerroSignalTable`].
+#define FERRO_SIGNAL_LAYOUT 1
+
 // The result of a call: [`FERRO_OK`] (`0`), or a negative error code.
 typedef int32_t FerroStatus;
 
@@ -38,6 +59,27 @@ typedef int64_t (*FerroEventDataFn)(void *user_data, FerroHandle sender, int64_t
 // Releases the user data of a subscription ([`ferro_subscribe_data`]) once the handler is
 // removed: by [`ferro_unsubscribe`], or when the object goes away.
 typedef void (*FerroReleaseFn)(void *user_data);
+
+// The signal table of the process (docs/c-abi.md, section 14): arrays the library allocates
+// once, which stay at their addresses until the process ends. `capacity` is a multiple of 64;
+// `dirty` and `changed` have `capacity / 64` words.
+typedef struct {
+    // [`FERRO_SIGNAL_LAYOUT`].
+    uint32_t layout;
+    // The number of slots.
+    uint32_t capacity;
+    // The value of each slot, written whole.
+    uint64_t *values;
+    // The version of each slot: raised by the library every time the value changes.
+    uint64_t *versions;
+    // Language to UI: a bit per slot, set by the language after it wrote the value.
+    uint64_t *dirty;
+    // UI to language: a bit per slot, set by the library after it wrote a watched value; the
+    // language clears it.
+    uint64_t *changed;
+    // What each slot holds (`FERRO_SIGNAL_*`); written by the library only.
+    const uint32_t *kinds;
+} FerroSignalTable;
 
 // Work posted to the UI thread with [`ferro_post`]: called with its token. The result is
 // ignored (a function that returns `int64_t` is what every language can make).
@@ -263,6 +305,12 @@ FerroStatus ferro_frame_bool(int64_t property, bool value);
 // and number [`ferro_frame_event_text`] and [`ferro_frame_event_f64`] give. Any thread.
 FerroStatus ferro_frame_on(int64_t event, int64_t tag, int64_t value_property);
 
+// Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14):
+// the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding
+// while the frames keep the record, so a write of the slot updates the property with no new
+// frame. Any thread.
+FerroStatus ferro_frame_bind(int64_t property, int64_t slot);
+
 // Makes the open element a memo element: its subtree is what `version` says it is (a revision
 // of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets
 // that the version fixes. While the element keeps its key and its version, a commit does not
@@ -371,6 +419,88 @@ int64_t ferro_property_id(const char *name, int64_t length);
 // name, checked when it is first used with a class. Any thread.
 int64_t ferro_event_id(const char *name,
                        int64_t length);
+
+// Creates the signal table of the process with room for `capacity` slots (rounded up to a
+// multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay
+// at their addresses until the process ends. `NULL` on a failure (a capacity that is not
+// positive or above 2^24; off the UI thread). UI thread only.
+const FerroSignalTable *ferro_signal_table(int64_t capacity);
+
+// [`ferro_signal_table`] for a language that cannot read memory (it calls
+// `ferro_signal_set_*` and `ferro_signal_get_*`): creates the table, or keeps the one that
+// exists, and returns a status. UI thread only.
+FerroStatus ferro_signals_init(int64_t capacity);
+
+// Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the
+// value `0` (the empty text), and returns its index, or a negative status
+// ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only.
+int64_t ferro_signal_new(int32_t kind);
+
+// Frees the slot `slot`: its bindings are removed and its kind is `FERRO_SIGNAL_FREE` until
+// [`ferro_signal_new`] takes it again. UI thread only.
+FerroStatus ferro_signal_free(int64_t slot);
+
+// Writes an integer into the slot and marks it dirty (the store and the bit of section 14, for
+// a language that cannot write memory). Any thread.
+FerroStatus ferro_signal_set_i64(int64_t slot, int64_t value);
+
+// Writes a number into the slot and marks it dirty. Any thread.
+FerroStatus ferro_signal_set_f64(int64_t slot, double value);
+
+// Writes a boolean into the slot and marks it dirty. Any thread.
+FerroStatus ferro_signal_set_bool(int64_t slot, bool value);
+
+// Writes a handle (`0` for null) into the slot and marks it dirty. Any thread.
+FerroStatus ferro_signal_set_handle(int64_t slot, FerroHandle value);
+
+// Writes UTF-8 text (`length` bytes, negative for NUL-terminated) into a text slot and marks
+// it dirty; the slot value becomes the length. UI thread only.
+FerroStatus ferro_signal_set_str(int64_t slot, const char *text, int64_t length);
+
+// The integer of the slot (the load of section 14, for a language that cannot read memory);
+// `0` when the slot is not an integer slot (recorded). Any thread.
+int64_t ferro_signal_get_i64(int64_t slot);
+
+// The number of the slot; `0` when the slot is not a number slot (recorded). Any thread.
+double ferro_signal_get_f64(int64_t slot);
+
+// The boolean of the slot; `false` when the slot is not a boolean slot (recorded). Any thread.
+bool ferro_signal_get_bool(int64_t slot);
+
+// The version of the slot (raised every time its value changes); `-1` for a slot that is not
+// in the table (recorded). Any thread.
+int64_t ferro_signal_version(int64_t slot);
+
+// The text of a text slot as NUL-terminated UTF-8 owned by the library until the next call on
+// the thread; the empty text when the slot is not a text slot (recorded), never `NULL`. A
+// language reads it when the version of the slot changed. UI thread only.
+const char *ferro_signal_get_cstr(int64_t slot);
+
+// Binds `property` of `object` to the slot: the property takes the value of the slot now and
+// every time an apply finds the slot dirty, with no frame and no call of the language. Returns a
+// positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only.
+int64_t ferro_signal_bind(int64_t slot, FerroHandle object, int64_t property);
+
+// Watches `property` of `object` into the slot: the library writes the value of the property
+// into the slot now and every time it changes (the value, then the version, then the changed
+// bit), so the language reads it with a load and no call. A text property goes into a text slot
+// (read with [`ferro_signal_get_cstr`] when the version changed). Returns a positive binding ID
+// for [`ferro_signal_unbind`], or a negative status. UI thread only.
+int64_t ferro_signal_watch(int64_t slot, FerroHandle object, int64_t property);
+
+// Removes a binding of [`ferro_signal_bind`] or [`ferro_signal_watch`]. UI thread only.
+FerroStatus ferro_signal_unbind(int64_t binding);
+
+// Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its
+// value written to every property bound to it. Returns the number of slots applied, or a
+// negative status (the first failed write; the others are still made). The library applies by
+// itself at the start of every frame commit and at the end of every dispatch; a language calls
+// this after writing slots outside them (a timer of its own). UI thread only.
+int64_t ferro_signals_apply(void);
+
+// Clears `changed` bits of the slot for a language that cannot write memory, and returns
+// whether it was set. Any thread.
+bool ferro_signal_take_changed(int64_t slot);
 
 // Makes the calling thread the UI thread: UI objects can be created and used on it from now on,
 // and on no other thread. Registers the tables of types, so that every type, property and event
