@@ -339,13 +339,13 @@ fn names_in_a_template_of_the_drawn_decorations_do_not_make_a_document_ambient()
           </WindowDrawnDecorationsContent></WindowDrawnDecorationsTemplate></Setter>
         </ControlTheme>"#,
     );
-    let plan = plan(&templated, &merged).expect("units");
-    let decorations = unit(&plan, "Controls/WindowDrawnDecorations.xaml");
+    let units = plan(&templated, &merged).expect("units");
+    let decorations = unit(&units, "Controls/WindowDrawnDecorations.xaml");
     assert_eq!(decorations.type_keys, strings(&["WindowDrawnDecorations"]));
     assert!(decorations.types.contains(&"Button".to_string()), "{:?}", decorations.types);
-    assert!(!unit(&plan, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
+    assert!(!unit(&units, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
 
     let named = theme(r#"<Border x:Key="Frame"><Button x:Name="PART_CloseButton" /></Border>"#);
-    let plan = plan(&named, &merged).expect("units");
-    assert!(unit(&plan, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
+    let units = plan(&named, &merged).expect("units");
+    assert!(unit(&units, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
 }
