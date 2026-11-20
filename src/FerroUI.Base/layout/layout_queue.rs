@@ -151,6 +151,11 @@ impl<T: LayoutQueueItem> LayoutQueue<T> {
     /// Ends a layout loop, and tells whether a pass over a large tree filled the queue (its
     /// storage beyond what an emptied buffer keeps was given back; `utilities::resting`, #836).
     pub fn end_loop(&mut self) -> bool {
+        // A loop that queued nothing (an idle pass) has nothing to clear or give back: what a
+        // pass over a large tree filled was given back at the end of that pass.
+        if self.loop_queue_info.entries.is_empty() && self.not_finalized_buffer.is_empty() && self.inner.is_empty() {
+            return false;
+        }
         for (item, info) in &self.loop_queue_info.entries {
             if info.count >= self.max_enqueue_count_per_loop {
                 self.not_finalized_buffer.push((item.clone(), *info));
