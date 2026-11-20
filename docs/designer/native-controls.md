@@ -71,17 +71,17 @@ Open the owning Cargo project and build it from **Project** to load the exported
 
 ### Follow a Rust declaration from XAML
 
-Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, or typed binding member and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
+Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, typed binding member, or style selector operand and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
 
 ### Review a registered property rename
 
-Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name or a typed binding member and choose the **Rename registered property** icon in the source toolbar. Enter its new public name and choose **Review property rename**.
+Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name, a typed binding member, or a property inside a style selector. Choose the **Rename registered property** icon, enter its new public name, and choose **Review property rename**.
 
 Choose a file and compare **Original source** and **Proposed source**. If Studio shows **Potential references**, choose a location and select the source icon to inspect that usage. Open a new review when ready to apply. Use the check icon to commit the displayed Rust and XAML patches. Undo or Redo from any participating tab moves all the edits together. Save the files and rebuild the package to publish the new schema. [Supported source forms](vscode/authoring.md#rename-a-registered-xaml-property) · [MCP workflow](vscode/reference.md#review-a-registered-property-rename-with-mcp)
 
 ### Review a registered type rename
 
-Build the owning Cargo package to index its XAML types and Rust declarations. In **Code** or **Split**, put the caret on a registered control tag or a type value. Select the **Rename registered type** icon and enter the new name.
+Build the owning Cargo package to index its XAML types and Rust declarations. In **Code** or **Split**, put the caret on a registered control tag, type value, or type inside a style selector. Select the **Rename registered type** icon and enter the new name.
 
 When the XAML name comes from its Rust declaration, Studio resolves Rust references in the background using `rust-analyzer` on `PATH`. Set `FERROUI_RUST_ANALYZER` to an executable path to select a specific copy. For a literal XAML alias, the review opens as soon as the source planner finishes.
 

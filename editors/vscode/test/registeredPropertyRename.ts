@@ -8,7 +8,16 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     const { propertyRename } = await extension.activate();
     const original = xaml.getText();
     const sibling = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredPropertyConsumer.xaml');
-    const consumer = original.replace('Caption="Review"', 'Caption="🧭 More details"');
+    const consumer = [
+        '<StackPanel xmlns="https://github.com/ferroui" xmlns:local="using:Audit.Controls">',
+        '    <StackPanel.Styles>',
+        '        <Style Selector="Border &gt; :is(local|AuditCard).Caption[Caption=Caption]">',
+        '            <Setter Property="Caption" Value="🧭 More details"/>',
+        '        </Style>',
+        '    </StackPanel.Styles>',
+        '    <local:AuditCard Caption="Customer"/>',
+        '</StackPanel>',
+    ].join('\r\n');
     await vscode.workspace.fs.writeFile(sibling, Buffer.from(consumer));
     const rust = await vscode.workspace.openTextDocument(rustUri);
     const rustOriginal = rust.getText();
@@ -40,13 +49,21 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     await vscode.commands.executeCommand('ferroui.propertyRenameReview.apply');
     await until(() => xaml.getText().includes('Heading='));
     const opened = await vscode.workspace.openTextDocument(sibling);
-    assert.equal(opened.getText(), nextConsumer.replace('Caption=', 'Heading='));
+    assert.equal(opened.getText(), nextConsumer
+        .replace('[Caption=', '[Heading=')
+        .replace('Property="Caption"', 'Property="Heading"')
+        .replace('AuditCard Caption=', 'AuditCard Heading='));
     assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
     await vscode.window.showTextDocument(xaml);
     await vscode.commands.executeCommand('undo');
     await until(() => xaml.getText() === original && opened.getText() === nextConsumer && rust.getText() === draft);
+    const selector = opened.positionAt(nextConsumer.indexOf('[Caption=') + 2);
+    await until(async () => {
+        const [definition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, selector) ?? [];
+        return definition?.uri.toString() === rust.uri.toString() && rust.getText(definition.range) === 'Caption';
+    });
     await vscode.window.showTextDocument(rust);
     await vscode.commands.executeCommand('undo');
     await until(() => rust.getText() === rustOriginal);
-    console.log('VS Code reviewed a registered property change, rejected a stale plan, and undid the grouped Rust and XAML edits');
+    console.log('VS Code navigated and reviewed a registered property across XAML selectors and Rust, rejected a stale plan, and undid the group');
 }

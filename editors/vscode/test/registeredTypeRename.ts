@@ -7,6 +7,8 @@ export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rust
     const extension = vscode.extensions.getExtension<{ typeRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { typeRename } = await extension.activate();
     const xamlConsumer = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredTypeConsumer.xaml');
+    const styled = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredPropertyConsumer.xaml'));
+    const originalStyle = styled.getText();
     const codeConsumer = vscode.Uri.joinPath(rustUri, '..', 'registered_type_consumer.rs');
     const markup = '<ContentControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="using:Audit.Controls" Content="{x:Type ui:AuditCard}"/>';
     const code = 'use crate::AuditCard;\nfn inspect(_: &AuditCard) {}\n';
@@ -48,10 +50,11 @@ export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rust
         assert.equal(editedXaml.getText(), markup.replaceAll(symbol, replacement));
         assert.equal(editedRust.getText(), code.replaceAll(symbol, replacement));
         assert.equal(rust.getText(), originalRust.replaceAll(symbol, replacement));
+        assert.equal(styled.getText(), originalStyle.replaceAll(symbol, replacement));
         await vscode.window.showTextDocument(xaml);
         await vscode.commands.executeCommand('undo');
         await until(() => xaml.getText() === originalXaml && editedXaml.getText() === markup
-            && editedRust.getText() === code && rust.getText() === originalRust);
-        console.log('VS Code reviewed a registered control rename with a Rust provider and undid all four files');
+            && editedRust.getText() === code && rust.getText() === originalRust && styled.getText() === originalStyle);
+        console.log('VS Code reviewed a control rename with a Rust provider and undid all five files, including the style selector');
     } finally { provider.dispose(); }
 }
