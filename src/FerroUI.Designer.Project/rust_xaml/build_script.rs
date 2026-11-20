@@ -1,5 +1,5 @@
 //! Identify the authored FerroUI builders without inspecting generated Rust.
-use super::{RustPathAnchor, string_literal};
+use super::{string_literal, RustPathAnchor};
 use std::collections::BTreeMap;
 use syn::{Expr, ExprMethodCall, Item, LitStr, Local, Macro, Pat, UseTree};
 
@@ -7,6 +7,7 @@ pub(super) enum Site<'source> {
     Path(&'source LitStr, RustPathAnchor),
     Key(&'source LitStr, &'source Macro),
     Registration(&'source LitStr, &'source LitStr, &'source Macro, bool),
+    FileDocuments,
     Root(&'source LitStr),
     Discovery,
 }
@@ -114,13 +115,17 @@ impl<'source> BuildScript<'source> {
                 .into_iter()
                 .map(|(key, input)| Site::Key(key, input))
                 .collect(),
+            (Some(Builder::Group), "document_files") => vec![Site::FileDocuments],
             (Some(Builder::Group), "class_document") => {
                 let Some(literal) = string_literal(value) else {
                     return Vec::new();
                 };
-                if let Some(entries) = self.documents(&call.receiver) {
+                if let Some(documents) = self.documents(&call.receiver) {
+                    if documents.method == "document_files" {
+                        return Vec::new();
+                    }
                     return self
-                        .keys(entries)
+                        .keys(&documents.args[0])
                         .into_iter()
                         .filter(|(key, _)| key.value() == literal.value())
                         .map(|(_, input)| Site::Key(literal, input))
@@ -171,6 +176,10 @@ impl<'source> BuildScript<'source> {
         let Some(documents) = self.documents(expression) else {
             return vec![Site::Discovery];
         };
+        if documents.method == "document_files" {
+            // The selected Cargo build records the inputs and logical aliases.
+            return Vec::new();
+        }
         let mut exported = true;
         for member in self.builder_chain(expression) {
             match member {
@@ -181,7 +190,7 @@ impl<'source> BuildScript<'source> {
                         .first()
                         .and_then(|arg| string_literal(self.value(arg)));
                     return module.map_or_else(Vec::new, |module| {
-                        self.keys(documents)
+                        self.keys(&documents.args[0])
                             .into_iter()
                             .map(|(key, input)| Site::Registration(module, key, input, exported))
                             .collect()
@@ -193,10 +202,15 @@ impl<'source> BuildScript<'source> {
         Vec::new()
     }
 
-    fn documents(&self, expression: &'source Expr) -> Option<&'source Expr> {
+    fn documents(&self, expression: &'source Expr) -> Option<&'source ExprMethodCall> {
         self.builder_chain(expression)
             .find_map(|member| match member {
-                Expr::MethodCall(call) if call.method == "documents" => call.args.first(),
+                Expr::MethodCall(call)
+                    if (call.method == "documents" || call.method == "document_files")
+                        && call.args.len() == 1 =>
+                {
+                    Some(call)
+                }
                 _ => None,
             })
     }

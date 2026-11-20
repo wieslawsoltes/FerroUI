@@ -172,11 +172,33 @@ The planner follows literal XAML includes, typed URI and image properties, and c
 
 In the selected Cargo build target, the review can update `Build::input`, Cargo rerun directives, and the registration keys in `XamlGroup::documents` and `class_document` that directly identify the moved file. Rust includes keep the filesystem spelling. Compiled registration keys follow their XAML root and use URI escapes such as `%20` for a space.
 
-An exported group can publish `Shared/Palette.xaml` from a file such as `Themes/PaletteSource.xaml`. Moving the file updates its literal `include_str!` and keeps the published alias. When a key follows the source path, the review also updates literal `ferres://` consumers in XAML and Rust. Run **Build Project XAML Schema** for a package with a custom assembly name so the planner can use its emitted name. If the new address is already registered, choose another destination. Review computed paths in the build script.
+An exported group can publish `Shared/Palette.xaml` from a file such as `Themes/PaletteSource.xaml`. Moving the file updates its literal `include_str!` and keeps the published alias. When a key follows the source path, the review also updates literal `ferres://` consumers in XAML and Rust. Run **Build Project XAML Schema** for a package with a custom assembly name so the planner can use its emitted name. If the new address is already registered, choose another destination.
 
 For a move that changes a generated Rust `build_…` name, build the owning package with **Build Project XAML Schema** and let rust-analyzer load the same Cargo target. The Changes editor shows affected authored Rust imports and calls beside the XAML and Cargo changes. A move can change a neighboring build function when their keys previously produced the same name. A class keeps its `populate` entry point. Save the reviewed sources and run Cargo to regenerate the Rust modules. If the generated declaration is out of date or rust-analyzer cannot resolve it, refresh the schema and let rust-analyzer finish loading before reviewing again.
 
 The review includes saved stage sets and native scenario JSON, including unsaved edits to their open buffers. Stage sets use file URIs. Scenarios use paths relative to their own directory or absolute file paths. When a stage URI changes, its prototype scenario remap key follows it. A remap's path changes when it points to the moved file. The planner edits those values in their original JSON positions. Repair an incomplete draft that still has a relevant saved reference, or resolve a conflicting remap key, before reviewing the move again. [Studio workflow](../native-controls.md#move-an-xaml-file) · [MCP workflow](reference.md#move-an-xaml-file-with-mcp)
+
+### Computed Cargo groups with file-backed registrations
+
+Declare the logical key and physical path separately with `xaml_document_file!`. Relative input paths start at the Cargo package directory. Pass the records selected by your build script to `XamlGroup::document_files`. Use the key in `class_document` when a group compiles an `x:Class`. The build watches the physical files and records the Rust declaration that supplied each one.
+
+```rust
+use ferroui_build::{xaml_document_file, Build, TypeSystem, XamlGroup};
+
+fn main() {
+    let preview = xaml_document_file!("Themes/Preview.xaml", "Source/Preview.xaml");
+    let production = xaml_document_file!("Themes/Light.xaml", "Source/Light.xaml");
+    let mut build = Build::from_env().type_system(TypeSystem::Model);
+    for (module, file) in [("preview_theme", preview), ("production_theme", production)] {
+        build = build.compile_group(XamlGroup::new(module).document_files(&[file]));
+    }
+    build.run();
+}
+```
+
+Run **Build Project XAML Schema** for the Cargo target you want to review. The **Changes** editor includes the path literal in `build.rs` or in the Rust module that declares the selected input. The review keeps the logical key, `ferres://` consumers, and generated Rust names. After applying the move, save the participating sources and rebuild the package. [Computed groups in the Dock sample](../../../samples/Dock/FerroDockReactiveUISample/build.rs)
+
+The review uses the declaration positions from the selected build. If a declaration shifted, save it and build the schema again. Give the physical path as a literal at the `xaml_document_file!` call so the move can preserve the rest of the computation. If the review flags a relative XAML reference that would resolve differently after a move, use an explicit resource URI that resolves under the published key and review again.
 
 ![The Changes editor shows the new dictionary location and each affected reference beside the preview](../images/vscode-xaml-file-move-review.jpg)
 

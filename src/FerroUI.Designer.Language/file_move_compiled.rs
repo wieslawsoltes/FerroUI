@@ -1,10 +1,12 @@
 //! Keep explicit Cargo registrations and their packaged URI consumers in one move plan.
-use super::{compiled_key, input_base, refers_to, xaml_roots};
-use crate::{FileMoveDraft, LanguageError, LanguageService, Result, require};
-use ferroui_build_scan::model::AssemblyModel;
+use super::{compiled_key, input_base, inputs, refers_to, xaml_roots};
+use crate::{require, FileMoveDraft, LanguageError, LanguageService, Result};
+use ferroui_build_scan::{
+    compiled_index::CompiledXamlInput, compiled_names::CompiledGroupKind, model::AssemblyModel,
+};
 use ferroui_designer_project::{
-    RustXamlReferences, RustXamlRegistration, XamlFileMove, canonical_file_uri, file_path,
-    file_uri, relative_asset_path, resolve_uri,
+    canonical_file_uri, file_path, file_uri, relative_asset_path, resolve_uri, RustXamlReferences,
+    RustXamlRegistration, XamlFileMove,
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -23,6 +25,10 @@ pub(crate) struct CompiledAddresses {
     build: Option<BuildSnapshot>,
     pub(crate) generated_rust: Vec<GeneratedRustRename>,
     generated_directory: Option<PathBuf>,
+    pub(super) file_inputs: BTreeMap<String, Vec<CompiledXamlInput>>,
+    pub(super) has_compiler_index: bool,
+    file_class_keys: BTreeSet<String>,
+    discovered_class_keys: BTreeSet<String>,
 }
 
 pub(super) struct BuildSnapshot {
@@ -62,10 +68,7 @@ impl CompiledAddresses {
         } else {
             return Ok(Self::default());
         };
-        let Ok(references) = RustXamlReferences::parse(&source, true) else {
-            // The Rust patch planner reports incomplete scripts that reference the moved file.
-            return Ok(Self::default());
-        };
+        let references = RustXamlReferences::parse(&source, true);
         let destination = file_path(&movement.to)?;
         let mut addresses = Self {
             workspace: service.workspace_root(&movement.from).cloned(),
@@ -85,8 +88,16 @@ impl CompiledAddresses {
             catalog.iter().all(|model| model.name == assembly),
             "Rebuild the package XAML schema to resolve conflicting assembly names",
         )?;
-        let roots = xaml_roots(package, &references);
-        for registration in references.registrations.iter().filter(|item| item.exported) {
+        let roots = references
+            .as_ref()
+            .ok()
+            .map(|references| xaml_roots(package, references))
+            .unwrap_or_default();
+        for registration in references
+            .iter()
+            .flat_map(|references| &references.registrations)
+            .filter(|item| item.exported)
+        {
             let Some(base) = input_base(package, &script_path, registration.anchor) else {
                 continue;
             };
@@ -106,30 +117,102 @@ impl CompiledAddresses {
             } else {
                 None
             };
-            if let Some(old) = addresses.routes.insert(key, next.clone()) {
-                require(
-                    old == next,
-                    format!("The registered XAML address {previous} is ambiguous"),
-                )?;
-            }
+            addresses.insert_route(key, &previous, next)?;
         }
         if let Some((_, project)) = schema {
-            let manifest = package.join("Cargo.toml").canonicalize()
+            let manifest = package
+                .join("Cargo.toml")
+                .canonicalize()
                 .map_err(ferroui_designer_project::ProjectError::from)?;
             if let Some(output) = project.catalog.compiled_xaml_output(&manifest)? {
+                for group in &output.index.groups {
+                    if group.kind != CompiledGroupKind::Class {
+                        continue;
+                    }
+                    let Some(key) = group
+                        .members
+                        .first()
+                        .and_then(|member| class_key(&member.key))
+                    else {
+                        continue;
+                    };
+                    if group.file_backed {
+                        addresses.file_class_keys.insert(key);
+                    } else if group.discovery_root.is_some() {
+                        addresses.discovered_class_keys.insert(key);
+                    }
+                }
+                let file_modules: BTreeSet<_> = output
+                    .index
+                    .groups
+                    .iter()
+                    .filter(|group| group.file_backed)
+                    .map(|group| group.module.as_str())
+                    .collect();
+                addresses.has_compiler_index = !file_modules.is_empty();
                 addresses.generated_directory = Some(output.module_directory());
-                addresses.generated_rust = symbols::plan(
-                    &output, movement, &roots, &script, &script_path, &references,
-                )?;
+                if let Ok(references) = &references {
+                    addresses.generated_rust = symbols::plan(
+                        &output,
+                        movement,
+                        &roots,
+                        &script,
+                        &script_path,
+                        references,
+                    )?;
+                }
+                for document in catalog.iter().flat_map(|model| &model.documents) {
+                    if document.public
+                        && document
+                            .build_path
+                            .iter()
+                            .chain(&document.populate_path)
+                            .filter_map(|path| path.rsplit("::").nth(1))
+                            .any(|module| file_modules.contains(module))
+                    {
+                        if let Some(key) = address_key(&document.uri) {
+                            addresses.insert_route(key, &document.uri, None)?;
+                        }
+                    }
+                }
+                addresses.file_inputs =
+                    inputs::by_source(service, movement, output.index.file_inputs)?;
             }
         }
-        addresses.build = Some(BuildSnapshot {
-            uri: script,
-            source,
-            references,
-        });
+        if let Ok(references) = references {
+            addresses.build = Some(BuildSnapshot {
+                uri: script,
+                source,
+                references,
+            });
+        }
         addresses.check_destinations()?;
         Ok(addresses)
+    }
+
+    pub(crate) fn moves_file_input(&self) -> bool {
+        !self.file_inputs.is_empty()
+    }
+
+    pub(super) fn preserves_class_key(&self, key: &str) -> Result<bool> {
+        let Some(key) = class_key(key).filter(|key| self.file_class_keys.contains(key)) else {
+            return Ok(false);
+        };
+        require(
+            !self.discovered_class_keys.contains(&key),
+            format!("The class selector {key} is shared by file-backed and discovered groups. Select the file-backed class with the registration's key() method."),
+        )?;
+        Ok(true)
+    }
+
+    fn insert_route(&mut self, key: String, uri: &str, next: Option<String>) -> Result<()> {
+        if let Some(old) = self.routes.insert(key, next.clone()) {
+            require(
+                old == next,
+                format!("The registered XAML address {uri} is ambiguous"),
+            )?;
+        }
+        Ok(())
     }
 
     pub(super) fn build_for(&self, uri: &str) -> Option<&BuildSnapshot> {
@@ -137,7 +220,9 @@ impl CompiledAddresses {
     }
 
     pub(super) fn is_generated(&self, file: &std::path::Path) -> bool {
-        self.generated_directory.as_ref().is_some_and(|directory| file.starts_with(directory))
+        self.generated_directory
+            .as_ref()
+            .is_some_and(|directory| file.starts_with(directory))
     }
 
     fn check_destinations(&self) -> Result<()> {
@@ -171,6 +256,10 @@ impl CompiledAddresses {
         }
         Some(next.as_deref().unwrap_or(uri))
     }
+}
+
+fn class_key(key: &str) -> Option<String> {
+    relative_asset_path(key.trim_start_matches('/'))
 }
 
 fn owns_assembly(service: &LanguageService, owner: &str, assembly: &str) -> bool {

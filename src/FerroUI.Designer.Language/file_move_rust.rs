@@ -1,11 +1,11 @@
 //! Resolve Rust reference sites against the indexed Cargo packages and draft snapshots.
-use super::{FileMoveDocument, FileMoveDraft, LanguageService, move_document, new_reference};
+use super::{move_document, new_reference, FileMoveDocument, FileMoveDraft, LanguageService};
 use crate::{LanguageError, LineIndex, Result};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_designer_project::{
+    canonical_file_uri, file_path, file_uri, relative_asset_uri, relative_file_path, resolve_uri,
     DocumentEntry, DocumentKind, ProjectDescriptor, ProjectWorkspace, RustPathAnchor, RustXamlPath,
-    RustXamlReferences, Solution, XamlFileMove, canonical_file_uri, file_path, file_uri,
-    relative_asset_uri, relative_file_path, resolve_uri,
+    RustXamlReferences, Solution, XamlFileMove,
 };
 use std::{
     collections::BTreeMap,
@@ -15,6 +15,8 @@ use std::{
 
 #[path = "file_move_compiled.rs"]
 mod compiled;
+#[path = "file_move_inputs.rs"]
+mod inputs;
 pub(super) use compiled::CompiledAddresses;
 pub use compiled::GeneratedRustRename;
 
@@ -57,20 +59,23 @@ impl LanguageService {
             };
             let build = cached_build.is_some()
                 || is_cargo_build(entry, project, package, source, &mut builds)?;
-            if !RustXamlReferences::may_contain_paths(source, build) {
+            let compiled_inputs = addresses.file_inputs.get(&entry.uri);
+            let build_sources = build || compiled_inputs.is_some();
+            if !RustXamlReferences::may_contain_paths(source, build_sources) {
                 continue;
             }
             let parsed;
             let references = if let Some(snapshot) = cached_build {
                 &snapshot.references
             } else {
-                parsed = match RustXamlReferences::parse(source, build) {
+                parsed = match RustXamlReferences::parse(source, build_sources) {
                     Ok(references) => references,
                     Err(_)
-                        if from
-                            .file_name()
-                            .and_then(|name| name.to_str())
-                            .is_some_and(|name| source.contains(name)) =>
+                        if compiled_inputs.is_some()
+                            || from
+                                .file_name()
+                                .and_then(|name| name.to_str())
+                                .is_some_and(|name| source.contains(name)) =>
                     {
                         return Err(LanguageError(format!(
                             "Repair the Rust draft that may reference this XAML file: {}",
@@ -80,6 +85,22 @@ impl LanguageService {
                     Err(_) => continue,
                 };
                 &parsed
+            };
+            if cached_build.is_some()
+                && !addresses.has_compiler_index
+                && (references.uses_file_documents
+                    || references
+                        .file_documents
+                        .iter()
+                        .any(|input| refers_to(package, &input.site.path, &movement.from)))
+            {
+                return Err(LanguageError(
+                    "Build the project XAML schema to resolve its file-backed registrations".into(),
+                ));
+            }
+            let file_paths = match compiled_inputs {
+                Some(inputs) => inputs::paths(inputs, source, references, package)?,
+                None => Vec::new(),
             };
             let roots = xaml_roots(package, references);
             if references.discovers_xaml
@@ -102,7 +123,7 @@ impl LanguageService {
                 destination: &to,
             };
             let mut patches = Vec::new();
-            for site in &references.paths {
+            for site in references.paths.iter().chain(file_paths) {
                 if let Some(path) = context.replacement(site)? {
                     patches.push(TextPatch {
                         span: SourceSpan::new(site.range.start, site.range.end),
@@ -110,13 +131,14 @@ impl LanguageService {
                     });
                 }
             }
+            patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
             patches.dedup_by(|later, earlier| {
                 later.span == earlier.span && later.replacement == earlier.replacement
             });
             if !patches.is_empty() {
                 let document =
                     move_document(&entry.uri, version, &LineIndex::new(source), patches)?;
-                RustXamlReferences::parse(&document.after, build)?;
+                RustXamlReferences::parse(&document.after, build_sources)?;
                 documents.push(document);
             }
         }
@@ -226,13 +248,18 @@ impl RustMove<'_> {
         let Some((input, anchor)) = &site.input else {
             // Discovery scans below the configured root, and selects the class
             // by its raw path relative to the manifest.
-            return if self.refers_to_move(self.package, &site.path) {
+            return if self.refers_to_move(self.package, &site.path)
+                && !self.addresses.preserves_class_key(&site.path)?
+            {
                 Ok(Some(relative_file_path(self.package, self.destination)?))
             } else {
                 Ok(None)
             };
         };
-        if !self.base(*anchor).is_some_and(|base| self.refers_to_move(base, input)) {
+        if !self
+            .base(*anchor)
+            .is_some_and(|base| self.refers_to_move(base, input))
+        {
             return Ok(None);
         }
         compiled_key(

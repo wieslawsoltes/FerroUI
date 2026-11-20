@@ -210,6 +210,21 @@ impl LanguageService {
             {
                 continue;
             }
+            if addresses.moves_file_input()
+                && !(path.starts_with('/') || path.contains(':'))
+                && file_path(owner).is_ok_and(|path| {
+                    path.ancestors().skip(1).find(|parent| parent.join("Cargo.toml").is_file())
+                        == Some(movement.package_root.as_path())
+                })
+            {
+                // The Cargo compiler still resolves this literal relative to the
+                // published key. Rebasing it for the physical file could break
+                // the compiled tree even if it worked in an isolated preview.
+                return Err(LanguageError(format!(
+                    "Use an explicit XAML resource URI for '{}' in {owner} before moving this file-backed registration",
+                    site.value
+                )));
+            }
             let spelling = new_reference(path, after_owner, after_target, movement)?;
             let replacement = format!("{spelling}{suffix}");
             patches.extend(site.patches(&replacement));

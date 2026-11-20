@@ -10,8 +10,9 @@ use crate::{ProjectError, Result};
 use proc_macro2::Span;
 use std::ops::Range;
 use syn::{
-    Expr, ExprLit, Lit, LitStr, Macro, Stmt,
+    spanned::Spanned,
     visit::{self, Visit},
+    Expr, ExprLit, Lit, LitStr, Macro, Stmt,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -52,9 +53,18 @@ pub struct RustXamlReferences {
     pub paths: Vec<RustXamlPath>,
     /// Explicit documents passed to a Cargo compilation group.
     pub registrations: Vec<RustXamlRegistration>,
+    /// File-backed candidates. The compiler's input index identifies which call sites it used.
+    pub file_documents: Vec<RustXamlFileInput>,
+    pub uses_file_documents: bool,
     /// Explicit document discovery roots authored on a Cargo build builder.
     pub xaml_roots: Vec<String>,
     pub discovers_xaml: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RustXamlFileInput {
+    pub callee: Range<usize>,
+    pub site: RustXamlPath,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -135,26 +145,36 @@ impl Collector<'_> {
         prefix: &str,
         input: Option<(String, RustPathAnchor)>,
     ) {
+        if let Some(site) = self.path(literal, anchor, prefix, input) {
+            self.references.paths.push(site);
+        }
+    }
+
+    fn path(
+        &self,
+        literal: &LitStr,
+        anchor: RustPathAnchor,
+        prefix: &str,
+        input: Option<(String, RustPathAnchor)>,
+    ) -> Option<RustXamlPath> {
         let value = literal.value();
-        let Some(path) = value.strip_prefix(prefix) else {
-            return;
-        };
+        let path = value.strip_prefix(prefix)?;
         let filename = if anchor == RustPathAnchor::ResourceUri {
             path.split(['?', '#']).next().unwrap_or(path)
         } else {
             path
         };
         if !filename.to_ascii_lowercase().ends_with(".xaml") {
-            return;
+            return None;
         }
         let range = literal.span().byte_range();
-        self.references.paths.push(RustXamlPath {
+        Some(RustXamlPath {
             range: self.offset + range.start..self.offset + range.end,
             path: path.to_owned(),
             anchor,
             input,
             prefix: prefix.to_owned(),
-        });
+        })
     }
 }
 
@@ -169,6 +189,20 @@ impl<'source> Visit<'source> for Collector<'source> {
     }
 
     fn visit_macro(&mut self, expression: &'source Macro) {
+        if self.cargo_build {
+            let site = self
+                .macros
+                .file_input(expression)
+                .and_then(|literal| self.path(&literal, RustPathAnchor::Package, "", None));
+            if let Some(site) = site {
+                let callee = expression.path.span().byte_range();
+                self.references.file_documents.push(RustXamlFileInput {
+                    callee: self.offset + callee.start..self.offset + callee.end,
+                    site,
+                });
+                return;
+            }
+        }
         if let Some((literal, anchor, prefix)) = self
             .macros
             .include_path(expression)
@@ -205,6 +239,7 @@ impl<'source> Visit<'source> for Collector<'source> {
                     Site::Path(literal, anchor) => self.record(literal, anchor, "", None),
                     Site::Root(literal) => self.references.xaml_roots.push(literal.value()),
                     Site::Discovery => self.references.discovers_xaml = true,
+                    Site::FileDocuments => self.references.uses_file_documents = true,
                     Site::Key(literal, input) => {
                         if let Some(input) = self.included_file(input) {
                             self.record(literal, RustPathAnchor::XamlRoot, "", Some(input));

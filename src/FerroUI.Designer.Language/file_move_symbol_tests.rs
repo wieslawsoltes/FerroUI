@@ -55,6 +55,7 @@ fn compiled_project(
         module: "views".into(),
         kind,
         discovery_root: discovery.then(|| "Themes".into()),
+        file_backed: false,
         members: keys
             .iter()
             .zip(&names)

@@ -85,6 +85,8 @@ An open **Preview Stages** card follows its source through the move, Undo, and R
 
 For explicit Cargo registrations, the review keeps authored URI aliases and rebases file-derived keys along with their literal XAML and Rust consumers. Build the owning package to load metadata for custom assembly names. [How the planner handles compiled addresses](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
+For computed groups that use `XamlGroup::document_files`, Studio uses the selected build's input index to find the path declared in Rust. Review that path change in **Proposed source**. The published key and generated Rust names stay stable. Build the owning package again if Studio reports that a declaration shifted. [Declare file-backed Cargo inputs](vscode/authoring.md#computed-cargo-groups-with-file-backed-registrations)
+
 For a move that changes a generated Rust build function, build the owning Cargo package from Studio and make `rust-analyzer` available on Studio’s `PATH`. Set `FERROUI_RUST_ANALYZER` before launching Studio to select a different executable. **Review file move** resolves the Rust imports and calls in the background using the build’s Cargo feature and profile settings. The same review includes edits to open Rust drafts. Close the flyout to cancel an in-progress review. Once the changes appear, apply and save them, then rebuild to regenerate the compiled modules. [Review a move with generated Rust references in VS Code](vscode/authoring.md#move-an-xaml-file-and-its-references)
 
 ### Solid color editor

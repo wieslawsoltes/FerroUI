@@ -9,6 +9,7 @@ use syn::{
 #[derive(Default)]
 pub(super) struct MacroSyntax {
     local_names: BTreeSet<String>,
+    file_input_names: BTreeSet<String>,
 }
 
 impl MacroSyntax {
@@ -32,6 +33,31 @@ impl MacroSyntax {
             Expr::Macro(nested) => self.manifest_path(&nested.mac),
             value => Some((take_literal(value)?, RustPathAnchor::SourceFile, "")),
         }
+    }
+
+    pub(super) fn file_input(&self, expression: &Macro) -> Option<LitStr> {
+        let mut segments = expression.path.segments.iter();
+        let first = &segments.next()?.ident;
+        let absolute = expression.path.leading_colon.is_some();
+        let known = match segments.next() {
+            None => !absolute && self.file_input_names.contains(&first.to_string()),
+            Some(last) => {
+                first == "ferroui_build"
+                    && last.ident == "xaml_document_file"
+                    && segments.next().is_none()
+                    && (absolute || !self.local_names.contains(&first.to_string()))
+            }
+        };
+        if !known {
+            return None;
+        }
+        let args = expression
+            .parse_body_with(Punctuated::<Expr, Token![,]>::parse_terminated)
+            .ok()?;
+        if args.len() != 2 {
+            return None;
+        }
+        take_literal(args.into_iter().last()?)
     }
 
     pub(super) fn manifest_path(
@@ -80,6 +106,15 @@ impl MacroSyntax {
 }
 
 impl<'source> Visit<'source> for MacroSyntax {
+    fn visit_item_use(&mut self, item: &'source syn::ItemUse) {
+        if let UseTree::Path(path) = &item.tree {
+            if path.ident == "ferroui_build" {
+                file_input_imports(&path.tree, &mut self.file_input_names);
+            }
+        }
+        visit::visit_item_use(self, item);
+    }
+
     fn visit_item_macro(&mut self, item: &'source syn::ItemMacro) {
         if let Some(name) = &item.ident {
             self.local_names.insert(name.to_string());
@@ -101,6 +136,23 @@ impl<'source> Visit<'source> for MacroSyntax {
             }
             _ => visit::visit_use_tree(self, tree),
         }
+    }
+}
+
+fn file_input_imports(tree: &UseTree, names: &mut BTreeSet<String>) {
+    match tree {
+        UseTree::Name(name) if name.ident == "xaml_document_file" => {
+            names.insert(name.ident.to_string());
+        }
+        UseTree::Rename(name) if name.ident == "xaml_document_file" => {
+            names.insert(name.rename.to_string());
+        }
+        UseTree::Group(group) => {
+            for item in &group.items {
+                file_input_imports(item, names);
+            }
+        }
+        _ => {}
     }
 }
 

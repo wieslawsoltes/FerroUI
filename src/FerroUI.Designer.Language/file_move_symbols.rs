@@ -36,7 +36,12 @@ pub(super) fn plan(
 ) -> Result<Vec<GeneratedRustRename>> {
     let mut renames = Vec::new();
     let destination = file_path(&movement.to)?;
-    for group in &output.index.groups {
+    for group in output
+        .index
+        .groups
+        .iter()
+        .filter(|group| !group.file_backed)
+    {
         let mut keys = BTreeMap::new();
         if let Some(root) = &group.discovery_root {
             if let Some((from, to)) = discovered_keys(group, movement, &destination, root)? {

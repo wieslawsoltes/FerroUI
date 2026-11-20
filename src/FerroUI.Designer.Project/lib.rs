@@ -21,7 +21,10 @@ pub use process::{spawn_project_process, stop_project_process};
 pub use tasks::CargoBuildConfiguration;
 pub use file_move::{SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
 mod rust_xaml;
-pub use rust_xaml::{RustPathAnchor, RustXamlPath, RustXamlReferences, RustXamlRegistration, check_rust_rename_tokens};
+pub use rust_xaml::{
+    check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
+    RustXamlRegistration,
+};
 pub use preview_sources::{LocalPreviewSources, PreviewSourceBuffer, local_preview_sources};
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 
