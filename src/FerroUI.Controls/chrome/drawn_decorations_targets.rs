@@ -77,7 +77,10 @@ mod tests {
         // No other crate of the repository implements a window backend with drawn decorations: the
         // targets of iOS, Android and the browser have none.
         let stand_ins = [
+            // This file, which names the method it searches for.
+            "FerroUI.Controls/chrome/drawn_decorations_targets.rs",
             "FerroUI.Controls/platform/i_window_impl.rs",
+            "FerroUI.Controls/platform/platform_manager_tests.rs",
             "FerroUI.Controls/testing/mock_window_impl.rs",
             "FerroUI.DesignerSupport/remote/previewer_window_impl.rs",
             "FerroUI.DesignerSupport/remote/stubs.rs",
