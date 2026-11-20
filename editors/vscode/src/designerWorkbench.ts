@@ -11,6 +11,7 @@ import type { DictionaryExtraction, DictionarySite } from './dictionaryExtractio
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import type { EventHandlers, HandlerEditSite } from './eventHandlers';
+import { includedTemplateUri, type IncludedTemplatePreview } from './includedTemplate';
 import { LIBRARY_VIEW, LibraryView } from './libraryView';
 import { OutlineView } from './outlineView';
 import { choosePlacement } from './placementPicker';
@@ -32,7 +33,7 @@ import { STYLES_VIEW, StylesView } from './stylesView';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
 import { errorMessage, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
-import { languageOf } from './textDocument';
+import { asPosition, languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
 const OUTLINE_VIEW = 'ferroui.outline';
@@ -267,10 +268,28 @@ export class DesignerWorkbench implements vscode.Disposable {
                 this.followFocus();
             }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            }, restored);
+            }, (token, target, signal) => this.openIncludedTemplate(designer, token, target, signal), restored);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
+    }
+
+    private async openIncludedTemplate(consumer: DesignerPanel, token: number, target: IncludedTemplatePreview, signal: AbortSignal): Promise<void> {
+        const ensureConsumer = () => {
+            signal.throwIfAborted();
+            if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen Item Templates.');
+        };
+        const uri = await includedTemplateUri(consumer.document.uri, target.source);
+        ensureConsumer();
+        const designer = await this.openDocument(uri, asPosition(target.source.range.start));
+        await designer.waitForSnapshot(signal);
+        ensureConsumer();
+        const current = designer.currentToken;
+        if (current === undefined) throw new Error('Wait for the included XAML preview.');
+        const opened = await designer.studioPresent(current, 'designer_definition', { action: 'enter_included_template', target }, undefined, signal);
+        if (!opened || designer.currentToken === undefined) throw new Error('The dictionary changed while opening the template.');
+        await designer.revealSource({ session: designer.session, token: designer.currentToken }, target.source.range);
+        designer.panel.reveal(undefined, true);
     }
 
     private prepareMove(from: vscode.Uri, to: vscode.Uri): void {

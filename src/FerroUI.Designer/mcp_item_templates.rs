@@ -17,11 +17,13 @@ pub(super) fn tools() -> Vec<Value> {
     let arguments = json!({"node":s::id(),"property":properties,"expected_model":s::string()});
     let mut assign = arguments.clone();
     assign["resource"] = s::id();
+    let mut included = arguments.clone();
+    included["key"] = s::string();
     let required = ["node", "property", "expected_model"];
     vec![
         s::tool(
             QUERY,
-            "Read an authored control or column's item template slots, source ranges, local definitions and compatible resources. Use the returned model for item template actions.",
+            "Read an authored control or column's template slots, source ranges, local and included definitions, and assignable resources. Use the returned model for item template actions.",
             s::object(json!({"node":s::id()}), &["node"]),
             false,
         ),
@@ -39,6 +41,7 @@ pub(super) fn tools() -> Vec<Value> {
                     &["node", "property", "expected_model", "resource"],
                     true,
                 ),
+                s::action("assign_included_resource", included, &["node", "property", "expected_model", "key"], true),
             ],
             true,
         ),
@@ -58,6 +61,10 @@ pub(super) fn call(
     require_model(args, &report)?;
     let property = decode::<ItemTemplateMember>(args, "property")?;
     if args["action"] == "preview" {
+        let slot = session.item_template_slot(node, property)?;
+        if let Some(target) = session.included_item_template_preview(&slot)? {
+            return Ok(json!({"document":state(session), "openDefinition":target}));
+        }
         session.preview_item_template(node, property)?;
     } else {
         let change = serde_json::from_value::<ItemTemplateChange>(args.clone())
@@ -70,26 +77,30 @@ pub(super) fn call(
 fn report(session: &DesignerSession, node: u64) -> Result<Value, String> {
     let document = session.document();
     let slots = session.item_template_slots(node)?;
-    let resources = if slots.iter().any(|slot| slot.reason.is_none()) {
-        item_template_resources(document, node).map_err(|error| error.to_string())?
+    let (resources, included_resources) = if slots.iter().any(|slot| slot.reason.is_none()) {
+        (
+            item_template_resources(document, node).map_err(|error| error.to_string())?,
+            session.included_template_resources(node)?,
+        )
     } else {
-        Vec::new()
+        (Vec::new(), Vec::new())
     };
     let index = LineIndex::new(document.source());
     let slots = slots
         .iter()
         .map(|slot| {
-            json!({
+            Ok(json!({
                 "property":slot.property, "value":slot.value, "reason":slot.reason,
                 "range":slot.span.and_then(|span| index.range(span).ok()),
+                "includedDefinition":session.assigned_included_template(slot)?,
                 "canCopyInline":slot.reason.is_none() && slot.can_copy_inline(document),
                 "canReset":slot.reason.is_none() && slot.can_reset
-            })
+            }))
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, String>>()?;
     Ok(accepted_report(
         session,
         QUERY,
-        json!({"node":node,"slots":slots,"resources":resources}),
+        json!({"node":node,"slots":slots,"resources":resources,"includedResources":included_resources}),
     ))
 }

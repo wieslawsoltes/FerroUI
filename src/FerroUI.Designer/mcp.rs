@@ -607,7 +607,17 @@ impl UiToolProvider for DesignerMcp {
             return columns::call(&mut session, name, args);
         }
         if item_templates::handles(name) {
-            return item_templates::call(&mut session, name, args);
+            let result = item_templates::call(&mut session, name, args)?;
+            if let (Some(workspace), Some(target)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade),
+                result.get("openDefinition"),
+            ) {
+                let target = serde_json::from_value(target.clone()).map_err(|error| error.to_string())?;
+                drop(session);
+                workspace.open_included_template(target)?;
+                return Ok(state(&owner.borrow()));
+            }
+            return Ok(result);
         }
         if components::handles(name) {
             return components::call(&mut session, name, args);

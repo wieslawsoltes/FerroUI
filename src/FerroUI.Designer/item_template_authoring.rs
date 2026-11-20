@@ -51,7 +51,7 @@ impl DesignerSession {
             .collect()
     }
 
-    fn item_template_slot(
+    pub(crate) fn item_template_slot(
         &self,
         owner: NodeId,
         property: ItemTemplateMember,
@@ -95,10 +95,15 @@ impl DesignerSession {
         change: ItemTemplateChange,
     ) -> Result<(), String> {
         let label = change.label();
-        let edits = self
-            .item_template_slot(owner, property)?
-            .plan(self.document(), change)
-            .map_err(|error| error.to_string())?;
+        let slot = self.item_template_slot(owner, property)?;
+        let edits = match change {
+            ItemTemplateChange::AssignIncludedResource { key } => {
+                self.included_template_node(owner, &key, None)?
+                    .ok_or("Select an included data template that resolves across themes")?;
+                slot.assign_key(self.document(), &key)
+            }
+            change => slot.plan(self.document(), change),
+        }.map_err(|error| error.to_string())?;
         if !edits.is_empty() {
             self.apply(label, edits)
                 .map_err(|error| error.to_string())?;
@@ -119,7 +124,7 @@ impl DesignerSession {
         self.enter_definition(
             template,
             DefinitionPreviewOptions::default(),
-            Some(crate::item_template_samples::ItemTemplatePreview { owner, property }),
+            Some(crate::item_template_samples::ItemTemplatePreview::Assigned { owner, property }),
         )
     }
 

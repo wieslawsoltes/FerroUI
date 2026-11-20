@@ -27,6 +27,7 @@ import { verifyBindingMcp } from './studioBindingMcp';
 import { verifyGridMcp } from './studioGridMcp';
 import { verifyColumnsMcp } from './studioColumnsMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
+import { verifyIncludedItemTemplatesMcp } from './includedItemTemplatesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
@@ -175,6 +176,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyRsxControlRename({ invoke, content });
         await verifyColumnsMcp({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
+        await verifyIncludedItemTemplatesMcp({ invoke, content });
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });

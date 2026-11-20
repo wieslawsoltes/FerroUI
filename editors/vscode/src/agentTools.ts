@@ -392,9 +392,11 @@ export class AgentTools {
                 const { timelineKeys } = await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 return { ...describe(panel), ...(timelineKeys && { keyframes: timelineKeys }) };
             }
-            case 'designer_studio_present':
-                await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+            case 'designer_studio_present': {
+                const presentation = await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source };
                 break;
+            }
             case 'designer_timeline_control':
                 await this.workbench.revealDesign(panel, 'timeline');
                 return this.workbench.controlTimeline(panel, { session: panel.session, token: args.expected_revision },

@@ -1,5 +1,6 @@
 import type { QuickPickItem } from 'vscode';
 import type { Range } from './protocol';
+import type { IncludedTemplateSource } from './includedTemplate';
 import { choose, type StudioContext } from './studioContext';
 
 type TemplateProperty = keyof typeof templateLabels;
@@ -14,12 +15,14 @@ interface TemplateSlot {
     reason: string | null;
     canCopyInline: boolean;
     canReset: boolean;
+    includedDefinition?: IncludedTemplateSource | null;
 }
 
 interface TemplateModel {
     model: string;
     slots: TemplateSlot[];
     resources: { node: number; key: string; target_type: string | null }[];
+    includedResources?: Pick<IncludedTemplateSource, 'uri' | 'key'>[];
 }
 
 interface TemplateAction extends QuickPickItem {
@@ -48,15 +51,17 @@ export async function editItemTemplates(context: StudioContext, node: number): P
     const args = { node, property: slot.property, expected_model: model.model };
     const edit = (action: 'create_inline' | 'copy_inline' | 'reset') => context.edit(tool, { ...args, action });
     const available: TemplateAction[] = [];
-    if ((slot.value.kind === 'inline' || slot.value.kind === 'resource') && slot.value.definition !== null) {
-        const definition = slot.value.definition;
+    const definition = slot.value.kind === 'inline' || slot.value.kind === 'resource' ? slot.value.definition : null;
+    const included = slot.includedDefinition;
+    if (definition !== null || included) {
         available.push({
             label: '$(preview) Edit Template on Canvas',
             run: async () => {
                 await context.present(tool, { ...args, action: 'preview' });
-                if (!context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
+                if (!included && !context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
             },
-        }, { label: '$(go-to-file) Reveal Template Source', run: () => context.reveal(definition) });
+        }, { label: '$(go-to-file) Reveal Template Source',
+            run: () => included ? context.revealIncludedTemplate(included) : context.reveal(definition!) });
     } else if (slot.range) {
         const range = slot.range;
         available.push({ label: '$(go-to-file) Reveal Template Assignment', run: () => context.revealRange(range) });
@@ -65,14 +70,23 @@ export async function editItemTemplates(context: StudioContext, node: number): P
         if (slot.value.kind === 'unset') {
             available.push({ label: '$(add) Create Inline Template', run: () => edit('create_inline') });
         }
-        if (model.resources.length) {
+        const resources = [
+            ...model.resources.map(resource => ({
+                label: `$(symbol-structure) ${resource.key}`, description: resource.target_type ?? undefined,
+                arguments: { action: 'assign_resource', resource: resource.node },
+            })),
+            ...(model.includedResources ?? []).map(resource => ({
+                label: `$(symbol-structure) ${resource.key}`,
+                description: decodeURIComponent(resource.uri.split('/').at(-1) ?? ''),
+                arguments: { action: 'assign_included_resource', key: resource.key },
+            })),
+        ];
+        if (resources.length) {
             available.push({
                 label: '$(library) Assign Template Resource…',
                 run: async () => {
-                    const picked = await choose('Assign a Visible Data Template', model.resources.map(resource => ({
-                        label: `$(symbol-structure) ${resource.key}`, description: resource.target_type ?? undefined, resource: resource.node,
-                    })));
-                    if (picked) await context.edit(tool, { ...args, action: 'assign_resource', resource: picked.resource });
+                    const picked = await choose('Assign a Visible Data Template', resources);
+                    if (picked) await context.edit(tool, { ...args, ...picked.arguments });
                 },
             });
         }

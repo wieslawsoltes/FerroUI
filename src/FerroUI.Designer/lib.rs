@@ -46,6 +46,7 @@ mod layout_helper_renderer;
 mod preview_checks;
 mod column_authoring;
 mod item_template_authoring;
+mod item_template_project;
 mod item_template_samples;
 mod item_template_scope;
 mod property_trace;

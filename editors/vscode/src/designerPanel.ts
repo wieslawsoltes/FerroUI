@@ -101,6 +101,7 @@ export class DesignerPanel implements vscode.Disposable {
         caret: vscode.Position,
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
+        private readonly onOpenDefinition: (token: number, target: NonNullable<CanvasPresentation['openDefinition']>, signal: AbortSignal) => Promise<void>,
         restored?: DesignerCanvasState,
     ) {
         const document = this.document;
@@ -600,7 +601,7 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
-        return this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
+        const presentation = await this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
             presentation => {
                 if (name === 'designer_design_data_edit') this.rememberDesignData(args);
                 if (name === 'designer_program') {
@@ -615,6 +616,8 @@ export class DesignerPanel implements vscode.Disposable {
                 if (presentation.timelineTargets !== undefined || name === 'designer_definition'
                     || (name === 'designer_state' && (args as { action?: string }).action !== 'advance_preview')) this.animationCatalogEpoch++;
             });
+        if (presentation?.openDefinition) await this.onOpenDefinition(token + 1, presentation.openDefinition, signal);
+        return presentation;
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {

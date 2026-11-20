@@ -6,7 +6,7 @@ use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::{AnimationValue, Sample};
 use ferroui_designer_animation::native::FrozenPreviewClock;
 use ferroui_designer_core::{Document, NodeId};
-use ferroui_designer_project::{CompiledResources, PreviewSourceBuffer, local_preview_sources_with_resources};
+use ferroui_designer_project::{CompiledResources, LocalPreviewSources, PreviewIncludes, PreviewSourceBuffer, local_preview_sources_with_resources};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_markup_xaml::FromXamlObject;
@@ -16,6 +16,8 @@ use std::{rc::Rc, sync::Arc};
 
 #[path = "runtime_property_sources.rs"]
 mod property_sources;
+#[path = "runtime_include_sources.rs"]
+mod include_sources;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);
@@ -55,6 +57,7 @@ pub(crate) struct RuntimePreview {
     options_epoch: u64,
     isolated: bool,
     workspace: WorkspaceSources,
+    pub(crate) resource_sources: include_sources::ResourceSources,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
@@ -182,6 +185,7 @@ impl RuntimePreview {
             options_epoch: NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed),
             isolated,
             workspace,
+            resource_sources: Default::default(),
             native_window: None,
             window_projection: false,
             definition_scope: scope,
@@ -348,8 +352,10 @@ impl RuntimePreview {
 
     pub(crate) fn set_workspace_root(&mut self, root: std::path::PathBuf, document: &Document) {
         self.workspace.root = Some(root);
-        if let Some(snapshot) = self.workspace_snapshot(document) {
-            snapshot.run(|| self.reload_with_sources(document, true));
+        if let Some(local) = self.workspace_sources(document) {
+            self.reload_local_sources(document, true, local);
+        } else {
+            self.set_include_documents(PreviewIncludes::default());
         }
     }
 
@@ -369,18 +375,34 @@ impl RuntimePreview {
     }
 
     fn reload_document(&mut self, document: &Document, initialize: bool) {
-        if let Some(snapshot) = self.workspace_snapshot(document) {
-            snapshot.run(|| self.reload_with_sources(document, initialize));
+        if let Some(local) = self.workspace_sources(document) {
+            self.reload_local_sources(document, initialize, local);
         } else {
             self.reload_with_sources(document, initialize);
+            if self.workspace.root.is_some() {
+                self.set_include_documents(PreviewIncludes::default());
+            }
         }
     }
 
-    fn workspace_snapshot(&self, document: &Document) -> Option<ferroui_markup_xaml::source_overlay::SourceSnapshot> {
+    fn workspace_sources(&self, document: &Document) -> Option<LocalPreviewSources> {
         let root = self.workspace.root.as_deref()?;
-        let sources = local_preview_sources_with_resources(Some(root), &self.uri, document, &self.workspace.buffers, self.workspace.resources.as_deref());
-        (!sources.accepted.is_empty() || !sources.unavailable.is_empty()).then(||
-            ferroui_markup_xaml::source_overlay::SourceSnapshot::new(sources.accepted, sources.unavailable))
+        let sources = local_preview_sources_with_resources(
+            Some(root), &self.uri, document, &self.workspace.buffers, self.workspace.resources.as_deref(),
+        );
+        (!sources.accepted.is_empty() || !sources.unavailable.is_empty()).then_some(sources)
+    }
+
+    fn reload_local_sources(&mut self, document: &Document, initialize: bool, local: LocalPreviewSources) {
+        let snapshot = ferroui_markup_xaml::source_overlay::SourceSnapshot::new(local.accepted, local.unavailable);
+        snapshot.run(|| self.reload_with_sources(document, initialize));
+        self.set_include_documents(local.includes);
+    }
+
+    pub(crate) fn set_include_documents(&mut self, includes: PreviewIncludes) {
+        if matches!(self.status, PreviewStatus::Ready { .. }) {
+            self.resource_sources.0 = includes;
+        }
     }
 
     fn reload_with_sources(&mut self, document: &Document, initialize: bool) {

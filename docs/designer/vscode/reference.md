@@ -76,9 +76,9 @@ Indices start at zero. The move index is the column’s place in the resulting l
 
 ### Edit item templates with MCP
 
-1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, property names, local definitions, source ranges, and visible template resources.
-2. Open the native definition preview with `designer_studio_present` and `tool: "designer_item_template"`. Pass the current editor frame as `expected_revision` and use `arguments: { action: "preview", node, property: "ItemTemplate", expected_model: model }`. Exit with the `designer_definition` presentation action `exit`.
-3. Use `designer_studio_edit` with the same tool and model fields for `create_inline`, `copy_inline`, `assign_resource`, or `reset`. For assignment, pass the selected template ID as `resource`. Read a fresh model after a change. Pass the same `selection` to the query and the action when specifying it explicitly.
+1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, slot names and ranges, the assigned `includedDefinition` when resolved, and `includedResources` available for assignment.
+2. Open the native definition preview with `designer_studio_present` and `tool: "designer_item_template"`. Pass the current editor frame as `expected_revision` and use `arguments: { action: "preview", node, property: "ItemTemplate", expected_model: model }`. When the result includes `opened_definition`, look up the dictionary's session in `ferroui_designs` and edit the definition in that session. The `designer_definition` presentation action `exit` returns to the current document's canvas.
+3. Use `designer_studio_edit` with the same tool and model fields. For local assignment, send `action: "assign_resource"` and its `resource` ID. For included assignment, send `action: "assign_included_resource"` and its `key` from `includedResources`. The other actions are `create_inline`, `copy_inline`, and `reset`. Read a fresh model after a source or preview change. Use the same explicit `selection` for query and action.
 
 On Studio’s server, call `designer_item_templates` and `designer_item_template` directly. For `expected_revision`, pass the Studio document revision. [Authoring guide](authoring.md#edit-item-and-cell-templates)
 

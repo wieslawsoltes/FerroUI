@@ -34,7 +34,9 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
     let layers = input.layer_view.as_ref().filter(|layers| layers.block.as_ref() == active_block.as_ref().map(|range| &range.start))
         .and_then(|input| serde_json::from_value(input.state.clone()).ok());
-    let (image, bounds, render_error, timeline_pose) = match snapshot.run(|| renderer.render(input, design.xaml.source(), snapshot.clone(), layers.as_ref())) {
+    let (image, bounds, render_error, timeline_pose) = match snapshot.run(|| {
+        renderer.render(input, design.xaml.source(), snapshot.clone(), local.includes, layers.as_ref())
+    }) {
         Ok(frame) => {
             notices.extend(frame.notices);
             (Some(frame.image), frame.bounds, None, frame.timeline_pose)

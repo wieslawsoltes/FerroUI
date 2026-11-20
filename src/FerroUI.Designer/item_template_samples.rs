@@ -1,18 +1,24 @@
 //! Select a representative item from the active fixture without evaluating application code.
 use crate::{
-    DefinitionScope, NodeId, component_session::property_schema, design_time_samples::simple_path,
+    component_session::property_schema, design_time_samples::simple_path, DefinitionScope, NodeId,
 };
 use ferroui_designer_core::{
+    design_fixtures::{DesignFixture, DesignFixtures, DESIGN_NAMESPACE},
     Document, MarkupValue, Node,
-    design_fixtures::{DESIGN_NAMESPACE, DesignFixture, DesignFixtures},
 };
 use ferroui_designer_language::FRAMEWORK_NAMESPACE;
-use ferroui_designer_tools::{ItemTemplateMember, nearest_table};
+use ferroui_designer_tools::{nearest_table, ItemTemplateMember};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct ItemTemplatePreview {
-    pub(crate) owner: NodeId,
-    pub(crate) property: ItemTemplateMember,
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum ItemTemplatePreview {
+    Assigned {
+        owner: NodeId,
+        property: ItemTemplateMember,
+    },
+    Included {
+        key: String,
+        sample: Option<DesignFixture>,
+    },
 }
 
 pub(crate) fn definition_fixture(
@@ -21,10 +27,24 @@ pub(crate) fn definition_fixture(
     enabled: bool,
     selected: Option<&str>,
 ) -> Result<Option<DesignFixture>, String> {
-    let Some(template) = scope.item_template.filter(|_| enabled) else {
+    let Some(template) = scope.item_template.as_ref().filter(|_| enabled) else {
         return Ok(None);
     };
-    let Some((owner, property)) = source_owner(document, template) else {
+    match template {
+        ItemTemplatePreview::Assigned { owner, property } => {
+            assigned_fixture(document, *owner, *property, selected)
+        }
+        ItemTemplatePreview::Included { sample, .. } => Ok(sample.clone()),
+    }
+}
+
+pub(crate) fn assigned_fixture(
+    document: &Document,
+    owner: NodeId,
+    property: ItemTemplateMember,
+    selected: Option<&str>,
+) -> Result<Option<DesignFixture>, String> {
+    let Some((owner, property)) = source_owner(document, owner, property) else {
         return Ok(None);
     };
     let Some(path) = items_binding(document, owner, property) else {
@@ -55,14 +75,15 @@ pub(crate) fn definition_fixture(
 
 fn source_owner(
     document: &Document,
-    template: ItemTemplatePreview,
+    owner: NodeId,
+    template: ItemTemplateMember,
 ) -> Option<(&Node, &'static str)> {
     use ItemTemplateMember::*;
-    let owner = match template.property {
-        CellTemplate | CellEditingTemplate => nearest_table(document, template.owner)?,
-        _ => template.owner,
+    let owner = match template {
+        CellTemplate | CellEditingTemplate => nearest_table(document, owner)?,
+        _ => owner,
     };
-    let property = if template.property == MenuItemTemplate {
+    let property = if template == MenuItemTemplate {
         "MenuItemsSource"
     } else {
         "ItemsSource"

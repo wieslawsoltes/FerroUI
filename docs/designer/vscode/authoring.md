@@ -294,16 +294,20 @@ Each action updates the unsaved XAML and native preview through one Undo step. M
 
 | Action | Result |
 |---|---|
-| **Edit Template on Canvas** | Open the assigned local definition. Use the canvas, Outline, and Properties to edit the original XAML. |
+| **Edit Template on Canvas** | Open the assigned definition. A template in an included dictionary opens in its owning Design tab. Use the canvas, Outline, and Properties to edit its XAML. |
 | **Create Inline Template** | Add a data template with a bound text control to a slot that uses the default. Open it on the canvas to change its contents. |
-| **Assign Template Resource** | Choose a visible `DataTemplate` or `TreeDataTemplate`. The editor writes a checked resource reference. |
+| **Assign Template Resource** | Choose a visible `DataTemplate` or `TreeDataTemplate`. Included choices show their dictionary's filename. Assignments use resources that resolve to the same definition across themes. |
 | **Make Inline Copy** | Give this control its own copy of a local resource template. The shared definition and its other uses stay intact. The resource dependencies must resolve the same way inside the copy. |
 | **Reset Template** | Remove the local assignment from an optional slot. A `TreeDataGridTemplateColumn` requires a cell template. |
 | **Reveal Template Source** or **Reveal Template Assignment** | Open the authored definition or its assignment in XAML. |
 
-When **Design Data** supplies an array through a simple `ItemsSource` binding, the template canvas shows the first item from the selected fixture. Try the **Trial** fixture to see a different customer. Use the back arrow in the designer toolbar to return to the original view. Preview navigation leaves the buffer intact. Each source edit takes one Undo step.
+When **Design Data** supplies an array through a simple `ItemsSource` binding, the template canvas shows the first item from the selected fixture. Try the **Trial** fixture in the local sample to see a different customer. Use the back arrow in the designer toolbar to return from a local template to the view.
 
-The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Open Rust template closures and application-supplied XAML expressions at their source. For a resource defined in another document, use its assignment to locate the definition. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+Try [IncludedItemTemplates.xaml](../../../editors/vscode/test/fixtures/IncludedItemTemplates.xaml) inside a workspace. Select **Directory** and edit its template to open **Customer Rows.xaml** in the dictionary's own resource scope. Its preview starts with the consuming view's selected fixture and resolves the brush from the dictionary. Change the template in **Properties**, then switch to the original Design tab to see the update from the unsaved dictionary. Use Undo in **Customer Rows.xaml** to restore the template. Reopen the template from the consuming view to sample a different fixture.
+
+![Customer Rows.xaml beside its native template preview, showing the Alpine and Co. fixture row](../images/vscode-included-item-template.jpg)
+
+The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Included templates need a literal, workspace-local dictionary include that the preview can resolve. **Make Inline Copy** is available for local definitions whose dependencies can be preserved. Open Rust template closures and application-supplied XAML expressions at their source. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![The VS Code item-template actions beside the source and the native customer directory](../images/vscode-item-template-actions.jpg)
 

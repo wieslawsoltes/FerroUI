@@ -164,7 +164,9 @@ Each action updates the native design and writes one source transaction. Undo re
 
 Select an items control or an authored table column in Layers. Open **Edit item templates** beside the property search. The popup shows each supported slot and its current assignment. Use the canvas, source, new template, copy, or reset icon for that slot. To assign a resource, choose a visible template and confirm with the check icon.
 
-The canvas uses the first item from the selected design fixture when the items binding resolves to an array. Choose **Return to document** to restore the original view and selection. Each create, assign, copy, or reset action uses one source transaction. Use **Make inline copy** when the rest of the view should continue using the shared definition. [VS Code workflow](vscode/authoring.md#edit-item-and-cell-templates) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
+The canvas uses the first item from the selected design fixture when the items binding resolves to an array. Choose **Return to document** to leave a local template preview. Each assignment, inline creation, copy, or reset uses one source transaction. Apply **Make inline copy** to a local resource whose dependencies can be preserved.
+
+For a template supplied by a workspace dictionary include, the canvas and source icons open its owning document tab. The canvas starts with the consuming view's selected fixture. Edit and undo definition changes in the dictionary tab, then switch back to the consuming view to inspect the result. The picker includes reliably resolved templates and shows their dictionary's filename. [VS Code workflow](vscode/authoring.md#edit-item-and-cell-templates) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
 
 ## Contextual panel layout
 

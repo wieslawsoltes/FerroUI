@@ -1,9 +1,9 @@
 use super::*;
-use ferroui_base::{Ref, interactivity::RoutedEventArgs};
+use ferroui_base::{interactivity::RoutedEventArgs, Ref};
 use ferroui_controls::{
-    ContentControl, Window,
     automation::AutomationProperties,
     testing::{TestServices, UnitTestApplication},
+    ContentControl, Window,
 };
 use ferroui_markup_xaml::FromXamlObject;
 
@@ -125,20 +125,109 @@ fn a_required_tree_grid_cell_template_cannot_be_reset() {
         .unwrap()
         .id;
     let slots = session.item_template_slots(node).unwrap();
-    assert!(
-        slots
-            .iter()
-            .any(|slot| slot.property == ItemTemplateMember::CellTemplate && !slot.can_reset)
-    );
-    assert!(
-        session
-            .edit_item_template(
-                node,
-                ItemTemplateMember::CellTemplate,
-                ItemTemplateChange::Reset
-            )
-            .unwrap_err()
-            .contains("requires an item template")
-    );
+    assert!(slots
+        .iter()
+        .any(|slot| slot.property == ItemTemplateMember::CellTemplate && !slot.can_reset));
+    assert!(session
+        .edit_item_template(
+            node,
+            ItemTemplateMember::CellTemplate,
+            ItemTemplateChange::Reset
+        )
+        .unwrap_err()
+        .contains("requires an item template"));
     assert_eq!(session.document().source(), source);
+}
+
+#[test]
+fn studio_edits_an_included_template_in_its_own_tab_with_the_consumer_fixture() {
+    use ferroui_designer_core::{Document, Edit};
+    use ferroui_designer_project::{file_uri, Solution};
+    use std::{fs, path::PathBuf};
+
+    struct Files(PathBuf);
+    impl Drop for Files {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+    const VIEW: &str =
+        include_str!("../../editors/vscode/test/fixtures/IncludedItemTemplates.xaml");
+    const DICTIONARY: &str =
+        include_str!("../../editors/vscode/test/fixtures/Templates/Customer Rows.xaml");
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let root = Files(
+        std::env::temp_dir().join(format!("ferroui-included-template-{}", std::process::id())),
+    );
+    fs::create_dir_all(root.0.join("Templates")).unwrap();
+    fs::write(root.0.join("Directory.xaml"), VIEW).unwrap();
+    let dictionary = root.0.join("Templates/Customer Rows.xaml");
+    fs::write(&dictionary, DICTIONARY).unwrap();
+    let view_uri = file_uri(root.0.canonicalize().unwrap().join("Directory.xaml")).unwrap();
+    let dictionary_uri = file_uri(dictionary.canonicalize().unwrap()).unwrap();
+    let workspace = DesignerWorkspace::with_uri(VIEW, view_uri.clone()).unwrap();
+    workspace
+        .set_solution(Solution::discover(&root.0).unwrap())
+        .unwrap();
+    let window = Window::new();
+    window.set_width(1240.0);
+    window.set_height(840.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let owner = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Directory")
+        .unwrap();
+    let target = {
+        let session = session.borrow();
+        let slot = session
+            .item_template_slot(owner, ItemTemplateMember::ItemTemplate)
+            .unwrap();
+        session
+            .included_item_template_preview(&slot)
+            .unwrap()
+            .unwrap()
+    };
+    assert_eq!(target.source.uri, dictionary_uri);
+    let stale = Document::new(DICTIONARY.replace("FontSize=\"16\"", "FontSize=\"17\"")).unwrap();
+    assert!(target.source.node_in(&stale, &dictionary_uri).is_err());
+    workspace.open_included_template(target).unwrap();
+    window.update_layout();
+    let mut active = session.borrow_mut();
+    assert_eq!(active.document_uri(), dictionary_uri);
+    assert_eq!(active.definition_scope().unwrap().title, "CustomerRow");
+    let name = active.document().ast().find_name("CustomerName").unwrap();
+    active.refresh_runtime_mapping();
+    assert_eq!(
+        active
+            .preview
+            .visual(name)
+            .and_then(|visual| visual.cast::<TextBlock>())
+            .and_then(|text| text.text())
+            .as_deref(),
+        Some("Alpine & Co.")
+    );
+    active
+        .apply(
+            "Change row text size",
+            vec![Edit::SetAttribute {
+                node: name,
+                name: "FontSize".into(),
+                value: "24".into(),
+            }],
+        )
+        .unwrap();
+    assert!(active
+        .authored_source()
+        .contains("Name=\"CustomerName\" FontSize=\"24\""));
+    active.undo().unwrap();
+    assert_eq!(active.authored_source(), DICTIONARY);
+    drop(active);
+    workspace.activate_document(&view_uri).unwrap();
+    assert_eq!(session.borrow().authored_source(), VIEW);
+    window.close();
 }

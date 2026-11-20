@@ -72,6 +72,7 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     presentation.timeline_position = result.get("timelinePosition").cloned();
     presentation.timeline_targets = result.get("timelineTargets").cloned();
     presentation.transition_position = result.get("transitionPosition").cloned();
+    presentation.open_definition = result.get("openDefinition").cloned();
     if let (Some(position), Some(range)) = (&mut presentation.transition_position, route_source) {
         position["sourceRange"] = json!(range);
     }
@@ -85,7 +86,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
             Some("preview" | "preview_targets" | "scrub" | "scrub_all" | "play_program" | "play_range" | "advance_program" | "pause_program" | "stop_program" | "play_all")
         ),
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
-        "designer_definition" => matches!(action, Some("enter" | "exit")),
+        "designer_definition" => matches!(action, Some("enter" | "enter_included_template" | "exit")),
         "designer_item_template" => action == Some("preview"),
         "designer_design_data_edit" => matches!(action, Some("enabled" | "fixture")),
         "designer_layer" => action.is_some(),
@@ -345,7 +346,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }
-        "designer_item_template" => matches!(action, Some("create_inline" | "copy_inline" | "reset" | "assign_resource")),
+        "designer_item_template" => matches!(action, Some("create_inline" | "copy_inline" | "reset" | "assign_resource" | "assign_included_resource")),
         // All actions for these schemas are source-backed.
         "designer_component"
         | "designer_style_edit"

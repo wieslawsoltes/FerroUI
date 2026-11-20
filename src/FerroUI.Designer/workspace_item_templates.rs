@@ -1,6 +1,7 @@
 //! Contextual native Studio controls. Source edits use the same template plans as MCP.
+use super::inspector_actions::{add_button, icon_button, picker, text, COPY, RESET, SOURCE};
 use super::DesignerWorkspace;
-use super::inspector_actions::{COPY, RESET, SOURCE, add_button, icon_button, picker, text};
+use crate::item_template_project::{IncludedItemTemplate, IncludedTemplatePreview};
 use crate::{design_time::DesignTimeSnapshot, icons};
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::TextWrapping;
@@ -10,8 +11,8 @@ use ferroui_controls::{
 };
 use ferroui_designer_core::{NodeId, SourceSpan};
 use ferroui_designer_tools::{
-    ItemTemplateChange, ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot,
-    ItemTemplateValue, item_template_resources,
+    item_template_resources, ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot,
+    ItemTemplateValue,
 };
 use std::rc::{Rc, Weak};
 
@@ -45,6 +46,41 @@ impl DesignerWorkspace {
             .set_is_visible(matches!(
                 session.selection(), [node] if !session.item_template_members(*node).is_empty()
             ));
+    }
+
+    pub(crate) fn open_included_template(
+        self: &Rc<Self>,
+        target: IncludedTemplatePreview,
+    ) -> Result<(), String> {
+        let source = target.source.clone();
+        self.in_template_document(&source, |workspace, _| {
+            workspace
+                .session
+                .borrow_mut()
+                .enter_included_item_template(target)?;
+            workspace.focus_definition_canvas();
+            Ok(())
+        })
+    }
+
+    fn in_template_document(
+        self: &Rc<Self>,
+        source: &IncludedItemTemplate,
+        action: impl FnOnce(&Rc<Self>, SourceSpan) -> Result<(), String>,
+    ) -> Result<(), String> {
+        let previous = self.session.borrow().document_uri().to_owned();
+        self.activate_document(&source.uri)?;
+        let span = {
+            let session = self.session.borrow();
+            source
+                .node_in(session.document(), session.document_uri())
+                .map(|(_, span)| span)
+        };
+        let result = span.and_then(|span| action(self, span));
+        if result.is_err() && previous != source.uri {
+            self.activate_document(&previous)?;
+        }
+        result
     }
 }
 
@@ -93,12 +129,33 @@ impl TemplateActions {
 
     fn preview(&self, property: ItemTemplateMember) {
         self.run(|workspace| {
+            let included = {
+                let session = workspace.session.borrow();
+                let slot = session.item_template_slot(self.owner, property)?;
+                session.included_item_template_preview(&slot)?
+            };
+            if let Some(target) = included {
+                workspace.open_included_template(target)?;
+                self.close();
+                return Ok(());
+            }
             workspace
                 .session
                 .borrow_mut()
                 .preview_item_template(self.owner, property)?;
             self.close();
             workspace.focus_definition_canvas();
+            Ok(())
+        });
+    }
+
+    fn reveal_included(&self, source: &IncludedItemTemplate) {
+        self.run(|workspace| {
+            workspace.in_template_document(source, |workspace, span| {
+                workspace.select_source_span(span);
+                Ok(())
+            })?;
+            self.close();
             Ok(())
         });
     }
@@ -130,12 +187,14 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     let session = workspace.session.borrow();
     let [owner] = session.selection() else { return };
     let result = session.item_template_slots(*owner).and_then(|slots| {
-        let resources = if slots.iter().any(|slot| slot.reason.is_none()) {
-            item_template_resources(session.document(), *owner)
-                .map_err(|error| error.to_string())?
-        } else {
-            Vec::new()
-        };
+        let resources = template_choices(&session, *owner, &slots)?;
+        let slots = slots
+            .into_iter()
+            .map(|slot| {
+                let included = session.assigned_included_template(&slot)?;
+                Ok((slot, included))
+            })
+            .collect::<Result<Vec<_>, String>>()?;
         Ok((slots, resources))
     });
     let (slots, resources) = match result {
@@ -153,7 +212,7 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
         status: status.downgrade(),
         owner: *owner,
     };
-    for slot in slots {
+    for (slot, included) in slots {
         let span = slot
             .value
             .definition()
@@ -161,7 +220,15 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
             .map(|node| node.name_span)
             .or(slot.span);
         let can_copy = slot.can_copy_inline(session.document());
-        add_slot(&body, actions.clone(), &slot, span, can_copy, &resources);
+        add_slot(
+            &body,
+            actions.clone(),
+            &slot,
+            span,
+            included,
+            can_copy,
+            &resources,
+        );
     }
 }
 
@@ -170,8 +237,9 @@ fn add_slot(
     actions: TemplateActions,
     slot: &ItemTemplateSlot,
     source: Option<SourceSpan>,
+    included: Option<IncludedItemTemplate>,
     can_copy: bool,
-    resources: &[ItemTemplateResource],
+    resources: &[TemplateChoice],
 ) {
     let title = StackPanel::new();
     let label = text(slot.property.name());
@@ -197,13 +265,21 @@ fn add_slot(
     bar.children().add(tools.clone().upcast::<Control>());
     body.children().add(bar.upcast::<Control>());
     let property = slot.property;
-    if slot.value.definition().is_some() {
+    if slot.value.definition().is_some() || included.is_some() {
         let action = actions.clone();
         add_button(&tools, icons::FIT, "Edit template on canvas", move || {
             action.preview(property)
         });
     }
-    if let Some(span) = source {
+    if let Some(included) = included {
+        let action = actions.clone();
+        add_button(
+            &tools,
+            SOURCE,
+            "Reveal included template source",
+            move || action.reveal_included(&included),
+        );
+    } else if let Some(span) = source {
         let action = actions.clone();
         add_button(&tools, SOURCE, "Reveal template source", move || {
             action.reveal(span)
@@ -238,11 +314,59 @@ fn add_slot(
     }
 }
 
+struct TemplateChoice {
+    label: String,
+    change: ItemTemplateChange,
+}
+
+fn template_choices(
+    session: &crate::DesignerSession,
+    owner: NodeId,
+    slots: &[ItemTemplateSlot],
+) -> Result<Vec<TemplateChoice>, String> {
+    if slots.iter().all(|slot| slot.reason.is_some()) {
+        return Ok(Vec::new());
+    }
+    let local =
+        item_template_resources(session.document(), owner).map_err(|error| error.to_string())?;
+    let mut choices = local
+        .into_iter()
+        .map(|resource| TemplateChoice {
+            label: resource.key,
+            change: ItemTemplateChange::AssignResource {
+                resource: resource.node,
+            },
+        })
+        .collect::<Vec<_>>();
+    choices.extend(
+        session
+            .included_template_resources(owner)?
+            .into_iter()
+            .map(|resource| {
+                let name = ferroui_designer_project::file_path(&resource.uri)
+                    .ok()
+                    .and_then(|path| {
+                        path.file_name()
+                            .and_then(|name| name.to_str())
+                            .map(str::to_owned)
+                    });
+                TemplateChoice {
+                    label: name.map_or_else(
+                        || resource.key.clone(),
+                        |name| format!("{} · {name}", resource.key),
+                    ),
+                    change: ItemTemplateChange::AssignIncludedResource { key: resource.key },
+                }
+            }),
+    );
+    Ok(choices)
+}
+
 fn add_resource_picker(
     body: &StackPanel,
     actions: TemplateActions,
     property: ItemTemplateMember,
-    resources: &[ItemTemplateResource],
+    resources: &[TemplateChoice],
 ) {
     let bar = Grid::new();
     bar.set_column_definitions(
@@ -250,25 +374,20 @@ fn add_resource_picker(
     );
     let choice = picker(
         "Template resource",
-        resources.iter().map(|resource| resource.key.as_str()),
+        resources.iter().map(|resource| resource.label.as_str()),
         0,
     );
-    let ids = resources
+    let changes = resources
         .iter()
-        .map(|resource| resource.node)
+        .map(|resource| resource.change.clone())
         .collect::<Vec<_>>();
     let select = choice.downgrade();
     let assign = icon_button(icons::CHECK, "Assign template resource", move || {
-        if let Some(resource) = select
+        if let Some(change) = select
             .upgrade()
-            .and_then(|choice| ids.get(choice.selected_index() as usize))
+            .and_then(|choice| changes.get(choice.selected_index() as usize))
         {
-            actions.edit(
-                property,
-                ItemTemplateChange::AssignResource {
-                    resource: *resource,
-                },
-            );
+            actions.edit(property, change.clone());
         }
     });
     Grid::set_column(&assign, 1);

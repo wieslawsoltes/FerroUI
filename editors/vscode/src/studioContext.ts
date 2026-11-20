@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import type { EditResult, Range } from './protocol';
+import { includedTemplateUri, type IncludedTemplateSource } from './includedTemplate';
+import { exactRange } from './textDocument';
 
 export class StudioContext {
     readonly selection: number[];
@@ -50,6 +52,18 @@ export class StudioContext {
     async revealRange(range: Range): Promise<void> {
         this.ensure();
         await this.panel.revealSource({ session: this.panel.session, token: this.token }, range);
+    }
+
+    async revealIncludedTemplate(source: IncludedTemplateSource): Promise<void> {
+        this.ensure();
+        const uri = await includedTemplateUri(this.panel.document.uri, source);
+        const document = await vscode.workspace.openTextDocument(uri);
+        this.ensure();
+        const selection = exactRange(document, source.range);
+        if (!['DataTemplate', 'TreeDataTemplate'].includes(document.getText(selection).split(':').at(-1) ?? '')) {
+            throw new Error('The template declaration changed. Reopen Item Templates.');
+        }
+        await vscode.window.showTextDocument(document, { selection, preview: false });
     }
 }
 

@@ -71,6 +71,8 @@ pub(crate) struct Presentation {
     pub(crate) timeline_targets: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) transition_position: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) open_definition: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -138,7 +140,10 @@ impl Renderer {
         }
     }
 
-    pub(crate) fn render(&mut self, input: &Render, source: &str, sources: SourceSnapshot, layers: Option<&LayerViewState>) -> Result<Frame, String> {
+    pub(crate) fn render(
+        &mut self, input: &Render, source: &str, sources: SourceSnapshot,
+        includes: ferroui_designer_project::PreviewIncludes, layers: Option<&LayerViewState>,
+    ) -> Result<Frame, String> {
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
         }
@@ -166,6 +171,7 @@ impl Renderer {
             }
             PreviewStatus::Failed { message, .. } => return Err(message.clone()),
         }
+        session.set_accepted_preview_includes(includes);
         let window = PreviewWindow(Window::new());
         window.0.set_window_decorations(WindowDecorations::None);
         window.0.set_width(f64::from(input.width));
@@ -240,6 +246,7 @@ impl Renderer {
             timeline_position: None,
             timeline_targets: None,
             transition_position: None,
+            open_definition: None,
         })
     }
 }

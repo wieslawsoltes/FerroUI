@@ -164,6 +164,11 @@ impl DesignerSession {
         self.preview.uri()
     }
 
+    /// Supply authored include locations from the source snapshot used to mount this preview.
+    pub fn set_accepted_preview_includes(&mut self, includes: ferroui_designer_project::PreviewIncludes) {
+        self.preview.set_include_documents(includes);
+    }
+
     pub(crate) fn set_workspace_preview_root(&mut self, root: std::path::PathBuf) {
         self.preview.set_workspace_root(root, &self.document);
     }

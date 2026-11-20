@@ -1,5 +1,5 @@
 //! Retain an item template preview when an editor replaces its native frame.
-use crate::{DefinitionScope, DesignerSession};
+use crate::{item_template_samples::ItemTemplatePreview, DefinitionScope, DesignerSession};
 use ferroui_designer_core::{Document, NodeId};
 
 pub struct ItemTemplateScopeSnapshot {
@@ -11,7 +11,7 @@ pub struct ItemTemplateScopeSnapshot {
 impl DesignerSession {
     pub fn item_template_scope_snapshot(&self) -> Option<ItemTemplateScopeSnapshot> {
         let scope = self.definition_scope()?.clone();
-        scope.item_template?;
+        scope.item_template.as_ref()?;
         Some(ItemTemplateScopeSnapshot {
             document: self.document().snapshot_without_history(),
             scope,
@@ -40,20 +40,37 @@ impl DesignerSession {
             (current.name_span == previous.name_span && current.name == previous.name)
                 .then_some(current.id)
         };
-        let Some(mut item) = accepted.scope.item_template else {
+        let Some(mut item) = accepted.scope.item_template.clone() else {
             return Ok(false);
         };
-        let (Some(owner), Some(definition)) = (remap(item.owner), remap(accepted.scope.node))
-        else {
+        let Some(definition) = remap(accepted.scope.node) else {
             return Ok(false);
         };
-        let attached = self.item_template_slots(owner)?.into_iter().any(|slot| {
-            slot.property == item.property && slot.value.definition() == Some(definition)
-        });
-        if !attached {
-            return Ok(false);
+        match &mut item {
+            ItemTemplatePreview::Assigned { owner, property } => {
+                let Some(current) = remap(*owner) else {
+                    return Ok(false);
+                };
+                if !self.item_template_slots(current)?.into_iter().any(|slot| {
+                    slot.property == *property && slot.value.definition() == Some(definition)
+                }) {
+                    return Ok(false);
+                }
+                *owner = current;
+            }
+            ItemTemplatePreview::Included { key, .. } => {
+                if self
+                    .document()
+                    .ast()
+                    .node(definition)
+                    .and_then(ferroui_designer_tools::keyed_item_template)
+                    .as_ref()
+                    != Some(key)
+                {
+                    return Ok(false);
+                }
+            }
         }
-        item.owner = owner;
         let return_selection = accepted
             .scope
             .return_selection

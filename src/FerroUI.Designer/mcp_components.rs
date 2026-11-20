@@ -182,6 +182,7 @@ pub(super) fn tools() -> Vec<Value> {
                     &["node"],
                     true,
                 ),
+                s::action("enter_included_template", json!({"target":{"type":"object"}}), &["target"], true),
                 s::action(
                     "exit",
                     json!({"expected_scope_epoch":s::revision()}),
@@ -278,6 +279,7 @@ pub(super) fn call(
                     node_id(args, "node")?,
                     preview_options(args)?,
                 )?,
+                "enter_included_template" => session.enter_included_item_template(decode(args, "target")?)?,
                 "exit" => session.exit_definition_scope()?,
                 _ => return Err("Unknown definition-scope action".into()),
             }
