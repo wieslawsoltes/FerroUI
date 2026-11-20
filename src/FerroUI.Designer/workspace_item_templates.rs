@@ -82,6 +82,16 @@ impl DesignerWorkspace {
         }
         result
     }
+
+    pub(crate) fn show_template_consumer(self: &Rc<Self>, uri: &str) -> Result<(), String> {
+        let Ok(uri) = ferroui_designer_project::canonical_file_uri(uri) else {
+            return Ok(());
+        };
+        if self.document_uris().contains(&uri) {
+            self.activate_document(&uri)?;
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone)]

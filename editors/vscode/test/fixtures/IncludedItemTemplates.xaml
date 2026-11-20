@@ -15,7 +15,7 @@
       <TextBlock Text="Customer directory" FontSize="26" FontWeight="SemiBold" Foreground="#FF172F41" />
       <ListBox Name="Directory" Height="164" ItemsSource="{Binding Customers}" ItemTemplate="{StaticResource CustomerRow}" />
       <TextBlock Text="Review queue" FontSize="16" Foreground="#FF1D4862" />
-      <ListBox Name="ReviewQueue" Height="82" ItemsSource="{Binding Customers}" />
+      <ListBox Name="ReviewQueue" Height="82" ItemsSource="{Binding Customers}" ItemTemplate="{StaticResource CompactCustomer}" />
     </StackPanel>
   </Border>
 </UserControl>

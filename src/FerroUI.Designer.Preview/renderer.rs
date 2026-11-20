@@ -73,6 +73,8 @@ pub(crate) struct Presentation {
     pub(crate) transition_position: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) open_definition: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) return_to_consumer: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -247,6 +249,7 @@ impl Renderer {
             timeline_targets: None,
             transition_position: None,
             open_definition: None,
+            return_to_consumer: None,
         })
     }
 }

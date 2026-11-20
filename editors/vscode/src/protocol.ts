@@ -276,6 +276,7 @@ export interface CanvasPresentation {
     timelineTargets?: TimelineTargetOverrides;
     transitionPosition?: NativeTransitionPosition;
     openDefinition?: import('./includedTemplate').IncludedTemplatePreview;
+    returnToConsumer?: string;
 }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
     focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean };

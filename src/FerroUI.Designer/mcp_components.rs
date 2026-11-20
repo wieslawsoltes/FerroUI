@@ -274,7 +274,13 @@ pub(super) fn call(
                     ));
                 }
             }
-            match text(args, "action")?.as_str() {
+            let action = text(args, "action")?;
+            let consumer = if action == "exit" {
+                session.included_template_consumer().map(str::to_owned)
+            } else {
+                None
+            };
+            match action.as_str() {
                 "enter" => session.enter_definition_scope_with_options(
                     node_id(args, "node")?,
                     preview_options(args)?,
@@ -283,7 +289,11 @@ pub(super) fn call(
                 "exit" => session.exit_definition_scope()?,
                 _ => return Err("Unknown definition-scope action".into()),
             }
-            Ok(json!({"document":state(session),"scope":scope_state(session)}))
+            let mut result = json!({"document":state(session),"scope":scope_state(session)});
+            if let Some(consumer) = consumer {
+                result["returnToConsumer"] = json!(consumer);
+            }
+            Ok(result)
         }
         _ => Err("Unknown component tool".into()),
     }

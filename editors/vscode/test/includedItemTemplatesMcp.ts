@@ -57,9 +57,9 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
     };
 
     const queue = await read('ReviewQueue');
-    assert.ok(queue.model.includedResources.some(resource => resource.key === 'CompactCustomer' && resource.uri === dictionaryUri.toString()));
-    content(await apply(queue, { action: 'assign_included_resource', key: 'CompactCustomer' }));
-    assert.match(consumer.getText(), /Name="ReviewQueue"[^>]*ItemTemplate="\{StaticResource 'CompactCustomer'\}"/);
+    assert.ok(queue.model.includedResources.some(resource => resource.key === 'CustomerRow' && resource.uri === dictionaryUri.toString()));
+    content(await apply(queue, { action: 'assign_included_resource', key: 'CustomerRow' }));
+    assert.match(consumer.getText(), /Name="ReviewQueue"[^>]*ItemTemplate="\{StaticResource 'CustomerRow'\}"/);
     await undo(session, consumer, originalConsumer);
     assert.equal(dictionary.getText(), draft);
 
@@ -92,17 +92,23 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
     assert.notEqual(await image(), baseline);
     const edited = await frame(owner);
     const stale = await invoke('designer_studio_present', { session: owner, expected_revision: edited.revision,
-        tool: 'designer_definition', arguments: { action: 'enter_included_template', target: { source: target, sample: null } } });
+        tool: 'designer_definition', arguments: { action: 'enter_included_template', target: {
+            source: target, sample: null, consumer: consumer.uri.toString(),
+        } } });
     assert.ok(stale.isError);
     assert.match(stale.content[0]?.text ?? '', /included template source changed/i);
     await undo(owner, dictionary, draft);
     await frame(session);
     assert.equal(await image(), baseline);
     await undo(owner, dictionary, originalDictionary);
+    const active = await frame(owner);
+    const returned = content<{ returned_to: string }>(await invoke('designer_studio_present', { session: owner,
+        expected_revision: active.revision, tool: 'designer_definition', arguments: { action: 'exit' } }));
+    assert.equal(returned.returned_to, consumer.uri.toString());
 
     const labels = ['IncludedItemTemplates.xaml', 'Customer Rows.xaml'];
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs)
         .filter(tab => labels.some(label => tab.label === label || tab.label === `Design · ${label}`));
     await vscode.window.tabGroups.close(tabs);
-    console.log('VS Code and MCP opened an unsaved included template with its consumer fixture, edited its owning buffer, and refreshed the consumer through Undo');
+    console.log('VS Code and MCP opened an unsaved included template with its consumer fixture, edited its owning buffer, refreshed the consumer through Undo, and returned to its Design tab');
 }

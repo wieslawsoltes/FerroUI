@@ -13,6 +13,7 @@ export interface IncludedTemplateSource {
 export interface IncludedTemplatePreview {
     source: IncludedTemplateSource;
     sample: unknown;
+    consumer: string;
 }
 
 export async function includedTemplateUri(consumer: vscode.Uri, target: IncludedTemplateSource): Promise<vscode.Uri> {

@@ -73,6 +73,7 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     presentation.timeline_targets = result.get("timelineTargets").cloned();
     presentation.transition_position = result.get("transitionPosition").cloned();
     presentation.open_definition = result.get("openDefinition").cloned();
+    presentation.return_to_consumer = result["returnToConsumer"].as_str().map(str::to_owned);
     if let (Some(position), Some(range)) = (&mut presentation.transition_position, route_source) {
         position["sourceRange"] = json!(range);
     }

@@ -620,7 +620,16 @@ impl UiToolProvider for DesignerMcp {
             return Ok(result);
         }
         if components::handles(name) {
-            return components::call(&mut session, name, args);
+            let mut result = components::call(&mut session, name, args)?;
+            if let (Some(workspace), Some(consumer)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade),
+                result["returnToConsumer"].as_str(),
+            ) {
+                drop(session);
+                workspace.show_template_consumer(consumer)?;
+                result["document"] = state(&owner.borrow());
+            }
+            return Ok(result);
         }
         if style_composition::handles(name) {
             return style_composition::call(&mut session, name, args);

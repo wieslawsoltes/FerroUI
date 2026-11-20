@@ -268,17 +268,24 @@ export class DesignerWorkbench implements vscode.Disposable {
                 this.followFocus();
             }, message => {
                 void this.drag.receive(designer, message).catch(error => designer.post({ type: 'edit', error: errorMessage(error) }));
-            }, (token, target, signal) => this.openIncludedTemplate(designer, token, target, signal), restored);
+            }, (token, target, signal) => this.navigateTemplate(designer, token, target, signal), restored);
         designer.onDidChange(() => this.followFocus());
         this.panels.set(key, designer);
         return designer;
     }
 
-    private async openIncludedTemplate(consumer: DesignerPanel, token: number, target: IncludedTemplatePreview, signal: AbortSignal): Promise<void> {
+    private async navigateTemplate(consumer: DesignerPanel, token: number, target: IncludedTemplatePreview | string, signal: AbortSignal): Promise<boolean> {
         const ensureConsumer = () => {
             signal.throwIfAborted();
             if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen Item Templates.');
         };
+        if (typeof target === 'string') {
+            ensureConsumer();
+            const previous = this.panels.get(target);
+            if (!previous || previous.isDisposed) return false;
+            await this.revealDesign(previous, 'canvas');
+            return true;
+        }
         const uri = await includedTemplateUri(consumer.document.uri, target.source);
         ensureConsumer();
         const designer = await this.openDocument(uri, asPosition(target.source.range.start));
@@ -290,6 +297,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         if (!opened || designer.currentToken === undefined) throw new Error('The dictionary changed while opening the template.');
         await designer.revealSource({ session: designer.session, token: designer.currentToken }, target.source.range);
         designer.panel.reveal(undefined, true);
+        return true;
     }
 
     private prepareMove(from: vscode.Uri, to: vscode.Uri): void {

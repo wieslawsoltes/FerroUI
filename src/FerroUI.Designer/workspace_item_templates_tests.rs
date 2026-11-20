@@ -227,7 +227,48 @@ fn studio_edits_an_included_template_in_its_own_tab_with_the_consumer_fixture() 
     active.undo().unwrap();
     assert_eq!(active.authored_source(), DICTIONARY);
     drop(active);
-    workspace.activate_document(&view_uri).unwrap();
+    workspace.return_to_document().unwrap();
+    assert_eq!(session.borrow().document_uri(), view_uri);
     assert_eq!(session.borrow().authored_source(), VIEW);
+    #[cfg(feature = "mcp")]
+    {
+        use crate::mcp::{DesignerMcp, Permissions};
+        use ferroui_mcp::UiToolProvider;
+        use serde_json::json;
+
+        let provider = DesignerMcp::with_workspace(&workspace);
+        let read = provider
+            .call(
+                "designer_item_templates",
+                &json!({"node": owner}),
+                Permissions::default(),
+            )
+            .unwrap();
+        let revision = session.borrow().document().revision();
+        let permission = || Permissions {
+            allow_property_writes: true,
+            ..Default::default()
+        };
+        provider
+            .call(
+                "designer_item_template",
+                &json!({
+                    "node": owner, "property": "ItemTemplate", "action": "preview",
+                    "expected_revision": revision, "expected_model": read["model"],
+                }),
+                permission(),
+            )
+            .unwrap();
+        assert_eq!(session.borrow().document_uri(), dictionary_uri);
+        let revision = session.borrow().document().revision();
+        provider
+            .call(
+                "designer_definition",
+                &json!({"action": "exit", "expected_revision": revision}),
+                permission(),
+            )
+            .unwrap();
+        assert_eq!(session.borrow().document_uri(), view_uri);
+    }
     window.close();
 }

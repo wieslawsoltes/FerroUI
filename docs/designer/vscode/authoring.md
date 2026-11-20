@@ -303,7 +303,7 @@ Each action updates the unsaved XAML and native preview through one Undo step. M
 
 When **Design Data** supplies an array through a simple `ItemsSource` binding, the template canvas shows the first item from the selected fixture. Try the **Trial** fixture in the local sample to see a different customer. Use the back arrow in the designer toolbar to return from a local template to the view.
 
-Try [IncludedItemTemplates.xaml](../../../editors/vscode/test/fixtures/IncludedItemTemplates.xaml) inside a workspace. Select **Directory** and edit its template to open **Customer Rows.xaml** in the dictionary's own resource scope. Its preview starts with the consuming view's selected fixture and resolves the brush from the dictionary. Change the template in **Properties**, then switch to the original Design tab to see the update from the unsaved dictionary. Use Undo in **Customer Rows.xaml** to restore the template. Reopen the template from the consuming view to sample a different fixture.
+Try [IncludedItemTemplates.xaml](../../../editors/vscode/test/fixtures/IncludedItemTemplates.xaml) inside a workspace. Select **Directory** and edit its template to open **Customer Rows.xaml** in the dictionary's own resource scope. Its preview starts with the consuming view's selected fixture and resolves the brush from the dictionary. Change the template in **Properties**, then use the back arrow to see the update in the consuming Design tab. Use Undo in **Customer Rows.xaml** to restore the template. Reopen the template from the consuming view to sample a different fixture.
 
 ![Customer Rows.xaml beside its native template preview, showing the Alpine and Co. fixture row](../images/vscode-included-item-template.jpg)
 

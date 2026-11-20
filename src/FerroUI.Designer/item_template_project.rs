@@ -32,6 +32,7 @@ pub(crate) struct IncludedItemTemplate {
 pub(crate) struct IncludedTemplatePreview {
     pub source: IncludedItemTemplate,
     pub sample: Option<DesignFixture>,
+    pub consumer: String,
 }
 
 #[derive(Serialize)]
@@ -188,7 +189,11 @@ impl DesignerSession {
         } else {
             None
         };
-        Ok(Some(IncludedTemplatePreview { source, sample }))
+        Ok(Some(IncludedTemplatePreview {
+            source,
+            sample,
+            consumer: self.document_uri().to_owned(),
+        }))
     }
 
     pub(crate) fn enter_included_item_template(
@@ -213,8 +218,16 @@ impl DesignerSession {
         let item = ItemTemplatePreview::Included {
             key: target.source.key,
             sample: target.sample,
+            consumer: target.consumer,
         };
         self.enter_definition(node, DefinitionPreviewOptions::default(), Some(item))
+    }
+
+    pub(crate) fn included_template_consumer(&self) -> Option<&str> {
+        match self.definition_scope()?.item_template.as_ref()? {
+            ItemTemplatePreview::Included { consumer, .. } => Some(consumer),
+            ItemTemplatePreview::Assigned { .. } => None,
+        }
     }
 }
 
