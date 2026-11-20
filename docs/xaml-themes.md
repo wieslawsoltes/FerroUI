@@ -408,6 +408,31 @@ Details are in docs/porting/theme-trimming.md, section 22.
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
 name, the first time the control looks for its theme. Release builds do not check.
 
+**How a build applies its runs.** The function of a document that merges units calls
+`rt::apply_theme_unit(active_theme_units(), unit, run, ..)` where the entries of a run were:
+the call looks the active table up and searches it for the unit, and a unit the application
+trimmed adds nothing. The WinUI theme has 347 such calls in its two population functions, and
+hello world keeps 16 of its 166 units. An experiment of #853 changes two things, each with a
+switch of `ThemeUnitPlan` (`rust_emitter`), both off: the generated files are what they were.
+
+- `keys_in_runs`: every merged `*_themeresources.xaml` assigns the key of its theme dictionary
+  (`<ResourceDictionary x:Key="Default">`) to the theme dictionary of the theme it was merged
+  into. The merge joins only dictionaries with equal keys, so after the first assignment, which
+  is outside every unit, the others write the value the dictionary has. With the switch they
+  are entries of the unit of their document: they go into its run, and a trimmed unit takes
+  them with it. Without it they stay in the population function, one between each two calls.
+- `regions`: calls of runs that add to one dictionary, with only comments between them, are
+  one call of `rt::apply_theme_region(active_theme_units(), &[(unit, run), ..], ..)`. It
+  applies the same runs in the same order and stops at the same failure; the units of a region
+  ascend, and it walks the table once. A region needs its indices in 16 bits, else its calls
+  stay. A call alone stays a call of `rt::apply_theme_unit`.
+
+Turning it on: `DEFAULT_THEME_UNIT_PLAN = ThemeUnitPlan::ON` in
+`rust_emitter/theme_units.rs`, then the checked-in generated files are regenerated (section 2,
+and `tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs` where it changes). Whether it
+stays on is decided by the size of the stripped hello world and of a larger sample, and by the
+start (`docs/binary-size.md`).
+
 ## 4. Rules for theme markup
 
 ### 4.1 Document structure
@@ -639,6 +664,7 @@ section 9).
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
+| The runs of a build as regions, key assignments of merged theme dictionaries in their units (`ThemeUnitPlan`, off) | #853 | In review, to be measured |
 | `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
 | Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
