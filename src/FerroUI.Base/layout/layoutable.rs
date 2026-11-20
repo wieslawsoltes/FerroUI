@@ -602,6 +602,8 @@ impl Layoutable {
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
+    // Inlined into `Interactive::construct`, its one caller outside tests (see there).
+    #[inline]
     pub fn construct() -> Self {
         Self {
             base: Visual::construct(),

@@ -69,6 +69,11 @@ impl Interactive {
     pub const DEFAULT_ROUTES: RoutingStrategies = RoutingStrategies::DIRECT.union(RoutingStrategies::BUBBLE);
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
+    // Kept out of line, with `Layoutable::construct` inlined into it: the code layout every
+    // element construction ran with before #567 added handler methods to this file, which made
+    // the compiler inline this into its callers instead (+2.3 % instructions mounting list
+    // controls in the gate).
+    #[inline(never)]
     pub fn construct() -> Self {
         Self { base: Layoutable::construct(), event_handlers: RefCell::new(Vec::new()) }
     }
