@@ -397,11 +397,15 @@ impl DesignerWorkspace {
     pub(super) fn sync_preview_stage_sources(&self) -> Result<(), String> {
         let active = self.session.borrow().document_uri().to_owned();
         let sources = self.preview_stage_sources();
+        let includes = self.preview_stage_local_includes(&sources);
         let (options, epoch) = self.preview_stage_host_options();
         self.preview_stages
             .board
             .borrow_mut()
-            .sync_sources(&active, sources, options, epoch)
+            .sync_sources_with_local_includes(
+                &active, sources, options, epoch,
+                &includes.iter().map(|(uri, set)| (uri.as_str(), set)).collect(),
+            )
     }
 
     /// Called before the regular source/selection refresh early return. Board state

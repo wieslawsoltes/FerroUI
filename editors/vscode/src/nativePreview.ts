@@ -100,7 +100,9 @@ export class NativePreview implements vscode.Disposable {
         let configured = this.projects.get(project);
         if (!configured) {
             const id = ++this.nextProject;
-            configured = this.send('configureProject', { id, workspaceRoot: project.workspaceRoot, ...project.metadata }).then(() => id);
+            configured = this.send('configureProject', {
+                id, workspaceRoot: project.workspaceRoot, resourceMoves: project.resourceMoves, ...project.metadata,
+            }).then(() => id);
             this.projects.set(project, configured);
             void configured.catch(() => this.projects.delete(project));
         }

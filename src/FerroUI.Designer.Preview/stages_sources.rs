@@ -1,7 +1,11 @@
 //! Prepare authored stages with the same bounded local include resolver as the canvas.
 use crate::{document::DesignDocument, projects::Projects, protocol::Source};
-use ferroui_designer::{PreviewHostOptions, PreviewStageBoard, PreviewStageSource, PreviewStageSourceMoves};
-use ferroui_designer_project::{local_preview_sources, LocalPreviewSources, PreviewSourceBuffer};
+use ferroui_designer::{
+    PreviewHostOptions, PreviewStageBoard, PreviewStageSource, PreviewStageSourceMoves,
+};
+use ferroui_designer_project::{
+    local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer,
+};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -42,11 +46,12 @@ impl StageSource {
                 pending: false,
             },
         };
-        let includes = local_preview_sources(
+        let includes = local_preview_sources_with_resources(
             workspace_root.as_deref(),
             &authored.uri,
             &preview.document,
             buffers,
+            project.map(|project| &project.resources),
         );
         Ok(Self {
             authored,

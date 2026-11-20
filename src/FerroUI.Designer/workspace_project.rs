@@ -119,6 +119,7 @@ impl DesignerWorkspace {
         }
         let mut session = self.session.borrow_mut();
         session.set_workspace_preview_buffers(Vec::new());
+        session.set_workspace_preview_resources(None, false);
         session.set_workspace_preview_root(root);
     }
     pub fn select_project(&self, index: usize) -> Result<(), String> {
@@ -274,7 +275,9 @@ impl DesignerWorkspace {
         self.disconnect_sharing();
         let buffers = self.project.borrow().tabs.iter().filter(|(_, tab)| tab.rust.is_none() && tab.document.is_dirty())
             .map(|(uri, tab)| ferroui_designer_project::PreviewSourceBuffer { uri: uri.clone(), source: Some(tab.source().into()) }).collect();
+        let resources = self.try_language_service().ok().and_then(|language| language.compiled_resources(uri));
         self.session.borrow_mut().set_workspace_preview_buffers(buffers);
+        self.session.borrow_mut().set_workspace_preview_resources(resources, false);
         self.session
             .borrow_mut()
             .restore_authored_document(tab.document, tab.rust, tab.preview_uri)?;
@@ -693,7 +696,14 @@ impl DesignerWorkspace {
             self.refresh_rust_catalog();
         }
         let published = refreshed.into_iter().map(|result| result.and_then(|(root, catalog)| {
-            self.try_language_service()?.set_project_catalog(root, catalog).map_err(|error| error.to_string())
+            let resources = {
+                let mut language = self.try_language_service()?;
+                language.set_project_catalog(root, catalog).map_err(|error| error.to_string())?;
+                let session = self.session.borrow();
+                language.compiled_resources(session.document_uri())
+            };
+            self.session.borrow_mut().set_workspace_preview_resources(resources, true);
+            Ok(())
         }));
         for result in published.chain(added) {
             if let Err(error) = result { self.status.set_text(Some(&error)); }

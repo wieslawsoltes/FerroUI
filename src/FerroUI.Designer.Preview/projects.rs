@@ -1,7 +1,7 @@
 use crate::protocol::{Asset, Source};
-use ferroui_designer::{DesignerAsset, registered_designer_assets};
+use ferroui_designer::{registered_designer_assets, DesignerAsset};
 use ferroui_designer_language::Schema;
-use ferroui_designer_project::{BuildMetadata, canonical_file_uri, file_path};
+use ferroui_designer_project::{canonical_file_uri, file_path, BuildMetadata, CompiledResources};
 use ferroui_designer_rsx::RsxCatalog;
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -16,6 +16,7 @@ pub(crate) struct Project {
     pub(crate) rsx: RsxCatalog,
     pub(crate) assets: Vec<DesignerAsset>,
     pub(crate) toolbox: Vec<Asset>,
+    pub(crate) resources: CompiledResources,
 }
 
 #[derive(Deserialize)]
@@ -23,6 +24,8 @@ pub(crate) struct Project {
 pub(crate) struct Registration {
     id: u64,
     workspace_root: PathBuf,
+    #[serde(default)]
+    resource_moves: BTreeMap<String, String>,
     #[serde(flatten)]
     metadata: BuildMetadata,
 }
@@ -53,6 +56,8 @@ impl Projects {
             .metadata
             .catalog()
             .map_err(|error| error.to_string())?;
+        let mut resources = catalog.compiled_resources(&root).unwrap_or_default();
+        resources.retarget(&request.resource_moves);
         let assets = registered_designer_assets(&catalog, request.metadata.package.as_deref());
         let mut schema = Schema::ferroui();
         schema.register_project(&catalog);
@@ -72,6 +77,7 @@ impl Projects {
                 rsx,
                 assets,
                 toolbox,
+                resources,
             },
         );
         Ok(previous)

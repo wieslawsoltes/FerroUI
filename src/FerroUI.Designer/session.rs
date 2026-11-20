@@ -170,6 +170,11 @@ impl DesignerSession {
     pub(crate) fn set_workspace_preview_buffers(&mut self, buffers: Vec<ferroui_designer_project::PreviewSourceBuffer>) {
         self.preview.set_workspace_buffers(buffers);
     }
+    pub(crate) fn set_workspace_preview_resources(&mut self, resources: Option<std::sync::Arc<ferroui_designer_project::CompiledResources>>, refresh: bool) {
+        if self.preview.set_workspace_resources(resources) && refresh {
+            self.preview.reload(&self.document);
+        }
+    }
     /// Record a successful write of the current authored buffer.
     pub fn mark_saved(&mut self) {
         self.mark_saved_source(self.authored_source().to_owned());

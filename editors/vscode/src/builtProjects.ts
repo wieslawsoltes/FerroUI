@@ -9,6 +9,7 @@ const stateKey = 'ferroui.builtProjectMetadata.v1';
 export interface BuiltProject {
     readonly metadata: ProjectMetadata;
     readonly workspaceRoot: string;
+    readonly resourceMoves?: Readonly<Record<string, string>>;
 }
 
 export class BuiltProjects implements vscode.Disposable {
@@ -16,6 +17,7 @@ export class BuiltProjects implements vscode.Disposable {
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChange = this.changed.event;
     private readonly folders: vscode.Disposable;
+    private readonly moves: vscode.Disposable;
 
     constructor(private readonly state: vscode.Memento, private readonly output: vscode.OutputChannel) {
         const saved = state.get<ProjectMetadata[]>(stateKey, []);
@@ -26,6 +28,7 @@ export class BuiltProjects implements vscode.Disposable {
             }
             this.changed.fire();
         });
+        this.moves = vscode.workspace.onDidRenameFiles(event => this.retargetResources(event.files));
     }
 
     get metadata(): ProjectMetadata[] {
@@ -61,8 +64,30 @@ export class BuiltProjects implements vscode.Disposable {
         return true;
     }
 
+    private retargetResources(files: vscode.FileRenameEvent['files']): void {
+        if (!vscode.workspace.isTrusted) return;
+        let changed = false;
+        for (const [manifest, project] of this.projects) {
+            const root = path.dirname(manifest);
+            const moves = new Map(files.filter(({ oldUri, newUri }) =>
+                [oldUri, newUri].every(uri => uri.scheme === 'file'
+                    && path.extname(uri.fsPath).toLowerCase() === '.xaml' && isInside(root, uri.fsPath)))
+                .map(({ oldUri, newUri }) => [oldUri.toString(), newUri.toString()]));
+            if (!moves.size) continue;
+            const previous = Object.entries(project.resourceMoves ?? {});
+            const relocated = new Set(previous.map(([, uri]) => uri));
+            const next = new Map(previous.map(([origin, uri]) => [origin, moves.get(uri) ?? uri]));
+            for (const [from, to] of moves) if (!relocated.has(from)) next.set(from, to);
+            for (const [origin, uri] of next) if (origin === uri) next.delete(origin);
+            this.projects.set(manifest, { ...project, resourceMoves: Object.fromEntries(next) });
+            changed = true;
+        }
+        if (changed) this.changed.fire();
+    }
+
     dispose(): void {
         this.folders.dispose();
+        this.moves.dispose();
         this.changed.dispose();
     }
 }

@@ -121,7 +121,7 @@ In VS Code, call `ferroui_workspace_plan_xaml_move` with `path` and `destination
 
 When the Cargo build publishes generated XAML symbols, VS Code uses rust-analyzer to add the affected authored Rust references to the review. The `generatedRust` entries identify each declaration and its old and new names. Review the Rust source changes in `documents`. A stale buffer or an unresolved declaration requires a fresh review. [Build the project schema and move a compiled view](authoring.md#move-an-xaml-file-and-its-references)
 
-For file-backed Cargo groups, both planners report the change to the Rust path literal in `documents`. The compiled key and generated entry points keep their names. Build the selected Cargo target before asking for the plan. [Computed Cargo group setup](authoring.md#computed-cargo-groups-with-file-backed-registrations)
+For file-backed Cargo groups, both planners report the change to the Rust path literal in `documents`. The compiled key and generated entry points keep their names. Relative XAML includes with a mapped compiled target follow its source through the move. Build the selected Cargo target before asking for the plan. [Computed Cargo group setup](authoring.md#computed-cargo-groups-with-file-backed-registrations)
 
 In Studio, open the source file and call `designer_plan_xaml_move` with `destination` and `expected_revision`. Send the same arguments and `review` to `designer_move_xaml` with write permission. Studio updates the saved stage sets and scenarios on Apply. Save the changed XAML and Rust buffers to publish their new references. Use Undo or Redo in a participating source tab to replay the move, including the saved files. [File move workflow](authoring.md#move-an-xaml-file-and-its-references)
 

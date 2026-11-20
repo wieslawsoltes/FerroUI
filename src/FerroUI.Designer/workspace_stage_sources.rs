@@ -7,6 +7,9 @@ use crate::{
     PreviewStageTarget, RuntimeNode,
 };
 use ferroui_designer_animation::VisualStateGroup;
+use ferroui_designer_project::{
+    file_path, local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer,
+};
 use ferroui_inspect::TreeKind;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -23,6 +26,36 @@ struct FocusContext {
 }
 
 impl DesignerWorkspace {
+    pub(super) fn preview_stage_local_includes(
+        &self,
+        sources: &[PreviewStageSource],
+    ) -> std::collections::BTreeMap<String, LocalPreviewSources> {
+        let state = self.project.borrow();
+        let (Some(workspace), Ok(language)) = (&state.workspace, self.try_language_service()) else {
+            return Default::default();
+        };
+        let compiled: Vec<_> = sources.iter().filter_map(|source| {
+            let resources = language.compiled_resources(&source.uri)?;
+            (!resources.is_empty()).then_some((source, resources))
+        }).collect();
+        if compiled.is_empty() {
+            return Default::default();
+        }
+        let buffers: Vec<_> = sources.iter().filter_map(|source| {
+            let path = file_path(&source.uri).ok()?;
+            path.extension()?.eq_ignore_ascii_case("xaml").then(|| PreviewSourceBuffer {
+                uri: source.uri.clone(),
+                source: (!source.pending).then(|| source.document.source().to_owned()),
+            })
+        }).collect();
+        compiled.into_iter().map(|(source, resources)| {
+            let includes = local_preview_sources_with_resources(
+                Some(&workspace.solution.root), &source.uri, &source.document, &buffers, Some(&resources),
+            );
+            (source.uri.clone(), includes)
+        }).collect()
+    }
+
     pub(super) fn preview_stage_sources(&self) -> Vec<PreviewStageSource> {
         let session = self.session.borrow();
         let uri = session.document_uri();

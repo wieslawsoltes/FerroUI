@@ -3,7 +3,7 @@ use crate::edits::{addable_properties, can_remove, editable_attribute};
 use crate::protocol::{OutlineNode, Property, Render, Snapshot};
 use crate::projects::Project;
 use crate::renderer::Renderer;
-use ferroui_designer_project::local_preview_sources;
+use ferroui_designer_project::local_preview_sources_with_resources;
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 
 pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&Project>) -> Result<Snapshot, String> {
@@ -29,7 +29,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     } else {
         (Vec::new(), None)
     };
-    let local = local_preview_sources(input.workspace_root.as_deref(), &input.document.uri, &design.xaml, &input.local_sources);
+    let local = local_preview_sources_with_resources(input.workspace_root.as_deref(), &input.document.uri, &design.xaml, &input.local_sources, project.map(|project| &project.resources));
     let dependencies = local.dependencies.into_iter().collect();
     let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
     let layers = input.layer_view.as_ref().filter(|layers| layers.block.as_ref() == active_block.as_ref().map(|range| &range.start))

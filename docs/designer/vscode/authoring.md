@@ -198,7 +198,11 @@ fn main() {
 
 Run **Build Project XAML Schema** for the Cargo target you want to review. The **Changes** editor includes the path literal in `build.rs` or in the Rust module that declares the selected input. The review keeps the logical key, `ferres://` consumers, and generated Rust names. After applying the move, save the participating sources and rebuild the package. [Computed groups in the Dock sample](../../../samples/Dock/FerroDockReactiveUISample/build.rs)
 
-The review uses the declaration positions from the selected build. If a declaration shifted, save it and build the schema again. Give the physical path as a literal at the `xaml_document_file!` call so the move can preserve the rest of the computation. If the review flags a relative XAML reference that would resolve differently after a move, use an explicit resource URI that resolves under the published key and review again.
+The review uses the declaration positions from the selected build. If a declaration shifted, save it and build the schema again. Give the physical path as a literal at the `xaml_document_file!` call so the move can preserve the rest of the computation.
+
+Relative `ResourceInclude`, `MergeResourceInclude`, and `StyleInclude` paths follow their compiled group when the build records the target's source. For example, a view registered as `Published/Card.xaml` can include `Colors.xaml` from the same group even when the registered palette lives in `Source/Palette.xaml`. The review preserves that include when either source moves. Design, Stages, and language navigation follow the relocated source through Apply, Undo, and Redo while the build schema is loaded. An open palette draft still supplies the preview. Loose-file includes use their filesystem base and appear in the review when their literal needs to change.
+
+If the review flags different targets across compiled groups, inspect the reported include and choose a resource address that identifies the intended target in each group. Rebuild the selected project schema if it predates the source mappings. References to assets without a compiler source mapping may require an explicit resource URI before the move can proceed.
 
 ![The Changes editor shows the new dictionary location and each affected reference beside the preview](../images/vscode-xaml-file-move-review.jpg)
 
