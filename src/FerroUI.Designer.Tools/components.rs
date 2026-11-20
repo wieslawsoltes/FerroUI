@@ -9,6 +9,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub(crate) mod authoring;
 #[path = "component_resource_refs.rs"]
 pub(crate) mod references;
+#[path = "component_resource_graph.rs"]
+mod resource_graph;
 #[path = "dictionary_extraction.rs"]
 pub(crate) mod extraction;
 #[path = "item_templates.rs"]
@@ -19,12 +21,15 @@ pub use authoring::{
 };
 pub use references::{
     ComponentResourceContext, ComponentResourceResolution, component_resource_references,
-    component_resource_resolution, resolve_component_resource,
+    component_resource_location, component_resource_resolution, resolve_component_resource,
     resolve_component_resource_in_context,
+};
+pub use resource_graph::{
+    ComponentResourceLocation, ComponentResourceSources, IncludedResourceDocument,
 };
 pub use item_templates::{
     ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
-    ItemTemplateSlot, ItemTemplateValue, item_template_resources,
+    ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template,
 };
 
 /// Build a scope-qualified StaticResource/DynamicResource expression without treating

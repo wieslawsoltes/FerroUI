@@ -92,6 +92,7 @@ pub struct ItemTemplateResource {
 pub enum ItemTemplateChange {
     CreateInline,
     AssignResource { resource: NodeId },
+    AssignIncludedResource { key: String },
     CopyInline,
     Reset,
 }
@@ -100,7 +101,7 @@ impl ItemTemplateChange {
     pub fn label(&self) -> &'static str {
         match self {
             Self::CreateInline => "Create inline item template",
-            Self::AssignResource { .. } => "Assign item template resource",
+            Self::AssignResource { .. } | Self::AssignIncludedResource { .. } => "Assign item template resource",
             Self::CopyInline => "Make inline item template copy",
             Self::Reset => "Reset item template",
         }
@@ -184,6 +185,10 @@ pub fn item_template_resources(
             })
         })
         .collect())
+}
+
+pub fn keyed_item_template(node: &Node) -> Option<String> {
+    is_template(node).then(|| literal_key(node)).flatten()
 }
 
 fn is_template(node: &Node) -> bool {

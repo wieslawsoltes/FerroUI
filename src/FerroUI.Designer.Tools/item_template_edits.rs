@@ -3,9 +3,7 @@ use super::*;
 
 impl ItemTemplateSlot {
     pub fn plan(&self, document: &Document, change: ItemTemplateChange) -> Result<Vec<Edit>> {
-        if let Some(reason) = &self.reason {
-            return Err(ToolError(reason.clone()));
-        }
+        self.ensure_editable()?;
         let owner = element(document, self.owner)?;
         let property = self.property.name();
         let mut edits = self.clear();
@@ -32,22 +30,10 @@ impl ItemTemplateSlot {
                     resolve_component_resource(document, owner.id, &key) == Some(resource),
                     "The template resource is hidden or ambiguous in this item's scope",
                 )?;
-                let value = references::reference_expression(document, owner.id, &key, false)?;
-                if matches!(&self.value, ItemTemplateValue::Resource { definition: Some(id), dynamic: false, .. } if *id == resource)
-                {
-                    return Ok(Vec::new());
-                }
-                let name = if let ItemTemplateDeclaration::Attribute(name) = &self.declaration {
-                    edits.clear();
-                    name.clone()
-                } else {
-                    property.into()
-                };
-                edits.push(Edit::SetAttribute {
-                    node: owner.id,
-                    name,
-                    value,
-                });
+                return self.assign_key(document, &key);
+            }
+            ItemTemplateChange::AssignIncludedResource { .. } => {
+                return Err(ToolError("Resolve the included resource from the accepted source graph".into()));
             }
             ItemTemplateChange::CopyInline => {
                 require(
@@ -64,6 +50,29 @@ impl ItemTemplateSlot {
             }
         }
         validated(document, edits)
+    }
+
+    /// The host verifies the winning resource in its accepted inclusion graph
+    /// before supplying the key. Local assignment uses the same source edits.
+    pub fn assign_key(&self, document: &Document, key: &str) -> Result<Vec<Edit>> {
+        self.ensure_editable()?;
+        if matches!(&self.value, ItemTemplateValue::Resource { key: current, dynamic: false, .. } if current == key) {
+            return Ok(Vec::new());
+        }
+        let value = references::reference_expression(document, self.owner, key, false)?;
+        let mut edits = self.clear();
+        let name = if let ItemTemplateDeclaration::Attribute(name) = &self.declaration {
+            edits.clear();
+            name.clone()
+        } else {
+            self.property.name().into()
+        };
+        edits.push(Edit::SetAttribute { node: self.owner, name, value });
+        validated(document, edits)
+    }
+
+    fn ensure_editable(&self) -> Result<()> {
+        self.reason.as_ref().map_or(Ok(()), |reason| Err(ToolError(reason.clone())))
     }
 
     fn clear(&self) -> Vec<Edit> {

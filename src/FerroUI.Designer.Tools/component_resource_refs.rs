@@ -1,5 +1,6 @@
 //! Lexical resource lookup and structured markup references shared by catalog and edits.
 use super::*;
+use super::resource_graph::ResourceScope;
 use ferroui_designer_core::design_fixtures::is_fixtures;
 use ferroui_designer_core::{MarkupArgument, MarkupExtension};
 
@@ -31,12 +32,12 @@ impl ComponentResourceResolution {
 }
 
 #[derive(Default)]
-struct Lookup {
-    candidates: BTreeSet<NodeId>,
+struct Lookup<'a> {
+    candidates: BTreeSet<ComponentResourceLocation<'a>>,
     may_be_missing: bool,
     external: bool,
 }
-impl Lookup {
+impl<'a> Lookup<'a> {
     fn missing() -> Self {
         Self {
             may_be_missing: true,
@@ -99,6 +100,40 @@ pub fn component_resource_resolution(
     key: &str,
     context: Option<&ComponentResourceContext>,
 ) -> Result<ComponentResourceResolution> {
+    let result = resolve(ResourceScope::root(document, "", None), target, key, context)?;
+    Ok(ComponentResourceResolution {
+        candidates: result.candidates.into_iter().map(|candidate| candidate.node).collect(),
+        may_be_missing: result.may_be_missing,
+        external: result.external,
+    })
+}
+
+/// Resolve a declaration from the accepted include graph. An opaque provider,
+/// unknown theme path or duplicate key can prevent proving a single target.
+pub fn component_resource_location<'a>(
+    document: &'a Document,
+    address: &'a str,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    sources: &'a dyn ComponentResourceSources,
+) -> Result<Option<ComponentResourceLocation<'a>>> {
+    let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
+    if result.may_be_missing || result.external || result.candidates.len() != 1 {
+        return Ok(None);
+    }
+    Ok(result.candidates.into_iter().next())
+}
+
+type Visited<'a> = BTreeSet<(&'a str, NodeId)>;
+
+fn resolve<'a>(
+    scope: ResourceScope<'a>,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+) -> Result<Lookup<'a>> {
+    let document = scope.document;
     valid_document(document)?;
     element(document, target)?;
     if let Some(context) = context {
@@ -134,7 +169,7 @@ pub fn component_resource_resolution(
             .node(id)
             .ok_or_else(|| ToolError("Missing resource ancestor".into()))?;
         result.fallback(lookup_scope(
-            document,
+            scope,
             node,
             key,
             context,
@@ -142,28 +177,38 @@ pub fn component_resource_resolution(
         ));
         ancestor = node.parent;
     }
-    Ok(ComponentResourceResolution {
-        candidates: result.candidates.into_iter().collect(),
-        may_be_missing: result.may_be_missing,
-        external: result.external,
-    })
+    Ok(result)
 }
 
-fn lookup_scope(
-    document: &Document,
+fn lookup_scope<'a>(
+    scope: ResourceScope<'a>,
     owner: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
-    if !seen.insert(owner.id) {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let id = (scope.address, owner.id);
+    if !seen.insert(id) {
         return Lookup::external();
     }
+    let result = lookup_owner(scope, owner, key, context, seen);
+    seen.remove(&id);
+    result
+}
+
+fn lookup_owner<'a>(
+    scope: ResourceScope<'a>,
+    owner: &Node,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     if framework(owner) && owner.local_name() == "ResourceDictionary" {
         if external_dictionary(document, owner) {
             return Lookup::external();
         }
-        return lookup_children(document, &owner.children, key, context, seen);
+        return lookup_children(scope, &owner.children, key, context, seen);
     }
     let Ok(resources) = property_elements(document, owner, "Resources") else {
         return Lookup::external();
@@ -172,7 +217,7 @@ fn lookup_scope(
         .into_iter()
         .flat_map(|node| node.children.iter().copied())
         .collect::<Vec<_>>();
-    lookup_children(document, &children, key, context, seen)
+    lookup_children(scope, &children, key, context, seen)
 }
 
 fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
@@ -186,13 +231,14 @@ fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
             .is_ok_and(|identity| identity.matches_element(owner, node))
 }
 
-fn lookup_children(
-    document: &Document,
+fn lookup_children<'a>(
+    scope: ResourceScope<'a>,
     children: &[NodeId],
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     let nodes = children
         .iter()
         .filter_map(|id| document.ast().node(*id))
@@ -200,7 +246,7 @@ fn lookup_children(
     let local = nodes
         .iter()
         .filter(|node| literal_key(node).as_deref() == Some(key))
-        .map(|node| node.id)
+        .map(|node| scope.location(node.id))
         .collect::<BTreeSet<_>>();
     if !local.is_empty() {
         return Lookup {
@@ -218,7 +264,7 @@ fn lookup_children(
         if !result.may_be_missing {
             return result;
         }
-        result.fallback(lookup_scope(document, node, key, context, seen));
+        result.fallback(lookup_scope(scope, node, key, context, seen));
     }
     let themes = nodes
         .iter()
@@ -231,7 +277,7 @@ fn lookup_children(
         };
         for themes in themes {
             alternatives.alternative(lookup_themes(
-                document,
+                scope,
                 themes,
                 key,
                 context,
@@ -262,11 +308,7 @@ fn lookup_children(
                 if !group.may_be_missing {
                     break;
                 }
-                let value = if framework(child) && child.local_name() == "ResourceDictionary" {
-                    lookup_scope(document, child, key, context, &mut group_seen)
-                } else {
-                    Lookup::external()
-                };
+                let value = lookup_dictionary(scope, child, key, context, &mut group_seen);
                 group.fallback(value);
             }
             alternatives.alternative(group);
@@ -276,13 +318,14 @@ fn lookup_children(
     result
 }
 
-fn lookup_themes(
-    document: &Document,
+fn lookup_themes<'a>(
+    scope: ResourceScope<'a>,
     themes: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     let variants = themes
         .children
         .iter()
@@ -301,7 +344,7 @@ fn lookup_themes(
                 return result;
             }
             result.fallback(lookup_theme_name(
-                document,
+                scope,
                 &variants,
                 theme,
                 key,
@@ -319,7 +362,7 @@ fn lookup_themes(
                 continue;
             }
             let mut value =
-                lookup_theme_dictionary(document, variant, key, context, &mut seen.clone());
+                lookup_dictionary(scope, variant, key, context, &mut seen.clone());
             if name.is_none() && (!value.candidates.is_empty() || value.external) {
                 value.external = true;
             }
@@ -328,28 +371,28 @@ fn lookup_themes(
     }
     if result.may_be_missing {
         result.fallback(lookup_theme_name(
-            document, &variants, "Default", key, context, seen,
+            scope, &variants, "Default", key, context, seen,
         ));
     }
     result
 }
 
-fn lookup_theme_name(
-    document: &Document,
+fn lookup_theme_name<'a>(
+    scope: ResourceScope<'a>,
     variants: &[&Node],
     theme: &str,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
     let mut result: Option<Lookup> = None;
     let mut matches = 0;
     for variant in variants {
-        let name = theme_key(document, variant);
+        let name = theme_key(scope.document, variant);
         if name.as_deref().is_some_and(|name| name != theme) {
             continue;
         }
-        let mut value = lookup_theme_dictionary(document, variant, key, context, &mut seen.clone());
+        let mut value = lookup_dictionary(scope, variant, key, context, &mut seen.clone());
         if name.is_none() {
             // This runtime expression may denote the requested variant or another one.
             value.may_be_missing = true;
@@ -368,18 +411,25 @@ fn lookup_theme_name(
     result
 }
 
-fn lookup_theme_dictionary(
-    document: &Document,
+fn lookup_dictionary<'a>(
+    scope: ResourceScope<'a>,
     variant: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
     if framework(variant) && variant.local_name() == "ResourceDictionary" {
-        lookup_scope(document, variant, key, context, seen)
-    } else {
-        Lookup::external()
+        return lookup_scope(scope, variant, key, context, seen);
     }
+    if let Some(included) = scope.include(variant) {
+        let ast = included.document.ast();
+        if let Some(root) = ast.node(ast.root()).filter(|node| {
+            framework(node) && node.local_name() == "ResourceDictionary"
+        }) {
+            return lookup_scope(included, root, key, context, seen);
+        }
+    }
+    Lookup::external()
 }
 
 pub(crate) fn theme_key(document: &Document, node: &Node) -> Option<String> {

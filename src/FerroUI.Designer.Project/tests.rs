@@ -43,6 +43,13 @@ fn preview_resources_resolve_transitive_files_with_owned_drafts_and_uri_aliases(
     assert!(graph.accepted.contains_key(&outer));
     assert!(graph.accepted[&values].contains("<!-- draft -->"));
     assert!(graph.unavailable.is_empty());
+    let include = document.ast().elements().find(|node| node.local_name() == "ResourceInclude").unwrap();
+    let (address, declared) = graph.includes.resolve(&uri, &document, include).unwrap();
+    assert_eq!((address, declared.uri.as_str()), (outer.as_str(), outer.as_str()));
+    let include = declared.document.ast().elements().find(|node| node.local_name() == "ResourceInclude").unwrap();
+    let (_, draft) = graph.includes.resolve(address, &declared.document, include).unwrap();
+    assert_eq!(draft.uri, values);
+    assert_eq!(draft.document.source(), graph.accepted[&values]);
     let graph = local_preview_sources(Some(&fixture.0), &uri, &document, &[]);
     assert_eq!(graph.accepted[&values], "<ResourceDictionary/>");
 }
@@ -57,6 +64,7 @@ fn preview_resources_fence_cycles_missing_and_out_of_scope_paths() {
     let cyclic = fixture.write("A.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude Source="A.xaml"/></ResourceDictionary>"#);
     let graph = local_preview_sources(Some(&fixture.0), &uri, &ferroui_designer_core::Document::new(source).unwrap(), &[]);
     assert!(graph.accepted.is_empty());
+    assert_eq!(graph.includes.documents().count(), 0);
     assert!(graph.unavailable[&cyclic].contains("Circular"));
     assert!(graph.unavailable[&outside_uri].contains("inside"));
     let missing = file_uri(fixture.0.join("Missing.xaml")).unwrap();

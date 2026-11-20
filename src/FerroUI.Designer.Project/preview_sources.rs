@@ -26,6 +26,38 @@ pub struct LocalPreviewSources {
     pub accepted: BTreeMap<String, String>,
     pub unavailable: BTreeMap<String, String>,
     pub dependencies: BTreeSet<String>,
+    pub includes: PreviewIncludes,
+}
+
+/// Accepted include addresses and the authored documents that supplied them.
+/// The loader address may differ from the physical file in a compiled group.
+#[derive(Clone, Default)]
+pub struct PreviewIncludes {
+    documents: BTreeMap<String, PreviewInclude>,
+}
+
+#[derive(Clone)]
+pub struct PreviewInclude {
+    pub uri: String,
+    pub document: Document,
+}
+
+impl PreviewIncludes {
+    pub fn documents(&self) -> impl Iterator<Item = &PreviewInclude> {
+        self.documents.values()
+    }
+
+    pub fn resolve(
+        &self,
+        address: &str,
+        document: &Document,
+        node: &Node,
+    ) -> Option<(&str, &PreviewInclude)> {
+        let reference = include_reference(document, node)?;
+        let address = resolve_uri(address, &reference).ok()?;
+        let (address, include) = self.documents.get_key_value(&address)?;
+        Some((address.as_str(), include))
+    }
 }
 
 pub fn local_preview_sources(
@@ -116,6 +148,7 @@ impl Walker<'_> {
                 .and_then(|path| self.load(&uri, &path));
             if let Err(message) = result {
                 self.result.accepted.remove(&uri);
+                self.result.includes.documents.remove(&uri);
                 self.result.unavailable.insert(uri, message);
             }
         }
@@ -151,9 +184,8 @@ impl Walker<'_> {
         if file_path(uri).is_ok_and(|alias| alias == requested) {
             self.result.dependencies.insert(uri.into());
         }
-        if let Ok(canonical) = file_uri(&path) {
-            self.result.dependencies.insert(canonical);
-        }
+        let canonical = file_uri(&path).map_err(|error| error.to_string())?;
+        self.result.dependencies.insert(canonical.clone());
         let max = self.remaining.min(MAX_DOCUMENT_BYTES);
         let source = match self.buffers.get(&path) {
             Some(Some(source)) => (*source).to_owned(),
@@ -187,6 +219,10 @@ impl Walker<'_> {
         self.active.remove(&path);
         if !self.result.unavailable.contains_key(uri) {
             self.result.accepted.insert(uri.into(), source.into());
+            self.result.includes.documents.insert(uri.into(), PreviewInclude {
+                uri: canonical,
+                document,
+            });
         }
         Ok(())
     }
