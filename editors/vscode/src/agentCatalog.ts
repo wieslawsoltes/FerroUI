@@ -157,7 +157,7 @@ export const agentCatalog = {
     designer_block: tool('Activate one of the indexed RSX invocations reported by designer_wait. Use the current preview revision.',
         { ...frame, index: integer(0), reveal_source: truth }, ['session', 'expected_revision', 'index'], true, false),
     designer_view: tool('Show a designer view, refresh its preview, or set its logical width, height and appearance.',
-        { ...session, view: choice('canvas', 'outline', 'properties', 'toolbox', 'events', 'resources', 'assets', 'studio', 'timeline', 'data', 'library', 'columns'),
+        { ...session, view: choice('canvas', 'outline', 'properties', 'toolbox', 'events', 'resources', 'assets', 'studio', 'timeline', 'data', 'library', 'columns', 'styles'),
             outline_mode: choice('source', 'visual', 'logical', 'combined'), width: integer(64, 1536), height: integer(64, 1536), dark: truth, refresh: truth }, ['session'], true, false),
     designer_canvas: tool('Choose the canvas tab, Select or Interact mode, zoom, pan, focus order, and spacing overlays. Returns the applied workbench state.',
         { ...session, tab: choice('preview', 'counterpart'), mode: choice('select', 'interact'), zoom: choice('fit', 'fit_selection', 'actual'),

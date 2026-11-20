@@ -173,6 +173,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
     <button type="button" class="compact-action" id="menu-properties">Show Properties</button>
     <button type="button" id="menu-events">Show Events</button>
     <button type="button" id="menu-resources">Show Resources</button>
+    <button type="button" id="menu-styles">Show Styles &amp; Themes</button>
     <button type="button" id="menu-assets">Show Assets</button>
     <button type="button" id="menu-studio">Show Studio Tools</button>
     <button type="button" id="menu-timeline">Show Animation Timeline</button>
@@ -710,6 +711,45 @@ export function designDataHtml(webview: vscode.Webview, root: vscode.Uri): strin
         <p id="data-fixture-hint">Bind to fields under <code>data</code>. Clear the JSON to remove the fixtures.</p>
     </section>
 </main>`);
+}
+
+export function stylesHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'styles', 'FerroUI Styles & Themes', `
+<header class="style-header">
+    <nav class="segments" aria-label="Style and theme views">
+        <button id="styles-tab" type="button" aria-controls="styles-sheet" aria-pressed="true">Styles</button>
+        <button id="palette-tab" type="button" aria-controls="palette-sheet" aria-pressed="false">Palette</button>
+    </nav>
+    <div id="styles-toolbar" class="style-tools" aria-label="Style actions">
+        ${tool('style-new', 'add', 'New Style or Control Theme', 'popovertarget="style-new-menu"')}
+        <div id="style-new-menu" class="popover command-menu" popover role="group" aria-label="New definition">
+            <button id="style-create" type="button">${icon('paintcan')}Style…</button>
+            <button id="theme-create" type="button">${icon('color-mode')}Control Theme…</button>
+        </div>
+    </div>
+    <div id="palette-toolbar" class="style-tools" aria-label="Palette actions" hidden>
+        ${tool('palette-light', 'lightbulb', 'Preview Light theme', 'aria-pressed="false"')}
+        ${tool('palette-dark', 'color-mode', 'Preview Dark theme', 'aria-pressed="false"')}
+        ${tool('palette-compare', 'split-horizontal', 'Compare Light and Dark colors', 'aria-pressed="false"')}
+        ${tool('palette-add', 'add', 'Add palette color')}
+    </div>
+</header>
+<p id="styles-status" class="style-status" role="status" hidden></p>
+<p id="styles-error" class="style-error" role="alert" hidden></p>
+<fieldset id="styles-fields" class="styles-fields" aria-label="Style and palette editing" hidden>
+    <section id="styles-sheet" aria-label="Styles and control themes">
+        <select id="styles-definitions" aria-label="Style or control theme"></select>
+        <div id="style-details"></div>
+    </section>
+    <section id="palette-sheet" aria-label="Scoped palette" hidden>
+        <div class="palette-filters">
+            <select id="palette-scope" aria-label="Palette scope"></select>
+            <select id="palette-layer" aria-label="Palette layer"></select>
+        </div>
+        <input id="palette-search" class="filter" type="search" placeholder="Filter colors" aria-label="Filter palette colors" />
+        <div id="palette-details"></div>
+    </section>
+</fieldset>`);
 }
 
 function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string, extraStyles: readonly string[] = []): string {

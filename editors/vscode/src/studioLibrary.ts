@@ -22,7 +22,7 @@ export function componentKind(kind: string): string {
     return kind.replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
-export function componentActions(context: StudioContext, component: Component): StudioItem[] {
+export function componentActions(context: StudioContext, component: Component, editStyle?: () => Promise<void>): StudioItem[] {
     const { node, key } = component;
     const id = `definition:${node}`;
     const items = [
@@ -30,7 +30,10 @@ export function componentActions(context: StudioContext, component: Component): 
         action(`${id}:reveal`, 'Reveal definition in source', () => context.reveal(node), 'go-to-file'),
     ];
     if (component.usages) items.push(action(`${id}:references`, 'Find authored references…',
-        () => references(context, node), 'references'));
+        () => showResourceReferences(context, node), 'references'));
+    if (editStyle && context.panel.supportsStyleComposition && ['Style', 'ControlTheme'].includes(component.kind)) {
+        items.unshift(action(`${id}:style`, 'Edit Style or Theme', editStyle, 'paintcan'));
+    }
     if (context.writable && key) items.push(
         action(`${id}:rename`, 'Rename resource and references…', async () => {
             const next = await editText('New resource key', key);
@@ -74,7 +77,7 @@ export async function createTemplate(context: StudioContext, owner: number): Pro
         content, data_template: kind.data });
 }
 
-async function references(context: StudioContext, resource: number): Promise<void> {
+export async function showResourceReferences(context: StudioContext, resource: number): Promise<void> {
     const { references: entries } = await context.read<{ references: { node: number; property: string; dynamic: boolean }[] }>(
         'designer_component_references', { resource });
     const nodes = new Map(context.panel.nodes.map(node => [node.id, node]));

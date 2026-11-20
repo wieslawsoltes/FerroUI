@@ -26,7 +26,7 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
     private panel?: DesignerPanel;
     private key?: string;
 
-    constructor(visible: () => void) {
+    constructor(visible: () => void, private readonly editStyle: (panel: DesignerPanel, node: number) => Promise<void>) {
         this.view = vscode.window.createTreeView(LIBRARY_VIEW, { treeDataProvider: this, showCollapseAll: true });
         this.subscriptions = [this.view, this.changed, this.view.onDidChangeVisibility(visible),
             vscode.commands.registerCommand(run, async (item: StudioItem) => {
@@ -87,7 +87,10 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
                     label: component.display_name,
                     description: [component.target_type, component.usages && `${component.usages} ${component.usages === 1 ? 'use' : 'uses'}`]
                         .filter(Boolean).join(' · '),
-                    children: async () => componentActions(context, component),
+                    children: async () => componentActions(context, component, async () => {
+                        context.ensure();
+                        await this.editStyle(panel, component.node);
+                    }),
                 })),
             })));
         } catch (error) {

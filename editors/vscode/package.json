@@ -232,6 +232,12 @@
         "icon": "$(library)"
       },
       {
+        "command": "ferroui.showStyles",
+        "title": "Show Styles & Themes",
+        "category": "FerroUI",
+        "icon": "$(paintcan)"
+      },
+      {
         "command": "ferroui.studio.findDefinition",
         "title": "Find Definition in Designer",
         "category": "FerroUI",
@@ -684,6 +690,14 @@
           "name": "Resources",
           "icon": "dist/icons/library.svg",
           "contextualTitle": "FerroUI Resources",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.styles",
+          "name": "Styles & Themes",
+          "icon": "dist/icons/paintcan.svg",
+          "contextualTitle": "FerroUI Styles & Themes",
           "visibility": "collapsed"
         },
         {

@@ -15,7 +15,8 @@ const [host] = await Promise.all([
     build({
         entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts', outline: 'webview/outline.ts',
             toolbox: 'webview/toolbox.ts', details: 'webview/details.ts', assets: 'webview/assets.ts', runtime: 'webview/runtime.ts',
-            hosted: 'webview/hosted.ts', stages: 'webview/stages.ts', timeline: 'webview/timeline.ts', designData: 'webview/designData.ts' },
+            hosted: 'webview/hosted.ts', stages: 'webview/stages.ts', timeline: 'webview/timeline.ts', designData: 'webview/designData.ts',
+            styles: 'webview/styles.ts' },
         outdir: 'dist',
         bundle: true,
         platform: 'browser',
@@ -28,7 +29,7 @@ const codicons = 'node_modules/@vscode/codicons';
 await mkdir('dist/icons', { recursive: true });
 await Promise.all([
     ...['codicon.css', 'codicon.ttf'].map(file => copyFile(`${codicons}/dist/${file}`, `dist/icons/${file}`)),
-    ...['preview.svg', 'list-tree.svg', 'settings-gear.svg', 'extensions.svg', 'symbol-event.svg', 'library.svg', 'file-media.svg', 'history.svg', 'table.svg']
+    ...['preview.svg', 'list-tree.svg', 'settings-gear.svg', 'extensions.svg', 'symbol-event.svg', 'library.svg', 'file-media.svg', 'history.svg', 'table.svg', 'paintcan.svg']
         .map(file => copyFile(`${codicons}/src/icons/${file}`, `dist/icons/${file}`)),
 ]);
 

@@ -14,6 +14,7 @@ import { isInside } from '../src/workspacePaths';
 import { verifyHostedPreview } from './hostedPreview';
 import { reviewStateSource } from './rsxStatesMcp';
 import { until } from './wait';
+import type { PaletteSheet, StyleCatalog } from '../src/stylesProtocol';
 
 export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension('FerroUI.ferroui');
@@ -24,6 +25,7 @@ export async function run(): Promise<void> {
     assert.ok(views.ferrouiTimeline.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
     assert.ok(!views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.timeline'));
     assert.ok(views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.columns'));
+    assert.ok(views.ferrouiWorkbench.some(({ id }: { id: string }) => id === 'ferroui.styles'));
     const readme = await readFile(path.join(extension.extensionPath, 'readme.md'), 'utf8');
     const userGuide = readme.match(/\[VS Code user guides\]\(([^)]+)\)/)?.[1];
     assert.ok(userGuide, 'The installed README links to the user guides');
@@ -163,6 +165,18 @@ export async function run(): Promise<void> {
         assert.equal(trace.contributors[0].label, 'Style Border.priority');
         assert.ok(trace.contributors[0].source);
         assert.equal(tracesDocument.getText(asRange(trace.contributors[0].source.range)), '0.72');
+        assert.ok(native.capabilities.styleComposition, 'The installed preview negotiates scoped style composition');
+        const stylesDocument = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'StylePalette.xaml'));
+        const stylesSource = sourceOf(stylesDocument, 'xaml', new vscode.Position(0, 0));
+        const darkStyles = await native.render(stylesSource, { width: 660, height: 440, dark: true }, 26);
+        assert.ok(darkStyles.image, darkStyles.renderError ?? undefined);
+        const catalog = await native.studioQuery(26, 'designer_style_catalog', {}) as StyleCatalog;
+        const palette = await native.studioQuery(26, 'designer_palette', { owner: catalog.palette_owner }) as PaletteSheet;
+        assert.equal(palette.comparison.find(color => color.key === 'ActionSurface')?.dark?.value, '#FF537BE1');
+        const apply = darkStyles.nodes.find(node => node.name === 'ApplyPalette');
+        assert.ok(apply?.bounds);
+        const liveColor = await native.studioQuery(26, 'designer_property_trace', { node: apply.id, property: 'Background' }) as PropertyTrace<DesignTraceSource>;
+        assert.equal(liveColor.effective, '#FF537BE1');
         assert.ok(native.canvasGuides, 'The installed preview negotiates canvas guide support');
         const guide = await native.editCanvasGuides(native.canvasGuides.defaults, { action: 'add', axis: 'Vertical', position: -18.125 });
         assert.deepEqual(guide.settings.guides, [{ id: guide.selected, axis: 'Vertical', position: -18.125 }]);

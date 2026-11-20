@@ -4,6 +4,8 @@ Open a FerroUI `.xaml` file or a Rust file containing `ferroui_view::rsx!`, then
 
 Follow the [VS Code user guides](../../docs/designer/vscode/README.md) for setup, visual authoring, animation and stages, app preview, hot reload, testing, and MCP.
 
+Use [Styles & Themes](../../docs/designer/vscode/styles.md) to edit XAML selectors, control theme inheritance, and typed setters, compare Light and Dark resource colors, and preview either theme on the native canvas.
+
 ## Working in the designer
 
 - **Toolbox, Outline, Properties, Events, Resources, and Assets** are independent VS Code views. Open them from the canvas toolbar or the Command Palette. Use **View: Move View** to keep Tools and Outline beside the editor and put Properties in the Secondary Side Bar. **View: Toggle Maximize Editor Group** gives the canvas the space of both editor groups. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)

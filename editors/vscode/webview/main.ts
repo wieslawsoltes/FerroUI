@@ -125,7 +125,7 @@ for (const [action, id, message] of actions) {
         vscode.postMessage(message);
     });
 }
-for (const view of ['events', 'resources', 'assets', 'studio', 'timeline', 'data', 'library'] as const) {
+for (const view of ['events', 'resources', 'styles', 'assets', 'studio', 'timeline', 'data', 'library'] as const) {
     element(`menu-${view}`).addEventListener('click', () => {
         actionsMenu.hidePopover();
         vscode.postMessage({ type: 'dock', view });

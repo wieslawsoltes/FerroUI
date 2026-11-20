@@ -32,6 +32,7 @@ interface Frame {
     columnAuthoring: boolean;
     itemTemplateAuthoring: boolean;
     propertyTrace: boolean;
+    styleComposition: boolean;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -180,6 +181,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
+    get supportsStyleComposition(): boolean { return Boolean(this.frame?.styleComposition); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -730,6 +732,7 @@ export class DesignerPanel implements vscode.Disposable {
                 columnAuthoring: Boolean(client.capabilities.columnAuthoring),
                 itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
+                styleComposition: Boolean(client.capabilities.styleComposition),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
@@ -836,7 +839,7 @@ export class DesignerPanel implements vscode.Disposable {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
                 events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
                 studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData', library: 'ferroui.showLibrary',
-                columns: 'ferroui.showColumns' } as const;
+                columns: 'ferroui.showColumns', styles: 'ferroui.showStyles' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }

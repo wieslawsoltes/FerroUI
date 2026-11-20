@@ -73,6 +73,21 @@ Indices start at zero. The move index is the column’s place in the resulting l
 
 On Studio’s server, call `designer_item_templates` and `designer_item_template` directly. For `expected_revision`, pass the Studio document revision. [Authoring guide](authoring.md#edit-item-and-cell-templates)
 
+### Edit styles and palettes with MCP
+
+Use these tools directly in Designer Studio. In VS Code, pass the tool name and arguments through `designer_studio_query` for reads or `designer_studio_edit` for writes. Pass the current editor revision to VS Code and the current document revision to a direct Studio write.
+
+| Tool | Arguments and result |
+| --- | --- |
+| `designer_style_catalog` | Optional `target`. Lists authored styles and themes, eligible hosts, and named palette scopes. |
+| `designer_style_definition` | `node`. Reads the selector or base, typed setter choices, authored values, and exact source ranges. |
+| `designer_style_resources` | `owner` and `property`. Lists compatible resources visible from the setter's current native scope. |
+| `designer_style_edit` | `create` uses `owner` and `selector`. `selector` uses `node` and `selector`. `base` uses `node` and a compatible `base` ID or null. `setter` uses `owner`, `property`, and `value` or null to remove. `resource` uses `owner`, `property`, `resource`, and `dynamic`. `remove` uses an unkeyed style's `node`. Use `designer_component create_theme` to create a keyed control theme. |
+| `designer_palette` | `owner`. Returns authored colors by layer and resolution of each key in Light and Dark. |
+| `designer_palette_edit` | `set` uses a literal color's `node` and a native `color` string. `add` uses `owner`, `layer` (`shared`, `default`, `light`, or `dark`), `key`, `kind` (`color` or `solid_color_brush`), and `color`. |
+
+Use `designer_view` with `view: "styles"` to focus the dock. Set `dark` to change the canvas environment and wait for the new frame with `designer_wait`. Use `designer_definition enter` through `designer_studio_present` to preview a definition. [Styles & Themes guide](styles.md)
+
 ### Trace property values with MCP
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.
@@ -93,7 +108,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Rename RSX Control** |
-| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Show Events**, **Show Resources**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
+| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Show Events**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
