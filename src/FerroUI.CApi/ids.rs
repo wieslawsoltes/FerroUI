@@ -21,11 +21,11 @@
 use crate::api_ids;
 use crate::error::{status_or_value, Error, Result};
 use crate::strings;
+use crate::thread::UiCell;
 use crate::{FERRO_INVALID_ARGUMENT, FERRO_NOT_FOUND};
 use ferroui_base::interactivity::{RoutedEvent, RoutedEventRegistry};
 use ferroui_base::metadata::{MarkupEvent, MarkupProperty};
 use ferroui_base::{FerroProperty, FerroPropertyRegistry, TypeInfo};
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::c_char;
 use std::sync::{LazyLock, Mutex, MutexGuard, PoisonError};
@@ -136,6 +136,16 @@ pub(crate) fn intern_type(type_: &'static TypeInfo) -> Option<i64> {
     Some(i64::from(id))
 }
 
+/// Makes `type_` the class of the model ID `id` (a class entry of `api_types.rs`): the ID
+/// resolves with no lookup by name, also without the tables of types.
+pub(crate) fn register_model_type(id: i64, type_: &'static TypeInfo) {
+    if let Ok(id) = u32::try_from(id) {
+        if id > 0 {
+            lock(&TYPES).fill(id, type_);
+        }
+    }
+}
+
 /// The class of a type ID.
 pub(crate) fn type_info(id: i64) -> Result<&'static TypeInfo> {
     let not_found = || Error::new(FERRO_NOT_FOUND, format!("{id} is not a type ID"));
@@ -178,10 +188,15 @@ pub(crate) fn find_type(name: &str) -> Result<&'static TypeInfo> {
             return Ok(found);
         }
     }
-    Err(Error::new(
-        FERRO_NOT_FOUND,
-        format!("no type is named {name}, or more than one is (give its namespace: FerroUI.Controls.{name})"),
-    ))
+    // Without the tables of types a class is known once it is registered (docs/c-abi.md, section 16).
+    #[cfg(not(feature = "type-tables"))]
+    let message = format!(
+        "no registered type is named {name}: this library knows a class once its entry is called \
+         (ferro_type_<class>(), which the generated bindings call) or the framework creates one"
+    );
+    #[cfg(feature = "type-tables")]
+    let message = format!("no type is named {name}, or more than one is (give its namespace: FerroUI.Controls.{name})");
+    Err(Error::new(FERRO_NOT_FOUND, message))
 }
 
 /// The type ID of the class named `name` (`Button`, or `FerroUI.Controls.Button` where two
@@ -242,23 +257,19 @@ pub(crate) enum Event {
 /// What an ID was found to be on one class, `None` for nothing.
 type Resolutions<T> = Vec<Vec<(usize, Option<T>)>>;
 
-ferroui_base::ferro_thread_local! {
-    /// By property ID: what it is on each class it was used with.
-    static PROPERTIES: RefCell<Resolutions<Property>> = const { RefCell::new(Vec::new()) };
-    /// By event ID: what it is on each class it was used with.
-    static EVENTS: RefCell<Resolutions<Event>> = const { RefCell::new(Vec::new()) };
-}
+/// By property ID: what it is on each class it was used with (UI thread).
+static PROPERTIES: UiCell<Resolutions<Property>> = UiCell::new(Vec::new());
+/// By event ID: what it is on each class it was used with (UI thread).
+static EVENTS: UiCell<Resolutions<Event>> = UiCell::new(Vec::new());
 
 #[inline]
-fn cached<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize) -> Option<Option<T>> {
-    let cache = cache.borrow();
+fn cached<T: Copy>(cache: &mut Resolutions<T>, id: i64, key: usize) -> Option<Option<T>> {
     let index = usize::try_from(id).ok()?.checked_sub(1)?;
     cache.get(index)?.iter().find(|(class, _)| *class == key).map(|(_, found)| *found)
 }
 
-fn remember<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize, found: Option<T>) {
+fn remember<T: Copy>(cache: &mut Resolutions<T>, id: i64, key: usize, found: Option<T>) {
     if let Some(index) = usize::try_from(id).ok().and_then(|id| id.checked_sub(1)) {
-        let mut cache = cache.borrow_mut();
         if cache.len() <= index {
             cache.resize_with(index + 1, Vec::new);
         }
@@ -270,13 +281,13 @@ fn remember<T: Copy>(cache: &RefCell<Resolutions<T>>, id: i64, key: usize, found
 #[inline]
 pub(crate) fn property(type_: &'static TypeInfo, id: i64) -> Result<Property> {
     let key = type_ as *const TypeInfo as usize;
-    let found = match PROPERTIES.with(|cache| cached(cache, id, key)) {
+    let found = match PROPERTIES.with(|cache| cached(cache, id, key))? {
         Some(found) => found,
         None => {
             let name = property_name(id)?;
-            // Found with no borrow of the cache held: finding initialises the class.
+            // Found with no access of the cache running: finding initialises the class.
             let found = find_property(type_, name);
-            PROPERTIES.with(|cache| remember(cache, id, key, found));
+            PROPERTIES.with(|cache| remember(cache, id, key, found))?;
             found
         }
     };
@@ -318,12 +329,12 @@ fn find_property(type_: &'static TypeInfo, name: &str) -> Option<Property> {
 /// The event the ID `id` stands for on the class `type_`. UI thread.
 pub(crate) fn event(type_: &'static TypeInfo, id: i64) -> Result<Event> {
     let key = type_ as *const TypeInfo as usize;
-    let found = match EVENTS.with(|cache| cached(cache, id, key)) {
+    let found = match EVENTS.with(|cache| cached(cache, id, key))? {
         Some(found) => found,
         None => {
             let name = event_name(id)?;
             let found = find_event(type_, name);
-            EVENTS.with(|cache| remember(cache, id, key, found));
+            EVENTS.with(|cache| remember(cache, id, key, found))?;
             found
         }
     };

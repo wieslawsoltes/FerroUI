@@ -24,6 +24,9 @@ use std::rc::Rc;
 enum Callback {
     Token { function: unsafe extern "C" fn(i64, FerroHandle, i64) -> i64, token: i64 },
     Data(UserData),
+    /// The one dispatcher of the thread ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)),
+    /// with a tag.
+    Dispatch(i64),
 }
 
 /// The user data of a handler, released when the handler is dropped.
@@ -50,6 +53,7 @@ impl Callback {
             match self {
                 Callback::Token { function, token } => function(*token, sender, arg),
                 Callback::Data(data) => (data.function)(data.user_data, sender, arg),
+                Callback::Dispatch(tag) => crate::frame::dispatch_tag(*tag, sender, arg),
             }
         }
     }
@@ -75,7 +79,9 @@ impl Handler {
             self.sender.set(handle);
             return self.callback.call(handle, arg);
         }
-        let handle = handles::insert(sender.to_ref());
+        let Ok(handle) = handles::insert(sender.to_ref()) else {
+            return 0;
+        };
         let result = self.callback.call(handle, arg);
         let _ = handles::release(handle);
         result
@@ -154,6 +160,17 @@ pub extern "C" fn ferro_subscribe(object: FerroHandle, event: i64, function: Fer
         let function = function.ok_or_else(|| Error::new(FERRO_NULL_POINTER, "the function is NULL"))?;
         subscribe(object, event, Callback::Token { function, token })
     })
+}
+
+/// [`ferro_subscribe`] to the one dispatcher of the thread
+/// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it
+/// with `tag`, the sender and the argument, as an event bound in a frame does (the event text
+/// and number are empty). For a binding with one dispatcher, which then needs no trampoline of
+/// its own between the library and its dispatcher: one indirect call per event. Returns a
+/// positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only.
+#[no_mangle]
+pub extern "C" fn ferro_subscribe_dispatch(object: FerroHandle, event: i64, tag: i64) -> i64 {
+    status_or_value(|| subscribe(object, event, Callback::Dispatch(tag)))
 }
 
 /// [`ferro_subscribe`] with a `void *` in place of the token: `function` is called with

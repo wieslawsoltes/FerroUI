@@ -14,7 +14,6 @@ use crate::error::{status, Error, Result};
 use crate::handles;
 use crate::ids::{self, Property};
 use crate::strings;
-use crate::thread;
 use crate::{
     FerroHandle, FerroStatus, FERRO_BUFFER_TOO_SMALL, FERRO_INVALID_ARGUMENT, FERRO_INVALID_VALUE, FERRO_NULL_POINTER,
     FERRO_READ_ONLY, FERRO_TYPE_MISMATCH,
@@ -26,13 +25,13 @@ use ferroui_base::{BoxedValue, FerroObject, FerroProperty, PropertyValue, Ref};
 use ferroui_controls::Control;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::ffi::{c_char, CString};
+use std::ffi::c_char;
 use std::rc::Rc;
 
 /// The object of `object` and what `property` is on its class: the start of every value call.
+/// The handle table checks the thread.
 #[inline]
 fn target(object: FerroHandle, property: i64) -> Result<(Ref<FerroObject>, Property)> {
-    thread::check()?;
     let object = handles::get(object)?;
     let property = ids::property(object.get_type(), property)?;
     Ok((object, property))
@@ -124,24 +123,30 @@ pub unsafe extern "C" fn ferro_set_str(object: FerroHandle, property: i64, text:
     status(|| {
         // SAFETY: the caller passes a string as `ferro_set_str` documents.
         let text = unsafe { strings::borrowed(text, length) }?;
-        match target(object, property)? {
-            (object, Property::Registered(property)) => {
-                writable(property)?;
-                let type_id = property.property_type();
-                if type_id == TypeId::of::<Option<String>>() {
-                    return set_typed(&object, property, Some(text.to_owned()));
-                }
-                if type_id == TypeId::of::<String>() {
-                    return set_typed(&object, property, text.to_owned());
-                }
-                set_untyped(&object, property, Some(text_value(type_id, text)?), "the text")
-            }
-            (object, Property::Plain(property)) => {
-                let value = text_value((property.type_)().id(), text)?;
-                set_plain(&object, property, Some(value), "the text")
-            }
-        }
+        let (object, property) = target(object, property)?;
+        set_text_to(&object, property, text)
     })
+}
+
+/// [`ferro_set_str`] on an object and a property resolved already (a signal binding).
+pub(crate) fn set_text_to(object: &Ref<FerroObject>, property: Property, text: &str) -> Result<()> {
+    match property {
+        Property::Registered(property) => {
+            writable(property)?;
+            let type_id = property.property_type();
+            if type_id == TypeId::of::<Option<String>>() {
+                return set_typed(object, property, Some(text.to_owned()));
+            }
+            if type_id == TypeId::of::<String>() {
+                return set_typed(object, property, text.to_owned());
+            }
+            set_untyped(object, property, Some(text_value(type_id, text)?), "the text")
+        }
+        Property::Plain(property) => {
+            let value = text_value((property.type_)().id(), text)?;
+            set_plain(object, property, Some(value), "the text")
+        }
+    }
 }
 
 /// The untyped value text stands for in a property of the value type `type_id`: the member of an
@@ -166,20 +171,28 @@ fn text_value(type_id: TypeId, text: &str) -> Result<BoxedValue> {
 /// other numeric type. UI thread only.
 #[no_mangle]
 pub extern "C" fn ferro_set_f64(object: FerroHandle, property: i64, value: f64) -> FerroStatus {
-    status(|| match target(object, property)? {
-        (object, Property::Registered(property)) => {
+    status(|| {
+        let (object, property) = target(object, property)?;
+        set_f64_to(&object, property, value)
+    })
+}
+
+/// [`ferro_set_f64`] on an object and a property resolved already (a signal binding).
+pub(crate) fn set_f64_to(object: &Ref<FerroObject>, property: Property, value: f64) -> Result<()> {
+    match property {
+        Property::Registered(property) => {
             writable(property)?;
             let type_id = property.property_type();
             if type_id == TypeId::of::<f64>() {
-                return set_typed(&object, property, value);
+                return set_typed(object, property, value);
             }
             if type_id == TypeId::of::<f32>() {
-                return set_typed(&object, property, value as f32);
+                return set_typed(object, property, value as f32);
             }
-            set_untyped(&object, property, Some(Rc::new(value)), "a number")
+            set_untyped(object, property, Some(Rc::new(value)), "a number")
         }
-        (object, Property::Plain(property)) => set_plain(&object, property, Some(Rc::new(value)), "a number"),
-    })
+        Property::Plain(property) => set_plain(object, property, Some(Rc::new(value)), "a number"),
+    }
 }
 
 /// Writes an integer to `property` of `object`: straight to an `int32_t` or `int64_t` property,
@@ -187,27 +200,35 @@ pub extern "C" fn ferro_set_f64(object: FerroHandle, property: i64, value: f64) 
 /// flags), converted to any other numeric type. UI thread only.
 #[no_mangle]
 pub extern "C" fn ferro_set_i64(object: FerroHandle, property: i64, value: i64) -> FerroStatus {
-    status(|| match target(object, property)? {
-        (object, Property::Registered(property)) => {
+    status(|| {
+        let (object, property) = target(object, property)?;
+        set_i64_to(&object, property, value)
+    })
+}
+
+/// [`ferro_set_i64`] on an object and a property resolved already (a signal binding).
+pub(crate) fn set_i64_to(object: &Ref<FerroObject>, property: Property, value: i64) -> Result<()> {
+    match property {
+        Property::Registered(property) => {
             writable(property)?;
             let type_id = property.property_type();
             if type_id == TypeId::of::<i32>() {
                 let value = i32::try_from(value).map_err(|_| invalid(property))?;
-                return set_typed(&object, property, value);
+                return set_typed(object, property, value);
             }
             if type_id == TypeId::of::<i64>() {
-                return set_typed(&object, property, value);
+                return set_typed(object, property, value);
             }
             if type_id == TypeId::of::<f64>() {
-                return set_typed(&object, property, value as f64);
+                return set_typed(object, property, value as f64);
             }
-            set_untyped(&object, property, Some(integer_value(type_id, value)), "an integer")
+            set_untyped(object, property, Some(integer_value(type_id, value)), "an integer")
         }
-        (object, Property::Plain(property)) => {
+        Property::Plain(property) => {
             let value = integer_value((property.type_)().id(), value);
-            set_plain(&object, property, Some(value), "an integer")
+            set_plain(object, property, Some(value), "an integer")
         }
-    })
+    }
 }
 
 /// The untyped value an integer stands for in a property of the value type `type_id`: the member
@@ -222,20 +243,28 @@ fn integer_value(type_id: TypeId, value: i64) -> BoxedValue {
 /// Writes a boolean to `property` of `object`. UI thread only.
 #[no_mangle]
 pub extern "C" fn ferro_set_bool(object: FerroHandle, property: i64, value: bool) -> FerroStatus {
-    status(|| match target(object, property)? {
-        (object, Property::Registered(property)) => {
+    status(|| {
+        let (object, property) = target(object, property)?;
+        set_bool_to(&object, property, value)
+    })
+}
+
+/// [`ferro_set_bool`] on an object and a property resolved already (a signal binding).
+pub(crate) fn set_bool_to(object: &Ref<FerroObject>, property: Property, value: bool) -> Result<()> {
+    match property {
+        Property::Registered(property) => {
             writable(property)?;
             let type_id = property.property_type();
             if type_id == TypeId::of::<bool>() {
-                return set_typed(&object, property, value);
+                return set_typed(object, property, value);
             }
             if type_id == TypeId::of::<Option<bool>>() {
-                return set_typed(&object, property, Some(value));
+                return set_typed(object, property, Some(value));
             }
-            set_untyped(&object, property, Some(Rc::new(value)), "a boolean")
+            set_untyped(object, property, Some(Rc::new(value)), "a boolean")
         }
-        (object, Property::Plain(property)) => set_plain(&object, property, Some(Rc::new(value)), "a boolean"),
-    })
+        Property::Plain(property) => set_plain(object, property, Some(Rc::new(value)), "a boolean"),
+    }
 }
 
 /// The untyped value of the object of a handle: a control as controls are held in a content (a
@@ -469,8 +498,30 @@ pub unsafe extern "C" fn ferro_get_str(
 }
 
 ferroui_base::ferro_thread_local! {
-    /// The text the last `ferro_get_cstr` of the thread returned.
-    static LAST_TEXT: RefCell<CString> = RefCell::new(CString::default());
+    /// The text the last `ferro_get_cstr` of the thread returned, with its NUL, in a buffer kept
+    /// from one call to the next.
+    static LAST_TEXT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Appends the text of `property` of `object` (see [`text_of`]) to `out`: a text property is
+/// read in place, with no copy of its text but this one.
+fn append_text(object: &Ref<FerroObject>, property: Property, out: &mut Vec<u8>) -> Result<()> {
+    if let Property::Registered(registered) = property {
+        if registered.property_type() == TypeId::of::<Option<String>>() {
+            if let Some(styled) = registered.as_styled::<Option<String>>() {
+                object.with_value(styled, |text| out.extend_from_slice(text.as_deref().unwrap_or_default().as_bytes()));
+                return Ok(());
+            }
+        }
+        if registered.property_type() == TypeId::of::<String>() {
+            if let Some(styled) = registered.as_styled::<String>() {
+                object.with_value(styled, |text| out.extend_from_slice(text.as_bytes()));
+                return Ok(());
+            }
+        }
+    }
+    out.extend_from_slice(text_of(object, property)?.as_bytes());
+    Ok(())
 }
 
 /// Reads the text of `property` of `object` (see [`ferro_set_str`]) and returns it as a
@@ -483,12 +534,15 @@ pub extern "C" fn ferro_get_cstr(object: FerroHandle, property: i64) -> *const c
     let mut pointer = std::ptr::null();
     let code = status(|| {
         let (object, property) = target(object, property)?;
-        let text = CString::new(text_of(&object, property)?)
-            .map_err(|_| Error::new(FERRO_INVALID_VALUE, "the text has a NUL inside"))?;
         pointer = LAST_TEXT.with_borrow_mut(|last| {
-            *last = text;
-            last.as_ptr()
-        });
+            last.clear();
+            append_text(&object, property, last)?;
+            if last.contains(&0) {
+                return Err(Error::new(FERRO_INVALID_VALUE, "the text has a NUL inside"));
+            }
+            last.push(0);
+            Ok(last.as_ptr().cast::<c_char>())
+        })?;
         Ok(())
     });
     if code == crate::FERRO_OK {
@@ -510,7 +564,7 @@ pub unsafe extern "C" fn ferro_get_handle(object: FerroHandle, property: i64, re
             None => 0,
             Some(value) => {
                 let object = ValueTypes::as_object(&*value).ok_or_else(|| read_mismatch("an object"))?;
-                handles::insert(object)
+                handles::insert(object)?
             }
         };
         // SAFETY: checked for NULL; the caller passes a pointer to a `FerroHandle`.
@@ -616,6 +670,23 @@ pub unsafe extern "C" fn ferro_set_str16(
 pub(crate) fn peek_text(object: FerroHandle, property: i64) -> Option<String> {
     let (object, property) = target(object, property).ok()?;
     text_of(&object, property).ok()
+}
+
+/// Whether the text of `property` of `object` is `text` (null is the empty text): compared in
+/// place for a text property, with no copy of the text; nothing is recorded (the frames compare
+/// what an object shows with what a frame sets).
+pub(crate) fn shows_text(object: FerroHandle, property: i64, text: &str) -> bool {
+    let Ok((object, property)) = target(object, property) else {
+        return false;
+    };
+    if let Property::Registered(registered) = property {
+        if registered.property_type() == TypeId::of::<Option<String>>() {
+            if let Some(styled) = registered.as_styled::<Option<String>>() {
+                return object.with_value(styled, |shown| shown.as_deref().unwrap_or_default() == text);
+            }
+        }
+    }
+    text_of(&object, property).is_ok_and(|shown| shown == text)
 }
 
 /// The value of `property` of `object` as a number (a boolean as `0` or `1`), `None` when it is

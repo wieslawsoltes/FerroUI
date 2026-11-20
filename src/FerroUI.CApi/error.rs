@@ -5,14 +5,15 @@
 use crate::{FerroStatus, FERRO_OK, FERRO_PANIC};
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
-use std::ffi::{c_char, CString};
+use std::ffi::c_char;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 ferroui_base::ferro_thread_local! {
     /// The code of the last failure on this thread ([`ferro_last_error_code`]).
     static LAST_CODE: Cell<FerroStatus> = const { Cell::new(FERRO_OK) };
-    /// The message of the last failure on this thread ([`ferro_last_error`]).
-    static LAST_MESSAGE: RefCell<CString> = RefCell::new(CString::default());
+    /// The message of the last failure on this thread ([`ferro_last_error`]) with its NUL, in a
+    /// buffer kept from one failure to the next: clearing it allocates nothing.
+    static LAST_MESSAGE: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
 }
 
 /// A failure of a call: its status code and a message for [`ferro_last_error`].
@@ -43,9 +44,13 @@ pub(crate) type Result<T> = std::result::Result<T, Error>;
 fn record(code: FerroStatus, message: &str) {
     // A message cannot hold a NUL in C: one inside the text ends it there.
     let text = message.split('\0').next().unwrap_or_default();
-    let message = CString::new(text).unwrap_or_default();
     let _ = LAST_CODE.try_with(|last| last.set(code));
-    let _ = LAST_MESSAGE.try_with(|last| *last.borrow_mut() = message);
+    let _ = LAST_MESSAGE.try_with(|last| {
+        let mut last = last.borrow_mut();
+        last.clear();
+        last.extend_from_slice(text.as_bytes());
+        last.push(0);
+    });
 }
 
 /// The text of a panic payload.
@@ -91,6 +96,13 @@ pub(crate) fn status_or_value(body: impl FnOnce() -> Result<i64>) -> i64 {
     })
 }
 
+/// The message of the last failure of the calling thread.
+pub(crate) fn last_message() -> String {
+    LAST_MESSAGE
+        .try_with(|last| String::from_utf8_lossy(last.borrow().strip_suffix(&[0]).unwrap_or_default()).into_owned())
+        .unwrap_or_default()
+}
+
 /// The message of the last call that failed on the calling thread, as UTF-8 with a NUL at the end;
 /// an empty string when none has failed. Successful calls leave it as it is (as `errno`). The text
 /// stays valid until the next failure on the thread. Any thread.
@@ -98,8 +110,16 @@ pub(crate) fn status_or_value(body: impl FnOnce() -> Result<i64>) -> i64 {
 pub extern "C" fn ferro_last_error() -> *const c_char {
     static EMPTY: &[u8] = b"\0";
     LAST_MESSAGE
-        .try_with(|last| last.borrow().as_ptr())
-        .unwrap_or(EMPTY.as_ptr() as *const c_char)
+        .try_with(|last| {
+            let last = last.borrow();
+            if last.is_empty() {
+                EMPTY.as_ptr()
+            } else {
+                last.as_ptr()
+            }
+        })
+        .unwrap_or(EMPTY.as_ptr())
+        .cast()
 }
 
 /// The status code of the last call that failed on the calling thread ([`FERRO_OK`] when none has
@@ -116,5 +136,5 @@ pub extern "C" fn ferro_last_error_code() -> FerroStatus {
 #[no_mangle]
 pub extern "C" fn ferro_clear_error() {
     let _ = LAST_CODE.try_with(|last| last.set(FERRO_OK));
-    let _ = LAST_MESSAGE.try_with(|last| *last.borrow_mut() = CString::default());
+    let _ = LAST_MESSAGE.try_with(|last| last.borrow_mut().clear());
 }

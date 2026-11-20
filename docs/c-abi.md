@@ -7,15 +7,22 @@ against, the way Skia, SQLite and wgpu-native are consumed. This document descri
 of #636, with the changes #950 proposed for languages that have neither pointers nor
 closures in their FFI (Osprey, WebAssembly hosts, Dart, Go, Python).
 
+For application and binding authors, docs/c-abi-languages.md is the guide: how to call the ABI
+from each language and which path is the fastest for each kind of work.
+
 Phase 1 is the "full" build of #636: the tables of types are on, so any registered type,
-property and routed event can be found by name, and there is no markup. Selecting what an
-application uses, and trimming the library to it, is phase 2 (section 11).
+property and routed event can be found by name, and there is no markup. The by-use mode links
+only the classes a program registers with their entries, and the units of the theme they need
+(section 16); a library built for one application is phase 2 (section 11).
 
 ## 1. Building the library
 
 ```sh
 cargo build -p ferroui-capi            # with the desktop platform (Skia, the Fluent theme)
-cargo build -p ferroui-capi --no-default-features   # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features type-tables
+                                       # without: no renderer, no ferro_app_run
+cargo build -p ferroui-capi --no-default-features --features desktop
+                                       # by use: no tables of types (section 16)
 ```
 
 The crate is built as a dynamic library (`libferroui_capi.dylib`, `.so`, `ferroui_capi.dll`),
@@ -331,16 +338,15 @@ machine: the numbers say how large the overhead is, not its exact value.
 - No typed per-control functions in C: bindings generate them from the API model (section 12;
   Osprey first), and a selection trims them in phase 2.
 - No batch of writes (`ferro_set_values`): each scalar write is one direct call, which also
-  serves languages without arrays across their FFI (#950).
+  serves languages without arrays across their FFI (#950); a frame is the batch (section 13).
 - Mobile and the browser start through their hosts, not `ferro_app_run`.
 
 ## 11. Phase 2 and later
 
 - **Selection and generation (#636, step 2):** a manifest of the controls, properties, events
   and features an application uses (written by hand or collected from its sources), and a
-  generator of a per-application library from it: only those exports, the Cargo features
-  that go with them, the roots of the theme units, `type-tables` off. Then a size measurement
-  of a hello world built this way against the Rust hello world.
+  generator of a per-application library from it (#977): only those exports, the Cargo features
+  that go with them, the class entries and theme units of section 16, `type-tables` off.
 - **Bindings:** a header-only C++ wrapper with RAII handles and typed accessors generated from
   the selection; Go (cgo, `runtime.LockOSThread` for the UI thread); Dart and Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
@@ -367,10 +373,13 @@ every update and reconciled by the library into the retained tree of a root.
 | `ferro_frame_key_str(text, length)` | a text key for the open element |
 | `ferro_frame_str`, `_str16`, `_f64`, `_i64`, `_bool` | a property value of the open element, as the setters of section 4 write it |
 | `ferro_frame_on(event, tag, value_property)` | binds an event to a message tag; `value_property` is read as the value of the event |
+| `ferro_frame_memo(version, tag_base)` | makes the open element a memo element: not looked into while its key and version stay |
+| `ferro_frame_reuse(root, key, version, tag_base)` | writes one reuse record for the memo element of the last frame under `root`; the number of its tags, or a negative status (write it in full) |
 | `ferro_frame_commit(root)` | reconciles the frame into the children of `root` (`0`: windows, shown and closed) |
 | `ferro_frame_commit_bytes(root, data, length)` | the same for a buffer the caller wrote in the layout of the model |
 | `ferro_frame_dispatcher(function)` | the one dispatcher of the process (any thread): `function(tag, sender, value)` |
 | `ferro_frame_dispatch(tag, sender, arg)` | calls the dispatcher (the start of a loop, a test) |
+| `ferro_subscribe_dispatch(object, event, tag)` | subscribes the dispatcher itself to an event of an object, with a tag |
 | `ferro_frame_event_text()`, `ferro_frame_event_f64()` | the value of the event being dispatched |
 | `ferro_frame_find(root, key)` | the handle of a keyed element of the retained tree |
 | `ferro_frame_clear(root)` | takes the frames of `root` out and frees them |
@@ -379,11 +388,471 @@ The writer functions append records to a buffer of the calling thread (any threa
 records are the byte layout of the model (`frame`), so a language that writes memory commits
 a buffer of its own with one call. A commit writes only what changed, never writes back a
 text the object already shows, binds events once and changes their tags in place, and does
-not dispatch what it caused itself. The tests are `src/FerroUI.CApi/tests/frame_tests.rs` and
+not dispatch what it caused itself. What a frame costs, and memo elements, are in section 13.
+The tests are `src/FerroUI.CApi/tests/frame_tests.rs` and
 the frame part of `samples/CApi/abi_test.c`.
 
-- **Osprey (#950):** shape 1 works: Osprey executables over the dynamic library with
-  named-function callbacks (`samples/CApi/osprey`). Next: generated `extern fn` declarations and
-  ID constants from the same source as the header, then FerroUI owning the process with Osprey
-  as a library (shape 2).
-- **Values:** a `FerroValue` tagged union and `ferro_set_values` beside the scalar family.
+
+## 13. Performance
+
+What a call through the ABI costs, what was made cheaper and what was left out (#968
+follow-up). Measured on one Apple silicon Mac (2026-11-19) with the benchmark of the crate
+(`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`, the `bench`
+profile) and its C twin (`samples/CApi/call_overhead.c`, `make -C samples/CApi bench`): the
+median over five runs of the median of 9 samples. The machine was not idle (other builds ran
+on other cores); single numbers moved by up to 10 % from run to run, the differences below are
+far larger than that except where the text says otherwise.
+
+| Operation | Rust | ABI before | ABI after |
+| --- | ---: | ---: | ---: |
+| write `FontSize` (`ferro_set_f64`) | 28.5 ns | 36.6 ns | 34.8 ns |
+| write `Text` with a length (`ferro_set_str`) | 73.6 ns | 92.9 ns | 101.4 ns |
+| read `FontSize` (`ferro_get_f64`) | 3.4 ns | 8.3 ns | 7.3 ns |
+| the check of the thread (`ferro_is_ui_thread`) | | 1.4 ns | 0.6 ns |
+| the handle table (`ferro_retain` and `ferro_release`) | | 6.7 ns | 4.6 ns |
+| reset the error (`ferro_clear_error`) | | 15.9 ns | 0.4 ns |
+| raise `Click` (`ferro_raise`, the whole call) | 44.3 ns | 55.2 ns | 53.4 ns |
+| call the frame dispatcher (`ferro_frame_dispatch`) | | 27.0 ns | 5.0 ns |
+| frame: one text block, its text changes | 73.6 ns | 510 ns | 204 ns |
+| frame: 100 text blocks, one changes | 73.6 ns | 21.6 us | 3.18 us |
+| frame: 100 text blocks, none changes | | 21.2 us | 2.97 us |
+| frame: 100 text blocks, the scalar writer alone | | 2.79 us | 1.26 us |
+| frame: 100 text blocks, the commit of a buffer alone | | 18.6 us | 1.89 us |
+| frame: 1000 text blocks, one changes | | 211 us | 30.2 us |
+| frame: 100 memo text blocks, one changes | | | 1.81 us |
+| frame: 1000 memo text blocks, one changes | | | 17.8 us |
+
+The Rust column of the frames is the one `set_text` a frame comes down to. From C (the
+dynamic library): a frame of 100 text blocks of which one changes 19.9 us before, 3.2 us
+after, 1.72 us as memo elements; the frame dispatcher 28.0 ns before, 4.6 ns after.
+
+### 13.1 Where a call goes
+
+Each line of the benchmark was broken down with a sampling profiler before it was changed:
+
+- **A scalar call** (a write, a read) is the boundary that catches a panic (free unless one
+  is raised), the check of the thread, the lookup of the handle, the resolution of the
+  property ID for the class, and the typed setter or getter of the framework, which is most
+  of a write. A read in Rust is an inlined field access; through the ABI about 4 ns are the
+  call itself and its checks.
+- **A frame** cost what the whole tree costs, not what changed: the decoder built a tree of
+  elements (vectors and a string per element), the reconcile built a hash map per list of
+  siblings, and the writer appended each field with a separate copy. about 87 % of the
+  100-element frame was the commit, 13 % the writer.
+- **A read with a `Result`** (the getters of a binding that reports errors as values) cleared
+  the error of the thread first, which allocated a new empty C string every time.
+- **An event to a binding with one dispatcher** went through a trampoline of the binding and
+  `ferro_frame_dispatch`, which took a mutex and allocated an empty C string for the event text.
+
+### 13.2 What was made cheaper
+
+1. **Frames cost what changed** (`frame.rs`). The frame is indexed in one pass over its
+   record headers into a flat list of elements that is kept from one commit to the next (no
+   allocation per element); each element of the retained tree keeps the bytes of its
+   attribute records, and an element whose bytes did not change costs one short comparison
+   of bytes, with no decoding, no lookup and no write. Siblings whose keys and classes are the
+   ones of the last frame, in the same order, are matched by position in place, with no table
+   (the fast path of the keyed reconcilers of Inferno and ivi); only a reordered list builds the
+   keyed map. The text of a value is checked for UTF-8 when it is written: an unchanged value
+   was checked when it was first written (a text that is not UTF-8 fails its write like any
+   other value; a key that is not UTF-8 still refuses the frame). The commit of a buffer of 100
+   elements went from 18.6 us to 1.9 us, about 19 ns per element.
+2. **Memo elements and reuse records** (`ferro_frame_memo`, `ferro_frame_reuse`; records 10
+   and 11 of the layout). The idea of `Html.Lazy` and `React.memo` with an explicit version in
+   place of a comparison of arguments: an element with a memo record is not looked into while
+   its key and version stay, and a binding that asks `ferro_frame_reuse` first writes one
+   record in place of the whole subtree, and need not build it. The library keeps the bytes of
+   every memo element with an integer key, so a reuse record also works for an element that
+   moved to another parent, and a new tag base only moves the tags of its events (positional
+   tags of an Elm-like binding shift when an earlier element gains an event). From C, a reused
+   text block costs about 17 ns, about half of writing and comparing it; the gain grows with
+   the size of the subtree. In Osprey, building the view is most of a frame now (section 6 of
+   docs/osprey.md), which a memo element does not skip yet.
+3. **The writer appends words** (`Vec<u64>`), one store per field, in place of byte copies of
+   variable length: 2.79 us to 1.26 us for the 302 writer calls of 100 elements (with step 5).
+4. **No allocation on the paths of every call.** The error of the thread is a buffer that is
+   cleared, not a new C string (`ferro_clear_error` 15.9 ns to 0.4 ns); `ferro_get_cstr` reads
+   a text property in place into a kept buffer; the event text of a frame dispatch is a kept
+   buffer; the dispatcher is an atomic pointer, not a mutex (27.0 ns to 5.0 ns).
+5. **The UI thread is checked with one comparison** (`thread.rs`). The UI thread is remembered
+   as a token that the calling thread reads without a call where the platform allows: the
+   thread register on Apple arm64 (`TPIDRRO_EL0`), `pthread_self` on other Unix systems,
+   `GetCurrentThreadId` on Windows. The handle table, the resolved property and event IDs and
+   the state of the frames are statics behind `UiCell`, which checks that token and a busy flag
+   on every access (the same guarantees as a thread-local `RefCell`: no access from another
+   thread, no second access inside one), so a call reads no thread-local variable (a call into
+   the dynamic loader on macOS, a table of keys on Android). The check went from 1.4 ns to
+   0.6 ns, a retain and a release from 6.7 ns to 4.6 ns, a read from 8.3 ns to 7.3 ns. Every
+   guarantee of section 5 stays: a status for every failure, `FERRO_WRONG_THREAD` from another
+   thread, `FERRO_BAD_HANDLE` for a stale handle (handles keep their generation), nothing
+   unwinds.
+6. **One indirect call per event** for a binding with one dispatcher
+   (`ferro_subscribe_dispatch(object, event, tag)`): the library calls the dispatcher of
+   `ferro_frame_dispatcher` with the tag, with no function of the binding in between.
+
+The write of `Text` measured 5 to 9 ns slower after step 5 in these runs (the write of a
+number, the read and every other line got faster); the profile puts the difference at the end
+of the lookup of the handle and the property, where the code is the same for both writes, and
+no cause was found. It is left to a follow-up measurement on a quiet machine.
+
+### 13.3 What was left out, and why
+
+- **Subtree hashes** (Merkle hashing of each subtree, to skip an unchanged subtree with one
+  comparison): a frame is checked record by record anyway (every commit validates the layout
+  of what it is given), so an unchanged subtree still costs the walk over its headers, and
+  the exact comparison of attribute bytes costs about as much as hashing them. A hash would
+  also make a collision a missed update. Memo elements skip subtrees exactly, by the version
+  the binding gives.
+- **A batch scope** (check the thread and the handle once for several writes): after step 5
+  the check of the thread is a comparison and the handle lookup an index, about 2 ns of a
+  write of 35 ns; a frame is already the batch for many writes (one check of the thread and
+  one lookup of the root per commit).
+- **Fine-grained bound values for layer 1** (bind a value once, update it alone): layer 1 is
+  already fine-grained, one setter call per changed value.
+- **Borrowing the object for the length of a call** in place of counting a reference: a
+  setter can run code of the caller (a handler of a property change) that releases the very
+  handle, so the counted reference stays.
+- **Lazy elements in Osprey** (a function that builds a subtree only when its version changed):
+  Osprey 0.29 does not call a function held in a value whose effects it cannot track; the
+  `memo(version)` attribute skips writing and reconciling, not building.
+
+### 13.4 Link-time optimisation across C and Rust
+
+A C or C++ application that links the static library can let the linker optimise across the
+two languages: build the library with `RUSTFLAGS="-Clinker-plugin-lto"` (and `lto = false` in
+the profile, the linker does it) for the target alone (`--target`, so that build scripts are
+linked normally), and link with `clang -flto=thin` and `lld`, with a clang and an lld of the
+same LLVM version as rustc (`rustc -vV`; for example Rust 1.93 with LLVM 21.1.8 and clang
+21.1.8). The small functions of the ABI can then be inlined into the C program. Measured with
+`call_overhead.c` (three runs each): a read 8.0 ns dynamic, 8.0 ns static, 7.4 ns with LTO;
+a write and a frame within the noise of the three. The call itself is not where the cost of a
+call is (section 13.1), and the link of the 100-element benchmark took 52 s on 6 cores, so
+it is an option for an application that wants the last half nanosecond, not the default.
+It does not apply to Osprey, which calls the dynamic library.
+
+## 14. Signals shared through memory
+
+A signal is a value both sides of the bridge read and write directly: a slot of a table the
+library allocates once. A write of a signal from the language is a store, a read of a value
+the user changed is a load, and the library learns what changed from a bitset, with no call
+per value (#969 follow-up).
+
+### 14.1 What others do
+
+- **Seqlocks and versioned slots** (the Linux kernel, the shared-memory transports of trading
+  and robotics systems): a writer bumps a version around a write so that a reader of a
+  multi-word value can tell a torn read and retry. A value that fits one aligned word needs no
+  seqlock: the store is atomic. A version per slot still tells a reader what changed.
+- **Dirty bitsets and change rings**: game engines keep a changed bit per component (or per
+  chunk of an ECS component buffer) that a system scans and clears; replication layers and
+  audio engines pass parameter changes through a single-producer ring. A bitset holds one bit
+  per slot whatever the number of writes; a ring holds one record per write.
+- **React Native JSI / Hermes**: JavaScript holds host objects and calls C++ through them
+  synchronously; shared state is a C++ object both sides reach, not a copy, but every access is
+  still a call through the host object. Reanimated's shared values keep a value on the UI
+  thread that worklets read without going through the bridge.
+- **Flutter `dart:ffi`**: `Pointer<T>` and `asTypedList` give Dart direct loads and stores into
+  native memory; leaf calls are cheap, but memory is cheaper still.
+- **Godot GDExtension**: the engine hands the extension a table of function pointers and
+  variants are copied per call; it has no shared value table.
+- **WebAssembly and `SharedArrayBuffer`**: a UI on the main thread and a worker share a
+  buffer and use `Atomics.store`/`Atomics.load`/`Atomics.or` and a change counter, which is the
+  protocol below.
+- **FerroUI's declarative signals** (`ferroui-view`, `reactive.rs`): a `Signal<T>` handle into
+  a runtime of the thread, effects that run when a signal they read changes, and `batch` for
+  a group of writes. A slot can feed such a signal at the apply point (the apply sets it and
+  its effects run); the C ABI binds slots to properties directly instead, so the library does
+  not depend on `ferroui-view`.
+
+### 14.2 The table
+
+`ferro_signal_table(capacity)` returns a `FerroSignalTable` that stays at its address until the
+process ends (`ferro_signals_init` for a language that only calls):
+
+| Field | Words | Written by |
+| --- | --- | --- |
+| `values` | one 8-byte word per slot: `int64_t`, the bits of a `double`, `0`/`1`, a handle; for text the length | the language (slots it binds), the library (slots it watches) |
+| `versions` | one per slot, raised every time the value changes | the library |
+| `dirty` | one bit per slot | the language sets, the library takes |
+| `changed` | one bit per slot | the library sets, the language clears |
+| `kinds` | one `uint32_t` per slot (`FERRO_SIGNAL_I64` .. `FERRO_SIGNAL_TEXT`, `0` free) | the library |
+
+`ferro_signal_new(kind)` takes a slot; `ferro_signal_free` gives it back.
+
+- **Language to UI.** The language stores the value (a relaxed atomic store, or a plain store
+  on the UI thread), then sets bit `slot % 64` of `dirty[slot / 64]` (an atomic OR with release
+  order; a plain read-modify-write when only the UI thread writes). Any thread may write a
+  numeric slot this way. `ferro_signal_bind(slot, object, property)` binds a property to the
+  slot; a frame does the same with the `bind` record (12: property, slot,
+  `ferro_frame_bind`), and keeps the binding while its frames keep the record.
+- **The apply** runs on the UI thread at defined points: `ferro_signals_apply()`, the start of
+  every frame commit and the end of every dispatch. It takes each non-zero dirty word (an
+  atomic swap with acquire order), raises the version of each slot and writes the value to
+  every bound property through the typed setter of the property, resolved when the binding was
+  made (no handle or ID lookup per write), converted and validated as `ferro_set_f64` does.
+- **UI to language.** `ferro_signal_watch(slot, object, property)` subscribes to the changes of
+  a registered property: on every change the library writes the value (release order), raises
+  the version and sets the `changed` bit. The language reads with a load when it wants; the
+  version or the bit says whether anything changed. A text slot keeps the text in the library
+  (`ferro_signal_set_str`, `ferro_signal_get_cstr` when the version moved); its value word is
+  the length. What an apply writes into a property is not watched back into the same slot, so
+  a slot that is bound and watched (a text box) does not echo.
+- **Safety.** Every call checks the slot against the capacity and its kind; the apply ignores
+  bits of free slots, and `dirty` has exactly `capacity / 64` words, so no index is out of
+  bounds by construction. A binding holds a counted reference to its object and is checked
+  when it is made; a stale handle is `FERRO_BAD_HANDLE` there as everywhere. Direct stores and
+  loads are the language's own memory accesses inside arrays of the length the table states.
+
+### 14.3 What it costs
+
+Measured as section 13 (the same Mac, the median of five runs; the machine was not idle:
+other builds ran, load between 8 and 25, single numbers moved up to 30 % on the store line).
+
+| Operation | Through a call | Through the table |
+| --- | ---: | ---: |
+| Rust: write `FontSize` (setter) / a store and an apply | 34.4 ns | 52.7 ns |
+| Rust: 100 writes (100 setters / 100 stores and one apply) | 3.89 us | 4.48 us |
+| Rust: read `FontSize` (getter with a fallback / a load of a watched slot) | 7.3 ns | 0.6 ns |
+| Rust: one value of a frame of 100 elements (the frame written again / a bound value: a store and an apply) | 3.05 us | 52.5 ns |
+| C: write `FontSize` / a store and an apply | 35.8 ns | 47.5 ns |
+| C: 100 writes | 4.08 us | 4.28 us |
+| C: read `FontSize` / a load | 7.4 ns | 0.3 ns |
+| Osprey: 100 writes (100 setters / 100 `signalSetNumber` calls and one apply) | 3.60 us | 3.91 us |
+| Osprey: read `FontSize` (getter / `signalReadNumber`) | 11.9 ns | 6.7 ns |
+
+- **Reads pay**: a load of a watched value costs a tenth to a twentieth of a getter call, and
+  the language learns what changed from the versions and bits, with no event per value.
+- **Bound values in frames pay**: changing one value of a view through a bound slot costs
+  the write of that one property, not the description of the view again (58 times less for
+  100 elements). This is the fine-grained update that layer 2 lacked.
+- **Writes do not pay by themselves**: the property write of the framework is most of a
+  setter, and the apply adds the pass over the dirty words and its own bookkeeping, 5 to 15 %
+  more for 100 writes. A write through the table is still the way to batch writes from another
+  thread (any thread may store a numeric slot; a setter needs the UI thread and `ferro_post`)
+  and to update bound frame values; it is not a faster setter.
+
+### 14.4 What was left out
+
+- **An event ring** (events appended to a single-producer ring in shared memory that the
+  language drains with loads, next to the callback): implemented and measured, then removed.
+  From C a raise into the ring and its drain cost 51.3 ns against 49.7 ns to a C callback, from
+  Rust 42.8 against 40.7 ns; a language that cannot read memory (Osprey) drains it with a call
+  per event, which is what the callback costs. It may pay where a callback into the language
+  is expensive (a managed runtime's upcall); that is to be measured with such a binding.
+- **A shared string arena**: a text crosses as a copy into the language's own string either
+  way; the version tells when to read it, so a text slot costs one call per change, not per
+  read. An arena would add allocation and reuse rules on both sides for no fewer copies.
+- **The frame buffer in library memory**: `ferro_frame_commit_bytes` reads the caller's buffer
+  in place already; there is no copy at commit to remove.
+- **Seqlocks per slot**: every value is one aligned word, so a store is never torn; the text
+  of a text slot is read through a call on the UI thread.
+- **Feeding `ferroui-view` signals from slots**: possible at the apply point, but it would make
+  the C ABI depend on the declarative crate; bindings bind slots to properties directly.
+
+### 14.5 Which path to use
+
+Frames for structure, the signal table for values that change, direct calls for the rest: a
+view is built and restructured with frames, a value that changes after that is a bound slot
+written with a store, a value the user changes is a watched slot read with a load, and setters
+and getters serve setup, one-off writes and reads, and properties frames do not model. The
+table of cases, what not to do and what generated bindings do by default are in
+docs/bindings-design.md, section 2.1.
+
+The tests are `src/FerroUI.CApi/tests/signals_tests.rs` and `test_signals` of
+`samples/CApi/abi_test.c`; the Osprey sample is `samples/CApi/osprey-bindings/temperature_signals`.
+
+## 15. Controls written in another language
+
+A control and its code-behind can be written in C, and through the generated bindings in any
+language (#974). The language registers a class on one of four bases, sets the callbacks of the
+members it overrides, and registers the properties of the class; the framework then creates,
+styles, lays out, renders and routes input to instances of the class as to any control.
+
+### 15.1 How it works without a cost for Rust applications
+
+Nothing outside `ferroui-capi` changed: the class model, the property system and the hot paths
+of layout, styling and rendering are untouched.
+
+- **One Rust class per base**, in this crate, written as any Rust control: `ForeignControl:
+  Control`, `ForeignPanel: Panel`, `ForeignDecorator: Decorator`, `ForeignContentControl:
+  ContentControl`. Their overrides (measure, arrange, render, property changed, attached,
+  detached, apply template, pointer and key) read the class of the instance and call its
+  callback, or call the base when the class has none.
+- **A registered class is a type of its own.** `ferro_class_register(name, length, base)` makes a
+  `TypeInfo` at run time with the public constructors of the type system (`TypeInfo::new`, the
+  Rust class of the base as its base, a constructor of a fixed pool of 64), registers it with the
+  tables of types and copies the virtual table of the Rust class of the base, changing only its
+  type slot. Each instance is attached to the copy, so `get_type()` answers the registered
+  class: styles select it by name, `ferro_type_id` and `ferro_create` find it, frames create it,
+  and `is::<Control>()` holds.
+- **The callbacks of a class** are a table of function pointers (`ferro_class_on_measure`, ...)
+  set once; each instance holds a pointer to its class and the language's data pointer, so a
+  virtual call reads two fields and calls one function: no lookup, no allocation, no boxed value.
+- **Registered properties** (`ferro_property_register`) are styled (or attached) properties of the
+  property system, owned by an internal class outside every hierarchy and registered on the
+  registered class, so they are found by name only there (and on its subclasses; `Owner.Name`
+  for attached ones). Setters and getters of the ABI, frames, signals, styles, bindings and
+  animations use them as built-in ones; the flags make a change invalidate the measure, the
+  arrange or the render, and the property-changed callback runs for the class's own properties
+  only.
+
+### 15.2 The calls
+
+| Call | What it does |
+| --- | --- |
+| `ferro_class_register(name, length, base)` | a class on `FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR` or `_CONTENT_CONTROL`: its type ID |
+| `ferro_class_set_data(class_id, data)` | the data of the class, given to its create callback |
+| `ferro_class_on_create` | each new instance: the callback gives it its data with `ferro_object_set_data(object, data, release)` |
+| `ferro_class_on_measure`, `_on_arrange` | `(data, object, width_in, height_in, double *width, double *height)` |
+| `ferro_class_on_render` | `(data, object, context)`: draw with `ferro_draw_*` on `context` |
+| `ferro_class_on_property_changed` | `(data, object, property_id)` for the class's own properties |
+| `ferro_class_on_attached`, `_on_detached`, `_on_apply_template` | `(data, object, 0)` |
+| `ferro_class_on_pointer` | `(data, object, kind, x, y, modifiers)`, position relative to the instance; `1` handles it |
+| `ferro_class_on_key` | `(data, object, kind, key, modifiers)`; `1` handles it |
+| `ferro_property_register(owner, name, length, kind, default_number, default_text, flags)` | a property of a kind of signal (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`) with `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS`, `_ATTACHED`: its property ID |
+| `ferro_object_data(object)` | the data of an instance |
+| `ferro_layout_measure`, `_arrange`, `_desired_width`, `_desired_height`, `_bounds_width`, `_bounds_height` | lay out children from the callbacks, read sizes |
+| `ferro_layout_result(width, height)` | the result of the running measure or arrange callback, for a language that cannot write a `double *` |
+| `ferro_panel_child_count`, `ferro_panel_child` | the children of a class on `FERRO_BASE_PANEL` |
+| `ferro_template_part(object, name, length)` | a named part of the applied template, from the apply-template callback on |
+| `ferro_draw_brush(argb)`, `ferro_draw_pen(argb, thickness)` | brush and pen IDs (the same colour is the same ID); make them once |
+| `ferro_draw_rect`, `_ellipse`, `_line`, `_path`, `_text` | draw (a rounded rectangle, an ellipse, a line, path markup, text in the default typeface) |
+| `ferro_draw_push_clip`, `_push_transform`, `_push_opacity`, `ferro_draw_pop` | state; what a callback leaves pushed is popped after it |
+
+### 15.3 The rules for a callback
+
+1. **A plain C function pointer and a data pointer per instance**: no closures and no thunks of
+   the library. The data pointer is the language's own object (a `GCHandle` in .NET, a global
+   reference in Java, `Unmanaged` in Swift, a `cgo.Handle` in Go), released by the function given
+   to `ferro_object_set_data` when the instance goes away.
+2. **Scalars only**: no structure passed or returned by value, no varargs; sizes come back through
+   `double *` (or `ferro_layout_result`).
+3. **Synchronous on the UI thread, and reentrant**: a callback may call the ABI again (measure and
+   arrange its children, read and write properties, draw). The library holds none of its own state
+   (no `UiCell` access) while it calls out.
+4. **Errors as statuses**: a callback returns `0` (or `1` for a handled event), a negative status on
+   a failure, which the library records (`ferro_last_error`) and answers with the base behaviour.
+   Nothing may unwind out of a callback; the library catches what fails inside its own calls.
+5. **What it costs**: an unimplemented member never calls the language; layout callbacks run only
+   for invalidated elements; render is retained, called when the element is invalidated, and the
+   GPU scene replays what it recorded.
+
+Drawing records into the same retained GPU scene as the built-in controls (the render of a
+foreign class runs through the recorder of the compositing renderer): there is no CPU drawing
+path. Handles are checked as everywhere, every call is UI-thread only, and an ID or a context
+that is not valid is a status.
+
+### 15.4 What it costs
+
+`cargo bench -p ferroui-capi --no-default-features --bench call_overhead`, the same Mac as section
+13, the median of five runs (load 9 to 19 while it ran):
+
+| Operation | The control in Rust | Through the ABI |
+| --- | ---: | ---: |
+| measure and arrange 1000 elements in a stack panel (each invalidated) | 60.2 us | 70.1 us |
+| render 1000 elements (a filled rounded rectangle each) into the recorder | 25.0 us | 38.9 us |
+| write a number property that affects the measure (`MinWidth` / a registered one) | 30.9 ns | 26.9 ns |
+| read it | 7.2 ns | 7.4 ns |
+
+A measure and an arrange through callbacks cost about 10 ns more per element than the same Rust
+overrides (two indirect calls, the remembered handle checked, the result out-parameters kept for
+`ferro_layout_result`); a render about 14 ns more (the context made reachable to the drawing calls
+and the brush looked up by ID). A registered property is a styled property like the built-in ones:
+it costs the same.
+
+### 15.5 What is not there yet
+
+- Text input (`on_text_input`), focus members, automation peers and custom hit testing are not
+  forwarded; the base runs them.
+- More bases (an items control, a templated control without a content) can follow the same pattern.
+- Classes are found by name in the tables of types; the XAML loader creates them by name once it
+  reads markup through the C ABI (step 7 of #636).
+- At most 64 registered classes per process (the pool of constructors).
+
+The tests are `src/FerroUI.CApi/tests/foreign_tests.rs` and `test_controls` of
+`samples/CApi/abi_test.c`; the samples are `samples/CApi/gauge.h` (with `gauge.c`, `make -C
+samples/CApi run-gauge`) and `samples/CApi/osprey-bindings/gauge_control`.
+
+## 16. Classes by use
+
+The full library (section 1) has the tables of types: every class of the framework is linked and
+found by name, and the theme is the whole Fluent theme, so a statically linked C hello world is
+as large as an application that uses every control. The by-use mode (#976) links what a program
+registers instead.
+
+### 16.1 The entries of the classes
+
+Every class of the API model in the base crate and the controls (455 of them) has an **entry**,
+an exported function without arguments that returns its type ID:
+
+```c
+int64_t window = ferro_type_window();
+int64_t button = ferro_type_button();
+int64_t combo  = ferro_type_combo_box();
+```
+
+An entry registers the class (it is then found by name too), its default constructor and the
+type ID of the model (the constant of the generated bindings), and records the units of the
+Fluent theme the class adds to the ambient ones. The model lists the entry of each class
+(`entry` in `bindings/model/ferroui-api.json`); the entries are `src/FerroUI.CApi/api_types.rs`,
+which `tests/types_tests.rs` writes from the model and compares with the file
+(`FERROUI_CAPI_WRITE_TYPES=1 cargo test -p ferroui-capi --lib types` writes it again). The units
+of a class are the closure the build tool computes for a Rust application that names the class
+(`ferroui_build::theme_roots::kept_units`, docs/porting/theme-trimming.md), over the type models of
+the dependencies that the build script of the crate hands to the test: the template of a
+`ComboBox` brings the units of its popup, its items and its scroll bars.
+
+### 16.2 The two modes
+
+| | Full (default features) | By use (`--no-default-features --features desktop`) |
+| --- | --- | --- |
+| Tables of types | on: every class found by name | off: the classes registered by their entries, or created by the framework |
+| An entry | returns the ID (the class is known already) | registers the class and its units, returns the ID |
+| `ferro_type_id("Button")` | finds it | finds it once its entry was called |
+| Theme of `ferro_app_run` | the whole Fluent theme | the ambient units and the units of the registered classes |
+| A static program keeps | every class | the classes it registers and what they use |
+
+In the by-use mode a program calls the entries of the classes it uses **before `ferro_app_run`**,
+which constructs the theme from the units registered so far. An entry called later registers its
+class, but the theme does not grow: its control theme is missing. A class that is not registered
+is not found (`FERRO_NOT_FOUND`, with a message that names the entries). Generated bindings do it
+for the program: the Osprey bindings of a selection declare the entries of the classes it names
+and call them in `registerTypes()`, which `run` calls before the main loop (docs/osprey.md); the
+full bindings register nothing. `samples/CApi/hello_world.c` and `gauge.c` call them in `main`.
+
+A class written in another language (section 15) needs no entry: its registration registers it,
+and its default constructor is registered beside its type, so it is created in both modes.
+
+### 16.3 What it saves
+
+macOS (arm64), release, the C samples linked statically against `libferroui_capi.a` with
+`-Wl,-dead_strip` and stripped; the start-up is the wall time of 15 interleaved runs that close the
+window 200 ms after the start callback, less those 200 ms (a loaded machine: compare the columns,
+not the absolute numbers):
+
+| Program | Full | By use | Rust hello world |
+| --- | ---: | ---: | ---: |
+| `hello_world.c` (Window, StackPanel, TextBlock, Button) | 36.97 MB | 20.12 MB | 16.7 to 20.4 MB |
+| `gauge.c` (Window, StackPanel, a class written in C) | 36.99 MB | 20.17 MB | |
+| a window alone (`ferro_type_window()`) | | 19.99 MB | |
+| start-up of `hello_world.c`, median | 238 ms | 235 ms | |
+| start-up of `gauge.c`, median | 234 ms | 233 ms | |
+
+What one entry keeps beyond a window (the same link): `Button` and `TextBlock` nothing (a text block
+has no control theme, and the closure of the ambient units already keeps the one of a button), `ListBox` 2.03 MB,
+`TreeView` 2.12 MB, `TextBox` 2.70 MB, `ComboBox` 2.89 MB, `CalendarDatePicker` 3.23 MB.
+
+By crate (`scripts/capi/size_by_crate.py` over the link map, MB of symbols):
+
+| Crate | Full | By use |
+| --- | ---: | ---: |
+| ferroui_base | 14.77 | 8.01 |
+| ferroui_controls | 6.13 | 1.64 |
+| native (Skia, HarfBuzz, codecs) | 4.60 | 4.60 |
+| core | 3.78 | 1.77 |
+| ferroui_themes_fluent | 2.06 | 0.38 |
+| total | 34.89 | 18.97 |
+
+A dynamic library exports every entry, so it keeps every class whatever the program calls: the
+by-use mode pays off where the program is linked statically, or with a library built for one
+application with the exports of its selection only (#977).

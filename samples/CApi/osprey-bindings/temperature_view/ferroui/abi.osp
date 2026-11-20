@@ -307,6 +307,14 @@ extern fn ferro_focus(object: int) -> int32
 // handled. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status.
 // UI thread only.
 extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+// [`ferro_subscribe`] to the one dispatcher of the thread
+// ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls
+// it with `tag`, the sender and the argument, as an event bound in a frame does (the event
+// text and number are empty). For a binding with one dispatcher, which then needs no
+// trampoline of its own between the library and its dispatcher: one indirect call per event.
+// Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI
+// thread only.
+extern fn ferro_subscribe_dispatch(object: int, event: int, tag: int) -> int
 // Removes the handler of the subscription `subscription` ([`ferro_subscribe`]); its user data
 // is released ([`ferro_subscribe_data`]). [`FERRO_NOT_FOUND`] for an ID that is not a live
 // subscription. UI thread only.
@@ -316,6 +324,114 @@ extern fn ferro_unsubscribe(subscription: int) -> int32
 // interface from code. [`FERRO_NOT_SUPPORTED`] for an event whose arguments carry more than
 // the routing state (a pointer event). UI thread only.
 extern fn ferro_raise(object: int, event: int) -> int32
+// Gives the size of the measure or arrange callback that runs now (the innermost), for a
+// language that cannot write through the `double *` of the callback. UI thread only.
+extern fn ferro_layout_result(width: float, height: float) -> int32
+// Registers the class `name` (UTF-8, `length` bytes, negative for NUL-terminated) on the base
+// `base` (`FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR`, `_CONTENT_CONTROL`) and returns its
+// type ID, or a negative status. The class is created by name
+// ([`ferro_create`](crate::ferro_create) with [`ferro_type_id`](crate::ferro_type_id)), in
+// frames and wherever a class is found by name; its virtual members call the callbacks set
+// with `ferro_class_on_*`, and fall through to the base where none is set. At most 64 classes
+// per process. UI thread only.
+extern fn ferro_class_register(name: string, length: int, base: int32) -> int
+// Sets the callback that gives each new instance of the class its data (`NULL` for none). UI
+// thread only.
+extern fn ferro_class_on_create(classId: int, callback: fn(Ptr, int) -> int32) -> int32
+// Sets the measure callback of the class (`NULL`: the base measures). UI thread only.
+extern fn ferro_class_on_measure(classId: int, callback: fn(Ptr, int, float, float, Ptr, Ptr) -> int32) -> int32
+// Sets the arrange callback of the class (`NULL`: the base arranges). UI thread only.
+extern fn ferro_class_on_arrange(classId: int, callback: fn(Ptr, int, float, float, Ptr, Ptr) -> int32) -> int32
+// Sets the render callback of the class (`NULL`: the base renders alone). The base renders
+// first (the background of a panel); the callback draws over it. UI thread only.
+extern fn ferro_class_on_render(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when a property the class registered changes, with its ID. UI
+// thread only.
+extern fn ferro_class_on_property_changed(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when an instance is attached to the visual tree. UI thread only.
+extern fn ferro_class_on_attached(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when an instance is detached from the visual tree. UI thread only.
+extern fn ferro_class_on_detached(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback called when the template of an instance is applied (a class on
+// `FERRO_BASE_CONTENT_CONTROL`); [`ferro_template_part`] finds its parts. UI thread only.
+extern fn ferro_class_on_apply_template(classId: int, callback: fn(Ptr, int, int) -> int32) -> int32
+// Sets the callback of pointer presses, releases and moves on an instance. UI thread only.
+extern fn ferro_class_on_pointer(classId: int, callback: fn(Ptr, int, int32, float, float, int) -> int32) -> int32
+// Sets the callback of key presses and releases on an instance. UI thread only.
+extern fn ferro_class_on_key(classId: int, callback: fn(Ptr, int, int32, int, int) -> int32) -> int32
+// Sets the data of the class, given to its create callback. UI thread only.
+extern fn ferro_class_set_data(classId: int, data: Ptr) -> int32
+// The data of an instance of a foreign class (`NULL` for none or on a failure, recorded). UI
+// thread only.
+extern fn ferro_object_data(object: int) -> Ptr
+// Registers a property of the foreign class `owner` (a type ID of [`ferro_class_register`])
+// and returns its property ID, or a negative status. `kind` is a kind of signal
+// (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`); the default is `default_number` (an integer
+// or a boolean as a number) or `default_text` (UTF-8, NUL-terminated, `NULL` for no text).
+// `flags` combine `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS` and
+// `_ATTACHED` (an attached property, `Owner.Name`, that every control takes). The property is
+// a styled property as the ones of the framework: the setters and getters of the ABI, frames,
+// signals, styles, bindings and animations use it. UI thread only.
+extern fn ferro_property_register(owner: int, name: string, length: int, kind: int32, defaultNumber: float, defaultText: string, flags: int) -> int
+// Measures `object` (a child, from a measure callback) at the available size. UI thread only.
+extern fn ferro_layout_measure(object: int, width: float, height: float) -> int32
+// Arranges `object` (a child, from an arrange callback) in the rectangle. UI thread only.
+extern fn ferro_layout_arrange(object: int, x: float, y: float, width: float, height: float) -> int32
+// The desired width of `object` after its measure (`0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_desired_width(object: int) -> float
+// The desired height of `object` after its measure (`0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_desired_height(object: int) -> float
+// The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render
+// callback of a language without instance data draws in. UI thread only.
+extern fn ferro_layout_bounds_width(object: int) -> float
+// The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread
+// only.
+extern fn ferro_layout_bounds_height(object: int) -> float
+// The number of children of a panel (`0` for another object, recorded). UI thread only.
+extern fn ferro_panel_child_count(object: int) -> int
+// The child `index` of a panel, with one reference counted (release it), or `0` (recorded). UI
+// thread only.
+extern fn ferro_panel_child(object: int, index: int) -> int
+// The part named `name` of the applied template of `object` (a foreign class on
+// `FERRO_BASE_CONTENT_CONTROL`), with one reference counted (release it), or `0` with
+// [`FERRO_NOT_FOUND`]. From the apply-template callback on. UI thread only.
+extern fn ferro_template_part(object: int, name: string, length: int) -> int
+// A solid brush of the colour `argb` (`0xAARRGGBB`) for the `ferro_draw_*` functions: its ID
+// (a positive number), the same for the same colour, or a negative status. Make the brushes of
+// a control once (at its creation) and draw with their IDs. UI thread only.
+extern fn ferro_draw_brush(argb: int) -> int
+// A solid pen of the colour `argb` and the thickness `thickness`: its ID, or a negative
+// status. UI thread only.
+extern fn ferro_draw_pen(argb: int, thickness: float) -> int
+// Fills (`brush`) and strokes (`pen`) a rectangle, its corners rounded by `radius_x` and
+// `radius_y`. UI thread only, in a render callback.
+extern fn ferro_draw_rect(context: int, x: float, y: float, width: float, height: float, radiusX: float, radiusY: float, brush: int, pen: int) -> int32
+// Fills and strokes the ellipse in the rectangle. UI thread only, in a render callback.
+extern fn ferro_draw_ellipse(context: int, x: float, y: float, width: float, height: float, brush: int, pen: int) -> int32
+// Strokes a line with the pen. UI thread only, in a render callback.
+extern fn ferro_draw_line(context: int, x1: float, y1: float, x2: float, y2: float, pen: int) -> int32
+// Fills and strokes the geometry of the path data `data` (the mini-language of markup: `M 0,0
+// L 10,10 Z`, UTF-8, `length` bytes, negative for NUL-terminated). UI thread only, in a render
+// callback.
+extern fn ferro_draw_path(context: int, data: string, length: int, brush: int, pen: int) -> int32
+// Draws `text` (UTF-8, `length` bytes, negative for NUL-terminated) with its top left at `x`,
+// `y`, in the default typeface at `size`, with the brush. UI thread only, in a render
+// callback.
+extern fn ferro_draw_text(context: int, text: string, length: int, x: float, y: float, size: float, brush: int) -> int32
+// Clips what is drawn next to the rectangle, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+extern fn ferro_draw_push_clip(context: int, x: float, y: float, width: float, height: float) -> int32
+// Transforms what is drawn next by the matrix (`m11 m12 m21 m22 dx dy`), until
+// [`ferro_draw_pop`]. UI thread only, in a render callback.
+extern fn ferro_draw_push_transform(context: int, m11: float, m12: float, m21: float, m22: float, dx: float, dy: float) -> int32
+// Draws what is drawn next with the opacity, until [`ferro_draw_pop`]. UI thread only, in a
+// render callback.
+extern fn ferro_draw_push_opacity(context: int, opacity: float) -> int32
+// Pops the clip, transform or opacity pushed last in the context. UI thread only, in a render
+// callback.
+extern fn ferro_draw_pop(context: int) -> int32
 // Starts a frame on the calling thread: empties the buffer of the scalar writer. Any thread
 // (the buffer is the calling thread's); commit it on the UI thread.
 extern fn ferro_frame_begin() -> int32
@@ -343,6 +459,27 @@ extern fn ferro_frame_bool(property: int, value: int8) -> int32
 // `value_property` (`0` for none), whose text and number [`ferro_frame_event_text`] and
 // [`ferro_frame_event_f64`] give. Any thread.
 extern fn ferro_frame_on(event: int, tag: int, valueProperty: int) -> int32
+// Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14):
+// the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding
+// while the frames keep the record, so a write of the slot updates the property with no new
+// frame. Any thread.
+extern fn ferro_frame_bind(property: int, slot: int) -> int32
+// Makes the open element a memo element: its subtree is what `version` says it is (a revision
+// of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets
+// that the version fixes. While the element keeps its key and its version, a commit does not
+// look into its subtree (a new `tag_base` moves its tags), and with an integer key the next
+// frame can reuse it whole ([`ferro_frame_reuse`]). A different subtree under the same key and
+// version is the caller's error: the commit keeps the old one. Any thread.
+extern fn ferro_frame_memo(version: int, tagBase: int) -> int32
+// Writes the memo element with the integer key `key` and the version `version` of the last
+// frame committed under `root` ([`ferro_frame_memo`]) into the frame of the calling thread as
+// one record, in place of its whole subtree, with its tags moved to start at `tag_base`.
+// Returns the number of tags the subtree uses (`0` or more: the next tag of the caller is
+// `tag_base` plus it), or a negative status, and then writes nothing: [`FERRO_NOT_FOUND`] when
+// the root has no such element (nothing is recorded; the caller writes the element in full),
+// or [`FERRO_WRONG_THREAD`](crate::FERRO_WRONG_THREAD) off the UI thread. Commit the frame
+// under the same root, before another commit under it. UI thread only.
+extern fn ferro_frame_reuse(root: int, key: int, version: int, tagBase: int) -> int
 // Commits the frame of the scalar writer of the calling thread under `root` (see
 // [`ferro_frame_commit_bytes`]) and empties the buffer. UI thread only.
 extern fn ferro_frame_commit(root: int) -> int32
@@ -355,9 +492,9 @@ extern fn ferro_frame_commit(root: int) -> int32
 extern fn ferro_frame_dispatcher(function: fn(int, int, int) -> int) -> int32
 // Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and
 // `arg` as an event would, and returns its result: a binding starts its loop with it (the tag
-// `0` asks for the first frame) and a test drives a message without an event. The event text
-// and number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher.
-// UI thread only.
+// `0` asks for the first frame), its one trampoline forwards the events of its subscriptions
+// with it, and a test drives a message without an event. The event text and number are empty.
+// [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI thread only.
 extern fn ferro_frame_dispatch(tag: int, sender: int, arg: int) -> int
 // The text of the value property of the event being dispatched, NUL-terminated and owned by
 // the library until the next event; empty for a binding without a value property or outside a
@@ -409,6 +546,64 @@ extern fn ferro_property_id(name: string, length: int) -> int
 // [`ferro_property_id`], the ID is the name, checked when it is first used with a class. Any
 // thread.
 extern fn ferro_event_id(name: string, length: int) -> int
+// [`ferro_signal_table`] for a language that cannot read memory (it calls `ferro_signal_set_*`
+// and `ferro_signal_get_*`): creates the table, or keeps the one that exists, and returns a
+// status. UI thread only.
+extern fn ferro_signals_init(capacity: int) -> int32
+// Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the
+// value `0` (the empty text), and returns its index, or a negative status
+// ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only.
+extern fn ferro_signal_new(kind: int32) -> int
+// Frees the slot `slot`: its bindings are removed and its kind is `FERRO_SIGNAL_FREE` until
+// [`ferro_signal_new`] takes it again. UI thread only.
+extern fn ferro_signal_free(slot: int) -> int32
+// Writes an integer into the slot and marks it dirty (the store and the bit of section 14, for
+// a language that cannot write memory). Any thread.
+extern fn ferro_signal_set_i64(slot: int, value: int) -> int32
+// Writes a number into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_f64(slot: int, value: float) -> int32
+// Writes a boolean into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_bool(slot: int, value: int8) -> int32
+// Writes a handle (`0` for null) into the slot and marks it dirty. Any thread.
+extern fn ferro_signal_set_handle(slot: int, value: int) -> int32
+// Writes UTF-8 text (`length` bytes, negative for NUL-terminated) into a text slot and marks
+// it dirty; the slot value becomes the length. UI thread only.
+extern fn ferro_signal_set_str(slot: int, text: string, length: int) -> int32
+// The integer of the slot (the load of section 14, for a language that cannot read memory);
+// `0` when the slot is not an integer slot (recorded). Any thread.
+extern fn ferro_signal_get_i64(slot: int) -> int
+// The number of the slot; `0` when the slot is not a number slot (recorded). Any thread.
+extern fn ferro_signal_get_f64(slot: int) -> float
+// The boolean of the slot; `false` when the slot is not a boolean slot (recorded). Any thread.
+extern fn ferro_signal_get_bool(slot: int) -> int8
+// The version of the slot (raised every time its value changes); `-1` for a slot that is not
+// in the table (recorded). Any thread.
+extern fn ferro_signal_version(slot: int) -> int
+// The text of a text slot as NUL-terminated UTF-8 owned by the library until the next call on
+// the thread; the empty text when the slot is not a text slot (recorded), never `NULL`. A
+// language reads it when the version of the slot changed. UI thread only.
+extern fn ferro_signal_get_cstr(slot: int) -> string
+// Binds `property` of `object` to the slot: the property takes the value of the slot now and
+// every time an apply finds the slot dirty, with no frame and no call of the language. Returns
+// a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only.
+extern fn ferro_signal_bind(slot: int, object: int, property: int) -> int
+// Watches `property` of `object` into the slot: the library writes the value of the property
+// into the slot now and every time it changes (the value, then the version, then the changed
+// bit), so the language reads it with a load and no call. A text property goes into a text
+// slot (read with [`ferro_signal_get_cstr`] when the version changed). Returns a positive
+// binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only.
+extern fn ferro_signal_watch(slot: int, object: int, property: int) -> int
+// Removes a binding of [`ferro_signal_bind`] or [`ferro_signal_watch`]. UI thread only.
+extern fn ferro_signal_unbind(binding: int) -> int32
+// Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its
+// value written to every property bound to it. Returns the number of slots applied, or a
+// negative status (the first failed write; the others are still made). The library applies by
+// itself at the start of every frame commit and at the end of every dispatch; a language calls
+// this after writing slots outside them (a timer of its own). UI thread only.
+extern fn ferro_signals_apply() -> int
+// Clears `changed` bits of the slot for a language that cannot write memory, and returns
+// whether it was set. Any thread.
+extern fn ferro_signal_take_changed(slot: int) -> int8
 // Makes the calling thread the UI thread: UI objects can be created and used on it from now
 // on, and on no other thread. Registers the tables of types, so that every type, property and
 // event of the framework can be found by name. Calling it again on the UI thread does nothing;
@@ -477,11 +672,26 @@ extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
 // (the caller's own string, returned as it is) in place of `NULL` when the read fails (the
 // failure is recorded): for a language whose strings cannot be `NULL`. UI thread only.
 extern fn ferro_get_cstr_or(object: int, property: int, fallback: string) -> string
+// registerTypes() -> int: registers the classes of the selection, with the units of the theme they
+// need, before the application starts (`run` calls it): what a library built for the
+// selection (without the tables of types) knows. A class that failed fails where it is created.
+extern fn ferro_type_stack_panel() -> int
+extern fn ferro_type_text_block() -> int
+extern fn ferro_type_text_box() -> int
+extern fn ferro_type_window() -> int
+fn registerTypes() = {
+    let id0 = ferro_type_stack_panel()
+    let id1 = ferro_type_text_block()
+    let id2 = ferro_type_text_box()
+    let id3 = ferro_type_window()
+    0
+}
+
 // A null pointer, for the reserved options of ferro_app_run (from the runtime of Osprey).
 extern fn osprey_ffi_null() -> Ptr
 
 // Not declared, because Osprey cannot pass what they take (a pointer to a result, a buffer,
-// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_post_data, ferro_timer_start, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
+// UTF-16, bytes) or return (a string that can be NULL): ferro_subscribe_data, ferro_object_set_data, ferro_frame_str16, ferro_frame_commit_bytes, ferro_signal_table, ferro_post_data, ferro_timer_start, ferro_get_f64, ferro_get_i64, ferro_get_bool, ferro_get_str, ferro_get_cstr, ferro_get_handle, ferro_set_str16.
 
 // ---- enumerations ----------------------------------------------------------------------------
 

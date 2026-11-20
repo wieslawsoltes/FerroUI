@@ -1,6 +1,7 @@
 /* Tests of the C ABI of FerroUI, from C (docs/c-abi.md, section 9): status codes, the UI thread
  * rule, bad handles, ID lookups, string lengths, values, children, events, posted work, getters
- * with a fallback, timers, the data of the event being handled and the focus. No
+ * with a fallback, timers, the data of the event being handled and the focus, frames, signals
+ * shared through memory (section 14) and a control written in C (section 15). No
  * window is opened: the thread is made the UI thread with ferro_init and driven with
  * ferro_run_jobs, so the tests run without a display and without the desktop platform.
  *
@@ -10,12 +11,14 @@
 
 #include <math.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #include "ferroui.h"
+#include "gauge.h"
 
 static int failures;
 static int checks;
@@ -358,6 +361,103 @@ static void test_frames(void) {
     CHECK_STATUS(FERRO_OK, ferro_release(root));
 }
 
+/* Signals shared through memory (docs/c-abi.md, section 14): a store and its dirty bit, applied to
+ * a bound property; a watched property read with a load; a bind record of a frame. */
+static void test_signals(void) {
+    const FerroSignalTable *table = ferro_signal_table(128);
+    CHECK(table != NULL && table->layout == FERRO_SIGNAL_LAYOUT && table->capacity % 64 == 0);
+    _Atomic uint64_t *values = (_Atomic uint64_t *)table->values;
+    _Atomic uint64_t *dirty = (_Atomic uint64_t *)table->dirty;
+    _Atomic uint64_t *changed = (_Atomic uint64_t *)table->changed;
+    FerroHandle block = create("TextBlock");
+    int64_t size = ferro_signal_new(FERRO_SIGNAL_F64);
+    CHECK(size >= 0);
+    CHECK_STATUS(FERRO_OK, ferro_signal_set_f64(size, 14.0));
+    CHECK(ferro_signal_bind(size, block, prop("FontSize")) > 0);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 14.0);
+    /* The store of a language that writes memory: the value, then the bit with release order. */
+    double next = 22.0;
+    uint64_t bits;
+    memcpy(&bits, &next, sizeof bits);
+    atomic_store_explicit(&values[size], bits, memory_order_relaxed);
+    atomic_fetch_or_explicit(&dirty[size / 64], 1ull << (size % 64), memory_order_release);
+    CHECK(ferro_signals_apply() >= 1);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 22.0);
+    CHECK_STATUS(FERRO_INVALID_ARGUMENT, ferro_signal_set_f64(1 << 30, 1.0));
+    CHECK_STATUS(FERRO_TYPE_MISMATCH, ferro_signal_set_i64(size, 1));
+
+    /* A watched text: typed into the box, read from the slot. */
+    FerroHandle box = create("TextBox");
+    int64_t typed = ferro_signal_new(FERRO_SIGNAL_TEXT);
+    CHECK(ferro_signal_watch(typed, box, prop("Text")) > 0);
+    int64_t version = ferro_signal_version(typed);
+    CHECK_STATUS(FERRO_OK, ferro_set_str(box, prop("Text"), "typed", -1));
+    CHECK(ferro_signal_version(typed) == version + 1);
+    CHECK(atomic_load_explicit(&values[typed], memory_order_acquire) == 5);
+    CHECK((atomic_load_explicit(&changed[typed / 64], memory_order_acquire) >> (typed % 64)) & 1);
+    CHECK(strcmp(ferro_signal_get_cstr(typed), "typed") == 0);
+
+    /* A bind record: the property follows the slot with no new frame. */
+    FerroHandle root = create("Border");
+    CHECK_STATUS(FERRO_OK, ferro_frame_begin());
+    CHECK_STATUS(FERRO_OK, ferro_frame_open(ferro_type_id("TextBlock", -1), 1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_bind(prop("FontSize"), size));
+    CHECK_STATUS(FERRO_OK, ferro_frame_close());
+    CHECK_STATUS(FERRO_OK, ferro_frame_commit(root));
+    FerroHandle framed = ferro_frame_find(root, 1);
+    CHECK(ferro_get_f64_or(framed, prop("FontSize"), 0) == 22.0);
+    CHECK_STATUS(FERRO_OK, ferro_signal_set_f64(size, 30.0));
+    CHECK(ferro_signals_apply() == 1);
+    CHECK(ferro_get_f64_or(framed, prop("FontSize"), 0) == 30.0);
+    CHECK(ferro_get_f64_or(block, prop("FontSize"), 0) == 30.0);
+    CHECK_STATUS(FERRO_OK, ferro_release(framed));
+    CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
+
+    CHECK_STATUS(FERRO_OK, ferro_signal_free(typed));
+    CHECK_STATUS(FERRO_OK, ferro_signal_free(size));
+    CHECK_STATUS(FERRO_OK, ferro_release(box));
+    CHECK_STATUS(FERRO_OK, ferro_release(block));
+    CHECK_STATUS(FERRO_OK, ferro_release(root));
+}
+
+/* A control written in C (gauge.h, docs/c-abi.md, section 15): created by its type ID and in a
+ * frame, measured and arranged through its callbacks, with its data and its registered property. */
+static void test_controls(void) {
+    CHECK(gauge_register() > 0);
+    CHECK(gauge_register() == gauge_class);
+    CHECK(ferro_type_id("Gauge", -1) == gauge_class);
+    FerroHandle gauge = ferro_create(gauge_class);
+    CHECK(gauge != 0);
+    CHECK(ferro_type_of(gauge) == gauge_class);
+    Gauge *data = ferro_object_data(gauge);
+    CHECK(data != NULL && data->track > 0 && data->fill > 0);
+    CHECK_STATUS(FERRO_OK, ferro_layout_measure(gauge, 1000, 1000));
+    CHECK(ferro_layout_desired_width(gauge) == 160 && ferro_layout_desired_height(gauge) == 16);
+    CHECK_STATUS(FERRO_OK, ferro_layout_measure(gauge, 100, 1000));
+    CHECK(ferro_layout_desired_width(gauge) == 100);
+    CHECK_STATUS(FERRO_OK, ferro_layout_arrange(gauge, 0, 0, 120, 16));
+    CHECK(data->width == 120 && data->height == 16);
+    CHECK(ferro_get_f64_or(gauge, gauge_level, -1) == 0.5);
+    CHECK_STATUS(FERRO_OK, ferro_set_f64(gauge, gauge_level, 0.75));
+    CHECK(ferro_get_f64_or(gauge, gauge_level, -1) == 0.75);
+    FerroHandle other = create("TextBlock");
+    CHECK_STATUS(FERRO_NOT_FOUND, ferro_set_f64(other, gauge_level, 0.5));
+    CHECK_STATUS(FERRO_OK, ferro_release(other));
+
+    FerroHandle root = create("Border");
+    CHECK_STATUS(FERRO_OK, ferro_frame_begin());
+    CHECK_STATUS(FERRO_OK, ferro_frame_open(gauge_class, 1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_f64(gauge_level, 0.1));
+    CHECK_STATUS(FERRO_OK, ferro_frame_close());
+    CHECK_STATUS(FERRO_OK, ferro_frame_commit(root));
+    FerroHandle framed = ferro_frame_find(root, 1);
+    CHECK(ferro_type_of(framed) == gauge_class && ferro_get_f64_or(framed, gauge_level, -1) == 0.1);
+    CHECK_STATUS(FERRO_OK, ferro_release(framed));
+    CHECK_STATUS(FERRO_OK, ferro_frame_clear(root));
+    CHECK_STATUS(FERRO_OK, ferro_release(root));
+    CHECK_STATUS(FERRO_OK, ferro_release(gauge));
+}
+
 int main(void) {
     CHECK(ferro_abi_version() == FERRO_ABI_VERSION);
     CHECK(!ferro_is_ui_thread());
@@ -377,6 +477,8 @@ int main(void) {
     test_timers();
     test_event_data_and_focus();
     test_frames();
+    test_signals();
+    test_controls();
 
     if (failures != 0) {
         fprintf(stderr, "abi_test: %d of %d checks failed\n", failures, checks);

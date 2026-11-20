@@ -146,6 +146,25 @@
     "doc": "Attaches `function` to the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of `object`: it is called with `token` on every raise of the event, on the UI thread (see [`FerroEventFn`]). For a routed event the handler listens to the direct and the bubbling route of events that are not handled yet, and a result other than `0` marks the event as handled. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only."
    },
    {
+    "name": "ferro_subscribe_dispatch",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "event",
+      "type": "i64"
+     },
+     {
+      "name": "tag",
+      "type": "i64"
+     }
+    ],
+    "doc": "[`ferro_subscribe`] to the one dispatcher of the thread ([`ferro_frame_dispatcher`](crate::ferro_frame_dispatcher)): every raise of the event calls it with `tag`, the sender and the argument, as an event bound in a frame does (the event text and number are empty). For a binding with one dispatcher, which then needs no trampoline of its own between the library and its dispatcher: one indirect call per event. Returns a positive subscription ID for [`ferro_unsubscribe`], or a negative status. UI thread only."
+   },
+   {
     "name": "ferro_subscribe_data",
     "returns": "i64",
     "params": [
@@ -197,6 +216,690 @@
      }
     ],
     "doc": "Raises the routed event `event` on `object` with plain event arguments, as the control does when it raises it (`Click` of a button, as a click does): for tests and for driving an interface from code. [`FERRO_NOT_SUPPORTED`] for an event whose arguments carry more than the routing state (a pointer event). UI thread only."
+   },
+   {
+    "name": "ferro_layout_result",
+    "returns": "status",
+    "params": [
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Gives the size of the measure or arrange callback that runs now (the innermost), for a language that cannot write through the `double *` of the callback. UI thread only."
+   },
+   {
+    "name": "ferro_class_register",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "base",
+      "type": "i32"
+     }
+    ],
+    "doc": "Registers the class `name` (UTF-8, `length` bytes, negative for NUL-terminated) on the base `base` (`FERRO_BASE_CONTROL`, `_PANEL`, `_DECORATOR`, `_CONTENT_CONTROL`) and returns its type ID, or a negative status. The class is created by name ([`ferro_create`](crate::ferro_create) with [`ferro_type_id`](crate::ferro_type_id)), in frames and wherever a class is found by name; its virtual members call the callbacks set with `ferro_class_on_*`, and fall through to the base where none is set. At most 64 classes per process. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_create",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroCreateFn"
+     }
+    ],
+    "doc": "Sets the callback that gives each new instance of the class its data (`NULL` for none). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_measure",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroLayoutFn"
+     }
+    ],
+    "doc": "Sets the measure callback of the class (`NULL`: the base measures). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_arrange",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroLayoutFn"
+     }
+    ],
+    "doc": "Sets the arrange callback of the class (`NULL`: the base arranges). UI thread only."
+   },
+   {
+    "name": "ferro_class_on_render",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroRenderFn"
+     }
+    ],
+    "doc": "Sets the render callback of the class (`NULL`: the base renders alone). The base renders first (the background of a panel); the callback draws over it. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_property_changed",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when a property the class registered changes, with its ID. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_attached",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when an instance is attached to the visual tree. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_detached",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when an instance is detached from the visual tree. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_apply_template",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroNotifyFn"
+     }
+    ],
+    "doc": "Sets the callback called when the template of an instance is applied (a class on `FERRO_BASE_CONTENT_CONTROL`); [`ferro_template_part`] finds its parts. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_pointer",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroPointerFn"
+     }
+    ],
+    "doc": "Sets the callback of pointer presses, releases and moves on an instance. UI thread only."
+   },
+   {
+    "name": "ferro_class_on_key",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "callback",
+      "type": "callback:FerroKeyFn"
+     }
+    ],
+    "doc": "Sets the callback of key presses and releases on an instance. UI thread only."
+   },
+   {
+    "name": "ferro_class_set_data",
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_id",
+      "type": "i64"
+     },
+     {
+      "name": "data",
+      "type": "pointer"
+     }
+    ],
+    "doc": "Sets the data of the class, given to its create callback. UI thread only."
+   },
+   {
+    "name": "ferro_object_set_data",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "release",
+      "type": "callback:FerroReleaseDataFn"
+     }
+    ],
+    "doc": "Sets the data of an instance of a foreign class, passed to every callback of the instance, and the function that releases it when the instance goes away (`NULL` for none). UI thread only."
+   },
+   {
+    "name": "ferro_object_data",
+    "returns": "pointer",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The data of an instance of a foreign class (`NULL` for none or on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_property_register",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "owner",
+      "type": "i64"
+     },
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "kind",
+      "type": "i32"
+     },
+     {
+      "name": "default_number",
+      "type": "f64"
+     },
+     {
+      "name": "default_text",
+      "type": "utf8"
+     },
+     {
+      "name": "flags",
+      "type": "i64"
+     }
+    ],
+    "doc": "Registers a property of the foreign class `owner` (a type ID of [`ferro_class_register`]) and returns its property ID, or a negative status. `kind` is a kind of signal (`FERRO_SIGNAL_I64`, `_F64`, `_BOOL`, `_TEXT`); the default is `default_number` (an integer or a boolean as a number) or `default_text` (UTF-8, NUL-terminated, `NULL` for no text). `flags` combine `FERRO_PROPERTY_AFFECTS_MEASURE`, `_ARRANGE`, `_RENDER`, `_INHERITS` and `_ATTACHED` (an attached property, `Owner.Name`, that every control takes). The property is a styled property as the ones of the framework: the setters and getters of the ABI, frames, signals, styles, bindings and animations use it. UI thread only."
+   },
+   {
+    "name": "ferro_layout_measure",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Measures `object` (a child, from a measure callback) at the available size. UI thread only."
+   },
+   {
+    "name": "ferro_layout_arrange",
+    "returns": "status",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Arranges `object` (a child, from an arrange callback) in the rectangle. UI thread only."
+   },
+   {
+    "name": "ferro_layout_desired_width",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The desired width of `object` after its measure (`0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_layout_desired_height",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The desired height of `object` after its measure (`0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_layout_bounds_width",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The width `object` was arranged at (its bounds; `0` on a failure, recorded): what a render callback of a language without instance data draws in. UI thread only."
+   },
+   {
+    "name": "ferro_layout_bounds_height",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The height `object` was arranged at (its bounds; `0` on a failure, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_panel_child_count",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "The number of children of a panel (`0` for another object, recorded). UI thread only."
+   },
+   {
+    "name": "ferro_panel_child",
+    "returns": "handle",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "index",
+      "type": "i64"
+     }
+    ],
+    "doc": "The child `index` of a panel, with one reference counted (release it), or `0` (recorded). UI thread only."
+   },
+   {
+    "name": "ferro_template_part",
+    "returns": "handle",
+    "params": [
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "name",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     }
+    ],
+    "doc": "The part named `name` of the applied template of `object` (a foreign class on `FERRO_BASE_CONTENT_CONTROL`), with one reference counted (release it), or `0` with [`FERRO_NOT_FOUND`]. From the apply-template callback on. UI thread only."
+   },
+   {
+    "name": "ferro_draw_brush",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "argb",
+      "type": "i64"
+     }
+    ],
+    "doc": "A solid brush of the colour `argb` (`0xAARRGGBB`) for the `ferro_draw_*` functions: its ID (a positive number), the same for the same colour, or a negative status. Make the brushes of a control once (at its creation) and draw with their IDs. UI thread only."
+   },
+   {
+    "name": "ferro_draw_pen",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "argb",
+      "type": "i64"
+     },
+     {
+      "name": "thickness",
+      "type": "f64"
+     }
+    ],
+    "doc": "A solid pen of the colour `argb` and the thickness `thickness`: its ID, or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_draw_rect",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     },
+     {
+      "name": "radius_x",
+      "type": "f64"
+     },
+     {
+      "name": "radius_y",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills (`brush`) and strokes (`pen`) a rectangle, its corners rounded by `radius_x` and `radius_y`. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_ellipse",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills and strokes the ellipse in the rectangle. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_line",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x1",
+      "type": "f64"
+     },
+     {
+      "name": "y1",
+      "type": "f64"
+     },
+     {
+      "name": "x2",
+      "type": "f64"
+     },
+     {
+      "name": "y2",
+      "type": "f64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Strokes a line with the pen. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_path",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "data",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     },
+     {
+      "name": "pen",
+      "type": "i64"
+     }
+    ],
+    "doc": "Fills and strokes the geometry of the path data `data` (the mini-language of markup: `M 0,0 L 10,10 Z`, UTF-8, `length` bytes, negative for NUL-terminated). UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_text",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "text",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "size",
+      "type": "f64"
+     },
+     {
+      "name": "brush",
+      "type": "i64"
+     }
+    ],
+    "doc": "Draws `text` (UTF-8, `length` bytes, negative for NUL-terminated) with its top left at `x`, `y`, in the default typeface at `size`, with the brush. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_clip",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "x",
+      "type": "f64"
+     },
+     {
+      "name": "y",
+      "type": "f64"
+     },
+     {
+      "name": "width",
+      "type": "f64"
+     },
+     {
+      "name": "height",
+      "type": "f64"
+     }
+    ],
+    "doc": "Clips what is drawn next to the rectangle, until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_transform",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "m11",
+      "type": "f64"
+     },
+     {
+      "name": "m12",
+      "type": "f64"
+     },
+     {
+      "name": "m21",
+      "type": "f64"
+     },
+     {
+      "name": "m22",
+      "type": "f64"
+     },
+     {
+      "name": "dx",
+      "type": "f64"
+     },
+     {
+      "name": "dy",
+      "type": "f64"
+     }
+    ],
+    "doc": "Transforms what is drawn next by the matrix (`m11 m12 m21 m22 dx dy`), until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_push_opacity",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     },
+     {
+      "name": "opacity",
+      "type": "f64"
+     }
+    ],
+    "doc": "Draws what is drawn next with the opacity, until [`ferro_draw_pop`]. UI thread only, in a render callback."
+   },
+   {
+    "name": "ferro_draw_pop",
+    "returns": "status",
+    "params": [
+     {
+      "name": "context",
+      "type": "i64"
+     }
+    ],
+    "doc": "Pops the clip, transform or opacity pushed last in the context. UI thread only, in a render callback."
    },
    {
     "name": "ferro_frame_begin",
@@ -343,6 +1046,59 @@
     "doc": "Binds the event `event` ([`ferro_event_id`](crate::ferro_event_id)) of the open element to the message tag `tag`: when it fires, the dispatcher of the thread ([`ferro_frame_dispatcher`]) is called with the tag, the sender, and the value of `value_property` (`0` for none), whose text and number [`ferro_frame_event_text`] and [`ferro_frame_event_f64`] give. Any thread."
    },
    {
+    "name": "ferro_frame_bind",
+    "returns": "status",
+    "params": [
+     {
+      "name": "property",
+      "type": "i64"
+     },
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds `property` of the open element to the signal slot `slot` (docs/c-abi.md, section 14): the commit binds it ([`ferro_signal_bind`](crate::ferro_signal_bind)) and keeps the binding while the frames keep the record, so a write of the slot updates the property with no new frame. Any thread."
+   },
+   {
+    "name": "ferro_frame_memo",
+    "returns": "status",
+    "params": [
+     {
+      "name": "version",
+      "type": "i64"
+     },
+     {
+      "name": "tag_base",
+      "type": "i64"
+     }
+    ],
+    "doc": "Makes the open element a memo element: its subtree is what `version` says it is (a revision of the data it shows, a hash of it), and the tags of its events are `tag_base` plus offsets that the version fixes. While the element keeps its key and its version, a commit does not look into its subtree (a new `tag_base` moves its tags), and with an integer key the next frame can reuse it whole ([`ferro_frame_reuse`]). A different subtree under the same key and version is the caller's error: the commit keeps the old one. Any thread."
+   },
+   {
+    "name": "ferro_frame_reuse",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "root",
+      "type": "handle"
+     },
+     {
+      "name": "key",
+      "type": "i64"
+     },
+     {
+      "name": "version",
+      "type": "i64"
+     },
+     {
+      "name": "tag_base",
+      "type": "i64"
+     }
+    ],
+    "doc": "Writes the memo element with the integer key `key` and the version `version` of the last frame committed under `root` ([`ferro_frame_memo`]) into the frame of the calling thread as one record, in place of its whole subtree, with its tags moved to start at `tag_base`. Returns the number of tags the subtree uses (`0` or more: the next tag of the caller is `tag_base` plus it), or a negative status, and then writes nothing: [`FERRO_NOT_FOUND`] when the root has no such element (nothing is recorded; the caller writes the element in full), or [`FERRO_WRONG_THREAD`](crate::FERRO_WRONG_THREAD) off the UI thread. Commit the frame under the same root, before another commit under it. UI thread only."
+   },
+   {
     "name": "ferro_frame_commit",
     "returns": "status",
     "params": [
@@ -400,7 +1156,7 @@
       "type": "i64"
      }
     ],
-    "doc": "Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and `arg` as an event would, and returns its result: a binding starts its loop with it (the tag `0` asks for the first frame) and a test drives a message without an event. The event text and number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI thread only."
+    "doc": "Calls the dispatcher of the thread ([`ferro_frame_dispatcher`]) with `tag`, `sender` and `arg` as an event would, and returns its result: a binding starts its loop with it (the tag `0` asks for the first frame), its one trampoline forwards the events of its subscriptions with it, and a test drives a message without an event. The event text and number are empty. [`FERRO_INVALID_STATE`] (as a negative result) without a dispatcher. UI thread only."
    },
    {
     "name": "ferro_frame_event_text",
@@ -534,6 +1290,250 @@
      }
     ],
     "doc": "The event ID of the name `name` (`Click`): a routed event of the class of the object or of a base class, or an event its metadata declares; `Button.Click` is the routed event a class owns, for a handler on an ancestor of the objects that raise it. As for [`ferro_property_id`], the ID is the name, checked when it is first used with a class. Any thread."
+   },
+   {
+    "name": "ferro_signal_table",
+    "returns": "const FerroSignalTable*",
+    "params": [
+     {
+      "name": "capacity",
+      "type": "i64"
+     }
+    ],
+    "doc": "Creates the signal table of the process with room for `capacity` slots (rounded up to a multiple of 64), or returns the one that exists (whose capacity then stays). The arrays stay at their addresses until the process ends. `NULL` on a failure (a capacity that is not positive or above 2^24; off the UI thread). UI thread only."
+   },
+   {
+    "name": "ferro_signals_init",
+    "returns": "status",
+    "params": [
+     {
+      "name": "capacity",
+      "type": "i64"
+     }
+    ],
+    "doc": "[`ferro_signal_table`] for a language that cannot read memory (it calls `ferro_signal_set_*` and `ferro_signal_get_*`): creates the table, or keeps the one that exists, and returns a status. UI thread only."
+   },
+   {
+    "name": "ferro_signal_new",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "kind",
+      "type": "i32"
+     }
+    ],
+    "doc": "Takes a free slot of the kind `kind` (`FERRO_SIGNAL_I64` to `FERRO_SIGNAL_TEXT`), with the value `0` (the empty text), and returns its index, or a negative status ([`FERRO_INVALID_STATE`] when the table is full or not created). UI thread only."
+   },
+   {
+    "name": "ferro_signal_free",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Frees the slot `slot`: its bindings are removed and its kind is `FERRO_SIGNAL_FREE` until [`ferro_signal_new`] takes it again. UI thread only."
+   },
+   {
+    "name": "ferro_signal_set_i64",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "i64"
+     }
+    ],
+    "doc": "Writes an integer into the slot and marks it dirty (the store and the bit of section 14, for a language that cannot write memory). Any thread."
+   },
+   {
+    "name": "ferro_signal_set_f64",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "f64"
+     }
+    ],
+    "doc": "Writes a number into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_bool",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "bool"
+     }
+    ],
+    "doc": "Writes a boolean into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_handle",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "value",
+      "type": "handle"
+     }
+    ],
+    "doc": "Writes a handle (`0` for null) into the slot and marks it dirty. Any thread."
+   },
+   {
+    "name": "ferro_signal_set_str",
+    "returns": "status",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "text",
+      "type": "utf8"
+     },
+     {
+      "name": "length",
+      "type": "i64"
+     }
+    ],
+    "doc": "Writes UTF-8 text (`length` bytes, negative for NUL-terminated) into a text slot and marks it dirty; the slot value becomes the length. UI thread only."
+   },
+   {
+    "name": "ferro_signal_get_i64",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The integer of the slot (the load of section 14, for a language that cannot read memory); `0` when the slot is not an integer slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_f64",
+    "returns": "f64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The number of the slot; `0` when the slot is not a number slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_bool",
+    "returns": "bool",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The boolean of the slot; `false` when the slot is not a boolean slot (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_version",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The version of the slot (raised every time its value changes); `-1` for a slot that is not in the table (recorded). Any thread."
+   },
+   {
+    "name": "ferro_signal_get_cstr",
+    "returns": "utf8",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "The text of a text slot as NUL-terminated UTF-8 owned by the library until the next call on the thread; the empty text when the slot is not a text slot (recorded), never `NULL`. A language reads it when the version of the slot changed. UI thread only."
+   },
+   {
+    "name": "ferro_signal_bind",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "property",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds `property` of `object` to the slot: the property takes the value of the slot now and every time an apply finds the slot dirty, with no frame and no call of the language. Returns a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_signal_watch",
+    "returns": "i64",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "property",
+      "type": "i64"
+     }
+    ],
+    "doc": "Watches `property` of `object` into the slot: the library writes the value of the property into the slot now and every time it changes (the value, then the version, then the changed bit), so the language reads it with a load and no call. A text property goes into a text slot (read with [`ferro_signal_get_cstr`] when the version changed). Returns a positive binding ID for [`ferro_signal_unbind`], or a negative status. UI thread only."
+   },
+   {
+    "name": "ferro_signal_unbind",
+    "returns": "status",
+    "params": [
+     {
+      "name": "binding",
+      "type": "i64"
+     }
+    ],
+    "doc": "Removes a binding of [`ferro_signal_bind`] or [`ferro_signal_watch`]. UI thread only."
+   },
+   {
+    "name": "ferro_signals_apply",
+    "returns": "i64",
+    "params": [],
+    "doc": "Applies the dirty slots: for each slot whose dirty bit is set, its version is raised and its value written to every property bound to it. Returns the number of slots applied, or a negative status (the first failed write; the others are still made). The library applies by itself at the start of every frame commit and at the end of every dispatch; a language calls this after writing slots outside them (a timer of its own). UI thread only."
+   },
+   {
+    "name": "ferro_signal_take_changed",
+    "returns": "bool",
+    "params": [
+     {
+      "name": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Clears `changed` bits of the slot for a language that cannot write memory, and returns whether it was set. Any thread."
    },
    {
     "name": "ferro_init",
@@ -1032,6 +2032,66 @@
     ],
     "doc": "Releases the user data of a subscription ([`ferro_subscribe_data`]) once the handler is removed: by [`ferro_unsubscribe`], or when the object goes away."
    },
+   "FerroCreateFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "class_data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     }
+    ],
+    "doc": "Called once for every new instance of a class, with the data of the class ([`ferro_class_set_data`]) and the instance (borrowed for the call); the callback gives the instance its own data with [`ferro_object_set_data`]."
+   },
+   "FerroRenderFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "context",
+      "type": "i64"
+     }
+    ],
+    "doc": "Render: `context` names the drawing context of the call for the `ferro_draw_*` functions; it is valid until the callback returns."
+   },
+   "FerroNotifyFn": {
+    "returns": "status",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     },
+     {
+      "name": "object",
+      "type": "handle"
+     },
+     {
+      "name": "arg",
+      "type": "i64"
+     }
+    ],
+    "doc": "A notification with one integer: a property of the class changed (`arg` is its property ID), the instance was attached to or detached from the visual tree, its template was applied."
+   },
+   "FerroReleaseDataFn": {
+    "returns": "void",
+    "params": [
+     {
+      "name": "data",
+      "type": "pointer"
+     }
+    ],
+    "doc": "Called when an instance goes away, with its data, so that the language releases it."
+   },
    "FerroPostFn": {
     "returns": "i64",
     "params": [
@@ -1068,6 +2128,111 @@
    }
   },
   "statuses": [
+   {
+    "name": "FERRO_POINTER_PRESSED",
+    "value": 1,
+    "doc": "A pointer was pressed on the instance."
+   },
+   {
+    "name": "FERRO_POINTER_RELEASED",
+    "value": 2,
+    "doc": "A pointer was released on the instance."
+   },
+   {
+    "name": "FERRO_POINTER_MOVED",
+    "value": 3,
+    "doc": "A pointer moved over the instance."
+   },
+   {
+    "name": "FERRO_KEY_DOWN",
+    "value": 1,
+    "doc": "A key went down while the instance had the focus."
+   },
+   {
+    "name": "FERRO_KEY_UP",
+    "value": 2,
+    "doc": "A key went up while the instance had the focus."
+   },
+   {
+    "name": "FERRO_BASE_CONTROL",
+    "value": 1,
+    "doc": "The base of a class: `Control`."
+   },
+   {
+    "name": "FERRO_BASE_PANEL",
+    "value": 2,
+    "doc": "The base of a class: `Panel` (children)."
+   },
+   {
+    "name": "FERRO_BASE_DECORATOR",
+    "value": 3,
+    "doc": "The base of a class: `Decorator` (one child)."
+   },
+   {
+    "name": "FERRO_BASE_CONTENT_CONTROL",
+    "value": 4,
+    "doc": "The base of a class: `ContentControl` (a content and a template)."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_MEASURE",
+    "value": 1,
+    "doc": "A registered property makes the instance measure again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_ARRANGE",
+    "value": 2,
+    "doc": "A registered property makes the instance arrange again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_AFFECTS_RENDER",
+    "value": 4,
+    "doc": "A registered property makes the instance render again when it changes."
+   },
+   {
+    "name": "FERRO_PROPERTY_INHERITS",
+    "value": 8,
+    "doc": "A registered property is inherited down the tree."
+   },
+   {
+    "name": "FERRO_PROPERTY_ATTACHED",
+    "value": 16,
+    "doc": "A registered property is attached: it can be set on any control (`Owner.Name`)."
+   },
+   {
+    "name": "FERRO_SIGNAL_FREE",
+    "value": 0,
+    "doc": "A free slot."
+   },
+   {
+    "name": "FERRO_SIGNAL_I64",
+    "value": 1,
+    "doc": "A slot of an `int64_t` (an enumeration as its value)."
+   },
+   {
+    "name": "FERRO_SIGNAL_F64",
+    "value": 2,
+    "doc": "A slot of a `double`, stored as its bits."
+   },
+   {
+    "name": "FERRO_SIGNAL_BOOL",
+    "value": 3,
+    "doc": "A slot of a boolean, stored as `0` or `1`."
+   },
+   {
+    "name": "FERRO_SIGNAL_HANDLE",
+    "value": 4,
+    "doc": "A slot of a handle (`0` for null)."
+   },
+   {
+    "name": "FERRO_SIGNAL_TEXT",
+    "value": 5,
+    "doc": "A slot of a text: the text is in the library, the slot value is its length in bytes."
+   },
+   {
+    "name": "FERRO_SIGNAL_LAYOUT",
+    "value": 1,
+    "doc": "The version of the layout of [`FerroSignalTable`]."
+   },
    {
     "name": "FERRO_OK",
     "value": 0,
@@ -1321,8 +2486,230 @@
      }
     ],
     "doc": "Gives the open element a text key in place of its integer key."
+   },
+   {
+    "op": 10,
+    "name": "memo",
+    "writer": "ferro_frame_memo",
+    "fields": [
+     {
+      "field": "version",
+      "type": "i64"
+     },
+     {
+      "field": "tag_base",
+      "type": "i64"
+     }
+    ],
+    "doc": "Makes the open element a memo element: while its key and `version` stay, a commit does not look into its subtree, and the next frame can reuse it whole. The tags of its events are `tag_base` plus offsets the version fixes."
+   },
+   {
+    "op": 11,
+    "name": "reuse",
+    "writer": "ferro_frame_reuse",
+    "fields": [
+     {
+      "field": "key",
+      "type": "i64"
+     },
+     {
+      "field": "version",
+      "type": "i64"
+     },
+     {
+      "field": "tag_base",
+      "type": "i64"
+     }
+    ],
+    "doc": "Stands for the memo element with the integer key `key` and the version `version` of the last frame under the root, with its tags moved to start at `tag_base`, in place of an element. `ferro_frame_reuse` writes it when the root has that element."
+   },
+   {
+    "op": 12,
+    "name": "bind",
+    "writer": "ferro_frame_bind",
+    "fields": [
+     {
+      "field": "property",
+      "type": "i64"
+     },
+     {
+      "field": "slot",
+      "type": "i64"
+     }
+    ],
+    "doc": "Binds a property of the open element to a slot of the signal table: a write of the slot updates the property at the next apply, with no new frame."
    }
   ]
+ },
+ "signals": {
+  "table": "ferro_signal_table",
+  "layout_version": 1,
+  "kinds": [
+   {
+    "value": 1,
+    "name": "i64"
+   },
+   {
+    "value": 2,
+    "name": "f64",
+    "doc": "the bits of the number"
+   },
+   {
+    "value": 3,
+    "name": "bool",
+    "doc": "0 or 1"
+   },
+   {
+    "value": 4,
+    "name": "handle"
+   },
+   {
+    "value": 5,
+    "name": "text",
+    "doc": "the text is in the library; the value is its length in bytes"
+   }
+  ],
+  "fields": [
+   {
+    "field": "layout",
+    "type": "u32"
+   },
+   {
+    "field": "capacity",
+    "type": "u32",
+    "doc": "a multiple of 64"
+   },
+   {
+    "field": "values",
+    "type": "u64[capacity]",
+    "writer": "the language (bound slots), the library (watched)"
+   },
+   {
+    "field": "versions",
+    "type": "u64[capacity]",
+    "writer": "the library"
+   },
+   {
+    "field": "dirty",
+    "type": "u64[capacity / 64]",
+    "writer": "the language, an atomic OR with release order"
+   },
+   {
+    "field": "changed",
+    "type": "u64[capacity / 64]",
+    "writer": "the library sets, the language clears"
+   },
+   {
+    "field": "kinds",
+    "type": "u32[capacity]",
+    "writer": "the library"
+   }
+  ],
+  "apply": "ferro_signals_apply, the start of every frame commit and the end of every dispatch"
+ },
+ "controls": {
+  "register": "ferro_class_register",
+  "bases": [
+   {
+    "value": 1,
+    "name": "Control"
+   },
+   {
+    "value": 2,
+    "name": "Panel"
+   },
+   {
+    "value": 3,
+    "name": "Decorator"
+   },
+   {
+    "value": 4,
+    "name": "ContentControl"
+   }
+  ],
+  "callbacks": [
+   {
+    "setter": "ferro_class_on_create",
+    "type": "FerroCreateFn",
+    "member": "created"
+   },
+   {
+    "setter": "ferro_class_on_measure",
+    "type": "FerroLayoutFn",
+    "member": "measure_override"
+   },
+   {
+    "setter": "ferro_class_on_arrange",
+    "type": "FerroLayoutFn",
+    "member": "arrange_override"
+   },
+   {
+    "setter": "ferro_class_on_render",
+    "type": "FerroRenderFn",
+    "member": "render"
+   },
+   {
+    "setter": "ferro_class_on_property_changed",
+    "type": "FerroNotifyFn",
+    "member": "on_property_changed"
+   },
+   {
+    "setter": "ferro_class_on_attached",
+    "type": "FerroNotifyFn",
+    "member": "on_attached_to_visual_tree"
+   },
+   {
+    "setter": "ferro_class_on_detached",
+    "type": "FerroNotifyFn",
+    "member": "on_detached_from_visual_tree"
+   },
+   {
+    "setter": "ferro_class_on_apply_template",
+    "type": "FerroNotifyFn",
+    "member": "on_apply_template"
+   },
+   {
+    "setter": "ferro_class_on_pointer",
+    "type": "FerroPointerFn",
+    "member": "on_pointer_*"
+   },
+   {
+    "setter": "ferro_class_on_key",
+    "type": "FerroKeyFn",
+    "member": "on_key_*"
+   }
+  ],
+  "property": {
+   "register": "ferro_property_register",
+   "kinds": "the kinds of signals: 1 i64, 2 f64, 3 bool, 5 text",
+   "flags": [
+    {
+     "value": 1,
+     "name": "affects_measure"
+    },
+    {
+     "value": 2,
+     "name": "affects_arrange"
+    },
+    {
+     "value": 4,
+     "name": "affects_render"
+    },
+    {
+     "value": 8,
+     "name": "inherits"
+    },
+    {
+     "value": 16,
+     "name": "attached"
+    }
+   ]
+  },
+  "data": {
+   "instance": "ferro_object_set_data",
+   "class": "ferro_class_set_data"
+  },
+  "status": "a callback returns 0 (or 1: handled) on success, a negative status on a failure"
  },
  "classes": [
   {
@@ -1334,6 +2721,7 @@
    ],
    "base": "TextBlock",
    "rust_path": "ferroui_controls::primitives::AccessText",
+   "entry": "ferro_type_access_text",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -1352,6 +2740,7 @@
    ],
    "base": "XamlCompositionBrushBase",
    "rust_path": "ferroui_base::media::AcrylicBrush",
+   "entry": "ferro_type_acrylic_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1375,6 +2764,7 @@
    ],
    "base": "StateTriggerBase",
    "rust_path": "ferroui_controls::AdaptiveTrigger",
+   "entry": "ferro_type_adaptive_trigger",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1394,6 +2784,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::primitives::AdornerLayer",
+   "entry": "ferro_type_adorner_layer",
    "creatable": false,
    "control": true,
    "children": "children",
@@ -1420,6 +2811,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "items",
@@ -1441,6 +2833,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "items",
@@ -1456,6 +2849,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::Animatable",
+   "entry": "ferro_type_animatable",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1474,6 +2868,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::Animation",
+   "entry": "ferro_type_animation",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1494,6 +2889,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::AnimatorKeyFrame",
+   "entry": "ferro_type_animator_key_frame",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1511,6 +2907,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::Application",
+   "entry": "ferro_type_application",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1531,6 +2928,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Arc",
+   "entry": "ferro_type_arc",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -1550,6 +2948,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::ArcSegment",
+   "entry": "ferro_type_arc_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1573,6 +2972,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::AutoCompleteBox",
+   "entry": "ferro_type_auto_complete_box",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -1621,6 +3021,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::AutoCompleteBoxAutomationPeer",
+   "entry": "ferro_type_auto_complete_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1638,6 +3039,7 @@
    ],
    "base": "HeaderedItemsControl",
    "rust_path": "ferroui_controls::AutoSuggestBox",
+   "entry": "ferro_type_auto_suggest_box",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -1666,6 +3068,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::AutoSuggestBoxAutomationPeer",
+   "entry": "ferro_type_auto_suggest_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1682,6 +3085,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::automation::peers::AutomationPeer",
+   "entry": "ferro_type_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1698,6 +3102,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::BackEase",
+   "entry": "ferro_type_back_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1716,6 +3121,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::BezierSegment",
+   "entry": "ferro_type_bezier_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1736,6 +3142,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_controls::utils::BindingEvaluator",
+   "entry": "ferro_type_binding_evaluator",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1754,6 +3161,7 @@
    ],
    "base": "CacheMode",
    "rust_path": "ferroui_base::media::BitmapCache",
+   "entry": "ferro_type_bitmap_cache",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1773,6 +3181,7 @@
    ],
    "base": "TextElement",
    "rust_path": "ferroui_controls::documents::Block",
+   "entry": "ferro_type_block",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1795,6 +3204,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::BlurEffect",
+   "entry": "ferro_type_blur_effect",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1812,6 +3222,7 @@
    ],
    "base": "Span",
    "rust_path": "ferroui_controls::documents::Bold",
+   "entry": "ferro_type_bold",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1827,6 +3238,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::Border",
+   "entry": "ferro_type_border",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -1850,6 +3262,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::BounceEase",
+   "entry": "ferro_type_bounce_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -1868,6 +3281,7 @@
    ],
    "base": "Animatable",
    "rust_path": "ferroui_base::media::Brush",
+   "entry": "ferro_type_brush",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1888,6 +3302,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::Button",
+   "entry": "ferro_type_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -1916,6 +3331,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ButtonAutomationPeer",
+   "entry": "ferro_type_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1932,6 +3348,7 @@
    ],
    "base": "Spinner",
    "rust_path": "ferroui_controls::ButtonSpinner",
+   "entry": "ferro_type_button_spinner",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -1952,6 +3369,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_base::media::CacheMode",
+   "entry": "ferro_type_cache_mode",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -1967,6 +3385,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::Calendar",
+   "entry": "ferro_type_calendar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -1997,6 +3416,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::CalendarAutomationPeer",
+   "entry": "ferro_type_calendar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2013,6 +3433,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::primitives::CalendarButton",
+   "entry": "ferro_type_calendar_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2030,6 +3451,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::CalendarDatePicker",
+   "entry": "ferro_type_calendar_date_picker",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2068,6 +3490,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::CalendarDatePickerAutomationPeer",
+   "entry": "ferro_type_calendar_date_picker_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2085,6 +3508,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::primitives::CalendarDayButton",
+   "entry": "ferro_type_calendar_day_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2104,6 +3528,7 @@
    ],
    "base": "ButtonAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::CalendarDayButtonAutomationPeer",
+   "entry": "ferro_type_calendar_day_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2120,6 +3545,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::primitives::CalendarItem",
+   "entry": "ferro_type_calendar_item",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2138,6 +3564,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::Canvas",
+   "entry": "ferro_type_canvas",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -2158,6 +3585,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::Carousel",
+   "entry": "ferro_type_carousel",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -2179,6 +3607,7 @@
    ],
    "base": "SelectingMultiPage",
    "rust_path": "ferroui_controls::CarouselPage",
+   "entry": "ferro_type_carousel_page",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2202,6 +3631,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::CarouselPageAutomationPeer",
+   "entry": "ferro_type_carousel_page_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2218,6 +3648,7 @@
    ],
    "base": "ToggleButton",
    "rust_path": "ferroui_controls::CheckBox",
+   "entry": "ferro_type_check_box",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2234,6 +3665,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::CircleEase",
+   "entry": "ferro_type_circle_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2249,6 +3681,7 @@
    ],
    "base": "Layoutable",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2269,6 +3702,7 @@
    ],
    "base": "Class1",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2284,6 +3718,7 @@
    ],
    "base": "Layoutable",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2300,6 +3735,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::ColorAnimation",
+   "entry": "ferro_type_color_animation",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2325,6 +3761,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::ColorAnimationUsingKeyFrames",
+   "entry": "ferro_type_color_animation_using_key_frames",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2344,6 +3781,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::ColorKeyFrame",
+   "entry": "ferro_type_color_key_frame",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2363,6 +3801,7 @@
    ],
    "base": "DefinitionBase",
    "rust_path": "ferroui_controls::ColumnDefinition",
+   "entry": "ferro_type_column_definition",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2383,6 +3822,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::CombinedGeometry",
+   "entry": "ferro_type_combined_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2403,6 +3843,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::ComboBox",
+   "entry": "ferro_type_combo_box",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -2432,6 +3873,7 @@
    ],
    "base": "SelectingItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ComboBoxAutomationPeer",
+   "entry": "ferro_type_combo_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2449,6 +3891,7 @@
    ],
    "base": "ListBoxItem",
    "rust_path": "ferroui_controls::ComboBoxItem",
+   "entry": "ferro_type_combo_box_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2465,6 +3908,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::CommandBar",
+   "entry": "ferro_type_command_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2501,6 +3945,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::CommandBarButton",
+   "entry": "ferro_type_command_bar_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2525,6 +3970,7 @@
    ],
    "base": "Separator",
    "rust_path": "ferroui_controls::CommandBarSeparator",
+   "entry": "ferro_type_command_bar_separator",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2546,6 +3992,7 @@
    ],
    "base": "ToggleButton",
    "rust_path": "ferroui_controls::CommandBarToggleButton",
+   "entry": "ferro_type_command_bar_toggle_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2570,6 +4017,7 @@
    ],
    "base": "GradientBrush",
    "rust_path": "ferroui_base::media::ConicGradientBrush",
+   "entry": "ferro_type_conic_gradient_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2590,6 +4038,7 @@
    ],
    "base": "Border",
    "rust_path": null,
+   "entry": null,
    "creatable": true,
    "control": true,
    "children": "child",
@@ -2609,6 +4058,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::ConnectedAnimationService",
+   "entry": "ferro_type_connected_animation_service",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2624,6 +4074,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::Contact",
+   "entry": "ferro_type_contact",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2649,6 +4100,7 @@
    ],
    "base": "StyleBase",
    "rust_path": "ferroui_base::styling::ContainerQuery",
+   "entry": "ferro_type_container_query",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2665,6 +4117,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::ContentControl",
+   "entry": "ferro_type_content_control",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2688,6 +4141,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ContentControlAutomationPeer",
+   "entry": "ferro_type_content_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2704,6 +4158,7 @@
    ],
    "base": "Page",
    "rust_path": "ferroui_controls::ContentPage",
+   "entry": "ferro_type_content_page",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2730,6 +4185,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ContentPageAutomationPeer",
+   "entry": "ferro_type_content_page_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2746,6 +4202,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::presenters::ContentPresenter",
+   "entry": "ferro_type_content_presenter",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2788,6 +4245,7 @@
    ],
    "base": "MenuBase",
    "rust_path": "ferroui_controls::ContextMenu",
+   "entry": "ferro_type_context_menu",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -2815,6 +4273,7 @@
    ],
    "base": "InputElement",
    "rust_path": "ferroui_controls::Control",
+   "entry": "ferro_type_control",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2842,6 +4301,7 @@
    ],
    "base": "AutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ControlAutomationPeer",
+   "entry": "ferro_type_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2858,6 +4318,7 @@
    ],
    "base": "StyleBase",
    "rust_path": "ferroui_base::styling::ControlTheme",
+   "entry": "ferro_type_control_theme",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2874,6 +4335,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::imaging::CroppedBitmap",
+   "entry": "ferro_type_cropped_bitmap",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2893,6 +4355,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::CubicEase",
+   "entry": "ferro_type_cubic_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2909,6 +4372,7 @@
    ],
    "base": "Animatable",
    "rust_path": "ferroui_base::media::DashStyle",
+   "entry": "ferro_type_dash_style",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -2929,6 +4393,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::DataValidationErrors",
+   "entry": "ferro_type_data_validation_errors",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -2951,6 +4416,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::DatePicker",
+   "entry": "ferro_type_date_picker",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -2980,6 +4446,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::DatePickerAutomationPeer",
+   "entry": "ferro_type_date_picker_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -2997,6 +4464,7 @@
    ],
    "base": "PickerPresenterBase",
    "rust_path": "ferroui_controls::DatePickerPresenter",
+   "entry": "ferro_type_date_picker_presenter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -3025,6 +4493,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::date_time_pickers::DateTimePickerPanel",
+   "entry": "ferro_type_date_time_picker_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -3048,6 +4517,7 @@
    ],
    "base": "AutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3063,6 +4533,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::Decorator",
+   "entry": "ferro_type_decorator",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -3082,6 +4553,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::DefinitionBase",
+   "entry": "ferro_type_definition_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3101,6 +4573,7 @@
    ],
    "base": "SystemBackdrop",
    "rust_path": "ferroui_controls::media::DesktopAcrylicBackdrop",
+   "entry": "ferro_type_desktop_acrylic_backdrop",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3119,6 +4592,7 @@
    ],
    "base": "ColorKeyFrame",
    "rust_path": "ferroui_controls::animation::DiscreteColorKeyFrame",
+   "entry": "ferro_type_discrete_color_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3137,6 +4611,7 @@
    ],
    "base": "DoubleKeyFrame",
    "rust_path": "ferroui_controls::animation::DiscreteDoubleKeyFrame",
+   "entry": "ferro_type_discrete_double_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3155,6 +4630,7 @@
    ],
    "base": "ObjectKeyFrame",
    "rust_path": "ferroui_controls::animation::DiscreteObjectKeyFrame",
+   "entry": "ferro_type_discrete_object_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3173,6 +4649,7 @@
    ],
    "base": "PointKeyFrame",
    "rust_path": "ferroui_controls::animation::DiscretePointKeyFrame",
+   "entry": "ferro_type_discrete_point_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3189,6 +4666,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::DockPanel",
+   "entry": "ferro_type_dock_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -3210,6 +4688,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::DoubleAnimation",
+   "entry": "ferro_type_double_animation",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3235,6 +4714,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::DoubleAnimationUsingKeyFrames",
+   "entry": "ferro_type_double_animation_using_key_frames",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3254,6 +4734,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::DoubleKeyFrame",
+   "entry": "ferro_type_double_key_frame",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3273,6 +4754,7 @@
    ],
    "base": "Page",
    "rust_path": "ferroui_controls::DrawerPage",
+   "entry": "ferro_type_drawer_page",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -3323,6 +4805,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::DrawerPageAutomationPeer",
+   "entry": "ferro_type_drawer_page_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3338,6 +4821,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::Drawing",
+   "entry": "ferro_type_drawing",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3354,6 +4838,7 @@
    ],
    "base": "TileBrush",
    "rust_path": "ferroui_base::media::DrawingBrush",
+   "entry": "ferro_type_drawing_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3372,6 +4857,7 @@
    ],
    "base": "Drawing",
    "rust_path": "ferroui_base::media::DrawingGroup",
+   "entry": "ferro_type_drawing_group",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3395,6 +4881,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::DrawingImage",
+   "entry": "ferro_type_drawing_image",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3415,6 +4902,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::DropDownButton",
+   "entry": "ferro_type_drop_down_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3433,6 +4921,7 @@
    ],
    "base": "DropShadowEffectBase",
    "rust_path": "ferroui_base::media::DropShadowDirectionEffect",
+   "entry": "ferro_type_drop_shadow_direction_effect",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3453,6 +4942,7 @@
    ],
    "base": "DropShadowEffectBase",
    "rust_path": "ferroui_base::media::DropShadowEffect",
+   "entry": "ferro_type_drop_shadow_effect",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3474,6 +4964,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::DropShadowEffectBase",
+   "entry": "ferro_type_drop_shadow_effect_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3496,6 +4987,7 @@
    ],
    "base": "ColorKeyFrame",
    "rust_path": "ferroui_controls::animation::EasingColorKeyFrame",
+   "entry": "ferro_type_easing_color_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3516,6 +5008,7 @@
    ],
    "base": "DoubleKeyFrame",
    "rust_path": "ferroui_controls::animation::EasingDoubleKeyFrame",
+   "entry": "ferro_type_easing_double_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3535,6 +5028,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::EasingFunctionBase",
+   "entry": "ferro_type_easing_function_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3555,6 +5049,7 @@
    ],
    "base": "PointKeyFrame",
    "rust_path": "ferroui_controls::animation::EasingPointKeyFrame",
+   "entry": "ferro_type_easing_point_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3572,6 +5067,7 @@
    ],
    "base": "Animatable",
    "rust_path": "ferroui_base::media::Effect",
+   "entry": "ferro_type_effect",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3588,6 +5084,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::ElasticEase",
+   "entry": "ferro_type_elastic_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3606,6 +5103,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Ellipse",
+   "entry": "ferro_type_ellipse",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -3622,6 +5120,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::EllipseGeometry",
+   "entry": "ferro_type_ellipse_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3644,6 +5143,7 @@
    ],
    "base": "TopLevel",
    "rust_path": "ferroui_controls::embedding::EmbeddableControlRoot",
+   "entry": "ferro_type_embeddable_control_root",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3663,6 +5163,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::EmbeddableControlRootAutomationPeer",
+   "entry": "ferro_type_embeddable_control_root_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3678,6 +5179,7 @@
    ],
    "base": "HeaderedContentControl",
    "rust_path": "ferroui_controls::Expander",
+   "entry": "ferro_type_expander",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3704,6 +5206,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ExpanderAutomationPeer",
+   "entry": "ferro_type_expander_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3721,6 +5224,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::ExperimentalAcrylicBorder",
+   "entry": "ferro_type_experimental_acrylic_border",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -3741,6 +5245,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::ExperimentalAcrylicMaterial",
+   "entry": "ferro_type_experimental_acrylic_material",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3764,6 +5269,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::ExponentialEase",
+   "entry": "ferro_type_exponential_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3782,6 +5288,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::FlexPanel",
+   "entry": "ferro_type_flex_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -3805,6 +5312,7 @@
    ],
    "base": "PopupFlyoutBase",
    "rust_path": "ferroui_controls::Flyout",
+   "entry": "ferro_type_flyout",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3825,6 +5333,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::FlyoutBase",
+   "entry": "ferro_type_flyout_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3845,6 +5354,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::FlyoutPresenter",
+   "entry": "ferro_type_flyout_presenter",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3861,6 +5371,7 @@
    ],
    "base": "IconElement",
    "rust_path": "ferroui_controls::FontIcon",
+   "entry": "ferro_type_font_icon",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -3881,6 +5392,7 @@
    ],
    "base": "IconSource",
    "rust_path": "ferroui_controls::FontIconSource",
+   "entry": "ferro_type_font_icon_source",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3903,6 +5415,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::Frame",
+   "entry": "ferro_type_frame",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3927,6 +5440,7 @@
    ],
    "base": "UserControl",
    "rust_path": "ferroui_controls::FramePage",
+   "entry": "ferro_type_frame_page",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -3945,6 +5459,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::Geometry",
+   "entry": "ferro_type_geometry",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -3963,6 +5478,7 @@
    ],
    "base": "Drawing",
    "rust_path": "ferroui_base::media::GeometryDrawing",
+   "entry": "ferro_type_geometry_drawing",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -3983,6 +5499,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::GeometryGroup",
+   "entry": "ferro_type_geometry_group",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4002,6 +5519,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_base::input::gesture_recognizers::GestureRecognizer",
+   "entry": "ferro_type_gesture_recognizer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4019,6 +5537,7 @@
    ],
    "base": "Drawing",
    "rust_path": "ferroui_base::media::GlyphRunDrawing",
+   "entry": "ferro_type_glyph_run_drawing",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4038,6 +5557,7 @@
    ],
    "base": "Brush",
    "rust_path": "ferroui_base::media::GradientBrush",
+   "entry": "ferro_type_gradient_brush",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4057,6 +5577,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::GradientStop",
+   "entry": "ferro_type_gradient_stop",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4075,6 +5596,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::Grid",
+   "entry": "ferro_type_grid",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -4101,6 +5623,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -4117,6 +5640,7 @@
    ],
    "base": "Thumb",
    "rust_path": "ferroui_controls::GridSplitter",
+   "entry": "ferro_type_grid_splitter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -4140,6 +5664,7 @@
    ],
    "base": "ListViewBase",
    "rust_path": "ferroui_controls::GridView",
+   "entry": "ferro_type_grid_view",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -4158,6 +5683,7 @@
    ],
    "base": "ListViewBaseAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4175,6 +5701,7 @@
    ],
    "base": "ListViewBaseItem",
    "rust_path": "ferroui_controls::GridViewItem",
+   "entry": "ferro_type_grid_view_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -4194,6 +5721,7 @@
    ],
    "base": "ListViewBaseItemAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4210,6 +5738,7 @@
    ],
    "base": "HeaderedContentControl",
    "rust_path": "ferroui_controls::GroupBox",
+   "entry": "ferro_type_group_box",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -4227,6 +5756,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::primitives::HeaderedContentControl",
+   "entry": "ferro_type_headered_content_control",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -4247,6 +5777,7 @@
    ],
    "base": "ItemsControl",
    "rust_path": "ferroui_controls::primitives::HeaderedItemsControl",
+   "entry": "ferro_type_headered_items_control",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -4268,6 +5799,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::primitives::HeaderedSelectingItemsControl",
+   "entry": "ferro_type_headered_selecting_items_control",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -4286,6 +5818,7 @@
    ],
    "base": "Span",
    "rust_path": "ferroui_controls::documents::Hyperlink",
+   "entry": "ferro_type_hyperlink",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4311,6 +5844,7 @@
    ],
    "base": "AutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::HyperlinkAutomationPeer",
+   "entry": "ferro_type_hyperlink_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4327,6 +5861,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::HyperlinkButton",
+   "entry": "ferro_type_hyperlink_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -4346,6 +5881,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::IconElement",
+   "entry": "ferro_type_icon_element",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -4362,6 +5898,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::IconSource",
+   "entry": "ferro_type_icon_source",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4379,6 +5916,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::Image",
+   "entry": "ferro_type_image",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -4401,6 +5939,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ImageAutomationPeer",
+   "entry": "ferro_type_image_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4417,6 +5956,7 @@
    ],
    "base": "TileBrush",
    "rust_path": "ferroui_base::media::ImageBrush",
+   "entry": "ferro_type_image_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4435,6 +5975,7 @@
    ],
    "base": "Drawing",
    "rust_path": "ferroui_base::media::ImageDrawing",
+   "entry": "ferro_type_image_drawing",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4454,6 +5995,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::ImmutableGeometry",
+   "entry": "ferro_type_immutable_geometry",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4470,6 +6012,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::InfoBadge",
+   "entry": "ferro_type_info_badge",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -4492,6 +6035,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::InfoBadgeTemplateSettings",
+   "entry": "ferro_type_info_badge_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4511,6 +6055,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::InfoBar",
+   "entry": "ferro_type_info_bar",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -4542,6 +6087,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::InfoBarAutomationPeer",
+   "entry": "ferro_type_info_bar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4559,6 +6105,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::primitives::InfoBarPanel",
+   "entry": "ferro_type_info_bar_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -4582,6 +6129,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::InfoBarTemplateSettings",
+   "entry": "ferro_type_info_bar_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4599,6 +6147,7 @@
    ],
    "base": "TextElement",
    "rust_path": "ferroui_controls::documents::Inline",
+   "entry": "ferro_type_inline",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4619,6 +6168,7 @@
    ],
    "base": "Inline",
    "rust_path": "ferroui_controls::documents::InlineUIContainer",
+   "entry": "ferro_type_inline_ui_container",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4637,6 +6187,7 @@
    ],
    "base": "Interactive",
    "rust_path": "ferroui_base::input::InputElement",
+   "entry": "ferro_type_input_element",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4702,6 +6253,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::InputPaneAwareDecorator",
+   "entry": "ferro_type_input_pane_aware_decorator",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -4720,6 +6272,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::input::InputScope",
+   "entry": "ferro_type_input_scope",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4737,6 +6290,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::input::InputScopeName",
+   "entry": "ferro_type_input_scope_name",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4754,6 +6308,7 @@
    ],
    "base": "Layoutable",
    "rust_path": "ferroui_base::interactivity::Interactive",
+   "entry": "ferro_type_interactive",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4772,6 +6327,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::effects::library::InteractiveBurningFlameEffect",
+   "entry": "ferro_type_interactive_burning_flame_effect",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4790,6 +6346,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::effects::library::InteractivePointerSpotlightEffect",
+   "entry": "ferro_type_interactive_pointer_spotlight_effect",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4808,6 +6365,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::effects::library::InteractiveReactiveGridEffect",
+   "entry": "ferro_type_interactive_reactive_grid_effect",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4826,6 +6384,7 @@
    ],
    "base": "Effect",
    "rust_path": "ferroui_base::media::effects::library::InteractiveWaterRippleEffect",
+   "entry": "ferro_type_interactive_water_ripple_effect",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4843,6 +6402,7 @@
    ],
    "base": "AutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::InteropAutomationPeer",
+   "entry": "ferro_type_interop_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4858,6 +6418,7 @@
    ],
    "base": "Span",
    "rust_path": "ferroui_controls::documents::Italic",
+   "entry": "ferro_type_italic",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4874,6 +6435,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::ItemsControl",
+   "entry": "ferro_type_items_control",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -4899,6 +6461,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ItemsControlAutomationPeer",
+   "entry": "ferro_type_items_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -4915,6 +6478,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::presenters::ItemsPresenter",
+   "entry": "ferro_type_items_presenter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -4934,6 +6498,7 @@
    ],
    "base": "VirtualizingStackPanel",
    "rust_path": "ferroui_controls::ItemsStackPanel",
+   "entry": "ferro_type_items_stack_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -4956,6 +6521,7 @@
    ],
    "base": "WrapPanel",
    "rust_path": "ferroui_controls::ItemsWrapGrid",
+   "entry": "ferro_type_items_wrap_grid",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -4974,6 +6540,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::input::KeyBinding",
+   "entry": "ferro_type_key_binding",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -4994,6 +6561,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::KeyFrame",
+   "entry": "ferro_type_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5010,6 +6578,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::KeySpline",
+   "entry": "ferro_type_key_spline",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5025,6 +6594,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::Label",
+   "entry": "ferro_type_label",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -5044,6 +6614,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::LabelAutomationPeer",
+   "entry": "ferro_type_label_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5060,6 +6631,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -5077,6 +6649,7 @@
    ],
    "base": "Decorator",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "child",
@@ -5094,6 +6667,7 @@
    ],
    "base": "TestRoot",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "child",
@@ -5111,6 +6685,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::LayoutTransformControl",
+   "entry": "ferro_type_layout_transform_control",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -5129,6 +6704,7 @@
    ],
    "base": "Visual",
    "rust_path": "ferroui_base::layout::Layoutable",
+   "entry": "ferro_type_layoutable",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5159,6 +6735,7 @@
    ],
    "base": "Border",
    "rust_path": "ferroui_controls::primitives::LightDismissOverlayLayer",
+   "entry": "ferro_type_light_dismiss_overlay_layer",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -5174,6 +6751,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Line",
+   "entry": "ferro_type_line",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -5193,6 +6771,7 @@
    ],
    "base": "Inline",
    "rust_path": "ferroui_controls::documents::LineBreak",
+   "entry": "ferro_type_line_break",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5209,6 +6788,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::LineGeometry",
+   "entry": "ferro_type_line_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5228,6 +6808,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::LineSegment",
+   "entry": "ferro_type_line_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5248,6 +6829,7 @@
    ],
    "base": "ColorKeyFrame",
    "rust_path": "ferroui_controls::animation::LinearColorKeyFrame",
+   "entry": "ferro_type_linear_color_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5266,6 +6848,7 @@
    ],
    "base": "DoubleKeyFrame",
    "rust_path": "ferroui_controls::animation::LinearDoubleKeyFrame",
+   "entry": "ferro_type_linear_double_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5283,6 +6866,7 @@
    ],
    "base": "GradientBrush",
    "rust_path": "ferroui_base::media::LinearGradientBrush",
+   "entry": "ferro_type_linear_gradient_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5304,6 +6888,7 @@
    ],
    "base": "PointKeyFrame",
    "rust_path": "ferroui_controls::animation::LinearPointKeyFrame",
+   "entry": "ferro_type_linear_point_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5320,6 +6905,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::ListBox",
+   "entry": "ferro_type_list_box",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5340,6 +6926,7 @@
    ],
    "base": "SelectingItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ListBoxAutomationPeer",
+   "entry": "ferro_type_list_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5357,6 +6944,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::ListBoxItem",
+   "entry": "ferro_type_list_box_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -5377,6 +6965,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ListItemAutomationPeer",
+   "entry": "ferro_type_list_item_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5393,6 +6982,7 @@
    ],
    "base": "ListViewBase",
    "rust_path": "ferroui_controls::ListView",
+   "entry": "ferro_type_list_view",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5411,6 +7001,7 @@
    ],
    "base": "ListViewBaseAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5428,6 +7019,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::ListViewBase",
+   "entry": "ferro_type_list_view_base",
    "creatable": false,
    "control": true,
    "children": "items",
@@ -5464,6 +7056,7 @@
    ],
    "base": "SelectingItemsControlAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5482,6 +7075,7 @@
    ],
    "base": "ListBoxItem",
    "rust_path": "ferroui_controls::ListViewBaseItem",
+   "entry": "ferro_type_list_view_base_item",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -5502,6 +7096,7 @@
    ],
    "base": "ListItemAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5519,6 +7114,7 @@
    ],
    "base": "ListViewBaseItem",
    "rust_path": "ferroui_controls::ListViewItem",
+   "entry": "ferro_type_list_view_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -5538,6 +7134,7 @@
    ],
    "base": "ListViewBaseItemAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5555,6 +7152,7 @@
    ],
    "base": "TextBox",
    "rust_path": "ferroui_controls::MaskedTextBox",
+   "entry": "ferro_type_masked_text_box",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -5581,6 +7179,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::MatrixTransform",
+   "entry": "ferro_type_matrix_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5598,6 +7197,7 @@
    ],
    "base": "MenuBase",
    "rust_path": "ferroui_controls::Menu",
+   "entry": "ferro_type_menu",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5614,6 +7214,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::MenuBase",
+   "entry": "ferro_type_menu_base",
    "creatable": false,
    "control": true,
    "children": "items",
@@ -5635,6 +7236,7 @@
    ],
    "base": "PopupFlyoutBase",
    "rust_path": "ferroui_controls::MenuFlyout",
+   "entry": "ferro_type_menu_flyout",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5657,6 +7259,7 @@
    ],
    "base": "MenuBase",
    "rust_path": "ferroui_controls::MenuFlyoutPresenter",
+   "entry": "ferro_type_menu_flyout_presenter",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5673,6 +7276,7 @@
    ],
    "base": "HeaderedSelectingItemsControl",
    "rust_path": "ferroui_controls::MenuItem",
+   "entry": "ferro_type_menu_item",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5707,6 +7311,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::MenuItemAutomationPeer",
+   "entry": "ferro_type_menu_item_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5723,6 +7328,7 @@
    ],
    "base": "SystemBackdrop",
    "rust_path": "ferroui_controls::media::MicaBackdrop",
+   "entry": "ferro_type_mica_backdrop",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5742,6 +7348,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -5758,6 +7365,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -5774,6 +7382,7 @@
    ],
    "base": "Page",
    "rust_path": "ferroui_controls::MultiPage",
+   "entry": "ferro_type_multi_page",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -5795,6 +7404,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::NativeControlHost",
+   "entry": "ferro_type_native_control_host",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -5813,6 +7423,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NativeControlHostPeer",
+   "entry": "ferro_type_native_control_host_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5829,6 +7440,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::NativeMenu",
+   "entry": "ferro_type_native_menu",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5848,6 +7460,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::NativeMenuBar",
+   "entry": "ferro_type_native_menu_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -5867,6 +7480,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NativeMenuBarAutomationPeer",
+   "entry": "ferro_type_native_menu_bar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5885,6 +7499,7 @@
    ],
    "base": "Menu",
    "rust_path": null,
+   "entry": null,
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5902,6 +7517,7 @@
    ],
    "base": "NativeMenuItemBase",
    "rust_path": "ferroui_controls::NativeMenuItem",
+   "entry": "ferro_type_native_menu_item",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5932,6 +7548,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::NativeMenuItemBase",
+   "entry": "ferro_type_native_menu_item_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -5952,6 +7569,7 @@
    ],
    "base": "MenuItem",
    "rust_path": null,
+   "entry": null,
    "creatable": true,
    "control": true,
    "children": "items",
@@ -5970,6 +7588,7 @@
    ],
    "base": "NativeMenuItem",
    "rust_path": "ferroui_controls::NativeMenuItemSeparator",
+   "entry": "ferro_type_native_menu_item_separator",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -5986,6 +7605,7 @@
    ],
    "base": "MultiPage",
    "rust_path": "ferroui_controls::NavigationPage",
+   "entry": "ferro_type_navigation_page",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6024,6 +7644,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NavigationPageAutomationPeer",
+   "entry": "ferro_type_navigation_page_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6040,6 +7661,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::NavigationView",
+   "entry": "ferro_type_navigation_view",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6091,6 +7713,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NavigationViewAutomationPeer",
+   "entry": "ferro_type_navigation_view_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6108,6 +7731,7 @@
    ],
    "base": "NavigationViewItemBase",
    "rust_path": "ferroui_controls::NavigationViewItem",
+   "entry": "ferro_type_navigation_view_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6137,6 +7761,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NavigationViewItemAutomationPeer",
+   "entry": "ferro_type_navigation_view_item_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6155,6 +7780,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::NavigationViewItemBase",
+   "entry": "ferro_type_navigation_view_item_base",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -6175,6 +7801,7 @@
    ],
    "base": "NavigationViewItemBase",
    "rust_path": "ferroui_controls::NavigationViewItemHeader",
+   "entry": "ferro_type_navigation_view_item_header",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6193,6 +7820,7 @@
    ],
    "base": "NavigationViewItemBase",
    "rust_path": "ferroui_controls::NavigationViewItemSeparator",
+   "entry": "ferro_type_navigation_view_item_separator",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6211,6 +7839,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::NavigationViewTemplateSettings",
+   "entry": "ferro_type_navigation_view_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6239,6 +7868,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NoneAutomationPeer",
+   "entry": "ferro_type_none_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6255,6 +7885,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::NotificationCard",
+   "entry": "ferro_type_notification_card",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6278,6 +7909,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::NumberBox",
+   "entry": "ferro_type_number_box",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6313,6 +7945,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NumberBoxAutomationPeer",
+   "entry": "ferro_type_number_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6330,6 +7963,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::NumericUpDown",
+   "entry": "ferro_type_numeric_up_down",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6376,6 +8010,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::NumericUpDownAutomationPeer",
+   "entry": "ferro_type_numeric_up_down_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6395,6 +8030,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::ObjectAnimationUsingKeyFrames",
+   "entry": "ferro_type_object_animation_using_key_frames",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6412,6 +8048,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::ObjectKeyFrame",
+   "entry": "ferro_type_object_key_frame",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6432,6 +8069,7 @@
    ],
    "base": "TopLevel",
    "rust_path": "ferroui_controls::embedding::offscreen::OffscreenTopLevel",
+   "entry": "ferro_type_offscreen_top_level",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -6448,6 +8086,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::primitives::OverlayLayer",
+   "entry": "ferro_type_overlay_layer",
    "creatable": false,
    "control": true,
    "children": "children",
@@ -6465,6 +8104,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::primitives::OverlayPopupHost",
+   "entry": "ferro_type_overlay_popup_host",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -6482,6 +8122,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::Page",
+   "entry": "ferro_type_page",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -6510,6 +8151,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::PageNavigationHost",
+   "entry": "ferro_type_page_navigation_host",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -6529,6 +8171,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::navigation::PageStackEntry",
+   "entry": "ferro_type_page_stack_entry",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6545,6 +8188,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::PagerControl",
+   "entry": "ferro_type_pager_control",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6584,6 +8228,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::PagerControlAutomationPeer",
+   "entry": "ferro_type_pager_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6602,6 +8247,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::PagerControlTemplateSettings",
+   "entry": "ferro_type_pager_control_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6620,6 +8266,7 @@
    ],
    "base": "Visual",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6635,6 +8282,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::Panel",
+   "entry": "ferro_type_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -6652,6 +8300,7 @@
    ],
    "base": "Block",
    "rust_path": "ferroui_controls::documents::Paragraph",
+   "entry": "ferro_type_paragraph",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6675,6 +8324,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Path",
+   "entry": "ferro_type_path",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6693,6 +8343,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::PathFigure",
+   "entry": "ferro_type_path_figure",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6714,6 +8365,7 @@
    ],
    "base": "StreamGeometry",
    "rust_path": "ferroui_base::media::PathGeometry",
+   "entry": "ferro_type_path_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6733,6 +8385,7 @@
    ],
    "base": "IconElement",
    "rust_path": "ferroui_controls::PathIcon",
+   "entry": "ferro_type_path_icon",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6752,6 +8405,7 @@
    ],
    "base": "IconSource",
    "rust_path": "ferroui_controls::PathIconSource",
+   "entry": "ferro_type_path_icon_source",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6770,6 +8424,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::PathSegment",
+   "entry": "ferro_type_path_segment",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6787,6 +8442,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::Pen",
+   "entry": "ferro_type_pen",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6810,6 +8466,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::PersonPicture",
+   "entry": "ferro_type_person_picture",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6840,6 +8497,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::PersonPictureAutomationPeer",
+   "entry": "ferro_type_person_picture_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6858,6 +8516,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::PersonPictureTemplateSettings",
+   "entry": "ferro_type_person_picture_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6878,6 +8537,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::date_time_pickers::PickerPresenterBase",
+   "entry": "ferro_type_picker_presenter_base",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -6895,6 +8555,7 @@
    ],
    "base": "GestureRecognizer",
    "rust_path": "ferroui_base::input::gesture_recognizers::PinchGestureRecognizer",
+   "entry": "ferro_type_pinch_gesture_recognizer",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -6911,6 +8572,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::PipsPager",
+   "entry": "ferro_type_pips_pager",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -6941,6 +8603,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::PipsPagerAutomationPeer",
+   "entry": "ferro_type_pips_pager_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6959,6 +8622,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::PipsPagerTemplateSettings",
+   "entry": "ferro_type_pips_pager_template_settings",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -6976,6 +8640,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::Pivot",
+   "entry": "ferro_type_pivot",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -7005,6 +8670,7 @@
    ],
    "base": "SelectingItemsControlAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7022,6 +8688,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::PivotHeaderItem",
+   "entry": "ferro_type_pivot_header_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -7039,6 +8706,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::PivotHeaderPanel",
+   "entry": "ferro_type_pivot_header_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -7055,6 +8723,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::PivotItem",
+   "entry": "ferro_type_pivot_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -7075,6 +8744,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7091,6 +8761,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::PivotPanel",
+   "entry": "ferro_type_pivot_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -7110,6 +8781,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::PlatformGeometry",
+   "entry": "ferro_type_platform_geometry",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7126,6 +8798,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::PointAnimation",
+   "entry": "ferro_type_point_animation",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7151,6 +8824,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::PointAnimationUsingKeyFrames",
+   "entry": "ferro_type_point_animation_using_key_frames",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7170,6 +8844,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::PointKeyFrame",
+   "entry": "ferro_type_point_key_frame",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7190,6 +8865,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::PolyBezierSegment",
+   "entry": "ferro_type_poly_bezier_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7209,6 +8885,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::PolyLineSegment",
+   "entry": "ferro_type_poly_line_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7226,6 +8903,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Polygon",
+   "entry": "ferro_type_polygon",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7244,6 +8922,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Polyline",
+   "entry": "ferro_type_polyline",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7263,6 +8942,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::PolylineGeometry",
+   "entry": "ferro_type_polyline_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7281,6 +8961,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::primitives::Popup",
+   "entry": "ferro_type_popup",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -7319,6 +9000,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::PopupAutomationPeer",
+   "entry": "ferro_type_popup_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7336,6 +9018,7 @@
    ],
    "base": "FlyoutBase",
    "rust_path": "ferroui_controls::primitives::PopupFlyoutBase",
+   "entry": "ferro_type_popup_flyout_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7364,6 +9047,7 @@
    ],
    "base": "ItemsControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "items",
@@ -7381,6 +9065,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::primitives::PopupOverlayLayer",
+   "entry": "ferro_type_popup_overlay_layer",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -7397,6 +9082,7 @@
    ],
    "base": "WindowBase",
    "rust_path": "ferroui_controls::primitives::PopupRoot",
+   "entry": "ferro_type_popup_root",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -7418,6 +9104,7 @@
    ],
    "base": "WindowBaseAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::PopupRootAutomationPeer",
+   "entry": "ferro_type_popup_root_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7434,6 +9121,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::PowerEase",
+   "entry": "ferro_type_power_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7452,6 +9140,7 @@
    ],
    "base": "Decorator",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "child",
@@ -7468,6 +9157,7 @@
    ],
    "base": "RangeBase",
    "rust_path": "ferroui_controls::ProgressBar",
+   "entry": "ferro_type_progress_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7492,6 +9182,7 @@
    ],
    "base": "RangeBaseAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ProgressBarAutomationPeer",
+   "entry": "ferro_type_progress_bar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7510,6 +9201,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::ProgressBarTemplateSettings",
+   "entry": "ferro_type_progress_bar_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7535,6 +9227,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::ProgressRing",
+   "entry": "ferro_type_progress_ring",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7560,6 +9253,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ProgressRingAutomationPeer",
+   "entry": "ferro_type_progress_ring_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7578,6 +9272,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::ProgressRingTemplateSettings",
+   "entry": "ferro_type_progress_ring_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7599,6 +9294,7 @@
    ],
    "base": "GestureRecognizer",
    "rust_path": "ferroui_base::input::gesture_recognizers::PullGestureRecognizer",
+   "entry": "ferro_type_pull_gesture_recognizer",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7618,6 +9314,7 @@
    ],
    "base": "PathSegment",
    "rust_path": "ferroui_base::media::QuadraticBezierSegment",
+   "entry": "ferro_type_quadratic_bezier_segment",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7637,6 +9334,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::QuadraticEase",
+   "entry": "ferro_type_quadratic_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7653,6 +9351,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::QuarticEase",
+   "entry": "ferro_type_quartic_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7669,6 +9368,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::QuinticEase",
+   "entry": "ferro_type_quintic_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7686,6 +9386,7 @@
    ],
    "base": "GradientBrush",
    "rust_path": "ferroui_base::media::RadialGradientBrush",
+   "entry": "ferro_type_radial_gradient_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7707,6 +9408,7 @@
    ],
    "base": "ToggleButton",
    "rust_path": "ferroui_controls::RadioButton",
+   "entry": "ferro_type_radio_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -7727,6 +9429,7 @@
    ],
    "base": "ToggleButtonAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RadioButtonAutomationPeer",
+   "entry": "ferro_type_radio_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7743,6 +9446,7 @@
    ],
    "base": "HeaderedSelectingItemsControl",
    "rust_path": "ferroui_controls::RadioButtons",
+   "entry": "ferro_type_radio_buttons",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -7763,6 +9467,7 @@
    ],
    "base": "SelectingItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RadioButtonsAutomationPeer",
+   "entry": "ferro_type_radio_buttons_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7780,6 +9485,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::primitives::RadioButtonsPanel",
+   "entry": "ferro_type_radio_buttons_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -7799,6 +9505,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::primitives::RangeBase",
+   "entry": "ferro_type_range_base",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -7825,6 +9532,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RangeBaseAutomationPeer",
+   "entry": "ferro_type_range_base_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7841,6 +9549,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::RatingControl",
+   "entry": "ferro_type_rating_control",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7868,6 +9577,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RatingControlAutomationPeer",
+   "entry": "ferro_type_rating_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -7886,6 +9596,7 @@
    ],
    "base": "RatingItemInfo",
    "rust_path": "ferroui_controls::RatingItemFontInfo",
+   "entry": "ferro_type_rating_item_font_info",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7911,6 +9622,7 @@
    ],
    "base": "RatingItemInfo",
    "rust_path": "ferroui_controls::RatingItemImageInfo",
+   "entry": "ferro_type_rating_item_image_info",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7935,6 +9647,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::RatingItemInfo",
+   "entry": "ferro_type_rating_item_info",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7950,6 +9663,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Rectangle",
+   "entry": "ferro_type_rectangle",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -7969,6 +9683,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::RectangleGeometry",
+   "entry": "ferro_type_rectangle_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -7989,6 +9704,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::RefreshContainer",
+   "entry": "ferro_type_refresh_container",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -8012,6 +9728,7 @@
    ],
    "base": "Interactive",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8037,6 +9754,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::RefreshVisualizer",
+   "entry": "ferro_type_refresh_visualizer",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -8058,6 +9776,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::RelativePanel",
+   "entry": "ferro_type_relative_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -8091,6 +9810,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -8107,6 +9827,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::RepeatButton",
+   "entry": "ferro_type_repeat_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -8127,6 +9848,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -8143,6 +9865,7 @@
    ],
    "base": "ResourceProvider",
    "rust_path": "ferroui_base::controls::ResourceDictionary",
+   "entry": "ferro_type_resource_dictionary",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8159,6 +9882,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::controls::ResourceProvider",
+   "entry": "ferro_type_resource_provider",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8176,6 +9900,7 @@
    ],
    "base": "RevealBrush",
    "rust_path": "ferroui_controls::media::RevealBackgroundBrush",
+   "entry": "ferro_type_reveal_background_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8193,6 +9918,7 @@
    ],
    "base": "RevealBrush",
    "rust_path": "ferroui_controls::media::RevealBorderBrush",
+   "entry": "ferro_type_reveal_border_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8210,6 +9936,7 @@
    ],
    "base": "XamlLight",
    "rust_path": "ferroui_controls::media::RevealBorderLight",
+   "entry": "ferro_type_reveal_border_light",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8226,6 +9953,7 @@
    ],
    "base": "XamlCompositionBrushBase",
    "rust_path": "ferroui_controls::media::RevealBrush",
+   "entry": "ferro_type_reveal_brush",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8249,6 +9977,7 @@
    ],
    "base": "XamlLight",
    "rust_path": "ferroui_controls::media::RevealHoverLight",
+   "entry": "ferro_type_reveal_hover_light",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8266,6 +9995,7 @@
    ],
    "base": "StackPanel",
    "rust_path": "ferroui_controls::ReversibleStackPanel",
+   "entry": "ferro_type_reversible_stack_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -8285,6 +10015,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::RichEditBox",
+   "entry": "ferro_type_rich_edit_box",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8364,6 +10095,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RichEditBoxAutomationPeer",
+   "entry": "ferro_type_rich_edit_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8383,6 +10115,7 @@
    ],
    "base": "RichTextBlock",
    "rust_path": "ferroui_controls::RichEditBoxTextPresenter",
+   "entry": "ferro_type_rich_edit_box_text_presenter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8404,6 +10137,7 @@
    ],
    "base": "NoneAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RichEditBoxTextPresenterAutomationPeer",
+   "entry": "ferro_type_rich_edit_box_text_presenter_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8421,6 +10155,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::RichTextBlock",
+   "entry": "ferro_type_rich_text_block",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8477,6 +10212,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::RichTextBlockAutomationPeer",
+   "entry": "ferro_type_rich_text_block_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8495,6 +10231,7 @@
    ],
    "base": "RichTextBlock",
    "rust_path": "ferroui_controls::RichTextBlockOverflow",
+   "entry": "ferro_type_rich_text_block_overflow",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8514,6 +10251,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::Rotate3DTransform",
+   "entry": "ferro_type_rotate3_d_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8538,6 +10276,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::RotateTransform",
+   "entry": "ferro_type_rotate_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8558,6 +10297,7 @@
    ],
    "base": "DefinitionBase",
    "rust_path": "ferroui_controls::RowDefinition",
+   "entry": "ferro_type_row_definition",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8577,6 +10317,7 @@
    ],
    "base": "Inline",
    "rust_path": "ferroui_controls::documents::Run",
+   "entry": "ferro_type_run",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8595,6 +10336,7 @@
    ],
    "base": "Application",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8611,6 +10353,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::ScaleTransform",
+   "entry": "ferro_type_scale_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8630,6 +10373,7 @@
    ],
    "base": "RangeBase",
    "rust_path": "ferroui_controls::primitives::ScrollBar",
+   "entry": "ferro_type_scroll_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8656,6 +10400,7 @@
    ],
    "base": "RangeBaseAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ScrollBarAutomationPeer",
+   "entry": "ferro_type_scroll_bar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8673,6 +10418,7 @@
    ],
    "base": "ContentPresenter",
    "rust_path": "ferroui_controls::presenters::ScrollContentPresenter",
+   "entry": "ferro_type_scroll_content_presenter",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -8701,6 +10447,7 @@
    ],
    "base": "GestureRecognizer",
    "rust_path": "ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer",
+   "entry": "ferro_type_scroll_gesture_recognizer",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8725,6 +10472,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::ScrollViewer",
+   "entry": "ferro_type_scroll_viewer",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -8768,6 +10516,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ScrollViewerAutomationPeer",
+   "entry": "ferro_type_scroll_viewer_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8786,6 +10535,7 @@
    ],
    "base": "GestureRecognizer",
    "rust_path": null,
+   "entry": null,
    "creatable": true,
    "control": false,
    "children": "none",
@@ -8803,6 +10553,7 @@
    ],
    "base": "Shape",
    "rust_path": "ferroui_controls::shapes::Sector",
+   "entry": "ferro_type_sector",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8823,6 +10574,7 @@
    ],
    "base": "TextBlock",
    "rust_path": "ferroui_controls::SelectableTextBlock",
+   "entry": "ferro_type_selectable_text_block",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8849,6 +10601,7 @@
    ],
    "base": "ItemsControl",
    "rust_path": "ferroui_controls::primitives::SelectingItemsControl",
+   "entry": "ferro_type_selecting_items_control",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -8883,6 +10636,7 @@
    ],
    "base": "ItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::SelectingItemsControlAutomationPeer",
+   "entry": "ferro_type_selecting_items_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8900,6 +10654,7 @@
    ],
    "base": "MultiPage",
    "rust_path": "ferroui_controls::SelectingMultiPage",
+   "entry": "ferro_type_selecting_multi_page",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -8921,6 +10676,7 @@
    ],
    "base": "Rectangle",
    "rust_path": "ferroui_controls::SelectionIndicator",
+   "entry": "ferro_type_selection_indicator",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8936,6 +10692,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::Separator",
+   "entry": "ferro_type_separator",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -8951,6 +10708,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::Shadow",
+   "entry": "ferro_type_shadow",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -8966,6 +10724,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::shapes::Shape",
+   "entry": "ferro_type_shape",
    "creatable": false,
    "control": true,
    "children": "none",
@@ -8992,6 +10751,7 @@
    ],
    "base": "EasingFunctionBase",
    "rust_path": "ferroui_controls::animation::SineEase",
+   "entry": "ferro_type_sine_ease",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9008,6 +10768,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::SkewTransform",
+   "entry": "ferro_type_skew_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9026,6 +10787,7 @@
    ],
    "base": "RangeBase",
    "rust_path": "ferroui_controls::Slider",
+   "entry": "ferro_type_slider",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -9050,6 +10812,7 @@
    ],
    "base": "RangeBaseAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::SliderAutomationPeer",
+   "entry": "ferro_type_slider_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9067,6 +10830,7 @@
    ],
    "base": "Brush",
    "rust_path": "ferroui_base::media::SolidColorBrush",
+   "entry": "ferro_type_solid_color_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9084,6 +10848,7 @@
    ],
    "base": "Inline",
    "rust_path": "ferroui_controls::documents::Span",
+   "entry": "ferro_type_span",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9101,6 +10866,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::Spinner",
+   "entry": "ferro_type_spinner",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -9123,6 +10889,7 @@
    ],
    "base": "ColorKeyFrame",
    "rust_path": "ferroui_controls::animation::SplineColorKeyFrame",
+   "entry": "ferro_type_spline_color_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9143,6 +10910,7 @@
    ],
    "base": "DoubleKeyFrame",
    "rust_path": "ferroui_controls::animation::SplineDoubleKeyFrame",
+   "entry": "ferro_type_spline_double_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9163,6 +10931,7 @@
    ],
    "base": "PointKeyFrame",
    "rust_path": "ferroui_controls::animation::SplinePointKeyFrame",
+   "entry": "ferro_type_spline_point_key_frame",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9181,6 +10950,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::SplitButton",
+   "entry": "ferro_type_split_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9206,6 +10976,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::SplitButtonAutomationPeer",
+   "entry": "ferro_type_split_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9222,6 +10993,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::SplitView",
+   "entry": "ferro_type_split_view",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9256,6 +11028,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::SplitViewTemplateSettings",
+   "entry": "ferro_type_split_view_template_settings",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9277,6 +11050,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::StackPanel",
+   "entry": "ferro_type_stack_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -9301,6 +11075,7 @@
    ],
    "base": "StateTriggerBase",
    "rust_path": "ferroui_controls::StateTrigger",
+   "entry": "ferro_type_state_trigger",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9320,6 +11095,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::StateTriggerBase",
+   "entry": "ferro_type_state_trigger_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9335,6 +11111,7 @@
    ],
    "base": "Timeline",
    "rust_path": "ferroui_controls::animation::Storyboard",
+   "entry": "ferro_type_storyboard",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9354,6 +11131,7 @@
    ],
    "base": "Geometry",
    "rust_path": "ferroui_base::media::StreamGeometry",
+   "entry": "ferro_type_stream_geometry",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9369,6 +11147,7 @@
    ],
    "base": "StyleBase",
    "rust_path": "ferroui_base::styling::Style",
+   "entry": "ferro_type_style",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9385,6 +11164,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::styling::StyleBase",
+   "entry": "ferro_type_style_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9402,6 +11182,7 @@
    ],
    "base": "Class1",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9418,6 +11199,7 @@
    ],
    "base": "Animatable",
    "rust_path": "ferroui_base::StyledElement",
+   "entry": "ferro_type_styled_element",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9441,6 +11223,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::styling::Styles",
+   "entry": "ferro_type_styles",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9457,6 +11240,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::SwipeControl",
+   "entry": "ferro_type_swipe_control",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9479,6 +11263,7 @@
    ],
    "base": "GestureRecognizer",
    "rust_path": "ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer",
+   "entry": "ferro_type_swipe_gesture_recognizer",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9501,6 +11286,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::SwipeItem",
+   "entry": "ferro_type_swipe_item",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9525,6 +11311,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::SwipeItems",
+   "entry": "ferro_type_swipe_items",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9543,6 +11330,7 @@
    ],
    "base": "IconElement",
    "rust_path": "ferroui_controls::SymbolIcon",
+   "entry": "ferro_type_symbol_icon",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -9562,6 +11350,7 @@
    ],
    "base": "IconSource",
    "rust_path": "ferroui_controls::SymbolIconSource",
+   "entry": "ferro_type_symbol_icon_source",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9580,6 +11369,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::media::SystemBackdrop",
+   "entry": "ferro_type_system_backdrop",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9598,6 +11388,7 @@
    ],
    "base": "XamlCompositionBrushBase",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9614,6 +11405,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::TabControl",
+   "entry": "ferro_type_tab_control",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -9639,6 +11431,7 @@
    ],
    "base": "HeaderedContentControl",
    "rust_path": "ferroui_controls::TabItem",
+   "entry": "ferro_type_tab_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9661,6 +11454,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": "ferroui_controls::primitives::TabStrip",
+   "entry": "ferro_type_tab_strip",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -9678,6 +11472,7 @@
    ],
    "base": "ListBoxItem",
    "rust_path": "ferroui_controls::primitives::TabStripItem",
+   "entry": "ferro_type_tab_strip_item",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9694,6 +11489,7 @@
    ],
    "base": "SelectingMultiPage",
    "rust_path": "ferroui_controls::TabbedPage",
+   "entry": "ferro_type_tabbed_page",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -9719,6 +11515,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TabbedPageAutomationPeer",
+   "entry": "ferro_type_tabbed_page_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9735,6 +11532,7 @@
    ],
    "base": "ListBox",
    "rust_path": "ferroui_controls::TableView",
+   "entry": "ferro_type_table_view",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -9755,6 +11553,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::TableViewCell",
+   "entry": "ferro_type_table_view_cell",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9775,6 +11574,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::presenters::TableViewCellsPresenter",
+   "entry": "ferro_type_table_view_cells_presenter",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -9792,6 +11592,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_controls::TableViewColumn",
+   "entry": "ferro_type_table_view_column",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -9824,6 +11625,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::TableViewColumnHeader",
+   "entry": "ferro_type_table_view_column_header",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9845,6 +11647,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::presenters::TableViewColumnHeadersPresenter",
+   "entry": "ferro_type_table_view_column_headers_presenter",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -9862,6 +11665,7 @@
    ],
    "base": "ListBoxItem",
    "rust_path": "ferroui_controls::TableViewRow",
+   "entry": "ferro_type_table_view_row",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -9878,6 +11682,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::primitives::TemplatedControl",
+   "entry": "ferro_type_templated_control",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -9913,6 +11718,7 @@
    ],
    "base": "Canvas",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "children",
@@ -9929,6 +11735,7 @@
    ],
    "base": "ContentControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "content",
@@ -9945,6 +11752,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -9961,6 +11769,7 @@
    ],
    "base": "Geometry",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -9979,6 +11788,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -9995,6 +11805,7 @@
    ],
    "base": "Layoutable",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10011,6 +11822,7 @@
    ],
    "base": "Decorator",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "child",
@@ -10027,6 +11839,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -10043,6 +11856,7 @@
    ],
    "base": "SelectingItemsControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "items",
@@ -10061,6 +11875,7 @@
    ],
    "base": "TestSelector",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "items",
@@ -10077,6 +11892,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::TextBlock",
+   "entry": "ferro_type_text_block",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10118,6 +11934,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TextBlockAutomationPeer",
+   "entry": "ferro_type_text_block_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10134,6 +11951,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::TextBox",
+   "entry": "ferro_type_text_box",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10197,6 +12015,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TextBoxAutomationPeer",
+   "entry": "ferro_type_text_box_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10213,6 +12032,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::TextDecoration",
+   "entry": "ferro_type_text_decoration",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -10239,6 +12059,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_controls::documents::TextElement",
+   "entry": "ferro_type_text_element",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10266,6 +12087,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::documents::TextHighlighter",
+   "entry": "ferro_type_text_highlighter",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -10285,6 +12107,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::presenters::TextPresenter",
+   "entry": "ferro_type_text_presenter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10323,6 +12146,7 @@
    ],
    "base": "Thumb",
    "rust_path": "ferroui_controls::primitives::TextSelectionHandle",
+   "entry": "ferro_type_text_selection_handle",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10341,6 +12165,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::primitives::TextSelectionHandleCanvas",
+   "entry": "ferro_type_text_selection_handle_canvas",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -10358,6 +12183,7 @@
    ],
    "base": "Canvas",
    "rust_path": "ferroui_controls::primitives::TextSelectorLayer",
+   "entry": "ferro_type_text_selector_layer",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -10374,6 +12200,7 @@
    ],
    "base": "Shadow",
    "rust_path": "ferroui_base::media::ThemeShadow",
+   "entry": "ferro_type_theme_shadow",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -10391,6 +12218,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::ThemeVariantScope",
+   "entry": "ferro_type_theme_variant_scope",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -10407,6 +12235,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -10423,6 +12252,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -10438,6 +12268,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::primitives::Thumb",
+   "entry": "ferro_type_thumb",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10459,6 +12290,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ThumbAutomationPeer",
+   "entry": "ferro_type_thumb_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10475,6 +12307,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::TickBar",
+   "entry": "ferro_type_tick_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10501,6 +12334,7 @@
    ],
    "base": "Brush",
    "rust_path": "ferroui_base::media::TileBrush",
+   "entry": "ferro_type_tile_brush",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10524,6 +12358,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::TimePicker",
+   "entry": "ferro_type_time_picker",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10549,6 +12384,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TimePickerAutomationPeer",
+   "entry": "ferro_type_time_picker_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10566,6 +12402,7 @@
    ],
    "base": "PickerPresenterBase",
    "rust_path": "ferroui_controls::TimePickerPresenter",
+   "entry": "ferro_type_time_picker_presenter",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10587,6 +12424,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::animation::Timeline",
+   "entry": "ferro_type_timeline",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10610,6 +12448,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::TitleBar",
+   "entry": "ferro_type_title_bar",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10641,6 +12480,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TitleBarAutomationPeer",
+   "entry": "ferro_type_title_bar_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10659,6 +12499,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::primitives::TitleBarTemplateSettings",
+   "entry": "ferro_type_title_bar_template_settings",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -10677,6 +12518,7 @@
    ],
    "base": "Button",
    "rust_path": "ferroui_controls::primitives::ToggleButton",
+   "entry": "ferro_type_toggle_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -10700,6 +12542,7 @@
    ],
    "base": "ContentControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ToggleButtonAutomationPeer",
+   "entry": "ferro_type_toggle_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10717,6 +12560,7 @@
    ],
    "base": "SplitButton",
    "rust_path": "ferroui_controls::ToggleSplitButton",
+   "entry": "ferro_type_toggle_split_button",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -10740,6 +12584,7 @@
    ],
    "base": "SplitButtonAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ToggleSplitButtonAutomationPeer",
+   "entry": "ferro_type_toggle_split_button_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10756,6 +12601,7 @@
    ],
    "base": "ToggleButton",
    "rust_path": "ferroui_controls::ToggleSwitch",
+   "entry": "ferro_type_toggle_switch",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -10778,6 +12624,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::ToolTip",
+   "entry": "ferro_type_tool_tip",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -10812,6 +12659,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::ToolTipAutomationPeer",
+   "entry": "ferro_type_tool_tip_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10828,6 +12676,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::TopLevel",
+   "entry": "ferro_type_top_level",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -10856,6 +12705,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -10875,6 +12725,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10890,6 +12741,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::primitives::Track",
+   "entry": "ferro_type_track",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -10918,6 +12770,7 @@
    ],
    "base": "ContentPage",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -10933,6 +12786,7 @@
    ],
    "base": "Animatable",
    "rust_path": "ferroui_base::media::Transform",
+   "entry": "ferro_type_transform",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10949,6 +12803,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::TransformGroup",
+   "entry": "ferro_type_transform_group",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -10967,6 +12822,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::animation::TransitionBase",
+   "entry": "ferro_type_transition_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -10989,6 +12845,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::TransitioningContentControl",
+   "entry": "ferro_type_transitioning_content_control",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -11010,6 +12867,7 @@
    ],
    "base": "Transform",
    "rust_path": "ferroui_base::media::TranslateTransform",
+   "entry": "ferro_type_translate_transform",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11029,6 +12887,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::TrayIcon",
+   "entry": "ferro_type_tray_icon",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11053,6 +12912,7 @@
    ],
    "base": "ItemsControl",
    "rust_path": "ferroui_controls::TreeView",
+   "entry": "ferro_type_tree_view",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -11076,6 +12936,7 @@
    ],
    "base": "ItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TreeViewAutomationPeer",
+   "entry": "ferro_type_tree_view_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11093,6 +12954,7 @@
    ],
    "base": "HeaderedItemsControl",
    "rust_path": "ferroui_controls::TreeViewItem",
+   "entry": "ferro_type_tree_view_item",
    "creatable": true,
    "control": true,
    "children": "items",
@@ -11119,6 +12981,7 @@
    ],
    "base": "ItemsControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::TreeViewItemAutomationPeer",
+   "entry": "ferro_type_tree_view_item_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11134,6 +12997,7 @@
    ],
    "base": "Span",
    "rust_path": "ferroui_controls::documents::Underline",
+   "entry": "ferro_type_underline",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11150,6 +13014,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::primitives::UniformGrid",
+   "entry": "ferro_type_uniform_grid",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -11173,6 +13038,7 @@
    ],
    "base": "Application",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11191,6 +13057,7 @@
    ],
    "base": "AutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::UnrealizedElementAutomationPeer",
+   "entry": "ferro_type_unrealized_element_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11208,6 +13075,7 @@
    ],
    "base": "UnrealizedElementAutomationPeer",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11224,6 +13092,7 @@
    ],
    "base": "ContentControl",
    "rust_path": "ferroui_controls::UserControl",
+   "entry": "ferro_type_user_control",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -11242,6 +13111,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::UserControlAutomationPeer",
+   "entry": "ferro_type_user_control_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11257,6 +13127,7 @@
    ],
    "base": "Control",
    "rust_path": "ferroui_controls::Viewbox",
+   "entry": "ferro_type_viewbox",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -11277,6 +13148,7 @@
    ],
    "base": "Control",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "none",
@@ -11294,6 +13166,7 @@
    ],
    "base": "VirtualizingPanel",
    "rust_path": "ferroui_controls::VirtualizingCarouselPanel",
+   "entry": "ferro_type_virtualizing_carousel_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -11310,6 +13183,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::VirtualizingPanel",
+   "entry": "ferro_type_virtualizing_panel",
    "creatable": false,
    "control": true,
    "children": "children",
@@ -11327,6 +13201,7 @@
    ],
    "base": "VirtualizingPanel",
    "rust_path": "ferroui_controls::VirtualizingStackPanel",
+   "entry": "ferro_type_virtualizing_stack_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -11354,6 +13229,7 @@
    ],
    "base": "CommandBarButton",
    "rust_path": null,
+   "entry": null,
    "creatable": false,
    "control": true,
    "children": "content",
@@ -11369,6 +13245,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_base::Visual",
+   "entry": "ferro_type_visual",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11402,6 +13279,7 @@
    ],
    "base": "TileBrush",
    "rust_path": "ferroui_base::media::VisualBrush",
+   "entry": "ferro_type_visual_brush",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11421,6 +13299,7 @@
    ],
    "base": "Decorator",
    "rust_path": "ferroui_controls::primitives::VisualLayerManager",
+   "entry": "ferro_type_visual_layer_manager",
    "creatable": true,
    "control": true,
    "children": "child",
@@ -11437,6 +13316,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::VisualState",
+   "entry": "ferro_type_visual_state",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11454,6 +13334,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::VisualStateGroup",
+   "entry": "ferro_type_visual_state_group",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11471,6 +13352,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::VisualStateManager",
+   "entry": "ferro_type_visual_state_manager",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11490,6 +13372,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_controls::VisualTransition",
+   "entry": "ferro_type_visual_transition",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11505,6 +13388,7 @@
    ],
    "base": "WindowBase",
    "rust_path": "ferroui_controls::Window",
+   "entry": "ferro_type_window",
    "creatable": true,
    "control": true,
    "children": "content",
@@ -11544,6 +13428,7 @@
    ],
    "base": "WindowBaseAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::WindowAutomationPeer",
+   "entry": "ferro_type_window_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11560,6 +13445,7 @@
    ],
    "base": "TopLevel",
    "rust_path": "ferroui_controls::WindowBase",
+   "entry": "ferro_type_window_base",
    "creatable": false,
    "control": true,
    "children": "content",
@@ -11582,6 +13468,7 @@
    ],
    "base": "ControlAutomationPeer",
    "rust_path": "ferroui_controls::automation::peers::WindowBaseAutomationPeer",
+   "entry": "ferro_type_window_base_automation_peer",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11599,6 +13486,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_controls::chrome::WindowDrawnDecorations",
+   "entry": "ferro_type_window_drawn_decorations",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11630,6 +13518,7 @@
    ],
    "base": "StyledElement",
    "rust_path": "ferroui_controls::chrome::WindowDrawnDecorationsContent",
+   "entry": "ferro_type_window_drawn_decorations_content",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11647,6 +13536,7 @@
    ],
    "base": "TemplatedControl",
    "rust_path": "ferroui_controls::WindowNotificationManager",
+   "entry": "ferro_type_window_notification_manager",
    "creatable": true,
    "control": true,
    "children": "none",
@@ -11666,6 +13556,7 @@
    ],
    "base": "Panel",
    "rust_path": "ferroui_controls::WrapPanel",
+   "entry": "ferro_type_wrap_panel",
    "creatable": true,
    "control": true,
    "children": "children",
@@ -11690,6 +13581,7 @@
    ],
    "base": "XamlLight",
    "rust_path": "ferroui_controls::media::XamlAmbientLight",
+   "entry": "ferro_type_xaml_ambient_light",
    "creatable": true,
    "control": false,
    "children": "none",
@@ -11711,6 +13603,7 @@
    ],
    "base": "Brush",
    "rust_path": "ferroui_base::media::XamlCompositionBrushBase",
+   "entry": "ferro_type_xaml_composition_brush_base",
    "creatable": false,
    "control": false,
    "children": "none",
@@ -11729,6 +13622,7 @@
    ],
    "base": null,
    "rust_path": "ferroui_base::media::XamlLight",
+   "entry": "ferro_type_xaml_light",
    "creatable": false,
    "control": false,
    "children": "none",

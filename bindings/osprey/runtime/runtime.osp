@@ -25,12 +25,31 @@ type Attr<M> = AttrText { attrTextProperty: int, attrTextValue: string }
     | AttrKey { attrKeyValue: int }
     | AttrOn { attrOnEvent: int, attrOnMessage: M }
     | AttrOnValue { attrValueEvent: int, attrValueProperty: int, attrValueMessage: M }
+    | AttrMemo { attrMemoVersion: int }
+    | AttrBind { attrBindProperty: int, attrBindSignal: int }
 
 // An element: a class (its type ID), attributes and children.
 type Element<M> = { elementType: int, elementAttrs: List<Attr<M>>, elementChildren: List<Element<M>> }
 
 // The key of an element among its siblings: an element keeps its control while its key stays.
 fn key<M>(value: int) -> Attr<M> = AttrKey { attrKeyValue: value }
+
+// Makes an element with a key a memo element: `version` says what its subtree shows (a
+// revision of the data, a hash of it). While the key and the version stay, the frame writes
+// one reuse record in place of the subtree and the library does not look into it; a new
+// version writes it again. Give a new version whenever anything in the subtree changes.
+fn memo<M>(version: int) -> Attr<M> = AttrMemo { attrMemoVersion: version }
+
+// The property of a value attribute bound to a signal (`bound(text(""), celsius)`): the element
+// takes the value of the signal, and follows its writes with no new frame (core.osp, signals).
+// The value of the attribute itself is not written.
+fn bound<M>(attr: Attr<M>, signal: int) -> Attr<M> = match attr {
+    AttrText { attrTextProperty, attrTextValue } => AttrBind { attrBindProperty: attrTextProperty, attrBindSignal: signal }
+    AttrNumber { attrNumberProperty, attrNumberValue } => AttrBind { attrBindProperty: attrNumberProperty, attrBindSignal: signal }
+    AttrInteger { attrIntegerProperty, attrIntegerValue } => AttrBind { attrBindProperty: attrIntegerProperty, attrBindSignal: signal }
+    AttrBool { attrBoolProperty, attrBoolValue } => AttrBind { attrBindProperty: attrBoolProperty, attrBindSignal: signal }
+    _ => attr
+}
 
 // ---- writing a frame ------------------------------------------------------------------------
 
@@ -39,6 +58,17 @@ fn keyOf<M>(attrs: List<Attr<M>>) -> int = match attrs {
     [first, ...rest] => match first {
         AttrKey { attrKeyValue } => attrKeyValue
         _ => keyOf(attrs: rest)
+    }
+}
+
+// The memo version of an element, if it has one.
+type MemoOf = NoMemo | MemoVersion { memoVersionValue: int }
+
+fn memoOf<M>(attrs: List<Attr<M>>) -> MemoOf = match attrs {
+    [] => NoMemo
+    [first, ...rest] => match first {
+        AttrMemo { attrMemoVersion } => MemoVersion { memoVersionValue: attrMemoVersion }
+        _ => memoOf(attrs: rest)
     }
 }
 
@@ -61,6 +91,11 @@ fn writeAttr<M>(attr: Attr<M>, tag: int) -> int = match attr {
         tag
     }
     AttrKey { attrKeyValue } => tag
+    AttrMemo { attrMemoVersion } => tag
+    AttrBind { attrBindProperty, attrBindSignal } => {
+        let _ = ferro_frame_bind(property: attrBindProperty, slot: attrBindSignal)
+        tag
+    }
     AttrOn { attrOnEvent, attrOnMessage } => {
         let _ = ferro_frame_on(event: attrOnEvent, tag: tag, valueProperty: 0)
         tag + 1
@@ -76,17 +111,37 @@ fn writeAttrs<M>(attrs: List<Attr<M>>, tag: int) -> int = match attrs {
     [first, ...rest] => writeAttrs(attrs: rest, tag: writeAttr(attr: first, tag: tag))
 }
 
-fn writeElement<M>(element: Element<M>, tag: int) -> int = {
-    let _ = ferro_frame_open(typeId: element.elementType, key: keyOf(attrs: element.elementAttrs))
+// Writes an element in full; a memo element with its memo record (`version`, the tag base).
+fn writeFull<M>(root: int, element: Element<M>, key: int, memo: MemoOf, tag: int) -> int = {
+    let _ = ferro_frame_open(typeId: element.elementType, key: key)
+    let _ = match memo {
+        NoMemo => 0
+        MemoVersion { memoVersionValue } => toInt(ferro_frame_memo(version: memoVersionValue, tagBase: tag))
+    }
     let next = writeAttrs(attrs: element.elementAttrs, tag: tag)
-    let after = writeChildren(children: element.elementChildren, tag: next)
+    let after = writeChildren(root: root, children: element.elementChildren, tag: next)
     let _ = ferro_frame_close()
     after
 }
 
-fn writeChildren<M>(children: List<Element<M>>, tag: int) -> int = match children {
+// Writes an element of the frame committed under `root`: a memo element that the last frame
+// under the root has with the same key and version as one reuse record (its subtree is not
+// written), anything else in full. The tag of the next event attribute.
+fn writeElement<M>(root: int, element: Element<M>, tag: int) -> int = {
+    let key = keyOf(attrs: element.elementAttrs)
+    let memo = memoOf(attrs: element.elementAttrs)
+    match memo {
+        NoMemo => writeFull(root: root, element: element, key: key, memo: memo, tag: tag)
+        MemoVersion { memoVersionValue } => {
+            let reused = if key == 0 { -1 } else { ferro_frame_reuse(root: root, key: key, version: memoVersionValue, tagBase: tag) }
+            if reused >= 0 { tag + reused } else { writeFull(root: root, element: element, key: key, memo: memo, tag: tag) }
+        }
+    }
+}
+
+fn writeChildren<M>(root: int, children: List<Element<M>>, tag: int) -> int = match children {
     [] => tag
-    [first, ...rest] => writeChildren(children: rest, tag: writeElement(element: first, tag: tag))
+    [first, ...rest] => writeChildren(root: root, children: rest, tag: writeElement(root: root, element: first, tag: tag))
 }
 
 // Commits `window` (a window element) as the frame of the application: shown the first time,
@@ -98,7 +153,7 @@ fn render<M>(window: Element<M>) -> Result<string, string> = {
         remainderByZero lhs => 0
     }
     let _ = ferro_frame_begin()
-    let _ = writeElement(element: window, tag: 1)
+    let _ = writeElement(root: 0, element: window, tag: 1)
     let status = ferro_frame_commit(root: 0)
     if toInt(status) == 0 { Success { value: "ok" } } else { failure() }
 }

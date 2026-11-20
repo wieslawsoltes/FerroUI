@@ -94,6 +94,11 @@ RESERVED = {
     "messageAt", "checkApi", "element", "attrs", "envSet", "getenv", "readResult", "report", "showWindow",
     "apiFingerprint", "abiVersion", "keyOf", "writeAttr", "writeAttrs", "writeElement", "writeChildren",
     "eventText", "seekAttrs", "seekElement", "seekChildren", "findKey", "dispatchEvent", "dispatchStart", "textAt", "typeAt",
+    "memo", "bound", "signalsInit", "signalText", "signalNumber", "signalInteger", "signalBool", "signalSetText",
+    "signalSetNumber", "signalSetInteger", "signalSetBool", "signalReadText", "signalReadNumber", "signalReadInteger",
+    "signalReadBool", "signalVersion", "signalBind", "signalWatch", "signalsApply",
+    "baseControl", "basePanel", "baseDecorator", "baseContentControl", "affectsMeasure", "affectsArrange",
+    "affectsRender", "controlClass", "numberProperty", "textProperty", "layoutResult",
 }
 
 # Osprey types of the C types of the model, for `extern fn` (#950: scalars, NUL-terminated
@@ -112,6 +117,16 @@ EXTERN_TYPES = {
     "callback:FerroEventFn": "fn(int, int, int) -> int",
     "callback:FerroStartFn": "fn(int) -> int",
     "callback:FerroPostFn": "fn(int) -> int",
+    # The callbacks of a control class (docs/c-abi.md, section 15): the data pointer of the
+    # instance (unused by Osprey, whose controls keep their state in registered properties), the
+    # handle, scalars, and the two `double *` of a layout result, which Osprey answers with
+    # `ferro_layout_result`.
+    "callback:FerroCreateFn": "fn(Ptr, int) -> int32",
+    "callback:FerroLayoutFn": "fn(Ptr, int, float, float, Ptr, Ptr) -> int32",
+    "callback:FerroRenderFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroNotifyFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroPointerFn": "fn(Ptr, int, int32, float, float, int) -> int32",
+    "callback:FerroKeyFn": "fn(Ptr, int, int32, int, int) -> int32",
 }
 
 # Functions whose `const char *` result can be NULL: Osprey strings cannot, so the binding
@@ -366,6 +381,7 @@ def generate_abi(model, names, selection):
         result = f" -> {returns}" if returns else ""
         lines += comment(function["doc"])
         lines.append(f"extern fn {function['name']}({', '.join(params)}){result}")
+    lines += generate_entries(model, selection)
     lines.append("// A null pointer, for the reserved options of ferro_app_run (from the runtime of Osprey).")
     lines.append("extern fn osprey_ffi_null() -> Ptr")
     lines.append("")
@@ -391,6 +407,30 @@ def generate_abi(model, names, selection):
     return "\n".join(lines).rstrip() + "\n", len(skipped)
 
 
+def generate_entries(model, selection):
+    """The entries of the classes the selection names (docs/c-abi.md, section 16) and
+    `registerTypes()`, which calls them: a library built without the tables of types knows the
+    classes registered by their entries, and an application linked to it keeps those alone. The
+    full bindings register nothing: the full library knows every class by name."""
+    lines = ["// registerTypes() -> int: registers the classes of the selection, with the units of the theme they",
+             "// need, before the application starts (`run` calls it): what a library built for the",
+             "// selection (without the tables of types) knows. A class that failed fails where it is created."]
+    entries = [] if selection.full else [cls["entry"] for cls in model["classes"]
+                                         if cls.get("entry") and selection.cls(cls)]
+    for entry in entries:
+        lines.append(f"extern fn {entry}() -> int")
+    if not entries:
+        lines.append("fn registerTypes() = 0")
+    else:
+        lines.append("fn registerTypes() = {")
+        for index, entry in enumerate(entries):
+            lines.append(f"    let id{index} = {entry}()")
+        lines.append("    0")
+        lines.append("}")
+    lines.append("")
+    return lines
+
+
 # ---- objects.osp (layer 1) --------------------------------------------------------------------
 
 def setter_call(kind, object_expr, prop_id, value_expr):
@@ -413,7 +453,7 @@ def signature(name, params, returns, text):
 def generate_objects(model, names, selection):
     lines = [HEADER, "//", "// Layer 1 of the Osprey bindings (docs/osprey.md): the fluent object model. A constructor per",
              "// class that can be created, a setter per property that takes the handle and returns it (setters",
-             "// chain with the pipe), a getter per property that returns a Result, and a helper per event",
+             "// chain with the pipe), a getter per property that returns a plain value, and a helper per event",
              "// that dispatches a tag to the one dispatcher of the application (core.osp).",
              "// A failed write is recorded by the library: `failure()` (core.osp) reads and clears it.",
              "", "namespace ferroobjects;", "", "import ferroui::*", ""]
@@ -500,12 +540,9 @@ def generate_objects(model, names, selection):
                 else:
                     read = f"ferro_get_f64_or(object: object, property: {prop['id']}, fallback: 0.0)"
                     type_ = "float"
-                lines += signature(name, "object: int", f"Result<{type_}, string>", f"reads {prop['name']} ({owners}).")
-                lines.append(f"fn {name}(object) = {{")
-                lines.append("    ferro_clear_error()")
-                lines.append(f"    let value = {read}")
-                lines.append("    readResult(value: value)")
-                lines.append("}")
+                lines += signature(name, "object: int", type_, f"reads {prop['name']} ({owners}); the fallback of"
+                                   " its kind when the read fails (`failure()` tells): a plain value, no Result.")
+                lines.append(f"fn {name}(object) = {read}")
                 counts["getters"] += 1
     lines.append("")
     lines.append("// ---- events --------------------------------------------------------------------------------")
@@ -522,7 +559,7 @@ def generate_objects(model, names, selection):
         lines += signature(name, "object: int, tag: int", "int", f"dispatches `tag` to the dispatcher of the"
                            f" application on every {event['name']} ({owners}). {doc}")
         lines.append(f"fn {name}(object, tag) = {{")
-        lines.append(f"    let _ = ferro_subscribe(object: object, event: {event['id']}, function: dispatchEvent, token: tag)")
+        lines.append(f"    let _ = ferro_subscribe_dispatch(object: object, event: {event['id']}, tag: tag)")
         lines.append("    object")
         lines.append("}")
         lines += signature(f"raise{pascal(event['words'])}", "object: int", "int", f"raises {event['name']} on the"
