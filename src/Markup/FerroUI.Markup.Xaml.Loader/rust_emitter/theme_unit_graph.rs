@@ -146,7 +146,15 @@ fn registers_outer_name(entry: Node<'_, '_>) -> bool {
             return true;
         }
         if tag.namespace() == Some(FERRO_XML_NAMESPACE)
-            && matches!(tag.name(), "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" | "ItemsPanelTemplate" | "FocusAdornerTemplate")
+            && matches!(
+                tag.name(),
+                "ControlTemplate"
+                    | "DataTemplate"
+                    | "TreeDataTemplate"
+                    | "ItemsPanelTemplate"
+                    | "FocusAdornerTemplate"
+                    | "WindowDrawnDecorationsTemplate"
+            )
         {
             template_end = node.range().end;
         }
