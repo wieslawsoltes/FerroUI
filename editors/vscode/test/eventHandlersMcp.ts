@@ -81,6 +81,9 @@ export async function verifyEventHandlers({ invoke, content }: McpFixture): Prom
     assert.match(doc.getText(), /Click="OnApplyClick"/);
     assert.match(rust.getText(), /fn OnApplyClick\(/);
     assert.ok(rust.getText().startsWith('// An unsaved Rust edit\n'));
+    assert.ok(doc.isDirty && rust.isDirty);
+    assert.equal(Buffer.from(await vscode.workspace.fs.readFile(xamlUri)).toString(), xamlSource);
+    assert.equal(Buffer.from(await vscode.workspace.fs.readFile(rustUri)).toString(), rustSource);
     assert.equal(rust.getText(asRange(plan.declaration.range)), 'OnApplyClick');
     const definitionAt = doc.positionAt(doc.getText().indexOf('OnApplyClick') + 2);
     await until(async () => {

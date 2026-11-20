@@ -14,6 +14,7 @@ let state: DetailsState = {};
 let contentKey = '';
 let request = 0;
 let pending: number | undefined;
+let pendingMessage: string | undefined;
 let error: string | undefined;
 
 filter.addEventListener('input', applyFilter);
@@ -25,6 +26,7 @@ window.addEventListener('message', ({ data }: MessageEvent<ToDetails>) => {
         render();
     } else if (data.request === pending) {
         pending = undefined;
+        pendingMessage = undefined;
         error = data.error;
         applyFilter();
     }
@@ -57,7 +59,7 @@ function applyFilter(): void {
         if (!row.hidden) count++;
     }
     list.toggleAttribute('inert', !state.frame || !items || pending !== undefined);
-    const message = error ?? (pending !== undefined ? 'Applying edit…' : state.message)
+    const message = error ?? pendingMessage ?? state.message
         ?? (count ? '' : items?.length ? 'No matches.' : view === 'events'
             ? state.target ? 'This control has no catalogued events.' : 'Select an authored control to browse its events.'
             : state.frame ? 'This document has no authored resource definitions.' : 'Open a XAML designer to browse resources.');
@@ -168,6 +170,7 @@ function editEvent(name: string, value: string | null): void {
 function edit(operation: NodeOperation): void {
     if (!state.target || pending !== undefined) return;
     pending = ++request;
+    pendingMessage = 'Applying edit…';
     error = undefined;
     vscode.postMessage({ type: 'edit', request, target: state.target, operation });
     applyFilter();

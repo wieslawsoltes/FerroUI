@@ -139,7 +139,7 @@ export class EventHandlers {
             edit.set(target.uri, edits.map(item => new vscode.TextEdit(exactRange(target, item.range), item.newText)));
         }
         signal?.throwIfAborted();
-        if (!await vscode.workspace.applyEdit(edit, { isRefactoring: true })) {
+        if (!await vscode.workspace.applyEdit(edit)) {
             throw new Error('VS Code could not apply the event handler to both buffers.');
         }
     }

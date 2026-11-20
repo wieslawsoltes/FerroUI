@@ -52,7 +52,14 @@ pub(crate) fn insert_registration(
             (_, index) => format!("_argument{}", index + 1),
         })
         .collect::<Vec<String>>();
-    lines.push((depth, format!("fn {name}({}) =>", parameters.join(", "))));
+    let declaration = format!("fn {name}({}) =>", parameters.join(", "));
+    if declaration.len() + closing.len() + depth * step.len() <= 100 {
+        lines.push((depth, declaration));
+    } else {
+        lines.push((depth, format!("fn {name}(")));
+        lines.extend(parameters.iter().map(|ty| (depth + 1, format!("{ty},"))));
+        lines.push((depth, ") =>".into()));
+    }
     lines.push((depth + 1, "|".into()));
     lines.push((depth + 2, format!("_this: &::ferroui_base::Ref<{class}>,")));
     for (argument, parameter) in arguments.iter().zip(parameters) {

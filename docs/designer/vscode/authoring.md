@@ -136,9 +136,13 @@ Open the Cargo project containing the XAML view and run **FerroUI: Build Project
 2. Choose **Create or open Rust handler** beside the event. For an unassigned event, accept the suggested name or enter a Rust identifier. The extension assigns the XAML attribute, adds the typed callback to the class’s `methods` list, and opens the declaration in the Rust editor. A named event uses its existing XAML spelling.
 3. Write the callback body in Rust, then save both buffers and rebuild the application. The new callback must be compiled into the next app process. [Choose a Run or Debug target](runtime.md)
 
+![The Events dock offers a handler name for the selected button](../images/vscode-create-event-handler.jpg)
+
 You can also put the cursor on an XAML event attribute and choose **Create Rust event handler** from Quick Fix. On a named event, use **Go to Definition** to open the registration, including one still in the unsaved Rust buffer. The Events source arrow opens the XAML attribute when a Rust declaration is unavailable.
 
 The XAML and Rust updates form one Undo step. Both source buffers stay open for review and save. The action checks revisions and preserves existing event expressions and objects. If the type’s registration has moved, build the Cargo schema again. [Studio source action](../native-controls.md#create-an-xaml-event-handler) · [MCP workflow](reference.md#create-an-event-handler-with-mcp)
+
+![The Events dock reveals the unsaved Rust registration while the native canvas stays visible](../images/vscode-event-handler-source.jpg)
 
 ## Trace an effective property value
 
