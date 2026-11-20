@@ -1,5 +1,3 @@
-/Users/wieslawsoltes/.codex/worktrees/adee/FerroUI/src/FerroUI.Designer/workspace_file_move.rs:
-
 use super::{
     DesignerWorkspace,
     project::{Tab, document_identity},

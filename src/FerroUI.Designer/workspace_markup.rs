@@ -1,5 +1,3 @@
-/Users/wieslawsoltes/.codex/worktrees/adee/FerroUI/src/FerroUI.Designer/workspace_markup.rs:
-
 use crate::{DesignerAsset, registered_designer_assets};
 use ferroui_designer_language::Schema;
 use ferroui_designer_project::{BuildMetadata, CargoBuildConfiguration, MarkupCatalog, file_path};

@@ -1,5 +1,3 @@
-/Users/wieslawsoltes/.codex/worktrees/adee/FerroUI/src/FerroUI.Designer/workspace_file_move_review.rs:
-
 use super::{DesignerWorkspace, resolution::MoveTarget};
 use crate::{
     icons,
