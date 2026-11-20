@@ -98,6 +98,12 @@ Build the package’s XAML schema. Call `designer_event_handler` with the curren
 
 Call `designer_scaffold_handler` with the same target, `handler`, and `expected_rust_version` from the read. The request requires write access. It updates the workspace buffers as one edit and returns the declaration location. Use `designer_history` in VS Code or `designer_undo` in Studio to undo the change. Save and rebuild when the handler is ready to run. [Events workflow](authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+### Extract a resource dictionary with MCP
+
+Call `designer_dictionary_extraction` with an authored `node` and the current `expected_revision`. Use the `session` from `designer_open` in VS Code. The result includes the source range, entry count, and suggested sibling filename. Pass `file_name` to preview the versioned `edit`, the `file` to create, and the `review` identifier.
+
+Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `file_name`, and `review`. The write creates the dictionary and updates the view in one editor transaction. Use `designer_history` in VS Code or `designer_undo` in Studio from the original view. When a source or destination changes, read the target again and review the new plan. [Resources workflow](authoring.md#extract-a-resource-dictionary)
+
 On the running app’s MCP connection, call `get_property_trace` with `node_id` and `property`. Contributor locations use the runtime’s one-based source coordinates and revision fingerprint when available. Read the trace again after interacting with the preview or the app. [Authoring guide](authoring.md#trace-an-effective-property-value)
 
 ### Read Preview Checks with MCP
@@ -115,6 +121,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
 | Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Show Events**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
+| Extract an inline XAML dictionary | **Extract Resource Dictionary…**, **Review New Dictionary**, **Apply Extraction**, **Cancel Extraction** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |

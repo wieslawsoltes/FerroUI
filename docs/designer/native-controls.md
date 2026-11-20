@@ -69,6 +69,12 @@ Choose a palette swatch to open the native color editor. Enter a literal or choo
 
 Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+### Extract an XAML resource dictionary
+
+Open the owning project. In **Split** or **Code**, put the caret on the resource, its inline dictionary, or the control that owns the `Resources` property. Choose the file icon **Extract resource dictionary** in the source toolbar. Enter the sibling filename and choose **Review extraction**. Compare **Original source** and **Source replacement**, then read the new file in its named tab.
+
+Choose **Apply extraction** to create the file and update the view. The original view stays open for review and save. Undo from that view restores the inline resources and removes the generated dictionary while its file and contents match the creation. Use Redo to create it again. If you edit the generated dictionary, undo those edits before reversing the extraction. [VS Code and MCP workflows](vscode/authoring.md#extract-a-resource-dictionary)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

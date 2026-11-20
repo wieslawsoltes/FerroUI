@@ -121,7 +121,7 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | --- | --- |
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
-| **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. In Studio, create a resource or rename it against the resolved scope. **Promote to resource** creates the entry and replaces the literal in one undo step. |
+| **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Extract the dictionary containing a resource when you want a separate reusable file. **Promote to resource** creates an entry and replaces a literal in one undo step. |
 | **Library** | Filter authored components, templates, themes, styles, and dictionaries by kind. **Find Definition in Designer** searches them and opens a scoped native preview. Use the definition’s actions to reveal its declaration and references. XAML authors can create a data or control template and duplicate or rename applicable resources. |
 | **Assets** | Browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. In **Behaviors**, attach routed-event or data-condition triggers and configure their actions in supported XAML. |
@@ -143,6 +143,20 @@ You can also put the cursor on an XAML event attribute and choose **Create Rust 
 The XAML and Rust updates form one Undo step. Both source buffers stay open for review and save. The action checks revisions and preserves existing event expressions and objects. If the type’s registration has moved, build the Cargo schema again. [Studio source action](../native-controls.md#create-an-xaml-event-handler) · [MCP workflow](reference.md#create-an-event-handler-with-mcp)
 
 ![The Events dock reveals the unsaved Rust registration while the native canvas stays visible](../images/vscode-event-handler-source.jpg)
+
+## Extract a resource dictionary
+
+1. Open the XAML view in a trusted workspace. Place the caret on the owning control, its `Resources` property, or a resource in the dictionary. Choose **Refactor…** and **Extract Resource Dictionary…**. In the **Resources** dock, the file icon beside a resource offers the same action for its dictionary.
+2. Enter a name for the new `.xaml` file beside the view. Review the native diff for the original view. Choose **Review New Dictionary** in the editor toolbar to read the file that will be created.
+3. Choose **Apply Extraction** from either review tab. The dictionary is created and the view receives a `ResourceInclude`. Save the view when you are ready for the change to reach the application. Use **Cancel Extraction** to close the review. Undo or Redo in the original view steps through the two-file change together.
+
+The action moves the whole inline dictionary, including comments, namespace aliases, and contained templates. An inline dictionary under `MergedDictionaries` is replaced in its original position. Sibling files keep existing relative asset and include paths. Static references inside the moved dictionary must resolve there or through its includes. If an expression belongs to the view’s namescope or code-behind, keep it with the view. The action checks for changed source and occupied destinations when you apply. [Studio workflow](../native-controls.md#extract-an-xaml-resource-dictionary) · [MCP workflow](reference.md#extract-a-resource-dictionary-with-mcp)
+
+![The VS Code diff shows the inline palette being replaced with a resource include](../images/vscode-dictionary-extraction-diff.jpg)
+
+![The proposed dictionary opens in a read-only tab with Apply and Cancel in the toolbar](../images/vscode-extracted-dictionary-review.jpg)
+
+![After Apply, the view references the new resource dictionary and the native preview still renders the palette](../images/vscode-extracted-dictionary-applied.jpg)
 
 ## Trace an effective property value
 
