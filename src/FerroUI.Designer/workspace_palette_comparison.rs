@@ -1,13 +1,15 @@
 //! Scoped palette comparison in the native Studio definition inspector.
-use super::{report, text, tool_button, Context, SOURCE};
-use crate::style_palette_comparison::{ComparedColor, PaletteComparison};
+use super::{Context, SOURCE, report, text, tool_button};
 use crate::PreviewTheme;
+use crate::style_palette_comparison::{ComparedColor, PaletteComparison};
+use ferroui_base::Ref;
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::{Color, SolidColorBrush};
-use ferroui_base::Ref;
+use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Border, ColumnDefinitions, Control, Grid, ScrollViewer, StackPanel, TextBlock,
+    Border, ColumnDefinitions, Control, Grid, ScrollViewer, StackPanel, TextBlock, ToolTip,
 };
+use std::rc::Rc;
 
 const THEMES: [PreviewTheme; 3] = [
     PreviewTheme::Light,
@@ -73,9 +75,10 @@ fn color_cell(
     let cell = StackPanel::new();
     cell.set_orientation(Orientation::Horizontal);
     cell.set_spacing(3.0);
-    let value = color.map_or("Unresolved", |color| {
-        color.value.as_deref().unwrap_or("Expression")
-    });
+    let value = match color {
+        Some(color) if color.issue.is_none() => color.value.as_deref().unwrap_or("Expression"),
+        _ => "Unresolved",
+    };
     if let Some(color) = Color::try_parse(value) {
         let swatch = Border::new();
         swatch.set_width(12.0);
@@ -84,19 +87,45 @@ fn color_cell(
         swatch.set_background(Some(SolidColorBrush::with_color(color).into()));
         cell.children().add(swatch.upcast::<Control>());
     }
-    cell.children().add(text(value).upcast::<Control>());
-    if let Some(source) = color.and_then(|color| color.source.clone()) {
-        let open = tool_button(
-            SOURCE,
-            &format!("Open {} declaration for {key}", theme.label()),
-        );
+    let label = text(value);
+    cell.children().add(label.clone().upcast::<Control>());
+    if let Some(color) = color {
+        let path = color
+            .path
+            .iter()
+            .map(|step| match step.reference {
+                Some(reference) => format!("{reference} {}", step.key),
+                None => step.key.clone(),
+            })
+            .collect::<Vec<_>>()
+            .join(" → ");
+        let name = format!("Open {} declaration for {key}", theme.label());
+        let details = [
+            Some(name.as_str()),
+            Some(value),
+            (!path.is_empty()).then_some(path.as_str()),
+            color.issue.as_deref(),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" · ");
+        let open = tool_button(SOURCE, &name);
+        ToolTip::set_tip(&label, Some(Rc::new(details.clone())));
+        ToolTip::set_tip(&open, Some(Rc::new(details.clone())));
+        AutomationProperties::set_name(&open, Some(&details));
+        let source = color.source.clone();
+        let span = color.span;
         let context = context.clone();
         let status = status.downgrade();
         open.click(move |_, _| {
-            report(
-                status.upgrade().as_ref(),
-                context.open_source(source.clone()),
-            )
+            let result = match source.clone() {
+                Some(source) => context.open_source(source),
+                None => context
+                    .workspace()
+                    .map(|workspace| workspace.select_source_span(span)),
+            };
+            report(status.upgrade().as_ref(), result);
         });
         cell.children().add(open.upcast::<Control>());
     }

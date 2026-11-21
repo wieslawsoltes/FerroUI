@@ -43,11 +43,19 @@ impl ComponentResourceResolution {
 
 #[derive(Default)]
 pub(super) struct Lookup<'a> {
-    candidates: BTreeSet<ComponentResourceLocation<'a>>,
+    pub(super) candidates: BTreeSet<ComponentResourceLocation<'a>>,
     may_be_missing: bool,
-    external: bool,
+    pub(super) external: bool,
     /// The authored scope which determines every variant, when it can be proven.
     provider: Option<ComponentResourceLocation<'a>>,
+    pub(super) origin: Option<ValueOrigin<'a>>,
+}
+
+/// Value queries also need the ambient parent stack and the outer lookup owner.
+pub(super) struct ValueOrigin<'a> {
+    pub scope: ResourceScope<'a>,
+    pub found_at: Option<NodeId>,
+    pub mounts: Vec<(ResourceScope<'a>, NodeId)>,
 }
 impl<'a> Lookup<'a> {
     pub(super) fn unique(&self) -> Option<ComponentResourceLocation<'a>> {
@@ -73,11 +81,9 @@ impl<'a> Lookup<'a> {
     }
     /// Join mutually possible theme/provider outcomes.
     fn alternative(&mut self, other: Self) {
-        self.provider = if self.candidates.is_empty() && !self.may_be_missing && !self.external {
-            other.provider()
-        } else {
-            None
-        };
+        let first = self.candidates.is_empty() && !self.may_be_missing && !self.external;
+        self.provider = if first { other.provider() } else { None };
+        self.origin = if first { other.origin } else { None };
         self.candidates.extend(other.candidates);
         self.may_be_missing |= other.may_be_missing;
         self.external |= other.external;
@@ -85,7 +91,9 @@ impl<'a> Lookup<'a> {
     /// Later scopes are reachable only along lookup paths that can still miss.
     fn fallback(&mut self, other: Self) {
         if self.may_be_missing {
-            self.provider = if self.candidates.is_empty() && !self.external { other.provider() } else { None };
+            let first = self.candidates.is_empty() && !self.external;
+            self.provider = if first { other.provider() } else { None };
+            self.origin = if first { other.origin } else { None };
             self.candidates.extend(other.candidates);
             self.may_be_missing = other.may_be_missing;
             self.external |= other.external;
@@ -209,13 +217,17 @@ pub(super) fn resolve<'a>(
             .ast()
             .node(id)
             .ok_or_else(|| ToolError("Missing resource ancestor".into()))?;
-        result.fallback(lookup_scope(
+        let mut candidate = lookup_scope(
             scope,
             node,
             key,
             context,
             &mut BTreeSet::new(),
-        ));
+        );
+        if let Some(origin) = &mut candidate.origin {
+            origin.found_at = Some(id);
+        }
+        result.fallback(candidate);
         ancestor = node.parent;
     }
     Ok(result)
@@ -264,7 +276,7 @@ fn lookup_owner<'a>(
     lookup_children(scope, &children, key, context, seen)
 }
 
-fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
+pub(super) fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
     let Some(owner) = node.parent.and_then(|id| document.ast().node(id)) else {
         return false;
     };
@@ -295,6 +307,7 @@ fn lookup_children<'a>(
     if !local.is_empty() {
         return Lookup {
             candidates: local,
+            origin: scope.track_value.then(|| ValueOrigin { scope, found_at: None, mounts: Vec::new() }),
             ..Lookup::default()
         };
     }
@@ -470,7 +483,11 @@ fn lookup_dictionary<'a>(
         if let Some(root) = ast.node(ast.root()).filter(|node| {
             framework(node) && node.local_name() == "ResourceDictionary"
         }) {
-            return lookup_scope(included, root, key, context, seen);
+            let mut result = lookup_scope(included, root, key, context, seen);
+            if let Some(origin) = &mut result.origin {
+                origin.mounts.push((scope, variant.id));
+            }
+            return result;
         }
     }
     Lookup::external()

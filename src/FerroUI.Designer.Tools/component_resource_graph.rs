@@ -32,6 +32,15 @@ pub(super) struct ResourceScope<'a> {
     pub address: &'a str,
     source_uri: Option<&'a str>,
     sources: Option<&'a dyn ComponentResourceSources>,
+    mounted_theme: Option<ThemeDeclaration<'a>>,
+    pub track_value: bool,
+}
+
+/// An included provider inherits the nearest authored theme from its mount point.
+#[derive(Clone, Copy)]
+pub(super) struct ThemeDeclaration<'a> {
+    pub document: &'a Document,
+    pub node: &'a Node,
 }
 
 impl<'a> ResourceScope<'a> {
@@ -40,7 +49,7 @@ impl<'a> ResourceScope<'a> {
         address: &'a str,
         sources: Option<&'a dyn ComponentResourceSources>,
     ) -> Self {
-        Self { document, address, source_uri: None, sources }
+        Self { document, address, source_uri: None, sources, mounted_theme: None, track_value: false }
     }
 
     pub fn location(self, node: NodeId) -> ComponentResourceLocation<'a> {
@@ -48,7 +57,7 @@ impl<'a> ResourceScope<'a> {
     }
 
     pub fn authored(source: &IncludedResourceDocument<'a>, sources: &'a dyn ComponentResourceSources) -> Self {
-        Self { document: source.document, address: source.address, source_uri: Some(source.uri), sources: Some(sources) }
+        Self { document: source.document, address: source.address, source_uri: Some(source.uri), sources: Some(sources), mounted_theme: None, track_value: false }
     }
 
     pub fn include(self, node: &Node) -> Option<Self> {
@@ -57,7 +66,22 @@ impl<'a> ResourceScope<'a> {
             document: source.document,
             address: source.address,
             source_uri: Some(source.uri),
+            mounted_theme: self.track_value.then(|| self.theme_at(node.id)).flatten(),
             ..self
         })
+    }
+
+    pub fn theme_at(self, at: NodeId) -> Option<ThemeDeclaration<'a>> {
+        let document = self.document;
+        let mut current = Some(at);
+        while let Some(node) = current.and_then(|id| document.ast().node(id)) {
+            current = node.parent;
+            if current.and_then(|id| document.ast().node(id)).is_some_and(|parent| {
+                references::dictionary_property(document, parent, "ThemeDictionaries")
+            }) {
+                return Some(ThemeDeclaration { document, node });
+            }
+        }
+        self.mounted_theme
     }
 }

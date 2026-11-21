@@ -135,6 +135,19 @@ pub fn palette_color(document: &Document, node: NodeId) -> Result<Option<Palette
     }))
 }
 
+/// Include keyed aliases in comparisons. Their target determines whether they are colors.
+pub fn palette_resource_keys(document: &Document) -> impl Iterator<Item = String> + '_ {
+    document.ast().elements().filter_map(|node| {
+        if super::components::ResourceValue::is_static_alias(document, node) {
+            literal_key(node)
+        } else if color_kind(node).is_some() {
+            palette_color(document, node.id).ok().flatten().map(|color| color.key)
+        } else {
+            None
+        }
+    })
+}
+
 pub fn resolve_palette_color(
     document: &Document,
     owner: NodeId,

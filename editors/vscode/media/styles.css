@@ -65,11 +65,13 @@
 }
 .palette-picker { cursor: pointer; }
 .palette-comparison-scroll { overflow-x: auto; }
-.palette-comparison { width: 100%; border-collapse: collapse; font-size: 11px; }
+.palette-comparison { width: 100%; min-width: 235px; table-layout: fixed; border-collapse: collapse; font-size: 11px; }
+.palette-comparison:has(thead th:nth-child(4)) { min-width: 284px; }
 .palette-comparison :is(td, th) { text-align: left; padding: 6px 3px; }
 .palette-comparison tr:not(:first-child), .palette-comparison tbody { border-top: 1px solid var(--vscode-widget-border, #80808040); }
 .palette-comparison th { color: var(--vscode-descriptionForeground); font-weight: 600; }
-.palette-comparison tbody th { overflow-wrap: anywhere; }
+.palette-comparison thead th:first-child { width: 32%; }
+.palette-comparison tbody th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .palette-comparison td > div { display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
 .palette-sample { display: flex; align-items: center; gap: 3px; height: 22px; }
 .palette-sample .row-action { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; }

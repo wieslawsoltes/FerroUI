@@ -65,8 +65,9 @@ export async function verifyHostedStyles(preview: NativePreview, update: (revisi
         await assert.rejects(plan(updated, target, { action: 'remove' }), /buffer changed/);
         const { resources } = await preview.hostedStyles<HostedStyleResources>(updated, { action: 'resources', target, property: 'Foreground' });
         assert.ok(resources.some(resource => resource.key === 'ReviewAccent'));
-        const accented = getDraft(await plan(updated, target, { action: 'resource', property: 'Foreground', key: 'ReviewAccent', dynamic: false }, typed), typed);
-        assert.equal(accented, typed.replace('Value="#FF233F67"', `Value="{StaticResource 'ReviewAccent'}"`));
+        assert.ok(resources.some(resource => resource.key === 'ReviewAccentAlias' && resource.type_name === 'SolidColorBrush'));
+        const accented = getDraft(await plan(updated, target, { action: 'resource', property: 'Foreground', key: 'ReviewAccentAlias', dynamic: false }, typed), typed);
+        assert.equal(accented, typed.replace('Value="#FF233F67"', `Value="{StaticResource 'ReviewAccentAlias'}"`));
         const colored = await render(3002, accented);
         assert.notEqual(colored.image.png, updated.image.png);
 

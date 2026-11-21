@@ -22,6 +22,7 @@ pub use canvas_guides::{CANVAS_MIN_ZOOM, CANVAS_RULER, CanvasGuide, CanvasGuideA
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference, ControlTemplatePart,
     ComponentResourceContext, ComponentResourceLocation, ComponentResourceResolution,
+    ResourceValue, ResourceValueStep, ResourceValueTrace,
     ScopedResourceResolution, AuthoredResourceScope, scoped_resource_resolution,
     resource_move_entry, resource_move_scope, resource_move_fragment, link_resource_dictionary,
     ComponentResourceSources, IncludedResourceDocument, ItemTemplateChange, ItemTemplateDeclaration,

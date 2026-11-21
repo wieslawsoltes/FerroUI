@@ -73,7 +73,16 @@ export interface PaletteColor {
     range: Range;
 }
 export interface PaletteColumn { layer: PaletteLayer; declaration?: number | null; unavailable?: string; colors: PaletteColor[] }
-export interface ResolvedColor { node?: number; value?: string | null; scope?: string | null; source?: StyleSource }
+export interface ResolvedColor {
+    node?: number;
+    value?: string | null;
+    scope?: string | null;
+    source?: StyleSource;
+    sourceAddress?: string;
+    range?: Range;
+    path?: { key: string; reference?: 'StaticResource' | 'DynamicResource' }[];
+    issue?: string;
+}
 export interface PaletteSheet {
     owner: number;
     layers: PaletteColumn[];
@@ -98,7 +107,7 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'definition' | 'scope' | 'references'; node: number }
     | { type: 'new'; kind: 'style' | 'theme' }
     | { type: 'included-sources'; page: 'styles' | 'palette' }
-    | { type: 'included-color'; key: string; theme: CanvasTheme }
+    | { type: 'color-source'; key: string; theme: CanvasTheme }
     | { type: 'return-to-consumer' }
     | { type: 'selector'; value: string }
     | { type: 'base'; base: Base | null }

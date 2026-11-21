@@ -97,14 +97,19 @@ function comparison(sheet: PaletteSheet, filter: string, send: (action: StylesAc
 function appendResolved(cell: HTMLTableCellElement, color: ResolvedColor | null | undefined,
     key: string, theme: CanvasTheme, send: (action: StylesAction) => void): void {
     const content = create('div');
-    const value = color?.value ?? (color ? 'Expression' : 'Unresolved');
-    content.title = [value, color?.scope].filter(Boolean).join(' · ');
+    const value = color?.value ?? (color && !color.issue ? 'Expression' : 'Unresolved');
+    const path = color?.path?.map(step => step.reference ? `${step.reference} ${step.key}` : step.key).join(' → ');
+    const details = [value, path, color?.scope, color?.issue].filter(Boolean).join(' · ');
+    content.title = details;
     const sample = create('div');
     sample.className = 'palette-sample';
     sample.append(swatch(color?.value ?? undefined));
-    if (color?.source) {
-        sample.append(actionButton('go-to-file', `Open ${canvasThemeLabels[theme]} declaration for ${key}`,
-            () => send({ type: 'included-color', key, theme })));
+    if (color?.source || color?.range) {
+        const reveal = actionButton('go-to-file', `Open ${canvasThemeLabels[theme]} declaration for ${key}`,
+            () => send({ type: 'color-source', key, theme }));
+        reveal.title += ` · ${details}`;
+        reveal.setAttribute('aria-description', details);
+        sample.append(reveal);
     }
     const label = create('span');
     label.textContent = value;

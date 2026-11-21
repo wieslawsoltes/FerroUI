@@ -10,7 +10,7 @@ Open an XAML view in **Design** and run **FerroUI: Show Styles & Themes**. You c
 1. In **Styles**, select a definition. The list includes its declaring scope. Select a control on the canvas or in Outline to make its style host and ancestors available when creating a style.
 2. Choose **New Style or Control Theme**. For a style, choose the host and enter a selector such as `Border.card`. To create a child style within a style or theme, start the selector with `^`, such as `^:pointerover`. For a control theme, choose a resource owner and provide the key and target type.
 3. Edit the **Selector** of a style or choose a compatible theme under **Based on**. The base theme must resolve from the definition's scope and use the same target type or a base type. Choices that would create a cycle are unavailable.
-4. Choose **Add setter** and select a property. Edit existing literal values in the setter rows. Use the link icon to choose a visible resource for a compatible property. A **Dynamic Resource** follows theme changes. A **Static Resource** resolves when the definition loads. Use the source arrow to open a binding, object value, or setter declaration.
+4. Choose **Add setter** and select a property. Edit existing literal values in the setter rows. Use the link icon to choose a visible resource for a compatible property. Keyed static aliases appear when their target type is compatible. The setter keeps the alias key. A **Dynamic Resource** follows theme changes. A **Static Resource** resolves when the definition loads. Use the source arrow to open a binding, object value, or setter declaration.
 5. Use **Preview definition on canvas** to sample the definition. Return to the document to see it applied to its authored controls. In **Properties**, use **Trace value** to see the actual winning setter or resource on a selected control. [Trace a value](authoring.md#trace-an-effective-property-value)
 
 Each accepted action takes one Undo step. For a keyed style or control theme, use the resource actions in **Library** to duplicate the definition or review a rename across consuming XAML files. [Resource rename](authoring.md#rename-a-resource-across-xaml-files)
@@ -32,6 +32,14 @@ On the sample, compare `ActionSurface` in Light and Dark. Change its Dark value 
 ![The palette resolves each color in Light and Dark while the canvas renders in Dark](../images/vscode-palette-comparison.jpg)
 
 [A Dark palette edit with the exact XAML value selected](../images/vscode-dark-palette-edit.jpg)
+
+### Follow a color alias
+
+In [StylePalette.xaml](../../../editors/vscode/test/fixtures/StylePalette.xaml), filter **Compare theme colors** for `TeamAccent`. Its `StaticResource` points to `ActiveAccent`, a brush whose `Color` uses `DynamicResource AccentInk`. Hover the source icon or focus it with the keyboard to inspect the chain and open the authored `AccentInk` value for that theme. Switch the canvas between Light and Dark to see the **Team palette** title change with the same resource.
+
+The comparison reads static references in their declaring dictionary and dynamic brush colors from their resource host. It follows accepted includes and theme fallbacks. A brush whose reference cannot be verified shows **Unresolved** with the reason. Edit the literal in its owning layer to keep the alias and its consumers intact. [App Preview palette](runtime.md#edit-a-palette-in-app-preview) · [Palette MCP tools](reference.md#edit-styles-and-palettes-with-mcp)
+
+![The palette compares TeamAccent beside its Dark color declaration and the native preview](../images/vscode-palette-resource-alias.jpg)
 
 ### Add a High contrast color
 

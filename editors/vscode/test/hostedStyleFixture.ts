@@ -27,6 +27,7 @@ export const authoredStyles = `<Styles xmlns="https://github.com/ferroui" xmlns:
 
 const palette = `<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <SolidColorBrush x:Key="ReviewAccent" Color="#FF247D60"/>
+  <StaticResource x:Key="ReviewAccentAlias" ResourceKey="ReviewAccent"/>
   <ControlTheme x:Key="StandardMessage" TargetType="TextBlock"><Setter Property="Foreground" Value="#FF233F67"/></ControlTheme>
   <ControlTheme x:Key="ApprovedMessage" TargetType="TextBlock"><Setter Property="Foreground" Value="#FF247D60"/></ControlTheme>
   <ControlTheme x:Key="WrongControl" TargetType="Border"/>

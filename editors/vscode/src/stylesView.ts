@@ -173,9 +173,10 @@ export class StylesView {
                     if (chosen) await context.present('designer_open_style_source', { source: chosen.source });
                     return;
                 }
-                case 'included-color': {
+                case 'color-source': {
                     const color = palette?.comparison.find(row => row.key === action.key)?.[action.theme];
                     if (color?.source) await context.present('designer_open_style_source', { source: color.source });
+                    else if (color?.range) await context.revealRange(color.range);
                     return;
                 }
                 case 'return-to-consumer': {

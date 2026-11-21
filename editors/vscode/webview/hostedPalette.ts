@@ -204,10 +204,13 @@ export class HostedPaletteView {
                 break;
             case 'references': this.send({ action: 'references', target, node: action.node }); break;
             case 'reveal': this.send({ action: 'locate', address: target.address, range: action.range }); break;
-            case 'included-color': {
-                const source = this.sheet?.comparison.find(row => row.key === action.key)?.[action.theme]?.source;
-                const file = this.documents.find(file => file.uri === source?.uri);
-                if (file && source) this.send({ action: 'locate', address: file.address, range: source.range });
+            case 'color-source': {
+                const color = this.sheet?.comparison.find(row => row.key === action.key)?.[action.theme];
+                if (!color) break;
+                const address = color.sourceAddress ?? (color.source
+                    ? this.documents.find(file => file.uri === color.source?.uri)?.address : target.address);
+                const range = color.range ?? color.source?.range;
+                if (address && range) this.send({ action: 'locate', address, range });
                 break;
             }
         }

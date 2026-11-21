@@ -44,16 +44,29 @@ export async function verifyStylesMcp({ invoke, content }: McpFixture): Promise<
     assert.equal(accent?.light?.value, '#FF295DC0');
     assert.equal(accent?.dark?.value, '#FF537BE1');
     assert.notEqual(accent?.light?.node, accent?.dark?.node);
-    const live = async (dark: boolean) => {
+    const alias = palette.comparison.find(row => row.key === 'TeamAccent');
+    assert.ok(alias?.light && alias.dark);
+    assert.equal(alias.light.value, '#FF145095');
+    assert.equal(alias.dark.value, '#FF8DC7F7');
+    assert.deepEqual(alias.dark.path, [
+        { key: 'TeamAccent' }, { key: 'ActiveAccent', reference: 'StaticResource' }, { key: 'AccentInk', reference: 'DynamicResource' },
+    ]);
+    assert.ok(alias.dark.range);
+    assert.equal(document.getText(asRange(alias.dark.range)), '#FF8DC7F7');
+    const { resources: choices } = await read<{ resources: { node: number; key: string }[] }>('designer_style_resources', { owner: style.node, property: 'Background' });
+    assert.ok(choices.some(choice => choice.key === 'TeamAccent'));
+    const live = async (dark: boolean, name = 'ApplyPalette', property = 'Background') => {
         content(await invoke('designer_view', { session, dark }));
         await wait();
         const { nodes } = content<{ nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
-        const button = nodes.find(node => node.name === 'ApplyPalette');
+        const button = nodes.find(node => node.name === name);
         assert.ok(button);
-        return (await read<{ effective: string }>('designer_property_trace', { node: button.id, property: 'Background' })).effective;
+        return (await read<{ effective: string }>('designer_property_trace', { node: button.id, property })).effective;
     };
     assert.equal(await live(false), '#FF295DC0');
     assert.equal(await live(true), '#FF537BE1');
+    assert.equal(await live(false, 'PaletteTitle', 'TextElement.Foreground'), alias.light.value);
+    assert.equal(await live(true, 'PaletteTitle', 'TextElement.Foreground'), alias.dark.value);
     assert.equal(document.getText(), original);
     revision = await wait();
     content(await edit('designer_palette_edit', revision, {

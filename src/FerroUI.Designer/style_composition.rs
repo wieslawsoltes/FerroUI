@@ -14,7 +14,7 @@ use ferroui_designer_tools::component_styles::{authored_setters, plan_style_chan
 use ferroui_designer_tools::theme_variants::HighContrastProvider;
 use ferroui_designer_tools::{
     component_property_attribute, component_resource_expression, resolve_component_resource,
-    ComponentAction, ComponentEntry, ComponentKind,
+    ComponentAction, ComponentEntry, ComponentKind, ComponentResourceSources, ResourceValue,
 };
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
 use std::rc::Rc;
@@ -314,14 +314,29 @@ impl DesignerSession {
         self.ensure_style_document()?;
         let native = setter_property(self.document(), owner, property)
             .ok_or("Select a known writable property")?;
+        let document = self.document();
+        let includes = self.accepted_preview_includes().map(crate::runtime_include_sources::IncludeLookup);
+        let sources = includes.as_ref().map(|includes| includes as &dyn ComponentResourceSources);
+        let context = self.component_resource_context(owner);
         Ok(self
             .visible_component_resources(owner)?
             .into_iter()
-            .filter(|entry| {
-                entry.key.is_some()
-                    && self.document().ast().node(entry.node).is_some_and(|node| {
-                        crate::editors::resource_is_compatible(native, node) == Some(true)
-                    })
+            .filter_map(|mut entry| {
+                let key = entry.key.as_deref()?;
+                let candidate = document.ast().node(entry.node)?;
+                if !ResourceValue::is_static_alias(document, candidate) {
+                    return (crate::editors::resource_is_compatible(native, candidate) == Some(true))
+                        .then_some(entry);
+                }
+                let target = ResourceValue::lookup(document, self.document_uri(), sources, owner, key, context.as_ref())
+                    .ok().flatten().filter(|value| value.location().node == entry.node && value.location().uri.is_none())?
+                    .alias_target(key, context.as_ref())?;
+                let terminal = target.document().ast().node(target.location().node)?;
+                if crate::editors::resource_is_compatible(native, terminal) != Some(true) {
+                    return None;
+                }
+                entry.type_name = format!("{{{}}}{}", terminal.namespace_uri.as_deref().unwrap_or(""), terminal.local_name());
+                Some(entry)
             })
             .collect())
     }

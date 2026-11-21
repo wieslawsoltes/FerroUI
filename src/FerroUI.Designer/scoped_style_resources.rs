@@ -6,7 +6,7 @@ use ferroui_designer_language::{Schema, FRAMEWORK_NAMESPACE};
 use ferroui_designer_project::PreviewIncludes;
 use ferroui_designer_tools::{
     component_resource_location, component_styles::authored_base_key, scoped_resource_resolution,
-    ComponentCatalog, ComponentKind,
+    ComponentCatalog, ComponentKind, ResourceValue,
 };
 use serde_json::{json, Value};
 use std::collections::BTreeSet;
@@ -108,14 +108,23 @@ impl StyleResources<'_> {
         }
         let mut types = BTreeSet::new();
         for location in lookup.candidates {
-            let resource = self
-                .at(location.address)
-                .and_then(|document| document.ast().node(location.node))
+            let document = self.at(location.address).ok_or("The authored resource source is unavailable")?;
+            let resource = document.ast().node(location.node)
                 .ok_or("The authored resource source is unavailable")?;
-            if !field.accepts_resource(self.schema, resource) {
+            let terminal = if ResourceValue::is_static_alias(document, resource) {
+                ResourceValue::lookup(self.document, self.address, Some(&sources), node, key, None)
+                    .map_err(|error| error.to_string())?
+                    .filter(|value| value.location() == location)
+                    .and_then(|value| value.alias_target(key, None))
+                    .and_then(|value| value.document().ast().node(value.location().node))
+                    .ok_or("Choose an alias with an unambiguous authored target")?
+            } else {
+                resource
+            };
+            if !field.accepts_resource(self.schema, terminal) {
                 return Err("Choose a resource compatible with the setter in each theme".into());
             }
-            types.insert(resource.local_name());
+            types.insert(terminal.local_name());
         }
         Ok(types.into_iter().collect::<Vec<_>>().join(" / "))
     }

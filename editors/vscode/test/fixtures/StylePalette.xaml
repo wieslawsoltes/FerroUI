@@ -7,12 +7,14 @@
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
           <SolidColorBrush x:Key="DetailInk" Color="#FF4C5A74" />
+          <Color x:Key="AccentInk">#FF405574</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="WorkspaceSurface" Color="#FFF0F4FB" />
           <SolidColorBrush x:Key="PanelSurface" Color="#FFFFFFFF" />
           <SolidColorBrush x:Key="HeadlineInk" Color="#FF182C48" />
           <SolidColorBrush x:Key="ActionSurface" Color="#FF295DC0" />
+          <Color x:Key="AccentInk">#FF145095</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
           <SolidColorBrush x:Key="WorkspaceSurface" Color="#FF131D2C" />
@@ -21,8 +23,11 @@
           <SolidColorBrush x:Key="DetailInk" Color="#FFA8BCDA" />
           <!-- Each theme keeps its own authored surface. -->
           <SolidColorBrush x:Key="ActionSurface" Color="#FF537BE1" />
+          <Color x:Key="AccentInk">#FF8DC7F7</Color>
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
+      <SolidColorBrush x:Key="ActiveAccent" Color="{DynamicResource AccentInk}" />
+      <StaticResource x:Key="TeamAccent" ResourceKey="ActiveAccent" />
       <ControlTheme x:Key="WorkspaceAction" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ActionSurface}" />
         <Setter Property="Foreground" Value="White" />
@@ -56,7 +61,7 @@
       <Border x:Name="ThemeCard" Classes="card">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
           <StackPanel Spacing="7" VerticalAlignment="Center">
-            <TextBlock Text="Team palette" Foreground="{DynamicResource HeadlineInk}" FontSize="18" FontWeight="SemiBold" />
+            <TextBlock x:Name="PaletteTitle" Text="Team palette" Foreground="{DynamicResource TeamAccent}" FontSize="18" FontWeight="SemiBold" />
             <TextBlock Text="Light and dark surfaces share resource keys." Foreground="{DynamicResource DetailInk}" TextWrapping="Wrap" />
           </StackPanel>
           <Button Grid.Column="1" x:Name="ApplyPalette" Theme="{StaticResource PrimaryAction}"

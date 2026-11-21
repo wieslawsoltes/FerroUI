@@ -25,7 +25,7 @@ export const hostedPaletteCatalog = {
         editArgs, Object.keys(editArgs)),
     designer_hosted_palette_edit: tool('Apply a checked application-preview palette edit to its owning XAML buffer in one Undo step.',
         editArgs, Object.keys(editArgs), true, false),
-    designer_hosted_palette_source: tool('Reveal an exact source range from the accepted application-preview palette. Use the source file address from the palette catalog.',
+    designer_hosted_palette_source: tool('Reveal an exact source range from the accepted App Preview palette. Use a comparison cell’s sourceAddress or its current palette scope address.',
         { ...frame, arguments: record({ address, range: record({ start: position, end: position }) }) },
         [...Object.keys(frame), 'arguments'], true, false),
     designer_hosted_palette_references: tool('Read references to a declared color in the selected palette source.',

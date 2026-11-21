@@ -35,7 +35,7 @@ Open **Visual state actions** to edit groups, setters, and transitions in XAML o
 3. In the layer view, change a swatch or enter a color. Use **Add palette color** to add a color or solid brush to the selected layer. For a new High contrast layer, choose a theme provider registered by the app.
 4. Check the updated frame before saving. The owning XAML buffer receives one undoable edit. If the buffer changes while a palette action is open, wait for the next accepted preview and try again.
 
-The palette follows workspace and mapped compiled includes from the accepted frame. Rebuild the preview binary if the color icon is missing on an XAML view. [Palette MCP tools](reference.md#edit-an-app-preview-palette-with-mcp)
+The palette follows workspace and mapped compiled includes from the accepted frame. For keyed aliases and supported brush references, the comparison shows the resolved color and the source icon opens the literal supplying it. Hover the icon to see the reference chain. Rebuild the preview binary if the color icon is missing on an XAML view. [Follow a color alias](styles.md#follow-a-color-alias) · [Palette MCP tools](reference.md#edit-an-app-preview-palette-with-mcp)
 
 ![App Preview beside the view’s XAML with Light, Dark, and High contrast palette values](../images/vscode-app-preview-palette-comparison.jpg)
 

@@ -15,7 +15,7 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
     const palette = (color: string) => '\uFEFF' + dictionary(`\r\n  <!-- 🙂 --> <SolidColorBrush x:Key="PanelBrush" Color="${color}"/>\r\n`);
     const view = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design" Width="380" Height="220">
       <Window.Resources>${dictionary('<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Dictionaries/Outer.xaml"/></ResourceDictionary.MergedDictionaries>')}</Window.Resources>
-      <Border Background="{StaticResource PanelBrush}" Padding="20"><app:PreviewBadge Text="Workspace draft"/></Border>
+      <Border Background="{StaticResource PanelAlias}" Padding="20"><app:PreviewBadge Text="Workspace draft"/></Border>
     </Window>`;
     try {
         const root = await realpath(directory);
@@ -25,7 +25,8 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
         const viewPath = path.join(root, 'Test.xaml');
         const uri = pathToFileURL(viewPath).toString();
         await mkdir(path.dirname(outer));
-        await writeFile(outer, dictionary('<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Color%20Set.xaml"/></ResourceDictionary.MergedDictionaries>'));
+        await writeFile(outer, dictionary(`<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Color%20Set.xaml"/></ResourceDictionary.MergedDictionaries>
+            <StaticResource x:Key="PanelAlias" ResourceKey="PanelBrush"/>`));
         await writeFile(palettePath, palette('#FF162137'));
         await writeFile(viewPath, view);
         const project = await compiledPaletteProject(root);
@@ -95,13 +96,19 @@ async function editIncludedPalette(preview: NativePreview, frame: HostedFrame, v
     const resolved = consumer.palette.comparison.find(row => row.key === 'PanelBrush');
     assert.equal(resolved?.light?.value, '#FF162137');
     assert.equal(resolved?.dark?.source?.uri, uri);
+    const alias = consumer.palette.comparison.find(row => row.key === 'PanelAlias')?.light;
+    assert.ok(alias?.range);
+    assert.equal(alias.value, '#FF162137');
+    assert.equal(alias.sourceAddress, dictionary.address);
+    assert.deepEqual(alias.path, [{ key: 'PanelAlias' }, { key: 'PanelBrush', reference: 'StaticResource' }]);
     const target = { address: dictionary.address, owner: dictionary.scopes[0].node };
     const { palette } = await preview.hostedPalette<HostedPaletteReport>(frame, { action: 'read', target });
     const color = palette.layers.flatMap(layer => layer.colors).find(color => color.key === 'PanelBrush');
     assert.ok(color?.editable);
     const { range } = await preview.hostedPalette<HostedPaletteLocation>(frame, {
-        action: 'locate', address: dictionary.address, range: color.range, source,
+        action: 'locate', address: alias.sourceAddress, range: alias.range, source,
     });
+    assert.deepEqual(range, color.range);
     assert.equal(range.start.line, 1);
     assert.equal(source.split('\r\n')[1].slice(range.start.character, range.end.character), '#FF162137');
     const edit = { action: 'set', node: color.node, color: '#FF23765E' } as const;

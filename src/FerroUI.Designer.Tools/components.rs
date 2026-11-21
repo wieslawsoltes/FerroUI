@@ -11,6 +11,8 @@ pub(crate) mod authoring;
 pub(crate) mod references;
 #[path = "component_resource_graph.rs"]
 mod resource_graph;
+#[path = "component_resource_values.rs"]
+mod resource_values;
 #[path = "component_resource_copy.rs"]
 mod resource_copy;
 #[path = "component_resource_move.rs"]
@@ -33,6 +35,7 @@ pub use references::{
 pub use resource_graph::{
     ComponentResourceLocation, ComponentResourceSources, IncludedResourceDocument,
 };
+pub use resource_values::{ResourceValue, ResourceValueStep, ResourceValueTrace};
 pub use resource_copy::ResourceCopySources;
 pub use resource_move::{AuthoredResourceScope, resource_move_entry, resource_move_scope, resource_move_fragment, link_resource_dictionary};
 pub use item_templates::{

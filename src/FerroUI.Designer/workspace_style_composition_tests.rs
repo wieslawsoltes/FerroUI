@@ -51,6 +51,16 @@ fn studio_palette_edits_the_dark_declaration_and_retains_exact_undo() {
         crate::PreviewTheme::Dark
     );
     assert!(!session.borrow().can_undo());
+    let alias_button = body.get_logical_descendants().find_map(|control| {
+        let button = control.cast::<Button>()?;
+        AutomationProperties::get_name(&button)
+            .is_some_and(|name| name.starts_with("Open Dark declaration for TeamAccent")
+                && name.contains("TeamAccent → StaticResource ActiveAccent → DynamicResource AccentInk")
+                && name.contains("#FF8DC7F7"))
+            .then_some(button)
+    }).expect("the palette comparison has a resolved and navigable alias");
+    alias_button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert!(!session.borrow().can_undo());
     let layer = body
         .get_logical_descendants()
         .find_map(|control| {

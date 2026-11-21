@@ -65,7 +65,7 @@ Select a style or theme in **Library** to edit its selector, setters, or base th
 
 Choose a palette swatch to open the native color editor. Enter a literal or choose a color and apply it. To add a token, choose the layer, fill in the key and color, and use the plus button. When creating a High contrast layer, select the application's theme package in the palette editor. An accepted color or style edit takes one Undo step. Use the source arrow beside a swatch to open its exact declaration. [VS Code guide](vscode/styles.md) · [MCP arguments](vscode/reference.md#edit-styles-and-palettes-with-mcp)
 
-In the consuming view's definition inspector, choose **Open included styles and palettes**. Select an entry and use the source arrow to open its owner in Studio. In the comparison, the source arrow beside a color follows the actual declaration, even when High contrast inherits its value from Dark. Choose **Edit scoped palette** to edit that layer. Use **Return to consuming view** in the definition inspector to see the unsaved change applied. Undo from the owning tab.
+In the consuming view's definition inspector, choose **Open included styles and palettes**. Select an entry and use the source arrow to open its owner in Studio. In the comparison, the source arrow follows keyed aliases and supported brush references to the authored color, including when High contrast inherits its value from Dark. The arrow's tooltip describes the chain. Choose **Edit scoped palette** to edit the supplying layer. Use **Return to consuming view** in the definition inspector to see the unsaved change applied. Undo from the owning tab. [Follow a color alias](vscode/styles.md#follow-a-color-alias)
 
 ### Edit Rust styles
 
