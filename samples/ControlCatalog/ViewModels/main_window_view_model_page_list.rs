@@ -14,6 +14,10 @@
 //!
 //! A page without a document (`ScreenPage`) is added with its constructor.
 //!
+//! Not from upstream: an entry can be hidden from the side bar for now without being removed
+//! (`HomeSectionBuilder::hide`, the OpenGL pages): it is recorded as an [`UnavailablePage`] with
+//! the reason [`HIDDEN`].
+//!
 //! Not ported: the unused method `HomeSectionBuilder.Navigate`.
 
 use crate::controls::SampleInfo;
@@ -26,7 +30,8 @@ use ferroui_base::Ref;
 use ferroui_controls::Page;
 use std::rc::Rc;
 
-/// A page of the upstream list that is left out of its section.
+/// A page of the upstream list that is left out of its section: one that does not load yet, or
+/// one that is hidden from the side bar for now ([`HIDDEN`]).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UnavailablePage {
     /// The title of the section of the page.
@@ -36,9 +41,14 @@ pub struct UnavailablePage {
     /// The rooted asset path of the document of the page.
     pub document: &'static str,
     /// What the page waits for: the reason of `excluded.txt`, or that its
-    /// class is not ported.
+    /// class is not ported; [`HIDDEN`] for a page that loads and is hidden.
     pub reason: String,
 }
+
+/// Not from upstream: the reason of a page that is hidden from the side bar for now
+/// (`HomeSectionBuilder::hide`). The page, its code and its tests are kept and the page loads;
+/// it is only not offered.
+pub const HIDDEN: &str = "hidden from the side bar for now (not removed): the pages of the section \"3D\" replace it";
 
 /// The sections of the catalog, and the pages that are left out of them.
 pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
@@ -166,9 +176,12 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
             // Not from upstream: PersonPicture of WinUI (docs/porting/winui-controls.md, G2).
             s.add("/Pages/PersonPicturePage.xaml", "PersonPicture", Icons::PERSON, "A person or a group: picture, initials and badges");
-            s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
-            s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
-            s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
+            // Hidden from the side bar for now, not removed: the pages of the section "3D" show 3D
+            // scenes with the 3D API of the framework instead. The pages, their code and their tests
+            // stay; `add` in place of `hide` shows them again.
+            s.hide("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
+            s.hide("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
+            s.hide("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
             s.add("/Pages/TransitioningContentControlPage.xaml", "TransitioningContentControl", Icons::TRANSITION, "Animate between content changes");
         }),
         // Not from upstream: the pages of the port of the WinUI composition API and of the WinUI
@@ -205,6 +218,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add_page(|| crate::pages::custom_effects_pages::shader_effects_page().upcast(), "Shader effects", Icons::SPARKLE, "Scan lines, a grid and a spotlight as runtime shaders");
             s.add_page(|| crate::pages::custom_effects_pages::interactive_effects_page().upcast(), "Interactive effects", Icons::CURSOR, "A spotlight, a grid, water ripples and a burn-away button that follow the pointer");
             s.add_page(|| crate::pages::custom_effects_pages::page_transitions_page().upcast(), "Page transitions", Icons::TRANSITION, "Dissolve and mask transitions between two pages, played by key frames");
+        }),
+        // Not from upstream: the pages of the 3D API of the framework (`ferroui-media3d`,
+        // docs/porting/media3d.md): scenes of models, lights and cameras in a `Viewport3D`.
+        section("3D", Icons::CUBE_3D, &mut unavailable, |s| {
+            s.add("/Pages/Viewport3DPage.xaml", "Viewport3D", Icons::CUBE, "A lit scene with a perspective camera, materials and rotations");
+            s.add("/Pages/Interaction3DPage.xaml", "3D Interaction", Icons::CURSOR, "Models that take pointer input, and the 3D hit test");
+            s.add("/Pages/Transforms3DPage.xaml", "3D Transforms and animation", Icons::TRANSFORM, "Transform groups and animated rotations");
         }),
         section("Status & Feedback", Icons::CHAT, &mut unavailable, |s| {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");
@@ -311,6 +331,21 @@ impl HomeSectionBuilder<'_> {
             Some(&self.section),
             samples,
         ));
+    }
+}
+
+impl HomeSectionBuilder<'_> {
+    /// Not from upstream: an entry of the list that is hidden from the side bar for now, not
+    /// removed. It is left out of its section and recorded as an [`UnavailablePage`] with the
+    /// reason [`HIDDEN`] (or with what it waits for, when it does not load yet), so that `add` in
+    /// its place shows it again with the same header, icon and description.
+    fn hide(&mut self, document: &'static str, header: &'static str, _icon_path: &str, _description: &str) {
+        let reason = match (XamlClass::find(document), crate::excluded(document)) {
+            (_, Some(excluded)) => excluded.reason.to_string(),
+            (None, None) => "the class of the document is not ported".to_string(),
+            (Some(_), None) => HIDDEN.to_string(),
+        };
+        self.unavailable.push(UnavailablePage { section: self.section.title(), header, document, reason });
     }
 }
 

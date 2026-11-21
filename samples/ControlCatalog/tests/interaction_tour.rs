@@ -464,7 +464,8 @@ impl Driver {
         self.close_popups(tour, &mut driven);
         // A window may be shown a few frames after the press that asked for
         // it (the dialog with the snapshot of the OpenGL page, shown when
-        // the snapshot is there).
+        // the snapshot is there; the page is hidden from the side bar for
+        // now, so the tour does not visit it).
         for _ in 0..2 {
             tour.settle();
             self.close_windows(&mut driven);

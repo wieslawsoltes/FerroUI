@@ -1,0 +1,113 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="Viewport3D"
+             x:Class="ControlCatalog.Pages.Viewport3DPage">
+  <!-- Not from upstream: the Viewport3D of FerroUI's 3D API (ferroui-media3d, docs/porting/media3d.md).
+       The scene is markup: a perspective camera, an ambient and a directional light, a floor and a
+       cube with a diffuse and a specular material, turned by three rotations. The code-behind
+       (`viewport_3d_page.rs`) moves the camera and sets the angles, the lights and the colours from the
+       controls beside the viewport. -->
+  <StackPanel Orientation="Vertical" Spacing="4">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A Viewport3D shows a scene of models, lights and a camera, drawn with a depth buffer and clipped to its bounds.</TextBlock>
+
+    <WrapPanel Margin="2,12,2,2" Orientation="Horizontal">
+      <Border Margin="0,0,16,16" Background="#FF1E2330" CornerRadius="6" ClipToBounds="True">
+        <Viewport3D x:Name="Viewport" Width="560" Height="380">
+          <Viewport3D.Camera>
+            <PerspectiveCamera Position="0,1.5,6" LookDirection="0,-0.25,-1" UpDirection="0,1,0" FieldOfView="45"/>
+          </Viewport3D.Camera>
+          <!-- The lights: lights are models, and every light of a viewport lights every model of it. -->
+          <ModelVisual3D>
+            <ModelVisual3D.Content>
+              <Model3DGroup>
+                <AmbientLight Color="#FF404040"/>
+                <DirectionalLight Color="White" Direction="-0.5,-1,-0.8"/>
+              </Model3DGroup>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+          <!-- The floor: one square facing up, below the reach of the turning cube. -->
+          <ModelVisual3D>
+            <ModelVisual3D.Content>
+              <GeometryModel3D>
+                <GeometryModel3D.Geometry>
+                  <MeshGeometry3D Positions="-3,-1.8,3 3,-1.8,3 3,-1.8,-3 -3,-1.8,-3" TriangleIndices="0 1 2 0 2 3"/>
+                </GeometryModel3D.Geometry>
+                <GeometryModel3D.Material>
+                  <DiffuseMaterial Brush="#FF8A8F99"/>
+                </GeometryModel3D.Material>
+              </GeometryModel3D>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+          <!-- The cube: four positions a face, so that each face has its own normal (generated, as none
+               are given), turned by roll, then pitch, then yaw. -->
+          <ModelVisual3D>
+            <ModelVisual3D.Transform>
+              <Transform3DGroup>
+                <RotateTransform3D>
+                  <RotateTransform3D.Rotation>
+                    <AxisAngleRotation3D Axis="0,0,1" Angle="0"/>
+                  </RotateTransform3D.Rotation>
+                </RotateTransform3D>
+                <RotateTransform3D>
+                  <RotateTransform3D.Rotation>
+                    <AxisAngleRotation3D Axis="1,0,0" Angle="-20"/>
+                  </RotateTransform3D.Rotation>
+                </RotateTransform3D>
+                <RotateTransform3D>
+                  <RotateTransform3D.Rotation>
+                    <AxisAngleRotation3D Axis="0,1,0" Angle="30"/>
+                  </RotateTransform3D.Rotation>
+                </RotateTransform3D>
+              </Transform3DGroup>
+            </ModelVisual3D.Transform>
+            <ModelVisual3D.Content>
+              <GeometryModel3D>
+                <GeometryModel3D.Geometry>
+                  <MeshGeometry3D
+                    Positions="-1,-1,1 1,-1,1 1,1,1 -1,1,1  1,-1,-1 -1,-1,-1 -1,1,-1 1,1,-1  1,-1,1 1,-1,-1 1,1,-1 1,1,1  -1,-1,-1 -1,-1,1 -1,1,1 -1,1,-1  -1,1,1 1,1,1 1,1,-1 -1,1,-1  -1,-1,-1 1,-1,-1 1,-1,1 -1,-1,1"
+                    TriangleIndices="0 1 2 0 2 3  4 5 6 4 6 7  8 9 10 8 10 11  12 13 14 12 14 15  16 17 18 16 18 19  20 21 22 20 22 23"/>
+                </GeometryModel3D.Geometry>
+                <GeometryModel3D.Material>
+                  <MaterialGroup>
+                    <DiffuseMaterial Brush="#FFD13438"/>
+                    <SpecularMaterial Brush="White" SpecularPower="40"/>
+                  </MaterialGroup>
+                </GeometryModel3D.Material>
+              </GeometryModel3D>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+        </Viewport3D>
+      </Border>
+
+      <StackPanel Width="260" Spacing="4">
+        <TextBlock FontSize="14" FontWeight="Bold">Cube</TextBlock>
+        <TextBlock>Yaw</TextBlock>
+        <Slider x:Name="Yaw" Minimum="-180" Maximum="180" Value="30" ValueChanged="SceneChanged"/>
+        <TextBlock>Pitch</TextBlock>
+        <Slider x:Name="Pitch" Minimum="-90" Maximum="90" Value="-20" ValueChanged="SceneChanged"/>
+        <TextBlock>Roll</TextBlock>
+        <Slider x:Name="Roll" Minimum="-180" Maximum="180" Value="0" ValueChanged="SceneChanged"/>
+        <TextBlock>Material colour</TextBlock>
+        <ComboBox x:Name="MaterialColour" SelectedIndex="0" HorizontalAlignment="Stretch" SelectionChanged="SceneChanged">
+          <ComboBoxItem>Red</ComboBoxItem>
+          <ComboBoxItem>Orange</ComboBoxItem>
+          <ComboBoxItem>Green</ComboBoxItem>
+          <ComboBoxItem>Blue</ComboBoxItem>
+          <ComboBoxItem>Purple</ComboBoxItem>
+          <ComboBoxItem>White</ComboBoxItem>
+        </ComboBox>
+        <CheckBox x:Name="Specular" IsChecked="True" Content="Specular highlight" IsCheckedChanged="SceneChanged"/>
+
+        <TextBlock Margin="0,12,0,0" FontSize="14" FontWeight="Bold">Camera</TextBlock>
+        <TextBlock>Distance</TextBlock>
+        <Slider x:Name="Distance" Minimum="3" Maximum="12" Value="6" ValueChanged="SceneChanged"/>
+        <TextBlock>Field of view (degrees)</TextBlock>
+        <Slider x:Name="FieldOfView" Minimum="20" Maximum="100" Value="45" ValueChanged="SceneChanged"/>
+
+        <TextBlock Margin="0,12,0,0" FontSize="14" FontWeight="Bold">Lights</TextBlock>
+        <CheckBox x:Name="Ambient" IsChecked="True" Content="Ambient light" IsCheckedChanged="SceneChanged"/>
+        <CheckBox x:Name="Directional" IsChecked="True" Content="Directional light" IsCheckedChanged="SceneChanged"/>
+      </StackPanel>
+    </WrapPanel>
+  </StackPanel>
+</ContentPage>

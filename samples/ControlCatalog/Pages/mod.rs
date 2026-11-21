@@ -81,6 +81,10 @@ mod numeric_up_down_page;
 mod open_gl_page;
 mod platform_info_page;
 mod progress_ring_page;
+// Not from upstream: the pages of FerroUI's 3D API (the section "3D", docs/porting/media3d.md).
+mod interaction_3d_page;
+mod transforms_3d_page;
+mod viewport_3d_page;
 mod platform_settings_page;
 mod pointer_canvas;
 mod progress_bar_page;
@@ -224,6 +228,9 @@ pub use grid_view_page::GridViewPage;
 pub use list_view_page::ListViewPage;
 pub use pivot_page::PivotPage;
 pub use progress_ring_page::ProgressRingPage;
+pub use interaction_3d_page::{Cube3D, Interaction3DPage, CUBE_COLOURS, CUBE_NAMES, SELECTED_COLOUR};
+pub use transforms_3d_page::{Transforms3DPage, Transforms3DScene, SPIN_AXES};
+pub use viewport_3d_page::{Viewport3DPage, Viewport3DScene, MATERIAL_COLOURS};
 pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
 pub use rich_edit_box_page::RichEditBoxPage;
@@ -339,6 +346,9 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     GridViewPage::TYPE,
     PivotPage::TYPE,
     ProgressRingPage::TYPE,
+    Interaction3DPage::TYPE,
+    Transforms3DPage::TYPE,
+    Viewport3DPage::TYPE,
     NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
     RichEditBoxPage::TYPE,
@@ -452,6 +462,9 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &GridViewPage::XAML_CLASS,
     &PivotPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
+    &Interaction3DPage::XAML_CLASS,
+    &Transforms3DPage::XAML_CLASS,
+    &Viewport3DPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,
     &RichEditBoxPage::XAML_CLASS,

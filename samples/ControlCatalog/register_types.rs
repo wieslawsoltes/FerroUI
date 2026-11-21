@@ -89,6 +89,8 @@ pub fn register_types() {
         ferroui_controls_livecharts::register_types();
         treedatagrid_demo::register_types();
         ferroui_opengl::register_types();
+        // The 3D API: the classes of the scenes of the pages of the section "3D".
+        ferroui_media3d::register_types();
         ferroui_media_video_controls::register_types();
         ferroui_media_camera_controls::register_types();
         crate::media_samples::register_types();

@@ -535,7 +535,9 @@ fn matches_pattern(pattern: &str, asset: &str) -> bool {
 
 /// The pages of the page list: `s.add("/Pages/X.xaml", "Header", ..)`,
 /// `s.add_with_samples("/Pages/X.xaml", "Header", ..)` and
-/// `s.add_page(|| X::new().upcast(), "Header", ..)`.
+/// `s.add_page(|| X::new().upcast(), "Header", ..)`; and the entries hidden from the side bar,
+/// `s.hide("/Pages/X.xaml", "Header", ..)`, which stay pages: what they reach is theirs, not the
+/// start-up's (the host never fetches it, as the catalog never creates them).
 fn page_list(
     units: &[Unit],
     index: &HashMap<&str, usize>,
@@ -544,13 +546,15 @@ fn page_list(
 ) -> Vec<Page> {
     let list = &units[*index.get(PAGE_LIST).unwrap_or_else(|| panic!("the page list {PAGE_LIST} does not exist"))].text;
     let mut pages: Vec<Page> = Vec::new();
-    for (at, call) in list.match_indices("s.add") {
+    let mut calls: Vec<(usize, &str)> = list.match_indices("s.add").chain(list.match_indices("s.hide")).collect();
+    calls.sort();
+    for (at, call) in calls {
         if list[..at].chars().next_back().is_some_and(is_identifier_char) {
             continue;
         }
         let rest = &list[at + call.len()..];
         let Some(open) = rest.find('(') else { continue };
-        let kind = &rest[..open];
+        let kind = if call == "s.hide" && open == 0 { "" } else if call == "s.hide" { continue } else { &rest[..open] };
         let arguments = &rest[open + 1..];
         let page = match kind {
             "" | "_with_samples" => {

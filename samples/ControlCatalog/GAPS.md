@@ -162,6 +162,18 @@ Three holders keep an element for a while after it left the tree, here as upstre
 | The input method manager of the keyboard device (`TextInputMethodManager._focusedElement`) | The item of a drop-down that closed while the focus was moving to it: the box that lost the focus closes the drop-down, the keyboard device clears the focus, and the change that was under way ends with `_textInputManager.SetFocusedElement(element)` for the item. | Until the focus changes again. One element. |
 | The context flyout of the text boxes of the Fluent theme | Its presenter, with three menu items: the flyout is one resource of the theme that every text box shows. | As long as the theme. One presenter (`the_context_flyout_of_text_boxes_is_shared`). |
 
+## Pages hidden from the side bar
+
+Not a gap: pages that load and are not offered for now. Their documents, classes and tests stay,
+and the generated tests of their documents run as before; `HomeSectionBuilder::hide` in
+`ViewModels/main_window_view_model_page_list.rs` leaves them out of their section and records each
+as an unavailable page with the reason `HIDDEN` (`tests/view_models.rs`,
+`the_open_gl_pages_are_hidden_from_the_side_bar`). Replacing `hide` with `add` shows a page again.
+
+| Page | Section | Why |
+|---|---|---|
+| OpenGL (`Pages/OpenGlPage.xaml`), OpenGL Lease (`Pages/OpenGl/OpenGlLeasePage.xaml`), OpenGL Interop (`Pages/OpenGl/OpenGlInteropPage.xaml`) | Media & Graphics | The pages of the section "3D" (Viewport3D, 3D Interaction, 3D Transforms and animation) show 3D scenes with the 3D API of the framework (`ferroui-media3d`, docs/porting/media3d.md) instead of drawing through OpenGL. The lease page also still waits for the code-behind below. |
+
 ## Code-behind that needs framework API the port does not have
 
 | Document | Missing API |
