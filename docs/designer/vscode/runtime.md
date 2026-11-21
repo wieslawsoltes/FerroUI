@@ -28,6 +28,19 @@ Edit a workspace dictionary or style included by the current view and watch App 
 
 Open **Visual state actions** to edit groups, setters, and transitions in XAML or mapped Rust. Choose a pose or route to preview it with the app’s real control properties and animation registry. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [Author visual states in App Preview](motion.md#author-visual-states-in-app-preview)
 
+### Edit a palette in App Preview
+
+1. Open an XAML App Preview with the current `ferroui-designer-support` and choose the **App Preview palette** color icon in the toolbar.
+2. Choose the view or one of its included XAML files, then select the palette scope. **Compare theme colors** shows where Light, Dark, and available High contrast colors resolve in the app’s resource graph. Scopes that inherit all their colors open in this mode. The source icon opens the corresponding declaration.
+3. In the layer view, change a swatch or enter a color. Use **Add palette color** to add a color or solid brush to the selected layer. For a new High contrast layer, choose a theme provider registered by the app.
+4. Check the updated frame before saving. The owning XAML buffer receives one undoable edit. If the buffer changes while a palette action is open, wait for the next accepted preview and try again.
+
+The palette follows workspace and mapped compiled includes from the accepted frame. Rebuild the preview binary if the color icon is missing on an XAML view. [Palette MCP tools](reference.md#edit-an-app-preview-palette-with-mcp)
+
+![App Preview beside the view’s XAML with Light, Dark, and High contrast palette values](../images/vscode-app-preview-palette-comparison.jpg)
+
+[See an unsaved color edit in the owning dictionary and the updated native frame](../images/vscode-app-preview-palette-edit.jpg)
+
 ## Hot reload and debug the running application
 
 1. From a trusted Cargo workspace, run **FerroUI: Run with Hot Reload**. Select a development binary. Try `hot-reload-demo` for registered XAML or `view-gallery` for reactive RSX. Use `ferroui.hotReload.targets` to name an exact Cargo manifest, package, binary, feature set, or argument list.

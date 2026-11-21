@@ -1,5 +1,11 @@
 body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidden; }
 .hosted-toolbar { justify-content: flex-end; }
+#hosted-palette { --popover-width: 480px; }
+.hosted-palette-controls { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding-block-end: 4px; }
+.hosted-palette-controls select { flex: 1 1 100px; min-inline-size: 0; max-inline-size: 100%; }
+#hosted-palette-search { flex: 1 1 100px; min-inline-size: 0; }
+.hosted-palette-colors { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+#hosted-palette-status { margin: 4px 0; }
 #hosted-fixture-label { flex: 1 1 120px; justify-content: flex-start; min-inline-size: 0; }
 #hosted-fixture { max-inline-size: calc(100% - 20px); }
 #hosted-animation-program { flex: 1 1 100px; min-inline-size: 0; }

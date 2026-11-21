@@ -7,6 +7,8 @@ export const contrastProviderLabels = { winui: 'WinUI', material: 'Material', ma
 export type ContrastProvider = keyof typeof contrastProviderLabels;
 export type PaletteColorKind = 'color' | 'solid_color_brush';
 export type StylesPage = 'styles' | 'palette' | 'comparison';
+export type PaletteEdit = { action: 'set'; node: number; color: string }
+    | { action: 'add'; owner: number; layer: PaletteLayer; key: string; kind: PaletteColorKind; color: string; provider?: ContrastProvider };
 
 export interface StyleScope { node: number; label: string }
 export interface StyleHost extends StyleScope { type_name: string; nested: boolean }

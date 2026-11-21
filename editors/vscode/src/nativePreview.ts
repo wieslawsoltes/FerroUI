@@ -11,6 +11,7 @@ import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentati
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource, HostedWorkspaceFrame, HostedWorkspaceSources } from './hostedProtocol';
+import type { NativePaletteRequest } from './hostedPaletteProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -36,7 +37,7 @@ export class NativePreview implements vscode.Disposable {
     assets: readonly Asset[] = [];
     canvasGuides?: GuideCatalog;
     capabilities: {
-        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
+        isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedPalette?: boolean; hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
@@ -141,6 +142,10 @@ export class NativePreview implements vscode.Disposable {
         return this.send('hostedRenderWorkspace', { ...source, workspace }, 35_000);
     }
     hostedFrame(): Promise<HostedFrame | null> { return this.send('hostedFrame'); }
+    hostedPalette<T>(frame: HostedAnimationFrame, request: NativePaletteRequest): Promise<T> {
+        if (!this.capabilities.hostedPalette) throw new Error('Update the FerroUI helper to edit an App Preview palette.');
+        return this.send('hostedPalette', { ...frame, ...request });
+    }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
     sampleHostedAnimation(request: HostedAnimationRequest): Promise<HostedAnimationSample> {
         return this.send('hostedAnimate', request, 12_000);

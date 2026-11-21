@@ -17,6 +17,7 @@ import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
@@ -27,10 +28,10 @@ import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange, StageInput } from './stagesProtocol';
-import type { StylesPage } from './stylesProtocol';
+import type { PaletteEdit, StylesPage } from './stylesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
-import { withViewportTheme, type CanvasAction, type CanvasInteraction, type CanvasTheme, type DesignerView, type DragOrigin, type DropTarget, type OutlineMode, type Placement } from './protocol';
+import { withViewportTheme, type CanvasAction, type CanvasInteraction, type CanvasTheme, type DesignerView, type DragOrigin, type DropTarget, type OutlineMode, type Placement, type Range } from './protocol';
 import { applyTextEdits } from './textDocument';
 import { isWorkspaceTool } from './workspaceCatalog';
 import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
@@ -209,6 +210,27 @@ export class AgentTools {
                 return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedCurveQuery, signal);
             case 'designer_hosted_image': return this.hosted.image(document.uri);
+            case 'designer_hosted_palette':
+                return this.hosted.palette(document.uri, (args.arguments as { target?: HostedPaletteTarget } | undefined)?.target, signal);
+            case 'designer_hosted_palette_edit_draft':
+            case 'designer_hosted_palette_edit': {
+                const { target, edit } = args.arguments as { target: HostedPaletteTarget; edit: PaletteEdit };
+                return this.hosted.paletteEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, edit,
+                    tool === 'designer_hosted_palette_edit', signal);
+            }
+            case 'designer_hosted_palette_source': {
+                const { address, range } = args.arguments as { address: string; range: Range };
+                return this.hosted.paletteSource(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, address, range, signal);
+            }
+            case 'designer_hosted_palette_references': {
+                const { target, node } = args.arguments as { target: HostedPaletteTarget; node: number };
+                return this.hosted.paletteReferences(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, node, signal);
+            }
+            case 'designer_hosted_palette_show':
+                return this.hosted.showPalette(document.uri, args.expected_generation, args.arguments as HostedPalettePresentation | undefined, signal);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationAction, signal);

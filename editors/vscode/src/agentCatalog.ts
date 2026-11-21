@@ -1,4 +1,5 @@
 import { choice, integer, object, text, tool, truth } from './agentSchema';
+import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
 
 const node = integer(1);
@@ -97,6 +98,7 @@ const resize = { ...frame, node, handle: integer(0, 7), dx: { type: 'number', mi
 const resizeRequired = ['session', 'expected_revision', 'node', 'handle', 'dx', 'dy'];
 
 export const agentCatalog = {
+    ...hostedPaletteCatalog,
     ...workspaceCatalog,
     ...fileMoveCatalog,
     ...renameCatalog,

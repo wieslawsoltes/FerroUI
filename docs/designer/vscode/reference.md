@@ -121,6 +121,14 @@ Use the owning session for edits and Undo. In VS Code, return with `designer_vie
 
 For the main Studio canvas, call `designer_preview_appearance` for the environment and supported themes. Call `designer_preview_set_theme` with `theme`, `expected_uri`, and `expected_revision` from that response. The same command switches the native canvas while preserving the document and its Undo history.
 
+### Edit an App Preview palette with MCP
+
+1. Open the XAML view in App Preview with `designer_hosted_open`. Use `designer_hosted_palette` with the design session to read the accepted source addresses and scope IDs. Repeat with `arguments.target` containing the `address` and `owner` to read the palette and compare theme resolution.
+2. Call `designer_hosted_palette_edit_draft` with `expected_generation`, `expected_revision`, and `expected_sequence` from the palette result. Pass `arguments.target` and `arguments.edit`. A `set` edit takes the color `node` and `color`. An `add` edit takes the scope `owner`, `layer`, `key`, `kind`, and `color`. For a new High contrast layer, select a `provider` from the reported providers.
+3. Apply the same arguments with `designer_hosted_palette_edit` after reviewing the returned patches. VS Code applies one undoable edit to the owning source buffer. Read the new frame before making another edit.
+
+Use `designer_hosted_palette_source` with the accepted frame, file `address`, and reported `range` to reveal a declaration. `designer_hosted_palette_references` reads uses in the selected source. Use `designer_hosted_palette_show` with the current generation to open the toolbar palette. Pass `target`, `layer`, or `compare` in `arguments` to choose the initial presentation. [App Preview palette guide](runtime.md#edit-a-palette-in-app-preview)
+
 ### Trace property values with MCP
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.

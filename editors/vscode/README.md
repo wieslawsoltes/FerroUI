@@ -144,6 +144,8 @@ Use **Animation clip actions** to create a clip on a live style owner and rename
 
 Use **Visual state actions** to edit groups, states, setters, and transitions in XAML or mapped Rust. The running app can sample a supported state or transition. Agents read the accepted state model and plan or apply one source edit with `designer_hosted_state_group_draft` and `designer_hosted_state_group`. [App Preview visual states](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)
 
+Open **App Preview palette** to compare Light, Dark, and High contrast colors in the previewed XAML scope. Choose the owning file to edit an included palette before saving. Each change takes one Undo step. [App Preview palette guide](../../docs/designer/vscode/runtime.md#edit-a-palette-in-app-preview)
+
 The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates the preview entry point. Enable its `app-preview` Cargo feature in `ferroui.hotReload.targets` to use it with the hosted design command.
 
 **Open Live App** shows actual managed or attached application windows. The visual, logical, and accessibility hierarchies use the existing authenticated runtime inspector. Inspect properties, styles, resources and diagnostics, or use Interact to send native input where the runtime permits it. Hold `Alt` while clicking in Inspect mode to choose from overlapping native visual hits. Runtime property overrides affect the attached app. **Reveal Source** uses compiler locations inside the workspace. Managed debug builds record the source for mounted RSX controls, and compatible hot reloads update those positions. Set `FERROUI_EDITOR_SOURCE=1` when launching a debug build outside VS Code to enable compiled RSX locations for attached inspection.

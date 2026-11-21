@@ -54,7 +54,7 @@
 .palette-filters > select:first-child { flex: 1 1 auto; }
 .palette-filters > select:last-child:not(:first-child) { width: auto; flex: 0 0 auto; }
 #palette-search { margin: 6px 0 4px; }
-.palette-swatch, .styles-fields .palette-picker {
+.palette-swatch, .palette-row .palette-picker {
     display: inline-block;
     width: 21px;
     height: 18px;

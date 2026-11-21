@@ -10,8 +10,12 @@ export interface IncludedSource {
 }
 
 export async function includedSourceUri(consumer: vscode.Uri, target: IncludedSource): Promise<vscode.Uri> {
+    return previewSourceUri(consumer, target.uri);
+}
+
+export async function previewSourceUri(consumer: vscode.Uri, address: string): Promise<vscode.Uri> {
     const folder = vscode.workspace.getWorkspaceFolder(consumer);
-    const uri = vscode.Uri.parse(target.uri, true);
+    const uri = vscode.Uri.parse(address, true);
     if (folder?.uri.scheme !== 'file' || uri.scheme !== 'file' || !uri.path.toLowerCase().endsWith('.xaml')) {
         throw new Error('Open the workspace containing the included XAML.');
     }

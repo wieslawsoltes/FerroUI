@@ -1,6 +1,7 @@
 import type { FromHosted, HostedFrame, ToHosted } from '../src/hostedProtocol';
 import { element } from './dom';
 import { HostedAnimationView } from './hostedAnimations';
+import { HostedPaletteView } from './hostedPalette';
 
 declare function acquireVsCodeApi(): {
     postMessage(message: FromHosted): void;
@@ -10,6 +11,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 const animations = new HostedAnimationView(message => vscode.postMessage(message), Boolean(vscode.getState()?.compare),
     compare => vscode.setState({ compare }));
+const palettes = new HostedPaletteView(message => vscode.postMessage(message));
 const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
@@ -30,12 +32,15 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }
     if (data.type === 'keyframeReply') { animations.keyframes.receive(data); return; }
     if (data.type === 'keyframeGroupReply') { animations.keyLanes.receive(data); return; }
+    if (data.type === 'paletteReply') { palettes.receive(data); return; }
+    if (data.type === 'openPalette') { palettes.open(data); return; }
     if (data.type === 'status') {
         if (status.textContent !== data.message) status.textContent = data.message;
         interactive = data.interactive;
         text.disabled = !interactive;
         send.disabled = !interactive;
         const { available, selected, revision, pending } = data.fixtures;
+        palettes.setReady(interactive ? revision : undefined);
         fixtureRevision = revision;
         fixtureLabel.hidden = !available.length;
         if (available.length !== availableFixtures.length || available.some((name, index) => name !== availableFixtures[index])) {
@@ -56,6 +61,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     canvas.hidden = false;
     input.hidden = false;
     animations.rendered(current);
+    palettes.rendered(current);
 });
 
 function position(event?: MouseEvent) {

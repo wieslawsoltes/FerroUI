@@ -7,6 +7,9 @@ import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCarg
 import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
+import { HostedPalettes } from './hostedPalettes';
+import { runHostedPaletteAction } from './hostedPaletteActions';
+import type { FromHostedPalette, HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
 import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
@@ -16,13 +19,14 @@ import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { editHostedStateRoute } from './hostedStateRoutes';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import { NativePreview } from './nativePreview';
-import { errorMessage, type Language } from './protocol';
+import { errorMessage, type Language, type Range } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
+import type { PaletteEdit } from './stylesProtocol';
 
 export class HostedDesign implements vscode.Disposable {
     private readonly command: vscode.Disposable;
@@ -105,6 +109,47 @@ export class HostedDesign implements vscode.Disposable {
         if (!frame) throw new Error('Wait for the current application preview.');
         const { image: { png, width, height }, revision, sequence } = frame;
         return { mimeType: 'image/png', data: png, width, height, revision, sequence, generation: session.generation, uri: uri.toString() };
+    }
+
+    async palette(uri: vscode.Uri, target: HostedPaletteTarget | undefined, signal: AbortSignal) {
+        const session = this.session(uri);
+        const frame = session.paletteFrame();
+        const result = target ? await session.palettes.report(frame, target, signal)
+            : await session.palettes.catalog(frame, signal);
+        return { generation: session.generation, frame, ...result };
+    }
+
+    paletteEdit(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
+        target: HostedPaletteTarget, edit: PaletteEdit, apply: boolean, signal: AbortSignal) {
+        return this.paletteSession(uri, generation).palettes.edit(frame, target, edit, apply, signal);
+    }
+
+    paletteSource(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
+        address: string, range: Range, signal: AbortSignal) {
+        return this.paletteSession(uri, generation).palettes.locate(frame, address, range, signal);
+    }
+
+    paletteReferences(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
+        target: HostedPaletteTarget, node: number, signal: AbortSignal) {
+        return this.paletteSession(uri, generation).palettes.references(frame, target, node, signal);
+    }
+
+    async showPalette(uri: vscode.Uri, generation: number, presentation: HostedPalettePresentation | undefined, signal: AbortSignal) {
+        const session = this.paletteSession(uri, generation);
+        const frame = session.paletteFrame();
+        if (presentation?.target) await session.palettes.report(frame, presentation.target, signal);
+        signal.throwIfAborted();
+        if (session.paletteFrame().revision !== frame.revision) throw new Error('Read the current App Preview palette.');
+        session.panel.reveal(session.panel.viewColumn, true);
+        session.openPalette(frame.revision, presentation);
+        return { generation, frame };
+    }
+
+    private paletteSession(uri: vscode.Uri, generation: number): HostedSession {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        session.paletteFrame();
+        return session;
     }
 
     async animate(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
@@ -200,6 +245,7 @@ export class HostedDesign implements vscode.Disposable {
 
 class HostedSession {
     readonly animations: HostedAnimations;
+    readonly palettes: HostedPalettes;
     private readonly dependencies = new DesignerDependencies();
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
@@ -229,6 +275,7 @@ class HostedSession {
             state => this.showAnimations(state),
             error => this.report(errorMessage(error), Boolean(this.currentFrame)),
             () => Boolean(this.client?.capabilities.hostedPreviewRanges));
+        this.palettes = new HostedPalettes(editor, (frame, signal, task) => this.withAcceptedFrame(frame, signal, task));
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, '**/*.[xX][aA][mM][lL]'));
         const dependencyChanged = (uri: vscode.Uri) => {
             if (uri.toString() !== editor.document.uri.toString() && this.dependencies.change(uri)) this.update();
@@ -355,6 +402,16 @@ class HostedSession {
 
     get currentFrame(): HostedFrame | undefined {
         if (this.client && this.frame?.revision === this.revision) return this.frame;
+    }
+
+    paletteFrame(): HostedAnimationFrame {
+        const frame = this.currentFrame;
+        if (!frame?.paletteAvailable) throw new Error('Open a current XAML App Preview with palette support.');
+        return { revision: frame.revision, sequence: frame.sequence };
+    }
+
+    openPalette(revision: number, presentation?: HostedPalettePresentation): void {
+        this.post({ type: 'openPalette', revision, presentation });
     }
 
     get message(): string { return this.status; }
@@ -497,6 +554,18 @@ class HostedSession {
 
     private async editAnimationSource<T extends HostedSourcePlan>(frame: HostedAnimationFrame, apply: boolean, signal: AbortSignal,
         planEdit: (client: NativePreview) => Promise<T>) {
+        return this.withAcceptedFrame(frame, signal, async (client, ensure) => {
+            const document = this.editor.document;
+            const version = document.version;
+            const plan = await planEdit(client);
+            ensure();
+            if (apply) await applyHostedSourcePatches(document, version, plan.patches);
+            return { ...plan, applied: apply && plan.patches.length > 0, version: document.version };
+        });
+    }
+
+    private async withAcceptedFrame<T>(frame: HostedAnimationFrame, signal: AbortSignal,
+        task: (client: NativePreview, ensure: () => void) => Promise<T>): Promise<T> {
         await this.polling;
         signal.throwIfAborted();
         const client = this.client;
@@ -506,16 +575,17 @@ class HostedSession {
         }
         const document = this.editor.document;
         const version = document.version;
+        const ensure = () => {
+            signal.throwIfAborted();
+            if (client !== this.client || this.disposed || frame.revision !== this.revision
+                || frame.sequence !== this.currentFrame?.sequence || version !== document.version) {
+                throw new Error('The application preview changed while preparing the source action.');
+            }
+        };
         clearTimeout(this.timer);
         this.pending = true;
         try {
-            const plan = await planEdit(client);
-            signal.throwIfAborted();
-            if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
-                throw new Error('The application preview source changed while planning the animation edit.');
-            }
-            if (apply) await applyHostedSourcePatches(document, version, plan.patches);
-            return { ...plan, applied: apply && plan.patches.length > 0, version: document.version };
+            return await task(client, ensure);
         } finally {
             this.pending = false;
             this.schedule(this.requested === this.revision ? 160 : 0);
@@ -602,6 +672,10 @@ class HostedSession {
             return;
         }
         if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'palette') {
+            await this.receivePalette(message);
+            return;
+        }
         if (message.type === 'animationIssues') {
             try { await this.revealAnimationIssue(message.frame); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
@@ -676,6 +750,17 @@ class HostedSession {
         if (!('revision' in message) || message.revision !== this.revision || message.sequence !== this.frame?.sequence) return;
         try { await this.client?.hostedInput(message); }
         catch (error) { this.report(errorMessage(error)); }
+    }
+
+    private async receivePalette({ frame, request, command }: FromHostedPalette): Promise<void> {
+        const reply = { type: 'paletteReply' as const, request, frame };
+        try {
+            this.paletteFrame();
+            const result = await runHostedPaletteAction(this.palettes, frame, command, () => this.paletteFrame());
+            this.post({ ...reply, result });
+        } catch (error) {
+            this.post({ ...reply, error: errorMessage(error) });
+        }
     }
 
     private async receiveKeyframeGroup(message: Extract<FromHosted, { type: 'keyframeGroup' }>): Promise<void> {

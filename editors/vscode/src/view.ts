@@ -339,9 +339,24 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
     ${tool('hosted-clip-actions', 'ellipsis', 'Animation clip actions', 'hidden')}
     ${tool('hosted-state-actions', 'symbol-enum', 'Visual state actions', 'hidden')}
+    ${tool('hosted-palette-button', 'symbol-color', 'App Preview palette', 'popovertarget="hosted-palette" aria-controls="hosted-palette" aria-haspopup="dialog" aria-expanded="false" hidden')}
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
     ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
 </header>
+<section id="hosted-palette" class="popover" popover role="dialog" aria-label="App Preview palette">
+    <div class="hosted-palette-controls">
+        <select id="hosted-palette-file" aria-label="Palette source file"></select>
+        <select id="hosted-palette-scope" aria-label="Palette scope"></select>
+        ${tool('hosted-palette-compare', 'split-horizontal', 'Compare theme colors', 'aria-pressed="false"')}
+        ${tool('hosted-palette-add', 'add', 'Add palette color')}
+    </div>
+    <div class="hosted-palette-controls">
+        <select id="hosted-palette-layer" aria-label="Palette layer"></select>
+        <input id="hosted-palette-search" type="search" placeholder="Filter colors" aria-label="Filter palette colors">
+    </div>
+    <p id="hosted-palette-status" class="dock-message" role="status" hidden></p>
+    <fieldset id="hosted-palette-colors" class="hosted-palette-colors" aria-label="Palette colors" disabled></fieldset>
+</section>
 <section id="hosted-animations" aria-label="Application animations" hidden>
     <div class="toolbar hosted-animation-toolbar">
         ${clipCompareButton()}
@@ -412,7 +427,7 @@ ${keyframeEditorHtml(false)}
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range', 'hosted-key-lanes']);
+</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range', 'hosted-key-lanes', 'styles']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {

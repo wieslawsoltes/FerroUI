@@ -118,7 +118,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
-            'state_group_draft', 'state_group']) {
+            'state_group_draft', 'state_group', 'palette', 'palette_edit_draft', 'palette_edit',
+            'palette_source', 'palette_references', 'palette_show']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -131,6 +132,12 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
         const keyDraft = await invoke('designer_hosted_keyframe_draft', hostedKey);
         assert.ok(keyDraft.isError && !keyDraft.content[0]?.text?.includes('allowWrites'));
+        const palette = { ...hostedKey, arguments: {
+            target: { address: 'ferres://sample/View.xaml', owner: 1 }, edit: { action: 'set', node: 2, color: '#FFFF0000' },
+        } };
+        assert.match((await invoke('designer_hosted_palette_edit', palette)).content[0]?.text ?? '', /allowWrites/);
+        const paletteDraft = await invoke('designer_hosted_palette_edit_draft', palette);
+        assert.ok(paletteDraft.isError && !paletteDraft.content[0]?.text?.includes('allowWrites'));
         const group = { ...hostedKey, arguments: { program: 1, command: {
             action: 'move_keyframes', keyframes: [{ target: 1, property: 'Opacity', time: .5 }], offset: .1,
         } } };

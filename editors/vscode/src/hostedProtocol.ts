@@ -2,6 +2,7 @@ import type { PreviewSourceBuffer, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
     HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction, HostedKeyframeSelection } from './hostedAnimationProtocol';
 import type { CurvePoint, KeyframeDraftPreview, KeyframeLocation } from './timelineProtocol';
+import type { FromHostedPalette, ToHostedPalette } from './hostedPaletteProtocol';
 
 export interface HostedSource {
     document: Source;
@@ -19,6 +20,7 @@ export interface HostedFrame {
     image: { png: string; width: number; height: number };
     fixture?: string | null;
     fixtures?: string[] | null;
+    paletteAvailable?: boolean;
     animations?: HostedAnimationCatalog;
     animationPresentation?: HostedAnimationPresentation;
 }
@@ -51,7 +53,7 @@ export interface HostedFixtureCatalog {
 export type HostedInput = { revision: number; sequence: number; x: number; y: number } & (
     { type: 'click' } | { type: 'scroll'; delta: number } | { type: 'text'; text: string });
 
-export type FromHosted = HostedInput | { type: 'ready' | 'refresh' }
+export type FromHosted = HostedInput | FromHostedPalette | { type: 'ready' | 'refresh' }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
     | { type: 'clipPlacement'; request: number; frame: HostedAnimationFrame; draft: HostedClipDraft }
     | { type: 'clipActions'; request: number; frame: HostedAnimationFrame; program?: number }
@@ -63,7 +65,7 @@ export type FromHosted = HostedInput | { type: 'ready' | 'refresh' }
     | { type: 'keyframeDraft'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeDraft; apply: boolean }
     | { type: 'keyframeGroup'; frame: HostedAnimationFrame; request: number; action: HostedKeyframeGroupAction }
     | { type: 'fixture'; revision: number; name: string | null };
-export type ToHosted = { type: 'frame'; frame: HostedFrame }
+export type ToHosted = ToHostedPalette | { type: 'frame'; frame: HostedFrame }
     | { type: 'animations'; state: HostedAnimationState; version: number }
     | { type: 'animationReply'; request: number }
     | { type: 'openKeyframe'; key: HostedKeyframeSelection }
