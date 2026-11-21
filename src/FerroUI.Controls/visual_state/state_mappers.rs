@@ -12,13 +12,18 @@
 //! groups, and only then; it runs again, with transitions, when the classes or the properties the
 //! states depend on change. It never changes a pseudo-class: the styles of the control keep
 //! working beside it.
+//!
+//! The class of a family states its mapper from its static constructor ([`register`]), so a mapper
+//! and the class it reads are linked into an application with the class alone (#612): naming the
+//! families here would keep the list box item, the text box and their classes in every
+//! application with a templated control.
 
 use super::VisualStateManager;
 use crate::primitives::{TemplatedControl, ToggleButton};
-use crate::{Button, CheckBox, Control, ListBoxItem, RadioButton, TextBox};
+use crate::{Control, ListBoxItem, TextBox};
 use ferroui_base::media::TextWrapping;
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{Ref, WeakRef};
+use ferroui_base::{ObjectType, Ref, TypeInfo, WeakRef};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -41,23 +46,39 @@ ferroui_base::ferro_thread_local! {
     static INSTALLED: RefCell<HashMap<usize, Installed>> = RefCell::new(HashMap::new());
 }
 
-/// The mapper of the family of `control`, the most derived first.
+ferroui_base::ferro_thread_local! {
+    /// The mapper of each family, by its class: stated by the static constructor of the class.
+    static MAPPERS: RefCell<Vec<(&'static TypeInfo, Mapper)>> = const { RefCell::new(Vec::new()) };
+}
+
+/// States the mapper of the family of class `T`, for `T` and the classes deriving from it that
+/// state none of their own. Called by the static constructor of `T`: a control of the class has
+/// its mapper on the thread that created it.
+pub(crate) fn register<T: ObjectType>(mapper: Mapper) {
+    MAPPERS.with(|mappers| {
+        let mut mappers = mappers.borrow_mut();
+        if !mappers.iter().any(|(type_, _)| std::ptr::eq(*type_, T::TYPE)) {
+            mappers.push((T::TYPE, mapper));
+        }
+    });
+}
+
+/// The mapper of the family of `control`: the one its class or its nearest base class states.
 fn mapper_of(control: &Control) -> Option<Mapper> {
-    if control.downcast_ref::<CheckBox>().is_some() {
-        Some(check_box)
-    } else if control.downcast_ref::<RadioButton>().is_some() {
-        Some(radio_button)
-    } else if control.downcast_ref::<ToggleButton>().is_some() {
-        Some(toggle_button)
-    } else if control.downcast_ref::<Button>().is_some() {
-        Some(button)
-    } else if control.downcast_ref::<ListBoxItem>().is_some() {
-        Some(list_box_item)
-    } else if control.downcast_ref::<TextBox>().is_some() {
-        Some(text_box)
-    } else {
+    MAPPERS.with(|mappers| {
+        let mappers = mappers.borrow();
+        if mappers.is_empty() {
+            return None;
+        }
+        let mut current = Some(control.get_type());
+        while let Some(type_) = current {
+            if let Some((_, mapper)) = mappers.iter().find(|(candidate, _)| std::ptr::eq(*candidate, type_)) {
+                return Some(*mapper);
+            }
+            current = type_.base_type();
+        }
         None
-    }
+    })
 }
 
 fn key(control: &Control) -> usize {
@@ -118,6 +139,12 @@ pub(crate) fn on_template_applied(control: &TemplatedControl) {
     mapper(&control, false);
 }
 
+/// Whether the class `type_` itself has stated a mapper on this thread.
+#[cfg(test)]
+pub(crate) fn has_mapper(type_: &'static TypeInfo) -> bool {
+    MAPPERS.with(|mappers| mappers.borrow().iter().any(|(candidate, _)| std::ptr::eq(*candidate, type_)))
+}
+
 /// Whether a mapper is installed on `control`.
 #[cfg(test)]
 pub(crate) fn is_installed(control: &Control) -> bool {
@@ -161,7 +188,7 @@ fn focus_states(control: &Ref<Control>, use_transitions: bool) {
 }
 
 /// WinUI's `Button::ChangeVisualState`.
-fn button(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn button(control: &Ref<Control>, use_transitions: bool) {
     go(control, common_state(control), use_transitions);
     focus_states(control, use_transitions);
 }
@@ -172,7 +199,7 @@ fn is_checked(control: &Control) -> Option<bool> {
 
 /// WinUI's `ToggleButton::ChangeVisualState`: the check state and the common state in one group
 /// (`Checked`, `CheckedPointerOver`, `IndeterminatePressed`, ...).
-fn toggle_button(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn toggle_button(control: &Ref<Control>, use_transitions: bool) {
     let common = common_state(control);
     let prefix = match is_checked(control) {
         None => "Indeterminate",
@@ -190,7 +217,7 @@ fn toggle_button(control: &Ref<Control>, use_transitions: bool) {
 
 /// WinUI's `CheckBox::ChangeVisualState`: the combined states (`UncheckedNormal`,
 /// `CheckedPointerOver`, `IndeterminateDisabled`, ...), else the older common and check states.
-fn check_box(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn check_box(control: &Ref<Control>, use_transitions: bool) {
     let common = common_state(control);
     let check = match is_checked(control) {
         None => "Indeterminate",
@@ -205,7 +232,7 @@ fn check_box(control: &Ref<Control>, use_transitions: bool) {
 }
 
 /// WinUI's `RadioButton::ChangeVisualState`: the common states and the check states.
-fn radio_button(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn radio_button(control: &Ref<Control>, use_transitions: bool) {
     go(control, common_state(control), use_transitions);
     let check = match is_checked(control) {
         None => "Indeterminate",
@@ -219,7 +246,7 @@ fn radio_button(control: &Ref<Control>, use_transitions: bool) {
 /// WinUI's `ListBoxItem::ChangeVisualState`: the common states (a disabled item whose content is
 /// a control shows `Normal`, the content shows its own disabled state), the selection states and
 /// the focus states.
-fn list_box_item(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn list_box_item(control: &Ref<Control>, use_transitions: bool) {
     let Some(item) = control.downcast_ref::<ListBoxItem>() else {
         return;
     };
@@ -276,7 +303,7 @@ fn list_box_item(control: &Ref<Control>, use_transitions: bool) {
 /// `Focused`, `PointerOver` or `Normal` (pressed and pointer focus look focused), and
 /// `ButtonVisible` while the delete button can be used (focused, not empty, not read-only, one
 /// line), else `ButtonCollapsed`.
-fn text_box(control: &Ref<Control>, use_transitions: bool) {
+pub(crate) fn text_box(control: &Ref<Control>, use_transitions: bool) {
     let Some(text_box) = control.downcast_ref::<TextBox>() else {
         return;
     };

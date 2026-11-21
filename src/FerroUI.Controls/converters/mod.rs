@@ -1,4 +1,20 @@
 //! Value converters used by the control themes.
+//!
+//! The casts of a converter to the converter interfaces (`IValueConverter`,
+//! `IMultiValueConverter`), which compiled markup needs before it sets a converter, are registered
+//! by the construction of the first converter of its type ([`register_casts!`]): every
+//! converter of this module is made through a constructor that registers them. A converter an
+//! application never makes keeps neither its cast nor the code of its conversion (#612).
+
+/// Registers the value conversions of converter `$type` (its `ValueTypeRegistration`, which
+/// holds its casts to the converter interfaces) on every thread, the first time a converter of
+/// the type is made; later calls read one flag.
+macro_rules! register_casts {
+    ($type:ty) => {{
+        static CASTS: ::std::sync::Once = ::std::sync::Once::new();
+        CASTS.call_once(::ferroui_base::data::core::ValueTypes::register_used::<$type>);
+    }};
+}
 
 mod border_gap_mask_converter;
 mod corner_radius_filter_converter;
