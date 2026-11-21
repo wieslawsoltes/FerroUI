@@ -1280,6 +1280,18 @@ focus manager, which always run, are left out of the 130). One root kept most of
 | `__TEXT,__text` | 16,257,332 bytes | 15,784,532 bytes | -472,800 bytes (-2.9 %) |
 | Class initialisers linked | 173 | 164 | -9 |
 | Fat LTO `__text` (the build of the trace) | 14,888,284 bytes | 14,477,240 bytes | -411,044 bytes |
+| `dist` file (stripped) | 17,446,112 bytes | 16,980,368 bytes | -465,744 bytes (-2.7 %) |
+| `dist` `__TEXT,__text` | 14,391,440 bytes | 13,975,444 bytes | -415,996 bytes (-2.9 %) |
+
+The catalog and the WinUI gallery use every family, so they link the same classes (built
+together in one invocation, section 2):
+
+| Stripped file / `__TEXT,__text`, macOS | main | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,675,136 / 60,846,200 | 80,659,088 / 60,829,068 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,418,280 | 66,542,192 / 51,421,796 |
+| `winui-gallery`, release | 57,368,984 / 40,124,248 | 57,368,968 / 40,118,076 |
+| `winui-gallery`, `dist` | 47,339,720 / 33,483,900 | 47,339,712 / 33,484,580 |
 
 What is left after the change, by what each initialiser keeps alone (`ircut.py`, the
 candidate's module): 363 kB over 121 classes, none above 93 kB. The largest are real uses on
