@@ -1,6 +1,7 @@
 use crate::{RsxNode, RsxProjection};
-use crate::animation::{AnimationStyle, RsxAnimation, RsxAnimationIssue};
+use crate::animation::{RsxAnimation, RsxAnimationIssue};
 use crate::states::{ProjectedStates, RsxStateGroup};
+use crate::styles::RsxStyle;
 use crate::tree::{Element, escape_xml};
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_language::FRAMEWORK_NAMESPACE;
@@ -123,7 +124,7 @@ impl RsxProjection<'_> {
 pub(crate) fn serialize<'a>(
     root: &Element,
     nodes: &[RsxNode],
-    styles: &'a BTreeMap<usize, Vec<AnimationStyle>>,
+    styles: &'a BTreeMap<usize, Vec<RsxStyle>>,
     states: &'a BTreeMap<usize, ProjectedStates>,
 ) -> RsxPreviewMarkup<'a> {
     let mut output = RsxPreviewMarkup::default();
@@ -136,7 +137,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         &mut self,
         element: &Element,
         nodes: &[RsxNode],
-        styles: &'a BTreeMap<usize, Vec<AnimationStyle>>,
+        styles: &'a BTreeMap<usize, Vec<RsxStyle>>,
         states: &'a BTreeMap<usize, ProjectedStates>,
         depth: usize,
     ) {
@@ -178,9 +179,9 @@ impl<'a> RsxPreviewMarkup<'a> {
         }
         self.source.push('>');
         if rules.is_some() || groups.is_some() {
-            let animations = rules.map_or(&[][..], Vec::as_slice);
+            let rules = rules.map_or(&[][..], Vec::as_slice);
             let markup = groups.map_or(&[][..], |groups| groups.markup.as_slice());
-            self.styles(&tag, animations, markup, depth + 1);
+            self.styles(&tag, rules, markup, depth + 1);
         }
         if let Some(columns) = columns {
             columns.render(&mut self.source, &pad);
@@ -192,28 +193,54 @@ impl<'a> RsxPreviewMarkup<'a> {
         let _ = write!(self.source, "\n{pad}</{tag}>");
     }
 
-    fn styles(&mut self, owner: &str, styles: &'a [AnimationStyle], states: &[String], depth: usize) {
+    fn styles(&mut self, owner: &str, styles: &'a [RsxStyle], states: &[String], depth: usize) {
         let pad = INDENT.repeat(depth);
         let _ = write!(self.source, "\n{pad}<{owner}.Styles>");
         for style in styles {
-            let selector = escape_xml(&style.selector, Some('"'));
-            let _ = write!(
-                self.source,
-                "\n{pad}{INDENT}<Style Selector=\"{selector}\">\n{pad}{INDENT}{INDENT}<Style.Animations>"
-            );
-            for clip in &style.clips {
-                let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}{INDENT}");
-                self.animations.push((self.source.len(), clip));
-                self.source.push_str(&clip.xaml);
-            }
-            let _ = write!(
-                self.source,
-                "\n{pad}{INDENT}{INDENT}</Style.Animations>\n{pad}{INDENT}</Style>"
-            );
+            self.style(style, depth + 1);
         }
         for state in states {
             let _ = write!(self.source, "\n{pad}{INDENT}{state}");
         }
         let _ = write!(self.source, "\n{pad}</{owner}.Styles>");
+    }
+
+    fn style(&mut self, style: &'a RsxStyle, depth: usize) {
+        let Some(selector) = &style.preview_selector else { return };
+        let pad = INDENT.repeat(depth);
+        let escaped = escape_xml(&selector.value, Some('"'));
+        let _ = write!(self.source, "\n{pad}<Style Selector=\"{escaped}\"");
+        for (alias, namespace) in &selector.namespaces {
+            let namespace = escape_xml(namespace, Some('"'));
+            let _ = write!(self.source, " xmlns:{alias}=\"{namespace}\"");
+        }
+        self.source.push('>');
+        for setter in &style.setters {
+            let (Some(field), Some(value)) = (&setter.field, setter.value()) else { continue };
+            let value = escape_xml(&value, Some('"'));
+            let name = &field.name;
+            let owner = field.owner_name();
+            let _ = write!(self.source, "\n{pad}{INDENT}<Setter xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"");
+            let prefix = if let Some(namespace) = &field.owner.namespace {
+                let namespace = escape_xml(namespace, Some('"'));
+                let _ = write!(self.source, " xmlns:rsxOwner=\"{namespace}\"");
+                "rsxOwner:"
+            } else { "" };
+            let owner = format!("{prefix}{owner}");
+            let _ = write!(self.source, " x:SetterTargetType=\"{owner}\" Property=\"{owner}.{name}\" Value=\"{value}\"/>");
+        }
+        if !style.clips.is_empty() {
+            let _ = write!(self.source, "\n{pad}{INDENT}<Style.Animations>");
+            for clip in &style.clips {
+                let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}");
+                self.animations.push((self.source.len(), clip));
+                self.source.push_str(&clip.xaml);
+            }
+            let _ = write!(self.source, "\n{pad}{INDENT}</Style.Animations>");
+        }
+        for child in &style.children {
+            self.style(child, depth + 1);
+        }
+        let _ = write!(self.source, "\n{pad}</Style>");
     }
 }

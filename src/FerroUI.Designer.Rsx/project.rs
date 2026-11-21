@@ -1,4 +1,4 @@
-use crate::animation::{AnimationStyle, RsxAnimationIssue, projected_styles};
+use crate::animation::RsxAnimationIssue;
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::columns::{ColumnSource, collection_member, table_kind};
@@ -9,6 +9,7 @@ use crate::source_array::ArraySlot;
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
 use crate::states::{self, ProjectedStates};
+use crate::styles::{RsxStyle, RsxStyleIssue, projected_styles};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
 use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
@@ -77,8 +78,9 @@ pub struct RsxProjection<'a> {
     pub omissions: Vec<String>,
     pub omitted_count: usize,
     pub animation_issues: Vec<RsxAnimationIssue>,
+    pub style_issues: Vec<RsxStyleIssue>,
     inner_trivia: bool,
-    pub(crate) styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    pub(crate) styles: BTreeMap<usize, Vec<RsxStyle>>,
     pub(crate) states: BTreeMap<usize, ProjectedStates>,
 }
 
@@ -92,6 +94,10 @@ impl RsxProjection<'_> {
     }
 
     pub fn has_projected_animations(&self) -> bool {
+        self.style_definitions().iter().any(|(_, style)| !style.clips.is_empty())
+    }
+
+    pub fn has_projected_styles(&self) -> bool {
         !self.styles.is_empty()
     }
 
@@ -110,7 +116,7 @@ impl RsxProjection<'_> {
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
-        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations() && !self.has_projected_states() && !self.has_projected_columns()
+        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states() && !self.has_projected_columns()
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -139,6 +145,9 @@ impl RsxProjection<'_> {
         }
         if self.has_projected_animations() {
             return Err("Edit mapped animation keys in Timeline and other Rust values in source or Properties".into());
+        }
+        if self.has_projected_styles() {
+            return Err("Edit mapped Rust style builders in Styles & Themes or in source".into());
         }
         if self.omitted_count != 0 {
             return Err(
@@ -204,6 +213,7 @@ impl RsxCatalog {
             omissions: state.omissions,
             omitted_count: state.omitted_count,
             animation_issues: state.animation_issues,
+            style_issues: state.style_issues,
             inner_trivia,
             styles: state.styles,
             states: state.states,
@@ -228,7 +238,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
     }
     let (tree, state) = parse_body(source, draft.mac.tokens, catalog)?;
     if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected)) {
-        return Err("Edit native animation and state declarations in their Rust source".into());
+        return Err("Edit native styles, animation, states, and columns in their authored scope".into());
     }
     if state.omitted_count != 0 {
         return Err(format!(
@@ -247,9 +257,10 @@ struct State {
     nodes: Vec<RsxNode>,
     omissions: Vec<String>,
     omitted_count: usize,
-    styles: BTreeMap<usize, Vec<AnimationStyle>>,
+    styles: BTreeMap<usize, Vec<RsxStyle>>,
     states: BTreeMap<usize, ProjectedStates>,
     animation_issues: Vec<RsxAnimationIssue>,
+    style_issues: Vec<RsxStyleIssue>,
 }
 
 impl State {
@@ -257,6 +268,26 @@ impl State {
         self.omitted_count += 1;
         if self.omissions.len() < 8 && !self.omissions.contains(&description) {
             self.omissions.push(description);
+        }
+    }
+
+    fn project_styles(&mut self, source: &str, index: usize, value: &syn::Expr, catalog: &RsxCatalog) {
+        let slot = &mut self.nodes[index].style_slot;
+        *slot = if matches!(slot, ArraySlot::Missing) {
+            ArraySlot::from_expression(value)
+        } else {
+            ArraySlot::Unavailable
+        };
+        let projected = projected_styles(source, value, catalog);
+        let partial = !projected.issues.is_empty() || !projected.animation_issues.is_empty();
+        self.style_issues.extend(projected.issues);
+        self.animation_issues.extend(projected.animation_issues);
+        if !projected.styles.is_empty() {
+            self.styles.entry(index).or_default().extend(projected.styles);
+        }
+        if partial {
+            let class = &self.nodes[index].class;
+            self.omit(format!("{class}.styles expression"));
         }
     }
 
@@ -315,6 +346,10 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    if setter == "styles" && class.xaml_property(None, "styles").is_none() && arguments.len() == 1 {
+                        self.project_styles(source, index, &arguments[0], catalog);
+                        continue;
+                    }
                     let templates = &mut self.nodes[index].templates;
                     templates.note_setter(&setter, false);
                     templates.record_call(
@@ -382,20 +417,7 @@ impl State {
                 continue;
             }
             if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
-                let slot = &mut self.nodes[index].style_slot;
-                *slot = if matches!(slot, ArraySlot::Missing) {
-                    ArraySlot::from_expression(value)
-                } else {
-                    ArraySlot::Unavailable
-                };
-                if let Some(projected) = projected_styles(source, value, catalog) {
-                    self.animation_issues.extend(projected.unavailable);
-                    if !projected.styles.is_empty() {
-                        self.styles.entry(index).or_default().extend(projected.styles);
-                    }
-                    if projected.omitted == 0 { continue; }
-                }
-                self.omit(format!("{class}.styles expression"));
+                self.project_styles(source, index, value, catalog);
                 continue;
             }
             if class.mapped_events() && owner.is_none() && setter.starts_with("on_") {

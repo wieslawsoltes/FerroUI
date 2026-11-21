@@ -20,6 +20,7 @@ mod source_array;
 mod source_edits;
 mod spacing_edits;
 mod states;
+mod styles;
 mod tree;
 mod wrap_edits;
 mod xaml;
@@ -35,6 +36,7 @@ pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
 pub use wrap_edits::{RsxWrap, RsxWrapResult};
 pub use states::{RsxStateGroup, RsxStateSource};
+pub use styles::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleIssue, RsxStyleSetter};
 pub use xaml::{apply_rsx, xaml_to_rsx};
 
 /// Count source-authored invocations without requiring registered control types.

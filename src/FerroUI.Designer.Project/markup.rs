@@ -149,8 +149,23 @@ impl MarkupCatalog {
     }
 
     pub fn animation_property(&self, accessor: &str) -> Option<MarkupAnimationProperty<'_>> {
+        self.setter_property(accessor, false)
+    }
+
+    /// Resolve a Rust style setter to its registered property and declaring type.
+    pub fn style_property(&self, accessor: &str) -> Option<MarkupAnimationProperty<'_>> {
+        self.setter_property(accessor, true)
+    }
+
+    fn setter_property(
+        &self,
+        accessor: &str,
+        allow_attached: bool,
+    ) -> Option<MarkupAnimationProperty<'_>> {
         let (listed, property) = self.models.find_accessor(accessor)?;
-        if property.kind != RegisteredKind::Styled || property.read_only {
+        let styled = property.kind == RegisteredKind::Styled
+            || allow_attached && property.kind == RegisteredKind::Attached;
+        if !styled || property.read_only {
             return None;
         }
         let path = property.owner.as_ref().unwrap_or(&listed.rust_path);

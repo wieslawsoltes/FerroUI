@@ -15,7 +15,7 @@ pub(crate) struct AnimationAttachment {
 }
 
 impl AnimationAttachment {
-    pub(super) fn read(
+    pub(crate) fn read(
         source: &str,
         call: &ExprMethodCall,
         declaration: SourceSpan,

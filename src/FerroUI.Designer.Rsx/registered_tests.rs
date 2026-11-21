@@ -63,6 +63,30 @@ impl Fixture {
 }
 
 #[test]
+fn registered_style_property_projects_typed_custom_control_and_keeps_constructor_comments() {
+    use crate::RsxStyleEdit;
+    use ferroui_designer_core::TextPatch;
+
+    let catalog = Fixture::catalog();
+    let source = r#"rsx! { StackPanel {
+        styles: [ferroui_view::style("StatusCard")
+            .set(crate::StatusCard::reading_radius_property(),
+                ferroui_base::CornerRadius::new(10.0, /* outer */ 20.0, 30.0, 40.0))],
+        crate::views::ReviewCard {}
+    }}"#;
+    let projection = catalog.project(source, 0).unwrap();
+    let style = projection.style_definitions()[0].1;
+    let setter = &style.setters[0];
+    assert_eq!(setter.value().as_deref(), Some("10,20,30,40"));
+    assert!(projection.xaml().contains("Selector=\"rsxStyle0|StatusCard\""));
+    assert!(projection.xaml().contains("Property=\"rsxOwner:StatusCard.ReadingRadius\""));
+    let plan = projection.plan_style(&RsxStyleEdit::Setter {
+        style: style.declaration.start, setter: setter.declaration.start, value: Some("10,25,30,40".into()),
+    }).unwrap();
+    assert_eq!(TextPatch::apply_all(source, plan).unwrap(), source.replace("20.0", "25.0"));
+}
+
+#[test]
 fn registered_typed_keys_keep_comments_other_invocations_and_opaque_clips() {
     use ferroui_designer_animation::{KeyframeEdit, ValueKind};
 

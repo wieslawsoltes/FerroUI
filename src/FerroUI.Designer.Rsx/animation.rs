@@ -11,7 +11,6 @@ mod value;
 
 use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::Expr;
 pub(crate) use keyframe::{BUILTINS as BUILTIN_PROPERTIES, property as view_property};
 pub(crate) use value::{ValueShape, ValueSource, rust_literal};
 
@@ -23,29 +22,16 @@ pub(crate) struct Property {
     pub(crate) shape: ValueShape,
     pub(crate) owner: Option<TargetType>,
 }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct TargetType {
     pub(crate) name: String,
     pub(crate) namespace: Option<String>,
 }
 
-#[derive(Debug)]
-pub(crate) struct AnimationStyle {
-    pub(crate) selector: String,
-    pub(crate) clips: Vec<RsxAnimation>,
-}
-
 #[derive(Clone, Debug)]
 pub struct RsxAnimationIssue {
     pub declaration: SourceSpan,
     pub reason: &'static str,
-}
-
-pub(crate) struct ProjectedStyles {
-    pub(crate) styles: Vec<AnimationStyle>,
-    pub(crate) unavailable: Vec<RsxAnimationIssue>,
-    pub(crate) omitted: usize,
 }
 
 /// Source mapping for one clip. Its keys address only authored Rust literals.
@@ -222,34 +208,4 @@ impl RsxAnimation {
         patches.sort_by_key(|patch| patch.span.start);
         Ok(patches)
     }
-}
-
-/// Find the inline native style builders without resolving arbitrary Rust names.
-pub(crate) fn projected_styles(
-    source: &str,
-    value: &Expr,
-    catalog: &crate::RsxCatalog,
-) -> Option<ProjectedStyles> {
-    let Expr::Array(array) = value else {
-        return None;
-    };
-    let mut result = ProjectedStyles {
-        styles: Vec::new(),
-        unavailable: Vec::new(),
-        omitted: 0,
-    };
-    for pair in array.elems.pairs() {
-        let comma = pair.punct().map(|punct| syntax::span(*punct));
-        match syntax::style(source, pair.value(), comma, catalog) {
-            Some((style, mut issues)) => {
-                result.omitted += issues.len();
-                result.unavailable.append(&mut issues);
-                if !style.clips.is_empty() {
-                    result.styles.push(style);
-                }
-            }
-            None => result.omitted += 1,
-        }
-    }
-    Some(result)
 }

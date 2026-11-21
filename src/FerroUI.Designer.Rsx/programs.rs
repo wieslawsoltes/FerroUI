@@ -117,10 +117,7 @@ impl RsxProjection<'_> {
     }
 
     fn clips(&self) -> impl Iterator<Item = &RsxAnimation> {
-        self.styles
-            .values()
-            .flatten()
-            .flat_map(|style| &style.clips)
+        self.style_definitions().into_iter().flat_map(|(_, style)| &style.clips)
     }
 
     fn check_animation_plan(

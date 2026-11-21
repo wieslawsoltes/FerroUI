@@ -5,7 +5,7 @@ use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct ValueShape {
     kind: ValueKind,
     brush: bool,
@@ -28,7 +28,7 @@ impl ValueShape {
     pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
-    pub(super) const SOLID_BRUSH: Self = Self {
+    pub(crate) const SOLID_BRUSH: Self = Self {
         kind: ValueKind::Color,
         brush: true,
     };

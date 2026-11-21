@@ -2,6 +2,7 @@
 //! matches a XAML type. A package can declare the correspondence in its exported
 //! MarkupAssembly metadata. Ordinary Rust name resolution remains rust-analyzer's.
 use crate::{catalog, literal::Literal};
+use crate::styles::{fields as style_fields, RsxStyleField};
 use ferroui_designer_language::Schema;
 use ferroui_designer_project::{
     rsx_mapping::{assembly_path, RsxBuilderMapping, PREFIX}, MarkupCatalog, MarkupControl,
@@ -20,6 +21,7 @@ pub(crate) use control::Class;
 pub struct RsxCatalog {
     registered: Vec<Arc<RegisteredClass>>,
     animation_properties: BTreeMap<String, crate::animation::Property>,
+    style_fields: Arc<BTreeMap<String, RsxStyleField>>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -77,7 +79,28 @@ impl RsxCatalog {
             .filter_map(|(class, ambiguous)| (!ambiguous).then_some(class))
             .collect();
         let animation_properties = animation::properties(catalog, package.as_deref());
-        Self { registered, animation_properties }
+        let style_fields = Arc::new(style_fields::project_fields(catalog, schema, package.as_deref()));
+        Self { registered, animation_properties, style_fields }
+    }
+
+    pub(crate) fn style_namespace(&self, name: &str) -> Option<Option<&str>> {
+        let mut registered = self.registered.iter().filter(|class| class.name == name);
+        let framework = catalog::schema().type_info(name, Some(ferroui_designer_language::FRAMEWORK_NAMESPACE))
+            .is_some_and(|ty| ty.name == name);
+        match (framework, registered.next(), registered.next()) {
+            (true, None, None) => Some(None),
+            (false, Some(class), None) => Some(Some(&class.namespace)),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn style_field(&self, rust: &str) -> Option<&RsxStyleField> {
+        self.style_fields.get(rust).or_else(|| style_fields::builtins().get(rust))
+    }
+
+    pub(crate) fn style_fields(&self) -> Vec<&RsxStyleField> {
+        style_fields::builtins().iter().filter(|(path, _)| !self.style_fields.contains_key(*path))
+            .map(|(_, field)| field).chain(self.style_fields.values()).collect()
     }
 
     pub(crate) fn animation_property(&self, path: &str) -> Option<&crate::animation::Property> {

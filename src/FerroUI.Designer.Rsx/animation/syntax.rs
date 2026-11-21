@@ -1,51 +1,11 @@
 use super::keyframe::{keyframe, record, MappedKey};
-use super::program_comment::AnimationAttachment;
 use super::{
-    AnimationStyle, DelaySource, FloatSource, RsxAnimation, RsxAnimationIssue, TargetType, TRACK_TARGET,
+    DelaySource, FloatSource, RsxAnimation, TargetType, TRACK_TARGET,
 };
 use crate::{tree::escape_xml, RsxCatalog};
 use ferroui_designer_animation::{Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
 use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt, UnOp};
-
-pub(super) fn style(
-    source: &str,
-    expr: &Expr,
-    comma: Option<SourceSpan>,
-    catalog: &RsxCatalog,
-) -> Option<(AnimationStyle, Vec<RsxAnimationIssue>)> {
-    let (factory, methods) = chain(expr)?;
-    let Expr::Lit(selector) = view_argument(factory, "style")? else {
-        return None;
-    };
-    let Lit::Str(selector) = &selector.lit else {
-        return None;
-    };
-    let selector = selector.value();
-    if !valid_selector(&selector) {
-        return None;
-    }
-    let lone_style = (methods.len() == 1).then(|| (span(expr), comma));
-    let mut clips = Vec::new();
-    let mut omitted = Vec::new();
-    for call in methods {
-        let declaration = argument(call, "animation")?;
-        if let Some(mut clip) = clip(declaration, catalog) {
-            let attachment = AnimationAttachment::read(source, call, span(declaration), lone_style);
-            if let Some(identity) = attachment.identity() {
-                identity.annotate_xaml(&mut clip.xaml);
-            }
-            clip.attachment = Some(attachment);
-            clips.push(clip);
-        } else {
-            omitted.push(RsxAnimationIssue {
-                declaration: span(declaration),
-                reason: "This clip contains a computed expression or a Rust builder form without a source mapping.",
-            });
-        }
-    }
-    Some((AnimationStyle { selector, clips }, omitted))
-}
 
 pub(crate) fn valid_selector(selector: &str) -> bool {
     !(selector.trim().is_empty()
@@ -56,7 +16,7 @@ pub(crate) fn valid_selector(selector: &str) -> bool {
         }))
 }
 
-pub(super) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
+pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument(factory, "animation")?)?;
     let mut timeline = Timeline::new(duration).ok()?;
