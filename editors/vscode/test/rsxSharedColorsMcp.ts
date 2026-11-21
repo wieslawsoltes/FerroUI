@@ -40,10 +40,11 @@ export async function verifyRsxSharedColorsMcp({ invoke, content }: McpFixture):
     const request = { session, expected_revision: await ready(), tool: 'designer_rsx_style_edit',
         arguments: { action: 'color_resource', style: initial.node, resource: entry.node, value: '#EB177254' } };
     assert.equal((await invoke('designer_studio_edit', request)).isError, true, 'A shared edit must have an explicit mode');
-    content(await invoke('designer_studio_edit', { ...request, arguments: { ...request.arguments, mode: 'declaration' } }));
+    const shared = { ...request, expected_revision: await ready(), arguments: { ...request.arguments, mode: 'declaration' } };
+    content(await invoke('designer_studio_edit', shared));
     assert.equal(document.getText(), original.replace(originalColor, 'Rgb::from_argb(235, 23u8, /* brand 🧭 */ 114, 84)'));
     assert.equal(await color(), '#EB177254');
-    assert.equal((await invoke('designer_studio_edit', { ...request, arguments: { ...request.arguments, mode: 'declaration' } })).isError, true);
+    assert.equal((await invoke('designer_studio_edit', shared)).isError, true);
     const undo = () => invoke('designer_history', { session, action: 'undo', expected_version: document.version }).then(content);
     await undo();
     assert.equal(document.getText(), original);
