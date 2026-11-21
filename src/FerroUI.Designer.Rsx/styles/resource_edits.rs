@@ -2,12 +2,16 @@
 use super::{
     RsxStyle,
     edit::{insert, qualified_getter},
+    resource_theme,
     resources::valid_key,
     string_literal,
 };
-use crate::{RsxProjection, animation::rust_literal, blocks::keep_comments};
+use crate::{
+    RsxProjection, animation::rust_literal, blocks::keep_comments, source_edits::line_prefix,
+};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
+use ferroui_designer_tools::component_palette::PaletteLayer;
 
 impl RsxProjection<'_> {
     pub(super) fn add_style_color(
@@ -15,19 +19,38 @@ impl RsxProjection<'_> {
         style: &RsxStyle,
         key: &str,
         value: &str,
+        layer: PaletteLayer,
     ) -> Result<Vec<TextPatch>, String> {
         if !valid_key(key) {
             return Err("Enter a nonempty resource key without surrounding whitespace or control characters".into());
         }
-        if style.resources.iter().any(|resource| resource.key == key) {
-            return Err("This rule already declares that resource key".into());
+        if style.resources.iter().any(|resource| {
+            resource.key == key
+                && (resource.layer == Some(layer)
+                    || layer != PaletteLayer::Shared && resource.layer.is_none())
+        }) {
+            return Err(
+                "This rule already declares or computes that key in the selected layer".into(),
+            );
         }
         let color =
             AnimationValue::parse(value, ValueKind::Color).map_err(|error| error.to_string())?;
         let value = rust_literal(&color)?;
+        let call = match resource_theme::constructor(layer) {
+            Some(variant) => format!(".theme_resource({variant}, {key:?}, {value})"),
+            None => format!(".resource({key:?}, {value})"),
+        };
+        let prefix = style
+            .resources
+            .iter()
+            .map(|entry| entry.declaration.start)
+            .chain(style.setters.iter().map(|setter| setter.declaration.start))
+            .map(|start| line_prefix(self.source, Some(start)))
+            .find(|prefix| !prefix.is_empty())
+            .unwrap_or("");
         Ok(vec![insert(
             style.declaration.end,
-            format!(".resource({key:?}, {value})"),
+            format!("{prefix}{call}"),
         )])
     }
 
@@ -40,7 +63,7 @@ impl RsxProjection<'_> {
         let authored = style
             .resources
             .iter()
-            .find(|entry| entry.declaration.start == resource)
+            .find(|entry| entry.declaration.start == resource && entry.layer.is_some())
             .and_then(|entry| entry.color.as_ref())
             .ok_or("Choose an authored color resource in this rule")?;
         let mut patches = Vec::new();

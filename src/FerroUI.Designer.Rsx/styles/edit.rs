@@ -2,6 +2,7 @@
 use super::{string_literal, syntax::validate_selector, Deletion, RsxStyle, RsxStyleField};
 use crate::{blocks::keep_comments, source_edits::line_prefix, RsxProjection};
 use ferroui_designer_core::{SourceSpan, TextPatch};
+use ferroui_designer_tools::component_palette::PaletteLayer;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -39,6 +40,7 @@ pub enum RsxStyleEdit {
         style: usize,
         key: String,
         value: String,
+        layer: Option<PaletteLayer>,
     },
     ColorResource {
         style: usize,
@@ -152,8 +154,8 @@ impl RsxProjection<'_> {
             RsxStyleEdit::SetResource { style, key, setter, getter } => {
                 self.plan_resource_setter(self.style_at(*style)?, key, *setter, getter.as_deref())?
             }
-            RsxStyleEdit::AddColorResource { style, key, value } => {
-                self.add_style_color(self.style_at(*style)?, key, value)?
+            RsxStyleEdit::AddColorResource { style, key, value, layer } => {
+                self.add_style_color(self.style_at(*style)?, key, value, layer.unwrap_or(PaletteLayer::Shared))?
             }
             RsxStyleEdit::ColorResource { style, resource, value } => {
                 self.change_style_color(self.style_at(*style)?, *resource, value)?

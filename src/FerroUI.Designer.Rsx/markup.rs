@@ -223,7 +223,7 @@ impl<'a> RsxPreviewMarkup<'a> {
             let _ = write!(self.source, " xmlns:{alias}=\"{namespace}\"");
         }
         self.source.push('>');
-        self.style_resources(style, &pad);
+        style_resources::write(&mut self.source, style, &pad);
         for setter in &style.setters {
             let (Some(field), Some(value)) = (&setter.field, setter.value()) else { continue };
             let value = escape_xml(&value, Some('"'));
@@ -261,18 +261,10 @@ impl<'a> RsxPreviewMarkup<'a> {
         let _ = write!(self.source, "\n{pad}</Style>");
     }
 
-    fn style_resources(&mut self, style: &RsxStyle, pad: &str) {
-        let mut entries = style.resource_entries().filter_map(|entry| {
-            Some((resource_key_attribute(&entry.key), entry.color()?))
-        }).peekable();
-        if entries.peek().is_none() { return; }
-        let _ = write!(self.source, "\n{pad}{INDENT}<Style.Resources>");
-        for (key, color) in entries {
-            let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}<Color xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Key=\"{key}\">{color}</Color>");
-        }
-        let _ = write!(self.source, "\n{pad}{INDENT}</Style.Resources>");
-    }
 }
+
+#[path = "markup_style_resources.rs"]
+mod style_resources;
 
 fn resource_key_attribute(key: &str) -> String {
     let escaped = escape_xml(key, Some('"'));

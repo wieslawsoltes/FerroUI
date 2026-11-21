@@ -1,6 +1,7 @@
 use super::RsxStyleEdit;
 use crate::{RsxProjection, project_rust};
 use ferroui_designer_core::{Document, TextPatch};
+use ferroui_designer_tools::component_palette::PaletteLayer;
 
 const VIEW: &str = r##"fn earlier() { rsx! { TextBlock { text: "🧭" } } }
 fn customer() { rsx! {
@@ -87,6 +88,7 @@ fn creates_and_projects_keys_with_xaml_punctuation() {
             style,
             key: key.into(),
             value: "#DB135189".into(),
+            layer: None,
         })
     };
     assert!(plan("Ink").is_err());
@@ -112,5 +114,103 @@ fn creates_and_projects_keys_with_xaml_punctuation() {
         project(&linked)
             .xaml()
             .contains("ResourceKey=\"{}{Ink &amp; &quot;Review&quot;}\"")
+    );
+}
+
+#[test]
+fn projects_literal_theme_families_and_preserves_theme_source_edits() {
+    let source = VIEW.replace(
+        ".resource(\"Ink\",",
+        ".theme_resource(ferroui_base::styling::ThemeVariant::default(), \"Ink\",",
+    );
+    let source = source.replace(".nested(",
+        ".theme_resource(ferroui_base::styling::ThemeVariant::dark(), \"Ink\", ferroui_base::media::Color::from_rgb(127, /* contrast fallback */ 179, 228))\n                .nested(").replace('\n', "\r\n");
+    let projection = project(&source);
+    let style = projection.style_definitions()[0].1.declaration.start;
+    let family = &projection.style_resource_choices(style)[0];
+    assert_eq!(family.light.unwrap().layer, Some(PaletteLayer::Default));
+    assert_eq!(family.dark.unwrap().color().as_deref(), Some("#FF7FB3E4"));
+    assert_eq!(
+        family.dark.unwrap().declaration,
+        family.high_contrast.unwrap().declaration
+    );
+    assert!(family.common_declaration().is_none());
+    let plan = |layer| {
+        projection.plan_style(&RsxStyleEdit::AddColorResource {
+            style,
+            key: "Ink".into(),
+            value: "#FFFFD064".into(),
+            layer: Some(layer),
+        })
+    };
+    assert!(plan(PaletteLayer::Dark).is_err());
+    let draft = TextPatch::apply_all(&source, plan(PaletteLayer::HighContrast).unwrap()).unwrap();
+    assert!(draft.contains(
+        "\r\n                .theme_resource(::ferroui_base::styling::ThemeVariant::new"
+    ));
+    let projected = project(&draft);
+    let family = &projected.style_resource_choices(style)[0];
+    assert_eq!(
+        family.high_contrast.unwrap().layer,
+        Some(PaletteLayer::HighContrast)
+    );
+    assert_eq!(
+        family.high_contrast.unwrap().color().as_deref(),
+        Some("#FFFFD064")
+    );
+    let document = Document::new(projected.xaml()).unwrap();
+    assert!(document.is_valid());
+    assert!(
+        document
+            .source()
+            .contains("rsxContrast:WinUITheme.HighContrast")
+    );
+    let change = projected
+        .plan_style(&RsxStyleEdit::ColorResource {
+            style,
+            resource: family.dark.unwrap().declaration.start,
+            value: "#FF7FB4E4".into(),
+        })
+        .unwrap();
+    assert_eq!(
+        TextPatch::apply_all(&draft, change).unwrap(),
+        draft.replace("/* contrast fallback */ 179", "/* contrast fallback */ 180")
+    );
+}
+
+#[test]
+fn computed_variant_prevents_guessing_a_color_and_shared_overrides_variants() {
+    let source = VIEW.replace(".nested(",
+        ".theme_resource(active_theme(), \"Ink\", ferroui_base::media::Color::from_rgb(127, 179, 228))\n                .nested(");
+    let projection = project(&source);
+    let rule = projection.style_definitions()[0].1;
+    let family = &projection.style_resource_choices(rule.declaration.start)[0];
+    assert_eq!(
+        family.common_declaration().unwrap().layer,
+        Some(PaletteLayer::Shared)
+    );
+    let computed = rule
+        .resources
+        .iter()
+        .find(|resource| resource.layer.is_none())
+        .unwrap();
+    assert!(
+        projection
+            .plan_style(&RsxStyleEdit::ColorResource {
+                style: rule.declaration.start,
+                resource: computed.declaration.start,
+                value: "#FF123456".into(),
+            })
+            .is_err()
+    );
+    let source = source.replace(
+        ".resource(\"Ink\",",
+        ".theme_resource(ferroui_base::styling::ThemeVariant::dark(), \"Ink\",",
+    );
+    let projection = project(&source);
+    assert!(
+        projection
+            .style_resource_choices(rule.declaration.start)
+            .is_empty()
     );
 }

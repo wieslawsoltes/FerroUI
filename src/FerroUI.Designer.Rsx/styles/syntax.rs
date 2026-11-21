@@ -122,9 +122,9 @@ impl ProjectedStyles {
                     method: rust::span(&call.method),
                     value,
                 });
-            } else if call.method == "resource" {
+            } else if call.method == "resource" || call.method == "theme_resource" {
                 let resource = RsxStyleResource::read(call);
-                if resource.as_ref().is_none_or(|resource| resource.color.is_none()) {
+                if resource.as_ref().is_none_or(|resource| resource.color.is_none() || resource.layer.is_none()) {
                     self.issue(method, "Reveal this computed or unmapped Rust resource");
                 }
                 resources.extend(resource);

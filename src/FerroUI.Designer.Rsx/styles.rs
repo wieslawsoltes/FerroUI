@@ -2,6 +2,7 @@
 mod edit;
 pub(crate) mod fields;
 mod resource_edits;
+mod resource_theme;
 mod resources;
 mod syntax;
 #[cfg(test)]
@@ -11,7 +12,7 @@ mod resources_tests;
 
 pub use edit::RsxStyleEdit;
 pub use fields::RsxStyleField;
-pub use resources::RsxStyleResource;
+pub use resources::{RsxStyleResource, RsxStyleResourceFamily};
 pub(crate) use syntax::projected_styles;
 
 use crate::animation::RsxAnimation;
