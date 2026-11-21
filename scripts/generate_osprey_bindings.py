@@ -64,6 +64,8 @@ import json
 import os
 import sys
 
+from ferroui_selection import AppSelection
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = os.path.join(ROOT, "bindings", "model", "ferroui-api.json")
 OUT = os.path.join(ROOT, "bindings", "osprey", "full")
@@ -290,6 +292,9 @@ class Selection:
                     self.classes.add(name)
                     name = bases.get(name)
         self.named = set(manifest.get("classes", [])) if manifest else set(bases)
+        # What a library built for the manifest returns (`ferro_selection_fingerprint`); 0 for the
+        # full bindings, which need the library of every class.
+        self.fingerprint = 0 if manifest is None else AppSelection(model, manifest).fingerprint
         self.properties = {p["name"] for p in model["properties"]
                            if self.full or any(d["owner"] in self.classes for d in p["declarations"])}
         self.events = {e["name"] for e in model["events"]
@@ -331,6 +336,9 @@ def generate_abi(model, names, selection):
     lines.append(f"// apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format"
                  f" {model['format']}.")
     lines.append(f"fn apiFingerprint() = {model['fingerprint']}")
+    lines.append("// selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a")
+    lines.append("// library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.")
+    lines.append(f"fn selectionFingerprint() = {selection.fingerprint}")
     lines.append(f"// abiVersion() -> int: the version of the ABI the bindings were generated for.")
     lines.append(f"fn abiVersion() = {model['abi_version']}")
     lines.append("")

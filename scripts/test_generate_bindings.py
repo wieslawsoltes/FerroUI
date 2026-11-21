@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Tests of the generators of the bindings: the API model (`generate_api_model.py`) and its Osprey
-backend (`generate_osprey_bindings.py`).
+"""Tests of the generators of the bindings: the API model (`generate_api_model.py`), its Osprey
+backend (`generate_osprey_bindings.py`) and the selection of an application they share with the
+generator of its library (`ferroui_selection.py`).
 
     python3 scripts/test_generate_bindings.py
 
@@ -208,6 +209,38 @@ class SelectionTests(unittest.TestCase):
                 roots = f.read()
             self.assertIn('"ferroui"', roots, f"{path}: the project builds its selection")
             self.assertNotIn("bindings/osprey/full", roots, f"{path}: not the full bindings")
+
+    def test_a_selection_registers_its_classes_and_has_its_fingerprint(self):
+        import ferroui_selection
+        manifest = {"classes": ["Window", "StackPanel", "TextBlock", "Button"], "layers": ["objects"]}
+        abi = self.selection(manifest["classes"], manifest["layers"])["abi.osp"]
+        for entry in ("ferro_type_window", "ferro_type_stack_panel", "ferro_type_text_block", "ferro_type_button"):
+            self.assertIn(f"extern fn {entry}() -> int", abi)
+            self.assertIn(f"= {entry}()", abi)
+        self.assertNotIn("ferro_type_text_box", abi)
+        fingerprint = ferroui_selection.AppSelection(self.model, manifest).fingerprint
+        self.assertIn(f"fn selectionFingerprint() = {fingerprint}\n", abi)
+        # The order of the classes and the layers do not matter; the classes and the calls do.
+        same = ferroui_selection.AppSelection(self.model, {"classes": list(reversed(manifest["classes"]))})
+        self.assertEqual(same.fingerprint, fingerprint)
+        other = ferroui_selection.AppSelection(self.model, {**manifest, "abi": ["frames"]})
+        self.assertNotEqual(other.fingerprint, fingerprint)
+        full = dict(OSPREY.outputs(None, self.model, self.names)[0])["abi.osp"]
+        self.assertIn("fn selectionFingerprint() = 0\n", full)
+        self.assertIn("fn registerTypes() = 0\n", full)
+
+    def test_the_exports_of_a_selection(self):
+        import ferroui_selection
+        selection = ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "abi": ["signals"]})
+        self.assertIn("ferro_type_button", selection.exports)
+        self.assertIn("ferro_create", selection.exports)
+        self.assertIn("ferro_selection_fingerprint", selection.exports)
+        self.assertIn("ferro_signal_new", selection.exports)
+        self.assertNotIn("ferro_frame_open", selection.exports)
+        self.assertNotIn("ferro_class_register", selection.exports)
+        self.assertNotIn("ferro_type_window", selection.exports)
+        with self.assertRaises(SystemExit):
+            ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "abi": ["widgets"]})
 
 
 def OSPREY_MODEL():
