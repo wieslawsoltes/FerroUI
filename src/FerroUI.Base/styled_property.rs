@@ -1,6 +1,6 @@
 use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
 use crate::ferro_property::{
-    convert_property_value, copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
+    copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
     FerroPropertyInit, NotifyingCallback, PayloadSlot, PropertyRoutes,
 };
 use crate::ferro_property_metadata::MetadataTable;
@@ -332,16 +332,6 @@ pub(crate) trait StyledCodec {
     fn enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool>;
     /// [`PropertyRoutes::route_unpack_binding_value`].
     fn unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>>;
-    /// Sets `value`, of another type, converted to the value type (`TryConvert` of the
-    /// property): with `priority`, or as the current value for `None`. The converted temporary is
-    /// copied and released before the write, as the typed routes did. `None` when the value does
-    /// not convert.
-    fn set_converted(
-        &'static self,
-        o: &FerroObject,
-        value: &dyn Any,
-        priority: Option<BindingPriority>,
-    ) -> Option<Option<Rc<dyn IDisposable>>>;
     /// The typed property, for downcasting.
     fn typed(&'static self) -> &'static dyn Any;
 }
@@ -459,22 +449,6 @@ impl<T: StyledValue> StyledCodec for StyledProperty<T> {
         unpack_binding_value::<T>(value)
     }
 
-    fn set_converted(
-        &'static self,
-        o: &FerroObject,
-        value: &dyn Any,
-        priority: Option<BindingPriority>,
-    ) -> Option<Option<Rc<dyn IDisposable>>> {
-        let value = convert_property_value::<T>(self, value)?;
-        Some(match priority {
-            Some(priority) => o.set_value_with_priority(self, value, priority),
-            None => {
-                o.set_current_value(self, value);
-                None
-            }
-        })
-    }
-
     fn typed(&'static self) -> &'static dyn Any {
         self
     }
@@ -501,6 +475,16 @@ impl StyledRoutes {
     #[inline]
     fn codec(&self) -> &'static dyn StyledCodec {
         self.property().styled_codec()
+    }
+}
+
+impl StyledRoutes {
+    /// `value`, of another type, converted to the value type of the property (`TryConvert` of
+    /// the property) and copied into a box of its own: the temporary of the conversion is released
+    /// before the value is validated, coerced or published, as the typed routes released it.
+    /// Panics as they did for a value that does not convert.
+    fn converted(&self, value: &dyn Any) -> BoxedValue {
+        converted_value(self.property(), self.codec(), value)
     }
 }
 
@@ -552,10 +536,8 @@ impl PropertyRoutes for StyledRoutes {
             if type_id == TypeId::of::<DoNothingType>() {
                 return;
             }
-            if self.codec().set_converted(o, value, None).is_none() {
-                property.invalid_value_type();
-            }
-            return;
+            let converted = self.converted(value);
+            return self.route_set_current_value(o, converted.as_any());
         }
         if !self.codec().set_current_value(o, value) {
             property.invalid_value_type();
@@ -643,8 +625,17 @@ fn set_other_styled_value(
     if type_id == TypeId::of::<DoNothingType>() {
         return None;
     }
-    match codec.set_converted(o, value, Some(priority)) {
-        Some(result) => result,
+    let converted = converted_value(property, codec, value);
+    codec.set_value(o, converted.as_any(), priority)
+}
+
+/// [`StyledRoutes::converted`] of `property`.
+fn converted_value(property: &'static FerroProperty, codec: &'static dyn StyledCodec, value: &dyn Any) -> BoxedValue {
+    let converted = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type());
+    let copy = converted.as_ref().and_then(|converted| codec.box_value(converted.as_any()));
+    drop(converted);
+    match copy {
+        Some(copy) => copy,
         None => property.invalid_value_type(),
     }
 }
