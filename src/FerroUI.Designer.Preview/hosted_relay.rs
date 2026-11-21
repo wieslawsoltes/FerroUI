@@ -36,8 +36,10 @@ use std::sync::{
 use std::time::Duration;
 
 mod animation;
+pub(crate) mod authored;
 pub(crate) mod palette;
 mod sources;
+pub(crate) mod styles;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
@@ -74,7 +76,7 @@ pub(crate) struct Relay {
     next_animation: i64,
     animation_sources: SourceMaps,
     authored_rsx: Option<AuthoredRsxFrame>,
-    palette: Option<palette::HostedPalette>,
+    authored: Option<authored::AuthoredPreview>,
     size: (f64, f64),
 }
 
@@ -125,6 +127,8 @@ pub(crate) struct Frame {
     fixtures: Option<Vec<String>>,
     #[serde(rename = "paletteAvailable")]
     palette_available: bool,
+    #[serde(rename = "stylesAvailable")]
+    styles_available: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     animations: Option<serde_json::Value>,
     #[serde(rename = "animationPresentation", skip_serializing_if = "Option::is_none")]
@@ -162,7 +166,7 @@ impl Relay {
             next_animation: 0,
             animation_sources: SourceMaps::default(),
             authored_rsx: None,
-            palette: None,
+            authored: None,
             size: (0.0, 0.0),
         })
     }
@@ -350,7 +354,7 @@ impl Relay {
                 ..Events::default()
             };
         }
-        self.palette = None;
+        self.authored = None;
         self.animation_sources.retain(design.restore_animation.as_ref());
         let project = projects.source(&design.document)?;
         let document = crate::document::DesignDocument::parse(&design.document, project)?;
@@ -394,9 +398,10 @@ impl Relay {
         if !matches!(state.outcome, Some(Ok(()))) || state.latest.is_none() {
             return Err("The application did not render this source revision".into());
         }
-        let palette = if design.document.language == Language::Xaml {
+        let authored = if design.document.language == Language::Xaml {
             state.palette.take().zip(authored).map(|(context, graph)| {
-                palette::HostedPalette::new(document.xaml.clone(), design.document.uri.clone(), graph, context)
+                let schema = project.map_or_else(|| Arc::clone(crate::document::shared_schema()), |project| Arc::clone(&project.schema));
+                authored::AuthoredPreview::new(document.xaml.clone(), design.document.uri.clone(), graph, context, schema)
             })
         } else {
             None
@@ -439,8 +444,9 @@ impl Relay {
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;
-        self.palette = palette;
-        frame.palette_available = self.palette.is_some();
+        self.authored = authored;
+        frame.palette_available = self.authored.is_some();
+        frame.styles_available = self.authored.is_some();
         frame.animation_presentation = presentation;
         Ok(frame)
     }
@@ -472,7 +478,8 @@ impl Relay {
             image,
             fixture,
             fixtures,
-            palette_available: self.palette.is_some(),
+            palette_available: self.authored.is_some(),
+            styles_available: self.authored.is_some(),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,
         }))

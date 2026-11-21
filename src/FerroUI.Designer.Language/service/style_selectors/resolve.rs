@@ -1,7 +1,7 @@
 //! Carry the compiler's target type through each branch of the selector.
 use super::{PropertyUse, References, Source, TypeUse};
 use crate::{Schema, TypeInfo, FRAMEWORK_NAMESPACE};
-use ferroui_designer_core::Document;
+use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_syntax::selector_grammar::{SelectorOperand, SelectorSyntax};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -50,6 +50,10 @@ pub(super) fn contains_nesting(syntax: &[SelectorSyntax]) -> bool {
     })
 }
 
+pub(super) fn validate_types(schema: &Schema, document: &Document, node: NodeId, syntax: &[SelectorSyntax]) -> Result<(), String> {
+    Scope { schema, namespaces: document.ast().namespaces(node), nesting: None }.validate_types(syntax)
+}
+
 struct Scope<'s> {
     schema: &'s Schema,
     namespaces: BTreeMap<String, String>,
@@ -75,6 +79,26 @@ impl<'s> Scope<'s> {
             .get(prefix)
             .map(String::as_str)
             .or_else(|| prefix.is_empty().then_some(FRAMEWORK_NAMESPACE))
+    }
+
+    fn validate_types(&self, syntax: &[SelectorSyntax]) -> Result<(), String> {
+        for item in syntax {
+            let (prefix, name) = match item {
+                SelectorSyntax::OfType { xmlns, type_name } | SelectorSyntax::Is { xmlns, type_name }
+                | SelectorSyntax::AttachedProperty { xmlns, type_name, .. } => (xmlns, type_name),
+                SelectorSyntax::Not { argument } => { self.validate_types(argument)?; continue; }
+                _ => continue,
+            };
+            let namespace = self.namespace(prefix).ok_or_else(|| format!("The selector namespace '{prefix}' is not declared"))?;
+            let ty = self.schema.exact_type_info(name, Some(namespace))
+                .ok_or_else(|| format!("The selected Cargo schema has no selector type '{name}' in '{namespace}'"))?;
+            if let SelectorSyntax::AttachedProperty { property, .. } = item {
+                if !self.schema.property(&ty.name, Some(&ty.namespace), property).is_some_and(|info| info.attached) {
+                    return Err(format!("'{name}.{property}' is not a registered attached property"));
+                }
+            }
+        }
+        Ok(())
     }
 
     fn resolve(

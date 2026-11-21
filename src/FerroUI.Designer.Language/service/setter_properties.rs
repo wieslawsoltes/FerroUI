@@ -34,7 +34,7 @@ pub(super) fn setter_value_property(
     setter_property(schema, document, owner, owner.attribute_info("Property")?)
 }
 
-fn setter_target<'a>(
+pub(super) fn setter_target<'a>(
     schema: &'a Schema,
     document: &Document,
     parent: NodeId,
@@ -49,10 +49,7 @@ fn setter_target<'a>(
     if !native(schema, parent, "ControlTheme") {
         return None;
     }
-    let target = parent
-        .attributes
-        .iter()
-        .find(|attribute| attribute.name == "TargetType")?;
+    let target = ferroui_designer_tools::component_property_attribute(document, parent.id, "TargetType").ok()??;
     binding::type_reference(schema, document, parent.id, &target.value)
 }
 

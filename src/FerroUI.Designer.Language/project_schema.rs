@@ -58,6 +58,7 @@ impl Schema {
             if let Some(existing) = merged.properties.get_mut(name) {
                 existing.authored = property.authored.clone();
                 existing.model_type = property.model_type.clone();
+                existing.style_settable = property.style_settable;
             }
         }
         self.register(merged);
@@ -142,6 +143,7 @@ fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel
     let mut properties = BTreeMap::new();
     for member in &item.properties {
         let mut info = property(&member.name, &member.value_type.text, member.setter.is_none(), false, false);
+        info.style_settable = Some(false);
         info.authored = catalog.authored_definition(assembly, item, Some((false, &member.name)));
         properties.insert(member.name.clone(), info);
     }
@@ -154,6 +156,7 @@ fn type_info(catalog: &MarkupCatalog, assembly: &AssemblyModel, item: &TypeModel
                     member.kind == RegisteredKind::Attached,
                     false,
                 );
+            info.style_settable = Some(member.kind != RegisteredKind::Direct && !member.read_only);
             info.authored = registered_origin(catalog, member).or_else(|| {
                 catalog.authored_definition(assembly, item, Some((true, &member.accessor)))
             });

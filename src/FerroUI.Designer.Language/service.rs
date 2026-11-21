@@ -17,6 +17,7 @@ mod registered_rename;
 mod registered_rsx;
 mod registered_types;
 mod setter_properties;
+mod style_authoring;
 mod style_selectors;
 mod refactoring;
 mod resource_dependencies;

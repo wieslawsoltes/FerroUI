@@ -52,6 +52,10 @@ impl PreviewIncludes {
         self.documents.iter().map(|(address, source)| (address.as_str(), source))
     }
 
+    pub fn authored_source(&self, address: &str) -> Option<&PreviewInclude> {
+        self.documents.get(address)
+    }
+
     pub fn resolve(
         &self,
         address: &str,

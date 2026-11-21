@@ -166,6 +166,8 @@ fn respond(
         "hostedFrame" => hosted.as_mut().ok_or_else(|| "Start an app-hosted session".into()).and_then(|relay| serialize(relay.frame())),
         "hostedPalette" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.palette(request)),
+        "hostedStyles" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.styles(request)),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
         "hostedAnimate" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

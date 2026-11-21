@@ -4,7 +4,7 @@ use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use ferroui_designer_language::{LineIndex, Range, Schema};
 use ferroui_designer_rsx::{RsxAnimation, RsxCatalog, RsxNode, RsxProjection, RsxStateGroup};
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 pub(crate) struct DesignDocument<'a> {
     pub(crate) xaml: Document,
@@ -144,6 +144,10 @@ fn rsx_catalog(project: Option<&Project>) -> &RsxCatalog {
 }
 
 pub(crate) fn schema() -> &'static Schema {
-    static SCHEMA: OnceLock<Schema> = OnceLock::new();
-    SCHEMA.get_or_init(Schema::ferroui)
+    shared_schema()
+}
+
+pub(crate) fn shared_schema() -> &'static Arc<Schema> {
+    static SCHEMA: OnceLock<Arc<Schema>> = OnceLock::new();
+    SCHEMA.get_or_init(|| Arc::new(Schema::ferroui()))
 }

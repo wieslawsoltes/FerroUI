@@ -3,7 +3,7 @@ mod resolve;
 
 use crate::{binding, PropertyInfo, Schema, TypeInfo, FRAMEWORK_NAMESPACE};
 use ferroui_designer_core::{Document, Node, NodeKind, SourceSpan, XmlText};
-use ferroui_markup_syntax::{character_reader::is_white_space, selector_grammar::SelectorGrammar};
+use ferroui_markup_syntax::{character_reader::is_white_space, selector_grammar::{SelectorGrammar, SelectorSyntax}};
 use std::{collections::BTreeSet, ops::Range};
 
 pub(super) struct References {
@@ -75,6 +75,17 @@ pub(super) fn target_type<'s>(
         .then(|| enclosing_target(schema, document, style))
         .flatten();
     resolve::target_type(schema, document, &source, nesting, &syntax)
+}
+
+pub(super) fn validate_selector(schema: &Schema, document: &Document, node: ferroui_designer_core::NodeId, text: &str, nested: bool) -> Result<(), String> {
+    let syntax = SelectorGrammar::parse(text).map_err(|error| error.to_string())?;
+    for branch in syntax.split(|part| matches!(part, SelectorSyntax::Comma)) {
+        let first = branch.first().ok_or("Enter a style selector")?;
+        if nested != matches!(first, SelectorSyntax::Nesting) {
+            return Err(if nested { "Begin every nested selector with ^" } else { "The ^ selector requires an enclosing style" }.into());
+        }
+    }
+    resolve::validate_types(schema, document, node, &syntax)
 }
 
 fn enclosing_target<'s>(

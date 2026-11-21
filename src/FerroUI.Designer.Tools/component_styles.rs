@@ -139,15 +139,7 @@ fn create_style(document: &Document, owner: NodeId, selector: &str) -> Result<Ve
 }
 
 fn set_base(document: &Document, theme: NodeId, base: Option<NodeId>) -> Result<Vec<Edit>> {
-    require(
-        is_theme(element(document, theme)?),
-        "Select an authored ControlTheme",
-    )?;
-    require(
-        property_elements(document, element(document, theme)?, "BasedOn")?.is_empty(),
-        "Edit the existing BasedOn object in source",
-    )?;
-    let value = base
+    let key = base
         .map(|base| {
             require(
                 is_theme(element(document, base)?),
@@ -181,9 +173,17 @@ fn set_base(document: &Document, theme: NodeId, base: Option<NodeId>) -> Result<
                     "The base chain references an object outside the control themes",
                 )?;
             }
-            component_resource_expression(document, theme, &key, false)
+            Ok(key)
         })
         .transpose()?;
+    plan_theme_base_reference(document, theme, key.as_deref())
+}
+
+/// Place a key already verified by the caller's scoped resource resolver.
+pub fn plan_theme_base_reference(document: &Document, theme: NodeId, key: Option<&str>) -> Result<Vec<Edit>> {
+    require(is_theme(element(document, theme)?), "Select an authored ControlTheme")?;
+    require(property_elements(document, element(document, theme)?, "BasedOn")?.is_empty(), "Edit the existing BasedOn object in source")?;
+    let value = key.map(|key| component_resource_expression(document, theme, key, false)).transpose()?;
     plan_component_action(
         document,
         &ComponentAction::SetProperty {
@@ -196,6 +196,21 @@ fn set_base(document: &Document, theme: NodeId, base: Option<NodeId>) -> Result<
 
 /// Resolve a simple authored base reference with the same lexical search as resource edits.
 pub fn base_theme(document: &Document, theme: NodeId) -> Result<Option<NodeId>> {
+    Ok(base_reference(document, theme)?.and_then(|key| resolve_component_resource(document, theme, &key)))
+}
+
+/// Read a static base reference, distinguishing an absent base from an opaque one.
+pub fn authored_base_key(document: &Document, theme: NodeId) -> Result<Option<String>> {
+    let key = base_reference(document, theme)?;
+    require(
+        key.is_some() || (component_property_attribute(document, theme, "BasedOn")?.is_none()
+            && property_elements(document, element(document, theme)?, "BasedOn")?.is_empty()),
+        "The base theme has unresolved inheritance; edit that chain in source first",
+    )?;
+    Ok(key)
+}
+
+fn base_reference(document: &Document, theme: NodeId) -> Result<Option<String>> {
     let Some(attribute) = component_property_attribute(document, theme, "BasedOn")? else {
         return Ok(None);
     };
@@ -211,7 +226,7 @@ pub fn base_theme(document: &Document, theme: NodeId) -> Result<Option<NodeId>> 
     let MarkupValue::Literal(key) = &extension.arguments[index].value else {
         return Ok(None);
     };
-    Ok(resolve_component_resource(document, theme, key))
+    Ok(Some(key.clone()))
 }
 
 fn is_style(node: &Node) -> bool {

@@ -29,6 +29,9 @@ pub struct PropertyInfo {
     pub authored: Option<Arc<MarkupSource>>,
     #[serde(skip)]
     pub model_type: Option<ModelType>,
+    /// Build metadata distinguishes style setters from direct and CLR properties.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style_settable: Option<bool>,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TypeInfo {

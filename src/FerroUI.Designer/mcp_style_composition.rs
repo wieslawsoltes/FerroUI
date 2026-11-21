@@ -5,15 +5,14 @@ use crate::style_composition::{
     compatible_base, setter_metadata, setter_property, supports_palette, supports_styles,
 };
 use crate::style_sources::StyleSource;
-use crate::{DesignerSession, PropertyEditorKind, ScopedPalette};
-use ferroui_designer_core::{Document, MarkupValue, NodeId, NodeKind};
+use crate::{DesignerSession, ScopedPalette};
+use ferroui_designer_core::{Document, NodeId, NodeKind};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_tools::component_styles::{authored_setters, base_theme, StyleChange};
+use ferroui_designer_tools::component_styles::{base_theme, StyleChange};
 use ferroui_designer_tools::{
-    component_property_attribute, component_property_elements, ComponentKind,
+    component_property_elements, ComponentKind,
 };
 use serde_json::{json, Value};
-use std::collections::BTreeSet;
 
 pub(super) fn handles(name: &str) -> bool {
     matches!(
@@ -302,73 +301,24 @@ fn lexical_style_owner(document: &Document, id: NodeId) -> Option<NodeId> {
 
 fn definition(session: &DesignerSession, node: NodeId) -> Result<Value, String> {
     let document = session.document();
-    let index = LineIndex::new(document.source());
     let catalog = session.component_catalog()?;
     let entry = catalog
         .entries
         .iter()
-        .find(|entry| {
-            entry.node == node
-                && matches!(
-                    entry.kind,
-                    ComponentKind::Style | ComponentKind::ControlTheme
-                )
-        })
+        .find(|entry| entry.node == node && matches!(entry.kind, ComponentKind::Style | ComponentKind::ControlTheme))
         .ok_or("Choose one authored Style or ControlTheme")?;
-    let declaration = document.ast().node(node).ok_or("The definition changed")?;
-    let (identity, member) = match entry.kind {
-        ComponentKind::Style => ("Selector", "selector"),
-        _ => ("BasedOn", "base"),
-    };
-    let field = component_property_attribute(document, node, identity)
-        .map_err(|error| error.to_string())?;
-    let editable = component_property_elements(document, node, identity)
-        .map_err(|error| error.to_string())?
-        .is_empty()
-        && (member != "selector"
-            || field.is_none_or(|value| matches!(value.markup(), Ok(MarkupValue::Literal(_)))));
-    let mut value = json!({
-        "node":node,"kind":entry.kind,"name":entry.display_name,"target":entry.target_type,
-        "range":index.range(declaration.name_span).map_err(|error| error.to_string())?,
-        "identity":{"kind":member,"value":field.map(|attribute| &attribute.value),"editable":editable},
-        "can_remove":entry.kind == ComponentKind::Style && entry.key.is_none()
+    let available = setter_target_type(document, node).into_iter().flat_map(|target| {
+        target.properties().iter()
+            .filter(|property| !property.is_direct() && !property.is_read_only())
+            .map(|property| property.name().to_owned())
+            .collect::<Vec<_>>()
     });
-    if member == "base" {
+    let mut value = crate::style_report::definition(document, entry, available, |name| (editor(document, node, name), true))?;
+    if entry.kind == ComponentKind::ControlTheme {
         value["base"] = json!(base_theme(document, node).map_err(|error| error.to_string())?);
         value["base_choices"] = json!(catalog.entries.iter().filter(|entry| compatible_base(document,node,entry))
             .map(|entry| json!({"node":entry.node,"name":entry.display_name,"type_name":entry.target_type})).collect::<Vec<_>>());
     }
-    let mut existing = BTreeSet::new();
-    let setters = authored_setters(document, node).map_err(|error| error.to_string())?
-        .into_iter().map(|setter| {
-            existing.insert(setter.property.clone());
-            let field = editor(document, node, &setter.property);
-            let expression = setter.value.as_ref().is_some_and(|value| matches!(MarkupValue::parse(value), Ok(MarkupValue::Extension(_))));
-            let editable = !expression && setter.object.is_none();
-            Ok(json!({"node":setter.node,"property":setter.property,"value":setter.value,"object":setter.object.is_some(),
-                "range":index.range(setter.span).map_err(|error| error.to_string())?, "field":field,"editable":editable,"expression":expression}))
-        }).collect::<Result<Vec<_>, String>>()?;
-    let available =
-        setter_target_type(document, node)
-            .map(|type_| {
-                let mut names = type_
-                    .properties()
-                    .iter()
-                    .filter(|property| {
-                        !property.is_direct()
-                            && !property.is_read_only()
-                            && !existing.contains(property.name())
-                    })
-                    .map(|property| property.name())
-                    .collect::<Vec<_>>();
-                names.sort_unstable();
-                names.dedup();
-                names.into_iter().map(|property|
-            json!({"property":property,"field":editor(document,node,property)})).collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
-    value["setters"] = json!(setters);
-    value["available"] = json!(available);
     Ok(value)
 }
 
@@ -377,17 +327,7 @@ fn editor(document: &Document, node: NodeId, name: &str) -> Value {
         return json!({"kind":"text","options":[],"resources":false});
     };
     let metadata = setter_metadata(node, name, property).1;
-    let (kind, options) = match metadata.kind {
-        PropertyEditorKind::Boolean => ("boolean", vec!["True".into(), "False".into()]),
-        PropertyEditorKind::Enumeration {
-            values,
-            flags: false,
-        } => ("choice", values),
-        PropertyEditorKind::Color | PropertyEditorKind::Brush => ("color", vec![]),
-        PropertyEditorKind::Number => ("number", vec![]),
-        _ => ("text", vec![]),
-    };
-    json!({"kind":kind,"options":options,"type_name":property.property_type_name(),"resources":true})
+    crate::style_report::setter_field(&metadata, property.property_type_name())
 }
 
 fn palette(session: &DesignerSession, owner: NodeId) -> Result<Value, String> {

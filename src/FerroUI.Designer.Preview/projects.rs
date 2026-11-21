@@ -6,13 +6,14 @@ use ferroui_designer_rsx::RsxCatalog;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 #[derive(Default)]
 pub(crate) struct Projects(BTreeMap<u64, Project>);
 
 pub(crate) struct Project {
     root: PathBuf,
-    pub(crate) schema: Schema,
+    pub(crate) schema: Arc<Schema>,
     pub(crate) rsx: RsxCatalog,
     pub(crate) assets: Vec<DesignerAsset>,
     pub(crate) toolbox: Vec<Asset>,
@@ -73,7 +74,7 @@ impl Projects {
             request.id,
             Project {
                 root,
-                schema,
+                schema: Arc::new(schema),
                 rsx,
                 assets,
                 toolbox,
