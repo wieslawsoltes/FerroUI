@@ -1,9 +1,10 @@
 import type { HostedAnimationFrame } from './hostedAnimationProtocol';
 import type { Range } from './protocol';
-import type { RustStyleEdit, StyleCatalog, StyleCreation, StyleDefinition } from './stylesProtocol';
+import type { PaletteLayer, RustStyleEdit, StyleCatalog, StyleCreation, StyleDefinition } from './stylesProtocol';
 
 export interface HostedStyleFile { address: string; uri: string }
 export interface HostedStyleTarget { address: string; node: number }
+export interface HostedStylePresentation { target?: HostedStyleTarget; compare?: boolean }
 export interface HostedStyleFiles { documents: HostedStyleFile[] }
 export interface HostedStyleCatalog { uri: string; catalog: StyleCatalog }
 export interface HostedStyleDefinition { uri: string; definition: StyleDefinition<string> }
@@ -30,10 +31,10 @@ export type HostedStyleCommand = HostedStyleRead
     | { action: 'create'; address: string }
     | { action: 'issues'; address: string }
     | { action: 'addSetter'; target: HostedStyleTarget }
-    | { action: 'addColorResource'; target: HostedStyleTarget }
+    | { action: 'addColorResource'; target: HostedStyleTarget; layer: PaletteLayer }
     | { action: 'addNested'; target: HostedStyleTarget }
     | { action: 'chooseResource'; target: HostedStyleTarget; property: string; setter: number };
 export type HostedStyleResult = HostedStyleFiles | HostedStyleCatalog | HostedStyleDefinition;
 export type FromHostedStyles = { type: 'styles'; request: number; frame: HostedAnimationFrame; command: HostedStyleCommand };
 export type ToHostedStyles = { type: 'stylesReply'; request: number; frame: HostedAnimationFrame; result?: HostedStyleResult; error?: string }
-    | { type: 'openStyles'; revision: number; target?: HostedStyleTarget };
+    | ({ type: 'openStyles'; revision: number } & HostedStylePresentation);

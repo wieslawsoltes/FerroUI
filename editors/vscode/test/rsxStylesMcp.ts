@@ -82,7 +82,39 @@ export async function verifyRustStylesMcp({ invoke, content }: McpFixture): Prom
     assert.equal((await inkTrace()).effective, '#FF224E7C');
     await undo();
     assert.equal(document.getText(), original);
+
+    const author = async (args: object) => content(await edit(await ready(), { style: style.node, ...args }));
+    const add = (layer: string, value: string) => author({ action: 'add_color_resource', key: 'ThemeInk', layer, value });
+    const theme = async (theme: string) => {
+        content(await invoke('designer_view', { session, theme }));
+        await ready();
+        return (await inkTrace()).effective;
+    };
+    await add('default', '#FF294D80');
+    await add('dark', '#FF78DAC9');
+    await author({ action: 'set_resource', setter: foreground.node, key: 'ThemeInk' });
+    const layers = () => read<StyleDefinition>('designer_rsx_styles', { node: style.node });
+    const compared = (await layers()).resource_comparison?.find(row => row.key === 'ThemeInk');
+    assert.equal(compared?.light?.scope, 'Default');
+    assert.equal(compared?.dark?.value, '#FF78DAC9');
+    assert.deepEqual(compared?.high_contrast, compared?.dark);
+    assert.equal(await theme('light'), '#FF294D80');
+    assert.equal(await theme('dark'), '#FF78DAC9');
+    assert.equal(await theme('high_contrast'), '#FF78DAC9');
+    await add('high_contrast', '#FFFFD36B');
+    const contrast = (await layers()).resource_comparison?.find(row => row.key === 'ThemeInk')?.high_contrast;
+    assert.equal(contrast?.value, '#FFFFD36B');
+    assert.ok(contrast.range && document.getText(asRange(contrast.range)).includes('Color::from_argb'));
+    assert.equal(await theme('high_contrast'), '#FFFFD36B');
+    await undo();
+    assert.equal(await theme('high_contrast'), '#FF78DAC9');
+    await undo();
+    await undo();
+    await undo();
+    assert.equal(document.getText(), original);
+    await theme('light');
+
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => tab.label === path || tab.label === `Design · ${path}`);
     await vscode.window.tabGroups.close(tabs);
-    console.log('VS Code and MCP edited and traced Rust style setters and resources, preserved nested styles and native clips, and restored exact source with Undo');
+    console.log('VS Code and MCP edited Rust styles, verified native Light, Dark and High contrast colors and fallbacks, and restored exact source with Undo');
 }

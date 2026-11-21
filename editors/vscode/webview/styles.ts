@@ -4,6 +4,7 @@ import { element } from './dom';
 import { paletteEditor } from './paletteEditor';
 import { styleDefinition } from './styleDefinitionEditor';
 import { actionButton } from './propertyEditor';
+import type { RustPaletteDisplay } from './rustStylePalette';
 
 declare function acquireVsCodeApi(): {
     getState(): { page: 'styles' | 'palette'; layer: PaletteLayer; compare: boolean } | undefined;
@@ -40,6 +41,7 @@ const error = element('styles-error');
 let state: StylesState = { stamp: 0 };
 let settings = vscode.getState() ?? { page: 'styles', layer: 'light', compare: false };
 let focusAfterEdit: string | undefined;
+const rustPalette: RustPaletteDisplay = { compare: false };
 
 function send(action: StylesAction): void {
     if (state.busy || !state.content || state.message) return;
@@ -91,19 +93,25 @@ window.addEventListener('message', event => {
     state = incoming.state;
     if (!previous.busy && state.busy && fields.contains(document.activeElement)) focusAfterEdit = document.activeElement?.id;
     if (state.stamp !== previous.stamp) error.hidden = true;
+    const rust = state.content?.catalog.source_kind === 'rust';
     if (state.page) {
-        settings.page = state.page;
-        if (state.compare !== undefined) settings.compare = state.compare;
-        if (state.paletteFocus) {
-            settings.layer = state.paletteFocus.layer;
-            settings.compare = false;
-            search.value = '';
+        if (rust) {
+            if (state.compare !== undefined) rustPalette.compare = state.compare;
+        } else {
+            settings.page = state.page;
+            if (state.compare !== undefined) settings.compare = state.compare;
+            if (state.paletteFocus) {
+                settings.layer = state.paletteFocus.layer;
+                settings.compare = false;
+                search.value = '';
+            }
+            vscode.setState(settings);
         }
-        vscode.setState(settings);
     }
-    if (previous.content !== state.content) renderData();
+    if (previous.content !== state.content || rust && state.compare !== undefined) renderData();
     else if (state.compare !== undefined) renderPalette();
     render();
+    if (rust && state.page === 'palette') document.getElementById('rust-palette-layer')?.scrollIntoView({ block: 'nearest' });
     if (state.paletteFocus?.color != null) {
         const value = document.getElementById(`palette-value-${state.paletteFocus.color}`);
         value?.scrollIntoView({ block: 'nearest' });
@@ -127,7 +135,7 @@ function renderData(): void {
         [entry.name, entry.scope].filter(Boolean).join(' · '), String(entry.node))));
     definitions.value = content.definition ? String(content.definition.node) : '';
     const rust = content.catalog.source_kind === 'rust';
-    details.replaceChildren(styleDefinition(content.definition, send, !rust));
+    details.replaceChildren(styleDefinition(content.definition, send, !rust, rustPalette));
     if (content.catalog.issues?.length) {
         details.append(actionButton('warning', 'Reveal Rust styles and values without a preview mapping',
             () => send({ type: 'style-issues' })));

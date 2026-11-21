@@ -17,7 +17,7 @@ export type RustStyleEdit = { action: 'create'; owner: number; selector: string 
     | { action: 'setter'; style: number; setter: number; value: string | null }
     | { action: 'add_setter'; style: number; getter: string; value: string }
     | { action: 'set_resource'; style: number; key: string } & ({ setter: number } | { getter: string })
-    | { action: 'add_color_resource'; style: number; key: string; value: string }
+    | { action: 'add_color_resource'; style: number; key: string; value: string; layer?: PaletteLayer }
     | { action: 'color_resource'; style: number; resource: number; value: string }
     | { action: 'remove'; style: number };
 
@@ -52,7 +52,8 @@ export interface AuthoredSetter extends StyleSetter {
     can_remove?: boolean;
     resource?: { key: string; declaration?: Range | null } | null;
 }
-export interface RustColorResource { node: number; key: string; color?: string | null; range: Range }
+export interface RustColorChoice { key: string; color?: string | null }
+export interface RustColorResource extends RustColorChoice { node: number; range: Range; layer?: PaletteLayer | null }
 export interface StyleDefinition<Base extends string | number = number> {
     node: number;
     kind: StyleSummary['kind'];
@@ -67,7 +68,8 @@ export interface StyleDefinition<Base extends string | number = number> {
     can_remove: boolean;
     nested_allowed?: boolean;
     color_resources?: RustColorResource[];
-    resource_choices?: RustColorResource[];
+    resource_choices?: RustColorChoice[];
+    resource_comparison?: PaletteComparisonRow[];
 }
 export interface PaletteColor {
     node: number;
@@ -90,10 +92,11 @@ export interface ResolvedColor {
     path?: { key: string; reference?: 'StaticResource' | 'DynamicResource' }[];
     issue?: string;
 }
+export type PaletteComparisonRow = { key: string } & Partial<Record<CanvasTheme, ResolvedColor | null>>;
 export interface PaletteSheet {
     owner: number;
     layers: PaletteColumn[];
-    comparison: ({ key: string } & Partial<Record<CanvasTheme, ResolvedColor | null>>)[];
+    comparison: PaletteComparisonRow[];
     contrastPreview?: boolean;
     contrastProviders?: ContrastProvider[];
 }
@@ -120,7 +123,7 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'base'; base: Base | null }
     | { type: 'setter'; property: string; value: string | null; node: number }
     | { type: 'setter-resource'; property: string; node: number }
-    | { type: 'add-color-resource' }
+    | { type: 'add-color-resource'; layer: PaletteLayer }
     | { type: 'rust-resource-color'; node: number; color: string }
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }
     | { type: 'add-nested-style' | 'style-issues' }

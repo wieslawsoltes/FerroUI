@@ -3,6 +3,7 @@ import type { FromHostedStyles, HostedStyleCommand, ToHostedStyles } from '../sr
 import type { RustStyleEdit, StyleCatalog, StyleDefinition, StylesAction } from '../src/stylesProtocol';
 import { anchorPopover, element } from './dom';
 import { sourceOptions } from './hostedSourceOptions';
+import type { RustPaletteDisplay } from './rustStylePalette';
 import { styleDefinition } from './styleDefinitionEditor';
 
 type OpenStyles = Extract<ToHostedStyles, { type: 'openStyles' }>;
@@ -16,6 +17,7 @@ export class HostedStylesView {
     private readonly issues = element<HTMLButtonElement>('hosted-style-issues');
     private readonly status = element('hosted-styles-status');
     private readonly fields = element<HTMLFieldSetElement>('hosted-styles-fields');
+    private readonly palette: RustPaletteDisplay = { compare: false };
     private frame?: HostedFrame;
     private readyRevision?: number;
     private opening?: OpenStyles;
@@ -64,6 +66,7 @@ export class HostedStylesView {
 
     open(message: OpenStyles): void {
         if (this.frame && this.frame.revision > message.revision) return;
+        if (message.compare !== undefined) this.palette.compare = message.compare;
         this.opening = message;
         this.refresh = true;
         this.sync();
@@ -162,7 +165,7 @@ export class HostedStylesView {
     }
 
     private render(): void {
-        this.fields.replaceChildren(styleDefinition(this.definition, action => this.action(action), false));
+        this.fields.replaceChildren(styleDefinition(this.definition, action => this.action(action), false, this.palette));
         this.sync();
     }
 
@@ -191,7 +194,7 @@ export class HostedStylesView {
             case 'add-nested-style': this.send({ action: 'addNested', target }); break;
             case 'setter-resource': this.send({ action: 'chooseResource', target, property: action.property, setter: action.node }); break;
             case 'add-color-resource':
-                if (rust) this.send({ action: 'addColorResource', target });
+                if (rust) this.send({ action: 'addColorResource', target, layer: action.layer });
                 break;
             case 'rust-resource-color':
                 if (rust) rustEdit({ action: 'color_resource', style: target.node, resource: action.node, value: action.color });

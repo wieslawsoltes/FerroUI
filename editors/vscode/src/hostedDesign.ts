@@ -13,7 +13,7 @@ import type { FromHostedPalette, HostedPalettePresentation, HostedPaletteTarget 
 import { HostedSources } from './hostedSources';
 import { runHostedStyleAction } from './hostedStyleActions';
 import { HostedStyles } from './hostedStyles';
-import type { FromHostedStyles, HostedStyleEdit, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import type { FromHostedStyles, HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
@@ -175,14 +175,15 @@ export class HostedDesign implements vscode.Disposable {
         return this.styleSession(uri, generation).styles.sources.locate(frame, address, range, signal);
     }
 
-    async showStyles(uri: vscode.Uri, generation: number, target: HostedStyleTarget | undefined, signal: AbortSignal) {
+    async showStyles(uri: vscode.Uri, generation: number, presentation: HostedStylePresentation | undefined, signal: AbortSignal) {
         const session = this.styleSession(uri, generation);
         const frame = session.styleFrame();
+        const target = presentation?.target;
         if (target) await session.styles.read(frame, { action: 'read', target }, signal);
         signal.throwIfAborted();
         if (session.styleFrame().revision !== frame.revision) throw new Error('Read the current App Preview styles.');
         session.panel.reveal(session.panel.viewColumn, true);
-        session.openStyles(frame.revision, target);
+        session.openStyles(frame.revision, presentation);
         return { generation, frame };
     }
 
@@ -464,8 +465,8 @@ class HostedSession {
         return { revision: frame.revision, sequence: frame.sequence };
     }
 
-    openStyles(revision: number, target?: HostedStyleTarget): void {
-        this.post({ type: 'openStyles', revision, target });
+    openStyles(revision: number, presentation?: HostedStylePresentation): void {
+        this.post({ type: 'openStyles', revision, ...presentation });
     }
 
     get message(): string { return this.status; }

@@ -45,7 +45,7 @@ export async function editRustStyle(context: StudioContext, content: StylesConte
             break;
         }
         case 'add-color-resource': {
-            const result = await promptRustColorResource();
+            const result = await promptRustColorResource(action.layer);
             if (result) await edit({ action: 'add_color_resource', style, ...result });
             break;
         }

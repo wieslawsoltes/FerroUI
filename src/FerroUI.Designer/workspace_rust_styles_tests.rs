@@ -134,3 +134,73 @@ fn rust_style_color_reaches_the_native_preview_and_keeps_source_navigation() {
     flyout.hide();
     window.close();
 }
+
+#[test]
+fn rust_palette_layers_compare_and_edit_the_dark_color_in_studio() {
+    use crate::{PreviewEnvironment, PreviewTheme};
+    use ferroui_controls::ComboBox;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = SOURCE.replace(
+        ".resource(\"ReviewInk\",",
+        ".theme_resource(ferroui_base::styling::ThemeVariant::default(), \"ReviewInk\",",
+    ).replace(".set(ferroui_controls::TextBlock::foreground_property(), \"#1C3554\")",
+        ".set_resource(ferroui_controls::TextBlock::foreground_property(), \"ReviewInk\")");
+    let uri = ferroui_designer_project::file_uri(std::env::temp_dir().join("rust_palette.rs")).unwrap();
+    let workspace = DesignerWorkspace::with_uri(&source, uri).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+
+    let session = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = |tool, args| provider.call(tool, &args, Permissions::default()).unwrap();
+    let node = read(RSX_STYLES, json!({}))["definitions"][0]["node"].as_u64().unwrap();
+    let edit = json!({"action":"add_color_resource", "style":node, "layer":"dark",
+        "key":"ReviewInk", "value":"#FFB3D8EF", "expected_revision":session.borrow().document().revision()});
+    provider.call(RSX_STYLE_EDIT, &edit, Permissions { allow_property_writes: true, ..Default::default() }).unwrap();
+    let authored = session.borrow().authored_source().to_owned();
+    let report = read(RSX_STYLES, json!({"node":node}));
+    let comparison = &report["resource_comparison"][0];
+    assert_eq!(comparison["light"]["value"], "#FF224E7C");
+    assert_eq!(comparison["dark"]["value"], "#FFB3D8EF");
+    assert_eq!(comparison["dark"], comparison["high_contrast"]);
+    workspace.set_preview_environment(PreviewEnvironment { theme: PreviewTheme::Dark, ..workspace.preview_environment() }).unwrap();
+    let ink = || {
+        let node = session.borrow().document().ast().find_name("Review").unwrap();
+        read("designer_property_trace", json!({"node":node,"property":"TextElement.Foreground"}))["effective"].clone()
+    };
+    assert_eq!(ink(), "#FFB3D8EF");
+
+    let anchor = workspace.control().get_control::<Button>("EditRustStyles");
+    let flyout = anchor.flyout().and_then(|flyout| flyout.cast::<Flyout>()).unwrap();
+    flyout.show_at(&anchor);
+    let menu = Ref::<Control>::from_xaml_object(&flyout.content().unwrap()).unwrap();
+    let control = |name: &str| menu.get_logical_descendants()
+        .find(|control| AutomationProperties::get_name(control).as_deref() == Some(name)).unwrap();
+    let toggle = control("Compare Rust theme colors").cast::<Button>().unwrap();
+    let click = RoutedEventArgs::with_event(Button::click_event());
+    toggle.raise_event(&click);
+    assert!(menu.get_logical_descendants().any(|control| AutomationProperties::get_name(&control)
+        .is_some_and(|name| name.starts_with("Open High contrast declaration for ReviewInk") && name.contains("Dark"))));
+    control("Rust color layer").cast::<ComboBox>().unwrap().set_selected_index(3);
+    window.update_layout();
+    let field = control("ReviewInk Dark color resource value").cast::<TextBox>().unwrap();
+    assert!(field.is_effectively_visible());
+    field.set_text(Some("#FFE3C792"));
+    let mut enter = KeyEventArgs::new();
+    enter.key = Key::Enter;
+    enter.set_routed_event(Some(InputElement::key_down_event()));
+    field.raise_event(&enter);
+    assert_eq!(ink(), "#FFE3C792");
+    assert_ne!(session.borrow().authored_source(), authored);
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), authored);
+    assert_eq!(ink(), "#FFB3D8EF");
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
+    assert_eq!(ink(), "#FF224E7C");
+    flyout.hide();
+    window.close();
+}

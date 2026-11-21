@@ -123,7 +123,7 @@ For the main Studio canvas, call `designer_preview_appearance` for the environme
 
 ### Edit Rust styles with MCP
 
-Use `designer_rsx_styles` through `designer_studio_query` for the selected RSX invocation. Omit arguments for the catalog or pass a style `node` to read its selector, setters, typed getter choices, and source ranges. `color_resources` lists declarations in the selected rule. `resource_choices` lists mapped color keys from the style host. A linked setter reports `resource.key` and the declaration range when available. Studio exposes the same tool directly. Computed expressions have source ranges.
+Use `designer_rsx_styles` through `designer_studio_query` for the selected RSX invocation. Omit arguments for the catalog or pass a style `node` to read its selector, setters, typed getter choices, and source ranges. `color_resources` lists declarations and their layers in the selected rule. `resource_choices` lists compatible color keys from the style host. `resource_comparison` shows the resolved Light, Dark, and High contrast values and the source range and layer supplying each cell. A linked setter reports `resource.key` and the declaration range when the same source supplies all mapped appearances. Studio exposes the same tool directly. Computed expressions have source ranges.
 
 Call `designer_rsx_style_edit` through `designer_studio_edit` with the current session and `expected_revision`. In Studio, call it directly with the document revision. Use IDs from the current catalog and definition.
 
@@ -134,12 +134,14 @@ Call `designer_rsx_style_edit` through `designer_studio_edit` with the current s
 | `selector` | `style` and the new `selector`. |
 | `setter` | `style`, the setter's `node` as `setter`, and the typed `value`. Pass `null` to remove it. |
 | `add_setter` | `style`, a `getter` from `available`, and the typed `value`. |
-| `add_color_resource` | `style`, a new `key`, and a hex `value`. |
+| `add_color_resource` | `style`, a `key` unique within the selected layer, a hex `value`, and optional `layer`. Use `shared` (default), `default`, `light`, `dark`, or `high_contrast`. |
 | `color_resource` | `style`, the declaration's `node` from `color_resources` as `resource`, and the new hex `value`. |
 | `set_resource` | `style`, a `key` from `resource_choices`, and exactly one of `setter` or `getter`. Use `setter` to link an existing value and `getter` to add a compatible property. |
 | `remove` | `style` with `can_remove` enabled. |
 
 For App Preview, read the Rust file, catalog, and definition with `designer_hosted_styles`. Use `designer_hosted_style_edit_draft` or `designer_hosted_style_edit` with the accepted generation, revision, and sequence. In `arguments.edit`, pass the selected action as a nested edit, such as `{"action":"rust","edit":{"action":"set_resource","style":220,"setter":289,"key":"ReviewInk"}}`. The target's `node` must match the reported style or owner. Use `designer_hosted_style_resources` to list compatible keys for a property and `designer_hosted_style_source` to open a reported range. [Rust color resources guide](styles.md#edit-rust-style-color-resources)
+
+Use `designer_view` with `styles_page: "comparison"` to show the selected inline Rust palette in the dock. In App Preview, use `designer_hosted_style_show` with `arguments.compare: true` and an optional `arguments.target` from the current definition. [App Preview style workflow](runtime.md#edit-styles-and-control-themes-in-app-preview)
 
 ### Edit an App Preview palette with MCP
 

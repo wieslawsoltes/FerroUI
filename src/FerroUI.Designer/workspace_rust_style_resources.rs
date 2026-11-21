@@ -1,19 +1,21 @@
-//! Color resources and compatible setters in Studio's Rust style editor.
-use super::{SOURCE, Scope, add_button, fields, picker, text};
+//! Author and compare appearance layers in Studio's Rust color palette.
+use super::super::palette_comparison::{self, COMPARE};
+use super::{SOURCE, Scope, add_button, fields, picker, resource_setters, text};
+use crate::style_palette_comparison::PaletteComparison;
 use crate::{PropertyColorEditor, icons};
 use ferroui_base::layout::Orientation;
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, Grid, StackPanel};
-use ferroui_designer_rsx::{
-    RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleResource, RsxStyleSetter,
-};
+use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleResourceFamily};
+use ferroui_designer_tools::component_palette::PaletteLayer;
 
 pub(super) fn section(
     body: &StackPanel,
     scope: &Scope,
     rule: &RsxStyle,
     fields: &[&RsxStyleField],
-    choices: &[&RsxStyleResource],
+    choices: &[RsxStyleResourceFamily<'_>],
+    comparison: &PaletteComparison,
 ) {
     let style = rule.declaration.start;
     let bar = StackPanel::new();
@@ -21,6 +23,21 @@ pub(super) fn section(
     bar.set_spacing(4.0);
     bar.children()
         .add(text("Color resources").upcast::<Control>());
+    let display = scope.pane.palette.clone();
+    let layer = display
+        .layer
+        .get()
+        .or_else(|| rule.resources.iter().find_map(|entry| entry.layer))
+        .unwrap_or(PaletteLayer::Shared);
+    let layers = PaletteLayer::ALL;
+    let selection = layers.iter().position(|entry| *entry == layer).unwrap_or(0);
+    let layer_picker = picker(
+        "Rust color layer",
+        layers.into_iter().map(PaletteLayer::title),
+        selection,
+    );
+    layer_picker.set_min_width(106.0);
+    bar.children().add(layer_picker.clone().upcast::<Control>());
     let pane = fields::prompt("Add Rust color resource");
     let key = fields::input("Resource key", "");
     key.set_placeholder_text(Some("Resource key"));
@@ -28,21 +45,104 @@ pub(super) fn section(
     let active = scope.clone();
     fields::value_row(&pane, "Color value", "#FF4C82D0", &[], move |value| {
         let key = key.text().unwrap_or_default().trim().to_owned();
-        active.apply(RsxStyleEdit::AddColorResource { style, key, value }, None);
+        let layer = active.pane.palette.layer.get().unwrap_or(layer);
+        active.apply(
+            RsxStyleEdit::AddColorResource {
+                style,
+                key,
+                value,
+                layer: Some(layer),
+            },
+            None,
+        );
     });
     fields::flyout_button(&bar, icons::ADD, "Add Rust color resource", pane);
-    add_setter(&bar, scope, rule, fields, choices);
-    body.children().add(bar.upcast::<Control>());
+    resource_setters::add_setter(&bar, scope, rule, fields, choices);
+    body.children().add(bar.clone().upcast::<Control>());
 
-    for resource in &rule.resources {
+    let colors = StackPanel::new();
+    let rows: Vec<_> = layers
+        .into_iter()
+        .map(|choice| {
+            let list = StackPanel::new();
+            color_rows(&list, scope, rule, choice);
+            list.set_is_visible(choice == layer);
+            colors.children().add(list.clone().upcast::<Control>());
+            list.downgrade()
+        })
+        .collect();
+    body.children().add(colors.clone().upcast::<Control>());
+    let comparison = (!comparison.rows.is_empty()).then(|| {
+        let active = scope.clone();
+        let comparison = palette_comparison::panel(comparison, move |_, span| active.reveal(span));
+        comparison.set_is_visible(display.compare.get());
+        colors.set_is_visible(!display.compare.get());
+        body.children().add(comparison.clone());
+        comparison.downgrade()
+    });
+    layer_picker.selection_changed({
+        let picker = layer_picker.downgrade();
+        let display = display.clone();
+        let comparison = comparison.clone();
+        let colors = colors.downgrade();
+        move |_, _| {
+            let Some(index) = picker
+                .upgrade()
+                .and_then(|picker| usize::try_from(picker.selected_index()).ok())
+            else {
+                return;
+            };
+            let Some(layer) = layers.get(index) else {
+                return;
+            };
+            display.layer.set(Some(*layer));
+            display.compare.set(false);
+            if let Some(colors) = colors.upgrade() {
+                colors.set_is_visible(true);
+            }
+            if let Some(comparison) = comparison.as_ref().and_then(|view| view.upgrade()) {
+                comparison.set_is_visible(false);
+            }
+            for (row, view) in rows.iter().enumerate() {
+                if let Some(view) = view.upgrade() {
+                    view.set_is_visible(row == index);
+                }
+            }
+        }
+    });
+    if let Some(comparison) = comparison {
+        let colors = colors.downgrade();
+        add_button(&bar, COMPARE, "Compare Rust theme colors", move || {
+            let show = !display.compare.get();
+            display.compare.set(show);
+            if let (Some(comparison), Some(colors)) = (comparison.upgrade(), colors.upgrade()) {
+                comparison.set_is_visible(show);
+                colors.set_is_visible(!show);
+            }
+        });
+    }
+}
+
+fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteLayer) {
+    let style = rule.declaration.start;
+    for resource in rule
+        .resources
+        .iter()
+        .filter(|entry| entry.layer == Some(layer))
+    {
         let resource_id = resource.declaration.start;
         let row = if let (Some(color), Ok(editor)) = (resource.color(), PropertyColorEditor::new())
         {
             let (row, tools) = fields::row(body, &resource.key);
             let _ = editor.configure(Some(&color), false);
+            let label = if layer == PaletteLayer::Shared {
+                resource.key.clone()
+            } else {
+                format!("{} {}", resource.key, layer.title())
+            };
             AutomationProperties::set_name(
                 &editor.text_editor(),
-                Some(&format!("{} color resource value", resource.key)),
+                Some(&format!("{label} color resource value")),
             );
             let active = scope.clone();
             editor.on_commit(move |value| {
@@ -71,123 +171,8 @@ pub(super) fn section(
             move || active.reveal(span),
         );
     }
-}
-
-pub(super) fn change_setter(
-    row: &StackPanel,
-    scope: &Scope,
-    style: usize,
-    setter: &RsxStyleSetter,
-    choices: &[&RsxStyleResource],
-) {
-    let current = setter.resource_key();
-    let member = setter.declaration.start;
-    let pane = fields::prompt("Assign a color resource");
-    let active = scope.clone();
-    resource_picker(&pane, choices, current, move |key| {
-        active.apply(
-            RsxStyleEdit::SetResource {
-                style,
-                key,
-                setter: Some(member),
-                getter: None,
-            },
-            None,
-        );
-    });
-    fields::flyout_button(row, icons::EXPRESSION, "Assign color resource", pane);
-    if let Some(source) = choices
-        .iter()
-        .find(|entry| Some(entry.key.as_str()) == current)
-    {
-        let span = source.source;
-        let active = scope.clone();
-        add_button(
-            row,
-            SOURCE,
-            &format!("Reveal declared resource {}", source.key),
-            move || active.reveal(span),
-        );
+    if body.children().is_empty() {
+        body.children()
+            .add(text("No colors in this layer.").upcast::<Control>());
     }
-}
-
-fn add_setter(
-    bar: &StackPanel,
-    scope: &Scope,
-    rule: &RsxStyle,
-    fields: &[&RsxStyleField],
-    choices: &[&RsxStyleResource],
-) {
-    if choices.is_empty() {
-        return;
-    }
-    let mut available = fields
-        .iter()
-        .filter(|field| field.accepts_color_resource() && !rule.has_setter(field))
-        .map(|field| {
-            (
-                format!("{} · {}", field.name, field.owner_name()),
-                field.getter.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    available.sort();
-    available.dedup_by(|a, b| a.0 == b.0);
-    if available.is_empty() {
-        return;
-    }
-    let style = rule.declaration.start;
-    let pane = fields::prompt("Add a color resource setter");
-    let property = picker(
-        "Setter property",
-        available.iter().map(|(label, _)| label.as_str()),
-        0,
-    );
-    pane.children().add(property.clone().upcast::<Control>());
-    let active = scope.clone();
-    resource_picker(&pane, choices, None, move |key| {
-        if let Some((_, getter)) = available.get(property.selected_index() as usize) {
-            active.apply(
-                RsxStyleEdit::SetResource {
-                    style,
-                    key,
-                    setter: None,
-                    getter: Some(getter.clone()),
-                },
-                None,
-            );
-        }
-    });
-    fields::flyout_button(bar, icons::EXPRESSION, "Add color resource setter", pane);
-}
-
-fn resource_picker(
-    pane: &StackPanel,
-    choices: &[&RsxStyleResource],
-    current: Option<&str>,
-    apply: impl Fn(String) + 'static,
-) {
-    let selected = choices
-        .iter()
-        .position(|entry| Some(entry.key.as_str()) == current)
-        .unwrap_or(0);
-    let keys = choices
-        .iter()
-        .map(|entry| entry.key.clone())
-        .collect::<Vec<_>>();
-    let labels = choices
-        .iter()
-        .map(|entry| format!("{} · {}", entry.key, entry.color().unwrap_or_default()))
-        .collect::<Vec<_>>();
-    let control = picker(
-        "Color resource",
-        labels.iter().map(String::as_str),
-        selected,
-    );
-    pane.children().add(control.clone().upcast::<Control>());
-    add_button(pane, icons::CHECK, "Apply color resource", move || {
-        if let Some(key) = keys.get(control.selected_index() as usize) {
-            apply(key.clone());
-        }
-    });
 }

@@ -71,7 +71,7 @@ In the consuming view's definition inspector, choose **Open included styles and 
 
 Open a Rust view, select its RSX invocation, and choose **Edit Rust styles** in the **Properties** toolbar. Pick a selector, edit its literal or a typed setter, and use Enter or the check icon to apply. The plus actions add a rule, a nested rule, or a setter. Use the source icon beside a computed value to open the expression. Each accepted change uses Studio’s document history. [VS Code and App Preview workflow](vscode/styles.md#edit-inline-rust-styles) · [MCP arguments](vscode/reference.md#edit-rust-styles-with-mcp)
 
-Under **Color resources**, add a keyed literal color or edit an authored swatch. Use **Assign color resource** on a compatible setter. **Add color resource setter** creates a typed setter with the selected key. The source icon opens the literal constructor or the setter’s string key. The preview follows the resource seen by the matched control. [Rust color resources guide](vscode/styles.md#edit-rust-style-color-resources)
+Under **Color resources**, choose **Shared**, **Default**, **Light**, **Dark**, or **High contrast** to add or edit an authored swatch. **Compare Rust theme colors** shows the resolved appearances and opens each supplying declaration. Use **Assign color resource** on a compatible setter. **Add color resource setter** creates a typed setter with the selected key. The source icon opens the literal constructor or the setter’s string key. The preview follows the resource seen by the matched control. [Rust color resources guide](vscode/styles.md#edit-rust-style-color-resources)
 
 ### Create an XAML event handler
 

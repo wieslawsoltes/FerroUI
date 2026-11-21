@@ -82,10 +82,17 @@ The editor maps explicit `ferroui_view::style` builders, typed property getters,
 
 ### Edit Rust style color resources
 
-1. Choose a rule in **Styles & Themes**. Under **Color resources**, choose **Add Rust color resource**, enter a key, and supply a hex color. The edit adds a `StyleBuilder::resource` call to the selected rule.
+1. Choose a rule in **Styles & Themes**. Under **Color resources**, select a layer and choose **Add Rust color resource**. Enter a key and a hex color. **Shared** adds a `StyleBuilder::resource` call. **Default**, **Light**, **Dark**, and **High contrast** add `StyleBuilder::theme_resource` calls. Use **Default** when you want a fallback for appearances without their own value. A **Shared** declaration for the same key takes priority in that rule.
 2. Use the link icon on a mapped color or brush setter to choose a resource. To add a setter that uses a resource, select **Add setter**, then choose **Resource reference** for a compatible property. The source uses `StyleBuilder::set_resource` with the selected key.
 3. Change the color with the swatch or hex field. The preview updates each styled control that resolves that key. Use the source icon to reveal the original color constructor. **Trace value** in Properties reveals the exact winning setter operand, including the referenced key.
+4. Choose **Compare Rust theme colors** to see the resolved Light, Dark, and High contrast values from the authored style dictionaries. Open any cell's source icon to find the color supplying that appearance. For example, a High contrast cell opens the Dark declaration when it inherits that value. Choose an appearance in the Design canvas toolbar to see the native result. High contrast preview appears when the host has a registered variant.
 
-The color editor maps literal `Color::new`, `Color::from_rgb`, and `Color::from_argb` declarations in inline Rust styles. Resource choices come from the style host and its authored ancestors. A closer resource on the matched control can change the effective value at runtime. Use the source arrow for computed values. The same color edit, compatible resource choices, and source navigation are available in App Preview. Each accepted edit takes one Undo step. [View resource API](../../declarative-ui.md#102-styles) · [MCP arguments](reference.md#edit-rust-styles-with-mcp)
+The color editor maps literal `Color::new`, `Color::from_rgb`, and `Color::from_argb` declarations in inline Rust styles. It recognizes the qualified `ferroui_base::styling::ThemeVariant` constructors for Default, Light, and Dark, and the known High contrast variant from WinUI, Material, or macOS. A High contrast declaration created by the editor uses the same string key and Dark inheritance with `ThemeVariant::new`. Use the warning icon to open a computed variant or other unmapped Rust expression.
+
+Resource choices and comparison values come from the style host and its authored ancestors. A closer resource on the matched control can change the effective value at runtime. The same color edits, layer comparison, and source navigation are available in App Preview. Each accepted edit takes one Undo step. [View resource API](../../declarative-ui.md#102-styles) · [MCP arguments](reference.md#edit-rust-styles-with-mcp)
 
 ![Styles and Themes shows a linked foreground, its edited green swatch, and the original Rust color constructor beside the native Design canvas](../images/vscode-rust-style-resource.jpg)
+
+![The Rust palette shows Light, Dark, and High contrast colors beside the selected Dark declaration and its native preview](../images/vscode-rust-theme-palette.jpg)
+
+[Compare the same layers in App Preview](../images/vscode-app-preview-rust-theme-palette.jpg)

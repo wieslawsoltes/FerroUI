@@ -4,7 +4,7 @@ Open a FerroUI `.xaml` file or a Rust file containing `ferroui_view::rsx!`, then
 
 Follow the [VS Code user guides](../../docs/designer/vscode/README.md) for setup, visual authoring, animation and stages, app preview, hot reload, testing, and MCP.
 
-Use Styles & Themes to edit XAML and mapped Rust selectors and typed setters, open XAML styles and palette colors from included files, and compare Light, Dark, and High contrast on the native canvas. [Styles & Themes guide](../../docs/designer/vscode/styles.md)
+Use Styles & Themes to edit XAML and mapped Rust selectors, typed setters, and appearance-specific colors. Open XAML styles and palette colors from included files. Compare Light, Dark, and High contrast color values and reveal the original XAML or Rust declaration. [Styles & Themes guide](../../docs/designer/vscode/styles.md)
 
 ## Working in the designer
 

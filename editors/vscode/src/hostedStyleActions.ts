@@ -69,7 +69,7 @@ export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAn
             return;
         }
         case 'addColorResource': {
-            const input = await promptRustColorResource();
+            const input = await promptRustColorResource(command.layer);
             if (input) await rustEdit(command.target, { action: 'add_color_resource', style: command.target.node, ...input });
             return;
         }

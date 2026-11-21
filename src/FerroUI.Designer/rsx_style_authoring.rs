@@ -1,8 +1,11 @@
 //! Shared report and source transaction for Rust style editors.
 use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField, RsxStyleResource};
+use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField};
 use serde_json::{json, Value};
+
+#[path = "rsx_style_palette.rs"]
+pub(crate) mod palette;
 
 impl DesignerSession {
     pub(crate) fn rust_style_projection(&self) -> Result<RsxProjection<'_>, String> {
@@ -38,13 +41,15 @@ pub fn rust_style_report(
             .iter()
             .find(|(_, style)| style.declaration.start == node)
             .ok_or("Choose a style from the current Rust invocation")?;
-        let choices = projection.style_resource_choices(node);
+        let families = projection.style_resource_families(node);
+        let choices: Vec<_> = families.iter().filter(|family| family.can_assign_color()).collect();
         let has_choices = !choices.is_empty();
         let setters = style.setters.iter().map(|setter| {
             let value = setter.value();
             let fallback = source.get(setter.source.range()).unwrap_or_default();
             let resource = setter.resource_key().map(|key| {
                 let declaration = choices.iter().find(|entry| entry.key == key)
+                    .and_then(|family| family.common_declaration())
                     .and_then(|entry| index.range(entry.source).ok());
                 json!({"key":key,"declaration":declaration})
             });
@@ -67,13 +72,14 @@ pub fn rust_style_report(
         available.dedup_by(|a, b| a.name == b.name && a.owner_name() == b.owner_name());
         let available = available.into_iter().map(|property|
             json!({"property":property.name,"getter":property.getter,"field":field_report(property, has_choices)})).collect::<Vec<_>>();
-        let resources = style.resources.iter().map(|resource| resource_report(&index, resource)).collect::<Vec<_>>();
-        let choices = choices.into_iter().map(|resource| resource_report(&index, resource)).collect::<Vec<_>>();
+        let resources = style.resources.iter().map(|resource| palette::resource_report(&index, resource)).collect::<Vec<_>>();
+        let choices = choices.into_iter().map(|family| palette::choice_report(&index, family)).collect::<Vec<_>>();
+        let comparison = palette::comparison(&index, &families);
         return Ok(json!({"node":node,"kind":"Style","name":style.selector,
             "range":index.range(style.selector_span).ok(),
             "identity":{"kind":"selector","value":style.selector,"editable":true},
             "nested_allowed":true,"can_remove":style.can_remove(),"setters":setters,"available":available,
-            "color_resources":resources,"resource_choices":choices}));
+            "color_resources":resources,"resource_choices":choices,"resource_comparison":comparison.rows}));
     }
     let definitions = styles.into_iter().map(|(owner, style)| {
         let span = projection.nodes[owner].name;
@@ -106,9 +112,4 @@ fn field_report(field: &RsxStyleField, has_choices: bool) -> Value {
     };
     json!({"kind":field.kind(),"type_name":field.type_name,"options":options,
         "resources":has_choices && field.accepts_color_resource(),"owner":field.owner_name()})
-}
-
-fn resource_report(index: &LineIndex, resource: &RsxStyleResource) -> Value {
-    json!({"node":resource.declaration.start,"key":resource.key,"color":resource.color(),
-        "range":index.range(resource.source).ok()})
 }

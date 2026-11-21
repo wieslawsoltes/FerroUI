@@ -53,6 +53,7 @@
 }
 .palette-filters > select:first-child { flex: 1 1 auto; }
 .palette-filters > select:last-child:not(:first-child) { width: auto; flex: 0 0 auto; }
+#rust-palette-layer { width: auto; max-width: 115px; }
 #palette-search { margin: 6px 0 4px; }
 .palette-swatch, .palette-row .palette-picker {
     display: inline-block;
@@ -66,13 +67,14 @@
 .palette-picker { cursor: pointer; }
 .palette-comparison-scroll { overflow-x: auto; }
 .palette-comparison { width: 100%; min-width: 235px; table-layout: fixed; border-collapse: collapse; font-size: 11px; }
-.palette-comparison:has(thead th:nth-child(4)) { min-width: 284px; }
+.palette-comparison:has(thead th:nth-child(4)) { min-width: 264px; }
 .palette-comparison :is(td, th) { text-align: left; padding: 6px 3px; }
 .palette-comparison tr:not(:first-child), .palette-comparison tbody { border-top: 1px solid var(--vscode-widget-border, #80808040); }
 .palette-comparison th { color: var(--vscode-descriptionForeground); font-weight: 600; }
-.palette-comparison thead th:first-child { width: 32%; }
+.palette-comparison thead th:first-child { width: 25%; }
 .palette-comparison tbody th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.palette-comparison td > div { display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.palette-comparison td > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; font-variant-numeric: tabular-nums; }
+.palette-comparison-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .palette-sample { display: flex; align-items: center; gap: 3px; height: 22px; }
 .palette-sample .row-action { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; }
 @media (max-width: 255px) {

@@ -1,14 +1,16 @@
-//! Scoped palette comparison in the native Studio definition inspector.
-use super::{Context, SOURCE, report, text, tool_button};
+//! Scoped palette comparison in Studio's XAML and Rust editors.
+use super::inspector_actions::{SOURCE, text, tool_button};
 use crate::PreviewTheme;
 use crate::style_palette_comparison::{ComparedColor, PaletteComparison};
+use crate::style_sources::StyleSource;
 use ferroui_base::Ref;
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::{Color, SolidColorBrush};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Border, ColumnDefinitions, Control, Grid, ScrollViewer, StackPanel, TextBlock, ToolTip,
+    Border, ColumnDefinitions, Control, Grid, ScrollViewer, StackPanel, ToolTip,
 };
+use ferroui_designer_core::SourceSpan;
 use std::rc::Rc;
 
 const THEMES: [PreviewTheme; 3] = [
@@ -17,10 +19,11 @@ const THEMES: [PreviewTheme; 3] = [
     PreviewTheme::HighContrast,
 ];
 
+pub(super) const COMPARE: &str = "F1 M1,2 H15 V14 H1 Z M2,3 V13 H7 V3 Z M9,3 V13 H14 V3 Z";
+
 pub(super) fn panel(
     comparison: &PaletteComparison,
-    context: &Context,
-    status: &Ref<TextBlock>,
+    reveal: impl Fn(Option<StyleSource>, SourceSpan) + Clone + 'static,
 ) -> Ref<Control> {
     let count = if comparison.high_contrast { 3 } else { 2 };
     let content = StackPanel::new();
@@ -37,7 +40,7 @@ pub(super) fn panel(
             values.high_contrast.as_ref(),
         ];
         for (index, value) in cells[..count].iter().enumerate() {
-            let cell = color_cell(&values.key, THEMES[index], *value, context, status);
+            let cell = color_cell(&values.key, THEMES[index], *value, reveal.clone());
             add_cell(&row, index, cell);
         }
         content.children().add(row.upcast::<Control>());
@@ -69,8 +72,7 @@ fn color_cell(
     key: &str,
     theme: PreviewTheme,
     color: Option<&ComparedColor>,
-    context: &Context,
-    status: &Ref<TextBlock>,
+    reveal: impl Fn(Option<StyleSource>, SourceSpan) + 'static,
 ) -> Ref<Control> {
     let cell = StackPanel::new();
     cell.set_orientation(Orientation::Horizontal);
@@ -103,6 +105,7 @@ fn color_cell(
         let details = [
             Some(name.as_str()),
             Some(value),
+            color.scope.as_deref(),
             (!path.is_empty()).then_some(path.as_str()),
             color.issue.as_deref(),
         ]
@@ -116,17 +119,7 @@ fn color_cell(
         AutomationProperties::set_name(&open, Some(&details));
         let source = color.source.clone();
         let span = color.span;
-        let context = context.clone();
-        let status = status.downgrade();
-        open.click(move |_, _| {
-            let result = match source.clone() {
-                Some(source) => context.open_source(source),
-                None => context
-                    .workspace()
-                    .map(|workspace| workspace.select_source_span(span)),
-            };
-            report(status.upgrade().as_ref(), result);
-        });
+        open.click(move |_, _| reveal(source.clone(), span));
         cell.children().add(open.upcast::<Control>());
     }
     cell.upcast()

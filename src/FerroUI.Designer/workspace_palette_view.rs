@@ -1,6 +1,7 @@
 //! Palette swatches, source navigation, and the native color editor in Studio.
 use super::{text, tool_button, Context, ADD, SOURCE};
 use crate::style_composition::contrast_providers;
+use crate::workspace::palette_comparison::{self, COMPARE};
 use crate::{PreviewTheme, PropertyColorEditor, ScopedPalette};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::Color;
@@ -17,13 +18,9 @@ use ferroui_designer_tools::component_palette::{
 use ferroui_designer_tools::theme_variants::HighContrastProvider;
 use std::rc::Rc;
 
-#[path = "workspace_palette_comparison.rs"]
-mod comparison;
-
 const SUN: &str = "M8,1 V3 M8,13 V15 M1,8 H3 M13,8 H15 M3,3 L4.5,4.5 M11.5,11.5 L13,13 M13,3 L11.5,4.5 M4.5,11.5 L3,13 M12,8 A4,4 0 1 1 4,8 A4,4 0 1 1 12,8";
 const MOON: &str = "F1 M14,10.2 A6.8,6.8 0 1 1 5.8,2 A6.1,6.1 0 0 0 14,10.2 Z";
 const CONTRAST: &str = "F0 M8,1 A7,7 0 1 1 8,15 A7,7 0 1 1 8,1 Z M8,2.5 A5.5,5.5 0 0 0 8,13.5 Z";
-const COMPARE: &str = "F1 M1,2 H15 V14 H1 Z M2,3 V13 H7 V3 Z M9,3 V13 H14 V3 Z";
 
 pub(super) fn body(
     context: Context,
@@ -101,7 +98,17 @@ pub(super) fn body(
         button.click(move |_, _| report(error.upgrade().as_ref(), verify.preview(theme)));
         bar.children().add(button.upcast::<Control>());
     }
-    let comparison = comparison::panel(&comparison, &context, &status);
+    let comparison = palette_comparison::panel(&comparison, {
+        let context = context.clone();
+        let status = status.downgrade();
+        move |source, span| {
+            let result = match source {
+                Some(source) => context.open_source(source),
+                None => context.workspace().map(|workspace| workspace.select_source_span(span)),
+            };
+            report(status.upgrade().as_ref(), result);
+        }
+    });
     comparison.set_is_visible(false);
     let toggle = tool_button(COMPARE, "Compare theme colors");
     toggle.set_name(Some("PaletteCompare".into()));

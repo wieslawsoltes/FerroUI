@@ -65,5 +65,23 @@ export async function verifyHostedRustStyles(preview: NativePreview, baseUri: st
     assert.equal(changed, repaint.replace('34, /* palette */ 78, 124', '34, /* palette */ 111, 92'));
     assert.notEqual((await render(3154, changed)).image.png, linked.image.png);
     assert.equal((await render(3155, original)).image.png, first.image.png);
-    console.log('App Preview linked a typed Rust color resource, edited it in place, and restored native pixels and source');
+
+    const defaultResource = repaint.replace('.resource("ReviewInk",',
+        '.theme_resource(ferroui_base::styling::ThemeVariant::default(), "ReviewInk",');
+    const themed = await render(3156, defaultResource);
+    assert.equal(themed.image.png, linked.image.png);
+    const addDark = { action: 'add_color_resource', style, layer: 'dark', key: 'ReviewInk', value: '#FFB3D8EF' } as const;
+    const [dark] = (await checked(themed, defaultResource, addDark)).patches;
+    assert.equal(defaultResource.slice(dark.start, dark.end), dark.expected);
+    assert.match(dark.replacement, /\.theme_resource\([^,]+::dark\(\), "ReviewInk"/);
+    const darkSource = defaultResource.slice(0, dark.start) + dark.replacement + defaultResource.slice(dark.end);
+    const darkFrame = await render(3157, darkSource);
+    const darkStyles = await preview.hostedStyles<HostedStyleDefinition>(darkFrame, { action: 'read', target });
+    const angles = darkStyles.definition.resource_comparison?.find(row => row.key === 'ReviewInk');
+    assert.equal(angles?.light?.value, '#FF224E7C');
+    assert.equal(angles?.dark?.value, '#FFB3D8EF');
+    assert.deepEqual(angles?.high_contrast, angles?.dark);
+    await assert.rejects(checked(darkFrame, darkSource, addDark), /selected layer/);
+    assert.equal((await render(3158, original)).image.png, first.image.png);
+    console.log('App Preview linked a typed Rust color resource, added a Dark declaration, resolved fallbacks, and restored native pixels and source');
 }

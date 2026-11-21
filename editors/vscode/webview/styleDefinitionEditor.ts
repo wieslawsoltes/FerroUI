@@ -1,10 +1,11 @@
-import type { AuthoredSetter, RustColorResource, StyleDefinition, StylesAction } from '../src/stylesProtocol';
-import { colorPicker, swatch } from './colorSwatch';
+import type { AuthoredSetter, StyleDefinition, StylesAction } from '../src/stylesProtocol';
 import { create } from './dom';
 import { actionButton } from './propertyEditor';
+import { rustStylePalette, type RustPaletteDisplay } from './rustStylePalette';
+import { submitValue } from './valueField';
 
 export function styleDefinition<Base extends string | number>(sheet: StyleDefinition<Base> | undefined,
-    send: (action: StylesAction<Base>) => void, previewAvailable = true): HTMLElement {
+    send: (action: StylesAction<Base>) => void, previewAvailable: boolean, palette: RustPaletteDisplay): HTMLElement {
     const root = create('div');
     if (!sheet) {
         const empty = create('p');
@@ -35,7 +36,7 @@ export function styleDefinition<Base extends string | number>(sheet: StyleDefini
         for (const setter of sheet.setters) list.append(setterRow(setter, send));
         root.append(list);
     }
-    if (sheet.color_resources) root.append(colorResources(sheet.color_resources, send));
+    if (sheet.color_resources) root.append(rustStylePalette(sheet.color_resources, sheet.resource_comparison, send, palette));
     return root;
 }
 
@@ -119,48 +120,4 @@ function setterInput(setter: AuthoredSetter, value: string): HTMLInputElement {
     if (setter.object) field.placeholder = 'XAML object';
     if (setter.field.kind === 'number') field.inputMode = 'decimal';
     return field;
-}
-
-function colorResources<Base extends string | number>(resources: readonly RustColorResource[], send: (action: StylesAction<Base>) => void): HTMLElement {
-    const section = create('section');
-    section.setAttribute('aria-label', 'Rust color resources');
-    const header = create('div');
-    header.className = 'style-subheader';
-    const caption = create('span');
-    caption.textContent = 'Color resources';
-    header.append(caption, actionButton('add', 'Add Rust color resource', () => send({ type: 'add-color-resource' })));
-    section.append(header);
-    for (const resource of resources) {
-        const row = create('div');
-        row.className = 'palette-row';
-        const title = create('label');
-        title.textContent = title.title = resource.key;
-        const input = create('input');
-        input.id = `rust-color-${resource.node}`;
-        input.setAttribute('aria-label', `${resource.key} color resource value`);
-        input.value = resource.color ?? 'Rust expression';
-        input.readOnly = !resource.color;
-        input.spellcheck = false;
-        title.htmlFor = input.id;
-        const change = (color: string) => send({ type: 'rust-resource-color', node: resource.node, color });
-        if (resource.color) submitValue(input, input.value, change);
-        row.append(resource.color ? colorPicker(resource.key, resource.color, change) : swatch(undefined), title, input,
-            actionButton('go-to-file', `Reveal ${resource.key} resource`, () => send({ type: 'reveal', range: resource.range })));
-        section.append(row);
-    }
-    return section;
-}
-
-export function submitValue(field: HTMLInputElement | HTMLSelectElement, original: string, apply: (value: string) => void): void {
-    let last = original;
-    const commit = () => {
-        if (field.value === last) return;
-        last = field.value;
-        apply(field.value);
-    };
-    field.addEventListener('change', commit);
-    if (field instanceof HTMLInputElement) field.addEventListener('keydown', event => {
-        if (event.key === 'Enter') { event.preventDefault(); commit(); }
-        if (event.key === 'Escape') field.value = last;
-    });
 }

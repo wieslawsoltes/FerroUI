@@ -18,7 +18,7 @@ import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
-import type { HostedStyleEdit, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
@@ -251,7 +251,7 @@ export class AgentTools {
                     { revision: args.expected_revision, sequence: args.expected_sequence }, address, range, signal);
             }
             case 'designer_hosted_style_show':
-                return this.hosted.showStyles(document.uri, args.expected_generation, (args.arguments as { target: HostedStyleTarget } | undefined)?.target, signal);
+                return this.hosted.showStyles(document.uri, args.expected_generation, args.arguments as HostedStylePresentation | undefined, signal);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationAction, signal);

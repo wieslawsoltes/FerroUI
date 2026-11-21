@@ -2,18 +2,24 @@
 use super::inspector_actions::{add_button, icon_button, picker, text, RESET, SOURCE};
 use super::DesignerWorkspace;
 use crate::icons;
+use crate::style_palette_comparison::PaletteComparison;
 use ferroui_base::{layout::Orientation, WeakRef};
 use ferroui_controls::{
     Button, Control, Flyout, PlacementMode, ScrollViewer, StackPanel, TextBlock,
 };
 use ferroui_designer_core::SourceSpan;
-use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit, RsxStyleResource};
+use ferroui_designer_language::LineIndex;
+use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit, RsxStyleResourceFamily};
+use ferroui_designer_tools::component_palette::PaletteLayer;
+use std::cell::Cell;
 use std::rc::{Rc, Weak};
 
 #[path = "workspace_rust_style_fields.rs"]
 mod fields;
 #[path = "workspace_rust_style_resources.rs"]
 mod resources;
+#[path = "workspace_rust_style_resource_setters.rs"]
+mod resource_setters;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_rust_styles_tests.rs"]
 mod tests;
@@ -28,6 +34,7 @@ impl DesignerWorkspace {
         let pane = Pane {
             workspace: Rc::downgrade(self),
             flyout: flyout.downgrade(),
+            palette: Rc::new(PaletteDisplay::default()),
         };
         flyout.opening(move |_| pane.render(0, None)).detach();
         anchor.set_flyout(Some(flyout.upcast()));
@@ -44,6 +51,13 @@ impl DesignerWorkspace {
 struct Pane {
     workspace: Weak<DesignerWorkspace>,
     flyout: WeakRef<Flyout>,
+    palette: Rc<PaletteDisplay>,
+}
+
+#[derive(Default)]
+struct PaletteDisplay {
+    layer: Cell<Option<PaletteLayer>>,
+    compare: Cell<bool>,
 }
 
 #[derive(Clone)]
@@ -141,8 +155,10 @@ impl Pane {
                 }
             });
             body.children().add(choices.upcast::<Control>());
-            let choices = projection.style_resource_choices(rule.declaration.start);
-            self.rule(&body, &tools, &scope, rule, &projection.style_fields(), &choices);
+            let families = projection.style_resource_families(rule.declaration.start);
+            let comparison = crate::rsx_style_authoring::palette::comparison(&LineIndex::new(session.authored_source()), &families);
+            let choices: Vec<_> = families.into_iter().filter(RsxStyleResourceFamily::can_assign_color).collect();
+            Self::rule(&body, &tools, &scope, rule, &projection.style_fields(), &choices, &comparison);
         } else {
             body.children()
                 .add(text("No inline styles in this RSX view.").upcast::<Control>());
@@ -151,13 +167,13 @@ impl Pane {
     }
 
     fn rule(
-        &self,
         body: &StackPanel,
         tools: &StackPanel,
         scope: &Scope,
         rule: &RsxStyle,
         fields: &[&ferroui_designer_rsx::RsxStyleField],
-        choices: &[&RsxStyleResource],
+        choices: &[RsxStyleResourceFamily<'_>],
+        comparison: &PaletteComparison,
     ) {
         let style = rule.declaration.start;
         let span = rule.selector_span;
@@ -193,7 +209,7 @@ impl Pane {
             } else if let Some(value) = setter.value() {
                 let active = scope.clone();
                 let options = field.map_or(&[][..], |field| field.options());
-                let row = fields::value_row(body, name, &value, options, move |value| {
+                fields::value_row(body, name, &value, options, move |value| {
                     active.apply(
                         RsxStyleEdit::Setter {
                             style,
@@ -202,8 +218,7 @@ impl Pane {
                         },
                         None,
                     );
-                });
-                row
+                })
             } else {
                 fields::source_row(body, name)
             };
@@ -213,7 +228,7 @@ impl Pane {
                     active.apply(RsxStyleEdit::Setter { style, setter: member, value: None }, None);
                 });
                 if field.is_some_and(|field| field.accepts_color_resource()) && !choices.is_empty() {
-                    resources::change_setter(&row, scope, style, setter, choices);
+                    resource_setters::change_setter(&row, scope, style, setter, choices);
                 }
             }
             let active = scope.clone();
@@ -224,7 +239,7 @@ impl Pane {
                 move || active.reveal(source),
             );
         }
-        resources::section(body, scope, rule, fields, choices);
+        resources::section(body, scope, rule, fields, choices, comparison);
     }
 }
 

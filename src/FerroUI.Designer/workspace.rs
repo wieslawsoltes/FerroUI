@@ -943,6 +943,8 @@ mod preview_checks;
 mod columns;
 #[path = "workspace_rust_styles.rs"]
 mod rust_styles;
+#[path = "workspace_palette_comparison.rs"]
+mod palette_comparison;
 #[path = "inspector_actions.rs"]
 mod inspector_actions;
 #[path = "workspace_property_trace.rs"]

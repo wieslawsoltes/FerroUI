@@ -1,5 +1,5 @@
 import { choose, editText } from './studioContext';
-import type { RustColorResource, StyleCatalog, StyleCreation, StyleSetter } from './stylesProtocol';
+import { paletteLayerLabels, type PaletteLayer, type RustColorChoice, type StyleCatalog, type StyleCreation, type StyleSetter } from './stylesProtocol';
 
 export async function chooseNewStyle(catalog: StyleCatalog, kind: 'style' | 'theme', suggestedType?: string): Promise<{ node: number; edit: StyleCreation } | undefined> {
     const scopes = kind === 'theme' ? catalog.palette_scopes : catalog.style_hosts;
@@ -43,17 +43,18 @@ export async function chooseNewSetter(available: readonly StyleSetter[]): Promis
     if (value !== undefined) return { property, kind: 'literal', value, getter: item.setter.getter };
 }
 
-export async function chooseRustColorResource(property: string, choices: readonly RustColorResource[]) {
+export async function chooseRustColorResource(property: string, choices: readonly RustColorChoice[]) {
     if (!choices.length) throw new Error('This style scope has no mapped color resource.');
     return await choose(`Choose a Color Resource for ${property}`,
-        choices.map(resource => ({ label: resource.key, description: resource.color ?? 'Color', key: resource.key })));
+        choices.map(resource => ({ label: resource.key, description: resource.color ?? 'Theme colors', key: resource.key })));
 }
 
-export async function promptRustColorResource(): Promise<{ key: string; value: string } | undefined> {
-    const key = await editText('Resource key', undefined, key => key.trim() ? undefined : 'Enter a resource key.', 'New Rust Color Resource');
+export async function promptRustColorResource(layer: PaletteLayer): Promise<{ key: string; value: string; layer?: PaletteLayer } | undefined> {
+    const title = `New Rust Color Resource · ${paletteLayerLabels[layer]}`;
+    const key = await editText('Resource key', undefined, key => key.trim() ? undefined : 'Enter a resource key.', title);
     if (key === undefined) return;
-    const value = await editText('Color value', '#FF4C82D0', undefined, 'New Rust Color Resource');
-    if (value !== undefined) return { key: key.trim(), value };
+    const value = await editText('Color value', '#FF4C82D0', undefined, title);
+    if (value !== undefined) return { key: key.trim(), value, ...(layer === 'shared' ? {} : { layer }) };
 }
 
 export async function chooseStyleResource<T extends { key: string; type_name: string }>(property: string, resources: readonly T[]) {
