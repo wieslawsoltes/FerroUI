@@ -62,6 +62,8 @@ Run **Build Project XAML Schema** for the owning Cargo target. In XAML, put the 
 
 The result opens the authored Rust registration for that type or property. Each step in a path such as `Address.Street` follows the build's type information, including dependency types exposed under a XAML alias. With `{CompiledBinding Street, DataType={x:Type data:PostalAddress}}`, place the caret on `Street` for the registered property or on `data:PostalAddress` for its type. Navigation resolves the current file or open Rust draft, so adding lines above a declaration keeps the selection on its name. Rebuild the schema after moving declarations between files, changing a registration, or using build output without the source index. [Studio workflow](../native-controls.md#follow-a-rust-declaration-from-xaml) · [MCP workflow](reference.md#find-registered-rust-definitions-with-mcp)
 
+Typed paths also support `$parent[local:Card].Title`, `RelativeSource={RelativeSource AncestorType={x:Type local:Card}}`, casts such as `((local:Card)Tag).Title`, and attached properties such as `$self.(local:Card.Badge)`. Go to Definition and the rename review use the resolved type or member under the caret. Null-conditional segments such as `Address?.Street` use the same metadata. A binding whose source type depends on runtime data appears under **Potential references** when it includes the old name. An explicit type cast can resolve the members that follow it.
+
 ### Rename a registered XAML property
 
 Run **Build Project XAML Schema**, then put the caret on a registered property in XAML, a typed binding, or a style selector. Choose **FerroUI: Rename Registered Property…** from the Command Palette or the editor context menu. Enter the new public XAML property name.

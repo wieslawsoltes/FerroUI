@@ -6,9 +6,11 @@ use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, SourceSpan};
 use std::collections::BTreeMap;
 
 mod fixes;
+mod path_source;
 mod property_references;
 pub(crate) use fixes::case_mismatch;
-pub(crate) use property_references::property_references;
+pub(crate) use path_source::is_relative_source;
+pub(crate) use property_references::{path_type_references, property_references};
 
 impl LanguageService {
     /// Locate the ends of typed binding paths visible in the requested source range.
@@ -119,6 +121,12 @@ pub(crate) fn type_at<'a>(
         .attributes
         .iter()
         .find(|attribute| attribute.value_span.contains(offset))?;
+    if let Some(operand) = path_type_references(schema, document, node.id, attribute)
+        .into_iter()
+        .find(|operand| operand.span.contains(offset))
+    {
+        return schema.type_info(&operand.spelling, Some(operand.namespace.as_deref()?));
+    }
     let directive = attribute.namespace_uri.as_deref()
         == Some("http://schemas.microsoft.com/winfx/2006/xaml")
         && attribute.name.rsplit(':').next() == Some("DataType");
@@ -139,12 +147,7 @@ pub(crate) fn type_at<'a>(
     }
     let raw = &document.source()[attribute.value_span.range()];
     let local_offset = offset.checked_sub(attribute.value_span.start)?;
-    let argument = markup_arguments_with_extensions(raw).into_iter().find(|argument| {
-        is_native_binding(schema, document, node.id, &argument.extension)
-            && argument.name.as_deref() == Some("DataType")
-            && argument.span.contains(local_offset)
-    })?;
-    type_reference(schema, document, node.id, &argument.value)
+    path_source::type_parameter_at(schema, document, node.id, raw, local_offset)
 }
 
 /// Resolve the individual path member under the caret, retaining its exact lexical source span.
@@ -161,9 +164,16 @@ pub(crate) fn at(
         if !attribute.value_span.contains(offset) {
             continue;
         }
+        if let Some((span, property)) = property_references(schema, document, node.id, attribute)
+            .into_iter()
+            .find(|(span, _)| span.contains(offset))
+        {
+            return Some((property, span));
+        }
         let raw = &document.source()[attribute.value_span.range()];
         for argument in markup_arguments(raw) {
-            if !is_path(&argument)
+            if argument.depth == 0
+                || !is_path(&argument)
                 || !is_native_binding(schema, document, node.id, &argument.extension)
             {
                 continue;
@@ -214,7 +224,7 @@ fn is_binding(extension: &str) -> bool {
     )
 }
 
-fn is_native_binding(schema: &Schema, document: &Document, node: NodeId, extension: &str) -> bool {
+pub(crate) fn is_native_binding(schema: &Schema, document: &Document, node: NodeId, extension: &str) -> bool {
     let (prefix, _) = extension.split_once(':').unwrap_or(("", extension));
     let namespaces = document.ast().namespaces(node);
     schema
@@ -264,6 +274,9 @@ fn source_type<'a>(
     if let Some(data_type) = parameters.get("DataType") {
         return type_reference(schema, document, node, data_type);
     }
+    if expression.starts_with("{TemplateBinding") || expression.contains("TemplatedParent") {
+        return template_target_type(schema, document, node);
+    }
     let mut current = Some(node);
     while let Some(id) = current {
         let ancestor = document.ast().node(id)?;
@@ -271,19 +284,7 @@ fn source_type<'a>(
             .type_info(&ancestor.name, ancestor.namespace_uri.as_deref())
             .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
             .map(|info| info.name.as_str());
-        if expression.starts_with("{TemplateBinding") || expression.contains("TemplatedParent") {
-            if native_type == Some("ControlTemplate") {
-                return ancestor
-                    .attributes
-                    .iter()
-                    .find(|attribute| {
-                        schema
-                            .attribute_property(document, ancestor, attribute)
-                            .is_some_and(|property| property.name == "TargetType")
-                    })
-                    .and_then(|attribute| type_reference(schema, document, id, &attribute.value));
-            }
-        } else if let Some(data_type) = ancestor.attributes.iter().find(|attribute| {
+        if let Some(data_type) = ancestor.attributes.iter().find(|attribute| {
             attribute.name.rsplit(':').next() == Some("DataType")
                 && attribute.namespace_uri.as_deref()
                     == Some("http://schemas.microsoft.com/winfx/2006/xaml")
@@ -330,36 +331,85 @@ fn source_type<'a>(
     }
     None
 }
+
+fn template_target_type<'a>(
+    schema: &'a Schema,
+    document: &Document,
+    node: NodeId,
+) -> Option<&'a TypeInfo> {
+    let mut current = Some(node);
+    while let Some(id) = current {
+        let ancestor = document.ast().node(id)?;
+        if schema
+            .type_info(&ancestor.name, ancestor.namespace_uri.as_deref())
+            .is_some_and(|info| {
+                info.namespace == crate::schema::FRAMEWORK_NAMESPACE && info.name == "ControlTemplate"
+            })
+        {
+            let target = ancestor.attributes.iter().find(|attribute| {
+                schema.attribute_property(document, ancestor, attribute)
+                    .is_some_and(|property| property.name == "TargetType")
+            })?;
+            return type_reference(schema, document, id, &target.value);
+        }
+        current = ancestor.parent;
+    }
+    None
+}
+
 pub(crate) fn type_reference<'a>(
     schema: &'a Schema,
     document: &Document,
     node: NodeId,
     reference: &str,
 ) -> Option<&'a TypeInfo> {
-    let namespaces = document.ast().namespaces(node);
-    let reference = if let Ok(MarkupValue::Extension(extension)) = MarkupValue::parse(reference) {
-        let (prefix, name) = extension
-            .name
-            .split_once(':')
-            .unwrap_or(("", &extension.name));
-        if name != "Type"
-            || namespaces.get(prefix).map(String::as_str)
-                != Some("http://schemas.microsoft.com/winfx/2006/xaml")
-            || extension.arguments.len() != 1
-            || extension.arguments[0]
+    if let Ok(extension @ MarkupValue::Extension(_)) = MarkupValue::parse(reference) {
+        return type_value(schema, document, node, &extension);
+    }
+    xml_type_name(schema, document, node, reference)
+}
+
+fn type_value<'a>(
+    schema: &'a Schema,
+    document: &Document,
+    node: NodeId,
+    value: &MarkupValue,
+) -> Option<&'a TypeInfo> {
+    let reference = match value {
+        MarkupValue::Literal(reference) => reference,
+        MarkupValue::Extension(extension) => {
+            let (prefix, name) = extension
                 .name
-                .as_deref()
-                .is_some_and(|name| name != "TypeName")
-        {
-            return None;
+                .split_once(':')
+                .unwrap_or(("", &extension.name));
+            if name != "Type"
+                || document.ast().namespaces(node).get(prefix).map(String::as_str)
+                    != Some("http://schemas.microsoft.com/winfx/2006/xaml")
+            {
+                return None;
+            }
+            let [argument] = extension.arguments.as_slice() else {
+                return None;
+            };
+            if argument.name.as_deref().is_some_and(|name| name != "TypeName") {
+                return None;
+            }
+            let MarkupValue::Literal(reference) = &argument.value else {
+                return None;
+            };
+            reference
         }
-        match extension.arguments.first()?.value.clone() {
-            MarkupValue::Literal(value) => value,
-            _ => return None,
-        }
-    } else {
-        reference.to_owned()
     };
+    xml_type_name(schema, document, node, reference)
+}
+
+fn xml_type_name<'a>(
+    schema: &'a Schema,
+    document: &Document,
+    node: NodeId,
+    reference: &str,
+) -> Option<&'a TypeInfo> {
+    let namespaces = document.ast().namespaces(node);
     let reference = reference.trim();
     let namespace = match reference.split_once(':') {
         Some((prefix, _)) => Some(namespaces.get(prefix)?.as_str()),

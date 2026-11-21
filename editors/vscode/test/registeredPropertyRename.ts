@@ -17,6 +17,7 @@ export async function verifyRegisteredPropertyRename(
         '            <Setter Property="Caption" Value="🧭 More details"/>',
         '        </Style>',
         '    </StackPanel.Styles>',
+        '    <TextBlock Text="{Binding ((local:AuditCard)Tag)?.Caption}"/>',
         '    <local:AuditCard Caption="Customer"/>',
         '</StackPanel>',
     ].join('\r\n');
@@ -69,6 +70,7 @@ export async function verifyRegisteredPropertyRename(
     assert.equal(opened.getText(), nextConsumer
         .replace('[Caption=', '[Heading=')
         .replace('Property="Caption"', 'Property="Heading"')
+        .replace('?.Caption}', '?.Heading}')
         .replace('AuditCard Caption=', 'AuditCard Heading='));
     assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
     const renamedMapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Heading: 'headingFromDraft' } });
@@ -83,6 +85,11 @@ export async function verifyRegisteredPropertyRename(
         const [definition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, selector) ?? [];
         return definition?.uri.toString() === rust.uri.toString() && rust.getText(definition.range) === 'Caption';
     });
+    const member = opened.positionAt(nextConsumer.indexOf('?.Caption') + 4);
+    const [bindingDefinition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, member) ?? [];
+    assert.ok(bindingDefinition);
+    assert.equal(bindingDefinition.uri.toString(), rust.uri.toString());
+    assert.equal(rust.getText(bindingDefinition.range), 'Caption');
     await vscode.window.showTextDocument(descriptor);
     await vscode.commands.executeCommand('undo');
     await until(() => descriptor.getText() === descriptorOriginal);

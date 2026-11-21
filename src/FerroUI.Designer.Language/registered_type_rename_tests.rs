@@ -70,6 +70,10 @@ fn a_control_name_updates_class_uses_and_requires_its_rust_declaration() {
             <a:Card.Title>Card</a:Card.Title>
         </a:Card>
         <ContentControl Content="{x:Type a:Card}" />
+        <TextBlock Text="{Binding $parent[a:Card].Tone}" />
+        <TextBlock Text="{Binding ((a:Card)Tag).Title}" />
+        <TextBlock Text="{Binding (a:Card.Badge)}" />
+        <TextBlock Text="{CompiledBinding Tone, RelativeSource={RelativeSource AncestorType=a:Card}}" />
         <Style Selector="a|Card.hot" />
     </StackPanel>"#;
     let code_behind = r#"<Border xmlns="https://github.com/ferroui"
@@ -96,7 +100,7 @@ fn a_control_name_updates_class_uses_and_requires_its_rust_declaration() {
         .unwrap();
     service.set_build_metadata(&metadata).unwrap();
     service.open(&uri, view, 1).unwrap();
-    let request = request(view, "Card.hot");
+    let request = request(view, "Card].Tone");
     let new_name = "SummaryCard";
     let base = service
         .plan_registered_type_rename(&uri, &request, new_name, &[])
@@ -209,4 +213,16 @@ fn a_control_name_updates_class_uses_and_requires_its_rust_declaration() {
         .unwrap_err()
         .0
         .contains("source changed"));
+    let possible_use = r#"<TextBlock Text="{Binding ((unknown:Card)Tag).Title}" xmlns="https://github.com/ferroui" />"#;
+    fixture.write("app/UnresolvedBinding.xaml", possible_use);
+    let possible_uri = file_uri(fixture.0.join("app/UnresolvedBinding.xaml")).unwrap();
+    let review = service.plan_registered_type_rename(&uri, &request, new_name, &[]).unwrap();
+    assert!(review.documents.iter().all(|document| document.edit.uri != possible_uri));
+    assert_eq!(review.unmapped.len(), 1);
+    assert_eq!(review.unmapped[0].uri, possible_uri);
+    let cast = possible_use.replace("unknown:Card", "a:SummaryCard")
+        .replace("xmlns=", "xmlns:a=\"using:Customer.Views\" xmlns=");
+    fixture.write("app/UnresolvedBinding.xaml", &cast);
+    assert!(service.plan_registered_type_rename(&uri, &request, new_name, &[])
+        .unwrap_err().0.contains("would capture"));
 }

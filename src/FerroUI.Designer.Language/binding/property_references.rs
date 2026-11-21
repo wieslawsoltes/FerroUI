@@ -1,87 +1,138 @@
-use super::{is_native_binding, is_path, member_type, named_target, source_type};
-use crate::references::markup_arguments_with_extensions;
+use super::{
+    member_type,
+    path_source::{element_type, named_type, PathSource},
+};
 use crate::{PropertyInfo, Schema};
-use ferroui_designer_core::{Attribute, Document, MarkupValue, NodeId, SourceSpan};
+use ferroui_designer_core::{Attribute, Document, NodeId, SourceSpan};
+use ferroui_markup_syntax::binding_expression_grammar::{Node, SpannedNode};
+use std::collections::BTreeMap;
 
-/// Walk a statically typed binding path and keep the exact spelling of each member.
+/// Resolve the member operands whose owner follows from the authored path.
 pub(crate) fn property_references(
     schema: &Schema,
     document: &Document,
     node: NodeId,
     attribute: &Attribute,
 ) -> Vec<(SourceSpan, PropertyInfo)> {
-    let Some((mut path, span, mut owner)) = path_target(schema, document, node, attribute) else {
+    let Some(path) = PathSource::from_attribute(schema, document, node, attribute) else {
         return Vec::new();
     };
-    let mut offset = span.end - path.len();
+    let namespaces = document.ast().namespaces(node);
+    let type_info =
+        |prefix: &str, name: &str| schema.type_info(name, Some(namespace(&namespaces, prefix)?));
+    let mut owner = path.owner;
     let mut references = Vec::new();
-    while !path.is_empty() {
-        let (name, remaining) = path.split_once('.').unwrap_or((path, ""));
-        if !crate::is_xaml_identifier(name) {
-            break;
-        }
-        let Some(property) = schema.property(&owner.name, Some(&owner.namespace), name) else {
-            break;
+    for SpannedNode {
+        node: part,
+        operand,
+    } in path.nodes
+    {
+        let (receiver, name, attached) = match part {
+            Node::PropertyName { property_name, .. } => (owner, property_name, false),
+            Node::AttachedPropertyName {
+                namespace,
+                type_name,
+                property_name,
+                ..
+            } => (type_info(&namespace, &type_name), property_name, true),
+            Node::Name { name } => {
+                owner = named_type(schema, document, node, &name);
+                continue;
+            }
+            Node::SelfNode => {
+                owner = element_type(schema, document, node);
+                continue;
+            }
+            Node::TypeCast {
+                namespace,
+                type_name,
+            } => {
+                owner = type_info(&namespace, &type_name);
+                continue;
+            }
+            Node::Ancestor {
+                namespace,
+                type_name,
+                ..
+            } => {
+                owner = type_name
+                    .and_then(|name| type_info(namespace.as_deref().unwrap_or_default(), &name));
+                continue;
+            }
+            Node::Indexer { .. } | Node::Stream => {
+                // A later explicit cast can restore a known type.
+                owner = None;
+                continue;
+            }
+            Node::EmptyExpression | Node::Not => continue,
         };
-        let next = member_type(schema, document, node, owner, &property);
-        references.push((SourceSpan::new(offset, offset + name.len()), property));
-        let Some(next) = next else { break };
-        offset += name.len() + 1;
-        path = remaining;
-        owner = next;
+        owner = None;
+        let Some(receiver) = receiver else { continue };
+        let Some(property) = schema
+            .property(&receiver.name, Some(&receiver.namespace), &name)
+            .filter(|property| !property.event && (!attached || property.attached))
+        else {
+            continue;
+        };
+        owner = member_type(schema, document, node, receiver, &property);
+        if let Some(span) = operand.and_then(|operand| path.text.source_span(operand.name)) {
+            references.push((span, property));
+        }
     }
     references
 }
 
-fn path_target<'s, 'a>(
-    schema: &'s Schema,
-    document: &'a Document,
+pub(crate) struct BindingTypeUse {
+    pub span: SourceSpan,
+    pub spelling: String,
+    pub namespace: Option<String>,
+}
+
+/// Keep the lexical namespace even for a type that cannot currently resolve.
+/// Rename review also checks whether the proposed name would capture that use.
+pub(crate) fn path_type_references(
+    schema: &Schema,
+    document: &Document,
     node: NodeId,
     attribute: &Attribute,
-) -> Option<(&'a str, SourceSpan, &'s crate::TypeInfo)> {
-    let MarkupValue::Extension(extension) = attribute.markup().ok()? else {
-        return None;
+) -> Vec<BindingTypeUse> {
+    let Some(path) = PathSource::from_attribute(schema, document, node, attribute) else {
+        return Vec::new();
     };
-    if !is_native_binding(schema, document, node, &extension.name) {
-        return None;
-    }
-    if extension
-        .arguments
-        .iter()
-        .any(|argument| match argument.name.as_deref() {
-            Some("Source") => true,
-            Some("RelativeSource") => !matches!(
-                &argument.value, MarkupValue::Extension(value)
-                    if value.name == "RelativeSource"
-                        && value.arguments.len() == 1
-                        && value.arguments[0].value == MarkupValue::Literal("Self".into())
-            ),
-            Some("ElementName") => !matches!(argument.value, MarkupValue::Literal(_)),
-            _ => false,
-        })
-    {
-        return None;
-    }
-    let raw = document.source().get(attribute.value_span.range())?;
-    let arguments: Vec<_> = markup_arguments_with_extensions(raw)
+    let namespaces = document.ast().namespaces(node);
+    path.nodes
         .into_iter()
-        .filter(|argument| argument.depth == 0)
-        .collect();
-    let mut paths = arguments.iter().filter(|argument| is_path(argument));
-    let argument = paths.next()?;
-    if paths.next().is_some() {
-        return None;
-    }
-    let span = SourceSpan::new(
-        attribute.value_span.start + argument.span.start,
-        attribute.value_span.start + argument.span.end,
-    );
-    let mut path = document.source().get(span.range())?;
-    if path != argument.value {
-        return None;
-    }
-    let owner = source_type(schema, document, node, raw, &arguments, &mut path, |name| {
-        named_target(document, node, name)
-    })?;
-    Some((path, span, owner))
+        .filter_map(|part| {
+            let operand = part.operand?;
+            let (prefix, spelling, range) = match part.node {
+                Node::TypeCast {
+                    namespace,
+                    type_name,
+                } => (namespace, type_name, operand.name),
+                Node::Ancestor {
+                    namespace,
+                    type_name: Some(name),
+                    ..
+                } => (namespace.unwrap_or_default(), name, operand.name),
+                Node::AttachedPropertyName {
+                    namespace,
+                    type_name,
+                    ..
+                } => (namespace, type_name, operand.owner?),
+                _ => return None,
+            };
+            Some(BindingTypeUse {
+                span: path.text.source_span(range)?,
+                namespace: namespace(&namespaces, &prefix).map(str::to_owned),
+                spelling,
+            })
+        })
+        .collect()
+}
+
+fn namespace<'a>(namespaces: &'a BTreeMap<String, String>, prefix: &str) -> Option<&'a str> {
+    namespaces
+        .get(prefix)
+        .map(String::as_str)
+        .or_else(|| prefix.is_empty().then_some(crate::FRAMEWORK_NAMESPACE))
 }

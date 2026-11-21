@@ -1,6 +1,7 @@
 //! Lex type-bearing XAML syntax while retaining the original local-name span.
 use crate::service::style_selectors::{self, References};
 use crate::{
+    binding,
     references::markup_tokens, require, LanguageError, Result, Schema, TypeInfo,
     FRAMEWORK_NAMESPACE,
 };
@@ -18,6 +19,7 @@ pub(super) struct TypeSite<'a> {
 
 enum Context<'a> {
     Markup(Option<String>),
+    Binding(Option<String>),
     Class(&'a str),
     Selector(String),
 }
@@ -27,6 +29,9 @@ impl TypeSite<'_> {
         let namespace = match &self.context {
             Context::Markup(namespace) => {
                 return schema.type_info(&self.spelling, namespace.as_deref())
+            }
+            Context::Binding(namespace) => {
+                return schema.type_info(&self.spelling, Some(namespace.as_deref()?));
             }
             Context::Selector(namespace) => {
                 return schema.exact_type_info(&self.spelling, Some(namespace))
@@ -141,6 +146,12 @@ impl<'a> AttributeContext<'a, '_> {
         if raw.starts_with('{') {
             if attribute.markup().is_ok() {
                 self.extensions(raw, start, sites);
+                sites.extend(binding::path_type_references(self.schema, self.document, self.node.id, attribute)
+                    .into_iter().map(|operand| TypeSite {
+                        span: operand.span,
+                        spelling: Cow::Owned(operand.spelling),
+                        context: Context::Binding(operand.namespace),
+                    }));
             }
             return;
         }
@@ -231,17 +242,15 @@ impl<'a> AttributeContext<'a, '_> {
                 } else if form == "Static" && parameter.is_none_or(|name| name == "Member") {
                     self.qualified_owner(raw, position, sites);
                 }
-            } else if parameter == Some("DataType")
-                && self
-                    .schema
-                    .extension(&argument.extension, namespace)
-                    .is_some_and(|extension| {
-                        matches!(
-                            extension.name.as_str(),
-                            "Binding" | "CompiledBinding" | "ReflectionBinding"
-                        )
-                    })
-            {
+            } else if match parameter {
+                Some("AncestorType") => binding::is_relative_source(
+                    self.schema, self.document, self.node.id, &argument.extension,
+                ),
+                Some("DataType") => binding::is_native_binding(
+                    self.schema, self.document, self.node.id, &argument.extension,
+                ),
+                _ => false,
+            } {
                 xml_name(sites, raw, position, self.namespaces);
             }
         }
@@ -330,6 +339,12 @@ pub(super) fn review(
                     patches.push(super::replacement(site.span, spelling));
                 }
             } else {
+                if matches!(site.context, Context::Binding(_))
+                    && (site.spelling == old || Some(site.spelling.as_ref()) == short)
+                    && site.resolve(before, package).is_none()
+                {
+                    unmapped.push(site.span);
+                }
                 require(
                     !resolves(site, after, package, target),
                     "The new type name would capture an existing XAML reference",

@@ -228,7 +228,7 @@ In Studio, use `designer_plan_property_rename` with the active XAML byte `offset
 
 ### Review a registered type rename with MCP
 
-Use the registered type's position in XAML, including a resolved type operand in a style selector. The reviewed documents include any mapped RSX type keys and Rust builder paths.
+Use the registered type's position in XAML, including a resolved type operand in a style selector or a typed binding path. The reviewed documents include any mapped RSX type keys and Rust builder paths. Property and type reviews keep unresolved binding uses in `unmapped` for source inspection. [Typed binding examples](authoring.md#follow-registered-rust-declarations)
 
 In VS Code, call `ferroui_workspace_plan_type_rename` with `path`, optional `folder`, a zero-based UTF-16 `position`, and `new_name`. The extension resolves any Rust symbol edits through its active rust-analyzer provider. Review the documents and `unmapped` locations before passing the same inputs and `review` to `ferroui_workspace_rename_type`.
 

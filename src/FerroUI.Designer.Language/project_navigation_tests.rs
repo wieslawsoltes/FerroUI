@@ -479,3 +479,52 @@ fn reviewed_binding_member_rename_follows_explicit_types_and_rejects_capture() {
             .contains("source changed")
     );
 }
+
+#[test]
+fn reviewed_bindings_follow_typed_ancestors_casts_and_attached_owners() {
+    let fixture = CatalogFixture::create();
+    let metadata = fixture.build();
+    let view = r#"<local:Card xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Customer.Views"
+        xmlns:other="using:Application" Tone="Blue">
+        <!-- 🧭 Tone and Badge -->
+        <TextBlock Text="{CompiledBinding !$parent[local:Card;1].T&#111;ne}" />
+        <TextBlock Text="{CompiledBinding Tone, RelativeSource={RelativeSource AncestorType={x:Type local:Card}}}" />
+        <TextBlock Text="{Binding Path=((local:Card)Tag)?.Tone}" />
+        <TextBlock Text="{Binding $self.(local:Card.Badge)}" />
+        <TextBlock Text="{Binding $parent.Tone}" />
+        <TextBlock Text="{Binding Tone, RelativeSource={other:RelativeSource AncestorType=local:Card}}" />
+        <TextBlock Text="Tone" />
+    </local:Card>"#.replace('\n', "\r\n");
+    fixture.write("app/Relative.xaml", &view);
+    let uri = file_uri(fixture.0.join("app/Relative.xaml")).unwrap();
+    let mut service = LanguageService::default();
+    service.index_solution(&Solution::discover(&fixture.0).unwrap()).unwrap();
+    service.set_build_metadata(&metadata).unwrap();
+    service.open(&uri, &view, 1).unwrap();
+    let request_at = |needle: &str| RegisteredPropertyRequest {
+        version: 1,
+        position: LineIndex::new(&view).position(view.find(needle).unwrap() + 1).unwrap(),
+    };
+    let definitions = service.definitions(&uri, view.find("T&#111;ne").unwrap() + 1).unwrap();
+    assert_eq!(definitions.len(), 1);
+    assert!(definitions[0].uri.ends_with("/app/rust/controls.rs"));
+    let type_operand = view.find("x:Type local:Card").unwrap() + "x:Type local:".len();
+    let type_definition = service.definitions(&uri, type_operand).unwrap();
+    assert_eq!(type_definition.len(), 1);
+    assert!(type_definition[0].uri.ends_with("/app/rust/controls.rs"));
+    let renamed = service.plan_registered_property_rename(&uri, &request_at("T&#111;ne"), "Accent", None).unwrap();
+    let changed = renamed.documents.iter().find(|document| document.edit.uri == uri).unwrap();
+    assert_eq!(changed.before, view);
+    assert_eq!(changed.after, view
+        .replace("Tone=\"Blue\"", "Accent=\"Blue\"")
+        .replace("T&#111;ne}", "Accent}")
+        .replace("CompiledBinding Tone,", "CompiledBinding Accent,")
+        .replace("?.Tone}", "?.Accent}"));
+    assert_eq!(renamed.unmapped.len(), 2);
+    assert!(service.definitions(&uri, view.find("$parent.Tone").unwrap() + "$parent.".len()).unwrap().is_empty());
+
+    let attached = service.plan_registered_property_rename(&uri, &request_at("Badge)}"), "Marker", None).unwrap();
+    let changed = attached.documents.iter().find(|document| document.edit.uri == uri).unwrap();
+    assert_eq!(changed.after, view.replace("local:Card.Badge)", "local:Card.Marker)"));
+}

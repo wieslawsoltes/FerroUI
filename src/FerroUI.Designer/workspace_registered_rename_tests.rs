@@ -6,7 +6,7 @@ use ferroui_mcp::{Permissions, UiToolProvider};
 use serde_json::json;
 use std::{fs, path::PathBuf};
 
-const VIEW: &str = r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:a="using:Audit" x:DataType="a:Customer" Text="{Binding Street}"/>"#;
+const VIEW: &str = r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:a="using:Audit" x:DataType="a:Customer" Text="{Binding (a:Customer)?.Street}"/>"#;
 const RUST: &str = r#"// Keep the getter 🪴
 mod builder_metadata;
 mod registry;
