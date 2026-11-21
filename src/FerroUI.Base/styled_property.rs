@@ -283,10 +283,10 @@ fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
 /// by `StyledProperty<T>`, one table for each value type. Everything else the routes do is in
 /// [`StyledRoutes`], compiled once (#997).
 pub(crate) trait StyledCodec {
-    /// The typed write of `value` with `priority` (the write of a typed route), `None` when it is
-    /// not a value of the value type. Asked for a value type kept as a shared storage type and for
-    /// a property with a validation callback, where the untyped write would convert or check the
-    /// value once more.
+    /// The typed write of `value` with `priority` (the write of a typed route) for a value type
+    /// kept as a shared storage type, where the untyped write would convert the value through the
+    /// codec once more; `None` for any other value type (decided when the function is compiled)
+    /// and for a value of another type.
     fn set_typed(
         &'static self,
         o: &FerroObject,
@@ -334,6 +334,11 @@ impl<T: StyledValue> StyledCodec for StyledProperty<T> {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Option<Rc<dyn IDisposable>>> {
+        // Only a value type kept as a shared storage type has a typed write here; any other is
+        // written by the untyped path (decided when the function is compiled).
+        if !<T::Storage as StyledValue>::SHARED_STORAGE {
+            return None;
+        }
         let value = value.downcast_ref::<T>()?;
         Some(o.set_value_with_priority(self, value.clone(), priority))
     }
@@ -544,9 +549,9 @@ impl PropertyRoutes for StyledRoutes {
                 None => {}
             }
         }
-        // A value to convert to a shared storage type or to validate: the typed write, which does
-        // either with the value it has.
-        if property.shared_storage() || property.validates() {
+        // A value to convert to a shared storage type: the typed write, which converts the value
+        // it has.
+        if property.shared_storage() {
             if let Some(result) = self.codec().set_typed(o, value, priority) {
                 return result;
             }
