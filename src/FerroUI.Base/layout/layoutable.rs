@@ -810,6 +810,11 @@ impl Layoutable {
     }
 
     fn set_desired_size(&self, value: Size) {
+        // A layout pass sets this for every child, mostly to what it is: an unchanged size does
+        // not read the property, whose accessor may be a call (it depends on the inlining).
+        if self.desired_size.get() == value {
+            return;
+        }
         self.set_and_raise_cell(Self::desired_size_property(), &self.desired_size, value);
     }
 
