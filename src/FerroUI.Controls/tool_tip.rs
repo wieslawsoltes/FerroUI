@@ -196,6 +196,10 @@ impl ToolTip {
     fn static_constructor() {
         // The subscription lives as long as the property.
         Self::is_open_property().changed().subscribe(Self::is_open_changed).detach();
+        // What follows the properties of the tool tips from outside the class, subscribed when
+        // the class is initialised rather than when the services and the top-level are (#612).
+        crate::tool_tip_service::tool_tips_in_use();
+        crate::top_level::TopLevel::tool_tips_in_use();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
