@@ -20,6 +20,7 @@ pub(crate) struct ProjectedStyles {
 pub(crate) struct PreviewSelector {
     pub(crate) value: String,
     pub(crate) namespaces: BTreeMap<String, String>,
+    needs_target_type: bool,
 }
 
 pub(crate) fn projected_styles(
@@ -80,6 +81,9 @@ impl ProjectedStyles {
         let value = selector.value();
         let selector_span = rust::span(selector);
         let preview_selector = preview_selector(&value, catalog, depth > 0);
+        let needs_target_type = preview_selector
+            .as_ref()
+            .is_some_and(|selector| selector.needs_target_type);
         let issue_count = self.issues.len();
         let animation_issue_count = self.animation_issues.len();
         if preview_selector.is_none() {
@@ -125,6 +129,9 @@ impl ProjectedStyles {
                 }
             } else if let Some(animation) = rust::argument(call, "animation") {
                 if let Some(mut clip) = rust::clip(animation, catalog) {
+                    if needs_target_type {
+                        rust::scope_untyped_clip(&mut clip, catalog);
+                    }
                     let attachment =
                         AnimationAttachment::read(source, call, rust::span(animation), lone_style);
                     if let Some(identity) = attachment.identity() {
@@ -175,7 +182,29 @@ pub(super) fn validate_selector(value: &str, nested: bool) -> Result<(), String>
 
 fn preview_selector(value: &str, catalog: &RsxCatalog, nested: bool) -> Option<PreviewSelector> {
     validate_selector(value, nested).ok()?;
-    let (_, operands) = SelectorGrammar::operand_ranges(value).ok()?;
+    let (syntax, operands) = SelectorGrammar::operand_ranges(value).ok()?;
+    let needs_target_type = syntax
+        .split(|node| matches!(node, SelectorSyntax::Comma))
+        .any(|branch| {
+            !branch
+                .rsplit(|node| {
+                    matches!(
+                        node,
+                        SelectorSyntax::Child
+                            | SelectorSyntax::Descendant
+                            | SelectorSyntax::Template
+                    )
+                })
+                .next()
+                .is_some_and(|subject| {
+                    subject.iter().any(|node| {
+                        matches!(
+                            node,
+                            SelectorSyntax::OfType { .. } | SelectorSyntax::Is { .. }
+                        )
+                    })
+                })
+        });
     let mut namespaces = BTreeMap::new();
     let mut projected = value.to_owned();
     for operand in operands.into_iter().rev() {
@@ -208,5 +237,6 @@ fn preview_selector(value: &str, catalog: &RsxCatalog, nested: bool) -> Option<P
     Some(PreviewSelector {
         value: projected,
         namespaces,
+        needs_target_type,
     })
 }

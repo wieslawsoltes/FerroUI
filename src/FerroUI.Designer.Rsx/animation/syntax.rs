@@ -52,7 +52,7 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         }
     }
     let mut xaml = timeline.to_xaml_authored_keys(TRACK_TARGET).ok()?;
-    if let Some(target) = target_type.as_ref().or_else(|| builtin_target(&keys, catalog)) {
+    if let Some(target) = &target_type {
         target.annotate(&mut xaml);
     }
     Some(RsxAnimation {
@@ -66,6 +66,14 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         keys,
         attachment: None,
     })
+}
+
+pub(crate) fn scope_untyped_clip(clip: &mut RsxAnimation, catalog: &RsxCatalog) {
+    if clip.target_type.is_none() {
+        if let Some(target) = builtin_target(&clip.keys, catalog) {
+            target.annotate(&mut clip.xaml);
+        }
+    }
 }
 
 // Rust getters carry their property types even when the selector only names a
