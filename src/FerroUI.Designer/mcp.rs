@@ -49,6 +49,8 @@ mod design_tokens;
 mod design_workflows_tests;
 #[path = "mcp_preview_stages.rs"]
 mod preview_stages;
+#[path = "mcp_preview_appearance.rs"]
+mod preview_appearance;
 #[path = "mcp_prototype.rs"]
 mod prototype;
 #[path = "mcp_schema.rs"]
@@ -328,6 +330,7 @@ impl UiToolProvider for DesignerMcp {
         tools.push(design_tokens::tool());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
+            tools.extend(preview_appearance::tools());
             tools.extend(preview_stages::tools());
             tools.extend(prototype::tools());
         }
@@ -358,6 +361,7 @@ impl UiToolProvider for DesignerMcp {
             || selection_workflows::handles(name)
             || spacing::handles(name)
             || wrap::handles(name)
+            || preview_appearance::handles(name)
             || preview_stages::handles(name)
             || placement::handles(name)
             || prototype::handles(name)
@@ -528,7 +532,7 @@ impl UiToolProvider for DesignerMcp {
             let mut session = owner.try_borrow_mut().map_err(|_| "Designer is already processing a transaction")?;
             return placement::call(&mut session, workspace.as_deref(), name, args);
         }
-        if preview_stages::handles(name) || prototype::handles(name) {
+        if preview_appearance::handles(name) || preview_stages::handles(name) || prototype::handles(name) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -541,6 +545,9 @@ impl UiToolProvider for DesignerMcp {
                     .try_borrow_mut()
                     .map_err(|_| "Designer is already processing a transaction")?,
             );
+            if preview_appearance::handles(name) {
+                return preview_appearance::call(&workspace, name, args);
+            }
             return if prototype::handles(name) {
                 prototype::call(&workspace, name, args, permissions)
             } else {

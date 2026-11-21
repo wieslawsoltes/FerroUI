@@ -36,14 +36,15 @@ impl PreviewTheme {
         }
     }
 
-    pub(super) fn resolve(self) -> Result<Option<ThemeVariant>, String> {
+    /// The native theme to apply to an independent preview host.
+    pub fn resolve(self) -> Result<Option<ThemeVariant>, String> {
         Ok(match self {
             Self::Light => Some(ThemeVariant::light()),
             Self::Dark => Some(ThemeVariant::dark()),
             Self::Inherit => None,
             Self::HighContrast => {
                 Some(ThemeVariant::high_contrast_variant().ok_or(
-                    "Load a theme with a native High Contrast variant to preview this stage",
+                    "Load a theme with a native High contrast variant to use this preview appearance",
                 )?)
             }
         })
@@ -56,6 +57,19 @@ impl PreviewTheme {
         }
         themes
     }
+}
+
+pub(crate) fn resource_context(theme: Option<ThemeVariant>) -> Option<ferroui_designer_tools::ComponentResourceContext> {
+    let mut context = ferroui_designer_tools::ComponentResourceContext::default();
+    if let Some(theme) = theme {
+        context.theme = Some(theme.key().as_str()?.to_owned());
+        let mut inherited = theme.inherit_variant();
+        while let Some(variant) = inherited {
+            context.inherited_themes.push(variant.key().as_str()?.to_owned());
+            inherited = variant.inherit_variant();
+        }
+    }
+    Some(context)
 }
 
 pub(super) fn preview_backing(scope: &ThemeVariantScope) -> Rc<dyn IBrush> {

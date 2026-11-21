@@ -1,6 +1,6 @@
 ---
 title: "Edit styles, control themes, and palettes"
-description: "Compose scoped XAML styles, work with control theme inheritance, and compare Light and Dark palette values in the native preview."
+description: "Compose scoped XAML styles, work with control theme inheritance, and compare theme colors in the native preview."
 ---
 
 Open an XAML view in **Design** and run **FerroUI: Show Styles & Themes**. You can also expand a style or control theme in **Library** and choose **Edit Style or Theme**. The dock follows the current design. Drag its title to move it beside your canvas. Try [StylePalette.xaml](../../../editors/vscode/test/fixtures/StylePalette.xaml) to follow these steps.
@@ -21,9 +21,9 @@ Each accepted action takes one Undo step. For a keyed style or control theme, us
 
 ## Compare and edit a palette
 
-1. Open **Palette** and choose a **Palette scope**. A scope is the selected resource owner or an authored dictionary. **Shared** shows ordinary entries. **Default**, **Light**, and **Dark** show the corresponding theme dictionaries.
-2. Use **Preview Light theme** or **Preview Dark theme** in the toolbar to switch the native Design preview. The canvas inherits the chosen preview theme. Controls with an explicit theme retain their authored setting.
-3. Choose **Compare Light and Dark colors** to see each key's resolved values side by side. The comparison follows the dictionary's local entries, variant and fallback lookup. Use the filter to find a key. Create a Light and a Dark card in **Stages** to compare the whole native view at once. [Compare stage environments](motion.md)
+1. Open **Palette** and choose a **Palette scope**. A scope is the selected resource owner or an authored dictionary. **Shared** shows ordinary entries. **Default**, **Light**, **Dark**, and **High contrast** show their authored theme layers.
+2. Switch the native canvas with the appearance icons in the palette toolbar. **Preview High contrast theme** appears when the helper supports it. On an XAML or RSX canvas, you can also open the size button and choose the **Appearance** before selecting **Apply**. Controls with an explicit theme retain their authored setting.
+3. Choose **Compare theme colors** to see each key's resolved values side by side. The comparison follows local entries, included dictionaries, and native variant fallbacks. Use the filter to find a key. Add cards in **Stages** for a side-by-side comparison of the entire view. [Compare stage environments](motion.md)
 4. Return to a layer and edit a color field or choose its swatch. The text field accepts native color names and hex values, including `#AARRGGBB` for alpha. The swatch changes RGB while retaining the existing alpha. Use **Add palette color** to create a `Color` or `SolidColorBrush`. Adding a color to a missing theme layer creates its dictionary in the same Undo step.
 5. Use the source arrow to open the exact declaration, or the references icon to find uses. A computed value opens in the source editor. Author Rust-owned style builders in the Rust source.
 
@@ -33,12 +33,20 @@ On the sample, compare `ActionSurface` in Light and Dark. Change its Dark value 
 
 [A Dark palette edit with the exact XAML value selected](../images/vscode-dark-palette-edit.jpg)
 
+### Add a High contrast color
+
+1. Choose **High contrast** in **Palette layer**, then select **Add palette color**.
+2. If the layer is missing, choose the theme package your application uses from the packages loaded by the preview host. Enter the resource key, choose `Color` or `SolidColorBrush`, and enter the value. FerroUI adds the typed theme key and color in one Undo step.
+3. Select **Preview High contrast theme** and choose **Compare theme colors**. In the included sample, `PanelSurface` comes from the nested High contrast dictionary, and `PanelAccent` inherits the Dark declaration. The arrow beside a comparison value opens the declaration that supplied it. [HighContrastPalette.xaml](../../../editors/vscode/test/fixtures/HighContrastPalette.xaml)
+
+![The VS Code Palette shows the three resolved themes and their source arrows beside the native High contrast canvas](../images/vscode-high-contrast-palette.jpg)
+
 ## Edit styles and palettes in included XAML
 
 Open a consuming view such as [IncludedStylePalette.xaml](../../../editors/vscode/test/fixtures/IncludedStylePalette.xaml). Its shared stylesheet and palette use paths relative to their declaring files.
 
 1. In **Styles**, select the source icon **Open included style or control theme** and choose a definition by name and file. The owner opens in the existing editor split with the definition selected in **Styles & Themes**. Edit the selector or a setter there.
-2. In **Palette**, select **Compare Light and Dark colors**. A source icon beside a resolved included color opens its owning scope and selects the color's layer. Use **Open included palette** in the toolbar to browse a dictionary and add a color. The comparison follows local overrides and merged dictionaries through the accepted preview.
+2. In **Palette**, select **Compare theme colors**. A source icon beside a resolved included color opens its owning scope and selects the color's layer. Use **Open included palette** in the toolbar to browse a dictionary and add a color. The comparison follows local overrides and merged dictionaries through the accepted preview.
 3. After editing, use the back arrow in **Styles & Themes** to return to the consuming design. The consumer renders from the unsaved XAML. Use **Undo** in the owning buffer to restore the declaration and update its consumers again.
 
 The pickers use the include sources in the current native preview. If an included source changes while you are opening it, reopen the picker after the preview catches up.

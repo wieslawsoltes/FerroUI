@@ -17,6 +17,14 @@ pub enum HighContrastProvider {
 impl HighContrastProvider {
     pub const ALL: [Self; 3] = [Self::WinUi, Self::Material, Self::MacOs];
 
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::WinUi => "WinUI",
+            Self::Material => "Material",
+            Self::MacOs => "macOS",
+        }
+    }
+
     pub fn theme_class(self) -> &'static str {
         match self {
             Self::WinUi => "WinUITheme",

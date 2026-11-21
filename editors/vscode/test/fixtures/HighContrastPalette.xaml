@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="ThemeWorkspace" Background="{DynamicResource PanelSurface}">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Styling/Accessible Palette.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <StackPanel MaxWidth="462" Margin="24" Spacing="18" VerticalAlignment="Center">
+    <TextBlock Text="Workspace appearance" FontSize="28" FontWeight="SemiBold"
+               Foreground="{DynamicResource PanelText}" />
+    <Border x:Name="AccentCard" Background="{DynamicResource PanelAccent}" Padding="20" CornerRadius="10">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Theme settings" FontSize="18" FontWeight="SemiBold"
+                   Foreground="{DynamicResource PanelText}" />
+        <TextBlock Text="Adjust the palette for this workspace." TextWrapping="Wrap"
+                   Foreground="{DynamicResource PanelText}" />
+        <Button Content="Apply palette" Margin="0,8,0,0" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

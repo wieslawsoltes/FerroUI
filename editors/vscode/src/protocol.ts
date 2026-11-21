@@ -37,7 +37,17 @@ export interface Source {
     project?: number;
 }
 export interface PreviewSourceBuffer { uri: string; source: string | null }
-export interface Viewport { width: number; height: number; dark: boolean }
+export const canvasThemeLabels = { light: 'Light', dark: 'Dark', high_contrast: 'High contrast' } as const;
+export type CanvasTheme = keyof typeof canvasThemeLabels;
+export interface Viewport { width: number; height: number; dark: boolean; theme?: 'high_contrast' }
+
+export function viewportTheme(viewport: Viewport): CanvasTheme {
+    return viewport.theme ?? (viewport.dark ? 'dark' : 'light');
+}
+
+export function withViewportTheme(viewport: Viewport, theme: CanvasTheme): Viewport {
+    return { ...viewport, dark: theme !== 'light', theme: theme === 'high_contrast' ? theme : undefined };
+}
 export interface DesignDataPresentation { enabled: boolean; fixture?: string }
 export const DEFAULT_VIEWPORT: Viewport = { width: 800, height: 520, dark: false };
 export const MIN_VIEWPORT_SIZE = 64;
@@ -53,10 +63,11 @@ export interface DesignerViewState {
 }
 export function isViewport(value: unknown): value is Viewport {
     if (!value || typeof value !== 'object') return false;
-    const { width, height, dark } = value as Partial<Viewport>;
+    const { width, height, dark, theme } = value as Partial<Viewport>;
     const validSize = (size: unknown): boolean => typeof size === 'number' && Number.isInteger(size)
         && size >= MIN_VIEWPORT_SIZE && size <= MAX_VIEWPORT_SIZE;
-    return validSize(width) && validSize(height) && typeof dark === 'boolean';
+    return validSize(width) && validSize(height) && typeof dark === 'boolean'
+        && (theme === undefined || (theme === 'high_contrast' && dark));
 }
 export interface Bounds { x: number; y: number; width: number; height: number }
 export type RuntimeTreeMode = 'visual' | 'logical' | 'combined';
@@ -293,7 +304,7 @@ export interface CanvasPresentation {
 }
 export interface RustTemplateNavigation { property: import('./itemTemplateLabels').TemplateProperty; range: Range }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
-    focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean };
+    focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean; highContrastTheme?: boolean };
 export interface CanvasFocusOrder {
     badges: { node: number; group: number; rank: number; label: string; bounds: Bounds; groupEntry: boolean }[];
     links: [number, number][];

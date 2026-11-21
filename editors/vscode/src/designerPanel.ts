@@ -9,7 +9,7 @@ import { GuideViews, type GuideAnchor } from './guideViews';
 import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { RustTemplateScopes } from './rustTemplateScopes';
-import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
+import { DEFAULT_VIEWPORT, errorMessage, isViewport, withViewportTheme, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { SpacingCatalog, SpacingDraft, SpacingRequest, SpacingResponse } from './spacingProtocol';
@@ -223,6 +223,7 @@ export class DesignerPanel implements vscode.Disposable {
     get selectedNode(): Snapshot['nodes'][number] | undefined { return this.runtime ? undefined : this.nodes.find(node => node.id === this.selected); }
     get runtimeSelection(): RuntimeRow | undefined { return this.runtime; }
     get dimensions(): Viewport { return this.viewport; }
+    get supportsHighContrastTheme(): boolean { return Boolean(this.frame?.canvas.highContrastTheme); }
     get authoredTimelinePose(): TimelinePreviewPose | undefined { return this.timelinePose; }
     get authoredTimelineProgram(): string | undefined {
         if (this.timelineProgramSelection?.version === this.document.version) return this.timelineProgramSelection.key;
@@ -826,7 +827,7 @@ export class DesignerPanel implements vscode.Disposable {
         this.pending = false;
         const token = this.generation;
         const version = this.document.version;
-        const viewport = this.viewport;
+        const requested = this.viewport;
         const caret = this.language === 'rust' && this.blockOffset !== undefined
             ? this.document.positionAt(this.blockOffset) : this.document.validatePosition(this.caret);
         const source = sourceOf(this.document, this.language, caret);
@@ -834,6 +835,8 @@ export class DesignerPanel implements vscode.Disposable {
         this.dependencies.start();
         try {
             const client = await this.getClient();
+            const highContrastTheme = Boolean(client.capabilities.canvasHighContrast);
+            const viewport = requested.theme && !highContrastTheme ? withViewportTheme(requested, 'dark') : requested;
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
@@ -845,6 +848,7 @@ export class DesignerPanel implements vscode.Disposable {
             });
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
+            this.viewport = viewport;
             snapshot.rustTemplate = this.templateScopes.accept(this.document, snapshot);
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
@@ -874,7 +878,7 @@ export class DesignerPanel implements vscode.Disposable {
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
-                canvas: { ...snapshot, nodes, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
+                canvas: { ...snapshot, nodes, highContrastTheme, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image),
                     spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image),
                     wrapAvailable: Boolean(client.capabilities.selectionWrapping && snapshot.image) } };

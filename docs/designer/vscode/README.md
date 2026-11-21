@@ -20,7 +20,7 @@ For a package built from this checkout, see the [extension build and packaging i
 | Task | Where to work |
 | --- | --- |
 | Find a project view, edit source and layout, configure columns and behaviors, or work with bindings and resources | [Author views and components](authoring.md) |
-| Compose XAML styles and themes or compare Light and Dark resource colors | [Edit styles, control themes, and palettes](styles.md) |
+| Compose XAML styles and compare Light, Dark, and High contrast colors | [Edit styles, control themes, and palettes](styles.md) |
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
 | Preview with the app’s types and data, inspect a running window, hot reload, or run UI tests | [Run and test a view](runtime.md) |
 | Set up MCP, find a command, or configure the workspace | [Use agents and configure the extension](reference.md) |

@@ -1,3 +1,4 @@
+import { canvasThemeLabels, type CanvasTheme } from '../src/protocol';
 import type { PaletteColumn, PaletteColor, PaletteSheet, ResolvedColor, StylesAction } from '../src/stylesProtocol';
 import { create } from './dom';
 import { actionButton } from './propertyEditor';
@@ -65,11 +66,14 @@ function swatch(argb: string | undefined): HTMLElement {
 }
 
 function comparison(sheet: PaletteSheet, filter: string, send: (action: StylesAction) => void): HTMLElement {
+    const themes: CanvasTheme[] = sheet.contrastPreview ? ['light', 'dark', 'high_contrast'] : ['light', 'dark'];
+    const container = create('div');
+    container.className = 'palette-comparison-scroll';
     const table = create('table');
     table.className = 'palette-comparison';
-    table.setAttribute('aria-label', 'Scoped resource resolution in Light and Dark themes');
+    table.setAttribute('aria-label', 'Scoped resource resolution by theme');
     const header = table.createTHead().insertRow();
-    for (const title of ['Color', 'Light', 'Dark']) {
+    for (const title of ['Color', ...themes.map(theme => canvasThemeLabels[theme])]) {
         const cell = create('th');
         cell.scope = 'col';
         cell.textContent = title;
@@ -82,25 +86,28 @@ function comparison(sheet: PaletteSheet, filter: string, send: (action: StylesAc
         key.scope = 'row';
         key.textContent = key.title = color.key;
         row.append(key);
-        for (const theme of ['light', 'dark'] as const) {
+        for (const theme of themes) {
             appendResolved(row.insertCell(), color[theme], color.key, theme, send);
         }
     }
-    return table;
+    container.append(table);
+    return container;
 }
 
 function appendResolved(cell: HTMLTableCellElement, color: ResolvedColor | null | undefined,
-    key: string, theme: 'light' | 'dark', send: (action: StylesAction) => void): void {
+    key: string, theme: CanvasTheme, send: (action: StylesAction) => void): void {
     const content = create('div');
     const value = color?.value ?? (color ? 'Expression' : 'Unresolved');
     content.title = [value, color?.scope].filter(Boolean).join(' · ');
-    const label = create('span');
-    label.textContent = value;
-    content.append(swatch(color?.value ?? undefined), label);
+    const sample = create('div');
+    sample.className = 'palette-sample';
+    sample.append(swatch(color?.value ?? undefined));
     if (color?.source) {
-        const name = theme === 'light' ? 'Light' : 'Dark';
-        content.append(actionButton('go-to-file', `Open ${name} declaration for ${key}`,
+        sample.append(actionButton('go-to-file', `Open ${canvasThemeLabels[theme]} declaration for ${key}`,
             () => send({ type: 'included-color', key, theme })));
     }
+    const label = create('span');
+    label.textContent = value;
+    content.append(sample, label);
     cell.append(content);
 }

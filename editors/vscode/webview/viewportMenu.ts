@@ -1,4 +1,4 @@
-import { DEFAULT_VIEWPORT, type Viewport } from '../src/protocol';
+import { canvasThemeLabels, DEFAULT_VIEWPORT, viewportTheme, withViewportTheme, type Viewport } from '../src/protocol';
 import { anchorPopover, element } from './dom';
 
 // Logical device sizes from Designer Studio that fit the preview host's output limits.
@@ -18,6 +18,7 @@ export class ViewportMenu {
     private readonly width = element<HTMLInputElement>('width');
     private readonly height = element<HTMLInputElement>('height');
     private readonly theme = element<HTMLSelectElement>('theme');
+    private readonly contrast = element<HTMLOptionElement>('theme-high-contrast');
     private viewport = DEFAULT_VIEWPORT;
 
     constructor(update: (viewport: Viewport) => void) {
@@ -42,8 +43,10 @@ export class ViewportMenu {
         element<HTMLFormElement>('viewport').addEventListener('submit', event => {
             event.preventDefault();
             if (!this.width.validity.valid || !this.height.validity.valid) return;
-            const next = { width: this.width.valueAsNumber, height: this.height.valueAsNumber, dark: this.theme.value === 'dark' };
-            const changed = next.width !== this.viewport.width || next.height !== this.viewport.height || next.dark !== this.viewport.dark;
+            const theme = this.theme.value;
+            if (theme !== 'light' && theme !== 'dark' && theme !== 'high_contrast') return;
+            const next = withViewportTheme({ ...this.viewport, width: this.width.valueAsNumber, height: this.height.valueAsNumber }, theme);
+            const changed = next.width !== this.viewport.width || next.height !== this.viewport.height || theme !== viewportTheme(this.viewport);
             this.show(next);
             this.popup.hidePopover();
             if (changed) update(next);
@@ -51,17 +54,18 @@ export class ViewportMenu {
         this.show(this.viewport);
     }
 
-    show(viewport: Viewport): void {
+    show(viewport: Viewport, highContrast?: boolean): void {
+        if (highContrast !== undefined) this.contrast.hidden = this.contrast.disabled = !highContrast;
         this.viewport = viewport;
         const label = `${viewport.width} × ${viewport.height}`;
         this.label.textContent = label;
-        this.trigger.title = `${label} · ${viewport.dark ? 'Dark' : 'Light'} · Preview size and theme`;
+        this.trigger.title = `${label} · ${canvasThemeLabels[viewportTheme(viewport)]} · Preview size and theme`;
     }
 
     private resetDraft(): void {
         this.width.valueAsNumber = this.viewport.width;
         this.height.valueAsNumber = this.viewport.height;
-        this.theme.value = this.viewport.dark ? 'dark' : 'light';
+        this.theme.value = viewportTheme(this.viewport);
         this.selectPreset();
     }
 

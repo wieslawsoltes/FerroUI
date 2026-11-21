@@ -20,6 +20,9 @@ mod palette;
 #[cfg(test)]
 #[path = "workspace_style_composition_tests.rs"]
 mod tests;
+#[cfg(all(test, feature = "mcp", feature = "render-smoke"))]
+#[path = "workspace_palette_tests.rs"]
+mod palette_tests;
 
 const PALETTE: &str = "F1 M8,1 A7,7 0 1 0 8,15 H9.5 A1.5,1.5 0 0 0 10.5,12.4 A1.2,1.2 0 0 1 11.4,10.3 H13 A2,2 0 0 0 15,8.3 A7,7 0 0 0 8,1 Z M4,6 A1,1 0 1 1 4,8 A1,1 0 1 1 4,6 Z M7,3 A1,1 0 1 1 7,5 A1,1 0 1 1 7,3 Z M11,4 A1,1 0 1 1 11,6 A1,1 0 1 1 11,4 Z";
 const ADD: &str = "M7,2 H9 V7 H14 V9 H9 V14 H7 V9 H2 V7 H7 Z";

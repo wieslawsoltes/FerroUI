@@ -6,12 +6,14 @@ use crate::{
     PropertyEditorMetadata,
 };
 use ferroui_base::media::Color;
+use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::{FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, NodeKind};
 use ferroui_designer_tools::component_palette::{
-    plan_add_palette_color, plan_palette_color, PaletteColorKind, PaletteLayer,
+    plan_add_palette_color_with_provider, plan_palette_color, PaletteColorKind, PaletteLayer,
 };
 use ferroui_designer_tools::component_styles::{authored_setters, plan_style_change, StyleChange};
+use ferroui_designer_tools::theme_variants::HighContrastProvider;
 use ferroui_designer_tools::{
     component_property_attribute, component_resource_expression, resolve_component_resource,
     ComponentAction, ComponentEntry, ComponentKind,
@@ -36,6 +38,13 @@ pub(crate) fn supports_palette(document: &Document, node: &Node) -> bool {
             || ferroui_base::styling::ControlTheme::TYPE.is_assignable_from(type_)
             || ferroui_base::styling::Styles::TYPE.is_assignable_from(type_)
     })
+}
+
+pub(crate) fn contrast_providers() -> Vec<HighContrastProvider> {
+    HighContrastProvider::ALL
+        .into_iter()
+        .filter(|provider| MarkupAssembly::find(provider.assembly()).is_some())
+        .collect()
 }
 
 fn parent_style(document: &Document, node: NodeId) -> Option<NodeId> {
@@ -333,6 +342,7 @@ impl DesignerSession {
         key: &str,
         kind: PaletteColorKind,
         color: &str,
+        provider: Option<HighContrastProvider>,
     ) -> Result<(), String> {
         self.ensure_style_edit()?;
         let scope = self
@@ -343,8 +353,18 @@ impl DesignerSession {
         if !supports_palette(self.document(), scope) {
             return Err("Choose an authored resource owner".into());
         }
-        let edits = plan_add_palette_color(self.document(), owner, layer, key, kind, &argb(color)?)
-            .map_err(|error| error.to_string())?;
+        if let Some(provider) = provider {
+            if layer != PaletteLayer::HighContrast {
+                return Err("Choose a theme provider for the High contrast layer".into());
+            }
+            if MarkupAssembly::find(provider.assembly()).is_none() {
+                return Err(format!("{} is unavailable in this preview host", provider.label()));
+            }
+        }
+        let edits = plan_add_palette_color_with_provider(
+            self.document(), owner, layer, key, kind, &argb(color)?, provider,
+        )
+        .map_err(|error| error.to_string())?;
         self.apply_style_edits("Add palette color", edits)
     }
 

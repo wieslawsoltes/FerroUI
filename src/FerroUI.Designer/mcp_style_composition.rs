@@ -2,7 +2,8 @@
 use super::{decode, node_id, schema as s, state, text};
 use crate::property_literals::setter_target_type;
 use crate::style_composition::{
-    argb, compatible_base, setter_metadata, setter_property, supports_palette, supports_styles,
+    argb, compatible_base, contrast_providers, setter_metadata, setter_property, supports_palette,
+    supports_styles,
 };
 use crate::style_sources::StyleSource;
 use crate::{DesignerSession, PropertyEditorKind};
@@ -105,13 +106,13 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::tool(
             "designer_palette",
-            "Read the selected scope's Shared, Default, Light, and Dark palette declarations. Compare Light and Dark resolution for each known key using the scoped XAML resolver.",
+            "Read the authored palette layers in a scope and compare how each key resolves in Light, Dark, and supported High contrast previews.",
             s::object(json!({"owner":s::id()}), &["owner"]),
             false,
         ),
         s::actions(
             "designer_palette_edit",
-            "Edit a literal Color or SolidColorBrush, or create one in a resource layer. Add creates a missing theme dictionary in the same transaction.",
+            "Edit or add a literal Color or SolidColorBrush. To create a High contrast dictionary, pass a provider from designer_palette in the same add action.",
             vec![
                 s::action(
                     "set",
@@ -121,7 +122,8 @@ pub(super) fn tools() -> Vec<Value> {
                 ),
                 s::action(
                     "add",
-                    json!({"owner":s::id(),"layer":{"enum":["shared","default","light","dark"]},
+                    json!({"owner":s::id(),"layer":{"enum":["shared","default","light","dark","high_contrast"]},
+                    "provider":{"enum":["winui","material","macos"]},
                     "key":s::string(),"kind":{"enum":["color","solid_color_brush"]},"color":s::string()}),
                     &["owner", "layer", "key", "kind", "color"],
                     true,
@@ -177,6 +179,7 @@ pub(super) fn call(
                 &text(args, "key")?,
                 decode(args, "kind")?,
                 &text(args, "color")?,
+                args.get("provider").map(|_| decode(args, "provider")).transpose()?,
             )?,
             _ => return Err("Choose a palette action".into()),
         },
@@ -411,5 +414,8 @@ fn palette(session: &DesignerSession, owner: NodeId) -> Result<Value, String> {
         }).collect::<Result<Vec<_>,String>>()?;
         Ok(json!({"layer":layer.layer,"declaration":layer.declaration,"unavailable":layer.unavailable,"colors":colors}))
     }).collect::<Result<Vec<_>,String>>()?;
-    Ok(json!({"owner":owner,"layers":layers,"comparison":comparisons}))
+    Ok(json!({
+        "owner":owner, "layers":layers, "comparison":comparisons.rows,
+        "contrastPreview":comparisons.high_contrast, "contrastProviders":contrast_providers()
+    }))
 }

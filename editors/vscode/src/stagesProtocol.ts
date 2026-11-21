@@ -1,6 +1,6 @@
-import type { PreviewFinding, PreviewSourceBuffer, Range, Snapshot, Source } from './protocol';
+import { canvasThemeLabels, type PreviewFinding, type PreviewSourceBuffer, type Range, type Snapshot, type Source } from './protocol';
 
-export const stageThemeLabels = { light: 'Light', dark: 'Dark', inherit: 'Application theme', high_contrast: 'High contrast' } as const;
+export const stageThemeLabels = { ...canvasThemeLabels, inherit: 'Application theme' } as const;
 export type StageTheme = keyof typeof stageThemeLabels;
 
 export type StageImage = NonNullable<Snapshot['image']>;

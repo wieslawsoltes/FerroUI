@@ -1,11 +1,13 @@
-//! Light and Dark comparisons follow the same graph as the accepted preview.
+//! Palette comparison follows the accepted resource graph and native variant chain.
 use crate::included_source::IncludedSourceIndex;
 use crate::style_composition::argb;
 use crate::style_sources::{StyleSource, StyleSourceKind};
-use crate::DesignerSession;
+use crate::{DesignerSession, PreviewTheme};
 use ferroui_designer_core::{NodeId, NodeKind};
 use ferroui_designer_tools::component_palette::{palette_color, PaletteLayer, PaletteLayerModel};
-use ferroui_designer_tools::{component_resource_location, component_resource_resolution};
+use ferroui_designer_tools::{
+    component_resource_location, component_resource_resolution, ComponentResourceContext,
+};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -20,10 +22,22 @@ pub(crate) struct ComparedColor {
 }
 
 #[derive(Serialize)]
-pub(crate) struct PaletteComparison {
+pub(crate) struct PaletteComparisonRow {
     pub key: String,
     pub light: Option<ComparedColor>,
     pub dark: Option<ComparedColor>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub high_contrast: Option<ComparedColor>,
+}
+
+pub(crate) struct PaletteComparison {
+    pub rows: Vec<PaletteComparisonRow>,
+    pub high_contrast: bool,
+}
+
+fn contrast_context() -> Option<ComponentResourceContext> {
+    let variant = PreviewTheme::HighContrast.resolve().ok()??;
+    crate::preview_theme::resource_context(Some(variant))
 }
 
 impl DesignerSession {
@@ -31,7 +45,7 @@ impl DesignerSession {
         &self,
         owner: NodeId,
         layers: &[PaletteLayerModel],
-    ) -> Result<Vec<PaletteComparison>, String> {
+    ) -> Result<PaletteComparison, String> {
         let local = layers
             .iter()
             .flat_map(|layer| layer.colors.iter().map(|color| color.key.clone()))
@@ -56,11 +70,10 @@ impl DesignerSession {
         let document = self.document();
         let mut indexes = BTreeMap::new();
         let mut resolve = |key: &str,
-                           layer: PaletteLayer|
+                           context: &ComponentResourceContext|
          -> Result<Option<ComparedColor>, String> {
-            let context = layer.resource_context();
             let (uri, node) = if includes.is_empty() {
-                let local = component_resource_resolution(document, owner, key, Some(&context))
+                let local = component_resource_resolution(document, owner, key, Some(context))
                     .map_err(|error| error.to_string())?;
                 let Some(node) = local.resolved() else {
                     return Ok(None);
@@ -72,7 +85,7 @@ impl DesignerSession {
                     self.document_uri(),
                     owner,
                     key,
-                    Some(&context),
+                    Some(context),
                     &self.preview.resource_sources,
                 )
                 .map_err(|error| error.to_string())?;
@@ -117,13 +130,26 @@ impl DesignerSession {
             }))
         };
         let mut rows = Vec::new();
+        let light_context = PaletteLayer::Light.resource_context();
+        let dark_context = PaletteLayer::Dark.resource_context();
+        let contrast = contrast_context();
         for key in keys {
-            let light = resolve(&key, PaletteLayer::Light)?;
-            let dark = resolve(&key, PaletteLayer::Dark)?;
-            if light.is_some() || dark.is_some() || local.contains(&key) {
-                rows.push(PaletteComparison { key, light, dark });
+            let light = resolve(&key, &light_context)?;
+            let dark = resolve(&key, &dark_context)?;
+            let high_contrast = contrast
+                .as_ref()
+                .map(|context| resolve(&key, context))
+                .transpose()?
+                .flatten();
+            if light.is_some() || dark.is_some() || high_contrast.is_some() || local.contains(&key) {
+                rows.push(PaletteComparisonRow {
+                    key,
+                    light,
+                    dark,
+                    high_contrast,
+                });
             }
         }
-        Ok(rows)
+        Ok(PaletteComparison { rows, high_contrast: contrast.is_some() })
     }
 }

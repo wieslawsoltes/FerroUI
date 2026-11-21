@@ -39,6 +39,7 @@ import { verifyResourceMove } from './resourceMoveMcp';
 import { verifyIncludedStylesMcp } from './includedStylesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
+import { verifyHighContrastPalette } from './highContrastPalette';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
 import { verifyStageKeyboard } from './stageKeyboardMcp';
@@ -212,6 +213,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
         await verifyIncludedStylesMcp({ invoke, content });
+        await verifyHighContrastPalette({ invoke, content });
         await verifyThemeResourceRename({ invoke, content });
         await verifyResourceMove({ invoke, content });
         await vscode.window.showTextDocument(document, { preserveFocus: false });

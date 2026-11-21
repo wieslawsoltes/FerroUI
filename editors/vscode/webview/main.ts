@@ -317,7 +317,7 @@ function presentSnapshot(message: SnapshotMessage, bitmap?: ImageBitmap | null):
         guides.present(message.guides);
     }
     drag.setFrame(hasImage ? message.frame : undefined);
-    size.show(message.viewport);
+    size.show(message.viewport, Boolean(message.snapshot.highContrastTheme));
     counterpart.show(snapshot.counterpart, message.sourceKey);
     const active = snapshot.activeBlock?.start;
     const selectedBlock = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);

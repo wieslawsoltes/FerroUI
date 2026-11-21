@@ -1015,7 +1015,7 @@ pub(crate) fn creation_namespaces(
         format!(" xmlns:{ui}=\"{FRAMEWORK}\" xmlns:{xaml}=\"{XAML}\""),
     )
 }
-fn fresh_prefix(namespaces: &BTreeMap<String, String>, base: &str) -> String {
+pub(crate) fn fresh_prefix(namespaces: &BTreeMap<String, String>, base: &str) -> String {
     if !namespaces.contains_key(base) {
         return base.into();
     }

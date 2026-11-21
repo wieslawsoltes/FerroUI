@@ -1,25 +1,33 @@
 //! Local color resources and theme dictionaries. Computed values and external providers
 //! remain source-backed. The native host validates literal colors before planning edits.
 use crate::components::{
-    ComponentAction, ComponentResourceContext, authoring, component_property_attribute, element,
-    external_dictionary, framework, literal_key, plan_component_action, property_elements,
-    references, resolve_component_resource_in_context, resource_owner, valid_document, validated,
+    authoring, component_property_attribute, element, external_dictionary, framework, literal_key,
+    plan_component_action, property_elements, references, resolve_component_resource_in_context,
+    resource_owner, valid_document, validated, ComponentAction, ComponentResourceContext,
 };
-use crate::{Result, ToolError, require};
+use crate::theme_variants::{HighContrastProvider, HIGH_CONTRAST_KEY};
+use crate::{require, Result, ToolError};
 use ferroui_designer_core::{Document, Edit, MarkupValue, Node, NodeId, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum PaletteLayer {
     Shared,
     Default,
     Light,
     Dark,
+    HighContrast,
 }
 
 impl PaletteLayer {
-    pub const ALL: [Self; 4] = [Self::Shared, Self::Default, Self::Light, Self::Dark];
+    pub const ALL: [Self; 5] = [
+        Self::Shared,
+        Self::Default,
+        Self::Light,
+        Self::Dark,
+        Self::HighContrast,
+    ];
 
     pub fn title(self) -> &'static str {
         match self {
@@ -27,13 +35,21 @@ impl PaletteLayer {
             Self::Default => "Default",
             Self::Light => "Light",
             Self::Dark => "Dark",
+            Self::HighContrast => "High contrast",
+        }
+    }
+
+    fn theme_key(self) -> &'static str {
+        match self {
+            Self::HighContrast => HIGH_CONTRAST_KEY,
+            other => other.title(),
         }
     }
 
     pub fn resource_context(self) -> ComponentResourceContext {
-        ComponentResourceContext {
-            theme: (self != Self::Shared).then(|| self.title().into()),
-            inherited_themes: Vec::new(),
+        match self {
+            Self::Shared => ComponentResourceContext::default(),
+            other => ComponentResourceContext::for_authored_theme(other.theme_key()),
         }
     }
 }
@@ -178,6 +194,18 @@ pub fn plan_add_palette_color(
     kind: PaletteColorKind,
     color: &str,
 ) -> Result<Vec<Edit>> {
+    plan_add_palette_color_with_provider(document, owner, layer, key, kind, color, None)
+}
+
+pub fn plan_add_palette_color_with_provider(
+    document: &Document,
+    owner: NodeId,
+    layer: PaletteLayer,
+    key: &str,
+    kind: PaletteColorKind,
+    color: &str,
+    provider: Option<HighContrastProvider>,
+) -> Result<Vec<Edit>> {
     valid_document(document)?;
     validate_color_literal(color)?;
     let to = destination(document, owner, layer)?;
@@ -187,7 +215,7 @@ pub fn plan_add_palette_color(
             resource_property, ..
         } => resource_property.unwrap_or(owner),
     };
-    let (prefix, xaml, namespaces) = authoring::creation_namespaces(document, at);
+    let (prefix, _, namespaces) = authoring::creation_namespaces(document, at);
     let fragment = match kind {
         PaletteColorKind::Color => format!("<{prefix}:Color{namespaces}>{color}</{prefix}:Color>"),
         PaletteColorKind::SolidColorBrush => {
@@ -210,7 +238,7 @@ pub fn plan_add_palette_color(
         } => {
             authoring::validate_key(key)?;
             let color = authoring::keyed_fragment(document, parent, &fragment, key)?;
-            let variant = variant_markup(&prefix, &xaml, &namespaces, layer, &color);
+            let variant = variant_markup(document, at, layer, provider, &color)?;
             let property = format!("{dictionary}.ThemeDictionaries");
             let source = if property_exists {
                 variant
@@ -232,7 +260,7 @@ pub fn plan_add_palette_color(
         Destination::NewDictionary { resource_property } => {
             authoring::validate_key(key)?;
             let color = authoring::keyed_fragment(document, at, &fragment, key)?;
-            let variant = variant_markup(&prefix, &xaml, &namespaces, layer, &color);
+            let variant = variant_markup(document, at, layer, provider, &color)?;
             let property = format!("{prefix}:ResourceDictionary.ThemeDictionaries");
             let themes = format!("<{property}>\n{variant}\n</{property}>");
             let wrapper = format!("{prefix}:ResourceDictionary");
@@ -327,7 +355,7 @@ fn destination(document: &Document, owner: NodeId, layer: PaletteLayer) -> Resul
             children.iter().all(|(_, key)| key.is_some()),
             "An unresolved theme key may overlap this layer; inspect the dictionary in source",
         )?;
-        children.retain(|(_, key)| key.as_deref() == Some(layer.title()));
+        children.retain(|(_, key)| key.as_deref() == Some(layer.theme_key()));
         require(
             children.len() <= 1,
             "More than one resource dictionary owns this theme layer",
@@ -435,16 +463,38 @@ fn append(document: &Document, parent: NodeId, source: String) -> Result<Vec<Edi
 }
 
 fn variant_markup(
-    prefix: &str,
-    xaml: &str,
-    namespaces: &str,
+    document: &Document,
+    at: NodeId,
     layer: PaletteLayer,
+    provider: Option<HighContrastProvider>,
     child: &str,
-) -> String {
-    format!(
-        "<{prefix}:ResourceDictionary{namespaces} {xaml}:Key=\"{}\">\n{child}\n</{prefix}:ResourceDictionary>",
-        layer.title()
-    )
+) -> Result<String> {
+    let (prefix, xaml, mut declarations) = authoring::creation_namespaces(document, at);
+    let key = if layer == PaletteLayer::HighContrast {
+        let provider = provider.ok_or_else(|| {
+            ToolError("Choose the application's High contrast theme provider".into())
+        })?;
+        let namespace = format!("using:{}", provider.assembly());
+        let namespaces = document.ast().namespaces(at);
+        let provider_prefix = namespaces
+            .iter()
+            .find(|(prefix, uri)| !prefix.is_empty() && *uri == &namespace)
+            .map(|(prefix, _)| prefix.clone())
+            .unwrap_or_else(|| {
+                let prefix = authoring::fresh_prefix(&namespaces, "contrast");
+                declarations.push_str(&format!(" xmlns:{prefix}=\"{namespace}\""));
+                prefix
+            });
+        format!(
+            "{{{xaml}:Static {provider_prefix}:{}.{HIGH_CONTRAST_KEY}}}",
+            provider.theme_class()
+        )
+    } else {
+        layer.theme_key().into()
+    };
+    Ok(format!(
+        "<{prefix}:ResourceDictionary{declarations} {xaml}:Key=\"{key}\">\n{child}\n</{prefix}:ResourceDictionary>",
+    ))
 }
 
 fn validate_color_literal(color: &str) -> Result<()> {

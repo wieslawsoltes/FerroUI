@@ -64,11 +64,15 @@
     background: var(--vscode-input-background);
 }
 .palette-picker { cursor: pointer; }
-.palette-comparison { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px; }
-.palette-comparison :is(td, th) { text-align: left; padding: 6px 3px; overflow: hidden; text-overflow: ellipsis; }
+.palette-comparison-scroll { overflow-x: auto; }
+.palette-comparison { width: 100%; border-collapse: collapse; font-size: 11px; }
+.palette-comparison :is(td, th) { text-align: left; padding: 6px 3px; }
 .palette-comparison tr:not(:first-child), .palette-comparison tbody { border-top: 1px solid var(--vscode-widget-border, #80808040); }
-.palette-comparison td > div { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; overflow-wrap: anywhere; }
 .palette-comparison th { color: var(--vscode-descriptionForeground); font-weight: 600; }
+.palette-comparison tbody th { overflow-wrap: anywhere; }
+.palette-comparison td > div { display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.palette-sample { display: flex; align-items: center; gap: 3px; height: 22px; }
+.palette-sample .row-action { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; }
 @media (max-width: 255px) {
     .style-setter, .palette-row { grid-template-columns: minmax(0, 1fr) auto; }
     .style-setter > label { grid-column: 1 / -1; }

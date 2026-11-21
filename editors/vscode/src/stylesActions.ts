@@ -1,6 +1,7 @@
 import type { StudioContext } from './studioContext';
 import { choose, editText } from './studioContext';
-import type { PaletteColorKind, PaletteLayer, StyleCatalog, StyleDefinition, StyleSetter } from './stylesProtocol';
+import { contrastProviderLabels, type ContrastProvider, type PaletteColorKind, type PaletteLayer, type PaletteSheet,
+    type StyleCatalog, type StyleDefinition, type StyleSetter } from './stylesProtocol';
 
 export async function createStyle(context: StudioContext, catalog: StyleCatalog, kind: 'style' | 'theme'): Promise<string | undefined> {
     const scopes = kind === 'theme' ? catalog.palette_scopes : catalog.style_hosts;
@@ -59,7 +60,18 @@ export async function assignStyleResource(context: StudioContext, node: number, 
     if (mode) await context.edit('designer_style_edit', { action: 'resource', owner: node, property, resource: item.resource.node, dynamic: mode.dynamic });
 }
 
-export async function addPaletteColor(context: StudioContext, owner: number, layer: PaletteLayer): Promise<void> {
+export async function addPaletteColor(context: StudioContext, palette: PaletteSheet, layer: PaletteLayer): Promise<void> {
+    const target = palette.layers.find(entry => entry.layer === layer);
+    if (!target || target.unavailable) throw new Error(target?.unavailable ?? 'Choose an authored palette layer.');
+    let provider: ContrastProvider | undefined;
+    if (layer === 'high_contrast' && target.declaration == null) {
+        const providers = palette.contrastProviders ?? [];
+        if (!providers.length) throw new Error('Load a theme package to create the High contrast layer.');
+        const item = await choose('Choose the Application Theme Package',
+            providers.map(provider => ({ label: contrastProviderLabels[provider], provider })));
+        if (!item) return;
+        provider = item.provider;
+    }
     const key = await editText('Color resource key', undefined, value => value.trim() ? undefined : 'Enter a resource key.', 'Add Palette Color');
     if (key === undefined) return;
     const kind = await choose<{ label: string; type: PaletteColorKind }>('Choose a Color Resource Type', [
@@ -68,5 +80,6 @@ export async function addPaletteColor(context: StudioContext, owner: number, lay
     ]);
     if (!kind) return;
     const color = await editText('FerroUI color value', '#FF4C82D0', undefined, 'Add Palette Color');
-    if (color !== undefined) await context.edit('designer_palette_edit', { action: 'add', owner, layer, key: key.trim(), kind: kind.type, color });
+    if (color !== undefined) await context.edit('designer_palette_edit',
+        { action: 'add', owner: palette.owner, layer, key: key.trim(), kind: kind.type, color, provider });
 }

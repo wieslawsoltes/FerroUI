@@ -27,9 +27,10 @@ import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, StageChange, StageInput } from './stagesProtocol';
+import type { StylesPage } from './stylesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
-import type { CanvasAction, CanvasInteraction, DesignerView, DragOrigin, DropTarget, OutlineMode, Placement } from './protocol';
+import { withViewportTheme, type CanvasAction, type CanvasInteraction, type CanvasTheme, type DesignerView, type DragOrigin, type DropTarget, type OutlineMode, type Placement } from './protocol';
 import { applyTextEdits } from './textDocument';
 import { isWorkspaceTool } from './workspaceCatalog';
 import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
@@ -59,11 +60,13 @@ interface Arguments extends CanvasAction, CargoSelection {
     offset?: number;
     limit?: number;
     view?: DesignerView;
+    styles_page?: StylesPage;
     outline_mode?: OutlineMode;
     inspector_id?: number;
     width?: number;
     height?: number;
     dark?: boolean;
+    theme?: CanvasTheme;
     refresh?: boolean;
     reveal_source?: boolean;
     asset?: string;
@@ -303,11 +306,21 @@ export class AgentTools {
                 await panel.waitForSnapshot(signal);
                 return describe(panel);
             case 'designer_view': {
+                const view = args.view ?? (args.styles_page ? 'styles' : undefined);
+                if (args.styles_page && view !== 'styles') throw new Error('Choose the Styles & Themes view to set its palette page.');
                 if (args.outline_mode) this.workbench.setOutlineMode(panel, args.outline_mode);
-                if (args.view) await this.workbench.revealDesign(panel, args.view);
+                if (view) await this.workbench.revealDesign(panel, view, args.styles_page);
                 const { width, height, dark } = args;
-                const viewport = { width: width ?? panel.dimensions.width, height: height ?? panel.dimensions.height, dark: dark ?? panel.dimensions.dark };
-                if (args.refresh || width !== undefined || height !== undefined || dark !== undefined) panel.configure(viewport);
+                const theme = args.theme ?? (dark === undefined ? undefined : dark ? 'dark' : 'light');
+                if (theme === 'high_contrast' && !panel.supportsHighContrastTheme) {
+                    await panel.waitForSnapshot(signal);
+                    if (!panel.supportsHighContrastTheme) throw new Error('Update the FerroUI preview helper to use High contrast.');
+                }
+                const { dimensions } = panel;
+                const viewport = { ...dimensions, width: width ?? dimensions.width, height: height ?? dimensions.height };
+                if (args.refresh || width !== undefined || height !== undefined || theme) {
+                    panel.configure(theme ? withViewportTheme(viewport, theme) : viewport);
+                }
                 return describe(panel);
             }
             case 'designer_canvas':
@@ -507,6 +520,7 @@ function describe(panel: DesignerPanel) {
         revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null, selection: panel.selectedIds,
         inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
         viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks,
+        available_themes: panel.supportsHighContrastTheme ? ['light', 'dark', 'high_contrast'] : ['light', 'dark'],
         ...(snapshot?.rustTemplate && { rust_template: snapshot.rustTemplate }) };
 }
 

@@ -27,6 +27,7 @@ pub(crate) struct Render {
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) dark: bool,
+    pub(crate) theme: Option<ferroui_designer::PreviewTheme>,
     pub(crate) frame: u64,
     #[serde(default, rename = "workspaceRoot")]
     pub(crate) workspace_root: Option<std::path::PathBuf>,

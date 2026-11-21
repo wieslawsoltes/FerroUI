@@ -3,11 +3,13 @@ use crate::rsx_animation::AuthoredRsxFrame;
 use crate::rsx_placement::PlacementPolicy;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
-use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Application, ContentControl, Window, WindowDecorations};
-use ferroui_designer::{capture_preview_stage_png, DesignerSession, LayerViewState, PreviewHostOptions, PreviewStatus};
+use ferroui_designer::{
+    capture_preview_stage_png, DesignerSession, LayerViewState, PreviewHostOptions, PreviewStatus,
+    PreviewTheme,
+};
 use ferroui_designer_core::NodeId;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
@@ -151,12 +153,12 @@ impl Renderer {
         if !(64..=1536).contains(&input.width) || !(64..=1536).contains(&input.height) {
             return Err("Preview width and height must be between 64 and 1536".into());
         }
-        let variant = if input.dark {
-            ThemeVariant::dark()
+        let theme = input.theme.unwrap_or(if input.dark {
+            PreviewTheme::Dark
         } else {
-            ThemeVariant::light()
-        };
-        self.app.set_requested_theme_variant(Some(variant));
+            PreviewTheme::Light
+        });
+        self.app.set_requested_theme_variant(theme.resolve()?);
         let host = ContentControl::new();
         host.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
         host.set_vertical_content_alignment(VerticalAlignment::Stretch);

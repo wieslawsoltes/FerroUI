@@ -1,4 +1,5 @@
-import type { FromStyles, PaletteLayer, StylesAction, StylesState, ToStyles } from '../src/stylesProtocol';
+import type { CanvasTheme } from '../src/protocol';
+import { paletteLayerLabels, type FromStyles, type PaletteLayer, type StylesAction, type StylesState, type ToStyles } from '../src/stylesProtocol';
 import { element } from './dom';
 import { paletteEditor } from './paletteEditor';
 import { styleDefinition } from './styleDefinitionEditor';
@@ -19,8 +20,11 @@ const scope = element<HTMLSelectElement>('palette-scope');
 const layers = element<HTMLSelectElement>('palette-layer');
 const search = element<HTMLInputElement>('palette-search');
 const colors = element('palette-details');
-const light = element<HTMLButtonElement>('palette-light');
-const dark = element<HTMLButtonElement>('palette-dark');
+const themeButtons: [CanvasTheme, HTMLButtonElement][] = [
+    ['light', element<HTMLButtonElement>('palette-light')],
+    ['dark', element<HTMLButtonElement>('palette-dark')],
+    ['high_contrast', element<HTMLButtonElement>('palette-high-contrast')],
+];
 const compare = element<HTMLButtonElement>('palette-compare');
 const add = element<HTMLButtonElement>('palette-add');
 const addStyle = element<HTMLButtonElement>('style-new');
@@ -57,8 +61,9 @@ layers.addEventListener('change', () => {
     renderPalette();
 });
 search.addEventListener('input', renderPalette);
-light.addEventListener('click', () => send({ type: 'preview-theme', dark: false }));
-dark.addEventListener('click', () => send({ type: 'preview-theme', dark: true }));
+for (const [theme, button] of themeButtons) {
+    button.addEventListener('click', () => send({ type: 'preview-theme', theme }));
+}
 compare.addEventListener('click', () => {
     settings.compare = !settings.compare;
     vscode.setState(settings);
@@ -87,6 +92,7 @@ window.addEventListener('message', event => {
     if (state.stamp !== previous.stamp) error.hidden = true;
     if (state.page) {
         settings.page = state.page;
+        if (state.compare !== undefined) settings.compare = state.compare;
         if (state.paletteFocus) {
             settings.layer = state.paletteFocus.layer;
             settings.compare = false;
@@ -95,6 +101,7 @@ window.addEventListener('message', event => {
         vscode.setState(settings);
     }
     if (previous.content !== state.content) renderData();
+    else if (state.compare !== undefined) renderPalette();
     render();
     if (state.paletteFocus?.color != null) {
         const value = document.getElementById(`palette-value-${state.paletteFocus.color}`);
@@ -121,8 +128,12 @@ function renderData(): void {
     details.replaceChildren(styleDefinition(content.definition, send));
     scope.replaceChildren(...content.catalog.palette_scopes.map(entry => new Option(entry.label, String(entry.node))));
     if (content.palette) scope.value = String(content.palette.owner);
-    layers.replaceChildren(...(content.palette?.layers ?? []).map(layer =>
-        new Option(layer.layer[0].toUpperCase() + layer.layer.slice(1), layer.layer)));
+    const available = content.palette?.layers ?? [];
+    if (available.length && !available.some(layer => layer.layer === settings.layer)) {
+        settings.layer = available.find(layer => layer.layer === state.theme)?.layer ?? available[0].layer;
+        vscode.setState(settings);
+    }
+    layers.replaceChildren(...available.map(layer => new Option(paletteLayerLabels[layer.layer], layer.layer)));
     layers.value = settings.layer;
     renderPalette();
 }
@@ -152,9 +163,11 @@ function render(): void {
         back.title = `Return to ${state.consumer}`;
         back.setAttribute('aria-label', back.title);
     }
-    light.disabled = dark.disabled = unavailable || !state.preview;
-    light.setAttribute('aria-pressed', String(state.preview && state.dark === false));
-    dark.setAttribute('aria-pressed', String(state.preview && state.dark === true));
+    for (const [theme, button] of themeButtons) {
+        button.hidden = theme === 'high_contrast' && !state.content?.palette?.contrastPreview;
+        button.disabled = unavailable || !state.preview;
+        button.setAttribute('aria-pressed', String(state.theme === theme));
+    }
     compare.disabled = unavailable || !state.content?.palette;
     compare.setAttribute('aria-pressed', String(settings.compare));
     layers.hidden = settings.compare;
@@ -164,7 +177,9 @@ function render(): void {
 function activeLayer() { return state.content?.palette?.layers.find(layer => layer.layer === settings.layer); }
 function setAdd(): void {
     const layer = activeLayer();
-    add.disabled = !layer || !!layer.unavailable || settings.compare || !!state.busy || !!state.message;
+    const providerMissing = layer?.layer === 'high_contrast' && layer.declaration == null
+        && !state.content?.palette?.contrastProviders?.length;
+    add.disabled = !layer || !!layer.unavailable || providerMissing || settings.compare || !!state.busy || !!state.message;
 }
 function renderPalette(): void {
     colors.replaceChildren(paletteEditor(state.content?.palette, activeLayer(), settings.compare, search.value.trim().toLowerCase(), send));

@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
-import { errorMessage } from './protocol';
+import { errorMessage, viewportTheme, withViewportTheme } from './protocol';
 import { addPaletteColor, addStyleSetter, assignStyleResource, createStyle } from './stylesActions';
 import { choose, StudioContext } from './studioContext';
 import { previewDefinition, showResourceReferences } from './studioLibrary';
-import type { FromStyles, PaletteSheet, StyleCatalog, StyleDefinition, StyleEditorLocation, StyleScope, StyleSummary, StylesAction, StylesState, ToStyles } from './stylesProtocol';
+import type { FromStyles, PaletteSheet, StyleCatalog, StyleDefinition, StyleEditorLocation, StyleScope, StyleSummary, StylesAction, StylesPage, StylesState, ToStyles } from './stylesProtocol';
 import { stylesHtml } from './view';
 
 export const STYLES_VIEW = 'ferroui.styles';
@@ -19,6 +19,7 @@ interface Selection {
     paletteFocus?: StylesState['paletteFocus'];
     consumer?: WeakRef<DesignerPanel>;
     page?: StylesState['page'];
+    compare?: boolean;
 }
 
 export class StylesView {
@@ -44,6 +45,7 @@ export class StylesView {
         selection.epoch++;
         selection.requestedDefinition = node;
         selection.page = 'styles';
+        selection.compare = undefined;
         selection.paletteFocus = undefined;
         this.refresh(panel);
     }
@@ -53,8 +55,18 @@ export class StylesView {
         selection.epoch++;
         selection.consumer = new WeakRef(consumer);
         selection.page = editor.page;
+        selection.compare = undefined;
         selection.requestedDefinition = editor.page === 'styles' ? editor.node : undefined;
         selection.paletteFocus = editor.page === 'palette' ? editor : undefined;
+        this.refresh(panel);
+    }
+
+    showPage(panel: DesignerPanel, page: StylesPage): void {
+        const selection = this.selection(panel);
+        selection.epoch++;
+        selection.page = page === 'comparison' ? 'palette' : page;
+        selection.compare = page === 'comparison';
+        selection.paletteFocus = undefined;
         this.refresh(panel);
     }
 
@@ -80,7 +92,7 @@ export class StylesView {
         }
         const selection = this.selection(panel);
         const context = new StudioContext(panel, token, () => this.panel === panel && this.stamp === stamp && this.view.visible);
-        this.publish({ stamp, busy: true, dark: panel.dimensions.dark, content: changedPanel ? undefined : this.state.content });
+        this.publish({ stamp, busy: true, theme: viewportTheme(panel.dimensions), content: changedPanel ? undefined : this.state.content });
         void this.read(context, stamp, selection);
     }
 
@@ -111,13 +123,15 @@ export class StylesView {
             selection.definition = definition;
             selection.scope = scope;
             const page = selection.page;
+            const compare = selection.compare;
             const paletteFocus = selection.paletteFocus;
             const consumer = selection.consumer?.deref();
             selection.nextName = undefined;
             selection.requestedDefinition = undefined;
             selection.paletteFocus = undefined;
             selection.page = undefined;
-            this.publish({ stamp, content: { catalog, definition: style, palette }, dark: panel.dimensions.dark, preview: true, page, paletteFocus,
+            selection.compare = undefined;
+            this.publish({ stamp, content: { catalog, definition: style, palette }, theme: viewportTheme(panel.dimensions), preview: true, page, compare, paletteFocus,
                 consumer: consumer && !consumer.isDisposed ? vscode.workspace.asRelativePath(consumer.document.uri) : undefined });
         } catch (error) {
             if (this.stamp === stamp) {
@@ -175,7 +189,8 @@ export class StylesView {
                 case 'reveal': await context.revealRange(action.range); return;
                 case 'references': await showResourceReferences(context, action.node); return;
                 case 'preview-theme':
-                    if (panel.dimensions.dark !== action.dark) panel.configure({ ...panel.dimensions, dark: action.dark });
+                    if (action.theme === 'high_contrast' && !panel.supportsHighContrastTheme) return;
+                    if (viewportTheme(panel.dimensions) !== action.theme) panel.configure(withViewportTheme(panel.dimensions, action.theme));
                     return;
                 case 'new': {
                     const name = await createStyle(context, content.catalog, action.kind);
@@ -189,7 +204,7 @@ export class StylesView {
                     await context.edit('designer_palette_edit', { action: 'set', node: action.node, color: action.color });
                     return;
                 case 'palette-add':
-                    if (palette) await addPaletteColor(context, palette.owner, action.layer);
+                    if (palette) await addPaletteColor(context, palette, action.layer);
                     return;
                 default:
                     if (definition) await this.definitionAction(context, definition, selection, action);

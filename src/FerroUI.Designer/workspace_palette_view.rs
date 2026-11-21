@@ -1,24 +1,28 @@
 //! Palette swatches, source navigation, and the native color editor in Studio.
 use super::{text, tool_button, Context, ADD, SOURCE};
-use crate::style_palette_comparison::PaletteComparison;
-use crate::style_sources::StyleSource;
+use crate::style_composition::contrast_providers;
 use crate::{PreviewTheme, PropertyColorEditor};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
-use ferroui_base::media::{Color, SolidColorBrush};
+use ferroui_base::media::Color;
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Border, ColumnDefinitions, ComboBox, Control, Grid, ScrollViewer, StackPanel, TextBlock,
+    ColumnDefinitions, ComboBox, Control, Grid, ScrollViewer, StackPanel, TextBlock,
     TextBox,
 };
 use ferroui_designer_core::NodeId;
 use ferroui_designer_tools::component_palette::{
     palette_layers, PaletteColor, PaletteColorKind, PaletteLayer, PaletteLayerModel,
 };
+use ferroui_designer_tools::theme_variants::HighContrastProvider;
 use std::rc::Rc;
+
+#[path = "workspace_palette_comparison.rs"]
+mod comparison;
 
 const SUN: &str = "M8,1 V3 M8,13 V15 M1,8 H3 M13,8 H15 M3,3 L4.5,4.5 M11.5,11.5 L13,13 M13,3 L11.5,4.5 M4.5,11.5 L3,13 M12,8 A4,4 0 1 1 4,8 A4,4 0 1 1 12,8";
 const MOON: &str = "F1 M14,10.2 A6.8,6.8 0 1 1 5.8,2 A6.1,6.1 0 0 0 14,10.2 Z";
+const CONTRAST: &str = "F0 M8,1 A7,7 0 1 1 8,15 A7,7 0 1 1 8,1 Z M8,2.5 A5.5,5.5 0 0 0 8,13.5 Z";
 const COMPARE: &str = "F1 M1,2 H15 V14 H1 Z M2,3 V13 H7 V3 Z M9,3 V13 H14 V3 Z";
 
 pub(super) fn body(
@@ -35,7 +39,7 @@ pub(super) fn body(
     drop(session);
 
     let content = StackPanel::new();
-    content.set_width(344.0);
+    content.set_width(if comparison.high_contrast { 424.0 } else { 344.0 });
     content.set_spacing(7.0);
     content
         .children()
@@ -45,6 +49,7 @@ pub(super) fn body(
     bar.set_spacing(4.0);
     let layer = layer.unwrap_or_else(|| match workspace.preview_environment().theme {
         PreviewTheme::Dark => PaletteLayer::Dark,
+        PreviewTheme::HighContrast => PaletteLayer::HighContrast,
         _ => PaletteLayer::Light,
     });
     let active = model
@@ -79,7 +84,16 @@ pub(super) fn body(
             "Preview Dark theme",
             "PalettePreviewDark",
         ),
+        (
+            PreviewTheme::HighContrast,
+            CONTRAST,
+            "Preview High contrast theme",
+            "PalettePreviewHighContrast",
+        ),
     ] {
+        if theme == PreviewTheme::HighContrast && !comparison.high_contrast {
+            continue;
+        }
         let button = tool_button(glyph, label);
         button.set_name(Some(name.into()));
         let verify = context.clone();
@@ -87,9 +101,9 @@ pub(super) fn body(
         button.click(move |_, _| report(error.upgrade().as_ref(), verify.preview(theme)));
         bar.children().add(button.upcast::<Control>());
     }
-    let comparison = compare_panel(&comparison, &context, &status);
+    let comparison = comparison::panel(&comparison, &context, &status);
     comparison.set_is_visible(false);
-    let toggle = tool_button(COMPARE, "Compare Light and Dark colors");
+    let toggle = tool_button(COMPARE, "Compare theme colors");
     toggle.set_name(Some("PaletteCompare".into()));
     let weak = comparison.downgrade();
     toggle.click(move |_, _| {
@@ -146,9 +160,17 @@ fn render_layer(
         panel.children().add(color_row(context, status, color));
     }
     if context.writable {
+        let needs_provider = layer.layer == PaletteLayer::HighContrast && layer.declaration.is_none();
+        let providers = if needs_provider { contrast_providers() } else { Vec::new() };
+        if needs_provider && providers.is_empty() {
+            let message = text("Load a theme package to create the High contrast layer.");
+            message.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
+            panel.children().add(message.upcast::<Control>());
+            return;
+        }
         panel
             .children()
-            .add(add_row(context, status, owner, layer.layer));
+            .add(add_row(context, status, owner, layer.layer, providers));
     }
 }
 
@@ -208,6 +230,7 @@ fn add_row(
     status: &Ref<TextBlock>,
     owner: NodeId,
     layer: PaletteLayer,
+    providers: Vec<HighContrastProvider>,
 ) -> Ref<Control> {
     let root = StackPanel::new();
     root.set_spacing(4.0);
@@ -222,11 +245,18 @@ fn add_row(
         vec!["SolidColorBrush".into(), "Color".into()],
         0,
     );
+    let provider = (!providers.is_empty()).then(|| choice(
+        "PaletteContrastProvider",
+        "High contrast theme package",
+        providers.iter().map(|provider| provider.label().into()).collect(),
+        0,
+    ));
     let add = tool_button(ADD, "Add palette color");
     add.set_name(Some("PaletteAddColor".into()));
     let error = status.downgrade();
     let verify = context.clone();
     let values = (key.clone(), color.clone(), kind.clone());
+    let selected_provider = provider.clone();
     add.click(move |_, _| {
         let kind = if values.2.selected_index() == 0 {
             PaletteColorKind::SolidColorBrush
@@ -235,8 +265,11 @@ fn add_row(
         };
         let key = values.0.text().unwrap_or_default();
         let color = values.1.text().unwrap_or_default();
-        let result = verify
-            .edit(|session| session.add_palette_color(owner, layer, key.trim(), kind, &color));
+        let provider = selected_provider.as_ref()
+            .and_then(|chooser| providers.get(chooser.selected_index() as usize).copied());
+        let result = verify.edit(|session| {
+            session.add_palette_color(owner, layer, key.trim(), kind, &color, provider)
+        });
         report(error.upgrade().as_ref(), result);
     });
     fields.children().add(key.upcast::<Control>());
@@ -246,78 +279,10 @@ fn add_row(
     fields.children().add(add.upcast::<Control>());
     root.children().add(fields.upcast::<Control>());
     root.children().add(kind.upcast::<Control>());
+    if let Some(provider) = provider {
+        root.children().add(provider.upcast::<Control>());
+    }
     root.upcast()
-}
-
-fn compare_panel(
-    rows: &[PaletteComparison],
-    context: &Context,
-    status: &Ref<TextBlock>,
-) -> Ref<Control> {
-    let content = StackPanel::new();
-    let heading = comparison_row("Color", [("Light", None), ("Dark", None)], context, status);
-    content.children().add(heading);
-    for row in rows {
-        let cells = [row.light.as_ref(), row.dark.as_ref()].map(|color| match color {
-            Some(color) => (
-                color.value.as_deref().unwrap_or("Expression"),
-                color.source.as_ref(),
-            ),
-            None => ("Unresolved", None),
-        });
-        content
-            .children()
-            .add(comparison_row(&row.key, cells, context, status));
-    }
-    let scroll = ScrollViewer::new();
-    scroll.set_max_height(174.0);
-    scroll.set_horizontal_scroll_bar_visibility(
-        ferroui_controls::primitives::ScrollBarVisibility::Disabled,
-    );
-    scroll.set_content(Some(Control::boxed(content)));
-    scroll.upcast()
-}
-
-fn comparison_row(
-    key: &str,
-    colors: [(&str, Option<&StyleSource>); 2],
-    context: &Context,
-    status: &Ref<TextBlock>,
-) -> Ref<Control> {
-    let row = Grid::new();
-    row.set_column_definitions(ColumnDefinitions::parse("*,*,*").unwrap());
-    row.set_column_spacing(5.0);
-    row.children().add(text(key).upcast::<Control>());
-    for (index, (value, source)) in colors.into_iter().enumerate() {
-        let cell = StackPanel::new();
-        cell.set_orientation(Orientation::Horizontal);
-        cell.set_spacing(3.0);
-        if let Some(color) = Color::try_parse(value.trim()) {
-            let swatch = Border::new();
-            swatch.set_width(12.0);
-            swatch.set_height(12.0);
-            swatch.set_vertical_alignment(VerticalAlignment::Center);
-            swatch.set_background(Some(SolidColorBrush::with_color(color).into()));
-            cell.children().add(swatch.upcast::<Control>());
-        }
-        cell.children().add(text(value).upcast::<Control>());
-        if let Some(source) = source.cloned() {
-            let theme = if index == 0 { "Light" } else { "Dark" };
-            let open = tool_button(SOURCE, &format!("Open {theme} declaration for {key}"));
-            let context = context.clone();
-            let status = status.downgrade();
-            open.click(move |_, _| {
-                report(
-                    status.upgrade().as_ref(),
-                    context.open_source(source.clone()),
-                )
-            });
-            cell.children().add(open.upcast::<Control>());
-        }
-        Grid::set_column(&cell, index as i32 + 1);
-        row.children().add(cell.upcast::<Control>());
-    }
-    row.upcast()
 }
 
 pub(super) fn choice(name: &str, label: &str, items: Vec<String>, index: usize) -> Ref<ComboBox> {

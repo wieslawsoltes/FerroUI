@@ -38,6 +38,7 @@ import type { ComponentLibrary } from './studioLibrary';
 import { StudioView } from './studioView';
 import type { LocatedStyleSource } from './stylesProtocol';
 import { STYLES_VIEW, StylesView } from './stylesView';
+import type { StylesPage } from './stylesProtocol';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
 import { errorMessage, type CanvasPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
@@ -439,11 +440,14 @@ export class DesignerWorkbench implements vscode.Disposable {
     designs(): readonly DesignerPanel[] { return [...this.panels.values()]; }
     get activeDesign(): DesignerPanel | undefined { return this.active; }
 
-    async revealDesign(panel: DesignerPanel, view: DesignerView): Promise<void> {
+    async revealDesign(panel: DesignerPanel, view: DesignerView, stylesPage?: StylesPage): Promise<void> {
         if (view === 'canvas') {
             panel.panel.reveal(undefined, false);
             this.setActive(panel);
-        } else await this.showDock(docks[view], panel.session);
+            return;
+        }
+        if (view === 'styles' && stylesPage) this.styles.showPage(panel, stylesPage);
+        await this.showDock(docks[view], panel.session);
     }
 
     controlTimeline(panel: DesignerPanel, frame: FrameTarget, control: TimelineControl, signal: AbortSignal) {

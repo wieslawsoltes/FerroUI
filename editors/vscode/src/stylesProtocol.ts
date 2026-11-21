@@ -1,8 +1,12 @@
-import type { Range } from './protocol';
+import { canvasThemeLabels, type CanvasTheme, type Range } from './protocol';
 import type { IncludedSource } from './includedSource';
 
-export type PaletteLayer = 'shared' | 'default' | 'light' | 'dark';
+export const paletteLayerLabels = { shared: 'Shared', default: 'Default', ...canvasThemeLabels } as const;
+export type PaletteLayer = keyof typeof paletteLayerLabels;
+export const contrastProviderLabels = { winui: 'WinUI', material: 'Material', macos: 'macOS' } as const;
+export type ContrastProvider = keyof typeof contrastProviderLabels;
 export type PaletteColorKind = 'color' | 'solid_color_brush';
+export type StylesPage = 'styles' | 'palette' | 'comparison';
 
 export interface StyleScope { node: number; label: string }
 export interface StyleHost extends StyleScope { type_name: string; nested: boolean }
@@ -54,22 +58,25 @@ export interface PaletteColor {
     uses: number;
     range: Range;
 }
-export interface PaletteColumn { layer: PaletteLayer; declaration?: number; unavailable?: string; colors: PaletteColor[] }
+export interface PaletteColumn { layer: PaletteLayer; declaration?: number | null; unavailable?: string; colors: PaletteColor[] }
 export interface ResolvedColor { node?: number; value?: string | null; scope?: string | null; source?: StyleSource }
 export interface PaletteSheet {
     owner: number;
     layers: PaletteColumn[];
-    comparison: { key: string; light?: ResolvedColor | null; dark?: ResolvedColor | null }[];
+    comparison: ({ key: string } & Partial<Record<CanvasTheme, ResolvedColor | null>>)[];
+    contrastPreview?: boolean;
+    contrastProviders?: ContrastProvider[];
 }
 export interface StylesContent { catalog: StyleCatalog; definition?: StyleDefinition; palette?: PaletteSheet }
 export interface StylesState {
     stamp: number;
     content?: StylesContent;
-    dark?: boolean;
+    theme?: CanvasTheme;
     preview?: boolean;
     busy?: boolean;
     message?: string;
     page?: 'styles' | 'palette';
+    compare?: boolean;
     paletteFocus?: Extract<StyleEditorLocation, { page: 'palette' }>;
     consumer?: string;
 }
@@ -77,7 +84,7 @@ export type StylesAction =
     | { type: 'definition' | 'scope' | 'references'; node: number }
     | { type: 'new'; kind: 'style' | 'theme' }
     | { type: 'included-sources'; page: 'styles' | 'palette' }
-    | { type: 'included-color'; key: string; theme: 'light' | 'dark' }
+    | { type: 'included-color'; key: string; theme: CanvasTheme }
     | { type: 'return-to-consumer' }
     | { type: 'selector'; value: string }
     | { type: 'base'; base: number | null }
@@ -86,7 +93,7 @@ export type StylesAction =
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }
     | { type: 'palette-add'; layer: PaletteLayer }
     | { type: 'palette-color'; node: number; color: string }
-    | { type: 'preview-theme'; dark: boolean }
+    | { type: 'preview-theme'; theme: CanvasTheme }
     | { type: 'reveal'; range: Range };
 export type FromStyles = { type: 'ready' } | { type: 'action'; stamp: number; action: StylesAction };
 export type ToStyles = { type: 'error'; stamp: number; message: string };

@@ -117,6 +117,7 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
                 width: scenario.viewport.width,
                 height: scenario.viewport.height,
                 dark: scenario.viewport.dark,
+                theme: None,
                 frame: 1,
                 workspace_root: Some(workspace.into()),
                 local_sources: Vec::new(),

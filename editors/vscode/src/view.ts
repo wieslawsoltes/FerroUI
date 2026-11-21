@@ -107,7 +107,7 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
             ${tool('rotate', 'arrow-swap', 'Swap width and height')}
             <label>Height ${dimension('height', DEFAULT_VIEWPORT.height)}</label>
         </div>
-        <label class="theme-field">Appearance <select id="theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+        <label class="theme-field">Appearance <select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option id="theme-high-contrast" value="high_contrast" hidden disabled>High contrast</option></select></label>
         <button type="submit" class="primary">Apply</button>
     </form>
 </div>
@@ -738,8 +738,9 @@ export function stylesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <div id="palette-toolbar" class="style-tools" aria-label="Palette actions" hidden>
         ${tool('palette-includes', 'go-to-file', 'Open included palette', 'hidden')}
         ${tool('palette-light', 'lightbulb', 'Preview Light theme', 'aria-pressed="false"')}
-        ${tool('palette-dark', 'color-mode', 'Preview Dark theme', 'aria-pressed="false"')}
-        ${tool('palette-compare', 'split-horizontal', 'Compare Light and Dark colors', 'aria-pressed="false"')}
+        ${tool('palette-dark', 'circle-large-filled', 'Preview Dark theme', 'aria-pressed="false"')}
+        ${tool('palette-high-contrast', 'color-mode', 'Preview High contrast theme', 'aria-pressed="false" hidden')}
+        ${tool('palette-compare', 'split-horizontal', 'Compare theme colors', 'aria-pressed="false"')}
         ${tool('palette-add', 'add', 'Add palette color')}
     </div>
 </header>
