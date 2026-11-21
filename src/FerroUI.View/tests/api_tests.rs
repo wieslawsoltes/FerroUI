@@ -74,6 +74,48 @@ fn styles_of_an_element_apply_to_the_controls_below_it() {
     owner.dispose();
 }
 
+#[test]
+fn style_resources_follow_the_matched_control_and_theme() {
+    use ferroui_base::controls::ResourceDictionary;
+    use ferroui_base::media::Color;
+    use ferroui_controls::Border;
+
+    let _app = app();
+    let owner = Owner::new_root();
+    let panel = owner.with(|| stack_panel()
+        .styles([style("Border.card")
+            .resource("CardFill", Color::from_rgb(41, 93, 192))
+            .set_resource(Border::background_property(), "CardFill"),
+            style("TextBlock.label").set_resource(TextBlock::foreground_property(), "ThemeInk")])
+        .child(border().name("Card").class("card"))
+        .child(text_block().class("label").text("Status"))
+        .into_element().mount());
+    let window = window_with(&panel);
+    let card = panel.get_visual_descendants().filter_map(|visual| visual.cast::<Border>())
+        .find(|card| card.name().as_deref() == Some("Card")).unwrap();
+    let label = panel.get_visual_descendants().find_map(|visual| visual.cast::<TextBlock>()).unwrap();
+    let fill = || card.background().expect("active resource setter contributes a brush").as_solid_color_brush().unwrap().color();
+    let ink = || label.foreground().unwrap().as_solid_color_brush().unwrap().color();
+    let current = card.try_find_resource(&"CardFill".into(), card.actual_theme_variant().as_ref()).flatten();
+    assert_eq!(current.as_ref().and_then(|value| value.downcast_ref::<Color>()).copied(), Some(Color::from_rgb(41, 93, 192)));
+    assert_eq!(fill(), Color::from_rgb(41, 93, 192));
+    card.resources().set("CardFill", Some(Rc::new(Color::from_rgb(20, 90, 58))));
+    assert_eq!(fill(), Color::from_rgb(20, 90, 58));
+    card.resources().remove(&"CardFill".into());
+    assert_eq!(fill(), Color::from_rgb(41, 93, 192));
+
+    for (theme, color) in [(ThemeVariant::light(), Color::from_rgb(17, 43, 62)),
+                           (ThemeVariant::dark(), Color::from_rgb(208, 225, 242))] {
+        let dictionary = ResourceDictionary::new();
+        dictionary.set("ThemeInk", Some(Rc::new(color)));
+        window.resources().set_theme_dictionary(theme.clone(), dictionary);
+        window.set_value(ThemeVariant::requested_theme_variant_property(), Some(theme));
+        assert_eq!(ink(), color);
+    }
+    window.close();
+    owner.dispose();
+}
+
 #[derive(Default)]
 struct ViewClock {
     subject: LightweightSubject<SignedDuration>,

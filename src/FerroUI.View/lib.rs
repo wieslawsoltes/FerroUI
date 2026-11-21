@@ -64,6 +64,7 @@ mod register_types;
 pub mod router;
 mod rust_paths;
 mod style;
+mod style_resources;
 mod table_columns;
 mod template;
 #[cfg(feature = "treedatagrid")]
