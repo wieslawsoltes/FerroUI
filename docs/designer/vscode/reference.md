@@ -141,6 +141,8 @@ Call `designer_rsx_style_edit` through `designer_studio_edit` with the current s
 
 For App Preview, read the Rust file, catalog, and definition with `designer_hosted_styles`. Use `designer_hosted_style_edit_draft` or `designer_hosted_style_edit` with the accepted generation, revision, and sequence. In `arguments.edit`, pass the selected action as a nested edit, such as `{"action":"rust","edit":{"action":"set_resource","style":220,"setter":289,"key":"ReviewInk"}}`. The target's `node` must match the reported style or owner. Use `designer_hosted_style_resources` to list compatible keys for a property and `designer_hosted_style_source` to open a reported range. [Rust color resources guide](styles.md#edit-rust-style-color-resources)
 
+When an App Preview value comes from a separate Rust module, the resource and its comparison cells provide `sourceAddress` and `range`. Use those fields with `designer_hosted_style_source`. Keep the style’s address and node as the edit target. A `color_resource` draft in `declaration` mode returns the owning module’s `uri` and patches. Apply the action with the same accepted frame, then use Undo in the owning editor if needed. [Shared Rust palettes in App Preview](runtime.md#edit-a-shared-rust-palette-in-app-preview)
+
 Use `designer_view` with `styles_page: "comparison"` to show the selected inline Rust palette in the dock. In App Preview, use `designer_hosted_style_show` with `arguments.compare: true` and an optional `arguments.target` from the current definition. [App Preview style workflow](runtime.md#edit-styles-and-control-themes-in-app-preview)
 
 ### Edit an App Preview palette with MCP

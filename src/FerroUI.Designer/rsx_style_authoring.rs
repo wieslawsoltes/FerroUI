@@ -35,6 +35,7 @@ pub fn rust_style_report(
     node: Option<usize>,
 ) -> Result<Value, String> {
     let index = LineIndex::new(source);
+    let modules = projection.module_sources();
     let styles = projection.style_definitions();
     if let Some(node) = node {
         let (_, style) = styles
@@ -72,9 +73,9 @@ pub fn rust_style_report(
         available.dedup_by(|a, b| a.name == b.name && a.owner_name() == b.owner_name());
         let available = available.into_iter().map(|property|
             json!({"property":property.name,"getter":property.getter,"field":field_report(property, has_choices)})).collect::<Vec<_>>();
-        let resources = style.resources.iter().map(|resource| palette::resource_report(&index, resource)).collect::<Vec<_>>();
-        let choices = choices.into_iter().map(|family| palette::choice_report(&index, family)).collect::<Vec<_>>();
-        let comparison = palette::comparison(&index, &families);
+        let resources = style.resources.iter().map(|resource| palette::resource_report(&index, modules, resource)).collect::<Vec<_>>();
+        let choices = choices.into_iter().map(|family| palette::choice_report(&index, modules, family)).collect::<Vec<_>>();
+        let comparison = palette::comparison(&index, modules, &families);
         return Ok(json!({"node":node,"kind":"Style","name":style.selector,
             "range":index.range(style.selector_span).ok(),
             "identity":{"kind":"selector","value":style.selector,"editable":true},

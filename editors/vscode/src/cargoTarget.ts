@@ -21,7 +21,7 @@ interface CargoPackage {
     name: string;
     manifest_path: string;
     features: Record<string, string[]>;
-    targets: { name: string; kind: string[] }[];
+    targets: { name: string; kind: string[]; src_path: string }[];
 }
 
 export interface CargoTarget {
@@ -34,6 +34,7 @@ export interface CargoTarget {
     packageId: string;
     packageName: string;
     binary: string;
+    crateRoot?: string;
     features: string[];
     args: string[];
     targetDirectory: string;
@@ -134,7 +135,7 @@ async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target
         .flatMap(pkg => pkg.targets.filter(bin => bin.kind.includes('bin') && (!target.binary || target.binary === bin.name)).map(bin => ({
             label: target.label ?? bin.name,
             folder, cargo, cargoDirectory: cwd, discoveryManifest: manifest, manifest: pkg.manifest_path,
-            packageId: pkg.id, packageName: pkg.name, binary: bin.name,
+            packageId: pkg.id, packageName: pkg.name, binary: bin.name, crateRoot: bin.src_path,
             features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
             args: target.args ?? [], targetDirectory: metadata.target_directory,
         })));

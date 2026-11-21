@@ -38,15 +38,17 @@ impl AuthoredRsxFrame {
                         "Use matching style or owner offsets from the accepted Rust frame".into(),
                     );
                 }
-                let patches = self.projection()?.plan_style(&edit)?;
+                let plan = self.projection()?.plan_style_source(&edit)?;
+                let owner = plan.source_uri.as_deref().unwrap_or(uri);
+                let source = self.style_source(owner)?;
                 let updated =
-                    TextPatch::apply_all(&source, patches).map_err(|error| error.to_string())?;
-                let patch = checked_source_patch(&source, &updated)?.map(source_patch);
-                Ok(json!({"uri":uri,"patches":patch.into_iter().collect::<Vec<_>>()}))
+                    TextPatch::apply_all(source, plan.patches).map_err(|error| error.to_string())?;
+                let patch = checked_source_patch(source, &updated)?.map(source_patch);
+                Ok(json!({"uri":owner,"patches":patch.into_iter().collect::<Vec<_>>()}))
             }
             Action::Source { address } => {
-                self.require_style_source(&address, None)?;
-                Ok(json!({"uri":uri}))
+                self.style_source(&address)?;
+                Ok(json!({"uri":address}))
             }
             Action::Resources { target, property } => {
                 self.require_style_source(&target.address, None)?;
@@ -67,15 +69,35 @@ impl AuthoredRsxFrame {
                 range,
                 source,
             } => {
-                self.require_style_source(&address, Some(&source))?;
+                self.verify_style_source(&address, &source)?;
                 LineIndex::new(&source)
                     .span(range)
                     .map_err(|error| error.to_string())?;
-                Ok(json!({"uri":uri,"range":range}))
+                Ok(json!({"uri":address,"range":range}))
+            }
+            Action::VerifySource { address, source } => {
+                self.verify_style_source(&address, &source)?;
+                Ok(json!({"uri":address}))
             }
             Action::Plan { .. } => {
                 Err("Choose a mapped Rust style action for this preview".into())
             }
+        }
+    }
+
+    fn style_source(&self, address: &str) -> Result<&str, String> {
+        if address == self.uri {
+            Ok(self.source())
+        } else {
+            self.module_source(address).ok_or_else(|| "The Rust module is outside the accepted App Preview source".into())
+        }
+    }
+
+    fn verify_style_source(&self, address: &str, source: &str) -> Result<(), String> {
+        if self.style_source(address)? == source {
+            Ok(())
+        } else {
+            Err("The Rust source changed after the accepted App Preview frame".into())
         }
     }
 

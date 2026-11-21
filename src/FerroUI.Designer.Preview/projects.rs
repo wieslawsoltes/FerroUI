@@ -12,7 +12,7 @@ use std::sync::Arc;
 pub(crate) struct Projects(BTreeMap<u64, Project>);
 
 pub(crate) struct Project {
-    root: PathBuf,
+    pub(crate) root: PathBuf,
     pub(crate) schema: Arc<Schema>,
     pub(crate) rsx: RsxCatalog,
     pub(crate) assets: Vec<DesignerAsset>,

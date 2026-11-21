@@ -24,7 +24,8 @@ export type NativeStyleRequest = HostedStyleRead
     | { action: 'resources'; target: HostedStyleTarget; property: string }
     | { action: 'plan'; target: HostedStyleTarget; edit: HostedStyleEdit; source: string }
     | HostedSourceRequest;
-export type HostedSourceRequest = { action: 'source'; address: string } | { action: 'locate'; address: string; range: Range; source: string };
+export type HostedSourceRequest = { action: 'source'; address: string } | { action: 'locate'; address: string; range: Range; source: string }
+    | { action: 'verifySource'; address: string; source: string };
 export type HostedStyleCommand = HostedStyleRead
     | { action: 'edit'; target: HostedStyleTarget; edit: HostedStyleEdit }
     | { action: 'locate'; address: string; range: Range }

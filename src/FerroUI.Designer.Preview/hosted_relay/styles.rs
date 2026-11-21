@@ -31,6 +31,7 @@ pub(crate) enum Action {
     },
     Source { address: String },
     Locate { address: String, range: Range, source: String },
+    VerifySource { address: String, source: String },
 }
 
 #[derive(Deserialize)]
@@ -95,6 +96,7 @@ impl AuthoredPreview {
             Action::Plan { .. } => Err("Choose an XAML style edit for this preview".into()),
             Action::Source { address } => Ok(json!({"uri":self.source_at(&address)?.0})),
             Action::Locate { address, range, source } => self.locate(&address, range, &source),
+            Action::VerifySource { .. } => Err("Choose the Rust App Preview that owns this module".into()),
         }
     }
 

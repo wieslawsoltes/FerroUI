@@ -2,6 +2,7 @@ use crate::document::DesignDocument;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_core::{NodeId, SourceSpan, TextPatch};
 use ferroui_designer_language::LineIndex;
+use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxCatalog, RsxStateGroup};
 use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
@@ -25,6 +26,7 @@ struct StateOwnerMapping {
 pub(crate) struct AuthoredRsxFrame {
     pub(crate) uri: String,
     source: Box<str>,
+    modules: Option<RustModuleSources>,
     invocation: SourceSpan,
     pub(crate) scope: AuthoredRustScope,
     clips: BTreeMap<NodeId, RsxAnimation>,
@@ -44,8 +46,16 @@ pub(crate) struct AuthoredRustScope {
 impl AuthoredRsxFrame {
     pub(crate) fn source(&self) -> &str { &self.source }
 
+    pub(crate) fn module_source(&self, uri: &str) -> Option<&str> {
+        Some(self.modules.as_ref()?.source(uri)?.source.as_ref())
+    }
+
+    pub(crate) fn module_sources(&self) -> Option<&RustModuleSources> {
+        self.modules.as_ref()
+    }
+
     pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
-        self.catalog.project(&self.source, self.invocation.start)
+        self.catalog.project_with_modules(&self.source, self.invocation.start, self.modules.as_ref())
     }
 
     pub(crate) fn capture(design: &DesignDocument<'_>, uri: &str) -> Option<Self> {
@@ -53,6 +63,7 @@ impl AuthoredRsxFrame {
         Some(Self {
             uri: uri.into(),
             source: design.source.into(),
+            modules: rsx.module_sources().cloned(),
             invocation: rsx.invocation,
             scope: AuthoredRustScope {
                 active: design.index.range(rsx.invocation).ok()?,

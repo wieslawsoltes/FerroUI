@@ -6,7 +6,7 @@ import { previewSourceUri } from './includedSource';
 import type { NativePreview } from './nativePreview';
 import type { Range } from './protocol';
 import type { HostedSourceRequest } from './hostedStylesProtocol';
-import { asRange } from './textDocument';
+import { asRange, languageOf } from './textDocument';
 
 type FrameAccess = <T>(frame: HostedAnimationFrame, signal: AbortSignal,
     task: (client: NativePreview, ensure: () => void) => Promise<T>) => Promise<T>;
@@ -28,13 +28,25 @@ export class HostedSources {
     edit(frame: HostedAnimationFrame, address: string, apply: boolean, signal: AbortSignal,
         plan: (client: NativePreview, source: string) => Promise<HostedAuthoredPlan>) {
         return this.withFrame(frame, signal, async (client, ensure) => {
-            const { uri, document } = await this.source(client, frame, address);
-            const version = document.version;
-            const edit = await plan(client, document.getText());
+            const original = await this.source(client, frame, address);
+            const originalVersion = original.document.version;
+            const edit = await plan(client, original.document.getText());
+            let target = original;
+            let version = originalVersion;
+            if (edit.uri !== original.uri) {
+                if (!client.capabilities.hostedRustModules || languageOf(this.editor.document) !== 'rust') {
+                    throw new Error('The source changed while preparing the edit.');
+                }
+                target = await this.source(client, frame, edit.uri);
+                version = target.document.version;
+                await this.request(client, frame, { action: 'verifySource', address: edit.uri, source: target.document.getText() });
+            }
             ensure();
-            if (edit.uri !== uri || document.version !== version) throw new Error('The source changed while preparing the edit.');
-            if (apply && edit.patches.length) await applyHostedSourcePatches(document, version, edit.patches);
-            return { ...edit, applied: apply && edit.patches.length > 0, version: document.version };
+            if (edit.uri !== target.uri || target.document.version !== version || original.document.version !== originalVersion) {
+                throw new Error('The source changed while preparing the edit.');
+            }
+            if (apply && edit.patches.length) await applyHostedSourcePatches(target.document, version, edit.patches);
+            return { ...edit, applied: apply && edit.patches.length > 0, version: target.document.version };
         });
     }
 
@@ -58,12 +70,14 @@ export class HostedSources {
     private async source(client: NativePreview, frame: HostedAnimationFrame, address: string) {
         const { uri } = await this.request<{ uri: string }>(client, frame, { action: 'source', address });
         const primary = this.editor.document.uri;
-        const source = uri === pathToFileURL(primary.fsPath).toString() ? primary : await previewSourceUri(primary, uri);
+        const kind = languageOf(this.editor.document) === 'rust' ? 'rust' : 'xaml';
+        const source = uri === pathToFileURL(primary.fsPath).toString() ? primary : await previewSourceUri(primary, uri, kind);
         return { uri, document: await vscode.workspace.openTextDocument(source) };
     }
 
     private request<T>(client: NativePreview, frame: HostedAnimationFrame, request: HostedSourceRequest): Promise<T> {
-        return client.capabilities.hostedRustStyles
-            ? client.hostedStyles<T>(frame, request) : client.hostedPalette<T>(frame, request);
+        if (client.capabilities.hostedRustStyles) return client.hostedStyles<T>(frame, request);
+        if (request.action === 'verifySource') throw new Error('Update the FerroUI preview helper to edit a Rust module.');
+        return client.hostedPalette<T>(frame, request);
     }
 }

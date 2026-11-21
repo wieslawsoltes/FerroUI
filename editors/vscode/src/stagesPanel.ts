@@ -3,7 +3,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { BuiltProjects } from './builtProjects';
-import { DesignerDependencies, dirtyXamlSources, xamlPath } from './designerDependencies';
+import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
@@ -266,7 +266,7 @@ class StageSession {
         const caret = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.selection.active
             ?? new vscode.Position(0, 0);
         const source = await client.inProject(sourceOf(document, language, caret), this.projects.forDocument(document.uri));
-        const localSources = client.capabilities.stageIncludes ? dirtyXamlSources([document.uri]) : undefined;
+        const localSources = client.capabilities.stageIncludes ? dirtyPreviewSources([document.uri]) : undefined;
         return { action, epoch, name, width, height, dark, source: stageDocument(source, document.uri), localSources };
     }
 
@@ -313,7 +313,7 @@ class StageSession {
             const active = stageDocument(source, uri);
             const additional = await this.stageSources(manifest, active.uri, client);
             const localSources = client.capabilities.stageIncludes
-                ? dirtyXamlSources([uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
+                ? dirtyPreviewSources([uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
             if (generation !== this.generation || this.disposed) return;
             const model = await client.syncStages(active, replaceBoard ? manifest : undefined, additional, localSources,
                 replaceBoard ? undefined : bindings);

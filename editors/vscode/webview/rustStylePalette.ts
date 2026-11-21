@@ -38,7 +38,7 @@ export function rustStylePalette<Base extends string | number>(resources: readon
         compare.setAttribute('aria-pressed', String(display.compare && Boolean(comparison?.length)));
         if (display.compare && comparison?.length) {
             content.replaceChildren(paletteComparison(comparison, ['light', 'dark', 'high_contrast'], '', color => {
-                if (color.range) send({ type: 'reveal', range: color.range });
+                if (color.range) send({ type: 'reveal', range: color.range, sourceAddress: color.sourceAddress });
             }));
             return;
         }
@@ -47,7 +47,7 @@ export function rustStylePalette<Base extends string | number>(resources: readon
         content.replaceChildren(...layerResources.map(entry => paletteColorRow({ id: `rust-color-${entry.node}`, key: entry.key,
             value: entry.color ?? 'Rust expression', color: entry.color ?? undefined, description: paletteLayerLabels[selected] }, {
             change: entry.color && !entry.shared_constant ? color => send({ type: 'rust-resource-color', node: entry.node, color }) : undefined,
-            reveal: () => send({ type: 'reveal', range: entry.range }),
+            reveal: () => send({ type: 'reveal', range: entry.range, sourceAddress: entry.sourceAddress ?? undefined }),
             edit: entry.shared_constant ? { label: `Change color from const ${entry.shared_constant}`,
                 apply: () => send({ type: 'rust-shared-color', node: entry.node }) } : undefined,
         })));

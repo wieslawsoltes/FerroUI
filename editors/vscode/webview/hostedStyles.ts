@@ -202,7 +202,7 @@ export class HostedStylesView {
             case 'rust-shared-color':
                 if (rust) this.send({ action: 'editSharedColor', target, resource: action.node });
                 break;
-            case 'reveal': this.send({ action: 'locate', address: target.address, range: action.range }); break;
+            case 'reveal': this.send({ action: 'locate', address: action.sourceAddress ?? target.address, range: action.range }); break;
         }
     }
 }

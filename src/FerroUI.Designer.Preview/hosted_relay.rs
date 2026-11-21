@@ -360,10 +360,21 @@ impl Relay {
         self.authored = None;
         self.animation_sources.retain(design.restore_animation.as_ref());
         let project = projects.source(&design.document)?;
-        let document = crate::document::DesignDocument::parse(&design.document, project)?;
+        let rust = design.workspace.as_ref().and_then(|workspace| workspace.rust_sources(&design, project));
+        if let Some(previous) = self.authored_rsx.as_ref()
+            .filter(|previous| rust.is_none() && design.document.language == Language::Rust && previous.uri == design.document.uri)
+            .and_then(AuthoredRsxFrame::module_sources)
+        {
+            *dependencies = Some(previous.dependencies().map(str::to_owned).collect());
+            return Err("Repair the Rust module sources to update App Preview".into());
+        }
+        let document = crate::document::DesignDocument::parse_with_rust_modules(&design.document, project, rust.as_ref())?;
         let prepared = design.workspace.as_ref().map(|workspace| {
             workspace.prepare(&design, &document.xaml, project.map(|project| &project.resources), dependencies)
         }).transpose()?;
+        if let Some(rust) = &rust {
+            dependencies.get_or_insert_with(Vec::new).extend(rust.dependencies().map(str::to_owned));
+        }
         let scope = SourceScope {
             uri: design.document.uri.clone(),
             assembly: design.assembly.clone(),

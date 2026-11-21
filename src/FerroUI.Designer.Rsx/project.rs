@@ -88,6 +88,10 @@ pub struct RsxProjection<'a> {
 }
 
 impl RsxProjection<'_> {
+    pub fn module_sources(&self) -> Option<&RustModuleSources> {
+        self.modules
+    }
+
     /// Carry the active invocation's start across checked edits to this file.
     pub fn invocation_start_after(&self, patches: &[TextPatch]) -> Result<usize, String> {
         let before = self.invocation.start;

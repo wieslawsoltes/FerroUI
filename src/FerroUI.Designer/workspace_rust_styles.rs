@@ -159,7 +159,7 @@ impl Pane {
             });
             body.children().add(choices.upcast::<Control>());
             let families = projection.style_resource_families(rule.declaration.start);
-            let comparison = crate::rsx_style_authoring::palette::comparison(&LineIndex::new(session.authored_source()), &families);
+            let comparison = crate::rsx_style_authoring::palette::comparison(&LineIndex::new(session.authored_source()), projection.module_sources(), &families);
             let choices: Vec<_> = families.into_iter().filter(RsxStyleResourceFamily::can_assign_color).collect();
             Self::rule(&body, &tools, &scope, rule, &projection.style_fields(), &choices, &comparison);
         } else {

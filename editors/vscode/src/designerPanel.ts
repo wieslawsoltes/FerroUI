@@ -3,7 +3,7 @@ import { recordedGeometry, recordedMove } from './animationGeometry';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
 import type { GuideCatalog, GuideEdit } from './canvasGuidesProtocol';
 import { CanvasRequests } from './canvasRequests';
-import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
 import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSnapping';
 import { GuideViews, type GuideAnchor } from './guideViews';
 import { LayerViews } from './layerViews';
@@ -850,7 +850,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             const snapshot = await client.render(input, viewport, token, {
                 workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
-                localSources: dirtyXamlSources([this.document.uri], this.document),
+                localSources: dirtyPreviewSources([this.document.uri], this.document),
                 designData: this.designData, layerView: this.layers.input(caret), timelinePose: this.timelinePose,
                 timelineTargets: this.timelineTargets,
             });

@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { choose, editText } from './studioContext';
 import { paletteLayerLabels, type PaletteLayer, type RustColorChoice, type RustColorResource, type StyleCatalog, type StyleCreation, type StyleSetter } from './stylesProtocol';
 
@@ -60,9 +61,11 @@ export async function promptRustColorResource(layer: PaletteLayer): Promise<{ ke
 export async function promptRustSharedColor(resource: RustColorResource | undefined) {
     if (!resource?.shared_constant || !resource.color) throw new Error('Choose a current color backed by a Rust constant.');
     const title = `Change ${resource.key} from const ${resource.shared_constant}`;
+    const owner = resource.sourceAddress && vscode.workspace.asRelativePath(vscode.Uri.parse(resource.sourceAddress));
     const scope = await choose(title, [
         { label: 'Use a local color', description: 'Change this style resource', mode: 'local' as const },
-        { label: `Edit const ${resource.shared_constant}`, description: 'Change every use of the constant', mode: 'declaration' as const },
+        { label: `Edit const ${resource.shared_constant}`, description: owner || 'Change every use of the constant',
+            detail: owner ? 'Change every use of the constant' : undefined, mode: 'declaration' as const },
     ]);
     if (!scope) return;
     const value = await editText(scope.label, resource.color, undefined, title);

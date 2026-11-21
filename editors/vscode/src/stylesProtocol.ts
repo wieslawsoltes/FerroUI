@@ -54,7 +54,9 @@ export interface AuthoredSetter extends StyleSetter {
     resource?: { key: string; declaration?: Range | null } | null;
 }
 export interface RustColorChoice { key: string; color?: string | null }
-export interface RustColorResource extends RustColorChoice { node: number; range: Range; layer?: PaletteLayer | null; shared_constant?: string | null }
+export interface RustColorResource extends RustColorChoice {
+    node: number; range: Range; layer?: PaletteLayer | null; shared_constant?: string | null; sourceAddress?: string | null;
+}
 export interface StyleDefinition<Base extends string | number = number> {
     node: number;
     kind: StyleSummary['kind'];
@@ -132,6 +134,6 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'palette-add'; layer: PaletteLayer }
     | { type: 'palette-color'; node: number; color: string }
     | { type: 'preview-theme'; theme: CanvasTheme }
-    | { type: 'reveal'; range: Range };
+    | { type: 'reveal'; range: Range; sourceAddress?: string };
 export type FromStyles = { type: 'ready' } | { type: 'action'; stamp: number; action: StylesAction };
 export type ToStyles = { type: 'error'; stamp: number; message: string };

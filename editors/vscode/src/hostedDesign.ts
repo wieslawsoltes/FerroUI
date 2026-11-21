@@ -4,7 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
-import { DesignerDependencies, dirtyXamlSources } from './designerDependencies';
+import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { HostedPalettes } from './hostedPalettes';
@@ -289,7 +289,7 @@ class HostedSession {
     readonly animations: HostedAnimations;
     readonly palettes: HostedPalettes;
     readonly styles: HostedStyles;
-    private readonly dependencies = new DesignerDependencies();
+    private readonly dependencies: DesignerDependencies;
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
     private compiler?: ReloadProcess;
@@ -323,7 +323,10 @@ class HostedSession {
         const sources = new HostedSources(editor, (frame, signal, task) => this.withAcceptedFrame(frame, signal, task));
         this.palettes = new HostedPalettes(sources);
         this.styles = new HostedStyles(sources);
-        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, '**/*.[xX][aA][mM][lL]'));
+        const rust = language === 'rust';
+        this.dependencies = new DesignerDependencies(rust);
+        const pattern = rust ? '**/*.{[rR][sS],[xX][aA][mM][lL]}' : '**/*.[xX][aA][mM][lL]';
+        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, pattern));
         const dependencyChanged = (uri: vscode.Uri) => {
             if (uri.toString() !== editor.document.uri.toString() && this.dependencies.change(uri)) this.update();
         };
@@ -424,10 +427,11 @@ class HostedSession {
                 const caret = this.rustBlockOffset === undefined ? this.editor.selection.active : document.positionAt(this.rustBlockOffset);
                 const source = await client.inProject(sourceOf(document, this.language, caret), this.project);
                 if (this.disposed || revision !== this.revision) return;
+                const rustTarget = this.language === 'rust' && client.capabilities.hostedRustModules ? this.target.crateRoot : undefined;
                 const result = await client.renderHostedWorkspace({ revision, assembly, projectPath, document: source, fixture: this.fixture,
                     restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
                     selectClipKey: this.clipSelection?.version === document.version ? this.clipSelection.key : undefined },
-                { root: this.target.folder.uri.fsPath, localSources: dirtyXamlSources([document.uri], document) });
+                { root: this.target.folder.uri.fsPath, rustTarget, localSources: dirtyPreviewSources([document.uri], document, Boolean(rustTarget)) });
                 if (this.disposed || client !== this.client || revision !== this.revision) return;
                 if (result.dependencies && this.dependencies.accept(result.dependencies)) { this.update(); return; }
                 if (result.error) throw new Error(result.error);

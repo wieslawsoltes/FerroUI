@@ -31,6 +31,7 @@ export interface HostedFrame {
 export interface HostedWorkspaceSources {
     root: string;
     localSources: PreviewSourceBuffer[];
+    rustTarget?: string;
 }
 
 export interface HostedWorkspaceFrame {
