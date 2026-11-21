@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.NativeProbe"
+ x:DataType="local:ProbeViewModel" x:CompileBindings="True"
+ Title="FerroRibbon — native integration probe" Width="760" Height="650" MinWidth="620" MinHeight="580">
+ <Window.Resources>
+  <ResourceDictionary><ResourceDictionary.MergedDictionaries><rs:RibbonThemeResources /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
+ </Window.Resources>
+ <ScrollViewer>
+  <StackPanel Margin="28" Spacing="16">
+   <TextBlock Text="FerroRibbon" FontSize="28" FontWeight="SemiBold" />
+   <TextBlock Text="Native panel and source layout integration. The complete ribbon is still being ported." TextWrapping="Wrap" />
+   <TextBlock Text="Adaptive layout · original stepwise reduction" FontSize="18" />
+   <Slider x:Name="WidthSlider" Minimum="120" Maximum="600" Value="{Binding AvailableWidth, Mode=TwoWay}" />
+   <TextBlock Text="{Binding LayoutSummary}" />
+   <TextBlock Text="Gallery grid · original UniformGrid panel" FontSize="18" Margin="0,12,0,0" />
+   <Slider x:Name="ColumnSlider" Minimum="1" Maximum="8" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding ColumnSetting, Mode=TwoWay}" />
+   <TextBlock Text="{Binding GridSummary}" />
+   <rs:RibbonUniformGridPanel x:Name="GalleryGrid" Columns="{Binding Columns}" ItemWidth="72" ItemHeight="42" Spacing="4" HorizontalAlignment="Left">
+    <TextBox Text="One" /><TextBox Text="Two" /><TextBox Text="Three" /><TextBox Text="Four" />
+    <TextBox Text="Five" /><TextBox Text="Six" /><TextBox Text="Seven" /><TextBox Text="Eight" />
+    <TextBox Text="Nine" /><TextBox Text="Ten" /><TextBox Text="Eleven" /><TextBox Text="Twelve" />
+   </rs:RibbonUniformGridPanel>
+   <TextBlock Text="Change the column count, edit a cell, and use Tab to move focus. Resizing preserves the child controls and their text." TextWrapping="Wrap" />
+   <TextBlock Text="Command presentation · source item layout" FontSize="18" />
+   <TextBox Text="{Binding PresentationLabel, Mode=TwoWay}" />
+   <CheckBox Content="Simplified presentation" IsChecked="{Binding IsSimplified, Mode=TwoWay}" />
+   <StackPanel Orientation="Horizontal" Spacing="12">
+    <rs:RibbonKeyTip x:Name="KeyTipBadge" Text="FP" VerticalAlignment="Center" />
+    <ToggleButton x:Name="SharedToggle" Content="Simplified presentation" IsChecked="{Binding IsSimplified, Mode=TwoWay}"
+                  Theme="{DynamicResource RibbonChromeButtonStyle}" Padding="10,6" />
+   </StackPanel>
+   <rs:RibbonItemContent Label="{Binding PresentationLabel}" Icon="%" ItemSize="Large"
+       IsSimplified="{Binding IsSimplified}" Foreground="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Left" />
+  </StackPanel>
+ </ScrollViewer>
+</Window>

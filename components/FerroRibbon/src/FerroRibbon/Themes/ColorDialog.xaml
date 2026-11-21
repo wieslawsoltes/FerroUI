@@ -1,0 +1,463 @@
+<!-- Copyright (c) Microsoft Corporation. MIT. Exact pinned Uno Fluent v2 conversion -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:FerroRibbon.Controls">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <Color x:Key="SystemAccentColorLight2">#FF76B9ED</Color>
+      <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{DynamicResource SystemAccentColorLight2}" />
+      <StaticResource x:Key="AccentButtonBackground" ResourceKey="AccentFillColorDefaultBrush" />
+      <Color x:Key="AccentFillColorDisabled">#28FFFFFF</Color>
+      <SolidColorBrush x:Key="AccentFillColorDisabledBrush" Color="{StaticResource AccentFillColorDisabled}" />
+      <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+      <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColorLight2}" Opacity="0.9" />
+      <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
+      <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColorLight2}" Opacity="0.8" />
+      <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+      <Color x:Key="ControlStrokeColorOnAccentDefault">#14FFFFFF</Color>
+      <Color x:Key="ControlStrokeColorOnAccentSecondary">#23000000</Color>
+      <LinearGradientBrush x:Key="AccentControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+        <LinearGradientBrush.RelativeTransform>
+          <MatrixTransform Matrix="1,0,0,-1,0,1" />
+        </LinearGradientBrush.RelativeTransform>
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Offset="0.33" Color="{StaticResource ControlStrokeColorOnAccentSecondary}" />
+          <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorOnAccentDefault}" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+      <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
+      <Color x:Key="ControlFillColorTransparent">#00FFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorTransparentBrush" Color="{StaticResource ControlFillColorTransparent}" />
+      <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+      <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+      <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlFillColorTransparentBrush" />
+      <Color x:Key="TextOnAccentFillColorPrimary">#000000</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="{StaticResource TextOnAccentFillColorPrimary}" />
+      <StaticResource x:Key="AccentButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <Color x:Key="TextOnAccentFillColorDisabled">#87FFFFFF</Color>
+      <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabled" />
+      <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <Color x:Key="TextOnAccentFillColorSecondary">#80000000</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="{StaticResource TextOnAccentFillColorSecondary}" />
+      <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
+      <Color x:Key="ControlFillColorDefault">#0FFFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{StaticResource ControlFillColorDefault}" />
+      <StaticResource x:Key="ButtonBackground" ResourceKey="ControlFillColorDefaultBrush" />
+      <Color x:Key="ControlFillColorDisabled">#0BFFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="{StaticResource ControlFillColorDisabled}" />
+      <StaticResource x:Key="ButtonBackgroundDisabled" ResourceKey="ControlFillColorDisabledBrush" />
+      <Color x:Key="ControlFillColorSecondary">#15FFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="{StaticResource ControlFillColorSecondary}" />
+      <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="ControlFillColorSecondaryBrush" />
+      <Color x:Key="ControlFillColorTertiary">#08FFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="{StaticResource ControlFillColorTertiary}" />
+      <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="ControlFillColorTertiaryBrush" />
+      <Color x:Key="ControlStrokeColorDefault">#12FFFFFF</Color>
+      <Color x:Key="ControlStrokeColorSecondary">#18FFFFFF</Color>
+      <LinearGradientBrush x:Key="ControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Offset="0.33" Color="{StaticResource ControlStrokeColorSecondary}" />
+          <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+      <StaticResource x:Key="ButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+      <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{StaticResource ControlStrokeColorDefault}" />
+      <StaticResource x:Key="ButtonBorderBrushDisabled" ResourceKey="ControlStrokeColorDefaultBrush" />
+      <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="ControlElevationBorderBrush" />
+      <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="ControlStrokeColorDefaultBrush" />
+      <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>
+      <Color x:Key="TextFillColorPrimary">#FFFFFF</Color>
+      <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{StaticResource TextFillColorPrimary}" />
+      <StaticResource x:Key="ButtonForeground" ResourceKey="TextFillColorPrimaryBrush" />
+      <Color x:Key="TextFillColorDisabled">#5DFFFFFF</Color>
+      <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="{StaticResource TextFillColorDisabled}" />
+      <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="TextFillColorDisabledBrush" />
+      <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="TextFillColorPrimaryBrush" />
+      <Color x:Key="TextFillColorSecondary">#C5FFFFFF</Color>
+      <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{StaticResource TextFillColorSecondary}" />
+      <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="TextFillColorSecondaryBrush" />
+      <Thickness x:Key="ButtonPadding">11,5,11,6</Thickness>
+      <FontFamily x:Key="ContentControlThemeFontFamily">$Default</FontFamily>
+      <Color x:Key="SolidBackgroundFillColorBase">#202020</Color>
+      <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{StaticResource SolidBackgroundFillColorBase}" />
+      <StaticResource x:Key="ContentDialogBackground" ResourceKey="SolidBackgroundFillColorBaseBrush" />
+      <Color x:Key="SurfaceStrokeColorDefault">#66757575</Color>
+      <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="{StaticResource SurfaceStrokeColorDefault}" />
+      <StaticResource x:Key="ContentDialogBorderBrush" ResourceKey="SurfaceStrokeColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogBorderWidth">1</Thickness>
+      <GridLength x:Key="ContentDialogButtonSpacing">8</GridLength>
+      <StaticResource x:Key="ContentDialogForeground" ResourceKey="TextFillColorPrimaryBrush" />
+      <x:Double x:Key="ContentDialogMaxHeight">756</x:Double>
+      <x:Double x:Key="ContentDialogMaxWidth">548</x:Double>
+      <x:Double x:Key="ContentDialogMinHeight">184</x:Double>
+      <x:Double x:Key="ContentDialogMinWidth">320</x:Double>
+      <Thickness x:Key="ContentDialogPadding">24</Thickness>
+      <Color x:Key="CardStrokeColorDefault">#19000000</Color>
+      <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="{StaticResource CardStrokeColorDefault}" />
+      <StaticResource x:Key="ContentDialogSeparatorBorderBrush" ResourceKey="CardStrokeColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogSeparatorThickness">0,0,0,1</Thickness>
+      <Color x:Key="SmokeFillColorDefault">#4D000000</Color>
+      <SolidColorBrush x:Key="SmokeFillColorDefaultBrush" Color="{StaticResource SmokeFillColorDefault}" />
+      <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="SmokeFillColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogTitleMargin">0,0,0,12</Thickness>
+      <Color x:Key="LayerFillColorAlt">#0DFFFFFF</Color>
+      <SolidColorBrush x:Key="LayerFillColorAltBrush" Color="{StaticResource LayerFillColorAlt}" />
+      <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="LayerFillColorAltBrush" />
+      <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
+      <CornerRadius x:Key="ControlCornerRadius">4,4,4,4</CornerRadius>
+      <CornerRadius x:Key="OverlayCornerRadius">8,8,8,8</CornerRadius>
+      <Color x:Key="FocusStrokeColorOuter">#FFFFFF</Color>
+      <SolidColorBrush x:Key="FocusStrokeColorOuterBrush" Color="{StaticResource FocusStrokeColorOuter}" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <Color x:Key="FocusStrokeColorInner">#B3000000</Color>
+      <SolidColorBrush x:Key="FocusStrokeColorInnerBrush" Color="{StaticResource FocusStrokeColorInner}" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="SystemAccentColorDark1">#FF005A9E</Color>
+      <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{DynamicResource SystemAccentColorDark1}" />
+      <StaticResource x:Key="AccentButtonBackground" ResourceKey="AccentFillColorDefaultBrush" />
+      <Color x:Key="AccentFillColorDisabled">#37000000</Color>
+      <SolidColorBrush x:Key="AccentFillColorDisabledBrush" Color="{StaticResource AccentFillColorDisabled}" />
+      <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+      <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColorDark1}" Opacity="0.9" />
+      <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
+      <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColorDark1}" Opacity="0.8" />
+      <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+      <Color x:Key="ControlStrokeColorOnAccentDefault">#14FFFFFF</Color>
+      <Color x:Key="ControlStrokeColorOnAccentSecondary">#66000000</Color>
+      <LinearGradientBrush x:Key="AccentControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+        <LinearGradientBrush.RelativeTransform>
+          <MatrixTransform Matrix="1,0,0,-1,0,1" />
+        </LinearGradientBrush.RelativeTransform>
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Offset="0.33" Color="{StaticResource ControlStrokeColorOnAccentSecondary}" />
+          <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorOnAccentDefault}" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+      <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
+      <Color x:Key="ControlFillColorTransparent">#00FFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorTransparentBrush" Color="{StaticResource ControlFillColorTransparent}" />
+      <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+      <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+      <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlFillColorTransparentBrush" />
+      <Color x:Key="TextOnAccentFillColorPrimary">#FFFFFF</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="{StaticResource TextOnAccentFillColorPrimary}" />
+      <StaticResource x:Key="AccentButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <Color x:Key="TextOnAccentFillColorDisabled">#FFFFFF</Color>
+      <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabled" />
+      <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <Color x:Key="TextOnAccentFillColorSecondary">#B3FFFFFF</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="{StaticResource TextOnAccentFillColorSecondary}" />
+      <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
+      <Color x:Key="ControlFillColorDefault">#B3FFFFFF</Color>
+      <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{StaticResource ControlFillColorDefault}" />
+      <StaticResource x:Key="ButtonBackground" ResourceKey="ControlFillColorDefaultBrush" />
+      <Color x:Key="ControlFillColorDisabled">#4DF9F9F9</Color>
+      <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="{StaticResource ControlFillColorDisabled}" />
+      <StaticResource x:Key="ButtonBackgroundDisabled" ResourceKey="ControlFillColorDisabledBrush" />
+      <Color x:Key="ControlFillColorSecondary">#80F9F9F9</Color>
+      <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="{StaticResource ControlFillColorSecondary}" />
+      <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="ControlFillColorSecondaryBrush" />
+      <Color x:Key="ControlFillColorTertiary">#4DF9F9F9</Color>
+      <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="{StaticResource ControlFillColorTertiary}" />
+      <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="ControlFillColorTertiaryBrush" />
+      <Color x:Key="ControlStrokeColorDefault">#0F000000</Color>
+      <Color x:Key="ControlStrokeColorSecondary">#29000000</Color>
+      <LinearGradientBrush x:Key="ControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+        <LinearGradientBrush.RelativeTransform>
+          <MatrixTransform Matrix="1,0,0,-1,0,1" />
+        </LinearGradientBrush.RelativeTransform>
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Offset="0.33" Color="{StaticResource ControlStrokeColorSecondary}" />
+          <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+      <StaticResource x:Key="ButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+      <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{StaticResource ControlStrokeColorDefault}" />
+      <StaticResource x:Key="ButtonBorderBrushDisabled" ResourceKey="ControlStrokeColorDefaultBrush" />
+      <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="ControlElevationBorderBrush" />
+      <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="ControlStrokeColorDefaultBrush" />
+      <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>
+      <Color x:Key="TextFillColorPrimary">#E4000000</Color>
+      <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{StaticResource TextFillColorPrimary}" />
+      <StaticResource x:Key="ButtonForeground" ResourceKey="TextFillColorPrimaryBrush" />
+      <Color x:Key="TextFillColorDisabled">#5C000000</Color>
+      <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="{StaticResource TextFillColorDisabled}" />
+      <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="TextFillColorDisabledBrush" />
+      <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="TextFillColorPrimaryBrush" />
+      <Color x:Key="TextFillColorSecondary">#9E000000</Color>
+      <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{StaticResource TextFillColorSecondary}" />
+      <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="TextFillColorSecondaryBrush" />
+      <Thickness x:Key="ButtonPadding">11,5,11,6</Thickness>
+      <FontFamily x:Key="ContentControlThemeFontFamily">$Default</FontFamily>
+      <Color x:Key="SolidBackgroundFillColorBase">#F3F3F3</Color>
+      <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{StaticResource SolidBackgroundFillColorBase}" />
+      <StaticResource x:Key="ContentDialogBackground" ResourceKey="SolidBackgroundFillColorBaseBrush" />
+      <Color x:Key="SurfaceStrokeColorDefault">#66757575</Color>
+      <SolidColorBrush x:Key="SurfaceStrokeColorDefaultBrush" Color="{StaticResource SurfaceStrokeColorDefault}" />
+      <StaticResource x:Key="ContentDialogBorderBrush" ResourceKey="SurfaceStrokeColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogBorderWidth">1</Thickness>
+      <GridLength x:Key="ContentDialogButtonSpacing">8</GridLength>
+      <StaticResource x:Key="ContentDialogForeground" ResourceKey="TextFillColorPrimaryBrush" />
+      <x:Double x:Key="ContentDialogMaxHeight">756</x:Double>
+      <x:Double x:Key="ContentDialogMaxWidth">548</x:Double>
+      <x:Double x:Key="ContentDialogMinHeight">184</x:Double>
+      <x:Double x:Key="ContentDialogMinWidth">320</x:Double>
+      <Thickness x:Key="ContentDialogPadding">24</Thickness>
+      <Color x:Key="CardStrokeColorDefault">#0F000000</Color>
+      <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="{StaticResource CardStrokeColorDefault}" />
+      <StaticResource x:Key="ContentDialogSeparatorBorderBrush" ResourceKey="CardStrokeColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogSeparatorThickness">0,0,0,1</Thickness>
+      <Color x:Key="SmokeFillColorDefault">#4D000000</Color>
+      <SolidColorBrush x:Key="SmokeFillColorDefaultBrush" Color="{StaticResource SmokeFillColorDefault}" />
+      <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="SmokeFillColorDefaultBrush" />
+      <Thickness x:Key="ContentDialogTitleMargin">0,0,0,12</Thickness>
+      <Color x:Key="LayerFillColorAlt">#FFFFFF</Color>
+      <SolidColorBrush x:Key="LayerFillColorAltBrush" Color="{StaticResource LayerFillColorAlt}" />
+      <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="LayerFillColorAltBrush" />
+      <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
+      <CornerRadius x:Key="ControlCornerRadius">4,4,4,4</CornerRadius>
+      <CornerRadius x:Key="OverlayCornerRadius">8,8,8,8</CornerRadius>
+      <Color x:Key="FocusStrokeColorOuter">#E4000000</Color>
+      <SolidColorBrush x:Key="FocusStrokeColorOuterBrush" Color="{StaticResource FocusStrokeColorOuter}" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <Color x:Key="FocusStrokeColorInner">#B3FFFFFF</Color>
+      <SolidColorBrush x:Key="FocusStrokeColorInnerBrush" Color="{StaticResource FocusStrokeColorInner}" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static c:RibbonColorDialogHost.HighContrastVariant}">
+      <Color x:Key="SystemAccentColor">#FF0078D7</Color>
+      <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="{DynamicResource SystemAccentColor}" />
+      <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlHighlightAccentBrush" />
+      <Color x:Key="SystemBaseLowColor">#33FFFFFF</Color>
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseLowBrush" Color="{StaticResource SystemBaseLowColor}" />
+      <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="{DynamicResource SystemAccentColor}" />
+      <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemControlForegroundAccentBrush" />
+      <Color x:Key="SystemBaseMediumLowColor">#66FFFFFF</Color>
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseMediumLowBrush" Color="{StaticResource SystemBaseMediumLowColor}" />
+      <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
+      <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="SystemControlHighlightAccentBrush" />
+      <SolidColorBrush x:Key="SystemControlDisabledTransparentBrush" Color="Transparent" />
+      <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseMediumLowBrush" Color="{StaticResource SystemBaseMediumLowColor}" />
+      <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
+      <SolidColorBrush x:Key="SystemControlHighlightTransparentBrush" Color="Transparent" />
+      <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentBrush" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltAccentBrush" Color="{DynamicResource SystemAccentColor}" />
+      <StaticResource x:Key="AccentButtonForeground" ResourceKey="SystemControlHighlightAltAccentBrush" />
+      <SolidColorBrush x:Key="SystemControlDisabledBaseMediumLowBrush" Color="{StaticResource SystemBaseMediumLowColor}" />
+      <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+      <Color x:Key="SystemChromeWhiteColor">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeWhiteBrush" Color="{StaticResource SystemChromeWhiteColor}" />
+      <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
+      <Color x:Key="SystemBaseHighColor">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="SystemControlHighlightBaseHighBrush" Color="{StaticResource SystemBaseHighColor}" />
+      <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
+      <StaticResource x:Key="ButtonBackground" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <StaticResource x:Key="ButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <Color x:Key="SystemColorHighlightTextColor">#FF000000</Color>
+      <SolidColorBrush x:Key="SystemColorHighlightTextColorBrush" Color="{DynamicResource SystemColorHighlightTextColor}" />
+      <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightTextColorBrush" />
+      <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="SystemColorHighlightTextColorBrush" />
+      <SolidColorBrush x:Key="SystemControlForegroundTransparentBrush" Color="Transparent" />
+      <StaticResource x:Key="ButtonBorderBrush" ResourceKey="SystemControlForegroundTransparentBrush" />
+      <StaticResource x:Key="ButtonBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <Color x:Key="SystemColorHighlightColor">#FF1AEBFF</Color>
+      <SolidColorBrush x:Key="SystemColorHighlightColorBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+      <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="SystemColorHighlightTextColorBrush" />
+      <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>
+      <Color x:Key="SystemColorButtonTextColor">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="SystemColorButtonTextColorBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <StaticResource x:Key="ButtonForeground" ResourceKey="SystemColorButtonTextColorBrush" />
+      <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+      <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="SystemControlHighlightBaseHighBrush" />
+      <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
+      <Thickness x:Key="ButtonPadding">11,5,11,6</Thickness>
+      <FontFamily x:Key="ContentControlThemeFontFamily">$Default</FontFamily>
+      <Color x:Key="SystemColorWindowColor">#FF000000</Color>
+      <SolidColorBrush x:Key="SystemColorWindowColorBrush" Color="{DynamicResource SystemColorWindowColor}" />
+      <StaticResource x:Key="ContentDialogBackground" ResourceKey="SystemColorWindowColorBrush" />
+      <Color x:Key="SystemColorWindowTextColor">#FF000000</Color>
+      <SolidColorBrush x:Key="SystemColorWindowTextColorBrush" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <StaticResource x:Key="ContentDialogBorderBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+      <Thickness x:Key="ContentDialogBorderWidth">2</Thickness>
+      <GridLength x:Key="ContentDialogButtonSpacing">8</GridLength>
+      <StaticResource x:Key="ContentDialogForeground" ResourceKey="SystemColorWindowTextColorBrush" />
+      <x:Double x:Key="ContentDialogMaxHeight">756</x:Double>
+      <x:Double x:Key="ContentDialogMaxWidth">548</x:Double>
+      <x:Double x:Key="ContentDialogMinHeight">184</x:Double>
+      <x:Double x:Key="ContentDialogMinWidth">320</x:Double>
+      <Thickness x:Key="ContentDialogPadding">24</Thickness>
+      <StaticResource x:Key="ContentDialogSeparatorBorderBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+      <Thickness x:Key="ContentDialogSeparatorThickness">0,0,0,1</Thickness>
+      <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="SystemColorWindowColorBrush" />
+      <Thickness x:Key="ContentDialogTitleMargin">0,0,0,12</Thickness>
+      <SolidColorBrush x:Key="SystemControlTransparentBrush" Color="Transparent" />
+      <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="SystemControlTransparentBrush" />
+      <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
+      <CornerRadius x:Key="ControlCornerRadius">4,4,4,4</CornerRadius>
+      <CornerRadius x:Key="OverlayCornerRadius">8,8,8,8</CornerRadius>
+      <SolidColorBrush x:Key="FocusStrokeColorOuterBrush" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <SolidColorBrush x:Key="FocusStrokeColorInnerBrush" Color="{DynamicResource SystemColorWindowColor}" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <ControlTheme x:Key="DefaultButtonStyle" TargetType="Button">
+    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid>
+            <ContentPresenter x:Name="ContentPresenter" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" AutomationProperties.AccessibilityView="Raw">
+              <ContentPresenter.Transitions>
+                <Transitions>
+                  <BrushTransition Duration="0:0:0.083" Property="Background" />
+                </Transitions>
+              </ContentPresenter.Transitions>
+            </ContentPresenter>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}" />
+    <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+    <Setter Property="BackgroundSizing" Value="OuterBorderEdge" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid>
+            <ContentPresenter x:Name="ContentPresenter" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" Foreground="{TemplateBinding Foreground}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" AutomationProperties.AccessibilityView="Raw">
+              <ContentPresenter.Transitions>
+                <Transitions>
+                  <BrushTransition Duration="0:0:0.083" Property="Background" />
+                </Transitions>
+              </ContentPresenter.Transitions>
+            </ContentPresenter>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style Selector="^:pointerover /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type c:RibbonDialogHost}" TargetType="c:RibbonDialogHost">
+    <Setter Property="Foreground" Value="{DynamicResource ContentDialogForeground}" />
+    <Setter Property="Background" Value="{DynamicResource ContentDialogBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ContentDialogBorderWidth}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ContentDialogBorderBrush}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="PrimaryButtonStyle" Value="{DynamicResource DefaultButtonStyle}" />
+    <Setter Property="SecondaryButtonStyle" Value="{DynamicResource DefaultButtonStyle}" />
+    <Setter Property="CloseButtonStyle" Value="{DynamicResource DefaultButtonStyle}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border x:Name="Container">
+            <Grid x:Name="LayoutRoot">
+              <Rectangle x:Name="SmokeLayerBackground" Fill="{DynamicResource ContentDialogSmokeFill}" />
+              <Border x:Name="BackgroundElement" Background="{TemplateBinding Background}" FlowDirection="{TemplateBinding FlowDirection}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" MinWidth="{DynamicResource ContentDialogMinWidth}" MaxWidth="{DynamicResource ContentDialogMaxWidth}" MinHeight="{DynamicResource ContentDialogMinHeight}" MaxHeight="{DynamicResource ContentDialogMaxHeight}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%" BackgroundSizing="InnerBorderEdge" CornerRadius="{TemplateBinding CornerRadius}">
+                <Border.RenderTransform>
+                  <ScaleTransform x:Name="ScaleTransform" />
+                </Border.RenderTransform>
+                <Border IsVisible="{Binding #DialogSpace.IsVisible}" CornerRadius="{DynamicResource OverlayCornerRadius}">
+                  <Grid x:Name="DialogSpace">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ScrollViewer x:Name="ContentScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" IsTabStop="False">
+                      <Border Padding="{DynamicResource ContentDialogPadding}" BorderThickness="{DynamicResource ContentDialogSeparatorThickness}" BorderBrush="{DynamicResource ContentDialogSeparatorBorderBrush}" Background="{DynamicResource ContentDialogTopOverlay}">
+                        <Grid>
+                          <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                          </Grid.RowDefinitions>
+                          <ContentControl x:Name="Title" Margin="{DynamicResource ContentDialogTitleMargin}" Content="{TemplateBinding Title}" ContentTemplate="{TemplateBinding TitleTemplate}" FontSize="20" FontFamily="$Default" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="False">
+                            <ContentControl.Template>
+                              <ControlTemplate>
+                                <ContentPresenter Content="{TemplateBinding Content}" TextWrapping="Wrap" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" TextBlock.MaxLines="2" />
+                              </ControlTemplate>
+                            </ContentControl.Template>
+                          </ContentControl>
+                          <ContentPresenter x:Name="Content" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" FontSize="{StaticResource ControlContentThemeFontSize}" FontFamily="{StaticResource ContentControlThemeFontFamily}" Foreground="{TemplateBinding Foreground}" Grid.Row="1" TextWrapping="Wrap" />
+                        </Grid>
+                      </Border>
+                    </ScrollViewer>
+                    <Border IsVisible="{Binding #CommandSpace.IsVisible}" Padding="{DynamicResource ContentDialogPadding}" Background="{TemplateBinding Background}" Grid.Row="1">
+                      <Grid x:Name="CommandSpace" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition x:Name="PrimaryColumn" Width="*" />
+                          <ColumnDefinition x:Name="FirstSpacer" Width="0" />
+                          <ColumnDefinition x:Name="SecondaryColumn" Width="0" />
+                          <ColumnDefinition x:Name="SecondSpacer" Width="{DynamicResource ContentDialogButtonSpacing}" />
+                          <ColumnDefinition x:Name="CloseColumn" Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="PrimaryButton" IsTabStop="True" Content="{TemplateBinding PrimaryButtonText}" IsEnabled="{TemplateBinding IsPrimaryButtonEnabled}" HorizontalAlignment="Stretch" Theme="{TemplateBinding PrimaryButtonStyle}" />
+                        <Button x:Name="SecondaryButton" IsTabStop="True" Content="{TemplateBinding SecondaryButtonText}" IsEnabled="{TemplateBinding IsSecondaryButtonEnabled}" HorizontalAlignment="Stretch" Theme="{TemplateBinding SecondaryButtonStyle}" />
+                        <Button x:Name="CloseButton" IsTabStop="True" Grid.Column="4" Content="{TemplateBinding CloseButtonText}" HorizontalAlignment="Stretch" Theme="{TemplateBinding CloseButtonStyle}" />
+                      </Grid>
+                    </Border>
+                  </Grid>
+                </Border>
+              </Border>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type c:RibbonColorDialogHost}" TargetType="c:RibbonColorDialogHost" BasedOn="{StaticResource {x:Type c:RibbonDialogHost}}" />
+</ResourceDictionary>

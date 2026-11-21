@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+ xmlns:cad="using:FerroRibbon.Sample.Cad">
+ <rs:RibbonIconPresenter Icon="{cad:CadIcon Name=Line}" />
+ <rs:RibbonIconPresenter Icon="{cad:CadIcon Name=LineHelp}" />
+ <rs:RibbonIconPresenter Icon="{cad:CadIcon Name=Unknown}" />
+ <rs:RibbonIconPresenter Icon="{x:Static cad:CadIcons.Box}" />
+ <rs:RibbonIconPresenter Icon="{x:Static cad:CadArt.HatchSolid}" />
+</StackPanel>

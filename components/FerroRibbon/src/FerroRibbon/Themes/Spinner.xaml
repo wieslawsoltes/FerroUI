@@ -1,0 +1,77 @@
+<!-- Original RibbonSpace spinner template. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonSpinner" x:Key="{x:Type c:RibbonSpinner}">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid Height="{TemplateBinding InputHeight}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <p:RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" Margin="3,0,4,0" IsVisible="{TemplateBinding IconVisibility,Converter={x:Static i:RibbonInputTemplateValues.VisibilityToBoolean}}" />
+            <TextBlock x:Name="PART_Label" Grid.Column="1" Text="{TemplateBinding Label}" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{TemplateBinding Foreground}" IsVisible="{TemplateBinding LabelVisibility,Converter={x:Static i:RibbonInputTemplateValues.VisibilityToBoolean}}" />
+            <Border x:Name="PART_InputBorder" Grid.Column="2" Width="{TemplateBinding InputWidth}" Background="{DynamicResource RibbonInputBackgroundBrush}" BorderBrush="{DynamicResource RibbonInputBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource RibbonControlCornerRadius}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <i:RibbonInputTextBox x:Name="PART_TextBox" VerticalAlignment="Center" FontSize="{TemplateBinding FontSize}" MinWidth="0" MinHeight="0" Padding="5,1,4,1" BorderThickness="0" Background="Transparent"
+                    Foreground="{TemplateBinding Foreground}" CaretBrush="{TemplateBinding Foreground}"
+                    PlaceholderForeground="{DynamicResource RibbonSecondaryForegroundBrush}"
+                    SelectionBrush="{DynamicResource RibbonAccentBrush}" SelectionForegroundBrush="{DynamicResource RibbonAccentForegroundBrush}">
+                  <TextBox.Resources>
+                    <x:Double x:Key="TextControlThemeMinHeight">18</x:Double>
+                    <x:Double x:Key="TextControlThemeMinWidth">20</x:Double>
+                    <Thickness x:Key="TextControlThemePadding">5,1,4,1</Thickness>
+                    <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                    <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                  </TextBox.Resources>
+                </i:RibbonInputTextBox>
+                <Grid Grid.Column="1" Width="16">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                  </Grid.RowDefinitions>
+                  <i:RibbonInputRepeatButton x:Name="PART_UpButton" IsTabStop="False" Theme="{StaticResource RibbonSpinButtonStyle}">
+                    <compat:FontIcon Glyph="" FontSize="7" />
+                  </i:RibbonInputRepeatButton>
+                  <i:RibbonInputRepeatButton x:Name="PART_DownButton" Grid.Row="1" IsTabStop="False" Theme="{StaticResource RibbonSpinButtonStyle}">
+                    <compat:FontIcon Glyph="" FontSize="7" />
+                  </i:RibbonInputRepeatButton>
+                </Grid>
+              </Grid>
+            </Border>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style Selector="^:input-pointerover /template/ Border#PART_InputBorder">
+      <Setter Property="BorderBrush" Value="{DynamicResource RibbonInputHoverBorderBrush}" />
+    </Style>
+    <Style Selector="^:input-focused /template/ Border#PART_InputBorder">
+      <Setter Property="BorderBrush" Value="{DynamicResource RibbonInputFocusBorderBrush}" />
+    </Style>
+    <Style Selector="^:input-disabled /template/ TextBlock#PART_Label">
+      <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
+    </Style>
+    <Style Selector="^:input-disabled /template/ Border#PART_InputBorder">
+      <Setter Property="Opacity" Value="0.6" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,49 @@
+<!-- RibbonSpace Items.xaml split styles. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme x:Key="DefaultRibbonSplitButtonStyle" TargetType="c:RibbonSplitButton">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="KeyboardNavigation.IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border x:Name="PART_Chrome" CornerRadius="{DynamicResource RibbonControlCornerRadius}" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
+            <Grid x:Name="PART_Root">
+              <Button x:Name="PART_PrimaryButton" Foreground="{TemplateBinding Foreground}" Theme="{StaticResource RibbonSplitPartButtonStyle}">
+                <p:RibbonItemContent x:Name="PART_PrimaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
+              </Button>
+              <Button x:Name="PART_SecondaryButton" Foreground="{TemplateBinding Foreground}" Theme="{StaticResource RibbonSplitPartButtonStyle}">
+                <p:RibbonItemContent x:Name="PART_SecondaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
+              </Button>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style Selector="^:checked /template/ Border#PART_Chrome">
+      <Setter Property="Background" Value="{DynamicResource RibbonItemCheckedBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#PART_Chrome">
+      <Setter Property="BorderBrush" Value="{DynamicResource RibbonItemCheckedBorderBrush}" />
+    </Style>
+    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_PrimaryContent">
+      <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
+    </Style>
+    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_PrimaryContent">
+      <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
+    </Style>
+    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_SecondaryContent">
+      <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
+    </Style>
+    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_SecondaryContent">
+      <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
+    </Style>
+    <Style Selector="^:dropdownopen /template/ Button#PART_SecondaryButton">
+      <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme TargetType="c:RibbonSplitButton" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" x:Key="{x:Type c:RibbonSplitButton}" />
+</ResourceDictionary>

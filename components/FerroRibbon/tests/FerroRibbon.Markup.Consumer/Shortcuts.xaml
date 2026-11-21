@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon x:Name="RibbonRoot" x:DataType="local:CommandViewModel" IsShortcutRoutingEnabled="True" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <r:Ribbon.DataContext><local:CommandViewModel /></r:Ribbon.DataContext>
+  <r:RibbonTab Header="Home"><r:RibbonGroup Header="Tools"><r:RibbonButton Id="first" Label="Run" Shortcut="Ctrl+B" Command="{Binding Command}" CommandParameter="{Binding Value}" /></r:RibbonGroup></r:RibbonTab>
+  <r:RibbonTab Header="Other"><r:RibbonGroup Header="Other"><r:RibbonButton Id="second" Label="Run again" Shortcut="Ctrl+B" Command="{Binding Command}" CommandParameter="{Binding Value}" /></r:RibbonGroup></r:RibbonTab>
+ </r:Ribbon>
+ <TextBlock Text="{Binding ElementName=RibbonRoot,Path=IsShortcutRoutingEnabled}" />
+</StackPanel>

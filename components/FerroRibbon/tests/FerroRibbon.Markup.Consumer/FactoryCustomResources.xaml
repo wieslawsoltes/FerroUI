@@ -1,0 +1,19 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <local:ConsumerElementFactory x:Key="Factory" />
+  <m:RibbonCustomItemModel x:Key="Custom" Id="custom-resource" Content="payload" TemplateKey="Pick" />
+  <ResourceDictionary x:Key="LookupResources">
+   <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary><DataTemplate x:Key="Pick"><TextBlock Text="first merged template" /></DataTemplate></ResourceDictionary>
+    <ResourceInclude Source="ferres://ferroribbon_markup_consumer/FactoryCustomTemplates.xaml" />
+   </ResourceDictionary.MergedDictionaries>
+   <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Dark">
+     <DataTemplate x:Key="Pick"><TextBlock Text="outer theme must lose to merged" /></DataTemplate>
+     <DataTemplate x:Key="Themed"><TextBlock Text="dark template" /></DataTemplate>
+    </ResourceDictionary>
+   </ResourceDictionary.ThemeDictionaries>
+  </ResourceDictionary>
+ </ResourceDictionary></StackPanel.Resources>
+ <TextBlock x:DataType="m:RibbonCustomItemModel" DataContext="{StaticResource Custom}" Text="{Binding TemplateKey}" />
+</StackPanel>

@@ -1,0 +1,5 @@
+<c:BitmapIcon xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:c="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon"
+ x:DataType="c:BitmapIconSource" x:CompileBindings="True"
+ UriSource="{Binding UriSource, Mode=TwoWay}" ShowAsMonochrome="{Binding ShowAsMonochrome, Mode=TwoWay}"
+ Foreground="{Binding Foreground, Mode=TwoWay}" />

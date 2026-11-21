@@ -1,0 +1,24 @@
+<local:ConsumerDialogHost xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" Title="Consumer dialog" PrimaryButtonText="Apply" SecondaryButtonText="Other" CloseButtonText="Cancel" IsSecondaryButtonEnabled="False">
+ <local:ConsumerDialogHost.Resources>
+  <ControlTemplate x:Key="Replacement" TargetType="r:RibbonColorDialogHost">
+   <StackPanel>
+    <ContentControl x:Name="Title" Content="{TemplateBinding Title}" />
+    <ContentPresenter x:Name="Content" Content="{TemplateBinding Content}" />
+    <Grid x:Name="CommandSpace">
+     <Grid.ColumnDefinitions>
+      <ColumnDefinition x:Name="PrimaryColumn" Width="*" />
+      <ColumnDefinition x:Name="SecondSpacer" Width="7.25" />
+      <ColumnDefinition x:Name="SecondaryColumn" Width="0" />
+      <ColumnDefinition x:Name="FirstSpacer" Width="0" />
+      <ColumnDefinition x:Name="CloseColumn" Width="*" />
+     </Grid.ColumnDefinitions>
+     <Button x:Name="PrimaryButton" Content="{TemplateBinding PrimaryButtonText}" IsEnabled="{TemplateBinding IsPrimaryButtonEnabled}" />
+     <Button x:Name="SecondaryButton" Content="{TemplateBinding SecondaryButtonText}" IsEnabled="{TemplateBinding IsSecondaryButtonEnabled}" />
+     <Button x:Name="CloseButton" Grid.Column="4" Content="{TemplateBinding CloseButtonText}" />
+    </Grid>
+   </StackPanel>
+  </ControlTemplate>
+ </local:ConsumerDialogHost.Resources>
+ <local:ConsumerDialogHost.PrimaryButtonStyle><ControlTheme TargetType="Button"><Setter Property="MinHeight" Value="41.5" /></ControlTheme></local:ConsumerDialogHost.PrimaryButtonStyle>
+ <TextBox x:Name="RetainedEditor" Text="consumer text" />
+</local:ConsumerDialogHost>

@@ -1,0 +1,11 @@
+<local:ApplicationMenuView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.ApplicationMenuView" x:Name="Root">
+  <r:Ribbon x:Name="RibbonOwner" IsVisible="False" />
+  <local:ConsumerApplicationMenu x:Name="Menu" Ribbon="{Binding #RibbonOwner}" RecentHeader="Documents" ItemInvoked="ItemClick" RecentItemInvoked="RecentInvoked">
+    <r:RibbonApplicationMenuItem Id="save-as" Label="{Binding #Root.Header}" >
+      <r:RibbonApplicationMenuItem Id="drawing" Label="Drawing" Command="{Binding #Root.Command}" CommandParameter="{Binding #Root.Parameter}" Click="ItemClick" />
+    </r:RibbonApplicationMenuItem>
+    <r:RibbonApplicationMenu.RecentItems><r:RibbonApplicationMenuRecentItem Title="Drawing" IsPinned="True" Click="RecentClick" /></r:RibbonApplicationMenu.RecentItems>
+    <r:RibbonApplicationMenu.FooterItems><Button Content="Options" /></r:RibbonApplicationMenu.FooterItems>
+  </local:ConsumerApplicationMenu>
+  <TextBlock Text="{Binding #Menu.FooterItems.Count}" />
+</local:ApplicationMenuView>

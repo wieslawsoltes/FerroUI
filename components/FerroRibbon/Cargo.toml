@@ -1,0 +1,78 @@
+# A workspace of its own, consumed from this repository by path, as components/FerroBoard is:
+# nothing in the FerroUI workspace depends on it, so no FerroUI application links it.
+[workspace]
+members = [
+    "src/FerroRibbon.Core",
+    "src/FerroRibbon",
+    "src/FerroRibbon.Platform",
+    "samples/FerroRibbon.Sample",
+    "samples/FerroRibbon.NativeProbe",
+    "samples/FerroRibbon.Browser",
+    "tests/FerroRibbon.Core.Consumer",
+    "tests/FerroRibbon.Markup.Consumer",
+    "tests/FerroRibbon.Search.Consumer",
+]
+# The samples need a rendering backend; the libraries and their consumers do not.
+default-members = [
+    "src/FerroRibbon.Core",
+    "src/FerroRibbon",
+    "src/FerroRibbon.Platform",
+    "tests/FerroRibbon.Core.Consumer",
+    "tests/FerroRibbon.Markup.Consumer",
+    "tests/FerroRibbon.Search.Consumer",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.93"
+license = "MIT"
+authors = ["Wiesław Šoltés"]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.dependencies]
+uuid = { version = "1.28.0", features = ["v4"] }
+bitflags = "2.13.2"
+futures-channel = "0.3.34"
+futures-util = { version = "0.3.34", default-features = false, features = ["std"] }
+futures-executor = "0.3.34"
+serde_json = "1.0.145"
+ferroui-base = { path = "../../src/FerroUI.Base" }
+ferroui-browser = { path = "../../src/Browser/FerroUI.Browser" }
+ferroui-build = { path = "../../src/FerroUI.Build.Tasks" }
+ferroui-build-scan = { path = "../../src/FerroUI.Build.Scan" }
+ferroui-controls = { path = "../../src/FerroUI.Controls" }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop" }
+ferroui-fonts-inter = { path = "../../src/FerroUI.Fonts.Inter" }
+ferroui-headless = { path = "../../src/Headless/FerroUI.Headless" }
+ferroui-markup-xaml = { path = "../../src/Markup/FerroUI.Markup.Xaml" }
+ferroui-markup-xaml-loader = { path = "../../src/Markup/FerroUI.Markup.Xaml.Loader" }
+ferroui-reactive = { path = "../../src/FerroUI.Reactive" }
+ferroui-reactiveui = { path = "../../src/FerroUI.ReactiveUI" }
+ferroui-system = { path = "../../src/FerroUI.System" }
+ferroui-themes-fluent = { path = "../../src/FerroUI.Themes.Fluent" }
+ferroui-themes-simple = { path = "../../src/FerroUI.Themes.Simple" }
+ferroui-themes-winui = { path = "../../src/FerroUI.Themes.WinUI" }
+
+[patch.crates-io]
+# The source hotfix for Graphite Metal's retained Objective-C objects, as in the FerroUI workspace.
+skia-bindings = { path = "../../external/rust-skia-bindings" }
+
+[profile.dev.package.ferroribbon-browser]
+# Keep debug builds within Chromium's WebAssembly module size limit.
+debug = 0
+
+[profile.browser]
+inherits = "release"
+opt-level = "z"
+lto = "thin"
+codegen-units = 1
+
+[profile.browser.package.ferroui-base]
+opt-level = "s"
+
+[profile.browser.package.ferroui-controls]
+opt-level = "s"

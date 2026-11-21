@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/TextInput.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Spinner.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Slider.xaml" /></ResourceDictionary.MergedDictionaries>
+  <m:RibbonSpinnerModel x:Key="Spinner" Minimum="-10" Maximum="30" Increment="0.25" Format="0.00" Unit="pt" InputWidth="85"><x:Arguments><x:String>spin</x:String><x:String>Spacing</x:String><x:Double>7.25</x:Double></x:Arguments></m:RibbonSpinnerModel>
+  <m:RibbonTextBoxModel x:Key="Text" Id="text" Label="Find" Text="café 😀" Placeholder="Search" InputWidth="160" />
+  <m:RibbonSliderModel x:Key="Slider" Id="slider" Label="Zoom" Minimum="-5" Maximum="50" StepFrequency="2.5" SliderWidth="155" Value="12.5" />
+  <m:RibbonModel x:Key="Graph"><m:RibbonModel.Tabs><m:RibbonTabModel Id="home" Label="Home"><m:RibbonTabModel.Groups><m:RibbonGroupModel Id="inputs" Label="Inputs"><m:RibbonGroupModel.Items><StaticResource ResourceKey="Spinner" /><StaticResource ResourceKey="Text" /><StaticResource ResourceKey="Slider" /></m:RibbonGroupModel.Items></m:RibbonGroupModel></m:RibbonTabModel.Groups></m:RibbonTabModel></m:RibbonModel.Tabs></m:RibbonModel>
+ </ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False" />
+ <TextBox x:DataType="m:RibbonTextBoxModel" DataContext="{StaticResource Text}" Text="{Binding Text, Mode=TwoWay}" />
+ <TextBlock x:DataType="m:RibbonSpinnerModel" DataContext="{StaticResource Spinner}" Text="{Binding Value}" />
+ <TextBlock x:DataType="m:RibbonSliderModel" DataContext="{StaticResource Slider}" Text="{Binding Value}" />
+</StackPanel>

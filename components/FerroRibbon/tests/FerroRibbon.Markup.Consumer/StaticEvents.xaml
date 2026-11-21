@@ -1,0 +1,2 @@
+<local:StaticEventConsumer xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.StaticEventConsumer" Ping="OnPing" Signal="OnChanged" Tag="{Binding $self.remove_Ping}" />

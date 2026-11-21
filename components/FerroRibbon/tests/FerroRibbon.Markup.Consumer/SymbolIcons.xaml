@@ -1,0 +1,11 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:c="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+  <StackPanel.Resources><ResourceDictionary>
+    <c:SymbolIconSource x:Key="Source" Symbol="Save" Foreground="#0000ff" />
+  </ResourceDictionary></StackPanel.Resources>
+  <c:SymbolIcon x:Name="Original" Symbol="Home" Foreground="#0000ff" />
+  <r:RibbonIconPresenter Icon="{Binding ElementName=Original}" IconSize="24" Foreground="#ff0000" />
+  <r:RibbonIconPresenter Icon="{StaticResource Source}" IconSize="23.5" Foreground="#ff0000" />
+  <c:MenuFlyoutItem Text="Symbol" r:RibbonMenu.Icon="{StaticResource Source}" />
+</StackPanel>

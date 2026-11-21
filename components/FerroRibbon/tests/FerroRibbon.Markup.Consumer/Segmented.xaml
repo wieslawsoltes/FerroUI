@@ -1,0 +1,22 @@
+<local:SegmentedView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer">
+ <local:SegmentedView.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries>
+   <ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" />
+   <ResourceInclude Source="ferres://FerroRibbon/Themes/Checked.xaml" />
+   <ResourceInclude Source="ferres://FerroRibbon/Themes/Segmented.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <m:RibbonSegmentModel x:Key="A" Label="Draw"><x:Arguments><x:String>draw</x:String></x:Arguments></m:RibbonSegmentModel>
+  <m:RibbonSegmentModel x:Key="B" Label="Review"><x:Arguments><x:String>review</x:String></x:Arguments></m:RibbonSegmentModel>
+  <m:RibbonSegmentedModel x:Key="Model" Id="workspace" Label="Workspace" SelectedSegment="{StaticResource B}">
+   <m:RibbonSegmentedModel.Segments><StaticResource ResourceKey="A" /><StaticResource ResourceKey="B" /></m:RibbonSegmentedModel.Segments>
+  </m:RibbonSegmentedModel>
+  <m:RibbonModel x:Key="Graph"><m:RibbonModel.Tabs><m:RibbonTabModel Id="view" Label="View"><m:RibbonTabModel.Groups><m:RibbonGroupModel Id="work" Label="Work"><m:RibbonGroupModel.Items><StaticResource ResourceKey="Model" /></m:RibbonGroupModel.Items></m:RibbonGroupModel></m:RibbonTabModel.Groups></m:RibbonTabModel></m:RibbonModel.Tabs></m:RibbonModel>
+ </ResourceDictionary></local:SegmentedView.Resources>
+ <r:Ribbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False" />
+ <local:ConsumerSegmented x:Name="Direct" SelectionChanged="Selected">
+  <r:RibbonSegment Label="Draw" Value="draw" />
+  <r:RibbonSegment Label="Review" Value="review" />
+ </local:ConsumerSegmented>
+ <TextBlock Text="{Binding ElementName=Direct, Path=SelectedIndex}" />
+ <r:RibbonSegmentedControl><r:RibbonSegmentedControl.Theme><ControlTheme TargetType="r:RibbonSegmentedControl"><Setter Property="Template"><ControlTemplate><StackPanel Name="PART_ItemsHost" Orientation="Horizontal" /></ControlTemplate></Setter></ControlTheme></r:RibbonSegmentedControl.Theme><r:RibbonSegment Label="Custom" /></r:RibbonSegmentedControl>
+</local:SegmentedView>

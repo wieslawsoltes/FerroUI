@@ -1,0 +1,14 @@
+<Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" RowDefinitions="Auto,Auto">
+  <Grid.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Search.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Grid.Resources>
+  <r:Ribbon x:Name="ConsumerRibbon" />
+  <r:RibbonSearchBox x:Name="ConsumerSearch" Grid.Row="1"
+                     Ribbon="{Binding #ConsumerRibbon}"
+                     PlaceholderText="Find a command" MaxResults="7" />
+</Grid>

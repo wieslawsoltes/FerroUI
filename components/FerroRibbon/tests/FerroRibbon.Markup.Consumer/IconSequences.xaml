@@ -1,0 +1,11 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer" xmlns:g="using:System.Collections.Generic" xmlns:m="using:FerroRibbon.Model">
+ <StackPanel.Resources><ResourceDictionary>
+  <g:List x:Key="Declared" x:TypeArguments="m:RibbonIconLayer"><m:RibbonIconLayer><x:Arguments><x:String>declared</x:String></x:Arguments></m:RibbonIconLayer></g:List>
+  <local:IconSequenceConsumer x:Key="Data" />
+  <m:RibbonButtonModel x:Key="CollectionCommand" Id="collection" Tag="{StaticResource Declared}" CommandParameter="{StaticResource Declared}" />
+ </ResourceDictionary></StackPanel.Resources>
+ <TextBlock DataContext="{StaticResource Data}" x:DataType="local:IconSequenceConsumer" Text="{Binding Layers.Count}" />
+ <TextBlock DataContext="{StaticResource Data}" x:DataType="local:IconSequenceConsumer" Text="{Binding Layers[0].Data}" />
+ <TextBlock DataContext="{StaticResource Declared}" x:CompileBindings="False" Text="{Binding Count}" />
+ <TextBlock DataContext="{StaticResource CollectionCommand}" x:CompileBindings="False" Text="{Binding Tag.Count}" />
+</StackPanel>

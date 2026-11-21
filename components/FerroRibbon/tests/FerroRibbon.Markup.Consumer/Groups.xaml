@@ -1,0 +1,21 @@
+<local:ConsumerRibbonGroup xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+ xmlns:local="using:FerroRibbon.Consumer"
+ x:DataType="local:CommandViewModel" Header="Clipboard" Id="clipboard"
+ IsDialogLauncherVisible="True" ItemsLayout="Rows" RowCount="2"
+ DialogLauncherCommand="{Binding Command}" DialogLauncherCommandParameter="{Binding Value}">
+ <local:ConsumerRibbonGroup.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries>
+   <ResourceInclude Source="ferres://FerroRibbon/Themes/Groups.xaml" />
+   <ResourceInclude Source="ferres://FerroRibbon/Themes/SimpleItems.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme x:Key="{x:Type local:ConsumerRibbonItemsContainer}" TargetType="local:ConsumerRibbonItemsContainer">
+   <Setter Property="Template"><ControlTemplate><StackPanel x:Name="PART_ItemsHost" /></ControlTemplate></Setter>
+  </ControlTheme>
+ </ResourceDictionary></local:ConsumerRibbonGroup.Resources>
+ <local:ConsumerRibbonGroup.DataContext><local:CommandViewModel /></local:ConsumerRibbonGroup.DataContext>
+ <r:RibbonButton Label="Paste" Command="{Binding Command}" CommandParameter="{Binding Value}" />
+ <r:RibbonStackPanel Spacing="4.5"><r:RibbonButton Label="Copy" /><r:RibbonButton Label="Cut" /></r:RibbonStackPanel>
+ <local:ConsumerRibbonItemsContainer><r:RibbonButton Label="Custom child" /></local:ConsumerRibbonItemsContainer>
+</local:ConsumerRibbonGroup>

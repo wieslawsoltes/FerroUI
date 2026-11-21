@@ -1,0 +1,9 @@
+<local:ConsumerBadge xmlns="https://github.com/ferroui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:local="using:FerroRibbon.Consumer" Text="Custom">
+  <local:ConsumerBadge.Template>
+    <ControlTemplate>
+      <Border Padding="7" Background="#123456"><TextBlock Text="{TemplateBinding Text}" /></Border>
+    </ControlTemplate>
+  </local:ConsumerBadge.Template>
+</local:ConsumerBadge>

@@ -1,0 +1,18 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:s="using:FerroRibbon.State" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries>
+  <s:RibbonState x:Key="Saved" SelectedTabId="custom" DisplayMode="Simplified" Density="Compact" QuickAccessPosition="BelowRibbon" ShowQuickAccessLabels="True">
+   <s:RibbonState.Customization><s:RibbonCustomization>
+    <s:RibbonCustomization.TabOrder><x:String>custom</x:String><x:String>home</x:String></s:RibbonCustomization.TabOrder>
+    <s:RibbonCustomization.CustomTabs><s:RibbonCustomTab Id="custom" Label="Personal">
+     <s:RibbonCustomTab.Groups><s:RibbonCustomGroup Id="mine" Label="My commands"><s:RibbonCustomGroup.ItemIds><x:String>cut</x:String></s:RibbonCustomGroup.ItemIds></s:RibbonCustomGroup></s:RibbonCustomTab.Groups>
+    </s:RibbonCustomTab></s:RibbonCustomization.CustomTabs>
+   </s:RibbonCustomization></s:RibbonState.Customization>
+  </s:RibbonState>
+ </ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerRibbon Tag="{StaticResource Saved}" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <r:RibbonTab Id="home" Header="Home"><r:RibbonGroup Id="tools" Header="Tools"><local:ConsumerRibbonButton Id="cut" Label="Cut" /></r:RibbonGroup></r:RibbonTab>
+ </local:ConsumerRibbon>
+ <TextBlock DataContext="{StaticResource Saved}" x:DataType="s:RibbonState" Text="{Binding Customization.CustomTabs[0].Label}" />
+</StackPanel>

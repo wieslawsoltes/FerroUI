@@ -1,0 +1,26 @@
+<!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
+<UserControl
+             xmlns="https://github.com/ferroui"
+             xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <!-- Native migration: declare the source recommended rs prefix explicitly. -->
+  <StackPanel>
+    <rs:Ribbon x:Name="RibbonElement">
+      <rs:RibbonTab Id="home" Header="Home">
+        <rs:RibbonGroup Id="font" Header="Font">
+          <rs:RibbonToggleButton Id="bold" Label="Bold" Icon="&#xE8DD;" />
+        </rs:RibbonGroup>
+      </rs:RibbonTab>
+    </rs:Ribbon>
+    <!-- A type from RibbonSpace.Controls.Primitives through the same prefix. -->
+    <rs:RibbonIconPresenter x:Name="IconElement" Icon="&#xE8C6;" />
+  </StackPanel>
+</UserControl>

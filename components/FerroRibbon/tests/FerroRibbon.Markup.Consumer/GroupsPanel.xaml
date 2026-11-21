@@ -1,0 +1,2 @@
+<r:RibbonGroupsPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+ PanelPresentation="Titles" ReductionStrategy="GroupByGroup" GroupSpacing="1.25"><r:RibbonGroup Header="Tools" /></r:RibbonGroupsPanel>

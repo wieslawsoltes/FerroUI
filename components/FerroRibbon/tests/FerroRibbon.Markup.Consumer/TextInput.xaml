@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:InputViewModel">
+ <StackPanel.DataContext><local:InputViewModel /></StackPanel.DataContext>
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/TextInput.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <r:RibbonTextBox x:Name="Input" Id="query" Label="Find" PlaceholderText="Find text" Text="{Binding Text,Mode=TwoWay}" Command="{Binding Command}" />
+ <local:ConsumerTextBox x:Name="CustomInput" Label="Hidden by override" Text="{Binding Text,Mode=TwoWay}" />
+ <TextBlock Text="{Binding ElementName=Input,Path=LabelVisibility}" />
+</StackPanel>

@@ -1,0 +1,6 @@
+<local:ImageEventsView xmlns="https://github.com/ferroui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:local="using:FerroRibbon.Consumer"
+                       x:Class="FerroRibbon.Consumer.ImageEventsView">
+  <Image ImageOpened="OnImageOpened" ImageFailed="OnImageFailed" />
+</local:ImageEventsView>

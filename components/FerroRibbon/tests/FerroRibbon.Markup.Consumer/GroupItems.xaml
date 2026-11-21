@@ -1,0 +1,8 @@
+<local:ConsumerGroupItemsPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="using:FerroRibbon.Consumer" xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+ ItemsLayout="Rows" RowCount="2" Metrics="{x:Static rs:RibbonMetrics.Compact}" SimplifiedSpacing="1.5">
+ <TextBox Width="21.5" Height="12" Text="One" />
+ <TextBox Width="33.25" Height="17" Text="Two" />
+ <TextBox Width="15" Height="9" Text="Three" />
+</local:ConsumerGroupItemsPanel>

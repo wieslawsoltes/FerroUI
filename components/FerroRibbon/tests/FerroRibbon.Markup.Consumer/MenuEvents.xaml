@@ -1,0 +1,7 @@
+<local:MenuEventsView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.MenuEventsView">
+ <r:Ribbon x:Name="Ribbon" IsContextMenuEnabled="True" CanCustomize="False" IsVisibilityMenuEnabled="True" ContextMenuOpening="OnContext" CustomizeRequested="OnCustomize">
+  <r:Ribbon.QuickAccessToolBar><r:RibbonQuickAccessToolBar /></r:Ribbon.QuickAccessToolBar>
+  <r:RibbonTab Id="home" Header="Home"><r:RibbonGroup Id="edit" Header="Edit"><r:RibbonButton Id="save" Label="Save" /></r:RibbonGroup></r:RibbonTab>
+ </r:Ribbon>
+ <TextBlock x:Name="Page" Tag="{x:Static r:RibbonCustomizePage.QuickAccessToolbar}" />
+</local:MenuEventsView>

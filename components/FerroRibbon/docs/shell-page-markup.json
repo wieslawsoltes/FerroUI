@@ -1,0 +1,25 @@
+{
+  "source": "samples/RibbonSpace.Demo/ShellPage.xaml",
+  "source_sha256": "1ed9e32344588d213902ac174d929045d271a998ac98a19f6718a20dc56e8302",
+  "revision": "9755e281547923f10397dffa366e3355b12b55ea",
+  "source_elements": 14,
+  "source_names": [
+    "Rail",
+    "WordRail",
+    "CadRail",
+    "PageHost"
+  ],
+  "source_ids": [
+    "rail.word",
+    "rail.excel",
+    "rail.powerpoint",
+    "rail.tools",
+    "rail.cad",
+    "rail.settings"
+  ],
+  "adaptations": [
+    "Page maps to native UserControl class; original complete Grid/rail/toggles/separator/host retained.",
+    "ThemeResource maps to native DynamicResource, with source font defaults explicit.",
+    "View actions use a control-independent generic navigation model and ReactiveUI command; native surface owns actual controls, pages and subscriptions."
+  ]
+}

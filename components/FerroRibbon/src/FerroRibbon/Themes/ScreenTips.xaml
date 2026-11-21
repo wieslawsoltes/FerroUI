@@ -1,0 +1,33 @@
+<!-- Split from pinned RibbonSpace Themes/Items.xaml, Copyright Wiesław Šoltés, MIT.
+     Only RibbonScreenTip is ported here. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ControlTheme TargetType="c:RibbonScreenTip" x:Key="{x:Type c:RibbonScreenTip}">
+    <Setter Property="MaxWidth" Value="320" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:RibbonScreenTip">
+          <Border Padding="2">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{TemplateBinding TitleText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+              <p:RibbonIconPresenter x:Name="PART_Image" Icon="{TemplateBinding Image}" IconSize="96" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
+              <TextBlock x:Name="PART_Description" Text="{TemplateBinding Description}" TextWrapping="Wrap" Opacity="0.9" />
+              <TextBlock x:Name="PART_DisabledReason" Text="{TemplateBinding DisabledReason}" TextWrapping="Wrap" FontStyle="Italic" Opacity="0.8" />
+              <Border x:Name="PART_Extended" BorderThickness="0,1,0,0" Padding="0,6,0,0" BorderBrush="{DynamicResource RibbonSeparatorBrush}" IsVisible="False">
+                <StackPanel Spacing="6">
+                  <p:RibbonIconPresenter x:Name="PART_ExtendedImage" Icon="{TemplateBinding ExtendedImage}" IconSize="160" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
+                  <TextBlock x:Name="PART_ExtendedDescription" Text="{TemplateBinding ExtendedDescription}" TextWrapping="Wrap" Opacity="0.9" />
+                </StackPanel>
+              </Border>
+              <Border x:Name="PART_HelpText" BorderThickness="0,1,0,0" Padding="0,6,0,0" BorderBrush="{DynamicResource RibbonSeparatorBrush}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <compat:FontIcon Glyph="" FontSize="12" />
+                  <TextBlock Text="{TemplateBinding HelpText}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer"
+    xmlns:compat="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+  <StackPanel.Resources><ResourceDictionary>
+    <local:ImageViewModel x:Key="Model" />
+    <compat:ImageIconSource x:Key="Source" x:DataType="local:ImageViewModel"
+        ImageSource="{Binding Image,Source={StaticResource Model},Mode=TwoWay}" />
+  </ResourceDictionary></StackPanel.Resources>
+  <r:RibbonIconPresenter Icon="{StaticResource Source}" />
+</StackPanel>

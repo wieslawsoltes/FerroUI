@@ -1,0 +1,11 @@
+<local:ConsumerRibbon xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+ xmlns:local="using:FerroRibbon.Consumer" IsApplicationButtonVisible="False">
+ <local:ConsumerRibbon.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+  <ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" />
+ </ResourceDictionary.MergedDictionaries></ResourceDictionary></local:ConsumerRibbon.Resources>
+ <r:RibbonTab Header="Home" Id="home"><r:RibbonGroup Header="Tools" IsDialogLauncherVisible="True">
+  <r:RibbonButton Label="Run" />
+ </r:RibbonGroup></r:RibbonTab>
+</local:ConsumerRibbon>

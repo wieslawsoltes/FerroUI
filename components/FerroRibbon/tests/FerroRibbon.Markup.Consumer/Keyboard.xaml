@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerRibbon x:Name="KeyRibbon" x:DataType="local:CommandViewModel" IsKeyTipsEnabled="True" ApplicationButtonKeyTip="FF" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <r:Ribbon.DataContext><local:CommandViewModel /></r:Ribbon.DataContext>
+  <r:RibbonTab Header="Home" KeyTip="H"><r:RibbonGroup Header="Tools"><r:RibbonButton Id="run" Label="Run" r:RibbonKeyTip.KeyTip="AB" Command="{Binding Command}" CommandParameter="{Binding Value}" /></r:RibbonGroup></r:RibbonTab>
+ </local:ConsumerRibbon>
+ <TextBlock Text="{Binding ElementName=KeyRibbon,Path=CurrentKeyTips.Count}" />
+ <TextBlock>
+  <TextBlock.Inlines>
+   <InlineUIContainer>
+    <InlineUIContainer.Child><HyperlinkButton Content="Help" /></InlineUIContainer.Child>
+   </InlineUIContainer>
+  </TextBlock.Inlines>
+ </TextBlock>
+</StackPanel>

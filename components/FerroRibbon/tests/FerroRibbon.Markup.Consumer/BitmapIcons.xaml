@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:c="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+ <StackPanel.Resources><ResourceDictionary><c:BitmapIconSource x:Key="Source" UriSource="ferres://bitmap_icon_consumer/missing.png" ShowAsMonochrome="False" Foreground="Blue" /></ResourceDictionary></StackPanel.Resources>
+ <c:BitmapIcon x:Name="Original" UriSource="ferres://bitmap_icon_consumer/missing.png" ShowAsMonochrome="False" Foreground="Blue" />
+ <r:RibbonIconPresenter Icon="{Binding ElementName=Original}" IconSize="24" Foreground="Red" />
+ <r:RibbonIconPresenter Icon="{StaticResource Source}" IconSize="23.5" Foreground="Red" />
+ <c:MenuFlyoutItem Text="Bitmap" r:RibbonMenu.Icon="{StaticResource Source}" />
+</StackPanel>

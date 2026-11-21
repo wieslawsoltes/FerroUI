@@ -1,0 +1,10 @@
+<rs:RibbonIconPresenter xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:compat="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon"
+    IconSize="22" Foreground="#ff0000">
+  <rs:RibbonIconPresenter.Icon>
+    <compat:FontIcon Glyph="&#xE000;" FontFamily="Consumer Symbols" FontSize="99"
+        FontWeight="Bold" FontStyle="Italic" Foreground="#0000ff" />
+  </rs:RibbonIconPresenter.Icon>
+</rs:RibbonIconPresenter>

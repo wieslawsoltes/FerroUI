@@ -1,0 +1,42 @@
+<!-- Original titlebar tree with explicit native padding wrapper. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Search.xaml" /></ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonTitleBar" x:Key="{x:Type c:RibbonTitleBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonTitleBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonTitleBarForegroundBrush}" />
+    <Setter Property="Height" Value="44" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding CaptionButtonsInset}"><Grid x:Name="PART_Root">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <!-- Empty drag area behind the content (AttachToWindow registers it as the OS title bar). -->
+            <Border x:Name="PART_DragRegion" Grid.Column="3" Background="Transparent" />
+            <p:RibbonIconPresenter x:Name="PART_AppIcon" Icon="{TemplateBinding AppIcon}" IconSize="20" Margin="12,0,6,0" Foreground="{DynamicResource RibbonTitleBarIconBrush}" />
+            <!-- Application menu button (IsAppIconMenuEnabled): the app icon opens the ribbon's application menu / backstage. -->
+            <Button x:Name="PART_AppButton" Theme="{StaticResource RibbonChromeButtonStyle}" IsVisible="False" Padding="6,4" Margin="6,0,2,0" VerticalAlignment="Center">
+              <p:RibbonIconPresenter Icon="{TemplateBinding AppIcon}" IconSize="24" Foreground="{DynamicResource RibbonTitleBarIconBrush}" />
+            </Button>
+            <ContentPresenter x:Name="PART_StartContent" Grid.Column="1" Content="{TemplateBinding StartContent}" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+            <Border x:Name="PART_QuickAccessHost" Grid.Column="2" VerticalAlignment="Center" Margin="4,0" />
+            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+              <StackPanel x:Name="PART_Title" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="{TemplateBinding DisplayTitle}" Foreground="{TemplateBinding Foreground}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="320" VerticalAlignment="Center" />
+                <TextBlock Text="{TemplateBinding Subtitle}" Foreground="{TemplateBinding Foreground}" Opacity="0.7" VerticalAlignment="Center" />
+              </StackPanel>
+              <c:RibbonSearchBox x:Name="PART_SearchBox" />
+            </StackPanel>
+            <ContentPresenter x:Name="PART_EndContent" Grid.Column="4" Content="{TemplateBinding EndContent}" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{TemplateBinding Foreground}" />
+          </Grid></Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

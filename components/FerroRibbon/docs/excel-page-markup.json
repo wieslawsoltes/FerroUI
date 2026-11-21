@@ -1,0 +1,175 @@
+{
+  "source": "samples/RibbonSpace.Demo/Pages/ExcelPage.xaml",
+  "source_sha256": "a2723f8e5840c421bc26a35b00887f05e2fd7d524d1828e4a8617ab3ce309838",
+  "page_code_sha256": "d42d47bcd8f514c62598352e47e4caf5be9eeefd0e6ad4f9a25dd1e45a9927fd",
+  "revision": "9755e281547923f10397dffa366e3355b12b55ea",
+  "source_elements": 25,
+  "native_elements": 1946,
+  "source_names": [
+    "TitleBar",
+    "Ribbon",
+    "FormulaBar",
+    "Sheet"
+  ],
+  "sheet_rows": 25,
+  "sheet_columns": 13,
+  "data_cells": 288,
+  "source_values": [
+    {
+      "row": 1,
+      "column": 1,
+      "text": "Category"
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "text": "Q1"
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "text": "Q2"
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "text": "Q3"
+    },
+    {
+      "row": 1,
+      "column": 5,
+      "text": "Q4"
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "text": "Rent"
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "text": "1,200"
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "text": "1,200"
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "text": "1,250"
+    },
+    {
+      "row": 2,
+      "column": 5,
+      "text": "1,250"
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "text": "Software"
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "text": "860"
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "text": "910"
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "text": "940"
+    },
+    {
+      "row": 3,
+      "column": 5,
+      "text": "990"
+    },
+    {
+      "row": 4,
+      "column": 1,
+      "text": "Travel"
+    },
+    {
+      "row": 4,
+      "column": 2,
+      "text": "420"
+    },
+    {
+      "row": 4,
+      "column": 3,
+      "text": "380"
+    },
+    {
+      "row": 4,
+      "column": 4,
+      "text": "610"
+    },
+    {
+      "row": 4,
+      "column": 5,
+      "text": "300"
+    },
+    {
+      "row": 5,
+      "column": 1,
+      "text": "Marketing"
+    },
+    {
+      "row": 5,
+      "column": 2,
+      "text": "1,900"
+    },
+    {
+      "row": 5,
+      "column": 3,
+      "text": "2,400"
+    },
+    {
+      "row": 5,
+      "column": 4,
+      "text": "2,100"
+    },
+    {
+      "row": 5,
+      "column": 5,
+      "text": "2,650"
+    },
+    {
+      "row": 6,
+      "column": 1,
+      "text": "Total"
+    },
+    {
+      "row": 6,
+      "column": 2,
+      "text": "4,380"
+    },
+    {
+      "row": 6,
+      "column": 3,
+      "text": "4,890"
+    },
+    {
+      "row": 6,
+      "column": 4,
+      "text": "4,900"
+    },
+    {
+      "row": 6,
+      "column": 5,
+      "text": "5,190"
+    }
+  ],
+  "adaptations": [
+    "Source x:Bind model is explicit one-time compiled named-root binding; status/selected cell have typed data contexts and one-way notifications.",
+    "Grid.Padding uses a native Border, preserving Grid attached placement and background coverage.",
+    "Entire original 25x13 BuildSheet loop is passive native XAML, including shared header/line mutable brushes and per-cell white/black mutable brushes.",
+    "Native cell event adapter and presentation actions install after populate; exact arbitrary custom-populate construction callback timing differs from original BuildSheet-after-TitleBar construction."
+  ]
+}

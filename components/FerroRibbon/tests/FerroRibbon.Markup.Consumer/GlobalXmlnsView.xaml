@@ -1,0 +1,35 @@
+<!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
+<UserControl
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rs="using:FerroRibbon.Controls">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    <ControlTheme x:Key="WideButton" TargetType="rs:RibbonButton" BasedOn="{StaticResource DefaultRibbonButtonStyle}">
+      <Setter Property="MinWidth" Value="80" />
+    </ControlTheme>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <StackPanel>
+    <RibbonTitleBar x:Name="TitleBarElement" Title="Document" />
+    <Ribbon x:Name="RibbonElement">
+      <Ribbon.QuickAccessToolBar>
+        <RibbonQuickAccessToolBar>
+          <RibbonButton Id="save" Label="Save" Icon="&#xE74E;" />
+        </RibbonQuickAccessToolBar>
+      </Ribbon.QuickAccessToolBar>
+      <RibbonTab Id="home" Header="Home">
+        <RibbonGroup Id="editing" Header="Editing">
+          <RibbonButton Id="find" Label="Find" Icon="&#xE721;" Theme="{StaticResource WideButton}" RibbonKeyTip.KeyTip="FD" />
+        </RibbonGroup>
+      </RibbonTab>
+    </Ribbon>
+    <RibbonToolBar>
+      <RibbonButton Id="pen" Label="Pen" Icon="&#xED63;" RibbonContextualToolBar.Context="pen" />
+    </RibbonToolBar>
+    <RibbonIconPresenter x:Name="IconElement" Icon="&#xE8C6;" />
+  </StackPanel>
+</UserControl>

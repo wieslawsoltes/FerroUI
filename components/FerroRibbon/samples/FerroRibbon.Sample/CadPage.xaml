@@ -1,0 +1,1204 @@
+<!-- Adapted from pinned RibbonSpace CadPage.xaml, Wiesław Šoltés, MIT. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Compatibility" xmlns:cad="using:FerroRibbon.Sample.Cad" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="FerroRibbon.Sample.Pages.CadPage" x:DataType="cad:CadViewModel" x:CompileBindings="True" RequestedThemeVariant="Dark">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <DataTemplate x:Key="LayerItemTemplate" x:DataType="cad:CadLayer">
+        <StackPanel Orientation="Horizontal" Spacing="3" Height="20">
+          <r:RibbonIconPresenter IconSize="16" Icon="{Binding OnIcon}" Foreground="{DynamicResource RibbonIconBrush}" />
+          <r:RibbonIconPresenter IconSize="16" Icon="{Binding FreezeIcon}" Foreground="{DynamicResource RibbonIconBrush}" />
+          <r:RibbonIconPresenter IconSize="16" Icon="{Binding LockIcon}" Foreground="{DynamicResource RibbonIconBrush}" />
+          <Border Width="12" Height="12" Margin="3,0,5,0" VerticalAlignment="Center" BorderThickness="1" Background="{Binding ColorBrush}" BorderBrush="{DynamicResource RibbonSwatchBorderBrush}" />
+          <TextBlock VerticalAlignment="Center" FontSize="12" Text="{Binding Name}" />
+        </StackPanel>
+      </DataTemplate>
+      <DataTemplate x:Key="ColorItemTemplate" x:DataType="cad:CadColorOption">
+        <StackPanel Orientation="Horizontal" Spacing="6" Height="20">
+          <Grid Width="14" Height="14" VerticalAlignment="Center">
+            <Border BorderThickness="1" Background="{Binding Swatch}" BorderBrush="{DynamicResource RibbonSwatchBorderBrush}" />
+            <Polygon Points="0,14 14,0 14,14" Fill="{DynamicResource RibbonSecondaryForegroundBrush}" Opacity="{Binding SpecialOpacity}" />
+          </Grid>
+          <TextBlock VerticalAlignment="Center" FontSize="12" Text="{Binding Name}" />
+        </StackPanel>
+      </DataTemplate>
+      <DataTemplate x:Key="LinetypeItemTemplate" x:DataType="cad:CadLinetype">
+        <StackPanel Orientation="Horizontal" Spacing="8" Height="20">
+          <Line Width="40" VerticalAlignment="Center" StrokeThickness="1.4" StartPoint="0,10" EndPoint="40,10" Stroke="{DynamicResource RibbonForegroundBrush}" StrokeDashArray="{Binding Dashes}" />
+          <TextBlock VerticalAlignment="Center" FontSize="12" Text="{Binding Name}" />
+        </StackPanel>
+      </DataTemplate>
+      <DataTemplate x:Key="LineweightItemTemplate" x:DataType="cad:CadLineweight">
+        <StackPanel Orientation="Horizontal" Spacing="8" Height="20">
+          <Rectangle Width="40" VerticalAlignment="Center" Height="{Binding Thickness}" Fill="{DynamicResource RibbonForegroundBrush}" />
+          <TextBlock VerticalAlignment="Center" FontSize="12" Text="{Binding Name}" />
+        </StackPanel>
+      </DataTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid x:Name="Root" Background="{DynamicResource RibbonWindowBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <r:RibbonTitleBar x:Name="TitleBar" Title="Drawing1.dwg" Subtitle="RibbonSpace CAD" Height="38" SearchWidth="260" AppIcon="{cad:CadIcon Name=AppLogo}" IsAppIconMenuEnabled="True">
+      <r:RibbonTitleBar.EndContent>
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <Button x:Name="SignIn" Padding="8,0" Height="28" AutomationProperties.Name="Sign in">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <c:FontIcon Glyph="" FontSize="14" />
+              <TextBlock Text="Sign In" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="HelpButton" Padding="6,0" Height="28" AutomationProperties.Name="Help" ToolTip.Tip="Help (F1)">
+            <r:RibbonIconPresenter Icon="{cad:CadIcon Name=Help}" IconSize="18" Foreground="{DynamicResource RibbonIconBrush}" />
+          </Button>
+        </StackPanel>
+      </r:RibbonTitleBar.EndContent>
+    </r:RibbonTitleBar>
+    <r:Ribbon x:Name="Ribbon" Grid.Row="1" Density="Compact" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False" IsMinimizeButtonVisible="True" MinimizeBehavior="CycleAll" CanFloatGroups="True" IsVisibilityMenuEnabled="True" ReductionStrategy="GroupByGroup" IsShortcutRoutingEnabled="True">
+      <r:Ribbon.ApplicationMenu>
+        <Flyout x:Name="AppMenuFlyout" Placement="BottomEdgeAlignedLeft">
+          <r:RibbonApplicationMenu x:Name="AppMenu" RecentHeader="Recent Documents">
+            <r:RibbonApplicationMenuItem Id="new" Label="New" Icon="{cad:CadIcon Name=New}">
+              <r:RibbonApplicationMenuItem Id="newDrawing" Label="Drawing" Description="Creates a new drawing from a template." />
+              <r:RibbonApplicationMenuItem Id="newSheetSet" Label="Sheet Set" Description="Creates a new sheet set to organize layouts." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="open" Label="Open" Icon="{cad:CadIcon Name=Open}">
+              <r:RibbonApplicationMenuItem Id="openDrawing" Label="Drawing" Description="Opens an existing drawing file." />
+              <r:RibbonApplicationMenuItem Id="openFromWeb" Label="From Web &amp; Mobile" Description="Opens a drawing stored in the cloud." />
+              <r:RibbonApplicationMenuItem Id="openSheetSet" Label="Sheet Set" Description="Opens a sheet set data file." />
+              <r:RibbonApplicationMenuItem Id="openDgn" Label="DGN" Description="Imports the data from a DGN file into a new drawing." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="save" Label="Save" Icon="{cad:CadIcon Name=Save}" />
+            <r:RibbonApplicationMenuItem x:Name="SaveAsItem" Id="saveAs" Label="Save As" Icon="{cad:CadIcon Name=SaveAs}">
+              <r:RibbonApplicationMenuItem Id="saveAsDrawing" Label="Drawing" Icon="{cad:CadIcon Name=SaveAs}" Description="Saves the current drawing to a DWG file." />
+              <r:RibbonApplicationMenuItem Id="saveAsTemplate" Label="Drawing Template" Icon="{cad:CadIcon Name=New}" Description="Creates a drawing template (DWT) file in which you can create new drawings." />
+              <r:RibbonApplicationMenuItem Id="saveAsStandards" Label="Drawing Standards" Icon="{cad:CadIcon Name=Customize}" Description="Creates a drawing standards (DWS) file for checking drawings against standards." />
+              <r:RibbonApplicationMenuItem Id="saveAsOther" Label="Other Formats" Icon="{cad:CadIcon Name=Save}" Description="Saves the current drawing in DWG, DWT, DWS or DXF file format." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="import" Label="Import" Icon="{cad:CadIcon Name=ImportPdf}" HasSeparatorBefore="True">
+              <r:RibbonApplicationMenuItem Id="importPdf" Label="PDF" Icon="{cad:CadIcon Name=ImportPdf}" Description="Imports the geometry, fills, raster images and text from a PDF file." />
+              <r:RibbonApplicationMenuItem Id="importDgn" Label="DGN" Description="Imports the data from a DGN file into the current drawing." />
+              <r:RibbonApplicationMenuItem Id="importOther" Label="Other Formats" Description="Imports files of various formats into the current drawing." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="export" Label="Export" Icon="{cad:CadIcon Name=ExportPdf}">
+              <r:RibbonApplicationMenuItem Id="exportPdf" Label="PDF" Icon="{cad:CadIcon Name=ExportPdf}" Description="Exports the current drawing or layouts to a PDF file." />
+              <r:RibbonApplicationMenuItem Id="exportDwf" Label="DWF" Icon="{cad:CadIcon Name=Publish}" Description="Creates a DWF file and lets you set individual page setup overrides." />
+              <r:RibbonApplicationMenuItem Id="exportDgn" Label="DGN" Description="Exports the current drawing to a DGN file." />
+              <r:RibbonApplicationMenuItem Id="exportFbx" Label="FBX" Icon="{cad:CadIcon Name=Box}" Description="Exports 3D objects, cameras and lights to an FBX file." />
+              <r:RibbonApplicationMenuItem Id="exportOther" Label="Other Formats" Description="Exports the drawing to other file formats." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="publish" Label="Publish" Icon="{cad:CadIcon Name=Publish}">
+              <r:RibbonApplicationMenuItem Id="publishShare" Label="Share View" Icon="{cad:CadIcon Name=Share}" Description="Publishes a design view of the drawing in a web browser." />
+              <r:RibbonApplicationMenuItem Id="publishSend" Label="Send to 3D Print Service" Icon="{cad:CadIcon Name=Box}" Description="Sends a 3D model to a 3D printing service." />
+              <r:RibbonApplicationMenuItem Id="publishArchive" Label="Archive" Description="Packages the current sheet set files for archiving." />
+              <r:RibbonApplicationMenuItem Id="publishEtransmit" Label="eTransmit" Description="Creates a package of the drawing and its dependent files." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="print" Label="Print" Icon="{cad:CadIcon Name=Plot}">
+              <r:RibbonApplicationMenuItem Id="printPlot" Label="Plot" Icon="{cad:CadIcon Name=Plot}" Description="Plots a drawing to a plotter, printer or file." />
+              <r:RibbonApplicationMenuItem Id="printBatch" Label="Batch Plot" Icon="{cad:CadIcon Name=BatchPlot}" Description="Publishes drawings to DWF, DWFx and PDF files, or to printers and plotters." />
+              <r:RibbonApplicationMenuItem Id="printSetup" Label="Page Setup" Icon="{cad:CadIcon Name=PageSetup}" Description="Controls the page layout, plotting device, paper size and other settings for each new layout." />
+              <r:RibbonApplicationMenuItem Id="printPreview" Label="Plot Preview" Icon="{cad:CadIcon Name=ZoomWindow}" Description="Displays the drawing as it will be plotted." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="utilities" Label="Drawing Utilities" Icon="{cad:CadIcon Name=Units}" HasSeparatorBefore="True">
+              <r:RibbonApplicationMenuItem Id="utilUnits" Label="Units" Icon="{cad:CadIcon Name=Units}" Description="Controls coordinate and angle display formats and precision." />
+              <r:RibbonApplicationMenuItem Id="utilAudit" Label="Audit" Icon="{cad:CadIcon Name=QuickSelect}" Description="Evaluates the integrity of a drawing and corrects some errors." />
+              <r:RibbonApplicationMenuItem Id="utilStatus" Label="Status" Icon="{cad:CadIcon Name=IdPoint}" Description="Displays drawing statistics, modes and extents." />
+              <r:RibbonApplicationMenuItem Id="utilPurge" Label="Purge" Icon="{cad:CadIcon Name=Purge}" Description="Removes unused items, such as block definitions and layers, from the drawing." />
+              <r:RibbonApplicationMenuItem Id="utilRecover" Label="Recover" Icon="{cad:CadIcon Name=Open}" Description="Repairs and then opens a damaged drawing file." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenuItem Id="close" Label="Close" Icon="{cad:CadIcon Name=Close}">
+              <r:RibbonApplicationMenuItem Id="closeCurrent" Label="Current Drawing" Description="Closes the current drawing." />
+              <r:RibbonApplicationMenuItem Id="closeAll" Label="All Drawings" Description="Closes all currently open drawings." />
+            </r:RibbonApplicationMenuItem>
+            <r:RibbonApplicationMenu.RecentItems>
+              <r:RibbonApplicationMenuRecentItem Title="Floor Plan.dwg" Path="Projects › Riverside House" IsPinned="True" />
+              <r:RibbonApplicationMenuRecentItem Title="Gearbox Housing.dwg" Path="Projects › Mechanical" IsPinned="True" />
+              <r:RibbonApplicationMenuRecentItem Title="Site Layout.dwg" Path="Projects › Riverside House" />
+              <r:RibbonApplicationMenuRecentItem Title="Bracket Detail.dwg" Path="Projects › Mechanical" />
+              <r:RibbonApplicationMenuRecentItem Title="Electrical Plan.dwg" Path="Documents" />
+            </r:RibbonApplicationMenu.RecentItems>
+            <r:RibbonApplicationMenu.FooterItems>
+              <Button x:Name="AppMenuOptions" Content="Options" MinWidth="80" />
+              <Button x:Name="AppMenuExit" Content="Exit RibbonSpace CAD" />
+            </r:RibbonApplicationMenu.FooterItems>
+          </r:RibbonApplicationMenu>
+        </Flyout>
+      </r:Ribbon.ApplicationMenu>
+      <r:Ribbon.QuickAccessToolBar>
+        <r:RibbonQuickAccessToolBar>
+          <r:RibbonButton Id="qat.new" Label="New" Icon="{cad:CadIcon Name=New}" Shortcut="Ctrl+N" />
+          <r:RibbonButton Id="qat.open" Label="Open" Icon="{cad:CadIcon Name=Open}" Shortcut="Ctrl+O" />
+          <r:RibbonButton Id="qat.save" Label="Save" Icon="{cad:CadIcon Name=Save}" Shortcut="Ctrl+S" />
+          <r:RibbonButton Id="qat.saveAs" Label="Save As" Icon="{cad:CadIcon Name=SaveAs}" Shortcut="Ctrl+Shift+S" />
+          <r:RibbonButton Id="qat.undo" Label="Undo" Icon="{cad:CadIcon Name=Undo}" Shortcut="Ctrl+Z" />
+          <r:RibbonButton Id="qat.redo" Label="Redo" Icon="{cad:CadIcon Name=Redo}" Shortcut="Ctrl+Y" />
+          <r:RibbonButton Id="qat.plot" Label="Plot" Icon="{cad:CadIcon Name=Plot}" Shortcut="Ctrl+P" />
+          <r:RibbonComboBox x:Name="WorkspaceCombo" Id="qat.workspace" Label="Workspace" IsEditable="False" InputWidth="168" Text="Drafting &amp; Annotation" CanAddToQuickAccess="False">
+            <x:String>Drafting &amp; Annotation</x:String>
+            <x:String>3D Basics</x:String>
+            <x:String>3D Modeling</x:String>
+          </r:RibbonComboBox>
+        </r:RibbonQuickAccessToolBar>
+      </r:Ribbon.QuickAccessToolBar>
+      <r:Ribbon.ContextualGroups>
+        <r:RibbonContextualTabGroup Id="textEditor" Header="Text Editor" Color="#4CAF50" Activation="SelectOnShow" />
+        <r:RibbonContextualTabGroup Id="hatchCreation" Header="Hatch Creation" Color="#3DA9F5" Activation="SelectOnShow" />
+      </r:Ribbon.ContextualGroups>
+      <r:RibbonTab Header="Home" Id="home" KeyTip="H">
+        <r:RibbonGroup x:Name="DrawGroup" Header="Draw" Id="draw" Icon="{cad:CadIcon Name=Line}" ScreenTip="Lines, circles, arcs, polylines and other basic geometry.">
+          <r:RibbonButton Id="line" Label="Line" Icon="{cad:CadIcon Name=Line}" Size="Large" KeyTip="LI">
+            <r:RibbonButton.ScreenTip>
+              <r:RibbonScreenTip Title="Line" Description="Creates straight line segments.&#10;&#10;LINE" ExtendedDescription="With the LINE command, you can create a series of contiguous line segments. Each segment is a line object that can be edited separately. Specify the first point, then each next point; press Enter to end or type C to close the sequence." ExtendedImage="{cad:CadIcon Name=LineHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonButton.ScreenTip>
+          </r:RibbonButton>
+          <r:RibbonButton Id="polyline" Label="Polyline" Icon="{cad:CadIcon Name=Polyline}" Size="Large" KeyTip="PL">
+            <r:RibbonButton.ScreenTip>
+              <r:RibbonScreenTip Title="Polyline" Description="Creates a 2D polyline, a single object that is composed of line and arc segments.&#10;&#10;PLINE" ExtendedDescription="Switch between line and arc segments while drawing; set the width of each segment. Polylines can be edited, joined and offset as a single object." ExtendedImage="{cad:CadIcon Name=PolylineHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonButton.ScreenTip>
+          </r:RibbonButton>
+          <r:RibbonSplitButton Id="circle" Label="Circle" Icon="{cad:CadIcon Name=CircleCenterRadius}" Size="Large" FollowLastChoice="True" KeyTip="CI">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Circle" Description="Creates a circle using a center point and a radius.&#10;&#10;CIRCLE" ExtendedDescription="Pick the center point, then the radius. The drop-down offers diameter, 2-point, 3-point and tangent methods; the button keeps the method you used last." ExtendedImage="{cad:CadIcon Name=CircleHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Center, Radius" Tag="{cad:CadIcon Name=CircleCenterRadius}" />
+              <c:MenuFlyoutItem Text="Center, Diameter" Tag="{cad:CadIcon Name=CircleTwoPoint}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="2-Point" Tag="{cad:CadIcon Name=CircleTwoPoint}" />
+              <c:MenuFlyoutItem Text="3-Point" Tag="{cad:CadIcon Name=CircleThreePoint}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Tan, Tan, Radius" Tag="{cad:CadIcon Name=CircleTanTanRadius}" />
+              <c:MenuFlyoutItem Text="Tan, Tan, Tan" Tag="{cad:CadIcon Name=CircleTanTanTan}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="arc" Label="Arc" Icon="{cad:CadIcon Name=Arc}" Size="Large" FollowLastChoice="True" KeyTip="AC" ScreenTip="Creates an arc.&#10;&#10;ARC">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="3-Point" Tag="{cad:CadIcon Name=Arc}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Start, Center, End" Tag="{cad:CadIcon Name=ArcStartCenterEnd}" />
+              <c:MenuFlyoutItem Text="Start, Center, Angle" Tag="{cad:CadIcon Name=ArcStartCenterEnd}" />
+              <c:MenuFlyoutItem Text="Start, Center, Length" Tag="{cad:CadIcon Name=ArcStartCenterEnd}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Start, End, Angle" Tag="{cad:CadIcon Name=Arc}" />
+              <c:MenuFlyoutItem Text="Start, End, Direction" Tag="{cad:CadIcon Name=Arc}" />
+              <c:MenuFlyoutItem Text="Start, End, Radius" Tag="{cad:CadIcon Name=Arc}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Continue" Tag="{cad:CadIcon Name=Arc}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="rectangle" Label="Rectangle" Icon="{cad:CadIcon Name=Rectangle}" Size="Small" FollowLastChoice="True" ScreenTip="Creates a rectangular polyline.&#10;&#10;RECTANG">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Rectangle" Tag="{cad:CadIcon Name=Rectangle}" />
+              <c:MenuFlyoutItem Text="Polygon" Tag="{cad:CadIcon Name=Polygon}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="hatch" Label="Hatch" Icon="{cad:CadIcon Name=Hatch}" Size="Small" FollowLastChoice="True" KeyTip="H">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Hatch" Description="Fills an enclosed area or selected objects with a hatch pattern, solid fill or gradient fill.&#10;&#10;HATCH" ExtendedDescription="Click inside an area bounded by objects to pick it, or select the boundary objects. The Hatch Creation contextual tab opens with patterns, scale, angle and options." ExtendedImage="{cad:CadIcon Name=HatchHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Hatch" Tag="{cad:CadIcon Name=Hatch}" />
+              <c:MenuFlyoutItem Text="Gradient" Tag="{cad:CadIcon Name=Gradient}" />
+              <c:MenuFlyoutItem Text="Boundary" Tag="{cad:CadIcon Name=Boundary}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="ellipse" Label="Ellipse" Icon="{cad:CadIcon Name=Ellipse}" Size="Small" FollowLastChoice="True" ScreenTip="Creates an ellipse or an elliptical arc.&#10;&#10;ELLIPSE">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Center" Tag="{cad:CadIcon Name=Ellipse}" />
+              <c:MenuFlyoutItem Text="Axis, End" Tag="{cad:CadIcon Name=Ellipse}" />
+              <c:MenuFlyoutItem Text="Elliptical Arc" Tag="{cad:CadIcon Name=EllipticalArc}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="spline" Label="Spline Fit" Icon="{cad:CadIcon Name=Spline}" Size="Small" ScreenTip="Creates a smooth curve that passes through fit points.&#10;&#10;SPLINE" />
+              <r:RibbonButton Id="constructionLine" Label="Construction Line" Icon="{cad:CadIcon Name=ConstructionLine}" Size="Small" ScreenTip="Creates a line of infinite length.&#10;&#10;XLINE" />
+              <r:RibbonButton Id="ray" Label="Ray" Icon="{cad:CadIcon Name=Ray}" Size="Small" ScreenTip="Creates a line that starts at a point and continues to infinity.&#10;&#10;RAY" />
+              <r:RibbonButton Id="multiplePoints" Label="Multiple Points" Icon="{cad:CadIcon Name=Point}" Size="Small" ScreenTip="Creates multiple point objects.&#10;&#10;POINT" />
+              <r:RibbonButton Id="multiline" Label="Multiline" Icon="{cad:CadIcon Name=MultiLine}" Size="Small" ScreenTip="Creates multiple parallel lines.&#10;&#10;MLINE" />
+            </r:RibbonStackPanel>
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="region" Label="Region" Icon="{cad:CadIcon Name=Region}" Size="Small" ScreenTip="Converts an object that encloses an area into a region object.&#10;&#10;REGION" />
+              <r:RibbonButton Id="revisionCloud" Label="Revision Cloud" Icon="{cad:CadIcon Name=RevisionCloud}" Size="Small" ScreenTip="Creates or modifies a revision cloud.&#10;&#10;REVCLOUD" />
+              <r:RibbonButton Id="donut" Label="Donut" Icon="{cad:CadIcon Name=Donut}" Size="Small" ScreenTip="Creates a filled circle or a wide ring.&#10;&#10;DONUT" />
+              <r:RibbonButton Id="boundary" Label="Boundary" Icon="{cad:CadIcon Name=Boundary}" Size="Small" ScreenTip="Creates a region or a polyline from an enclosed area.&#10;&#10;BOUNDARY" />
+              <r:RibbonButton Id="gradient" Label="Gradient" Icon="{cad:CadIcon Name=Gradient}" Size="Small" ScreenTip="Fills an enclosed area with a gradient fill.&#10;&#10;GRADIENT" />
+            </r:RibbonStackPanel>
+            <r:RibbonButton Id="divide" Label="Divide" Icon="{cad:CadIcon Name=Point}" Size="Medium" ScreenTip="Places point objects or blocks along an object at equal intervals.&#10;&#10;DIVIDE" />
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup x:Name="ModifyGroup" Header="Modify" Id="modify" Icon="{cad:CadIcon Name=Move}" ScreenTip="Move, copy, rotate, trim, fillet, array and other editing tools.">
+          <r:RibbonButton Id="move" Label="Move" Icon="{cad:CadIcon Name=Move}" Size="Medium" KeyTip="MV" ScreenTip="Moves objects a specified distance in a specified direction.&#10;&#10;MOVE" />
+          <r:RibbonButton Id="copy" Label="Copy" Icon="{cad:CadIcon Name=Copy}" Size="Medium" KeyTip="CO" ScreenTip="Copies objects a specified distance in a specified direction.&#10;&#10;COPY" />
+          <r:RibbonButton Id="stretch" Label="Stretch" Icon="{cad:CadIcon Name=Stretch}" Size="Medium" KeyTip="ST" ScreenTip="Stretches objects crossed by a selection window or polygon.&#10;&#10;STRETCH" />
+          <r:RibbonButton Id="rotate" Label="Rotate" Icon="{cad:CadIcon Name=Rotate}" Size="Medium" KeyTip="RO" ScreenTip="Rotates objects around a base point.&#10;&#10;ROTATE" />
+          <r:RibbonButton Id="mirror" Label="Mirror" Icon="{cad:CadIcon Name=Mirror}" Size="Medium" KeyTip="MI" ScreenTip="Creates a mirrored copy of selected objects.&#10;&#10;MIRROR" />
+          <r:RibbonButton Id="scale" Label="Scale" Icon="{cad:CadIcon Name=Scale}" Size="Medium" KeyTip="SC" ScreenTip="Enlarges or reduces selected objects, keeping the proportions after scaling.&#10;&#10;SCALE" />
+          <r:RibbonSplitButton Id="trim" Label="Trim" Icon="{cad:CadIcon Name=Trim}" Size="Medium" FollowLastChoice="True" KeyTip="TR">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Trim" Description="Trims objects to meet the edges of other objects.&#10;&#10;TRIM" ExtendedDescription="Select the portion of an object to trim: it is removed up to the nearest intersecting objects. Hold Shift to extend instead. Drag across several objects to trim them at once." ExtendedImage="{cad:CadIcon Name=TrimHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Trim" Tag="{cad:CadIcon Name=Trim}" />
+              <c:MenuFlyoutItem Text="Extend" Tag="{cad:CadIcon Name=Extend}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="fillet" Label="Fillet" Icon="{cad:CadIcon Name=Fillet}" Size="Medium" FollowLastChoice="True" KeyTip="F">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Fillet" Description="Rounds and fillets the edges of objects.&#10;&#10;FILLET" ExtendedDescription="Select two objects: an arc of the current fillet radius is created tangent to both, and the objects are trimmed or extended to meet it. A radius of 0 creates a sharp corner." ExtendedImage="{cad:CadIcon Name=FilletHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Fillet" Tag="{cad:CadIcon Name=Fillet}" />
+              <c:MenuFlyoutItem Text="Chamfer" Tag="{cad:CadIcon Name=Chamfer}" />
+              <c:MenuFlyoutItem Text="Blend Curves" Tag="{cad:CadIcon Name=Blend}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="array" Label="Array" Icon="{cad:CadIcon Name=ArrayRectangular}" Size="Medium" FollowLastChoice="True" KeyTip="AR">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Rectangular Array" Description="Distributes object copies into any combination of rows, columns and levels.&#10;&#10;ARRAYRECT" ExtendedDescription="The array stays associative: drag its grips or use the Array contextual tab to change the number of rows and columns and their spacing." ExtendedImage="{cad:CadIcon Name=ArrayHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Rectangular Array" Tag="{cad:CadIcon Name=ArrayRectangular}" />
+              <c:MenuFlyoutItem Text="Path Array" Tag="{cad:CadIcon Name=ArrayPath}" />
+              <c:MenuFlyoutItem Text="Polar Array" Tag="{cad:CadIcon Name=ArrayPolar}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="erase" Label="Erase" Icon="{cad:CadIcon Name=Erase}" Size="Small" KeyTip="E" ScreenTip="Removes objects from a drawing.&#10;&#10;ERASE" />
+          <r:RibbonButton Id="explode" Label="Explode" Icon="{cad:CadIcon Name=Explode}" Size="Small" KeyTip="X" ScreenTip="Breaks a compound object into its component objects.&#10;&#10;EXPLODE" />
+          <r:RibbonButton Id="offset" Label="Offset" Icon="{cad:CadIcon Name=Offset}" Size="Small" KeyTip="O">
+            <r:RibbonButton.ScreenTip>
+              <r:RibbonScreenTip Title="Offset" Description="Creates concentric circles, parallel lines and parallel curves.&#10;&#10;OFFSET" ExtendedDescription="Specify the offset distance, select an object, then click on the side to offset. Repeat to create several parallel copies at the same distance." ExtendedImage="{cad:CadIcon Name=OffsetHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonButton.ScreenTip>
+          </r:RibbonButton>
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="breakAtPoint" Label="Break at Point" Icon="{cad:CadIcon Name=BreakAtPoint}" Size="Small" ScreenTip="Breaks the selected object at a single point.&#10;&#10;BREAKATPOINT" />
+              <r:RibbonButton Id="break" Label="Break" Icon="{cad:CadIcon Name=Break}" Size="Small" ScreenTip="Breaks the selected object between two points.&#10;&#10;BREAK" />
+              <r:RibbonButton Id="join" Label="Join" Icon="{cad:CadIcon Name=Join}" Size="Small" ScreenTip="Joins the endpoints of similar objects to form a single object.&#10;&#10;JOIN" />
+              <r:RibbonButton Id="chamfer" Label="Chamfer" Icon="{cad:CadIcon Name=Chamfer}" Size="Small" ScreenTip="Bevels the edges of objects.&#10;&#10;CHAMFER" />
+              <r:RibbonButton Id="blend" Label="Blend Curves" Icon="{cad:CadIcon Name=Blend}" Size="Small" ScreenTip="Creates a spline in the gap between two selected lines or curves.&#10;&#10;BLEND" />
+              <r:RibbonButton Id="lengthen" Label="Lengthen" Icon="{cad:CadIcon Name=Lengthen}" Size="Small" ScreenTip="Changes the length of objects and the included angle of arcs.&#10;&#10;LENGTHEN" />
+            </r:RibbonStackPanel>
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="align" Label="Align" Icon="{cad:CadIcon Name=Align}" Size="Small" ScreenTip="Aligns objects with other objects in 2D and 3D.&#10;&#10;ALIGN" />
+              <r:RibbonButton Id="reverse" Label="Reverse" Icon="{cad:CadIcon Name=Reverse}" Size="Small" ScreenTip="Reverses the vertex order of lines, polylines, splines and helixes.&#10;&#10;REVERSE" />
+              <r:RibbonButton Id="editPolyline" Label="Edit Polyline" Icon="{cad:CadIcon Name=EditPolyline}" Size="Small" ScreenTip="Modifies polylines and 3D polygon meshes.&#10;&#10;PEDIT" />
+              <r:RibbonButton Id="extend" Label="Extend" Icon="{cad:CadIcon Name=Extend}" Size="Small" ScreenTip="Extends objects to meet the edges of other objects.&#10;&#10;EXTEND" />
+              <r:RibbonButton Id="arrayPolar" Label="Polar Array" Icon="{cad:CadIcon Name=ArrayPolar}" Size="Small" ScreenTip="Evenly distributes object copies in a circular pattern.&#10;&#10;ARRAYPOLAR" />
+              <r:RibbonButton Id="arrayPath" Label="Path Array" Icon="{cad:CadIcon Name=ArrayPath}" Size="Small" ScreenTip="Evenly distributes object copies along a path.&#10;&#10;ARRAYPATH" />
+            </r:RibbonStackPanel>
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Annotation" Id="annotation" ReductionOrder="5" Icon="{cad:CadIcon Name=MultilineText}" ScreenTip="Text, dimensions, leaders and tables.">
+          <r:RibbonSplitButton x:Name="TextSplit" Id="text" Label="Text" Icon="{cad:CadIcon Name=MultilineText}" Size="Large" FollowLastChoice="True" KeyTip="TX" ScreenTip="Creates a multiline text object.&#10;&#10;MTEXT">
+            <MenuFlyout>
+              <c:MenuFlyoutItem x:Name="MTextItem" Text="Multiline Text" Tag="{cad:CadIcon Name=MultilineText}" />
+              <c:MenuFlyoutItem Text="Single Line" Tag="{cad:CadIcon Name=SingleLineText}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="dimension" Label="Dimension" Icon="{cad:CadIcon Name=DimensionLinear}" Size="Large" FollowLastChoice="True" KeyTip="D" ScreenTip="Creates a linear dimension with a horizontal or vertical dimension line.&#10;&#10;DIMLINEAR">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Linear" Tag="{cad:CadIcon Name=DimensionLinear}" />
+              <c:MenuFlyoutItem Text="Aligned" Tag="{cad:CadIcon Name=DimensionAligned}" />
+              <c:MenuFlyoutItem Text="Angular" Tag="{cad:CadIcon Name=DimensionAngular}" />
+              <c:MenuFlyoutItem Text="Radius" Tag="{cad:CadIcon Name=DimensionRadius}" />
+              <c:MenuFlyoutItem Text="Diameter" Tag="{cad:CadIcon Name=DimensionDiameter}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonSplitButton Id="leader" Label="Leader" Icon="{cad:CadIcon Name=Multileader}" Size="Medium" FollowLastChoice="True" ScreenTip="Creates a multileader object.&#10;&#10;MLEADER">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Leader" Tag="{cad:CadIcon Name=Multileader}" />
+              <c:MenuFlyoutItem Text="Add Leader" Tag="{cad:CadIcon Name=Multileader}" />
+              <c:MenuFlyoutItem Text="Remove Leader" Tag="{cad:CadIcon Name=Multileader}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="table" Label="Table" Icon="{cad:CadIcon Name=Table}" Size="Medium" ScreenTip="Creates an empty table object.&#10;&#10;TABLE" />
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonButton Id="field" Label="Field" Icon="{cad:CadIcon Name=Field}" Size="Medium" ScreenTip="Creates a multiline text object with a field that updates automatically.&#10;&#10;FIELD" />
+            <r:RibbonComboBox Id="textStyle" Label="Text Style" Icon="{cad:CadIcon Name=TextStyle}" IsEditable="False" InputWidth="150" Text="Standard">
+              <x:String>Standard</x:String>
+              <x:String>Annotative</x:String>
+              <x:String>Arial Notes</x:String>
+              <x:String>Titles</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonComboBox Id="dimStyle" Label="Dimension Style" Icon="{cad:CadIcon Name=DimensionStyle}" IsEditable="False" InputWidth="150" Text="ISO-25">
+              <x:String>ISO-25</x:String>
+              <x:String>Annotative</x:String>
+              <x:String>Architectural</x:String>
+              <x:String>Standard</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonComboBox Id="mleaderStyle" Label="Multileader Style" Icon="{cad:CadIcon Name=Multileader}" IsEditable="False" InputWidth="150" Text="Standard">
+              <x:String>Standard</x:String>
+              <x:String>Annotative</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonComboBox Id="tableStyle" Label="Table Style" Icon="{cad:CadIcon Name=Table}" IsEditable="False" InputWidth="150" Text="Standard">
+              <x:String>Standard</x:String>
+              <x:String>Door Schedule</x:String>
+            </r:RibbonComboBox>
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup x:Name="LayersGroup" Header="Layers" Id="layers" ReductionOrder="1" Icon="{cad:CadIcon Name=LayerProperties}" ScreenTip="Layer properties, the current layer and layer tools.">
+          <r:RibbonButton Id="layerProperties" Label="Layer&#10;Properties" Icon="{cad:CadIcon Name=LayerProperties}" Size="Large" KeyTip="LA" ScreenTip="Manages layers and layer properties.&#10;&#10;LAYER" />
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="layerOff" Label="Off" Icon="{cad:CadIcon Name=LayerOff}" Size="Small" ScreenTip="Turns off the layer of a selected object.&#10;&#10;LAYOFF" />
+              <r:RibbonButton Id="layerIsolate" Label="Isolate" Icon="{cad:CadIcon Name=LayerIsolate}" Size="Small" ScreenTip="Hides or locks all layers except those of the selected objects.&#10;&#10;LAYISO" />
+              <r:RibbonButton Id="layerFreeze" Label="Freeze" Icon="{cad:CadIcon Name=LayerFreeze}" Size="Small" ScreenTip="Freezes the layer of selected objects.&#10;&#10;LAYFRZ" />
+              <r:RibbonButton Id="layerLock" Label="Lock" Icon="{cad:CadIcon Name=LayerLock}" Size="Small" ScreenTip="Locks the layer of a selected object.&#10;&#10;LAYLCK" />
+              <r:RibbonButton Id="layerUnisolate" Label="Unisolate" Icon="{cad:CadIcon Name=LayerUnisolate}" Size="Small" ScreenTip="Restores all layers that were hidden or locked with LAYISO.&#10;&#10;LAYUNISO" />
+              <r:RibbonButton Id="layerPrevious" Label="Previous" Icon="{cad:CadIcon Name=LayerPrevious}" Size="Small" ScreenTip="Undoes the last change or set of changes made to layer settings.&#10;&#10;LAYERP" />
+            </r:RibbonStackPanel>
+            <r:RibbonComboBox x:Name="LayerCombo" Id="layerCombo" IsEditable="False" InputWidth="164" ItemTemplate="{StaticResource LayerItemTemplate}" SelectionBoxTemplate="{StaticResource LayerItemTemplate}" MaxDropDownHeight="360" ScreenTip="Current layer: pick a layer to make it current, or toggle its on / freeze / lock state." ItemsSource="{x:Static cad:CadLayer.Samples}" />
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="makeCurrent" Label="Make Current" Icon="{cad:CadIcon Name=MakeCurrent}" Size="Medium" ScreenTip="Sets the current layer to that of a selected object.&#10;&#10;LAYMCUR" />
+              <r:RibbonButton Id="matchLayer" Label="Match Layer" Icon="{cad:CadIcon Name=MatchLayer}" Size="Small" ScreenTip="Changes the layer of selected objects to match the destination layer.&#10;&#10;LAYMCH" />
+            </r:RibbonStackPanel>
+          </r:RibbonStackPanel>
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonComboBox Id="layerState" Label="Layer State" IsEditable="False" InputWidth="170" Text="Unsaved Layer State">
+              <x:String>Unsaved Layer State</x:String>
+              <x:String>Plot - Floor Plan</x:String>
+              <x:String>Furniture Off</x:String>
+              <x:String>New Layer State...</x:String>
+              <x:String>Manage Layer States...</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonStackPanel>
+              <r:RibbonButton Id="layerOnAll" Label="Turn All Layers On" Icon="{cad:CadIcon Name=LayerOn}" Size="Small" ScreenTip="Turns on all layers in the drawing.&#10;&#10;LAYON" />
+              <r:RibbonButton Id="layerThawAll" Label="Thaw All Layers" Icon="{cad:CadIcon Name=LayerThaw}" Size="Small" ScreenTip="Thaws all layers in the drawing.&#10;&#10;LAYTHW" />
+              <r:RibbonButton Id="layerUnlock" Label="Unlock" Icon="{cad:CadIcon Name=LayerUnlock}" Size="Small" ScreenTip="Unlocks the layer of a selected object.&#10;&#10;LAYULK" />
+              <r:RibbonButton Id="layerMatch2" Label="Change to Current Layer" Icon="{cad:CadIcon Name=MatchLayer}" Size="Small" ScreenTip="Changes the layer of selected objects to the current layer.&#10;&#10;LAYCUR" />
+            </r:RibbonStackPanel>
+            <r:RibbonButton Id="layerWalk" Label="Layer Walk" Icon="{cad:CadIcon Name=LayerIsolate}" Size="Medium" ScreenTip="Displays objects on selected layers and hides objects on all other layers.&#10;&#10;LAYWALK" />
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Block" Id="block" ReductionOrder="4" Icon="{cad:CadIcon Name=InsertBlock}" ScreenTip="Insert, create and edit blocks.">
+          <r:RibbonGallery x:Name="BlockGallery" Id="insertBlock" Label="Insert" Icon="{cad:CadIcon Name=InsertBlock}" Size="Large" IsDropDownOnly="True" DropDownColumns="4" ItemWidth="84" ItemHeight="78" KeyTip="I" ScreenTip="Inserts a block or a drawing into the current drawing.&#10;&#10;INSERT">
+            <r:RibbonGalleryItem Label="Door - 900" Icon="{cad:CadIcon Name=BlockDoor}" Category="Current Drawing Blocks" Value="door" />
+            <r:RibbonGalleryItem Label="Window - 1500" Icon="{cad:CadIcon Name=BlockWindow}" Category="Current Drawing Blocks" Value="window" />
+            <r:RibbonGalleryItem Label="Chair" Icon="{cad:CadIcon Name=BlockChair}" Category="Current Drawing Blocks" Value="chair" />
+            <r:RibbonGalleryItem Label="Dining Table" Icon="{cad:CadIcon Name=BlockTable}" Category="Current Drawing Blocks" Value="table" />
+            <r:RibbonGalleryItem Label="Bed - Double" Icon="{cad:CadIcon Name=BlockBed}" Category="Current Drawing Blocks" Value="bed" />
+            <r:RibbonGalleryItem Label="WC" Icon="{cad:CadIcon Name=BlockToilet}" Category="Current Drawing Blocks" Value="wc" />
+            <r:RibbonGalleryItem Label="Tree" Icon="{cad:CadIcon Name=BlockTree}" Category="Current Drawing Blocks" Value="tree" />
+            <r:RibbonGalleryItem Label="North Arrow" Icon="{cad:CadIcon Name=BlockNorthArrow}" Category="Current Drawing Blocks" Value="north" />
+            <r:RibbonGalleryItem Label="Hex Bolt M10" Icon="{cad:CadIcon Name=BlockBolt}" Category="Recent Blocks" Value="bolt" />
+            <r:RibbonGalleryItem Label="Hex Nut M10" Icon="{cad:CadIcon Name=BlockNut}" Category="Recent Blocks" Value="nut" />
+            <r:RibbonGalleryItem Label="Section Mark" Icon="{cad:CadIcon Name=BlockSection}" Category="Recent Blocks" Value="section" />
+            <r:RibbonGalleryItem Label="A3 Title Block" Icon="{cad:CadIcon Name=BlockTitle}" Category="Recent Blocks" Value="title" />
+            <r:RibbonGallery.FooterItems>
+              <r:RibbonButton Label="Recent Blocks..." Icon="{cad:CadIcon Name=Recent}" />
+              <r:RibbonButton Label="Blocks from Libraries..." Icon="{cad:CadIcon Name=Open}" />
+            </r:RibbonGallery.FooterItems>
+          </r:RibbonGallery>
+          <r:RibbonButton Id="createBlock" Label="Create" Icon="{cad:CadIcon Name=CreateBlock}" Size="Medium" ScreenTip="Creates a block definition from selected objects.&#10;&#10;BLOCK" />
+          <r:RibbonButton Id="editBlock" Label="Edit" Icon="{cad:CadIcon Name=EditBlock}" Size="Medium" ScreenTip="Opens the block definition in the Block Editor.&#10;&#10;BEDIT" />
+          <r:RibbonSplitButton Id="editAttributes" Label="Edit Attributes" Icon="{cad:CadIcon Name=EditAttribute}" Size="Medium" FollowLastChoice="True" ScreenTip="Edits the attributes in a block reference.&#10;&#10;EATTEDIT">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Single" Tag="{cad:CadIcon Name=EditAttribute}" />
+              <c:MenuFlyoutItem Text="Multiple" Tag="{cad:CadIcon Name=EditAttribute}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonButton Id="defineAttributes" Label="Define Attributes" Icon="{cad:CadIcon Name=DefineAttributes}" Size="Medium" ScreenTip="Creates an attribute definition for storing data in a block.&#10;&#10;ATTDEF" />
+            <r:RibbonButton Id="manageAttributes" Label="Manage Attributes" Icon="{cad:CadIcon Name=EditAttribute}" Size="Medium" ScreenTip="Manages the attributes of a selected block definition.&#10;&#10;BATTMAN" />
+            <r:RibbonButton Id="synchronize" Label="Synchronize" Icon="{cad:CadIcon Name=EditBlock}" Size="Medium" ScreenTip="Updates block references with new attributes of the block definition.&#10;&#10;ATTSYNC" />
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Properties" Id="properties" ReductionOrder="2" Icon="{cad:CadIcon Name=MatchProperties}" IsDialogLauncherVisible="True" ScreenTip="Colour, lineweight, linetype and other object properties.">
+          <r:RibbonButton Id="matchProperties" Label="Match&#10;Properties" Icon="{cad:CadIcon Name=MatchProperties}" Size="Large" KeyTip="MA" ScreenTip="Applies the properties of a selected object to other objects.&#10;&#10;MATCHPROP" />
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonComboBox x:Name="ColorCombo" Id="objectColor" Icon="{cad:CadIcon Name=Color}" IsEditable="False" InputWidth="122" ItemTemplate="{StaticResource ColorItemTemplate}" SelectionBoxTemplate="{StaticResource ColorItemTemplate}" ScreenTip="Object Color: sets the color of selected objects (ByLayer by default)." ItemsSource="{x:Static cad:CadColorOption.Samples}" />
+            <r:RibbonComboBox x:Name="LineweightCombo" Id="objectLineweight" Icon="{cad:CadIcon Name=Lineweight}" IsEditable="False" InputWidth="122" ItemTemplate="{StaticResource LineweightItemTemplate}" SelectionBoxTemplate="{StaticResource LineweightItemTemplate}" MaxDropDownHeight="320" ScreenTip="Lineweight: sets the lineweight of selected objects." ItemsSource="{x:Static cad:CadLineweight.Samples}" />
+            <r:RibbonComboBox x:Name="LinetypeCombo" Id="objectLinetype" Icon="{cad:CadIcon Name=Linetype}" IsEditable="False" InputWidth="122" ItemTemplate="{StaticResource LinetypeItemTemplate}" SelectionBoxTemplate="{StaticResource LinetypeItemTemplate}" ScreenTip="Linetype: sets the linetype of selected objects." ItemsSource="{x:Static cad:CadLinetype.Samples}" />
+          </r:RibbonStackPanel>
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonSlider x:Name="TransparencySlider" Id="transparency" Label="Transparency" Icon="{cad:CadIcon Name=Transparency}" Minimum="0" Maximum="90" Value="0" InputWidth="120" />
+            <r:RibbonButton Id="list" Label="List" Icon="{cad:CadIcon Name=PropertiesPalette}" Size="Medium" ScreenTip="Displays property data for selected objects.&#10;&#10;LIST" />
+            <r:RibbonComboBox Id="plotStyle" Label="Plot Style" IsEditable="False" InputWidth="120" Text="ByColor">
+              <x:String>ByColor</x:String>
+              <x:String>ByLayer</x:String>
+            </r:RibbonComboBox>
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Groups" Id="groups" ReductionOrder="6" Icon="{cad:CadIcon Name=Group}">
+          <r:RibbonButton Id="group" Label="Group" Icon="{cad:CadIcon Name=Group}" Size="Large" ScreenTip="Creates and manages saved sets of objects called groups.&#10;&#10;GROUP" />
+          <r:RibbonButton Id="ungroup" Label="Ungroup" Icon="{cad:CadIcon Name=Ungroup}" Size="Small" ScreenTip="Disassociates the objects of a group.&#10;&#10;UNGROUP" />
+          <r:RibbonButton Id="groupEdit" Label="Group Edit" Icon="{cad:CadIcon Name=GroupEdit}" Size="Small" ScreenTip="Adds or removes objects from the selected group.&#10;&#10;GROUPEDIT" />
+          <r:RibbonToggleButton Id="groupSelection" Label="Group Selection" Icon="{cad:CadIcon Name=Group}" Size="Small" IsChecked="True" ScreenTip="Selecting one object of a group selects the whole group." />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Utilities" Id="utilities" ReductionOrder="7" Icon="{cad:CadIcon Name=MeasureDistance}">
+          <r:RibbonSplitButton Id="measure" Label="Measure" Icon="{cad:CadIcon Name=MeasureDistance}" Size="Large" FollowLastChoice="True" ScreenTip="Measures the distance between two points.&#10;&#10;MEASUREGEOM">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Quick" Tag="{cad:CadIcon Name=MeasureDistance}" />
+              <c:MenuFlyoutItem Text="Distance" Tag="{cad:CadIcon Name=MeasureDistance}" />
+              <c:MenuFlyoutItem Text="Angle" Tag="{cad:CadIcon Name=MeasureAngle}" />
+              <c:MenuFlyoutItem Text="Area" Tag="{cad:CadIcon Name=MeasureArea}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="quickSelect" Label="Quick Select" Icon="{cad:CadIcon Name=QuickSelect}" Size="Small" ScreenTip="Creates a selection set based on filtering criteria.&#10;&#10;QSELECT" />
+          <r:RibbonButton Id="selectAll" Label="Select All" Icon="{cad:CadIcon Name=SelectAll}" Size="Small" Shortcut="Ctrl+A" ScreenTip="Selects all objects in the drawing.&#10;&#10;SELECTALL" />
+          <r:RibbonButton Id="idPoint" Label="ID Point" Icon="{cad:CadIcon Name=IdPoint}" Size="Small" ScreenTip="Displays the coordinates of a location.&#10;&#10;ID" />
+          <r:RibbonGroup.SlideOutItems>
+            <r:RibbonButton Id="calculator" Label="Quick Calculator" Icon="{cad:CadIcon Name=Calculator}" Size="Medium" ScreenTip="Opens the calculator.&#10;&#10;QUICKCALC" />
+            <r:RibbonButton Id="pointStyle" Label="Point Style..." Icon="{cad:CadIcon Name=Point}" Size="Medium" ScreenTip="Specifies the display style and size of point objects.&#10;&#10;PTYPE" />
+          </r:RibbonGroup.SlideOutItems>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Clipboard" Id="clipboard" ReductionOrder="8" Icon="{cad:CadIcon Name=Paste}">
+          <r:RibbonSplitButton Id="paste" Label="Paste" Icon="{cad:CadIcon Name=Paste}" Size="Large" Shortcut="Ctrl+V" ScreenTip="Inserts objects from the Clipboard into the current drawing.&#10;&#10;PASTECLIP">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Paste" Tag="{cad:CadIcon Name=Paste}" />
+              <c:MenuFlyoutItem Text="Paste as Block" Tag="{cad:CadIcon Name=InsertBlock}" />
+              <c:MenuFlyoutItem Text="Paste to Original Coordinates" Tag="{cad:CadIcon Name=Paste}" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Paste Special..." />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="copyClip" Label="Copy Clip" Icon="{cad:CadIcon Name=CopyClip}" Size="Small" Shortcut="Ctrl+C" ScreenTip="Copies selected objects to the Clipboard.&#10;&#10;COPYCLIP" />
+          <r:RibbonButton Id="cutClip" Label="Cut" Icon="{cad:CadIcon Name=Cut}" Size="Small" Shortcut="Ctrl+X" ScreenTip="Copies selected objects to the Clipboard and removes them from the drawing.&#10;&#10;CUTCLIP" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="View" Id="homeView" ReductionOrder="9" Icon="{cad:CadIcon Name=Viewports}">
+          <r:RibbonDropDownButton Id="baseView" Label="Base" Icon="{cad:CadIcon Name=Viewports}" Size="Large" ScreenTip="Creates a base view from model space or from an Inventor model.&#10;&#10;VIEWBASE">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="From Model Space" Tag="{cad:CadIcon Name=Model}" />
+                <c:MenuFlyoutItem Text="From Inventor" Tag="{cad:CadIcon Name=Box}" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Solid" Id="solid" KeyTip="SO" IsTabVisible="False">
+        <r:RibbonGroup Header="Primitive" Id="primitive" Icon="{cad:CadIcon Name=Box}">
+          <r:RibbonSplitButton Id="box" Label="Box" Icon="{cad:CadIcon Name=Box}" Size="Large" FollowLastChoice="True" ScreenTip="Creates a 3D solid box.&#10;&#10;BOX">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Box" Tag="{cad:CadIcon Name=Box}" />
+              <c:MenuFlyoutItem Text="Cylinder" Tag="{cad:CadIcon Name=Cylinder}" />
+              <c:MenuFlyoutItem Text="Cone" Tag="{cad:CadIcon Name=Cone}" />
+              <c:MenuFlyoutItem Text="Sphere" Tag="{cad:CadIcon Name=Sphere}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="cylinder" Label="Cylinder" Icon="{cad:CadIcon Name=Cylinder}" Size="Large" ScreenTip="Creates a 3D solid cylinder.&#10;&#10;CYLINDER" />
+          <r:RibbonButton Id="sphere" Label="Sphere" Icon="{cad:CadIcon Name=Sphere}" Size="Medium" ScreenTip="Creates a 3D solid sphere.&#10;&#10;SPHERE" />
+          <r:RibbonButton Id="cone" Label="Cone" Icon="{cad:CadIcon Name=Cone}" Size="Medium" ScreenTip="Creates a 3D solid with a circular or elliptical base tapering to a point.&#10;&#10;CONE" />
+          <r:RibbonButton Id="polysolid" Label="Polysolid" Icon="{cad:CadIcon Name=MultiLine}" Size="Medium" ScreenTip="Creates a 3D wall-like solid.&#10;&#10;POLYSOLID" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Solid" Id="solidCreate" Icon="{cad:CadIcon Name=Extrude}">
+          <r:RibbonButton Id="extrude" Label="Extrude" Icon="{cad:CadIcon Name=Extrude}" Size="Large" ScreenTip="Extends the dimensions of a 2D object or 3D face into 3D space.&#10;&#10;EXTRUDE" />
+          <r:RibbonButton Id="presspull" Label="Presspull" Icon="{cad:CadIcon Name=Presspull}" Size="Large" ScreenTip="Extrudes or offsets bounded areas or faces dynamically.&#10;&#10;PRESSPULL" />
+          <r:RibbonButton Id="revolve" Label="Revolve" Icon="{cad:CadIcon Name=Revolve}" Size="Medium" ScreenTip="Creates a 3D solid or surface by sweeping a 2D object around an axis.&#10;&#10;REVOLVE" />
+          <r:RibbonButton Id="sweep" Label="Sweep" Icon="{cad:CadIcon Name=Sweep}" Size="Medium" ScreenTip="Creates a 3D solid or surface by sweeping a 2D object along a path.&#10;&#10;SWEEP" />
+          <r:RibbonButton Id="loft" Label="Loft" Icon="{cad:CadIcon Name=Loft}" Size="Medium" ScreenTip="Creates a 3D solid or surface between several cross sections.&#10;&#10;LOFT" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Boolean" Id="boolean" Icon="{cad:CadIcon Name=Union}">
+          <r:RibbonButton Id="union" Label="Union" Icon="{cad:CadIcon Name=Union}" Size="Large" ScreenTip="Combines selected 3D solids, surfaces or 2D regions.&#10;&#10;UNION" />
+          <r:RibbonButton Id="subtract" Label="Subtract" Icon="{cad:CadIcon Name=Subtract}" Size="Large" ScreenTip="Creates a 3D solid by subtracting one set of solids from another.&#10;&#10;SUBTRACT" />
+          <r:RibbonButton Id="intersect" Label="Intersect" Icon="{cad:CadIcon Name=Intersect}" Size="Large" ScreenTip="Creates a 3D solid from the overlapping volume of solids.&#10;&#10;INTERSECT" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Solid Editing" Id="solidEditing" Icon="{cad:CadIcon Name=Fillet}">
+          <r:RibbonButton Id="filletEdge" Label="Fillet Edge" Icon="{cad:CadIcon Name=Fillet}" Size="Medium" ScreenTip="Rounds and fillets the edges of solid objects.&#10;&#10;FILLETEDGE" />
+          <r:RibbonButton Id="chamferEdge" Label="Chamfer Edge" Icon="{cad:CadIcon Name=Chamfer}" Size="Medium" ScreenTip="Bevels the edges of 3D solids and surfaces.&#10;&#10;CHAMFEREDGE" />
+          <r:RibbonButton Id="slice" Label="Slice" Icon="{cad:CadIcon Name=Break}" Size="Medium" ScreenTip="Creates new 3D solids by slicing an existing object.&#10;&#10;SLICE" />
+          <r:RibbonButton Id="shell" Label="Shell" Icon="{cad:CadIcon Name=Offset}" Size="Medium" ScreenTip="Creates a hollow, thin wall with a specified thickness.&#10;&#10;SOLIDEDIT" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Surface" Id="surface" KeyTip="SU" IsTabVisible="False">
+        <r:RibbonGroup Header="Create" Id="surfaceCreate" Icon="{cad:CadIcon Name=Loft}">
+          <r:RibbonButton Id="networkSurface" Label="Network" Icon="{cad:CadIcon Name=SurfaceNetwork}" Size="Large" ScreenTip="Creates a surface in the space between several curves in the U and V directions.&#10;&#10;SURFNETWORK" />
+          <r:RibbonButton Id="planarSurface" Label="Planar" Icon="{cad:CadIcon Name=SurfacePlanar}" Size="Large" ScreenTip="Creates a planar surface.&#10;&#10;PLANESURF" />
+          <r:RibbonButton Id="loftSurface" Label="Loft" Icon="{cad:CadIcon Name=Loft}" Size="Medium" />
+          <r:RibbonButton Id="sweepSurface" Label="Sweep" Icon="{cad:CadIcon Name=Sweep}" Size="Medium" />
+          <r:RibbonButton Id="revolveSurface" Label="Revolve" Icon="{cad:CadIcon Name=Revolve}" Size="Medium" />
+          <r:RibbonButton Id="extrudeSurface" Label="Extrude" Icon="{cad:CadIcon Name=Extrude}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Edit" Id="surfaceEdit" Icon="{cad:CadIcon Name=Fillet}">
+          <r:RibbonButton Id="surfaceFillet" Label="Fillet" Icon="{cad:CadIcon Name=Fillet}" Size="Medium" />
+          <r:RibbonButton Id="surfaceTrim" Label="Trim" Icon="{cad:CadIcon Name=Trim}" Size="Medium" />
+          <r:RibbonButton Id="surfaceExtend" Label="Extend" Icon="{cad:CadIcon Name=Extend}" Size="Medium" />
+          <r:RibbonButton Id="surfaceBlend" Label="Blend" Icon="{cad:CadIcon Name=Blend}" Size="Medium" />
+          <r:RibbonButton Id="surfacePatch" Label="Patch" Icon="{cad:CadIcon Name=SurfacePlanar}" Size="Medium" />
+          <r:RibbonButton Id="surfaceOffset" Label="Offset" Icon="{cad:CadIcon Name=Offset}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Control Vertices" Id="controlVertices" Icon="{cad:CadIcon Name=Spline}">
+          <r:RibbonToggleButton Id="showCv" Label="Show CV" Icon="{cad:CadIcon Name=Spline}" Size="Large" />
+          <r:RibbonButton Id="rebuild" Label="Rebuild" Icon="{cad:CadIcon Name=SurfaceNetwork}" Size="Medium" />
+          <r:RibbonButton Id="addCv" Label="Add" Icon="{cad:CadIcon Name=Point}" Size="Medium" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Mesh" Id="mesh" KeyTip="E" IsTabVisible="False">
+        <r:RibbonGroup Header="Primitives" Id="meshPrimitives" Icon="{cad:CadIcon Name=MeshBox}">
+          <r:RibbonSplitButton Id="meshBox" Label="Mesh Box" Icon="{cad:CadIcon Name=MeshBox}" Size="Large" FollowLastChoice="True" ScreenTip="Creates a 3D mesh box.&#10;&#10;MESH">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Mesh Box" Tag="{cad:CadIcon Name=MeshBox}" />
+              <c:MenuFlyoutItem Text="Mesh Cylinder" Tag="{cad:CadIcon Name=Cylinder}" />
+              <c:MenuFlyoutItem Text="Mesh Sphere" Tag="{cad:CadIcon Name=Sphere}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="revolvedSurface" Label="Revolved Surface" Icon="{cad:CadIcon Name=Revolve}" Size="Medium" />
+          <r:RibbonButton Id="edgeSurface" Label="Edge Surface" Icon="{cad:CadIcon Name=SurfaceNetwork}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Mesh" Id="meshEdit" Icon="{cad:CadIcon Name=MeshSmooth}">
+          <r:RibbonButton Id="smoothObject" Label="Smooth Object" Icon="{cad:CadIcon Name=MeshSmooth}" Size="Large" />
+          <r:RibbonButton Id="smoothMore" Label="Smooth More" Icon="{cad:CadIcon Name=Sphere}" Size="Medium" />
+          <r:RibbonButton Id="smoothLess" Label="Smooth Less" Icon="{cad:CadIcon Name=MeshBox}" Size="Medium" />
+          <r:RibbonButton Id="refineMesh" Label="Refine Mesh" Icon="{cad:CadIcon Name=Grid}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Convert Mesh" Id="convertMesh" Icon="{cad:CadIcon Name=Box}">
+          <r:RibbonButton Id="convertSolid" Label="Convert to Solid" Icon="{cad:CadIcon Name=Box}" Size="Large" />
+          <r:RibbonButton Id="convertSurface" Label="Convert to Surface" Icon="{cad:CadIcon Name=SurfacePlanar}" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Visualize" Id="visualize" KeyTip="Z" IsTabVisible="False">
+        <r:RibbonGroup Header="Visual Styles" Id="visualStyles" Icon="{cad:CadIcon Name=StyleShaded}" ReductionOrder="1">
+          <r:RibbonGallery Id="visualStyleGallery" Label="Visual Styles" Icon="{cad:CadIcon Name=StyleShaded}" MaxColumns="6" MinColumns="3" ItemWidth="58" ItemHeight="58">
+            <r:RibbonGalleryItem Label="2D Wireframe" Icon="{cad:CadIcon Name=Style2DWireframe}" />
+            <r:RibbonGalleryItem Label="Hidden" Icon="{cad:CadIcon Name=StyleHidden}" />
+            <r:RibbonGalleryItem Label="Shaded" Icon="{cad:CadIcon Name=StyleShaded}" />
+            <r:RibbonGalleryItem Label="Realistic" Icon="{cad:CadIcon Name=StyleRealistic}" />
+            <r:RibbonGalleryItem Label="Conceptual" Icon="{cad:CadIcon Name=StyleConceptual}" />
+            <r:RibbonGalleryItem Label="X-Ray" Icon="{cad:CadIcon Name=StyleXRay}" />
+          </r:RibbonGallery>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Lights" Id="lights" Icon="{cad:CadIcon Name=Light}">
+          <r:RibbonDropDownButton Id="createLight" Label="Create Light" Icon="{cad:CadIcon Name=Light}" Size="Large">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="Point" Tag="{cad:CadIcon Name=Light}" />
+                <c:MenuFlyoutItem Text="Spot" Tag="{cad:CadIcon Name=Light}" />
+                <c:MenuFlyoutItem Text="Distant" Tag="{cad:CadIcon Name=Sun}" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonToggleButton Id="sunStatus" Label="Sun Status" Icon="{cad:CadIcon Name=Sun}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Materials" Id="materials" Icon="{cad:CadIcon Name=Material}">
+          <r:RibbonButton Id="materialsBrowser" Label="Materials Browser" Icon="{cad:CadIcon Name=Material}" Size="Large" />
+          <r:RibbonButton Id="attachByLayer" Label="Attach By Layer" Icon="{cad:CadIcon Name=LayerProperties}" Size="Medium" />
+          <r:RibbonButton Id="removeMaterials" Label="Remove Materials" Icon="{cad:CadIcon Name=Erase}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Render" Id="render" Icon="{cad:CadIcon Name=Render}" IsDialogLauncherVisible="True">
+          <r:RibbonButton Id="renderButton" Label="Render to Size" Icon="{cad:CadIcon Name=Render}" Size="Large" />
+          <r:RibbonComboBox Id="renderPreset" Label="Preset" IsEditable="False" InputWidth="120" Text="Medium">
+            <x:String>Low</x:String>
+            <x:String>Medium</x:String>
+            <x:String>High</x:String>
+            <x:String>Coffee-Break Quality</x:String>
+          </r:RibbonComboBox>
+          <r:RibbonComboBox Id="renderSize" Label="Size" IsEditable="False" InputWidth="120" Text="800 x 600 px">
+            <x:String>640 x 480 px</x:String>
+            <x:String>800 x 600 px</x:String>
+            <x:String>1920 x 1080 px</x:String>
+          </r:RibbonComboBox>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Camera" Id="camera" Icon="{cad:CadIcon Name=Camera}">
+          <r:RibbonButton Id="createCamera" Label="Create Camera" Icon="{cad:CadIcon Name=Camera}" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Insert" Id="insert" KeyTip="I">
+        <r:RibbonGroup Header="Block" Id="insertBlockGroup" Icon="{cad:CadIcon Name=InsertBlock}">
+          <r:RibbonButton Id="insertBlock2" Label="Insert" Icon="{cad:CadIcon Name=InsertBlock}" Size="Large" ScreenTip="Inserts a block or a drawing into the current drawing.&#10;&#10;INSERT" />
+          <r:RibbonButton Id="editAttributes2" Label="Edit Attribute" Icon="{cad:CadIcon Name=EditAttribute}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Block Definition" Id="blockDefinition" Icon="{cad:CadIcon Name=CreateBlock}">
+          <r:RibbonButton Id="createBlock2" Label="Create Block" Icon="{cad:CadIcon Name=CreateBlock}" Size="Large" />
+          <r:RibbonButton Id="defineAttributes2" Label="Define Attributes" Icon="{cad:CadIcon Name=DefineAttributes}" Size="Large" />
+          <r:RibbonButton Id="manageAttributes2" Label="Manage Attributes" Icon="{cad:CadIcon Name=EditAttribute}" Size="Medium" />
+          <r:RibbonButton Id="blockEditor" Label="Block Editor" Icon="{cad:CadIcon Name=EditBlock}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Reference" Id="reference" Icon="{cad:CadIcon Name=Attach}" IsDialogLauncherVisible="True">
+          <r:RibbonButton Id="attach" Label="Attach" Icon="{cad:CadIcon Name=Attach}" Size="Large" ScreenTip="Inserts a reference to an external file (drawing, image, PDF, DWF or DGN).&#10;&#10;ATTACH" />
+          <r:RibbonButton Id="clip" Label="Clip" Icon="{cad:CadIcon Name=Clip}" Size="Large" ScreenTip="Crops the display of a selected external reference, image or underlay.&#10;&#10;CLIP" />
+          <r:RibbonButton Id="adjust" Label="Adjust" Icon="{cad:CadIcon Name=Transparency}" Size="Medium" />
+          <r:RibbonButton Id="underlayLayers" Label="Underlay Layers" Icon="{cad:CadIcon Name=LayerProperties}" Size="Medium" />
+          <r:RibbonComboBox Id="frames" Label="Frames" IsEditable="False" InputWidth="120" Text="Frames vary*">
+            <x:String>Frames vary*</x:String>
+            <x:String>Hide frames</x:String>
+            <x:String>Display and plot frames</x:String>
+            <x:String>Display but don't plot</x:String>
+          </r:RibbonComboBox>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Import" Id="importGroup" Icon="{cad:CadIcon Name=ImportPdf}">
+          <r:RibbonButton Id="pdfImport" Label="PDF Import" Icon="{cad:CadIcon Name=ImportPdf}" Size="Large" />
+          <r:RibbonButton Id="importFile" Label="Import" Icon="{cad:CadIcon Name=Open}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Data" Id="data" Icon="{cad:CadIcon Name=Field}">
+          <r:RibbonButton Id="fieldInsert" Label="Field" Icon="{cad:CadIcon Name=Field}" Size="Large" />
+          <r:RibbonButton Id="updateFields" Label="Update Fields" Icon="{cad:CadIcon Name=Redo}" Size="Medium" />
+          <r:RibbonButton Id="hyperlink" Label="Hyperlink" Icon="{cad:CadIcon Name=Share}" Size="Medium" />
+          <r:RibbonButton Id="oleObject" Label="OLE Object" Icon="{cad:CadIcon Name=Table}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Linking &amp; Extraction" Id="linking" Icon="{cad:CadIcon Name=DataExtraction}">
+          <r:RibbonButton Id="dataExtraction" Label="Extract Data" Icon="{cad:CadIcon Name=DataExtraction}" Size="Large" />
+          <r:RibbonButton Id="dataLink" Label="Data Link" Icon="{cad:CadIcon Name=Table}" Size="Medium" />
+          <r:RibbonButton Id="downloadSource" Label="Download from Source" Icon="{cad:CadIcon Name=Open}" Size="Medium" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Annotate" Id="annotate" KeyTip="A">
+        <r:RibbonGroup Header="Text" Id="annotateText" Icon="{cad:CadIcon Name=MultilineText}" IsDialogLauncherVisible="True">
+          <r:RibbonSplitButton Id="annotateMText" Label="Multiline Text" Icon="{cad:CadIcon Name=MultilineText}" Size="Large" FollowLastChoice="True">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Multiline Text" Tag="{cad:CadIcon Name=MultilineText}" />
+              <c:MenuFlyoutItem Text="Single Line" Tag="{cad:CadIcon Name=SingleLineText}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="checkSpelling" Label="Check Spelling" Icon="" Size="Large" />
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonComboBox Id="annotateTextStyle" Icon="{cad:CadIcon Name=TextStyle}" IsEditable="False" InputWidth="140" Text="Standard">
+              <x:String>Standard</x:String>
+              <x:String>Annotative</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonTextBox Id="findText" Icon="{cad:CadIcon Name=Search}" PlaceholderText="Find text" InputWidth="140" />
+            <r:RibbonComboBox Id="textHeight" Icon="{cad:CadIcon Name=SingleLineText}" IsEditable="True" InputWidth="140" Text="2.5">
+              <x:String>1.8</x:String>
+              <x:String>2.5</x:String>
+              <x:String>3.5</x:String>
+              <x:String>5</x:String>
+            </r:RibbonComboBox>
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Dimensions" Id="dimensions" Icon="{cad:CadIcon Name=DimensionLinear}" IsDialogLauncherVisible="True">
+          <r:RibbonSplitButton Id="annotateDimension" Label="Dimension" Icon="{cad:CadIcon Name=DimensionLinear}" Size="Large" FollowLastChoice="True">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Linear" Tag="{cad:CadIcon Name=DimensionLinear}" />
+              <c:MenuFlyoutItem Text="Aligned" Tag="{cad:CadIcon Name=DimensionAligned}" />
+              <c:MenuFlyoutItem Text="Angular" Tag="{cad:CadIcon Name=DimensionAngular}" />
+              <c:MenuFlyoutItem Text="Radius" Tag="{cad:CadIcon Name=DimensionRadius}" />
+              <c:MenuFlyoutItem Text="Diameter" Tag="{cad:CadIcon Name=DimensionDiameter}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="quickDim" Label="Quick" Icon="{cad:CadIcon Name=DimensionAligned}" Size="Medium" />
+          <r:RibbonButton Id="continueDim" Label="Continue" Icon="{cad:CadIcon Name=DimensionLinear}" Size="Medium" />
+          <r:RibbonButton Id="baselineDim" Label="Baseline" Icon="{cad:CadIcon Name=DimensionLinear}" Size="Medium" />
+          <r:RibbonButton Id="dimBreak" Label="Break" Icon="{cad:CadIcon Name=Break}" Size="Small" />
+          <r:RibbonButton Id="dimSpace" Label="Adjust Space" Icon="{cad:CadIcon Name=Stretch}" Size="Small" />
+          <r:RibbonButton Id="dimUpdate" Label="Update" Icon="{cad:CadIcon Name=Redo}" Size="Small" />
+          <r:RibbonComboBox Id="annotateDimStyle" Icon="{cad:CadIcon Name=DimensionStyle}" IsEditable="False" InputWidth="120" Text="ISO-25">
+            <x:String>ISO-25</x:String>
+            <x:String>Architectural</x:String>
+          </r:RibbonComboBox>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Leaders" Id="leaders" Icon="{cad:CadIcon Name=Multileader}" IsDialogLauncherVisible="True">
+          <r:RibbonButton Id="multileader" Label="Multileader" Icon="{cad:CadIcon Name=Multileader}" Size="Large" />
+          <r:RibbonButton Id="addLeader" Label="Add Leader" Icon="{cad:CadIcon Name=Multileader}" Size="Medium" />
+          <r:RibbonButton Id="alignLeaders" Label="Align" Icon="{cad:CadIcon Name=Align}" Size="Medium" />
+          <r:RibbonButton Id="collectLeaders" Label="Collect" Icon="{cad:CadIcon Name=Group}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Tables" Id="tables" Icon="{cad:CadIcon Name=Table}" IsDialogLauncherVisible="True">
+          <r:RibbonButton Id="tableInsert" Label="Table" Icon="{cad:CadIcon Name=Table}" Size="Large" />
+          <r:RibbonButton Id="extractTable" Label="Extract Data" Icon="{cad:CadIcon Name=DataExtraction}" Size="Medium" />
+          <r:RibbonButton Id="linkData" Label="Link Data" Icon="{cad:CadIcon Name=Field}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Markup" Id="markup" Icon="{cad:CadIcon Name=RevisionCloud}">
+          <r:RibbonButton Id="revcloud2" Label="Revision Cloud" Icon="{cad:CadIcon Name=RevisionCloud}" Size="Large" />
+          <r:RibbonButton Id="wipeout" Label="Wipeout" Icon="{cad:CadIcon Name=Region}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Annotation Scaling" Id="annotationScaling" Icon="{cad:CadIcon Name=AnnotationScale}">
+          <r:RibbonButton Id="scaleList" Label="Scale List" Icon="{cad:CadIcon Name=AnnotationScale}" Size="Large" />
+          <r:RibbonButton Id="addCurrentScale" Label="Add Current Scale" Icon="{cad:CadIcon Name=AnnotationScale}" Size="Medium" />
+          <r:RibbonButton Id="syncScale" Label="Sync Scale Positions" Icon="{cad:CadIcon Name=Align}" Size="Medium" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Parametric" Id="parametric" KeyTip="P">
+        <r:RibbonGroup Header="Geometric" Id="geometric" Icon="{cad:CadIcon Name=ConstraintAuto}" IsDialogLauncherVisible="True">
+          <r:RibbonButton Id="autoConstrain" Label="Auto&#10;Constrain" Icon="{cad:CadIcon Name=ConstraintAuto}" Size="Large" ScreenTip="Applies geometric constraints to a selection set based on tolerances.&#10;&#10;AUTOCONSTRAIN" />
+          <r:RibbonButton Id="coincident" Label="Coincident" Icon="{cad:CadIcon Name=ConstraintCoincident}" Size="Small" />
+          <r:RibbonButton Id="collinear" Label="Collinear" Icon="{cad:CadIcon Name=ConstraintCollinear}" Size="Small" />
+          <r:RibbonButton Id="concentric" Label="Concentric" Icon="{cad:CadIcon Name=ConstraintConcentric}" Size="Small" />
+          <r:RibbonButton Id="fix" Label="Fix" Icon="{cad:CadIcon Name=LayerLock}" Size="Small" />
+          <r:RibbonButton Id="parallel" Label="Parallel" Icon="{cad:CadIcon Name=ConstraintParallel}" Size="Small" />
+          <r:RibbonButton Id="perpendicular" Label="Perpendicular" Icon="{cad:CadIcon Name=ConstraintPerpendicular}" Size="Small" />
+          <r:RibbonButton Id="horizontal" Label="Horizontal" Icon="{cad:CadIcon Name=ConstraintHorizontal}" Size="Small" />
+          <r:RibbonButton Id="vertical" Label="Vertical" Icon="{cad:CadIcon Name=ConstraintVertical}" Size="Small" />
+          <r:RibbonButton Id="tangent" Label="Tangent" Icon="{cad:CadIcon Name=ConstraintTangent}" Size="Small" />
+          <r:RibbonButton Id="symmetric" Label="Symmetric" Icon="{cad:CadIcon Name=Mirror}" Size="Small" />
+          <r:RibbonButton Id="equal" Label="Equal" Icon="{cad:CadIcon Name=ConstraintEqual}" Size="Small" />
+          <r:RibbonButton Id="smooth" Label="Smooth" Icon="{cad:CadIcon Name=Spline}" Size="Small" />
+          <r:RibbonButton Id="showHide" Label="Show/Hide" Icon="{cad:CadIcon Name=LayerOn}" Size="Medium" />
+          <r:RibbonButton Id="showAll" Label="Show All" Icon="{cad:CadIcon Name=LayerOn}" Size="Medium" />
+          <r:RibbonButton Id="hideAll" Label="Hide All" Icon="{cad:CadIcon Name=LayerOff}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Dimensional" Id="dimensional" Icon="{cad:CadIcon Name=DimensionLinear}" IsDialogLauncherVisible="True">
+          <r:RibbonSplitButton Id="dimConstraint" Label="Linear" Icon="{cad:CadIcon Name=DimensionLinear}" Size="Large" FollowLastChoice="True">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Linear" Tag="{cad:CadIcon Name=DimensionLinear}" />
+              <c:MenuFlyoutItem Text="Aligned" Tag="{cad:CadIcon Name=DimensionAligned}" />
+              <c:MenuFlyoutItem Text="Angular" Tag="{cad:CadIcon Name=DimensionAngular}" />
+              <c:MenuFlyoutItem Text="Radius" Tag="{cad:CadIcon Name=DimensionRadius}" />
+              <c:MenuFlyoutItem Text="Diameter" Tag="{cad:CadIcon Name=DimensionDiameter}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="convertConstraint" Label="Convert" Icon="{cad:CadIcon Name=Redo}" Size="Medium" />
+          <r:RibbonButton Id="showDynamic" Label="Show Dynamic Constraints" Icon="{cad:CadIcon Name=LayerOn}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Manage" Id="parametricManage" Icon="{cad:CadIcon Name=Customize}">
+          <r:RibbonButton Id="deleteConstraints" Label="Delete Constraints" Icon="{cad:CadIcon Name=Erase}" Size="Large" />
+          <r:RibbonButton Id="parametersManager" Label="Parameters Manager" Icon="{cad:CadIcon Name=Calculator}" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="View" Id="view" KeyTip="V">
+        <r:RibbonGroup Header="Viewport Tools" Id="viewportTools" Icon="{cad:CadIcon Name=Model}">
+          <r:RibbonToggleButton x:Name="UcsToggle" Id="ucsIcon" Label="UCS Icon" Icon="{cad:CadIcon Name=Model}" Size="Large" IsChecked="True" ScreenTip="Shows the UCS icon in the drawing area.&#10;&#10;UCSICON" />
+          <r:RibbonToggleButton x:Name="ViewCubeToggle" Id="viewCube" Label="View Cube" Icon="{cad:CadIcon Name=Box}" Size="Large" IsChecked="True" ScreenTip="Shows the view cube navigation widget." />
+          <r:RibbonToggleButton x:Name="NavBarToggle" Id="navBar" Label="Navigation Bar" Icon="{cad:CadIcon Name=Pan}" Size="Large" IsChecked="True" ScreenTip="Shows the navigation bar (pan, zoom, orbit)." />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Named Views" Id="namedViews" Icon="{cad:CadIcon Name=NamedViews}">
+          <r:RibbonButton Id="viewManager" Label="View Manager" Icon="{cad:CadIcon Name=ViewManager}" Size="Medium" />
+          <r:RibbonButton Id="newView" Label="New View" Icon="{cad:CadIcon Name=NamedViews}" Size="Medium" />
+          <r:RibbonComboBox Id="viewList" IsEditable="False" InputWidth="120" Text="Unsaved View">
+            <x:String>Unsaved View</x:String>
+            <x:String>Ground Floor</x:String>
+            <x:String>Kitchen Detail</x:String>
+          </r:RibbonComboBox>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Model Viewports" Id="modelViewports" Icon="{cad:CadIcon Name=Viewports}">
+          <r:RibbonDropDownButton Id="viewportConfiguration" Label="Viewport&#10;Configuration" Icon="{cad:CadIcon Name=Viewports}" Size="Large">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="Single" />
+                <c:MenuFlyoutItem Text="Two: Vertical" />
+                <c:MenuFlyoutItem Text="Three: Right" />
+                <c:MenuFlyoutItem Text="Four: Equal" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonButton Id="namedViewports" Label="Named" Icon="{cad:CadIcon Name=NamedViews}" Size="Medium" />
+          <r:RibbonButton Id="joinViewports" Label="Join" Icon="{cad:CadIcon Name=Join}" Size="Medium" />
+          <r:RibbonButton Id="restoreViewports" Label="Restore" Icon="{cad:CadIcon Name=Undo}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Palettes" Id="palettes" Icon="{cad:CadIcon Name=PropertiesPalette}">
+          <r:RibbonToggleButton Id="toolPalettes" Label="Tool Palettes" Icon="{cad:CadIcon Name=Workspace}" Size="Large" />
+          <r:RibbonToggleButton Id="propertiesPalette" Label="Properties" Icon="{cad:CadIcon Name=PropertiesPalette}" Size="Large" Shortcut="Ctrl+1" />
+          <r:RibbonToggleButton Id="layerPalette" Label="Layer Properties" Icon="{cad:CadIcon Name=LayerProperties}" Size="Medium" />
+          <r:RibbonToggleButton x:Name="CommandLineToggle" Id="commandLine" Label="Command Line" Icon="{cad:CadIcon Name=CommandLine}" Size="Medium" IsChecked="True" Shortcut="Ctrl+9" />
+          <r:RibbonToggleButton Id="externalReferences" Label="External References" Icon="{cad:CadIcon Name=Attach}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Interface" Id="interface" Icon="{cad:CadIcon Name=Workspace}">
+          <r:RibbonToggleButton x:Name="FileTabsToggle" Id="fileTabs" Label="File Tabs" Icon="{cad:CadIcon Name=FileTabs}" Size="Large" IsChecked="True" />
+          <r:RibbonToggleButton x:Name="LayoutTabsToggle" Id="layoutTabs" Label="Layout Tabs" Icon="{cad:CadIcon Name=Paper}" Size="Large" IsChecked="True" />
+          <r:RibbonToggleButton x:Name="LightThemeToggle" Id="lightTheme" Label="Light Theme" Icon="{cad:CadIcon Name=Sun}" Size="Large" ScreenTip="Switches the interface between the dark (default) and the light theme." />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Ribbon" Id="ribbonFeatures" Icon="{cad:CadIcon Name=CleanScreen}" ScreenTip="Try the AutoCAD-class ribbon features of RibbonSpace.">
+          <r:RibbonDropDownButton x:Name="MinimizeBehaviorButton" Id="minimizeBehavior" Label="Minimize Behavior" Icon="{cad:CadIcon Name=CleanScreen}" Size="Large" ScreenTip="What the minimize button at the end of the tab row (and Ctrl+F1) does." />
+          <r:RibbonButton x:Name="CycleButton" Id="cycleMinimize" Label="Cycle State" Icon="{cad:CadIcon Name=Redo}" Size="Medium" ScreenTip="Moves to the next minimize state: full ribbon → panel buttons → panel titles → tabs." />
+          <r:RibbonToggleButton x:Name="PanelTitlesToggle" Id="panelTitles" Label="Panel Titles" Icon="{cad:CadIcon Name=MultilineText}" Size="Medium" IsChecked="True" ScreenTip="Shows or hides the panel titles (also in the ribbon context menu)." />
+          <r:RibbonButton x:Name="FloatLayersButton" Id="floatLayers" Label="Float Layers Panel" Icon="{cad:CadIcon Name=LayerProperties}" Size="Medium" ScreenTip="Floats the Layers panel; drag any panel title away from the ribbon to float it." />
+          <r:RibbonButton x:Name="ReturnPanelsButton" Id="returnPanels" Label="Return Panels" Icon="{cad:CadIcon Name=Undo}" Size="Medium" ScreenTip="Returns all floating panels to the ribbon." />
+          <r:RibbonButton x:Name="ShowTextEditorButton" Id="showTextEditor" Label="Text Editor Tab" Icon="{cad:CadIcon Name=MultilineText}" Size="Medium" ScreenTip="Shows the Text Editor contextual tab (as when editing multiline text)." />
+          <r:RibbonButton x:Name="ShowHatchButton" Id="showHatch" Label="Hatch Creation Tab" Icon="{cad:CadIcon Name=Hatch}" Size="Medium" ScreenTip="Shows the Hatch Creation contextual tab." />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Manage" Id="manage" KeyTip="M">
+        <r:RibbonGroup Header="Action Recorder" Id="actionRecorder" Icon="{cad:CadIcon Name=ActionRecorder}">
+          <r:RibbonToggleButton Id="record" Label="Record" Icon="{cad:CadIcon Name=ActionRecorder}" Size="Large" ScreenTip="Starts the Action Recorder.&#10;&#10;ACTRECORD" />
+          <r:RibbonButton Id="play" Label="Play" Icon="" Size="Medium" />
+          <r:RibbonButton Id="insertMessage" Label="Insert Message" Icon="{cad:CadIcon Name=MultilineText}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Customization" Id="customization" Icon="{cad:CadIcon Name=Customize}">
+          <r:RibbonButton Id="userInterface" Label="User&#10;Interface" Icon="{cad:CadIcon Name=Customize}" Size="Large" ScreenTip="Manages customized user interface elements.&#10;&#10;CUI" />
+          <r:RibbonButton Id="toolPalettesCustomize" Label="Tool Palettes" Icon="{cad:CadIcon Name=Workspace}" Size="Medium" />
+          <r:RibbonButton Id="importCustomization" Label="Import" Icon="{cad:CadIcon Name=Open}" Size="Medium" />
+          <r:RibbonButton Id="editAliases" Label="Edit Aliases" Icon="{cad:CadIcon Name=CommandLine}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Applications" Id="applications" Icon="{cad:CadIcon Name=LoadApplication}">
+          <r:RibbonButton Id="loadApplication" Label="Load&#10;Application" Icon="{cad:CadIcon Name=LoadApplication}" Size="Large" ScreenTip="Loads and unloads applications.&#10;&#10;APPLOAD" />
+          <r:RibbonButton Id="runScript" Label="Run Script" Icon="{cad:CadIcon Name=CommandLine}" Size="Medium" />
+          <r:RibbonButton Id="scriptEditor" Label="Script Editor" Icon="{cad:CadIcon Name=EditPolyline}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="CAD Standards" Id="cadStandards" Icon="{cad:CadIcon Name=QuickSelect}">
+          <r:RibbonButton Id="checkStandards" Label="Check" Icon="{cad:CadIcon Name=QuickSelect}" Size="Medium" />
+          <r:RibbonButton Id="configureStandards" Label="Configure" Icon="{cad:CadIcon Name=Customize}" Size="Medium" />
+          <r:RibbonButton Id="layerTranslator" Label="Layer Translator" Icon="{cad:CadIcon Name=MatchLayer}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Cleanup" Id="cleanup" Icon="{cad:CadIcon Name=Purge}">
+          <r:RibbonButton Id="purge" Label="Purge" Icon="{cad:CadIcon Name=Purge}" Size="Large" ScreenTip="Removes unused items from the drawing.&#10;&#10;PURGE" />
+          <r:RibbonButton Id="overkill" Label="Delete Duplicates" Icon="{cad:CadIcon Name=Erase}" Size="Medium" />
+          <r:RibbonButton Id="units" Label="Units" Icon="{cad:CadIcon Name=Units}" Size="Medium" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Output" Id="output" KeyTip="O">
+        <r:RibbonGroup Header="Plot" Id="plotGroup" Icon="{cad:CadIcon Name=Plot}">
+          <r:RibbonButton Id="plot" Label="Plot" Icon="{cad:CadIcon Name=Plot}" Size="Large" Shortcut="Ctrl+P" ScreenTip="Plots a drawing to a plotter, printer or file.&#10;&#10;PLOT" />
+          <r:RibbonButton Id="batchPlot" Label="Batch Plot" Icon="{cad:CadIcon Name=BatchPlot}" Size="Large" />
+          <r:RibbonButton Id="pageSetup" Label="Page Setup Manager" Icon="{cad:CadIcon Name=PageSetup}" Size="Medium" />
+          <r:RibbonButton Id="plotterManager" Label="Plotter Manager" Icon="{cad:CadIcon Name=Plot}" Size="Medium" />
+          <r:RibbonButton Id="preview" Label="Preview" Icon="{cad:CadIcon Name=ZoomWindow}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Export to DWF/PDF" Id="exportGroup" Icon="{cad:CadIcon Name=ExportPdf}">
+          <r:RibbonSplitButton Id="exportSplit" Label="Export" Icon="{cad:CadIcon Name=ExportPdf}" Size="Large" FollowLastChoice="True">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="PDF" Tag="{cad:CadIcon Name=ExportPdf}" />
+              <c:MenuFlyoutItem Text="DWF" Tag="{cad:CadIcon Name=Publish}" />
+              <c:MenuFlyoutItem Text="DWFx" Tag="{cad:CadIcon Name=Publish}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonComboBox Id="exportExtents" Label="Export:" IsEditable="False" InputWidth="110" Text="Display">
+            <x:String>Display</x:String>
+            <x:String>Extents</x:String>
+            <x:String>Window</x:String>
+          </r:RibbonComboBox>
+          <r:RibbonComboBox Id="exportPageSetup" Label="Page Setup:" IsEditable="False" InputWidth="110" Text="Current">
+            <x:String>Current</x:String>
+            <x:String>Override</x:String>
+          </r:RibbonComboBox>
+          <r:RibbonButton Id="exportPreview" Label="Preview" Icon="{cad:CadIcon Name=ZoomWindow}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Publish" Id="publishGroup" Icon="{cad:CadIcon Name=Publish}">
+          <r:RibbonButton Id="publishButton" Label="Publish" Icon="{cad:CadIcon Name=Publish}" Size="Large" />
+          <r:RibbonButton Id="print3d" Label="3D Print" Icon="{cad:CadIcon Name=Box}" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Collaborate" Id="collaborate" KeyTip="C">
+        <r:RibbonGroup Header="Share" Id="share" Icon="{cad:CadIcon Name=Share}">
+          <r:RibbonButton Id="shareDrawing" Label="Share" Icon="{cad:CadIcon Name=Share}" Size="Large" ScreenTip="Shares a copy of the drawing with others." />
+          <r:RibbonButton Id="sharedViews" Label="Shared Views" Icon="{cad:CadIcon Name=NamedViews}" Size="Large" />
+          <r:RibbonButton Id="pushToDocs" Label="Push to Cloud" Icon="{cad:CadIcon Name=Publish}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Compare" Id="compare" Icon="{cad:CadIcon Name=Compare}">
+          <r:RibbonButton Id="dwgCompare" Label="DWG Compare" Icon="{cad:CadIcon Name=Compare}" Size="Large" ScreenTip="Highlights the differences between two revisions of a drawing.&#10;&#10;COMPARE" />
+          <r:RibbonButton Id="xrefCompare" Label="Xref Compare" Icon="{cad:CadIcon Name=Attach}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Markup" Id="collaborateMarkup" Icon="{cad:CadIcon Name=RevisionCloud}">
+          <r:RibbonButton Id="markupImport" Label="Markup Import" Icon="{cad:CadIcon Name=ImportPdf}" Size="Large" />
+          <r:RibbonButton Id="markupAssist" Label="Markup Assist" Icon="{cad:CadIcon Name=RevisionCloud}" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Text Editor" Id="textEditorTab" ContextualGroupId="textEditor" KeyTip="X">
+        <r:RibbonGroup Header="Style" Id="teStyle" Icon="{cad:CadIcon Name=TextStyle}">
+          <r:RibbonGallery Id="teStyleGallery" Label="Text Style" Icon="{cad:CadIcon Name=TextStyle}" MaxColumns="3" MinColumns="2" ItemWidth="64" ItemHeight="50">
+            <r:RibbonGalleryItem Label="Standard" PreviewText="AaBb" PreviewFontSize="15" />
+            <r:RibbonGalleryItem Label="Annotative" PreviewText="AaBb" PreviewFontSize="15" PreviewFontStyle="Italic" />
+            <r:RibbonGalleryItem Label="Titles" PreviewText="AaBb" PreviewFontSize="17" PreviewFontWeight="Bold" />
+          </r:RibbonGallery>
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonToggleButton Id="teAnnotative" Label="Annotative" Icon="{cad:CadIcon Name=AnnotationScale}" Size="Medium" />
+            <r:RibbonComboBox Id="teHeight" Icon="{cad:CadIcon Name=SingleLineText}" IsEditable="True" InputWidth="90" Text="2.5">
+              <x:String>1.8</x:String>
+              <x:String>2.5</x:String>
+              <x:String>3.5</x:String>
+              <x:String>5</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonButton Id="teMask" Label="Mask" Icon="{cad:CadIcon Name=Region}" Size="Medium" />
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Formatting" Id="teFormatting" Icon="" ItemsLayout="Rows" RowCount="2">
+          <r:RibbonStackPanel>
+            <r:RibbonButtonGroup>
+              <r:RibbonToggleButton Id="teBold" Label="Bold" Icon="" Shortcut="Ctrl+B" />
+              <r:RibbonToggleButton Id="teItalic" Label="Italic" Icon="" Shortcut="Ctrl+I" />
+              <r:RibbonToggleButton Id="teUnderline" Label="Underline" Icon="" Shortcut="Ctrl+U" />
+              <r:RibbonToggleButton Id="teStrike" Label="Strikethrough" Icon="" />
+            </r:RibbonButtonGroup>
+            <r:RibbonFontComboBox Id="teFont" Text="Arial" InputWidth="130" />
+          </r:RibbonStackPanel>
+          <r:RibbonStackPanel>
+            <r:RibbonComboBox Id="teColor" IsEditable="False" InputWidth="110" ItemTemplate="{StaticResource ColorItemTemplate}" SelectionBoxTemplate="{StaticResource ColorItemTemplate}" x:Name="TextColorCombo" ItemsSource="{x:Static cad:CadColorOption.Samples}" />
+            <r:RibbonButton Id="teClearFormatting" Label="Clear Formatting" Icon="" Size="Small" />
+            <r:RibbonButton Id="teMatch" Label="Match" Icon="{cad:CadIcon Name=MatchProperties}" Size="Small" />
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Paragraph" Id="teParagraph" Icon="">
+          <r:RibbonDropDownButton Id="teJustification" Label="Justification" Icon="" Size="Large">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:RadioMenuFlyoutItem Text="Top Left TL" GroupName="just" IsChecked="True" />
+                <c:RadioMenuFlyoutItem Text="Top Center TC" GroupName="just" />
+                <c:RadioMenuFlyoutItem Text="Middle Center MC" GroupName="just" />
+                <c:RadioMenuFlyoutItem Text="Bottom Right BR" GroupName="just" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonButtonGroup>
+            <r:RibbonToggleButton Id="teLeft" Label="Left" Icon="" GroupName="teAlign" IsChecked="True" />
+            <r:RibbonToggleButton Id="teCenter" Label="Center" Icon="" GroupName="teAlign" />
+            <r:RibbonToggleButton Id="teRight" Label="Right" Icon="" GroupName="teAlign" />
+          </r:RibbonButtonGroup>
+          <r:RibbonDropDownButton Id="teBullets" Label="Bullets and Numbering" Icon="" Size="Small" />
+          <r:RibbonDropDownButton Id="teLineSpacing" Label="Line Spacing" Icon="" Size="Small" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Insert" Id="teInsert" Icon="{cad:CadIcon Name=Field}">
+          <r:RibbonDropDownButton Id="teColumns" Label="Columns" Icon="{cad:CadIcon Name=Table}" Size="Large" />
+          <r:RibbonDropDownButton Id="teSymbol" Label="Symbol" Icon="Ø" Size="Large">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="Degrees %%d  °" />
+                <c:MenuFlyoutItem Text="Plus/Minus %%p  ±" />
+                <c:MenuFlyoutItem Text="Diameter %%c  Ø" />
+                <c:MenuFlyoutItem Text="Centerline  ℄" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonButton Id="teField" Label="Field" Icon="{cad:CadIcon Name=Field}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Spell Check" Id="teSpell" Icon="">
+          <r:RibbonToggleButton Id="teSpellCheck" Label="Spell Check" Icon="" Size="Large" IsChecked="True" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Tools" Id="teTools" Icon="{cad:CadIcon Name=Search}">
+          <r:RibbonButton Id="teFind" Label="Find &amp;&#10;Replace" Icon="{cad:CadIcon Name=Search}" Size="Large" Shortcut="Ctrl+R" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Options" Id="teOptions" Icon="">
+          <r:RibbonButton Id="teMore" Label="More" Icon="" Size="Medium" />
+          <r:RibbonToggleButton Id="teRuler" Label="Ruler" Icon="{cad:CadIcon Name=AnnotationScale}" Size="Medium" IsChecked="True" />
+          <r:RibbonButton Id="teUndo" Label="Undo" Icon="{cad:CadIcon Name=Undo}" Size="Small" />
+          <r:RibbonButton Id="teRedo" Label="Redo" Icon="{cad:CadIcon Name=Redo}" Size="Small" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Close" Id="teClose" Icon="{cad:CadIcon Name=Close}">
+          <r:RibbonButton x:Name="CloseTextEditor" Id="closeTextEditor" Label="Close&#10;Text Editor" Icon="{cad:CadIcon Name=CloseEditor}" Size="Large" KeyTip="C" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Hatch Creation" Id="hatchCreationTab" ContextualGroupId="hatchCreation" KeyTip="W">
+        <r:RibbonGroup Header="Boundaries" Id="hcBoundaries" Icon="{cad:CadIcon Name=Boundary}">
+          <r:RibbonButton Id="hcPickPoints" Label="Pick Points" Icon="{cad:CadIcon Name=Boundary}" Size="Large" />
+          <r:RibbonButton Id="hcSelect" Label="Select" Icon="{cad:CadIcon Name=QuickSelect}" Size="Medium" />
+          <r:RibbonButton Id="hcRemove" Label="Remove" Icon="{cad:CadIcon Name=Erase}" Size="Medium" />
+          <r:RibbonButton Id="hcRecreate" Label="Recreate" Icon="{cad:CadIcon Name=Redo}" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Pattern" Id="hcPattern" Icon="{cad:CadIcon Name=Hatch}" ReductionOrder="1">
+          <r:RibbonGallery x:Name="HatchGallery" Id="hcPatternGallery" Label="Pattern" Icon="{cad:CadIcon Name=Hatch}" MaxColumns="6" MinColumns="3" Rows="1" ItemWidth="50" ItemHeight="50" ShowItemLabels="False">
+            <r:RibbonGalleryItem Label="SOLID" Icon="{cad:CadIcon Name=HatchSolid}" />
+            <r:RibbonGalleryItem Label="ANSI31" Icon="{cad:CadIcon Name=HatchAnsi31}" />
+            <r:RibbonGalleryItem Label="ANSI37" Icon="{cad:CadIcon Name=HatchAnsi37}" />
+            <r:RibbonGalleryItem Label="AR-BRSTD" Icon="{cad:CadIcon Name=HatchBrick}" />
+            <r:RibbonGalleryItem Label="AR-CONC" Icon="{cad:CadIcon Name=HatchConcrete}" />
+            <r:RibbonGalleryItem Label="GRAVEL" Icon="{cad:CadIcon Name=HatchGravel}" />
+            <r:RibbonGalleryItem Label="HONEY" Icon="{cad:CadIcon Name=HatchHoney}" />
+            <r:RibbonGalleryItem Label="NET" Icon="{cad:CadIcon Name=HatchNet}" />
+            <r:RibbonGalleryItem Label="GR_LINEAR" Icon="{cad:CadIcon Name=HatchGradient}" />
+          </r:RibbonGallery>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Properties" Id="hcProperties" Icon="{cad:CadIcon Name=Color}">
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonComboBox Id="hcType" Icon="{cad:CadIcon Name=Hatch}" IsEditable="False" InputWidth="110" Text="Pattern">
+              <x:String>Solid</x:String>
+              <x:String>Gradient</x:String>
+              <x:String>Pattern</x:String>
+              <x:String>User defined</x:String>
+            </r:RibbonComboBox>
+            <r:RibbonComboBox Id="hcColor" Icon="{cad:CadIcon Name=Color}" IsEditable="False" InputWidth="110" ItemTemplate="{StaticResource ColorItemTemplate}" SelectionBoxTemplate="{StaticResource ColorItemTemplate}" x:Name="HatchColorCombo" ItemsSource="{x:Static cad:CadColorOption.Samples}" />
+            <r:RibbonComboBox Id="hcBackground" Icon="{cad:CadIcon Name=Gradient}" IsEditable="False" InputWidth="110" Text="None">
+              <x:String>None</x:String>
+              <x:String>ByLayer</x:String>
+            </r:RibbonComboBox>
+          </r:RibbonStackPanel>
+          <r:RibbonStackPanel Orientation="Vertical" Spacing="2">
+            <r:RibbonSlider Id="hcTransparency" Label="Transparency" Minimum="0" Maximum="90" Value="0" InputWidth="96" />
+            <r:RibbonSpinner Id="hcAngle" Label="Angle" Value="0" Minimum="0" Maximum="360" Increment="15" Unit="°" InputWidth="70" />
+            <r:RibbonSpinner Id="hcScale" Label="Scale" Value="1" Minimum="0.01" Maximum="1000" Increment="0.25" Format="0.00" InputWidth="70" />
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Origin" Id="hcOrigin" Icon="{cad:CadIcon Name=Model}">
+          <r:RibbonButton Id="hcSetOrigin" Label="Set Origin" Icon="{cad:CadIcon Name=Model}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Options" Id="hcOptions" Icon="{cad:CadIcon Name=MatchProperties}" IsDialogLauncherVisible="True">
+          <r:RibbonToggleButton Id="hcAssociative" Label="Associative" Icon="{cad:CadIcon Name=Join}" Size="Large" IsChecked="True" />
+          <r:RibbonToggleButton Id="hcAnnotative" Label="Annotative" Icon="{cad:CadIcon Name=AnnotationScale}" Size="Large" />
+          <r:RibbonSplitButton Id="hcMatch" Label="Match Properties" Icon="{cad:CadIcon Name=MatchProperties}" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Close" Id="hcClose" Icon="{cad:CadIcon Name=Close}">
+          <r:RibbonButton x:Name="CloseHatch" Id="closeHatchCreation" Label="Close&#10;Hatch Creation" Icon="{cad:CadIcon Name=CloseEditor}" Size="Large" KeyTip="C" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+    </r:Ribbon>
+    <Border x:Name="FileTabsRow" Grid.Row="2" Height="30" Padding="4,4,4,0" Background="{DynamicResource RibbonWindowBackgroundBrush}">
+      <StackPanel x:Name="FileTabs" Orientation="Horizontal" Spacing="2">
+        <Border x:Name="CadFileTab0" Padding="12,0,12,0" MinWidth="90" CornerRadius="3,3,0,0">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadFileTab0Label" Text="Start" FontSize="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+        <Border x:Name="CadFileTab1" Padding="12,0,8,0" MinWidth="90" CornerRadius="3,3,0,0">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadFileTab1Label" Text="Drawing1*" FontSize="12" VerticalAlignment="Center" />
+            <c:FontIcon Glyph="" FontSize="8" VerticalAlignment="Center" Opacity="0.7" />
+          </StackPanel>
+        </Border>
+        <Border x:Name="CadFileTab2" Padding="12,0,8,0" MinWidth="90" CornerRadius="3,3,0,0">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadFileTab2Label" Text="Floor Plan" FontSize="12" VerticalAlignment="Center" />
+            <c:FontIcon Glyph="" FontSize="8" VerticalAlignment="Center" Opacity="0.7" />
+          </StackPanel>
+        </Border>
+        <Button x:Name="CadFileAdd" Width="26" Padding="0" Margin="2,0,0,0" VerticalAlignment="Stretch" AutomationProperties.Name="New">
+          <c:FontIcon Glyph="" FontSize="10" />
+        </Button>
+      </StackPanel>
+    </Border>
+    <Grid x:Name="DrawingArea" Grid.Row="3">
+      <cad:CadDrawingCanvas x:Name="Canvas" />
+      <Canvas x:Name="MTextLayer" IsHitTestVisible="False" IsVisible="{Binding MTextVisible}">
+        <Grid x:Name="MTextEditor">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="12" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Border x:Name="MTextRuler" Background="#E6EAEF" BorderBrush="#8C97A5" BorderThickness="1">
+            <Path x:Name="MTextTicks" Stroke="#4E5866" StrokeThickness="1" Data="M0,6 L0,11 M10,8 L10,11 M20,8 L20,11 M30,8 L30,11 M40,6 L40,11 M50,8 L50,11 M60,8 L60,11 M70,8 L70,11 M80,6 L80,11 M90,8 L90,11 M100,8 L100,11 M110,8 L110,11 M120,6 L120,11 M130,8 L130,11 M140,8 L140,11 M150,8 L150,11 M160,6 L160,11 M170,8 L170,11 M180,8 L180,11 M190,8 L190,11 M200,6 L200,11 M210,8 L210,11 M220,8 L220,11 M230,8 L230,11 M240,6 L240,11 M250,8 L250,11 M260,8 L260,11 M270,8 L270,11 M280,6 L280,11" />
+          </Border>
+          <Rectangle x:Name="MTextFrame" Grid.Row="1" StrokeThickness="1" StrokeDashArray="4,3" />
+          <StackPanel Grid.Row="1" Margin="6,4" Orientation="Horizontal" VerticalAlignment="Top">
+            <TextBlock x:Name="MTextText" Text="Open-plan living area, oak floor" FontFamily="Arial" FontSize="13" />
+            <Rectangle x:Name="MTextCaret" Width="1.5" Height="15" Margin="1,0,0,0" VerticalAlignment="Center" />
+          </StackPanel>
+        </Grid>
+      </Canvas>
+      <TextBlock x:Name="ViewportLabel" Text="[–][Top][2D Wireframe]" Margin="10,6,0,0" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" IsHitTestVisible="False" />
+      <Canvas x:Name="UcsIcon" Width="70" Height="70" Margin="14,0,0,58" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False">
+        <Path Data="M8,62 L8,10" Stroke="#5CB85C" StrokeThickness="2" />
+        <Path Data="M3,16 L8,6 L13,16 Z" Fill="#5CB85C" />
+        <Path Data="M8,62 L60,62" Stroke="#E05A5A" StrokeThickness="2" />
+        <Path Data="M54,57 L64,62 L54,67 Z" Fill="#E05A5A" />
+        <Rectangle Canvas.Left="4" Canvas.Top="58" Width="8" Height="8" Stroke="#C9CFD6" StrokeThickness="1.2" />
+        <TextBlock Canvas.Left="14" Canvas.Top="0" Text="Y" FontSize="12" FontWeight="SemiBold" Foreground="#5CB85C" />
+        <TextBlock Canvas.Left="58" Canvas.Top="40" Text="X" FontSize="12" FontWeight="SemiBold" Foreground="#E05A5A" />
+      </Canvas>
+      <Grid x:Name="ViewCube" Width="110" Height="128" Margin="0,10,46,0" HorizontalAlignment="Right" VerticalAlignment="Top">
+        <Ellipse x:Name="CubeRing" Width="96" Height="96" VerticalAlignment="Top" Margin="0,2,0,0" StrokeThickness="9" Opacity="0.55" />
+        <Border x:Name="CubeFace" Width="46" Height="46" VerticalAlignment="Top" Margin="0,27,0,0" BorderThickness="1" CornerRadius="1">
+          <TextBlock x:Name="CubeText" Text="TOP" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock x:Name="CubeN" Text="N" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0" />
+        <TextBlock x:Name="CubeS" Text="S" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,86,0,0" />
+        <TextBlock x:Name="CubeW" Text="W" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,43,0,0" />
+        <TextBlock x:Name="CubeE" Text="E" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,43,6,0" />
+        <Border x:Name="WcsBadge" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="8,1" CornerRadius="2" BorderThickness="1">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock x:Name="WcsText" Text="WCS" FontSize="10" />
+            <c:FontIcon x:Name="WcsChevron" Glyph="" FontSize="7" />
+          </StackPanel>
+        </Border>
+      </Grid>
+      <Border x:Name="NavBar" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,148,8,0" CornerRadius="2" BorderThickness="1" Padding="1">
+        <r:RibbonToolBar x:Name="NavToolBar" Orientation="Vertical" ShowLabels="False" Background="Transparent" BorderThickness="0" Padding="0" CornerRadius="0">
+          <r:RibbonButton Id="nav.wheel" Label="Full Navigation Wheel" Icon="{cad:CadIcon Name=Orbit}" />
+          <r:RibbonToggleButton x:Name="NavPan" Id="nav.pan" Label="Pan" Icon="{cad:CadIcon Name=Pan}" />
+          <r:RibbonSplitButton x:Name="NavZoom" Id="nav.zoomExtents" Label="Zoom Extents" Icon="{cad:CadIcon Name=ZoomExtents}" FollowLastChoice="True">
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Zoom Extents" Tag="{cad:CadIcon Name=ZoomExtents}" />
+              <c:MenuFlyoutItem Text="Zoom Window" Tag="{cad:CadIcon Name=ZoomWindow}" />
+              <c:MenuFlyoutItem Text="Zoom In" Tag="{cad:CadIcon Name=ZoomWindow}" />
+              <c:MenuFlyoutItem Text="Zoom Out" Tag="{cad:CadIcon Name=ZoomWindow}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="nav.orbit" Label="Orbit" Icon="{cad:CadIcon Name=Orbit}" />
+        </r:RibbonToolBar>
+      </Border>
+      <StackPanel x:Name="CommandLine" VerticalAlignment="Bottom" Margin="70,0,70,10" Spacing="0" MaxWidth="980">
+        <Border x:Name="CommandHistoryBox" CornerRadius="2,2,0,0" Padding="10,4" HorizontalAlignment="Stretch">
+          <TextBlock x:Name="CommandHistory" FontFamily="Consolas,Menlo,monospace" FontSize="12" TextWrapping="NoWrap" MaxLines="3" LineHeight="17" Text="{Binding HistoryText}" />
+        </Border>
+        <Border x:Name="CommandBar" Height="30" CornerRadius="2" BorderThickness="1">
+          <Grid ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="CommandClose" Width="22" Padding="0" Margin="2,0,0,0" AutomationProperties.Name="Close command line" Theme="{StaticResource RibbonChromeButtonStyle}">
+              <c:FontIcon Glyph="" FontSize="9" />
+            </Button>
+            <Button Grid.Column="1" Width="22" Padding="0" AutomationProperties.Name="Customize" Theme="{StaticResource RibbonChromeButtonStyle}">
+              <c:FontIcon Glyph="" FontSize="11" />
+            </Button>
+            <TextBlock x:Name="CommandPrompt" Grid.Column="2" Text="&gt;_" FontFamily="Consolas,Menlo,monospace" FontSize="12" VerticalAlignment="Center" Margin="2,0,0,1" />
+            <TextBox x:Name="CommandInput" Grid.Column="3" PlaceholderText="Type a command" FontFamily="Consolas,Menlo,monospace" FontSize="12" VerticalAlignment="Center" BorderThickness="0" MinHeight="0" Padding="4,4,4,4" Background="Transparent" AutomationProperties.Name="Command line" Text="{Binding CommandInput, Mode=TwoWay}" />
+            <Button Grid.Column="4" Width="24" Padding="0" Margin="0,0,2,0" AutomationProperties.Name="Recent commands" Theme="{StaticResource RibbonChromeButtonStyle}">
+              <c:FontIcon Glyph="" FontSize="9" />
+            </Button>
+          </Grid>
+        </Border>
+      </StackPanel>
+    </Grid>
+    <r:RibbonStatusBar x:Name="StatusBar" Grid.Row="4" MinHeight="30">
+      <StackPanel x:Name="LayoutTabs" Orientation="Horizontal" Spacing="1" VerticalAlignment="Stretch">
+        <Border x:Name="CadLayoutTab0" Padding="12,0,12,0" MinWidth="0" CornerRadius="0,0,3,3" Height="26">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadLayoutTab0Label" Text="Model" FontSize="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+        <Border x:Name="CadLayoutTab1" Padding="12,0,12,0" MinWidth="0" CornerRadius="0,0,3,3" Height="26">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadLayoutTab1Label" Text="Layout1" FontSize="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+        <Border x:Name="CadLayoutTab2" Padding="12,0,12,0" MinWidth="0" CornerRadius="0,0,3,3" Height="26">
+          <Border.Background>
+            <SolidColorBrush Color="Transparent" />
+          </Border.Background>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="CadLayoutTab2Label" Text="Layout2" FontSize="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+        <Button x:Name="CadLayoutAdd" Width="26" Padding="0" Margin="2,0,0,0" VerticalAlignment="Stretch" AutomationProperties.Name="New">
+          <c:FontIcon Glyph="" FontSize="10" />
+        </Button>
+      </StackPanel>
+      <r:RibbonStatusBar.EndItems>
+        <TextBlock x:Name="Coordinates" Text="6215.7290, 3820.4106, 0.0000" FontFamily="Consolas,Menlo,monospace" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <r:RibbonToggleButton x:Name="ModelToggle" Id="status.model" Label="MODEL" IsChecked="True" ScreenTip="Model or paper space" />
+        <r:RibbonToggleButton x:Name="GridToggle" Id="status.grid" ShowLabel="False" Label="Display Drawing Grid" Icon="{cad:CadIcon Name=Grid}" IsChecked="True" Shortcut="F7" />
+        <r:RibbonToggleButton Id="status.snap" ShowLabel="False" Label="Snap Mode" Icon="{cad:CadIcon Name=Snap}" Shortcut="F9" />
+        <r:RibbonSeparator />
+        <r:RibbonToggleButton Id="status.ortho" ShowLabel="False" Label="Ortho Mode" Icon="{cad:CadIcon Name=Ortho}" Shortcut="F8" />
+        <r:RibbonToggleButton Id="status.polar" ShowLabel="False" Label="Polar Tracking" Icon="{cad:CadIcon Name=Polar}" IsChecked="True" Shortcut="F10" />
+        <r:RibbonToggleButton Id="status.otrack" ShowLabel="False" Label="Object Snap Tracking" Icon="{cad:CadIcon Name=ObjectSnapTracking}" IsChecked="True" Shortcut="F11" />
+        <r:RibbonSplitButton x:Name="OsnapButton" Id="status.osnap" ShowLabel="False" Label="Object Snap" Icon="{cad:CadIcon Name=ObjectSnap}" IsCheckable="True" IsChecked="True" Shortcut="F3">
+          <MenuFlyout>
+            <c:ToggleMenuFlyoutItem Text="Endpoint" IsChecked="True" />
+            <c:ToggleMenuFlyoutItem Text="Midpoint" IsChecked="True" />
+            <c:ToggleMenuFlyoutItem Text="Center" IsChecked="True" />
+            <c:ToggleMenuFlyoutItem Text="Geometric Center" />
+            <c:ToggleMenuFlyoutItem Text="Node" />
+            <c:ToggleMenuFlyoutItem Text="Quadrant" />
+            <c:ToggleMenuFlyoutItem Text="Intersection" IsChecked="True" />
+            <c:ToggleMenuFlyoutItem Text="Extension" IsChecked="True" />
+            <c:ToggleMenuFlyoutItem Text="Perpendicular" />
+            <c:ToggleMenuFlyoutItem Text="Tangent" />
+            <c:ToggleMenuFlyoutItem Text="Nearest" />
+            <c:MenuFlyoutSeparator />
+            <c:MenuFlyoutItem Text="Object Snap Settings..." />
+          </MenuFlyout>
+        </r:RibbonSplitButton>
+        <r:RibbonSeparator />
+        <r:RibbonToggleButton x:Name="LineweightToggle" Id="status.lwt" ShowLabel="False" Label="Show/Hide Lineweight" Icon="{cad:CadIcon Name=ShowLineweight}" />
+        <r:RibbonToggleButton Id="status.transparency" ShowLabel="False" Label="Show/Hide Transparency" Icon="{cad:CadIcon Name=ShowTransparency}" />
+        <r:RibbonToggleButton Id="status.selectionCycling" ShowLabel="False" Label="Selection Cycling" Icon="{cad:CadIcon Name=SelectionCycling}" />
+        <r:RibbonSeparator />
+        <r:RibbonDropDownButton Id="status.annoScale" Label="1:1" ScreenTip="Annotation scale of the current view" Icon="{cad:CadIcon Name=AnnotationScale}">
+          <r:RibbonDropDownButton.Flyout>
+            <MenuFlyout>
+              <c:RadioMenuFlyoutItem Text="1:1" GroupName="annoScale" IsChecked="True" />
+              <c:RadioMenuFlyoutItem Text="1:2" GroupName="annoScale" />
+              <c:RadioMenuFlyoutItem Text="1:5" GroupName="annoScale" />
+              <c:RadioMenuFlyoutItem Text="1:10" GroupName="annoScale" />
+              <c:RadioMenuFlyoutItem Text="1:50" GroupName="annoScale" />
+              <c:RadioMenuFlyoutItem Text="1:100" GroupName="annoScale" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Custom..." />
+            </MenuFlyout>
+          </r:RibbonDropDownButton.Flyout>
+        </r:RibbonDropDownButton>
+        <r:RibbonDropDownButton x:Name="WorkspaceStatusButton" Id="status.workspace" ShowLabel="False" Label="Workspace Switching" Icon="{cad:CadIcon Name=Workspace}" />
+        <r:RibbonToggleButton x:Name="CleanScreenToggle" Id="status.cleanScreen" ShowLabel="False" Label="Clean Screen" Icon="{cad:CadIcon Name=CleanScreen}" Shortcut="Ctrl+0" />
+        <r:RibbonButton Id="status.customize" ShowLabel="False" Label="Customization" Icon="" />
+      </r:RibbonStatusBar.EndItems>
+    </r:RibbonStatusBar>
+  </Grid>
+</UserControl>

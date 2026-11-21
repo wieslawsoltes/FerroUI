@@ -1,0 +1,11 @@
+<local:ApplicationMenuView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.ApplicationMenuView" x:Name="Root">
+  <local:ApplicationMenuView.MenuItem>
+    <local:ConsumerApplicationMenuItem Id="save-as" Label="{Binding #Root.Header, Mode=OneWay}" Click="ItemClick">
+      <r:RibbonApplicationMenuItem Id="drawing" Label="Drawing" Description="Save drawing" />
+      <r:RibbonApplicationMenuItem Id="template" Label="Template" IsEnabled="False" />
+    </local:ConsumerApplicationMenuItem>
+  </local:ApplicationMenuView.MenuItem>
+  <local:ApplicationMenuView.RecentItem><r:RibbonApplicationMenuRecentItem Title="Document" Path="/documents/drawing" IsPinned="True" Click="RecentClick" /></local:ApplicationMenuView.RecentItem>
+  <TextBlock Text="{Binding #Root.MenuItem.Items.Count}" />
+  <TextBlock Text="{Binding #Root.MenuItem.Items[0].Label}" />
+</local:ApplicationMenuView>

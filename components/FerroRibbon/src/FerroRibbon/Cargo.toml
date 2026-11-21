@@ -1,0 +1,57 @@
+[package]
+name = "ferroribbon"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license = "MIT AND Apache-2.0"
+authors.workspace = true
+build = "build.rs"
+links = "ferroribbon_xaml"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+uuid.workspace = true
+ferroribbon-core = { path = "../FerroRibbon.Core" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-system.workspace = true
+futures-channel.workspace = true
+ferroui-markup-xaml.workspace = true
+resvg = { version = "0.50.0", default-features = false, features = ["text", "system-fonts", "raster-images"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+reqwest = { version = "0.13.5", optional = true, default-features = false, features = ["native-tls", "http2", "system-proxy", "gzip", "deflate"] }
+tokio = { version = "1.54.1", optional = true, features = ["macros", "rt-multi-thread"] }
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+js-sys = "=0.3.106"
+wasm-bindgen = "=0.2.129"
+web-sys = { version = "=0.3.106", features = [
+    "AbortController", "AbortSignal", "Headers", "ReadableStream",
+    "ReadableStreamDefaultReader", "RequestInit", "Response", "Window",
+] }
+
+[target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "emscripten"))'.dependencies]
+ferroribbon-platform = { path = "../FerroRibbon.Platform" }
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-themes-simple = { workspace = true }
+ferroui-headless = { workspace = true, features = ["testing"] }
+serde_json.workspace = true
+futures-util.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+# Loads icons named by http(s) URIs on native targets (reqwest, tokio, native TLS).
+http-images = ["dep:reqwest", "dep:tokio"]
+source-button-semantics-reproducer = []

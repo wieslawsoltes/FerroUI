@@ -1,0 +1,11 @@
+<local:ConsumerBackstage xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" Title="Application" NavigationPaneWidth="241.5">
+ <local:ConsumerBackstage.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Backstage.xaml" /></ResourceDictionary.MergedDictionaries>
+  <local:InputViewModel x:Key="Model" />
+  <DataTemplate x:Key="PageTemplate"><TextBlock Text="Template page" /></DataTemplate>
+  <ControlTemplate x:Key="Replacement"><StackPanel><Button x:Name="PART_BackButton" /><StackPanel x:Name="PART_TopItems" /><StackPanel x:Name="PART_BottomItems" /><ContentPresenter x:Name="PART_Content" /></StackPanel></ControlTemplate>
+ </ResourceDictionary></local:ConsumerBackstage.Resources>
+ <local:ConsumerBackstageItem x:DataType="local:InputViewModel" Header="{Binding Text,Source={StaticResource Model},Mode=TwoWay}" Id="info" KeyTip="I"><TextBlock Text="Content identity" /></local:ConsumerBackstageItem>
+ <r:RibbonBackstageItem Header="Template" Id="template" ContentTemplate="{StaticResource PageTemplate}" />
+ <r:RibbonBackstageItem x:DataType="local:InputViewModel" Header="Save" Id="save" Placement="Bottom" HasSeparatorBefore="True" Command="{Binding Command,Source={StaticResource Model}}" CommandParameter="from-backstage" ClosesBackstage="False" />
+</local:ConsumerBackstage>

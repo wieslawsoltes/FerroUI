@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace">
+ <ControlTheme x:Key="NoStates" TargetType="Button">
+  <Setter Property="BorderBrush" Value="#FFA55A11" />
+  <Setter Property="Template"><ControlTemplate>
+   <Border x:Name="NoStatesRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" />
+  </ControlTemplate></Setter>
+ </ControlTheme>
+ <ControlTheme x:Key="BothStates" TargetType="Button">
+  <Setter Property="BorderBrush" Value="#FFA55A11" />
+  <Setter Property="Template"><ControlTemplate>
+   <Border x:Name="SelectionRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+    r:RibbonGallery.SupportsSelectedState="True" r:RibbonGallery.SupportsUnselectedState="True" />
+  </ControlTemplate></Setter>
+  <Style Selector="^ /template/ Border#SelectionRoot:ribbon-gallery-selected"><Setter Property="BorderBrush" Value="#FF00AA22" /></Style>
+ </ControlTheme>
+ <ControlTheme x:Key="DerivedNoStates" TargetType="Button" BasedOn="{StaticResource BothStates}">
+  <Setter Property="Template"><ControlTemplate>
+   <Border x:Name="ReplacementRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" />
+  </ControlTemplate></Setter>
+ </ControlTheme>
+ <ControlTheme x:Key="SelectedOnly" TargetType="Button">
+  <Setter Property="BorderBrush" Value="#FFA55A11" />
+  <Setter Property="Template"><ControlTemplate>
+   <Border x:Name="SelectionRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+    r:RibbonGallery.SupportsSelectedState="True" />
+  </ControlTemplate></Setter>
+  <Style Selector="^ /template/ Border#SelectionRoot:ribbon-gallery-selected"><Setter Property="BorderBrush" Value="#FF00AA22" /></Style>
+ </ControlTheme>
+ <ControlTheme x:Key="UnselectedOnly" TargetType="Button">
+  <Setter Property="Template"><ControlTemplate>
+   <Border x:Name="SelectionRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+    r:RibbonGallery.SupportsUnselectedState="True" />
+  </ControlTemplate></Setter>
+  <Style Selector="^ /template/ Border#SelectionRoot:ribbon-gallery-unselected"><Setter Property="BorderBrush" Value="#FFFFAA00" /></Style>
+ </ControlTheme>
+</ResourceDictionary>

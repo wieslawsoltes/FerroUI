@@ -1,0 +1,118 @@
+<!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:ns2="using:FerroRibbon.Compatibility" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:meta="using:FerroRibbon.Internal" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:u="using:FerroRibbon.Compatibility" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme TargetType="c:RibbonTitleBar" x:Key="{x:Type c:RibbonTitleBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonTitleBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonTitleBarForegroundBrush}" />
+    <Setter Property="Height" Value="44" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding CaptionButtonsInset}"><Grid x:Name="PART_Root">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Border x:Name="PART_DragRegion" Grid.Column="3" Background="Transparent" />
+            <p:RibbonIconPresenter x:Name="PART_AppIcon" Icon="{TemplateBinding AppIcon}" IconSize="20" Margin="12,0,6,0" Foreground="{DynamicResource RibbonTitleBarIconBrush}" />
+            
+            <Button x:Name="PART_AppButton" Theme="{StaticResource RibbonChromeButtonStyle}" IsVisible="False" Padding="6,4" Margin="6,0,2,0" VerticalAlignment="Center">
+              <p:RibbonIconPresenter Icon="{TemplateBinding AppIcon}" IconSize="24" Foreground="{DynamicResource RibbonTitleBarIconBrush}" />
+            </Button>
+            <ContentPresenter x:Name="PART_StartContent" Grid.Column="1" Content="{TemplateBinding StartContent}" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+            <Border x:Name="PART_QuickAccessHost" Grid.Column="2" VerticalAlignment="Center" Margin="4,0" />
+            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+              <StackPanel x:Name="PART_Title" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="{TemplateBinding DisplayTitle}" Foreground="{TemplateBinding Foreground}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="320" VerticalAlignment="Center" />
+                <TextBlock Text="{TemplateBinding Subtitle}" Foreground="{TemplateBinding Foreground}" Opacity="0.7" VerticalAlignment="Center" />
+              </StackPanel>
+              <c:RibbonSearchBox x:Name="PART_SearchBox" />
+            </StackPanel>
+            <ContentPresenter x:Name="PART_EndContent" Grid.Column="4" Content="{TemplateBinding EndContent}" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{TemplateBinding Foreground}" />
+          </Grid></Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+<ControlTheme TargetType="c:RibbonStatusBar" x:Key="{x:Type c:RibbonStatusBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonStatusBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonStatusBarForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="8,0"><Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel x:Name="PART_StartItems" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" />
+            <StackPanel x:Name="PART_EndItems" Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" />
+          </Grid></Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+<ControlTheme TargetType="c:RibbonZoomControl" x:Key="{x:Type c:RibbonZoomControl}">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonStatusBarForegroundBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Height="24">
+            <Button x:Name="PART_ZoomOut" Theme="{StaticResource RibbonChromeButtonStyle}" Width="22" Padding="0" Foreground="{TemplateBinding Foreground}">
+              <u:FontIcon Glyph="" FontSize="10" />
+            </Button>
+            <meta:RibbonInputSlider x:Name="PART_Slider" Width="110" VerticalAlignment="Center" MinHeight="0" Padding="0" />
+            <Button x:Name="PART_ZoomIn" Theme="{StaticResource RibbonChromeButtonStyle}" Width="22" Padding="0" Foreground="{TemplateBinding Foreground}">
+              <u:FontIcon Glyph="" FontSize="10" />
+            </Button>
+            <Button x:Name="PART_Percent" Theme="{StaticResource RibbonChromeButtonStyle}" Content="{TemplateBinding ValueText}" MinWidth="44" Foreground="{TemplateBinding Foreground}" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+<ControlTheme TargetType="c:RibbonToolBar" x:Key="{x:Type c:RibbonToolBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonToolBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RibbonCommandBarBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="3" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border x:Name="PART_ItemsHost" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme TargetType="c:RibbonContextualToolBar" x:Key="{x:Type c:RibbonContextualToolBar}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid x:Name="PART_Host" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme TargetType="c:RibbonMenuBar" x:Key="{x:Type c:RibbonMenuBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonChromeBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="4,2">
+            <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="0" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

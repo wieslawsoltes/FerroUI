@@ -1,0 +1,35 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+ xmlns:m="using:FerroRibbon.Model">
+ <StackPanel.Styles>
+  <Style Selector="TextBlock">
+   <Setter Property="TextTrimming" Value="WordEllipsis" />
+   <Setter Property="ClipToBounds" Value="False" />
+  </Style>
+ </StackPanel.Styles>
+ <StackPanel.Resources>
+  <ResourceDictionary>
+   <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Gallery.xaml" />
+   </ResourceDictionary.MergedDictionaries>
+  <m:RibbonGalleryModel x:Key="PreviewModel" Id="modelPreview" Label="Model previews"
+   MinColumns="1" MaxColumns="1" ItemWidth="48" ItemHeight="52" ShowLabels="True">
+   <m:RibbonGalleryModel.Items>
+    <m:RibbonGalleryItemModel Label="Model label" Content="Model preview Á😀 العربية אבג is deliberately long" />
+   </m:RibbonGalleryModel.Items>
+  </m:RibbonGalleryModel>
+  </ResourceDictionary>
+ </StackPanel.Resources>
+ <TextBlock x:Name="Ordinary" Text="Ordinary application text" />
+ <r:RibbonGallery x:Name="DirectPreview" Label="Direct previews" MinColumns="1" MaxColumns="1"
+  ItemWidth="48" ItemHeight="52" ShowItemLabels="True">
+  <r:RibbonGalleryItem Label="Direct label" PreviewText="Direct preview Á😀 العربية אבג is deliberately long" />
+ </r:RibbonGallery>
+ <r:RibbonGallery MinColumns="1" MaxColumns="1" ItemWidth="48" ItemHeight="52" ShowItemLabels="False">
+  <r:RibbonGallery.ItemTemplate>
+   <DataTemplate><TextBlock Text="Template-owned preview" /></DataTemplate>
+  </r:RibbonGallery.ItemTemplate>
+  <r:RibbonGalleryItem Label="Custom label" />
+ </r:RibbonGallery>
+</StackPanel>

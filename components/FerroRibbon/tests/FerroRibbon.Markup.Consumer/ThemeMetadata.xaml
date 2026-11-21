@@ -1,0 +1,10 @@
+<local:ThemeConsumer xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="using:FerroRibbon.Consumer" xmlns:theme="using:FerroRibbon.Theming"
+ xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+ x:Name="themeRoot" Color="#abc" OptionalColor="{x:Null}" Palette="{x:Static theme:RibbonThemePalette.Excel}"
+ Chrome="Neutral" RibbonStyle="Cad" CurrentResources="{x:Static rs:RibbonTheme.Resources}">
+  <TextBlock Text="{Binding Name}" x:DataType="theme:RibbonThemePalette" DataContext="{x:Static theme:RibbonThemePalette.Excel}" />
+  <TextBlock Text="{Binding Presets[2].Name}" x:DataType="local:ThemeConsumer" DataContext="{Binding ElementName=themeRoot}" />
+  <TextBlock Text="{Binding CurrentResources.Palette.Name}" x:DataType="local:ThemeConsumer" DataContext="{Binding ElementName=themeRoot}" />
+  <TextBlock x:CompileBindings="True" Text="{Binding Palette.Name}" x:DataType="local:ThemeConsumer" DataContext="{Binding $parent[local:ThemeConsumer]}" />
+</local:ThemeConsumer>

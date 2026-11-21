@@ -1,0 +1,7 @@
+<local:ConsumerScroll xmlns="https://github.com/ferroui"
+  xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+  xmlns:local="using:FerroRibbon.Consumer" UseLayoutRounding="False">
+  <rs:RibbonScrollPanel.Content>
+    <local:ConsumerAdaptive ExtentWidth="300.5" UseLayoutRounding="False" />
+  </rs:RibbonScrollPanel.Content>
+</local:ConsumerScroll>

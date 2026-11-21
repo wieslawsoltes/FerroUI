@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:InputViewModel">
+ <StackPanel.DataContext><local:InputViewModel /></StackPanel.DataContext>
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Combo.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerCombo x:Name="Choice" Label="Choose" IsEditable="True" Text="{Binding Text,Mode=TwoWay}" Command="{Binding Command}">
+  <local:ConsumerCombo.ItemTemplate><DataTemplate><TextBlock Text="Popup template" /></DataTemplate></local:ConsumerCombo.ItemTemplate>
+  <local:ConsumerCombo.SelectionBoxTemplate><DataTemplate><TextBlock Text="Selection template" /></DataTemplate></local:ConsumerCombo.SelectionBoxTemplate>
+  <x:String>first</x:String><x:String>second</x:String>
+ </local:ConsumerCombo>
+ <r:RibbonFontComboBox /><r:RibbonFontSizeComboBox />
+ <TextBlock Text="{Binding ElementName=Choice,Path=Items.Count}" />
+ <TextBlock Text="{Binding Source={x:Static r:RibbonFontComboBox.DefaultFonts},Path=Count}" />
+ <TextBlock Text="{Binding Source={x:Static r:RibbonFontComboBox.DefaultFonts},Path=[0]}" />
+</StackPanel>

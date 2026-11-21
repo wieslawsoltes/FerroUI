@@ -1,0 +1,3 @@
+<Window xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:cad="using:FerroRibbon.Sample.Cad" Title="FerroRibbon — CAD canvas" Width="1200" Height="800" RequestedThemeVariant="Dark">
+ <cad:CadDrawingCanvas x:Name="Canvas" />
+</Window>

@@ -1,0 +1,19 @@
+<!-- Original ShellPage. Copyright Wiesław Soltes, MIT. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="FerroRibbon.Sample.ShellPage" Background="{DynamicResource RibbonWindowBackgroundBrush}" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <r:RibbonToolBar x:Name="Rail" Orientation="Vertical" ShowLabels="False" CornerRadius="0" BorderThickness="0,0,1,0" Padding="4,8" Background="{DynamicResource RibbonChromeBackgroundBrush}">
+      <r:RibbonToggleButton x:Name="WordRail" Id="rail.word" Label="Word (XAML)" Icon="" GroupName="pages" IsChecked="True" Tag="word" />
+      <r:RibbonToggleButton Id="rail.excel" Label="Excel (MVVM)" Icon="" GroupName="pages" Tag="excel" />
+      <r:RibbonToggleButton Id="rail.powerpoint" Label="PowerPoint (Simplified)" Icon="" GroupName="pages" Tag="powerpoint" />
+      <r:RibbonToggleButton Id="rail.tools" Label="Toolbars &amp; palettes" Icon="" GroupName="pages" Tag="tools" />
+      <r:RibbonToggleButton x:Name="CadRail" Id="rail.cad" Label="CAD (AutoCAD-class ribbon)" GroupName="pages" Tag="cad" />
+      <r:RibbonSeparator />
+      <r:RibbonToggleButton Id="rail.settings" Label="Settings" Icon="" GroupName="pages" Tag="settings" />
+    </r:RibbonToolBar>
+    <Grid x:Name="PageHost" Grid.Column="1" />
+  </Grid>
+</UserControl>

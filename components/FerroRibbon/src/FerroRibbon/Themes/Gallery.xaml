@@ -1,0 +1,47 @@
+<!-- Original RibbonSpace gallery template. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:ns2="using:FerroRibbon.Compatibility" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Buttons.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonGallery" x:Key="{x:Type c:RibbonGallery}">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid>
+            <Border x:Name="PART_InlineRoot" BorderBrush="{DynamicResource RibbonGalleryItemBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource RibbonControlCornerRadius}" Margin="0,1,0,1" VerticalAlignment="Center">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="PART_InlineHost" Padding="2" />
+                <Border Grid.Column="1" Width="16" BorderBrush="{DynamicResource RibbonGalleryItemBorderBrush}" BorderThickness="1,0,0,0">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Button x:Name="PART_UpButton" Theme="{StaticResource RibbonGalleryScrollButtonStyle}">
+                      <ns2:FontIcon Glyph="" FontSize="7" />
+                    </Button>
+                    <Button x:Name="PART_DownButton" Grid.Row="1" Theme="{StaticResource RibbonGalleryScrollButtonStyle}">
+                      <ns2:FontIcon Glyph="" FontSize="7" />
+                    </Button>
+                    <Button x:Name="PART_MoreButton" Grid.Row="2" Theme="{StaticResource RibbonGalleryScrollButtonStyle}">
+                      <ns2:FontIcon Glyph="" FontSize="8" />
+                    </Button>
+                  </Grid>
+                </Border>
+              </Grid>
+            </Border>
+            <c:RibbonButton x:Name="PART_DropDownButton" ShowChevron="True" CanAddToQuickAccess="False" IsVisible="False" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

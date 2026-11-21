@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:mv="using:FerroRibbon.Controls.Mvvm" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries>
+  <mv:RibbonModelBindings x:Key="Scope" />
+ </ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerRibbon Tag="{StaticResource Scope}" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <r:RibbonTab Header="Home"><r:RibbonGroup Header="Tools"><r:RibbonButton Id="xaml" Label="Declared" /></r:RibbonGroup></r:RibbonTab>
+ </local:ConsumerRibbon>
+ <TextBlock DataContext="{StaticResource Scope}" x:DataType="mv:RibbonModelBindings" Text="{Binding IsDisposed}" />
+</StackPanel>

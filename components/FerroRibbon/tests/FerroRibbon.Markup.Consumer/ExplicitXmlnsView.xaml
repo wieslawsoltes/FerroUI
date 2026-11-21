@@ -1,0 +1,22 @@
+<!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
+<UserControl
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <!-- Declared XML namespace URI (RibbonXmlns.Uri). -->
+  <rs:Ribbon x:Name="RibbonElement">
+    <rs:RibbonTab Id="home" Header="Home">
+      <rs:RibbonGroup Id="clipboard" Header="Clipboard">
+        <rs:RibbonButton Id="cut" Label="Cut" Icon="&#xE8C6;" />
+      </rs:RibbonGroup>
+    </rs:RibbonTab>
+  </rs:Ribbon>
+</UserControl>

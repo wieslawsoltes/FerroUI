@@ -1,0 +1,11 @@
+<local:GridPickView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer">
+ <local:GridPickView.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/GridPicker.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries>
+  <m:RibbonGridSize x:Key="Size"><x:Arguments><x:Int32>2</x:Int32><x:Int32>3</x:Int32></x:Arguments></m:RibbonGridSize>
+  <m:RibbonGridPickerModel x:Key="Model" Id="table" Label="Table" Rows="3" Columns="4" />
+  <m:RibbonModel x:Key="Graph"><m:RibbonModel.Tabs><m:RibbonTabModel Id="insert" Label="Insert"><m:RibbonTabModel.Groups><m:RibbonGroupModel Id="tables" Label="Tables"><m:RibbonGroupModel.Items><StaticResource ResourceKey="Model" /></m:RibbonGroupModel.Items></m:RibbonGroupModel></m:RibbonTabModel.Groups></m:RibbonTabModel></m:RibbonModel.Tabs></m:RibbonModel>
+ </ResourceDictionary></local:GridPickView.Resources>
+ <r:Ribbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False" />
+ <local:ConsumerGridPicker x:Name="Picker" Rows="2" Columns="3" SizePicked="Picked" />
+ <TextBlock Text="{Binding ElementName=Picker, Path=HighlightedSize.Columns}" />
+</local:GridPickView>

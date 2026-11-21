@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary><local:ConsumerButtonModel x:Key="Model" Id="derived" Label="Before" /></ResourceDictionary></StackPanel.Resources>
+ <TextBlock x:DataType="local:ConsumerButtonModel" DataContext="{StaticResource Model}" Text="{Binding Label, Mode=TwoWay}" />
+ <TextBlock x:DataType="m:RibbonNodeModel" DataContext="{StaticResource Model}" Text="{Binding Label}" />
+</StackPanel>

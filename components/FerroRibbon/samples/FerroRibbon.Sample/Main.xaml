@@ -1,0 +1,116 @@
+<Window xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:cad="using:FerroRibbon.Sample.Cad" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Sample"
+ x:DataType="local:SampleViewModel" x:CompileBindings="True"
+ Title="FerroRibbon — native ribbon sample" Width="1140" Height="700" MinWidth="340" MinHeight="400">
+
+ <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Background="#F0F2F5">
+  <r:RibbonTitleBar x:Name="DocumentTitleBar" Ribbon="{Binding #Ribbon}" Title="FerroRibbon document" Subtitle="Working copy" AppIcon="&#xE8A5;" IsAppIconMenuEnabled="True" />
+  <r:Ribbon Grid.Row="1" CanFloatGroups="True" IsShortcutRoutingEnabled="True" VisibilityMode="{Binding VisibilityMode,Mode=TwoWay}" IsMinimizeButtonVisible="True" DisplayMode="{Binding DisplayMode,Mode=TwoWay}" x:Name="Ribbon" IsApplicationButtonVisible="True" IsDisplayOptionsButtonVisible="False">
+   <r:Ribbon.Backstage>
+    <r:RibbonBackstage Title="FerroRibbon">
+     <r:RibbonBackstageItem Id="information" Header="Information" KeyTip="I"><StackPanel Spacing="16"><TextBlock Text="Document information" FontSize="28" /><TextBlock Text="{Binding Document}" TextWrapping="Wrap" /></StackPanel></r:RibbonBackstageItem>
+     <r:RibbonBackstageItem Id="file-save" Header="Save" KeyTip="S" Command="{Binding Action}" CommandParameter="Save" />
+     <r:RibbonBackstageItem Id="file-reset" Header="Reset ribbon" KeyTip="R" Command="{Binding Action}" CommandParameter="Reset ribbon" />
+     <r:RibbonBackstageItem Header="Return to document" KeyTip="C" Placement="Bottom" />
+    </r:RibbonBackstage>
+   </r:Ribbon.Backstage>
+   <r:Ribbon.QuickAccessToolBar>
+    <r:RibbonQuickAccessToolBar><r:RibbonButton Id="save" Label="Save" Icon="&#xE74E;" Command="{Binding Action}" CommandParameter="Save" /></r:RibbonQuickAccessToolBar>
+   </r:Ribbon.QuickAccessToolBar>
+   <r:RibbonTab Id="home" Header="Home" KeyTip="H">
+    <r:RibbonGroup Id="clipboard" Header="Clipboard" ReductionOrder="0">
+     <r:RibbonGroup.SlideOutItems>
+      <r:RibbonButton Id="paste-special" Label="Paste Special" Icon="&#xE77F;" Command="{Binding Action}" CommandParameter="Paste special" />
+      <r:RibbonButton Id="clipboard-history" Label="Clipboard History" Icon="&#xE8C8;" Command="{Binding Action}" CommandParameter="Clipboard history" />
+     </r:RibbonGroup.SlideOutItems>
+     <r:RibbonSplitButton Shortcut="Ctrl+V" Id="paste" Size="Large" Label="Paste" Icon="&#xE77F;" Command="{Binding Action}" CommandParameter="Paste" FollowLastChoice="True">
+      <MenuFlyout><MenuFlyoutItem Text="Keep Source" Command="{Binding Action}" CommandParameter="Paste keeping source" /><MenuFlyoutItem Text="Text Only" Command="{Binding Action}" CommandParameter="Paste text only" /></MenuFlyout>
+     </r:RibbonSplitButton>
+     <r:RibbonButton Shortcut="Ctrl+X" Id="cut" KeyTip="X" Label="Cut" Icon="&#xE8C6;" Size="Medium" Command="{Binding Action}" CommandParameter="Cut" />
+     <r:RibbonButton Shortcut="Ctrl+C" Id="copy" KeyTip="C" Label="Copy" Icon="&#xE8C8;" Size="Medium" Command="{Binding Action}" CommandParameter="Copy" />
+     <r:RibbonButton Id="format" Label="Format Painter" Icon="&#xE771;" Size="Medium" Command="{Binding Action}" CommandParameter="Format painter" />
+    </r:RibbonGroup>
+    <r:RibbonGroup Id="font" Header="Font" ReductionOrder="1">
+     <r:RibbonColorPicker Id="font-color" Label="Font Color" KeyTip="FC" ShowNoColor="True" SelectedColor="{Binding FontColor,Mode=TwoWay}" Command="{Binding FontColorAction}" />
+     <r:RibbonFontComboBox Id="font-family" KeyTip="FF" Text="{Binding FontFamily,Mode=TwoWay}" Command="{Binding Font}" />
+     <r:RibbonSpinner Id="font-size" KeyTip="FS" Label="Size" Minimum="8" Maximum="72" Format="0.#" Unit="pt" Value="{Binding FontSize,Mode=TwoWay}" Command="{Binding FontSizeAction}" />
+     <r:RibbonToggleButton Shortcut="Ctrl+B" Id="bold" KeyTip="B" Label="Bold" Icon="B" IsChecked="{Binding Bold,Mode=TwoWay}" Command="{Binding Action}" CommandParameter="Bold" />
+     <r:RibbonButton Label="Increase Font" Size="Large" Icon="A+" Command="{Binding Action}" CommandParameter="Increase font" />
+     <r:RibbonButton Label="Decrease Font" Icon="A−" Command="{Binding Action}" CommandParameter="Decrease font" />
+     <r:RibbonButton Label="Clear Formatting" Icon="&#xE894;" Command="{Binding Action}" CommandParameter="Clear formatting" />
+    </r:RibbonGroup>
+    <r:RibbonGroup Id="paragraph" Header="Paragraph" ReductionOrder="2">
+     <r:RibbonButton Label="Bullets" Size="Large" Icon="&#xE8FD;" Command="{Binding Action}" CommandParameter="Bullets" />
+     <r:RibbonButton Label="Numbering" Icon="&#xE8FE;" Command="{Binding Action}" CommandParameter="Numbering" />
+     <r:RibbonButton Label="Indent" Icon="&#xE8D3;" Command="{Binding Action}" CommandParameter="Indent" />
+    </r:RibbonGroup>
+    <r:RibbonGroup Id="editing" Header="Editing" ReductionOrder="3">
+     <r:RibbonTextBox Id="find-text" Label="Find" KeyTip="S" Shortcut="Ctrl+F" PlaceholderText="Find in document" Text="{Binding SearchText,Mode=TwoWay}" Command="{Binding Find}" />
+     <r:RibbonButton Label="Find" Size="Large" Icon="&#xE721;" Command="{Binding Action}" CommandParameter="Find" />
+     <r:RibbonButton Label="Select" Icon="&#xE8B0;" Command="{Binding Action}" CommandParameter="Select" />
+     <r:RibbonDropDownButton Id="editing-menu" KeyTip="M" Label="Actions" Icon="&#xE712;">
+      <r:RibbonDropDownButton.Flyout><MenuFlyout>
+       <MenuFlyoutItem Text="Select All" r:RibbonKeyTip.KeyTip="A" r:RibbonMenu.Icon="&#xE8B0;" Command="{Binding Action}" CommandParameter="Select all" KeyboardAcceleratorTextOverride="Ctrl+A" />
+       <MenuFlyoutSubItem Text="Document actions">
+        <MenuFlyoutItem Text="Find Next" Command="{Binding Action}" CommandParameter="Find next" />
+        <MenuFlyoutItem Text="Replace" Command="{Binding Action}" CommandParameter="Replace" />
+       </MenuFlyoutSubItem>
+      </MenuFlyout></r:RibbonDropDownButton.Flyout>
+     </r:RibbonDropDownButton>
+    </r:RibbonGroup>
+   </r:RibbonTab>
+   <r:RibbonTab Id="insert" Header="Insert" KeyTip="N">
+    <r:RibbonGroup Id="styles" Header="Styles"><r:RibbonGallery Id="styles-gallery" Label="Styles" KeyTip="ST" MinColumns="2" MaxColumns="5" Command="{Binding Action}">
+     <r:RibbonGalleryItem Label="Normal" Category="Paragraph" Value="Normal style" PreviewText="AaBb" />
+     <r:RibbonGalleryItem Label="Heading 1" Category="Headings" Value="Heading 1 style" PreviewText="AaBb" PreviewFontSize="20" PreviewFontWeight="Bold" />
+     <r:RibbonGalleryItem Label="Heading 2" Category="Headings" Value="Heading 2 style" PreviewText="AaBb" PreviewFontSize="17" PreviewFontWeight="Bold" />
+     <r:RibbonGalleryItem Label="Title" Category="Headings" Value="Title style" PreviewText="Title" PreviewFontSize="24" />
+     <r:RibbonGalleryItem Label="Subtitle" Category="Paragraph" Value="Subtitle style" PreviewText="Subtitle" PreviewFontStyle="Italic" />
+     <r:RibbonGallery.FooterItems><r:RibbonButton Label="Apply Styles" Command="{Binding Action}" CommandParameter="Apply styles" /></r:RibbonGallery.FooterItems>
+    </r:RibbonGallery></r:RibbonGroup>
+    <r:RibbonGroup Id="tables" Header="Tables"><r:RibbonDropDownButton Id="insert-table" KeyTip="T" Label="Table" Icon="&#xE80A;"><r:RibbonDropDownButton.Flyout><Flyout><r:RibbonGridPicker Rows="8" Columns="10" Command="{Binding TableAction}" /></Flyout></r:RibbonDropDownButton.Flyout></r:RibbonDropDownButton></r:RibbonGroup>
+    <r:RibbonGroup Header="Pages"><r:RibbonButton Label="Blank Page" Icon="&#xE8A5;" Command="{Binding Action}" CommandParameter="Blank page" /></r:RibbonGroup>
+    <r:RibbonGroup Header="Illustrations"><r:RibbonButton Label="Picture" Icon="&#xE91B;" Command="{Binding Action}" CommandParameter="Picture" /><r:RibbonButton Label="Shape" Icon="&#xE7EF;" Command="{Binding Action}" CommandParameter="Shape" /></r:RibbonGroup>
+    <r:RibbonGroup Header="Links"><r:RibbonButton Label="Hyperlink" Icon="&#xE71B;" Command="{Binding Action}" CommandParameter="Hyperlink" /></r:RibbonGroup>
+   </r:RibbonTab>
+   <r:RibbonTab Id="view" Header="View" KeyTip="W">
+    <r:RibbonGroup Id="workspace" Header="Workspace"><r:RibbonSegmentedControl Id="workspace-mode" KeyTip="WS" Label="Workspace" Command="{Binding Action}"><r:RibbonSegment Label="Write" Value="Write workspace" /><r:RibbonSegment Label="Review" Value="Review workspace" /><r:RibbonSegment Label="Draw" Value="Draw workspace" /></r:RibbonSegmentedControl></r:RibbonGroup>
+    <r:RibbonGroup Header="Document"><r:RibbonButton Label="Print Layout" Icon="&#xE8A5;" Command="{Binding Action}" CommandParameter="Print layout" /><r:RibbonButton Label="Reading View" Icon="&#xE736;" Command="{Binding Action}" CommandParameter="Reading view" /></r:RibbonGroup>
+    <r:RibbonGroup Header="Options"><r:RibbonCheckBox Label="Simplified Ribbon" IsChecked="{Binding Simplified,Mode=TwoWay}" /><r:RibbonCheckBox Id="guides" Label="Show Guides" IsChecked="{Binding ShowGuides,Mode=TwoWay}" /></r:RibbonGroup>
+    <r:RibbonGroup Header="Zoom"><r:RibbonButton Label="Zoom In" Icon="&#xE8A3;" Command="{Binding Action}" CommandParameter="Zoom in" /><r:RibbonButton Label="Zoom Out" Icon="&#xE71F;" Command="{Binding Action}" CommandParameter="Zoom out" /></r:RibbonGroup>
+    <r:RibbonGroup Id="preview" Header="Preview"><r:RibbonSlider Id="opacity" KeyTip="O" Label="Opacity" Minimum="0" Maximum="100" StepFrequency="5" InputWidth="100" Value="{Binding OpacityPercent,Mode=TwoWay}" Command="{Binding OpacityAction}" /></r:RibbonGroup>
+    <r:RibbonGroup Id="ribbon-state" Header="Ribbon state">
+     <r:RibbonButton Id="customize-ribbon" Label="Customize Ribbon" Command="{Binding Action}" CommandParameter="Customize ribbon" />
+     <r:RibbonButton Id="customize-qat" Label="Customize Quick Access" Command="{Binding Action}" CommandParameter="Customize quick access" />
+     <r:RibbonButton Label="Save Ribbon" Command="{Binding Action}" CommandParameter="Save ribbon" />
+     <r:RibbonButton Label="Restore Ribbon" Command="{Binding Action}" CommandParameter="Restore ribbon" />
+     <r:RibbonButton Label="Reset Customization" Command="{Binding Action}" CommandParameter="Reset ribbon" />
+     <r:RibbonButton Label="Reset Quick Access" Command="{Binding Action}" CommandParameter="Reset quick access" />
+    </r:RibbonGroup>
+   </r:RibbonTab>
+  </r:Ribbon>
+  <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*" Margin="6" ColumnSpacing="8">
+   <r:RibbonMenuBar x:Name="CommandMenus" VerticalAlignment="Center">
+    <r:RibbonMenuBarItem Header="Document"><MenuFlyoutItem Text="Save" Command="{Binding Action}" CommandParameter="Save" /></r:RibbonMenuBarItem>
+    <r:RibbonMenuBarItem x:Name="ToolOptionsMenu" Header="Tools"><MenuFlyoutItem x:Name="TextToolsAction" Text="Text tools" Command="{Binding Action}" CommandParameter="Text tools" /><MenuFlyoutItem x:Name="DrawToolsAction" Text="Draw tools" Command="{Binding Action}" CommandParameter="Draw tools" /></r:RibbonMenuBarItem>
+   </r:RibbonMenuBar>
+   <r:RibbonToolBar x:Name="DocumentToolbar" Grid.Column="1" Width="220" ShowLabels="True">
+    <r:RibbonButton Id="toolbar-save" Label="Save" Icon="&#xE74E;" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Save" />
+    <r:RibbonButton Id="toolbar-copy" Label="Copy" Icon="&#xE8C8;" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Copy" />
+    <r:RibbonButton Id="toolbar-paste" Label="Paste" Icon="&#xE77F;" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Paste" />
+    <r:RibbonButton Id="toolbar-print" Label="Print" Icon="&#xE749;" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Print" />
+   </r:RibbonToolBar>
+   <r:RibbonContextualToolBar x:Name="ToolOptions" Grid.Column="2" ActiveContext="{Binding ActiveTool}">
+    <r:RibbonToolBar x:Name="TextOptions" r:RibbonContextualToolBar.Context="text" ShowLabels="True"><r:RibbonButton Label="Text options" Icon="A" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Text options" /></r:RibbonToolBar>
+    <r:RibbonToolBar x:Name="DrawOptions" r:RibbonContextualToolBar.Context="draw" ShowLabels="True"><r:RibbonButton Label="Pen" Icon="{cad:CadIcon Name=Line}" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Pen" /><r:RibbonButton Label="Brush" Icon="{cad:CadIcon Name=HatchSolid}" SimplifiedLabel="Show" Command="{Binding Action}" CommandParameter="Brush" /></r:RibbonToolBar>
+   </r:RibbonContextualToolBar>
+  </Grid>
+  <LayoutTransformControl x:Name="DocumentZoom" Grid.Row="3" Margin="44,30">
+   <LayoutTransformControl.LayoutTransform><ScaleTransform ScaleX="{Binding ZoomScale}" ScaleY="{Binding ZoomScale}" /></LayoutTransformControl.LayoutTransform>
+  <Border x:Name="DocumentPage" Opacity="{Binding DocumentOpacity}" Padding="42" Background="White" BorderBrush="#D4D9E1" BorderThickness="1" CornerRadius="3">
+   <TextBox x:Name="Document" FontFamily="{Binding FontFamily}" Text="{Binding Document,Mode=TwoWay}" Foreground="{Binding DocumentForeground}" CaretBrush="#202530" AcceptsReturn="True" TextWrapping="Wrap" FontSize="{Binding FontSize}" BorderThickness="0" Background="Transparent" />
+  </Border>
+  </LayoutTransformControl>
+  <r:RibbonStatusBar x:Name="DocumentStatusBar" Grid.Row="4" Ribbon="{Binding #Ribbon}"><TextBlock Text="{Binding Status}" VerticalAlignment="Center" /><r:RibbonStatusBar.EndItems><r:RibbonZoomControl x:Name="DocumentZoomControl" Value="{Binding ZoomPercent,Mode=TwoWay}" Command="{Binding ZoomAction}" /></r:RibbonStatusBar.EndItems></r:RibbonStatusBar>
+ </Grid>
+</Window>

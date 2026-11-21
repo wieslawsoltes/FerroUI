@@ -1,0 +1,50 @@
+<!-- Original RibbonSpace Backstage template. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:si="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <si:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonBackstage" x:Key="{x:Type c:RibbonBackstage}">
+    <Setter Property="Background" Value="{DynamicResource RibbonBackstageContentBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid Background="{TemplateBinding Background}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="{Binding NavigationPaneWidth, RelativeSource={RelativeSource TemplatedParent}}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Background="{DynamicResource RibbonBackstagePaneBackgroundBrush}">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+              <Button x:Name="PART_BackButton" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" HorizontalAlignment="Left" Width="40" Height="40" Margin="12,14,0,6" CornerRadius="20" Theme="{StaticResource RibbonChromeButtonStyle}">
+                <compat:FontIcon Glyph="" FontSize="16" />
+              </Button>
+              <TextBlock Grid.Row="1" Text="{TemplateBinding Title}" Margin="20,0,12,10" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" TextTrimming="CharacterEllipsis" />
+              <ContentPresenter Grid.Row="2" Content="{TemplateBinding PaneHeader}" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" />
+              <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="PART_TopItems" Spacing="0" />
+              </ScrollViewer>
+              <StackPanel x:Name="PART_BottomItems" Grid.Row="4" Spacing="0" Margin="0,0,0,12" />
+            </Grid>
+            <Grid x:Name="PART_ContentRoot" Grid.Column="1">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <TextBlock x:Name="PART_PageTitle" Text="{TemplateBinding PageTitle}" FontSize="30" FontWeight="SemiLight" Margin="40,34,40,10" AutomationProperties.AccessibilityView="Content" />
+              <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ContentPresenter x:Name="PART_Content" Margin="40,8,40,32" />
+              </ScrollViewer>
+            </Grid>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

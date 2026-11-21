@@ -1,0 +1,11 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer"
+ x:DataType="local:CommandViewModel" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+  <ResourceInclude Source="ferres://FerroRibbon/Themes/Buttons.xaml" />
+ </ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <StackPanel.DataContext><local:CommandViewModel /></StackPanel.DataContext>
+ <r:RibbonButton Id="paste" Label="Paste" Icon="P" Size="Large" KeyTip="V" Command="{Binding Command}" CommandParameter="{Binding Value,Mode=TwoWay}" />
+ <local:ConsumerRibbonButton Label="Custom" Size="Small" />
+ <r:RibbonDropDownButton Label="More" />
+</StackPanel>

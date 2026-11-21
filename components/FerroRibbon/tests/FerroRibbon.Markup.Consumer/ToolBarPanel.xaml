@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:r="using:FerroRibbon.Controls" xmlns:c="using:FerroRibbon.Consumer">
+  <c:ConsumerToolBarPanel x:Name="Toolbar" Orientation="Vertical" Columns="2" Spacing="1.25" UseLayoutRounding="False">
+    <p:RibbonToolBarPanel.OverflowButton><Button x:Name="More" Width="12.5" Height="11.25" /></p:RibbonToolBarPanel.OverflowButton>
+    <Border x:Name="First" Width="29.25" Height="17.5" />
+    <Border Width="41" Height="23" />
+    <r:RibbonSeparator Width="2" Height="3" />
+    <Border Width="19.75" Height="14.25" />
+  </c:ConsumerToolBarPanel>
+  <p:RibbonToolBarPanel x:Name="UnknownOrientation" Orientation="99" Columns="-2" />
+  <p:RibbonToolBarPanel x:Name="NumericHorizontal" Orientation="1" />
+  <p:RibbonToolBarPanel x:Name="MinimumOrientation" Orientation="-2147483648" />
+  <p:RibbonToolBarPanel x:Name="MaximumOrientation" Orientation="2147483647" />
+  <TextBlock x:Name="InitialCount" x:DataType="c:ConsumerToolBarPanel" DataContext="{Binding #Toolbar}" Text="{Binding OverflowItems.Count}" />
+</StackPanel>

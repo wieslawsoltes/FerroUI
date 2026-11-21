@@ -1,0 +1,20 @@
+<!-- Original RibbonSpace segmented control template. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonSegmentedControl" x:Key="{x:Type c:RibbonSegmentedControl}">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{DynamicResource RibbonInputBackgroundBrush}" BorderBrush="{DynamicResource RibbonInputBorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource RibbonControlCornerRadius}" Padding="1">
+            <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="1" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

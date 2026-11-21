@@ -1,0 +1,24 @@
+//! Native metadata for unchanged Core model APIs. Copyright Wiesław Šoltés, MIT.
+use super::*;
+use ferroribbon_core::model::{
+    RibbonIcon, RibbonNodeModel, RibbonNodeModelImpl, RibbonScreenTip, RibbonSegmentModel,
+    RibbonSegmentModelImpl,
+};
+use ferroribbon_core::{ObservableObject, RibbonMergeAction};
+
+pub struct ObservableObjectMetadata;
+ferroui_base::ferro_markup_type!(class ObservableObjectMetadata as "ObservableObject" {
+ namespace:"FerroRibbon",handles:[ObservableObject]
+});
+pub struct RibbonNodeModelMetadata;
+ferroui_base::ferro_markup_type!(class RibbonNodeModelMetadata as "RibbonNodeModel" {
+ namespace:"FerroRibbon.Model",this:Rc<dyn RibbonNodeModelImpl>,handles:[Rc<dyn RibbonNodeModelImpl>,Option<Rc<dyn RibbonNodeModelImpl>>,Rc<RibbonNodeModel>,RibbonNodeModel],base:ObservableObject,
+ properties:[Id:Option<String>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|string(v.id()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<String>|v.set_id(x.map(Into::into))},Label:Option<String>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|string(v.label()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<String>|v.set_label(x.map(Into::into))},Icon:Option<Rc<RibbonIcon>>{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.icon(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<Rc<RibbonIcon>>|v.set_icon(x)},LargeIcon:Option<Rc<RibbonIcon>>{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.large_icon(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<Rc<RibbonIcon>>|v.set_large_icon(x)},IsVisible:bool{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.is_visible(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:bool|v.set_is_visible(x)},IsEnabled:bool{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.is_enabled(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:bool|v.set_is_enabled(x)},KeyTip:Option<String>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|string(v.key_tip()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<String>|v.set_key_tip(x.map(Into::into))},ScreenTip:Option<Rc<RibbonScreenTip>>{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.screen_tip(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<Rc<RibbonScreenTip>>|v.set_screen_tip(x)},Description:Option<String>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|string(v.description()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<String>|v.set_description(x.map(Into::into))},Order:i32{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.order(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:i32|v.set_order(x)},Tag:Option<ferroui_base::BoxedValue>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|crate::metadata::model_objects::to_native(v.tag()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<ferroui_base::BoxedValue>|v.set_tag(crate::metadata::model_objects::from_native_replacing(x,||v.tag()))},AutomationId:Option<String>{try_get:|v:&Rc<dyn RibbonNodeModelImpl>|string(v.automation_id()),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:Option<String>|v.set_automation_id(x.map(Into::into))},MergeAction:RibbonMergeAction{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.merge_action(),set:|v:&Rc<dyn RibbonNodeModelImpl>,x:RibbonMergeAction|v.set_merge_action(x)},Keywords:ModelStrings{get:|v:&Rc<dyn RibbonNodeModelImpl>|v.keywords()}],
+ methods:[try fn ToString()->String =>|v:&Rc<dyn RibbonNodeModelImpl>|v.to_ribbon_string().to_utf8().map_err(|e|e.to_string())],
+});
+pub struct RibbonSegmentModelMetadata;
+ferroui_base::ferro_markup_type!(class RibbonSegmentModelMetadata as "RibbonSegmentModel" {
+ namespace:"FerroRibbon.Model",this:Rc<dyn RibbonSegmentModelImpl>,handles:[Rc<dyn RibbonSegmentModelImpl>,Option<Rc<dyn RibbonSegmentModelImpl>>,Rc<RibbonSegmentModel>,RibbonSegmentModel],base:Rc<dyn RibbonNodeModelImpl>,
+ constructors:[()=>||RibbonSegmentModel::with_options(None,None,None,None) as Rc<dyn RibbonSegmentModelImpl>,(Option<String>)=>|v0:Option<String>|RibbonSegmentModel::with_options(v0.map(Into::into),None,None,None) as Rc<dyn RibbonSegmentModelImpl>,(Option<String>,Option<String>)=>|v0:Option<String>,v1:Option<String>|RibbonSegmentModel::with_options(v0.map(Into::into),v1.map(Into::into),None,None) as Rc<dyn RibbonSegmentModelImpl>,(Option<String>,Option<String>,Option<Rc<RibbonIcon>>)=>|v0:Option<String>,v1:Option<String>,v2:Option<Rc<RibbonIcon>>|RibbonSegmentModel::with_options(v0.map(Into::into),v1.map(Into::into),v2,None) as Rc<dyn RibbonSegmentModelImpl>,(Option<String>,Option<String>,Option<Rc<RibbonIcon>>,Option<ferroui_base::BoxedValue>)=>|v0:Option<String>,v1:Option<String>,v2:Option<Rc<RibbonIcon>>,v3:Option<ferroui_base::BoxedValue>|RibbonSegmentModel::with_options(v0.map(Into::into),v1.map(Into::into),v2,crate::metadata::model_objects::from_native(v3)) as Rc<dyn RibbonSegmentModelImpl>],
+ properties:[Value:Option<ferroui_base::BoxedValue>{try_get:|v:&Rc<dyn RibbonSegmentModelImpl>|crate::metadata::model_objects::to_native(v.value()),set:|v:&Rc<dyn RibbonSegmentModelImpl>,x:Option<ferroui_base::BoxedValue>|v.set_value(crate::metadata::model_objects::from_native_replacing(x,||v.value()))}],
+});

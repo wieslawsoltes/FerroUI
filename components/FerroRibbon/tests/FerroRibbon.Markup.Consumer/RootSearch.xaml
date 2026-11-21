@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:s="using:FerroRibbon.Search">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries>
+  <s:RibbonSearchEntry x:Key="Help"><x:Arguments><x:String>help</x:String><x:String>Help</x:String></x:Arguments></s:RibbonSearchEntry>
+  <s:RibbonSearchEntry x:Key="FullEntry"><x:Arguments><x:String>full</x:String><x:String>Hé𐐨</x:String><x:String>Path</x:String><x:String>Description</x:String><x:Null /><x:String>Ctrl+H</x:String><x:String>payload</x:String><x:Boolean>False</x:Boolean></x:Arguments></s:RibbonSearchEntry>
+  <s:RibbonSearchResult x:Key="FullResult"><x:Arguments><StaticResource ResourceKey="FullEntry" /><x:Double>1.25</x:Double></x:Arguments></s:RibbonSearchResult>
+  <s:RibbonSearchEngine x:Key="Engine" MaxRecent="3" />
+ </ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon x:Name="SearchRoot" IsDisplayOptionsButtonVisible="False">
+  <r:Ribbon.AdditionalSearchEntries><StaticResource ResourceKey="Help" /></r:Ribbon.AdditionalSearchEntries>
+  <r:RibbonTab Id="home" Header="Home"><r:RibbonGroup Id="tools" Header="Tools"><r:RibbonButton x:Name="Alpha" Id="alpha" Label="Alpha" r:RibbonSearch.Keywords="first, start" /><r:RibbonButton Id="beta" Label="Beta" r:RibbonSearch.IsSearchable="False" /></r:RibbonGroup></r:RibbonTab>
+ </r:Ribbon>
+ <TextBlock x:Name="Count" x:DataType="r:Ribbon" DataContext="{Binding #SearchRoot}" Text="{Binding AdditionalSearchEntries.Count}" />
+ <TextBlock x:Name="RecentLimit" x:DataType="s:RibbonSearchEngine" DataContext="{StaticResource Engine}" Text="{Binding MaxRecent}" />
+</StackPanel>

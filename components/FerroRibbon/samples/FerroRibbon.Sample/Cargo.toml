@@ -1,0 +1,38 @@
+[package]
+name = "ferroribbon-sample"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+build = "build.rs"
+[lib]
+path = "lib.rs"
+[[bin]]
+name = "ferroribbon-sample"
+path = "program.rs"
+required-features = ["desktop"]
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-desktop", "ferroribbon/http-images"]
+[dependencies]
+ferroribbon = { path = "../../src/FerroRibbon" }
+ferroribbon-core = { path = "../../src/FerroRibbon.Core" }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-system = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+ferroui-themes-simple = { workspace = true }
+time = { version = "0.3.55", default-features = false, features = ["local-offset"] }
+ferroui-desktop = { workspace = true, optional = true }
+[build-dependencies]
+ferroui-build = { workspace = true }
+[target.'cfg(windows)'.dependencies]
+ferroui-themes-winui = { workspace = true }
+[dev-dependencies]
+serde_json = "1.0.154"
+ferroui-markup-xaml-loader = { workspace = true, features = ["emitter"] }
+ferroui-headless = { workspace = true, features = ["testing"] }
+[lints.rust]
+unsafe_code = "forbid"

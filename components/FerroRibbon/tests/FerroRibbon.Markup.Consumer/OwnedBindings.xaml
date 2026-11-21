@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+ xmlns:local="using:FerroRibbon.Consumer"
+ x:DataType="local:IconViewModel" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+  <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+ </ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <StackPanel.DataContext><local:IconViewModel IconText="Owned" /></StackPanel.DataContext>
+ <r:RibbonButton Label="Owned" AutomationProperties.Name="{Binding IconText}" />
+ <r:RibbonDropDownButton Label="Owned" AutomationProperties.Name="{Binding IconText}" />
+ <r:RibbonToggleButton Label="Owned" AutomationProperties.Name="{Binding IconText}" />
+ <r:RibbonCheckBox Label="Owned" AutomationProperties.Name="{Binding IconText}" />
+ <local:ConsumerRibbonButton Label="Owned" AutomationProperties.Name="{Binding IconText}" />
+</StackPanel>

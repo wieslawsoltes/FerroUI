@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon DisplayMode="Simplified" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <r:RibbonTab x:Name="Tab" Header="Home">
+   <r:RibbonGroup Header="Commands"><r:RibbonButton Label="Run" SimplifiedVisibility="Overflow" /></r:RibbonGroup>
+  </r:RibbonTab>
+ </r:Ribbon>
+ <TextBlock Text="{Binding ElementName=Tab,Path=DisplayGroups[0].Header}" />
+</StackPanel>

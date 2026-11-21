@@ -1,0 +1,28 @@
+[package]
+name = "ferroribbon-core"
+description = "UI-independent RibbonSpace algorithms and models for FerroRibbon"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+uuid.workspace = true
+bitflags.workspace = true
+ferroui-system.workspace = true
+ferroui-reactive.workspace = true
+ferroui-reactiveui.workspace = true
+futures-channel.workspace = true
+futures-util.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+futures-executor.workspace = true
+
+[lints]
+workspace = true

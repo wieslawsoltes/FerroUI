@@ -1,0 +1,45 @@
+<!-- Original RibbonSpace toolbar templates. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonToolBar" x:Key="{x:Type c:RibbonToolBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonToolBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RibbonCommandBarBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="3" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border x:Name="PART_ItemsHost" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme TargetType="c:RibbonContextualToolBar" x:Key="{x:Type c:RibbonContextualToolBar}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Grid x:Name="PART_Host" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme TargetType="c:RibbonMenuBar" x:Key="{x:Type c:RibbonMenuBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonChromeBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="4,2">
+            <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="0" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

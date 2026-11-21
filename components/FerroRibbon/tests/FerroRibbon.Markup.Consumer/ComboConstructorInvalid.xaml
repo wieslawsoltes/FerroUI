@@ -1,0 +1,4 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="using:FerroRibbon.Model">
+ <StackPanel.Resources><ResourceDictionary><x:String x:Key="Bad">not an enumerable</x:String></ResourceDictionary></StackPanel.Resources>
+ <ContentControl><m:RibbonComboBoxModel><x:Arguments><x:Null /><x:Null /><StaticResource ResourceKey="Bad" /></x:Arguments></m:RibbonComboBoxModel></ContentControl>
+</StackPanel>

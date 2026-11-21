@@ -1,0 +1,19 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:compat="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+  <StackPanel.Resources><ResourceDictionary>
+    <compat:FontIconSource x:Key="Font" Glyph="Source" FontFamily="Consumer Symbols" FontWeight="Bold"
+        FontStyle="Italic" FontSize="99" MirroredWhenRightToLeft="True" IsTextScaleFactorEnabled="False" Foreground="#0000ff" />
+    <compat:PathIconSource x:Key="Path" Data="M0,0 L10,0 L0,10 Z" Foreground="#0000ff" />
+    <compat:ImageIconSource x:Key="Image" ImageSource="{x:Null}" Foreground="#0000ff" />
+  </ResourceDictionary></StackPanel.Resources>
+  <r:RibbonIconPresenter Icon="{StaticResource Font}" IconSize="23.5" Foreground="#ff0000" />
+  <r:RibbonIconPresenter Icon="{StaticResource Path}" IconSize="23.5" Foreground="#ff0000" />
+  <r:RibbonIconPresenter Icon="{StaticResource Image}" IconSize="23.5" Foreground="#ff0000" />
+  <r:RibbonIconPresenter IconSize="25"><r:RibbonIconPresenter.Icon>
+    <compat:FontIconSource Glyph="Inline" FontFamily="Inline Symbols" />
+  </r:RibbonIconPresenter.Icon></r:RibbonIconPresenter>
+  <compat:MenuFlyoutItem Text="Font" r:RibbonMenu.Icon="{StaticResource Font}" />
+  <compat:MenuFlyoutItem Text="Path" r:RibbonMenu.Icon="{StaticResource Path}" />
+  <compat:MenuFlyoutItem Text="Image" r:RibbonMenu.Icon="{StaticResource Image}" />
+</StackPanel>

@@ -6,7 +6,7 @@ resolver = "2"
 # this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
 # `benchmarks/comparison` holds the framework comparison's own FerroUI application (a submodule)
 # and a manifest that builds it from this checkout (benchmarks/comparison/README.md).
-exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison", "benchmarks/comparison"]
+exclude = ["components/FerroBoard", "components/FerroRibbon", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison", "benchmarks/comparison"]
 members = [
     "src/Windows/FerroUI.Direct2D",
     "tests/FerroUI.ResourceBenchmarks",

@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" xmlns:c="using:System.Collections.ObjectModel" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <c:ObservableCollection x:Key="Initial" x:TypeArguments="x:Object"><x:String>One</x:String><x:Null /><x:Int32>23</x:Int32></c:ObservableCollection>
+  <m:RibbonComboBoxModel x:Key="Combo" IsEditable="True" Placeholder="Pick"><x:Arguments><x:String>choice</x:String><x:String>Choice</x:String><StaticResource ResourceKey="Initial" /></x:Arguments></m:RibbonComboBoxModel>
+  <m:RibbonComboBoxModel x:Key="Inline" Id="inline" Label="Inline"><m:RibbonComboBoxModel.Items><x:String>Nested</x:String><m:RibbonButtonModel Id="node" Label="Node label" /></m:RibbonComboBoxModel.Items></m:RibbonComboBoxModel>
+  <m:RibbonComboBoxModel x:Key="Empty"><x:Arguments><x:Null /><x:Null /><x:Null /></x:Arguments></m:RibbonComboBoxModel>
+  <m:RibbonModel x:Key="Graph"><m:RibbonModel.Tabs><m:RibbonTabModel Id="home" Label="Home"><m:RibbonTabModel.Groups><m:RibbonGroupModel Id="inputs" Label="Inputs"><m:RibbonGroupModel.Items><StaticResource ResourceKey="Combo" /><StaticResource ResourceKey="Inline" /></m:RibbonGroupModel.Items></m:RibbonGroupModel></m:RibbonTabModel.Groups></m:RibbonTabModel></m:RibbonModel.Tabs></m:RibbonModel>
+ </ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False" />
+ <TextBlock x:DataType="m:RibbonComboBoxModel" DataContext="{StaticResource Combo}" Text="{Binding Items.Count}" />
+ <TextBlock x:DataType="m:RibbonComboBoxModel" DataContext="{StaticResource Combo}" Text="{Binding Items[0]}" />
+ <TextBox x:DataType="m:RibbonComboBoxModel" DataContext="{StaticResource Combo}" Text="{Binding Text, Mode=TwoWay}" />
+</StackPanel>

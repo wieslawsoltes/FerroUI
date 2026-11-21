@@ -1,0 +1,3 @@
+<local:ConsumerTabHeader xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:DataType="r:RibbonTabHeader" Tag="{Binding Tab.Header, RelativeSource={RelativeSource Self}}">
+ <x:Arguments><r:RibbonTab Header="Detached" Id="detached" /></x:Arguments>
+</local:ConsumerTabHeader>

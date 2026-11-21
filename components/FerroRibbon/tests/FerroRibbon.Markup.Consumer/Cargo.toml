@@ -1,0 +1,134 @@
+
+[package]
+name = "ferroribbon-markup-consumer"
+version = "0.1.0"
+edition = "2024"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroribbon = { path = "../../src/FerroRibbon" }
+ferroribbon-core = { path = "../../src/FerroRibbon.Core" }
+futures-util = { version = "0.3.34", default-features = false, features = ["std"] }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-system = { workspace = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+futures-channel = "0.3.34"
+ferroui-controls = { workspace = true, features = ["testing"] }
+serde_json = "1.0.154"
+ferroui-themes-simple = { workspace = true }
+ferroui-headless = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["emitter"] }
+
+[features]
+framework-value-constructors-reproducer = []
+source-model-object-equality-transfer-reproducer = []
+framework-collation-reproducer = []
+framework-model-events-send-reproducer = []
+framework-localization-reproducer = []
+framework-command-subscription-reproducer = []
+framework-system-colors-reproducer = []
+framework-static-events-reproducer = []
+framework-delegate-reproducer = []
+framework-event-accessors-reproducer = []
+framework-compiled-resources-reproducer = []
+
+[[test]]
+name = "framework-runtime-indexer"
+path = "../fixtures/framework/runtime_indexer.rs"
+
+[[test]]
+name = "framework-compiled-resources"
+path = "../fixtures/framework/compiled_resource_include.rs"
+
+[[test]]
+name = "framework-collation"
+path = "../fixtures/framework/search_collation.rs"
+required-features = ["framework-collation-reproducer"]
+
+[[test]]
+name = "framework-localization"
+path = "../fixtures/framework/localization_gaps.rs"
+
+[[test]]
+name = "framework-command-subscription"
+path = "../fixtures/framework/command_subscription.rs"
+
+[[test]]
+name = "framework-system-colors"
+path = "../fixtures/framework/system_colors.rs"
+required-features = ["framework-system-colors-reproducer"]
+
+[[test]]
+name = "framework-static-events"
+path = "../fixtures/framework/static_events.rs"
+
+[[test]]
+name = "framework-delegate-equality"
+path = "../fixtures/framework/delegate_equality.rs"
+
+[[test]]
+name = "framework-event-accessors"
+path = "../fixtures/framework/event_accessors.rs"
+
+[[test]]
+name = "framework-child-namescope-lifetime"
+path = "../fixtures/framework/child_namescope_lifetime.rs"
+
+[[test]]
+name = "framework-raw-selection-container"
+path = "../fixtures/framework/raw_selection_container.rs"
+
+[[test]]
+name = "framework-pointer-fidelity"
+path = "../fixtures/framework/pointer_fidelity.rs"
+
+[[test]]
+name = "framework-model-events-send"
+path = "../fixtures/framework/model_events_send.rs"
+required-features = ["framework-model-events-send-reproducer"]
+
+[[test]]
+name = "framework-culture-float"
+path = "../fixtures/framework/culture_float.rs"
+
+[[test]]
+name = "framework-number-currentinfo"
+path = "../fixtures/framework/number_current_info.rs"
+
+[[test]]
+name = "framework-binding-writeback"
+path = "../fixtures/framework/binding_writeback.rs"
+
+[[test]]
+name = "framework-slider-services"
+path = "../fixtures/framework/slider_services.rs"
+
+[[test]]
+name = "framework-thumb-start-policy"
+path = "../fixtures/framework/thumb_start_policy.rs"
+
+[[test]]
+name = "framework-object-instance-data"
+path = "../fixtures/framework/object_instance_data.rs"
+
+[[test]]
+name="framework-erased-values"
+path="../fixtures/framework/erased_values.rs"
+
+[[test]]
+name = "framework-model-views"
+path = "../fixtures/framework/model_views.rs"
+
+[[test]]
+name = "framework-reference-conversion"
+path = "../fixtures/framework/reference_conversion.rs"

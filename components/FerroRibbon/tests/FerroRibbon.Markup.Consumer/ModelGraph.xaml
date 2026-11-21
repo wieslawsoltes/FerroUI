@@ -1,0 +1,20 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Backstage.xaml" /></ResourceDictionary.MergedDictionaries>
+  <m:RibbonModel x:Key="Graph" Title="Model graph">
+   <m:RibbonModel.Tabs>
+    <m:RibbonTabModel Id="home" Label="Home"><m:RibbonTabModel.Groups>
+     <m:RibbonGroupModel Id="tools" Label="Tools" RowCount="2"><m:RibbonGroupModel.Items>
+      <m:RibbonButtonModel Id="save" Label="Save" KeyTip="S" />
+      <m:RibbonToggleButtonModel Id="bold" Label="Bold" KeyTip="B" />
+     </m:RibbonGroupModel.Items></m:RibbonGroupModel>
+    </m:RibbonTabModel.Groups></m:RibbonTabModel>
+   </m:RibbonModel.Tabs>
+  </m:RibbonModel>
+ </ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerRibbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False"><r:RibbonTab Id="declared" Header="Declared" /></local:ConsumerRibbon>
+ <TextBlock x:DataType="m:RibbonModel" DataContext="{StaticResource Graph}" Text="{Binding Title}" />
+ <TextBlock x:DataType="m:RibbonModel" DataContext="{StaticResource Graph}" Text="{Binding Tabs.Count}" />
+ <TextBlock x:DataType="m:RibbonModel" DataContext="{StaticResource Graph}" Text="{Binding Tabs[0].Label}" />
+ <TextBlock x:DataType="m:RibbonModel" DataContext="{StaticResource Graph}" Text="{Binding SelectedTab.Label}" />
+</StackPanel>

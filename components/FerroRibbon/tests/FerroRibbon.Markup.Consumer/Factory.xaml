@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:mv="using:FerroRibbon.Controls.Mvvm" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary>
+  <mv:RibbonElementFactory x:Key="NativeFactory" />
+  <local:ConsumerElementFactory x:Key="CustomFactory" />
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Slider.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/SimpleItems.xaml" /></ResourceDictionary.MergedDictionaries>
+ </ResourceDictionary></StackPanel.Resources>
+ <r:RibbonButton Label="Declared" Tag="{StaticResource NativeFactory}" r:RibbonSearch.Keywords="copy,paste" r:RibbonSearch.IsSearchable="False" />
+ <r:RibbonGroup Header="Generated" Tag="{StaticResource CustomFactory}"><r:RibbonButton Id="declared" Label="Existing" /></r:RibbonGroup>
+ <local:ConsumerRibbon IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False"><r:RibbonTab Header="Declared" Id="declared-tab" /></local:ConsumerRibbon>
+</StackPanel>

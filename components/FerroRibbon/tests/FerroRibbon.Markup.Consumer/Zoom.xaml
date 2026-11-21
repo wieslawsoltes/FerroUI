@@ -1,0 +1,19 @@
+<local:ZoomView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:i="using:FerroRibbon.Internal" xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:NumberViewModel" x:Class="FerroRibbon.Consumer.ZoomView">
+  <local:ZoomView.DataContext><local:NumberViewModel /></local:ZoomView.DataContext>
+  <local:ZoomView.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Zoom.xaml" /></ResourceDictionary.MergedDictionaries>
+      <ControlTemplate x:Key="Replacement" TargetType="r:RibbonZoomControl">
+        <StackPanel Orientation="Horizontal">
+          <Button x:Name="PART_ZoomOut" Content="Less" />
+          <i:RibbonInputSlider x:Name="PART_Slider" Width="120" />
+          <Button x:Name="PART_ZoomIn" Content="More" />
+          <Button x:Name="PART_Percent" Content="{TemplateBinding ValueText}" />
+        </StackPanel>
+      </ControlTemplate>
+    </ResourceDictionary>
+  </local:ZoomView.Resources>
+  <local:ConsumerZoom x:Name="Zoom" Minimum="0" Maximum="200" Step="10" Value="{Binding Value,Mode=TwoWay}" Command="{Binding Command}" ValueChanged="Changed" ZoomDialogRequested="Dialog" />
+  <TextBlock x:Name="Percentage" Text="{Binding #Zoom.ValueText}" />
+  <r:RibbonZoomControl Value="125.5" />
+</local:ZoomView>

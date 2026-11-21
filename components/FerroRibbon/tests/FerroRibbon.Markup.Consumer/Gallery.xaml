@@ -1,0 +1,7 @@
+<local:ConsumerGallery xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer"
+ x:Name="Gallery" Label="Styles" MinColumns="2" MaxColumns="5" IsFilterEnabled="True">
+ <local:ConsumerGallery.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Gallery.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></local:ConsumerGallery.Resources>
+ <r:RibbonGalleryItem x:Name="Normal" Label="Normal" Category="Paragraph" Value="normal" PreviewText="AaBb" PreviewFontSize="17.5" />
+ <r:RibbonGalleryItem x:Name="Heading" Label="Heading 1" Category="Headings" Value="heading" PreviewText="AaBb" PreviewFontWeight="Bold" />
+ <local:ConsumerGallery.FooterItems><r:RibbonButton x:Name="Footer" Label="Apply styles" /></local:ConsumerGallery.FooterItems>
+</local:ConsumerGallery>

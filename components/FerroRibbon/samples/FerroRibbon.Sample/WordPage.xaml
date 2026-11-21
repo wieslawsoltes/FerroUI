@@ -1,0 +1,549 @@
+<!-- Adapted from pinned RibbonSpace WordPage.xaml. Copyright Wiesław Šoltés, MIT. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Compatibility" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.WordPage" x:DataType="vm:WordViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
+  <Grid Background="{DynamicResource RibbonWindowBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <r:RibbonTitleBar x:Name="TitleBar" Title="Quarterly report" Subtitle="• Saved to this PC" AppIcon="" Ribbon="{Binding #Ribbon}">
+      <r:RibbonTitleBar.StartContent>
+        <ToggleSwitch x:Name="AutoSave" OnContent="AutoSave" OffContent="AutoSave" MinWidth="0" Margin="4,0,0,0" IsChecked="True" />
+      </r:RibbonTitleBar.StartContent>
+      <r:RibbonTitleBar.EndContent>
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <Border Width="28" Height="28" CornerRadius="14" Background="{DynamicResource RibbonAccentBrush}">
+            <TextBlock Text="WS" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RibbonAccentForegroundBrush}" />
+          </Border>
+        </StackPanel>
+      </r:RibbonTitleBar.EndContent>
+    </r:RibbonTitleBar>
+    <r:Ribbon x:Name="Ribbon" Grid.Row="1" IsShortcutRoutingEnabled="True" FontFamily="Segoe UI Variable Small, Segoe UI, $Default">
+      <r:Ribbon.QuickAccessToolBar>
+        <r:RibbonQuickAccessToolBar>
+          <r:RibbonButton Id="qat.save" Label="Save" Icon="" Shortcut="Ctrl+S" />
+          <r:RibbonButton Id="qat.undo" Label="Undo" Icon="" Shortcut="Ctrl+Z" />
+          <r:RibbonButton Id="qat.redo" Label="Redo" Icon="" Shortcut="Ctrl+Y" />
+        </r:RibbonQuickAccessToolBar>
+      </r:Ribbon.QuickAccessToolBar>
+      <r:Ribbon.Backstage>
+        <r:RibbonBackstage Title="Word">
+          <r:RibbonBackstageItem Id="home" Header="Home" Icon="" KeyTip="H">
+            <StackPanel Spacing="16">
+              <TextBlock Text="Good afternoon" FontSize="20" />
+              <StackPanel Orientation="Horizontal" Spacing="16">
+                <Border Width="150" Height="190" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource RibbonCommandBarBorderBrush}" Background="{DynamicResource RibbonCommandBarBackgroundBrush}">
+                  <TextBlock Text="Blank document" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" />
+                </Border>
+                <Border Width="150" Height="190" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource RibbonCommandBarBorderBrush}" Background="{DynamicResource RibbonAccentSubtleBrush}">
+                  <TextBlock Text="Report" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" />
+                </Border>
+                <Border Width="150" Height="190" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource RibbonCommandBarBorderBrush}" Background="{DynamicResource RibbonAccentSubtleStrongBrush}">
+                  <TextBlock Text="Resume" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" />
+                </Border>
+              </StackPanel>
+              <TextBlock Text="Recent" FontSize="16" FontWeight="SemiBold" />
+              <TextBlock Text="Quarterly report.docx — Documents" Opacity="0.8" />
+              <TextBlock Text="Product roadmap.docx — OneDrive" Opacity="0.8" />
+            </StackPanel>
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="new" Header="New" Icon="" KeyTip="N">
+            <TextBlock Text="Choose a template to start a new document." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="open" Header="Open" Icon="" KeyTip="O">
+            <TextBlock Text="Browse recent files, OneDrive and this PC." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="info" Header="Info" Icon="" HasSeparatorBefore="True" KeyTip="I">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Protect Document" FontWeight="SemiBold" />
+              <TextBlock Text="Control what types of changes people can make to this document." TextWrapping="Wrap" />
+              <TextBlock Text="Inspect Document" FontWeight="SemiBold" Margin="0,12,0,0" />
+              <TextBlock Text="Before publishing this file, be aware that it contains document properties and author's name." TextWrapping="Wrap" />
+            </StackPanel>
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem x:Name="BackstageSave" Id="save" Header="Save" Icon="" KeyTip="S" Command="{Binding BackstageSaveAction}" />
+          <r:RibbonBackstageItem Id="saveAs" Header="Save As" Icon="" KeyTip="A">
+            <TextBlock Text="Save a copy of this document." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="print" Header="Print" Icon="" KeyTip="P">
+            <TextBlock Text="Print preview and printer settings." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="export" Header="Export" Icon="" KeyTip="E">
+            <TextBlock Text="Create PDF/XPS documents or change the file type." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="close" Header="Close" Icon="" KeyTip="C" />
+          <r:RibbonBackstageItem Id="account" Header="Account" Icon="" Placement="Bottom">
+            <TextBlock Text="Signed in as a demo user." />
+          </r:RibbonBackstageItem>
+          <r:RibbonBackstageItem Id="options" Header="Options" Icon="" Placement="Bottom">
+            <TextBlock Text="Customize RibbonSpace options." />
+          </r:RibbonBackstageItem>
+        </r:RibbonBackstage>
+      </r:Ribbon.Backstage>
+      <r:Ribbon.ContextualGroups>
+        <r:RibbonContextualTabGroup Id="table" Header="Table Tools" Color="#0F7B6C" Activation="SelectOnShow" />
+        <r:RibbonContextualTabGroup Id="picture" Header="Picture Tools" Color="#8764B8" />
+      </r:Ribbon.ContextualGroups>
+      <r:Ribbon.TabStripItems>
+        <r:RibbonButton Id="comments" Label="Comments" Icon="" ShowLabel="True" SimplifiedLabel="Show" />
+        <r:RibbonDropDownButton Id="editingMode" Label="Editing" Icon="" SimplifiedLabel="Show">
+          <r:RibbonDropDownButton.Flyout>
+            <MenuFlyout>
+              <c:RadioMenuFlyoutItem Text="Editing" GroupName="mode" IsChecked="True" />
+              <c:RadioMenuFlyoutItem Text="Reviewing" GroupName="mode" />
+              <c:RadioMenuFlyoutItem Text="Viewing" GroupName="mode" />
+            </MenuFlyout>
+          </r:RibbonDropDownButton.Flyout>
+        </r:RibbonDropDownButton>
+        <r:RibbonSplitButton Id="share" Label="Share" Icon="" Size="Small" SimplifiedLabel="Show">
+          <MenuFlyout>
+            <c:MenuFlyoutItem Text="Share" />
+            <c:MenuFlyoutItem Text="Copy link" />
+            <c:MenuFlyoutItem Text="Send a copy" />
+          </MenuFlyout>
+        </r:RibbonSplitButton>
+      </r:Ribbon.TabStripItems>
+      <r:RibbonTab Header="Home" Id="home" KeyTip="H">
+        <r:RibbonGroup Header="Clipboard" Id="clipboard" Icon="" IsDialogLauncherVisible="True" ReductionOrder="-1">
+          <r:RibbonSplitButton Id="paste" Label="Paste" Icon="" SizeDefinition="Large" Shortcut="Ctrl+V" KeyTip="V">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Paste" Shortcut="Ctrl+V" Description="Add content from the Clipboard to your document." HelpText="Tell me more" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <c:MenuFlyoutItem Text="Keep Source Formatting" />
+              <c:MenuFlyoutItem Text="Merge Formatting" />
+              <c:MenuFlyoutItem Text="Keep Text Only" />
+              <c:MenuFlyoutSeparator />
+              <c:MenuFlyoutItem Text="Paste Special..." />
+              <c:MenuFlyoutItem Text="Set Default Paste..." />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+          <r:RibbonButton Id="cut" Label="Cut" Icon="" Shortcut="Ctrl+X" KeyTip="X" />
+          <r:RibbonButton Id="copy" Label="Copy" Icon="" Shortcut="Ctrl+C" KeyTip="C" />
+          <r:RibbonToggleButton Id="formatPainter" Label="Format Painter" Icon="" Size="Medium" KeyTip="FP" ScreenTip="Apply the look of one selection to other content." />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Font" Id="font" Icon="" ItemsLayout="Rows" RowCount="2" IsDialogLauncherVisible="True">
+          <r:RibbonStackPanel>
+            <r:RibbonFontComboBox x:Name="FontFamilyBox" Id="fontFamily" Text="Segoe UI" KeyTip="FF" />
+            <r:RibbonFontSizeComboBox x:Name="FontSizeBox" Id="fontSize" Text="{Binding FontSizeText, Mode=TwoWay}" KeyTip="FS" />
+            <r:RibbonButtonGroup>
+              <r:RibbonButton Id="growFont" Label="Increase Font Size" Icon="" Shortcut="Ctrl+]" KeyTip="FG" />
+              <r:RibbonButton Id="shrinkFont" Label="Decrease Font Size" Icon="" Shortcut="Ctrl+[" KeyTip="FK" />
+            </r:RibbonButtonGroup>
+            <r:RibbonDropDownButton Id="changeCase" Label="Change Case" Icon="Aa" Size="Small" KeyTip="7">
+              <r:RibbonDropDownButton.Flyout>
+                <MenuFlyout>
+                  <c:MenuFlyoutItem Text="Sentence case." />
+                  <c:MenuFlyoutItem Text="lowercase" />
+                  <c:MenuFlyoutItem Text="UPPERCASE" />
+                  <c:MenuFlyoutItem Text="Capitalize Each Word" />
+                  <c:MenuFlyoutItem Text="tOGGLE cASE" />
+                </MenuFlyout>
+              </r:RibbonDropDownButton.Flyout>
+            </r:RibbonDropDownButton>
+            <r:RibbonButton Id="clearFormatting" Label="Clear All Formatting" Icon="" Size="Small" KeyTip="E" />
+          </r:RibbonStackPanel>
+          <r:RibbonStackPanel>
+            <r:RibbonButtonGroup>
+              <r:RibbonToggleButton x:Name="Bold" Id="bold" Label="Bold" Icon="" Shortcut="Ctrl+B" KeyTip="1" ScreenTip="Make your text bold." IsChecked="{Binding Bold, Mode=TwoWay}" />
+              <r:RibbonToggleButton x:Name="Italic" Id="italic" Label="Italic" Icon="" Shortcut="Ctrl+I" KeyTip="2" ScreenTip="Italicize your text." IsChecked="{Binding Italic, Mode=TwoWay}" />
+              <r:RibbonToggleButton x:Name="Underline" Id="underline" Label="Underline" Icon="" Shortcut="Ctrl+U" KeyTip="3" ScreenTip="Underline your text." IsChecked="{Binding Underline, Mode=TwoWay}" />
+              <r:RibbonToggleButton x:Name="Strike" Id="strikethrough" Label="Strikethrough" Icon="" KeyTip="4" IsChecked="{Binding Strike, Mode=TwoWay}" />
+              <r:RibbonToggleButton Id="subscript" Label="Subscript" Icon="M3 5h2.5l3 4.5 3-4.5H14l-4.2 6.2L14 18h-2.5l-3-4.5-3 4.5H3l4.2-6.3z M16 16h4v1.5l-2.2 1.5H20V21h-4v-1.5l2.2-1.5H16z" GroupName="script" Shortcut="Ctrl+=" KeyTip="5" />
+              <r:RibbonToggleButton Id="superscript" Label="Superscript" Icon="" GroupName="script" Shortcut="Ctrl+Shift+=" KeyTip="6" />
+            </r:RibbonButtonGroup>
+            <r:RibbonColorPicker x:Name="Highlight" Id="highlight" Label="Text Highlight Color" Icon="" SelectedColor="Yellow" ShowNoColor="True" KeyTip="I" />
+            <r:RibbonColorPicker x:Name="FontColor" Id="fontColor" Label="Font Color" Icon="" SelectedColor="#C00000" KeyTip="FC" />
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Paragraph" Id="paragraph" Icon="" ItemsLayout="Rows" RowCount="2" IsDialogLauncherVisible="True">
+          <r:RibbonStackPanel>
+            <r:RibbonSplitButton Id="bullets" Label="Bullets" Icon="" Size="Small" IsCheckable="True" KeyTip="U">
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="• Bullet" />
+                <c:MenuFlyoutItem Text="○ Circle" />
+                <c:MenuFlyoutItem Text="■ Square" />
+                <c:MenuFlyoutSeparator />
+                <c:MenuFlyoutItem Text="Define New Bullet..." />
+              </MenuFlyout>
+            </r:RibbonSplitButton>
+            <r:RibbonSplitButton Id="numbering" Label="Numbering" Icon="M9 5h12v2H9z M9 11h12v2H9z M9 17h12v2H9z M4 3h2v5H5V4.2H4z M3.5 10h3v1.3l-1.6 1.5h1.6V14h-3v-1.3l1.6-1.5H3.5z M3.5 16h3v5h-3v-1.1h1.9v-.9H4v-1h1.4v-.9H3.5z" Size="Small" IsCheckable="True" KeyTip="N" />
+            <r:RibbonButtonGroup>
+              <r:RibbonButton Id="outdent" Label="Decrease Indent" Icon="M3 4h18v2H3z M11 9h10v2H11z M11 13h10v2H11z M3 18h18v2H3z M7 8.5v7L3 12z" KeyTip="AO" />
+              <r:RibbonButton Id="indent" Label="Increase Indent" Icon="M3 4h18v2H3z M11 9h10v2H11z M11 13h10v2H11z M3 18h18v2H3z M3 8.5l4 3.5-4 3.5z" KeyTip="AI" />
+            </r:RibbonButtonGroup>
+            <r:RibbonButton Id="sort" Label="Sort" Icon="" Size="Small" KeyTip="SO" />
+            <r:RibbonToggleButton x:Name="ShowMarks" Id="showMarks" Label="Show/Hide ¶" Icon="¶" Shortcut="Ctrl+Shift+8" KeyTip="8" />
+          </r:RibbonStackPanel>
+          <r:RibbonStackPanel>
+            <r:RibbonButtonGroup>
+              <r:RibbonToggleButton x:Name="AlignLeft" Id="alignLeft" Label="Align Left" Icon="" GroupName="align" IsChecked="True" Shortcut="Ctrl+L" KeyTip="AL" />
+              <r:RibbonToggleButton x:Name="AlignCenter" Id="alignCenter" Label="Center" Icon="" GroupName="align" Shortcut="Ctrl+E" KeyTip="AC" />
+              <r:RibbonToggleButton x:Name="AlignRight" Id="alignRight" Label="Align Right" Icon="" GroupName="align" Shortcut="Ctrl+R" KeyTip="AR" />
+              <r:RibbonToggleButton x:Name="Justify" Id="justify" Label="Justify" Icon="" GroupName="align" Shortcut="Ctrl+J" KeyTip="AJ" />
+            </r:RibbonButtonGroup>
+            <r:RibbonDropDownButton Id="lineSpacing" Label="Line and Paragraph Spacing" Icon="" Size="Small" KeyTip="K">
+              <r:RibbonDropDownButton.Flyout>
+                <MenuFlyout>
+                  <c:RadioMenuFlyoutItem Text="1.0" GroupName="spacing" />
+                  <c:RadioMenuFlyoutItem Text="1.15" GroupName="spacing" IsChecked="True" />
+                  <c:RadioMenuFlyoutItem Text="1.5" GroupName="spacing" />
+                  <c:RadioMenuFlyoutItem Text="2.0" GroupName="spacing" />
+                </MenuFlyout>
+              </r:RibbonDropDownButton.Flyout>
+            </r:RibbonDropDownButton>
+            <r:RibbonColorPicker x:Name="Shading" Id="shading" Label="Shading" Icon="" SelectedColor="#DEEBF7" ShowNoColor="True" ShowAutomatic="False" KeyTip="H" />
+            <r:RibbonSplitButton Id="borders" Label="Borders" Icon="" Size="Small" KeyTip="B" />
+          </r:RibbonStackPanel>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Styles" Id="styles" Icon="" IsDialogLauncherVisible="True" ReductionOrder="1">
+          <r:RibbonGallery x:Name="Styles" Id="stylesGallery" Label="Styles" Icon="" MaxColumns="6" MinColumns="3" ItemWidth="76" IsFilterEnabled="True" KeyTip="L">
+            <r:RibbonGalleryItem Label="Normal" Value="Normal" PreviewText="AaBbCcDd" Category="Paragraph" />
+            <r:RibbonGalleryItem Label="No Spacing" Value="NoSpacing" PreviewText="AaBbCcDd" Category="Paragraph" />
+            <r:RibbonGalleryItem Label="Heading 1" Value="Heading1" PreviewText="AaBbCc" PreviewFontSize="17" PreviewForeground="#2F5496" Category="Headings" />
+            <r:RibbonGalleryItem Label="Heading 2" Value="Heading2" PreviewText="AaBbCcD" PreviewFontSize="15" PreviewForeground="#2F5496" Category="Headings" />
+            <r:RibbonGalleryItem Label="Title" Value="Title" PreviewText="AaB" PreviewFontSize="22" Category="Headings" />
+            <r:RibbonGalleryItem Label="Subtitle" Value="Subtitle" PreviewText="AaBbCcDd" PreviewForeground="#595959" Category="Headings" />
+            <r:RibbonGalleryItem Label="Emphasis" Value="Emphasis" PreviewText="AaBbCcDd" PreviewFontStyle="Italic" Category="Character" />
+            <r:RibbonGalleryItem Label="Strong" Value="Strong" PreviewText="AaBbCcDd" PreviewFontWeight="Bold" Category="Character" />
+            <r:RibbonGalleryItem Label="Quote" Value="Quote" PreviewText="AaBbCcDd" PreviewFontStyle="Italic" PreviewForeground="#404040" Category="Paragraph" />
+            <r:RibbonGalleryItem Label="Intense Quote" Value="IntenseQuote" PreviewText="AaBbCcDd" PreviewFontStyle="Italic" PreviewForeground="#2F5496" Category="Paragraph" />
+            <r:RibbonGallery.FooterItems>
+              <r:RibbonButton Label="Create a Style" Icon="" />
+              <r:RibbonButton Label="Clear Formatting" Icon="" />
+              <r:RibbonButton Label="Apply Styles..." Icon="" />
+            </r:RibbonGallery.FooterItems>
+          </r:RibbonGallery>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Editing" Id="editing" Icon="">
+          <r:RibbonDropDownButton Id="find" Label="Find" Icon="" KeyTip="FD">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="Find" KeyboardAcceleratorTextOverride="Ctrl+F" />
+                <c:MenuFlyoutItem Text="Advanced Find..." />
+                <c:MenuFlyoutItem Text="Go To..." KeyboardAcceleratorTextOverride="Ctrl+G" />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonButton Id="replace" Label="Replace" Icon="" Shortcut="Ctrl+H" KeyTip="R" />
+          <r:RibbonDropDownButton Id="select" Label="Select" Icon="" KeyTip="SL">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:MenuFlyoutItem Text="Select All" KeyboardAcceleratorTextOverride="Ctrl+A" />
+                <c:MenuFlyoutItem Text="Select Objects" />
+                <c:MenuFlyoutItem Text="Selection Pane..." />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Voice" Id="voice" Icon="">
+          <r:RibbonSplitButton Id="dictate" Label="Dictate" Icon="" KeyTip="D" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Editor" Id="editor" Icon="">
+          <r:RibbonButton Id="editorPane" Label="Editor" Icon="" Size="Large" KeyTip="G" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Insert" Id="insert" KeyTip="N">
+        <r:RibbonGroup Header="Pages" Id="pages" Icon="">
+          <r:RibbonDropDownButton Id="coverPage" Label="Cover Page" Icon="" Size="Large" />
+          <r:RibbonButton Id="blankPage" Label="Blank Page" Icon="" Size="Large" />
+          <r:RibbonButton Id="pageBreak" Label="Page Break" Icon="" Size="Large" Shortcut="Ctrl+Enter" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Tables" Id="tables" Icon="">
+          <r:RibbonDropDownButton x:Name="InsertTable" Id="insertTable" Label="Table" Icon="" Size="Large" KeyTip="T">
+            <r:RibbonDropDownButton.Flyout>
+              <Flyout>
+                <r:RibbonGridPicker x:Name="TablePicker" />
+              </Flyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Illustrations" Id="illustrations" Icon="">
+          <r:RibbonDropDownButton Id="pictures" Label="Pictures" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="shapes" Label="Shapes" Icon="" Size="Large" />
+          <r:RibbonButton Id="icons" Label="Icons" Icon="" Size="Large" />
+          <r:RibbonButton Id="models3d" Label="3D Models" Icon="" />
+          <r:RibbonButton Id="smartArt" Label="SmartArt" Icon="" />
+          <r:RibbonButton Id="chart" Label="Chart" Icon="" />
+          <r:RibbonDropDownButton Id="screenshot" Label="Screenshot" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Media" Id="media" Icon="">
+          <r:RibbonButton Id="onlineVideo" Label="Online Videos" Icon="" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Links" Id="links" Icon="">
+          <r:RibbonButton Id="link" Label="Link" Icon="" Shortcut="Ctrl+K" />
+          <r:RibbonButton Id="bookmark" Label="Bookmark" Icon="" />
+          <r:RibbonButton Id="crossReference" Label="Cross-reference" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Comments" Id="insertComments" Icon="">
+          <r:RibbonButton Id="newComment" Label="Comment" Icon="" Size="Large" Shortcut="Ctrl+Alt+M" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Header &amp; Footer" Id="headerFooter" Icon="">
+          <r:RibbonDropDownButton Id="header" Label="Header" Icon="" />
+          <r:RibbonDropDownButton Id="footer" Label="Footer" Icon="" />
+          <r:RibbonDropDownButton Id="pageNumber" Label="Page Number" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Text" Id="text" Icon="">
+          <r:RibbonDropDownButton Id="textBox" Label="Text Box" Icon="" Size="Large" />
+          <r:RibbonButton Id="quickParts" Label="Quick Parts" Icon="" />
+          <r:RibbonButton Id="wordArt" Label="WordArt" Icon="" />
+          <r:RibbonButton Id="dropCap" Label="Drop Cap" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Symbols" Id="symbols" Icon="">
+          <r:RibbonSplitButton Id="equation" Label="Equation" Icon="" Shortcut="Alt+=" />
+          <r:RibbonDropDownButton Id="symbol" Label="Symbol" Icon="Ω" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Design" Id="design" KeyTip="D">
+        <r:RibbonGroup Header="Document Formatting" Id="docFormatting" Icon="">
+          <r:RibbonDropDownButton Id="themes" Label="Themes" Icon="" Size="Large" />
+          <r:RibbonGallery x:Name="ThemeGallery" Id="styleSets" Label="Style Set" MaxColumns="5" MinColumns="3" ItemWidth="70" ItemHeight="62" ShowItemLabels="False">
+            <r:RibbonGalleryItem Label="Office" PreviewText="Title" PreviewFontSize="16" PreviewBackground="#FFFFFF" />
+            <r:RibbonGalleryItem Label="Basic" PreviewText="Title" PreviewFontSize="16" PreviewForeground="#1F3864" PreviewBackground="#F2F2F2" />
+            <r:RibbonGalleryItem Label="Lines" PreviewText="Title" PreviewFontSize="16" PreviewForeground="#C55A11" PreviewBackground="#FBE5D6" />
+            <r:RibbonGalleryItem Label="Shaded" PreviewText="Title" PreviewFontSize="16" PreviewForeground="#FFFFFF" PreviewBackground="#2F5496" />
+            <r:RibbonGalleryItem Label="Casual" PreviewText="Title" PreviewFontSize="16" PreviewForeground="#375623" PreviewBackground="#E2EFDA" />
+            <r:RibbonGalleryItem Label="Lines (Stylish)" PreviewText="Title" PreviewFontSize="16" PreviewForeground="#7030A0" PreviewBackground="#EDE0F5" />
+          </r:RibbonGallery>
+          <r:RibbonDropDownButton Id="colors" Label="Colors" Icon="" />
+          <r:RibbonDropDownButton Id="fonts" Label="Fonts" Icon="" />
+          <r:RibbonDropDownButton Id="paragraphSpacing" Label="Paragraph Spacing" Icon="" />
+          <r:RibbonCheckBox Id="setAsDefault" Label="Set as Default" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Page Background" Id="pageBackground" Icon="">
+          <r:RibbonDropDownButton Id="watermark" Label="Watermark" Icon="" Size="Large" />
+          <r:RibbonColorPicker x:Name="PageColor" Id="pageColor" Label="Page Color" Icon="" Size="Large" SelectedColor="White" ShowNoColor="True" ShowAutomatic="False" />
+          <r:RibbonButton Id="pageBorders" Label="Page Borders" Icon="" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Layout" Id="layout" KeyTip="P">
+        <r:RibbonGroup Header="Page Setup" Id="pageSetup" Icon="" IsDialogLauncherVisible="True">
+          <r:RibbonDropDownButton Id="margins" Label="Margins" Icon="" Size="Large">
+            <r:RibbonDropDownButton.Flyout>
+              <MenuFlyout>
+                <c:RadioMenuFlyoutItem Text="Normal" GroupName="margins" IsChecked="True" />
+                <c:RadioMenuFlyoutItem Text="Narrow" GroupName="margins" />
+                <c:RadioMenuFlyoutItem Text="Moderate" GroupName="margins" />
+                <c:RadioMenuFlyoutItem Text="Wide" GroupName="margins" />
+                <c:MenuFlyoutSeparator />
+                <c:MenuFlyoutItem Text="Custom Margins..." />
+              </MenuFlyout>
+            </r:RibbonDropDownButton.Flyout>
+          </r:RibbonDropDownButton>
+          <r:RibbonDropDownButton Id="orientation" Label="Orientation" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="size" Label="Size" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="columns" Label="Columns" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="breaks" Label="Breaks" Icon="" />
+          <r:RibbonDropDownButton Id="lineNumbers" Label="Line Numbers" Icon="M9 5h12v2H9z M9 11h12v2H9z M9 17h12v2H9z M4 3h2v5H5V4.2H4z" />
+          <r:RibbonDropDownButton Id="hyphenation" Label="Hyphenation" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Paragraph" Id="layoutParagraph" Icon="" IsDialogLauncherVisible="True">
+          <r:RibbonLabel Label="Indent" Icon="M3 4h18v2H3z M11 9h10v2H11z M11 13h10v2H11z M3 18h18v2H3z M3 8.5l4 3.5-4 3.5z" />
+          <r:RibbonSpinner Id="indentLeft" Label="Left:" Value="0" Minimum="0" Maximum="22" Increment="0.1" Unit="cm" Format="0.0" InputWidth="72" />
+          <r:RibbonSpinner Id="indentRight" Label="Right:" Value="0" Minimum="0" Maximum="22" Increment="0.1" Unit="cm" Format="0.0" InputWidth="72" />
+          <r:RibbonLabel Label="Spacing" Icon="" />
+          <r:RibbonSpinner Id="spacingBefore" Label="Before:" Value="0" Minimum="0" Maximum="1584" Increment="6" Unit="pt" InputWidth="72" />
+          <r:RibbonSpinner Id="spacingAfter" Label="After:" Value="8" Minimum="0" Maximum="1584" Increment="6" Unit="pt" InputWidth="72" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Arrange" Id="arrange" Icon="">
+          <r:RibbonDropDownButton Id="position" Label="Position" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="wrapText" Label="Wrap Text" Icon="" Size="Large" />
+          <r:RibbonSplitButton Id="bringForward" Label="Bring Forward" Icon="" Size="Medium" />
+          <r:RibbonSplitButton Id="sendBackward" Label="Send Backward" Icon="" Size="Medium" />
+          <r:RibbonButton Id="selectionPane" Label="Selection Pane" Icon="" />
+          <r:RibbonDropDownButton Id="align" Label="Align" Icon="" Size="Small" />
+          <r:RibbonDropDownButton Id="group" Label="Group" Icon="" Size="Small" />
+          <r:RibbonDropDownButton Id="rotate" Label="Rotate" Icon="" Size="Small" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Review" Id="review" KeyTip="R">
+        <r:RibbonGroup Header="Proofing" Id="proofing" Icon="M3 15l2.4-9h1.9l2.4 9H8.1l-.5-2H5.1l-.5 2z M5.5 11.5h1.7L6.3 8z M12 19l3 3 7-7-1.4-1.4-5.6 5.6-1.6-1.6z">
+          <r:RibbonButton Id="editorReview" Label="Editor" Icon="M3 15l2.4-9h1.9l2.4 9H8.1l-.5-2H5.1l-.5 2z M5.5 11.5h1.7L6.3 8z M12 19l3 3 7-7-1.4-1.4-5.6 5.6-1.6-1.6z" Size="Large" Shortcut="F7" />
+          <r:RibbonButton Id="thesaurus" Label="Thesaurus" Icon="" Shortcut="Shift+F7" />
+          <r:RibbonButton Id="wordCount" Label="Word Count" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Language" Id="language" Icon="">
+          <r:RibbonDropDownButton Id="translate" Label="Translate" Icon="" Size="Large" />
+          <r:RibbonDropDownButton Id="languageSettings" Label="Language" Icon="" Size="Large" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Comments" Id="reviewComments" Icon="">
+          <r:RibbonButton Id="newComment2" Label="New Comment" Icon="" Size="Large" />
+          <r:RibbonButton Id="deleteComment" Label="Delete" Icon="" />
+          <r:RibbonButton Id="previousComment" Label="Previous" Icon="" />
+          <r:RibbonButton Id="nextComment" Label="Next" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Tracking" Id="tracking" Icon="" IsDialogLauncherVisible="True">
+          <r:RibbonToggleButton Id="trackChanges" Label="Track Changes" Icon="" Size="Large" Shortcut="Ctrl+Shift+E" />
+          <r:RibbonComboBox Id="markup" Text="Simple Markup" InputWidth="130" IsEditable="False">
+            <x:String>Simple Markup</x:String>
+            <x:String>All Markup</x:String>
+            <x:String>No Markup</x:String>
+            <x:String>Original</x:String>
+          </r:RibbonComboBox>
+          <r:RibbonDropDownButton Id="showMarkup" Label="Show Markup" Icon="" />
+          <r:RibbonButton Id="reviewingPane" Label="Reviewing Pane" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Changes" Id="changes" Icon="">
+          <r:RibbonSplitButton Id="accept" Label="Accept" Icon="" />
+          <r:RibbonSplitButton Id="reject" Label="Reject" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Protect" Id="protect" Icon="">
+          <r:RibbonButton Id="restrictEditing" Label="Restrict Editing" Icon="" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="View" Id="view" KeyTip="W">
+        <r:RibbonGroup Header="Views" Id="views" Icon="">
+          <r:RibbonToggleButton Id="readMode" Label="Read Mode" Icon="" Size="Large" GroupName="view" />
+          <r:RibbonToggleButton Id="printLayout" Label="Print Layout" Icon="" Size="Large" GroupName="view" IsChecked="True" />
+          <r:RibbonToggleButton Id="webLayout" Label="Web Layout" Icon="" Size="Large" GroupName="view" />
+          <r:RibbonToggleButton Id="outline" Label="Outline" Icon="" GroupName="view" />
+          <r:RibbonToggleButton Id="draft" Label="Draft" Icon="" GroupName="view" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Show" Id="show" Icon="">
+          <r:RibbonCheckBox Id="ruler" Label="Ruler" IsChecked="True" />
+          <r:RibbonCheckBox Id="gridlines" Label="Gridlines" />
+          <r:RibbonCheckBox Id="navigationPane" Label="Navigation Pane" IsChecked="True" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Zoom" Id="zoom" Icon="">
+          <r:RibbonButton Id="zoomDialog" Label="Zoom" Icon="" Size="Large" />
+          <r:RibbonButton Id="zoom100" Label="100%" Icon="" Size="Large" />
+          <r:RibbonButton Id="onePage" Label="One Page" Icon="" />
+          <r:RibbonButton Id="multiplePages" Label="Multiple Pages" Icon="" />
+          <r:RibbonButton Id="pageWidth" Label="Page Width" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Window" Id="window" Icon="">
+          <r:RibbonButton Id="newWindow" Label="New Window" Icon="" Size="Large" />
+          <r:RibbonButton Id="arrangeAll" Label="Arrange All" Icon="" />
+          <r:RibbonButton Id="split" Label="Split" Icon="" />
+          <r:RibbonToggleButton Id="sideBySide" Label="View Side by Side" Icon="" Size="Medium" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Macros" Id="macros" Icon="">
+          <r:RibbonSplitButton Id="macrosButton" Label="Macros" Icon="" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Help" Id="help" KeyTip="Y">
+        <r:RibbonGroup Header="Help" Id="helpGroup" Icon="">
+          <r:RibbonButton Id="helpButton" Label="Help" Icon="" Size="Large" Shortcut="F1" />
+          <r:RibbonButton Id="feedback" Label="Feedback" Icon="" Size="Large" />
+          <r:RibbonButton Id="showTraining" Label="Show Training" Icon="" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Table Design" Id="tableDesign" ContextualGroupId="table" KeyTip="JT">
+        <r:RibbonGroup Header="Table Style Options" Id="tableStyleOptions">
+          <r:RibbonCheckBox Id="headerRow" Label="Header Row" IsChecked="True" />
+          <r:RibbonCheckBox Id="totalRow" Label="Total Row" />
+          <r:RibbonCheckBox Id="bandedRows" Label="Banded Rows" IsChecked="True" />
+          <r:RibbonCheckBox Id="firstColumn" Label="First Column" IsChecked="True" />
+          <r:RibbonCheckBox Id="lastColumn" Label="Last Column" />
+          <r:RibbonCheckBox Id="bandedColumns" Label="Banded Columns" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Table Styles" Id="tableStyles" ReductionOrder="1">
+          <r:RibbonGallery Id="tableStylesGallery" Label="Table Styles" MaxColumns="7" MinColumns="3" ItemWidth="60" ItemHeight="48" ShowItemLabels="False">
+            <r:RibbonGalleryItem Label="Plain Table 1" PreviewBackground="#F2F2F2" />
+            <r:RibbonGalleryItem Label="Grid Table 1 Light" PreviewBackground="#DEEBF7" />
+            <r:RibbonGalleryItem Label="Grid Table 4 Accent 1" PreviewBackground="#4472C4" />
+            <r:RibbonGalleryItem Label="Grid Table 4 Accent 2" PreviewBackground="#ED7D31" />
+            <r:RibbonGalleryItem Label="Grid Table 4 Accent 6" PreviewBackground="#70AD47" />
+            <r:RibbonGalleryItem Label="List Table 3" PreviewBackground="#A5A5A5" />
+            <r:RibbonGalleryItem Label="List Table 7 Colorful" PreviewBackground="#FFC000" />
+            <r:RibbonGalleryItem Label="Grid Table 5 Dark" PreviewBackground="#44546A" />
+          </r:RibbonGallery>
+          <r:RibbonColorPicker Id="tableShading" Label="Shading" Icon="" Size="Large" SelectedColor="#DEEBF7" ShowNoColor="True" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Borders" Id="tableBorders">
+          <r:RibbonButton Id="borderStyles" Label="Border Styles" Icon="" Size="Large" />
+          <r:RibbonSplitButton Id="tableBordersButton" Label="Borders" Icon="" Size="Large" />
+          <r:RibbonButton Id="borderPainter" Label="Border Painter" Icon="" Size="Large" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+      <r:RibbonTab Header="Layout" Id="tableLayout" ContextualGroupId="table" KeyTip="JL">
+        <r:RibbonGroup Header="Rows &amp; Columns" Id="rowsColumns">
+          <r:RibbonButton Id="deleteRows" Label="Delete" Icon="" Size="Large" />
+          <r:RibbonButton Id="insertAbove" Label="Insert Above" Icon="" Size="Large" />
+          <r:RibbonButton Id="insertBelow" Label="Insert Below" Icon="" Size="Large" />
+          <r:RibbonButton Id="insertLeft" Label="Insert Left" Icon="" />
+          <r:RibbonButton Id="insertRight" Label="Insert Right" Icon="" />
+        </r:RibbonGroup>
+        <r:RibbonGroup Header="Cell Size" Id="cellSize" IsDialogLauncherVisible="True">
+          <r:RibbonSpinner Id="rowHeight" Label="Height:" Value="0.5" Minimum="0" Maximum="55" Increment="0.1" Unit="cm" Format="0.00" />
+          <r:RibbonSpinner Id="columnWidth" Label="Width:" Value="4.2" Minimum="0" Maximum="55" Increment="0.1" Unit="cm" Format="0.00" />
+          <r:RibbonButton Id="autoFit" Label="AutoFit" Icon="" />
+        </r:RibbonGroup>
+      </r:RibbonTab>
+    </r:Ribbon>
+    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto">
+      <ScrollViewer.Styles>
+        <FluentTheme />
+      </ScrollViewer.Styles>
+      <Border Padding="24">
+        <Grid>
+          <Border x:Name="PageSheet" Width="760" MinHeight="760" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{Binding PageBackground}" CornerRadius="2" Padding="72,64" BorderThickness="1" BorderBrush="#20000000" RequestedThemeVariant="Light" RenderTransform="{Binding ZoomTransform}" RenderTransformOrigin="380,0">
+            <StackPanel Spacing="14">
+              <TextBlock x:Name="DocTitle" Text="Quarterly report" FontSize="{Binding TitleFontSize}" Foreground="{Binding TitleForeground}" FontStyle="{Binding TitleFontStyle}" FontWeight="{Binding TitleFontWeight}" />
+              <TextBlock x:Name="DocText" TextWrapping="Wrap" FontSize="{Binding BodyFontSize, Mode=TwoWay}" Foreground="{Binding BodyForeground}" Text="RibbonSpace brings a modern, Office-style ribbon to FerroUI. Select text styles, fonts, colors and alignment in the ribbon to format this paragraph. Hover the Styles gallery for live preview, press Alt for KeyTips, Alt+Q for search, Ctrl+F1 to collapse the ribbon, or right-click any command to add it to the Quick Access Toolbar." FontFamily="{Binding BodyFontFamily}" FontWeight="{Binding BodyFontWeight}" FontStyle="{Binding BodyFontStyle}" TextDecorations="{Binding BodyDecorations}" TextAlignment="{Binding BodyAlignment}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="ToggleTable" Content="Select a table (shows Table Tools)" Command="{Binding ToggleTableAction}" />
+                <Button x:Name="ToggleDark" Content="Toggle dark mode" Command="{Binding ToggleDarkAction}" />
+              </StackPanel>
+              <Border x:Name="TableSample" BorderThickness="1" BorderBrush="#4472C4" CornerRadius="2" IsVisible="{Binding TableVisible}">
+                <Grid ColumnSpacing="1" RowSpacing="1" Background="#4472C4">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                  </Grid.RowDefinitions>
+                  <Border Background="#4472C4" Padding="8">
+                    <TextBlock Text="Region" Foreground="White" FontWeight="SemiBold" />
+                  </Border>
+                  <Border Grid.Column="1" Background="#4472C4" Padding="8">
+                    <TextBlock Text="Q3" Foreground="White" FontWeight="SemiBold" />
+                  </Border>
+                  <Border Grid.Column="2" Background="#4472C4" Padding="8">
+                    <TextBlock Text="Q4" Foreground="White" FontWeight="SemiBold" />
+                  </Border>
+                  <Border Grid.Row="1" Background="#DEEBF7" Padding="8">
+                    <TextBlock Text="North" Foreground="#242424" />
+                  </Border>
+                  <Border Grid.Row="1" Grid.Column="1" Background="#DEEBF7" Padding="8">
+                    <TextBlock Text="1.2M" Foreground="#242424" />
+                  </Border>
+                  <Border Grid.Row="1" Grid.Column="2" Background="#DEEBF7" Padding="8">
+                    <TextBlock Text="1.5M" Foreground="#242424" />
+                  </Border>
+                  <Border Grid.Row="2" Background="White" Padding="8">
+                    <TextBlock Text="South" Foreground="#242424" />
+                  </Border>
+                  <Border Grid.Row="2" Grid.Column="1" Background="White" Padding="8">
+                    <TextBlock Text="0.9M" Foreground="#242424" />
+                  </Border>
+                  <Border Grid.Row="2" Grid.Column="2" Background="White" Padding="8">
+                    <TextBlock Text="1.1M" Foreground="#242424" />
+                  </Border>
+                </Grid>
+              </Border>
+              <TextBlock x:Name="LastCommand" Opacity="0.6" FontSize="12" Foreground="#424242" Text="{Binding LastCommand}" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+    </ScrollViewer>
+    <r:RibbonStatusBar Grid.Row="3">
+      <TextBlock Text="Page 1 of 1" VerticalAlignment="Center" />
+      <TextBlock x:Name="WordCount" Text="64 words" VerticalAlignment="Center" />
+      <TextBlock Text="English (United States)" VerticalAlignment="Center" />
+      <r:RibbonStatusBar.EndItems>
+        <r:RibbonButton Label="Focus" Icon="" />
+        <r:RibbonToggleButton Label="Read Mode" Icon="" GroupName="statusView" />
+        <r:RibbonToggleButton Label="Print Layout" Icon="" GroupName="statusView" IsChecked="True" />
+        <r:RibbonToggleButton Label="Web Layout" Icon="" GroupName="statusView" />
+        <r:RibbonZoomControl x:Name="Zoom" Value="100" />
+      </r:RibbonStatusBar.EndItems>
+    </r:RibbonStatusBar>
+  </Grid>
+</UserControl>

@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui"
+    xmlns:compat="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+  <compat:FontIcon FlowDirection="RightToLeft" MirroredWhenRightToLeft="True" Glyph="➔" />
+  <compat:FontIcon MirroredWhenRightToLeft="True" FlowDirection="RightToLeft" Glyph="➔" />
+</StackPanel>

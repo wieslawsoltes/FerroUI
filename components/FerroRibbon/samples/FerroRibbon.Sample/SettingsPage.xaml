@@ -1,0 +1,83 @@
+<!-- Adapted from pinned RibbonSpace SettingsPage.xaml. Copyright Wiesław Šoltés, MIT. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.SettingsPage" Foreground="{DynamicResource ThemeForegroundBrush}" FontSize="14" x:DataType="vm:SettingsViewModel" x:CompileBindings="True">
+  <ScrollViewer Background="{DynamicResource RibbonWindowBackgroundBrush}">
+    <Border Padding="32">
+      <Grid ColumnSpacing="32" RowSpacing="12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="360" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Spacing="14">
+          <TextBlock Text="Appearance" FontSize="22" FontWeight="SemiBold" />
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Theme" x:Name="ThemeHeader" />
+            <ComboBox x:Name="Theme" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #ThemeHeader}" AutomationProperties.Name="Theme">
+              <x:String>System</x:String>
+              <x:String>Light</x:String>
+              <x:String>Dark</x:String>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Accent palette" x:Name="PaletteHeader" />
+            <ComboBox x:Name="Palette" AutomationProperties.LabeledBy="{Binding #PaletteHeader}" AutomationProperties.Name="Accent palette" />
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Chrome style" x:Name="ChromeHeader" />
+            <ComboBox x:Name="Chrome" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #ChromeHeader}" AutomationProperties.Name="Chrome style">
+              <x:String>Neutral</x:String>
+              <x:String>Colorful (accent title bar)</x:String>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Surface style (Office pages)" x:Name="SurfaceHeader" />
+            <ComboBox x:Name="Surface" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #SurfaceHeader}" AutomationProperties.Name="Surface style (Office pages)">
+              <x:String>Office</x:String>
+              <x:String>CAD (AutoCAD-like)</x:String>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Density" x:Name="DensityHeader" />
+            <ComboBox x:Name="Density" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #DensityHeader}" AutomationProperties.Name="Density">
+              <x:String>Comfortable</x:String>
+              <x:String>Compact</x:String>
+              <x:String>Touch</x:String>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Ribbon layout (all pages)" x:Name="LayoutHeader" />
+            <ComboBox x:Name="Layout" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #LayoutHeader}" AutomationProperties.Name="Ribbon layout (all pages)">
+              <x:String>Page default</x:String>
+              <x:String>Classic</x:String>
+              <x:String>Simplified</x:String>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Width="280" Spacing="4" HorizontalAlignment="Left">
+            <TextBlock Text="Ribbon UI language" x:Name="LanguageBoxHeader" />
+            <ComboBox x:Name="LanguageBox" SelectedIndex="0" AutomationProperties.LabeledBy="{Binding #LanguageBoxHeader}" AutomationProperties.Name="Ribbon UI language">
+              <x:String>en</x:String>
+              <x:String>de</x:String>
+              <x:String>fr</x:String>
+              <x:String>es</x:String>
+              <x:String>pl</x:String>
+            </ComboBox>
+          </StackPanel>
+          <TextBlock Text="Word ribbon" FontSize="22" FontWeight="SemiBold" Margin="0,16,0,0" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button x:Name="ShowState" Content="Show state JSON" Command="{Binding ShowStateAction}" />
+            <Button x:Name="ResetCustomization" Content="Reset customization" Command="{Binding ResetCustomizationAction}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button x:Name="Customize" Content="Customize the Ribbon..." Command="{Binding CustomizeAction}" />
+            <Button x:Name="Palette2" Content="Command palette" Command="{Binding Palette2Action}" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="12">
+          <TextBlock Text="State (RibbonState JSON)" FontSize="16" FontWeight="SemiBold" />
+          <TextBox x:Name="StateJson" AcceptsReturn="True" TextWrapping="Wrap" Height="260" FontFamily="Consolas,Menlo,monospace" FontSize="12" Text="{Binding StateJson, Mode=TwoWay}" />
+          <TextBlock Text="Event log (ItemInvoked)" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock x:Name="LogText" FontFamily="Consolas,Menlo,monospace" FontSize="12" TextWrapping="Wrap" Text="{Binding LogText}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </ScrollViewer>
+</UserControl>

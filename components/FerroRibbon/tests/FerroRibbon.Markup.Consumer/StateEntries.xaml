@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="using:FerroRibbon.State">
+ <StackPanel.Resources><ResourceDictionary><s:RibbonCustomization x:Key="State" /></ResourceDictionary></StackPanel.Resources>
+ <TextBlock x:DataType="s:RibbonCustomization" DataContext="{StaticResource State}" Text="{CompiledBinding Labels.Count}" />
+ <TextBlock x:DataType="s:RibbonCustomization" DataContext="{StaticResource State}" Text="{CompiledBinding GroupOrder.Count}" />
+</StackPanel>

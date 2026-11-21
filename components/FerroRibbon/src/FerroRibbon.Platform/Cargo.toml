@@ -1,0 +1,18 @@
+[package]
+name = "ferroribbon-platform"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license = "MIT"
+authors.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+[build-dependencies]
+cc = "1.9"
+pkg-config = "0.3.34"
+[dev-dependencies]
+serde_json.workspace = true
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

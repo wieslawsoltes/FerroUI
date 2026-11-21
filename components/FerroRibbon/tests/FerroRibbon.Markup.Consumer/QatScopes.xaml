@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Backstage.xaml" /></ResourceDictionary.MergedDictionaries>
+  <local:QatScopeFactory x:Key="Factory" />
+ </ResourceDictionary></StackPanel.Resources>
+ <r:Ribbon ItemFactory="{StaticResource Factory}" IsDisplayOptionsButtonVisible="False" />
+</StackPanel>

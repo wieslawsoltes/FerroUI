@@ -1,0 +1,1 @@
+<ContentControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="using:FerroRibbon.Model"><ContentControl.Content><m:RibbonGridSize><x:Arguments><x:Int32>2</x:Int32><x:Int32>3</x:Int32></x:Arguments></m:RibbonGridSize></ContentControl.Content></ContentControl>

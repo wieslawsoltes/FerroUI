@@ -1,0 +1,9 @@
+<local:StatusView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.StatusView" x:DataType="local:NumberViewModel">
+  <local:StatusView.DataContext><local:NumberViewModel /></local:StatusView.DataContext>
+  <local:StatusView.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Status.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Zoom.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Checked.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></local:StatusView.Resources>
+  <r:Ribbon x:Name="SharedRibbon" IsVisible="False" />
+  <local:ConsumerStatus x:Name="Footer" Ribbon="{Binding #SharedRibbon}" ItemInvoked="Invoked">
+    <r:RibbonToggleButton Id="grid" Label="Grid" IsChecked="False" />
+    <local:ConsumerStatus.EndItems><r:RibbonZoomControl Id="zoom" Minimum="0" Maximum="200" Value="{Binding Value,Mode=TwoWay}" Command="{Binding Command}" /></local:ConsumerStatus.EndItems>
+  </local:ConsumerStatus>
+</local:StatusView>

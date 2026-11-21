@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:i="using:FerroRibbon.Internal" xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:NumberViewModel">
+ <StackPanel.DataContext><local:NumberViewModel /></StackPanel.DataContext>
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Slider.xaml" /></ResourceDictionary.MergedDictionaries>
+  <ControlTemplate x:Key="Replacement"><i:RibbonInputSlider x:Name="PART_Slider" /></ControlTemplate>
+ </ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerSlider x:Name="Zoom" Label="Zoom" Minimum="0" Maximum="10" StepFrequency="2" Value="{Binding Value,Mode=TwoWay}" Command="{Binding Command}" />
+ <r:RibbonSlider StepFrequency="0.25" Value="1.25" />
+ <TextBlock Text="{Binding ElementName=Zoom,Path=Value}" />
+ <Thumb DragStartPolicy="PrimaryPressWhenIdle" />
+</StackPanel>

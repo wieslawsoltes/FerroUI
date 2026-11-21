@@ -1,0 +1,17 @@
+
+[package]
+name = "ferroribbon-core-consumer"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+ferroribbon-core = { path = "../../src/FerroRibbon.Core" }
+ferroui-system = { workspace = true }
+
+[lib]
+path = "lib.rs"
+
+[dev-dependencies]
+futures-executor = "0.3.34"
+futures-util = { version = "0.3.34", default-features = false, features = ["std"] }

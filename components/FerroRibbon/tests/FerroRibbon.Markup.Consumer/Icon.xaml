@@ -1,0 +1,8 @@
+<local:ConsumerIcon xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FerroRibbon.Consumer"
+    x:DataType="local:IconViewModel" x:CompileBindings="True"
+    Icon="{Binding IconText}" IconSize="{Binding IconSize, Mode=TwoWay}"
+    Foreground="#123456" UseLayoutRounding="False">
+  <local:ConsumerIcon.DataContext><local:IconViewModel /></local:ConsumerIcon.DataContext>
+</local:ConsumerIcon>

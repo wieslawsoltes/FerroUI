@@ -1,0 +1,17 @@
+<StackPanel xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:local="using:FerroRibbon.Consumer"
+    xmlns:compat="clr-namespace:FerroRibbon.Compatibility;assembly=FerroRibbon">
+  <rs:RibbonIconPresenter IconSize="22">
+    <rs:RibbonIconPresenter.Icon>
+      <compat:ImageIcon Source="{StaticResource ConsumerBitmap}" />
+    </rs:RibbonIconPresenter.Icon>
+  </rs:RibbonIconPresenter>
+  <compat:MenuFlyoutItem Text="Image" rs:RibbonMenu.Icon="Assets/cut.png" />
+  <local:ConsumerImageIcon x:DataType="local:ImageViewModel"
+      Source="{Binding Image, Mode=TwoWay}">
+    <local:ConsumerImageIcon.DataContext><local:ImageViewModel /></local:ConsumerImageIcon.DataContext>
+  </local:ConsumerImageIcon>
+  <compat:ImageIcon Source="{x:Null}" />
+</StackPanel>

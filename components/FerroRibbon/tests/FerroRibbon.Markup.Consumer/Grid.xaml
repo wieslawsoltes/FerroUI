@@ -1,0 +1,12 @@
+<rs:RibbonUniformGridPanel xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:local="using:FerroRibbon.Consumer"
+    x:DataType="local:GridViewModel" x:CompileBindings="True"
+    Columns="{Binding Columns, Mode=TwoWay}" FirstRow="0"
+    MaxRows="1" ItemWidth="20" ItemHeight="10" Spacing="2" UseLayoutRounding="False">
+  <rs:RibbonUniformGridPanel.DataContext><local:GridViewModel /></rs:RibbonUniformGridPanel.DataContext>
+  <Button Content="One" KeyboardNavigation.IsTabStop="False" />
+  <Button Content="Two" />
+  <Button Content="Three" />
+</rs:RibbonUniformGridPanel>

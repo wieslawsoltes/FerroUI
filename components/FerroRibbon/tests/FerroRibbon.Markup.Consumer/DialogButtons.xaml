@@ -1,0 +1,4 @@
+<local:MenuEventsView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.MenuEventsView" x:DataType="local:CommandViewModel" x:CompileBindings="True">
+ <local:MenuEventsView.DataContext><local:CommandViewModel /></local:MenuEventsView.DataContext>
+ <r:RibbonColorDialogHost PrimaryButtonText="Primary" SecondaryButtonText="Secondary" CloseButtonText="Close" PrimaryButtonClick="OnDialog" SecondaryButtonClick="OnDialog" CloseButtonClick="OnDialog" PrimaryButtonCommand="{Binding Command}" PrimaryButtonCommandParameter="{Binding Value}" SecondaryButtonCommand="{Binding Command}" SecondaryButtonCommandParameter="{Binding Value}" CloseButtonCommand="{Binding Command}" CloseButtonCommandParameter="{Binding Value}"/>
+</local:MenuEventsView>

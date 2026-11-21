@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace">
+ <TextBlock Tag="{x:Static r:RibbonDialogOutcome.Dismissed}" />
+ <TextBlock Tag="{x:Static r:RibbonDialogOutcome.Primary}" />
+ <TextBlock Tag="{x:Static r:RibbonDialogOutcome.Secondary}" />
+</StackPanel>

@@ -1,0 +1,8 @@
+<local:TitleView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.TitleView" x:DataType="local:NumberViewModel">
+  <local:TitleView.DataContext><local:NumberViewModel /></local:TitleView.DataContext>
+  <local:TitleView.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Title.xaml" /></ResourceDictionary.MergedDictionaries>
+    <ControlTemplate x:Key="Replacement" TargetType="r:RibbonTitleBar"><Grid><Border x:Name="PART_DragRegion" Background="Transparent" /><Border x:Name="PART_QuickAccessHost" /><TextBlock x:Name="PART_Title" Text="{TemplateBinding DisplayTitle}" /><Button x:Name="PART_AppButton" /><Border x:Name="PART_AppIcon" /><r:RibbonSearchBox x:Name="PART_SearchBox" /></Grid></ControlTemplate>
+  </ResourceDictionary></local:TitleView.Resources>
+  <r:Ribbon x:Name="SharedRibbon" IsVisible="False"><r:Ribbon.QuickAccessToolBar><r:RibbonQuickAccessToolBar /></r:Ribbon.QuickAccessToolBar></r:Ribbon>
+  <local:ConsumerTitle x:Name="TitleBar" Ribbon="{Binding #SharedRibbon}" Title="Document" Subtitle="Saved" IsAppIconMenuEnabled="True" SearchWidth="{Binding Value}" AppIconClick="Invoked" />
+</local:TitleView>

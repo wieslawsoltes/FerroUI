@@ -1,0 +1,11 @@
+<local:RootBackstageConsumer xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer" x:Class="FerroRibbon.Consumer.RootBackstageConsumer" x:CompileBindings="True">
+ <local:RootBackstageConsumer.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Backstage.xaml" /></ResourceDictionary.MergedDictionaries>
+  <r:RibbonHandledEventArgs x:Key="Arguments" Handled="True" />
+ </ResourceDictionary></local:RootBackstageConsumer.Resources>
+ <r:Ribbon ApplicationButtonClick="OnFile" BackstageOpened="OnOpened" BackstageClosed="OnClosed" IsDisplayOptionsButtonVisible="False">
+  <r:Ribbon.Backstage><r:RibbonBackstage Title="File" NavigationPaneWidth="242.5"><r:RibbonBackstageItem Header="Information" Id="info" KeyTip="I"><TextBlock Text="Same native page" /></r:RibbonBackstageItem><r:RibbonBackstageItem Header="Close" KeyTip="C" Placement="Bottom" /></r:RibbonBackstage></r:Ribbon.Backstage>
+  <r:RibbonTab Header="Home" KeyTip="H" />
+ </r:Ribbon>
+ <TextBlock x:DataType="r:RibbonHandledEventArgs" Text="{Binding Handled,Source={StaticResource Arguments}}" />
+</local:RootBackstageConsumer>

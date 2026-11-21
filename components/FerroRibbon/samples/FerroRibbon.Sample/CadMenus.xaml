@@ -1,0 +1,18 @@
+<!-- Original CadPage circle split-button fragment -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="using:FerroRibbon.Controls" xmlns:cad="using:FerroRibbon.Sample.Cad">
+<r:RibbonSplitButton Id="circle" Label="Circle" Icon="{cad:CadIcon Name=CircleCenterRadius}" Size="Large" FollowLastChoice="True" KeyTip="CI">
+            <r:RibbonSplitButton.ScreenTip>
+              <r:RibbonScreenTip Title="Circle" Description="Creates a circle using a center point and a radius.&#x0a;&#x0a;CIRCLE" ExtendedDescription="Pick the center point, then the radius. The drop-down offers diameter, 2-point, 3-point and tangent methods; the button keeps the method you used last." ExtendedImage="{cad:CadIcon Name=CircleHelp}" HelpText="Press F1 for more help" />
+            </r:RibbonSplitButton.ScreenTip>
+            <MenuFlyout>
+              <MenuFlyoutItem Text="Center, Radius" Tag="{cad:CadIcon Name=CircleCenterRadius}" />
+              <MenuFlyoutItem Text="Center, Diameter" Tag="{cad:CadIcon Name=CircleTwoPoint}" />
+              <MenuFlyoutSeparator />
+              <MenuFlyoutItem Text="2-Point" Tag="{cad:CadIcon Name=CircleTwoPoint}" />
+              <MenuFlyoutItem Text="3-Point" Tag="{cad:CadIcon Name=CircleThreePoint}" />
+              <MenuFlyoutSeparator />
+              <MenuFlyoutItem Text="Tan, Tan, Radius" Tag="{cad:CadIcon Name=CircleTanTanRadius}" />
+              <MenuFlyoutItem Text="Tan, Tan, Tan" Tag="{cad:CadIcon Name=CircleTanTanTan}" />
+            </MenuFlyout>
+          </r:RibbonSplitButton>
+</StackPanel>

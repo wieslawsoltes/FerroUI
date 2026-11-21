@@ -1,0 +1,12 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:m="using:FerroRibbon.Model" xmlns:local="using:FerroRibbon.Consumer" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Groups.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/SimpleItems.xaml" /></ResourceDictionary.MergedDictionaries>
+  <local:ConsumerElementFactory x:Key="Factory" />
+  <DataTemplate x:Key="Keyed"><TextBlock Text="Template from markup" /></DataTemplate>
+  <Button x:Key="Existing" Content="Direct native content" />
+  <m:RibbonCustomItemModel x:Key="Data" Id="data" Content="Initial data" TemplateKey="Keyed" />
+  <m:RibbonCustomItemModel x:Key="Direct" Id="direct"><m:RibbonCustomItemModel.Content><StaticResource ResourceKey="Existing" /></m:RibbonCustomItemModel.Content></m:RibbonCustomItemModel>
+ </ResourceDictionary></StackPanel.Resources>
+ <TextBlock x:DataType="m:RibbonCustomItemModel" DataContext="{StaticResource Data}" Text="{Binding TemplateKey}" />
+ <r:RibbonGroup Header="Custom content" />
+</StackPanel>

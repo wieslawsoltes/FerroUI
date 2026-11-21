@@ -1,0 +1,23 @@
+<!-- Source Chrome.xaml StatusBar; explicit Border supplies native padding. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ControlTheme TargetType="c:RibbonStatusBar" x:Key="{x:Type c:RibbonStatusBar}">
+    <Setter Property="Background" Value="{DynamicResource RibbonStatusBarBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RibbonStatusBarForegroundBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}" Padding="8,0"><Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel x:Name="PART_StartItems" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" />
+            <StackPanel x:Name="PART_EndItems" Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" />
+          </Grid></Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

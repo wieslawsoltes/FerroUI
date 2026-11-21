@@ -1,0 +1,5 @@
+<!-- Exact RibbonSpace Items.xaml color picker declaration. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:FerroRibbon.Controls">
+ <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Split.xaml" /></ResourceDictionary.MergedDictionaries>
+ <ControlTheme x:Key="{x:Type c:RibbonColorPicker}" TargetType="c:RibbonColorPicker" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" />
+</ResourceDictionary>

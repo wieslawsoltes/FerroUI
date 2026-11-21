@@ -1,0 +1,11 @@
+<local:ConsumerItemContent xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
+    xmlns:local="using:FerroRibbon.Consumer"
+    x:DataType="local:IconViewModel" x:CompileBindings="True"
+    Label="{Binding IconText,Mode=TwoWay}" ItemSize="Large" Part="All"
+    Metrics="{x:Static rs:RibbonMetrics.Compact}" ShowChevron="True"
+    Foreground="#223344" ColorBar="#eeccaa">
+  <local:ConsumerItemContent.DataContext><local:IconViewModel /></local:ConsumerItemContent.DataContext>
+  <local:ConsumerItemContent.Icon><Border Width="10" Height="8" /></local:ConsumerItemContent.Icon>
+</local:ConsumerItemContent>

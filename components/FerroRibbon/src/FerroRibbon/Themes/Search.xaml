@@ -1,0 +1,43 @@
+<!-- Original RibbonSpace Inputs.xaml SearchBox tree. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonSearchBox" x:Key="{x:Type c:RibbonSearchBox}">
+    <Setter Property="Width" Value="320" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Background="{DynamicResource RibbonSearchBackgroundBrush}" BorderBrush="{DynamicResource RibbonSearchBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8,0,4,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <compat:FontIcon Glyph="" FontSize="14" Foreground="{DynamicResource RibbonSecondaryForegroundBrush}" VerticalAlignment="Center" />
+              <i:RibbonInputTextBox x:Name="PART_TextBox" Grid.Column="1" VerticalAlignment="Center" MinWidth="0" MinHeight="0" FontSize="12" Padding="6,2,4,2" BorderThickness="0" Background="Transparent"
+                  Foreground="{DynamicResource RibbonForegroundBrush}" CaretBrush="{DynamicResource RibbonForegroundBrush}"
+                  PlaceholderForeground="{DynamicResource RibbonSecondaryForegroundBrush}"
+                  SelectionBrush="{DynamicResource RibbonAccentBrush}" SelectionForegroundBrush="{DynamicResource RibbonAccentForegroundBrush}">
+                <TextBox.Resources>
+                  <x:Double x:Key="TextControlPlaceholderOpacity">1</x:Double>
+                  <x:Double x:Key="TextControlThemeMinHeight">20</x:Double>
+                  <Thickness x:Key="TextControlThemePadding">6,2,4,2</Thickness>
+                  <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+                  <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                  <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                  <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                  <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                  <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                  <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                  <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                </TextBox.Resources>
+              </i:RibbonInputTextBox>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

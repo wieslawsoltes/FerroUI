@@ -1,0 +1,25 @@
+<!-- RibbonSpace Chrome.xaml zoom template. Copyright Wiesław Šoltés, MIT. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ControlTheme TargetType="c:RibbonZoomControl" x:Key="{x:Type c:RibbonZoomControl}">
+    <Setter Property="Foreground" Value="{DynamicResource RibbonStatusBarForegroundBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Height="24">
+            <Button x:Name="PART_ZoomOut" Theme="{StaticResource RibbonChromeButtonStyle}" Width="22" Padding="0" Foreground="{TemplateBinding Foreground}">
+              <compat:FontIcon Glyph="&#xE738;" FontSize="10" />
+            </Button>
+            <i:RibbonInputSlider x:Name="PART_Slider" Width="110" VerticalAlignment="Center" MinHeight="0" Padding="0" />
+            <Button x:Name="PART_ZoomIn" Theme="{StaticResource RibbonChromeButtonStyle}" Width="22" Padding="0" Foreground="{TemplateBinding Foreground}">
+              <compat:FontIcon Glyph="&#xE710;" FontSize="10" />
+            </Button>
+            <Button x:Name="PART_Percent" Theme="{StaticResource RibbonChromeButtonStyle}" Content="{TemplateBinding ValueText}" MinWidth="44" Foreground="{TemplateBinding Foreground}" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
