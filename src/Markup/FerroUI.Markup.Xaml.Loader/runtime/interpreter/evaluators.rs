@@ -259,7 +259,7 @@ fn evaluate_setter_with_arguments(
     if let Some(direct) = any.downcast_ref::<XamlDirectCallPropertySetter>() {
         return Some((|| {
             let mut arguments = Vec::with_capacity(values.len() + 1);
-            arguments.push(target.clone());
+            if direct.consumes_target() { arguments.push(target.clone()); }
             evaluate_arguments(context, &mut arguments)?;
             context.call_method(direct.method(), &arguments, line_info).map(|_| ())
         })());
@@ -294,7 +294,7 @@ pub(crate) fn call_standard_setter(
         all
     };
     if let Some(direct) = any.downcast_ref::<XamlDirectCallPropertySetter>() {
-        let all = with_target(target.clone());
+        let all = if direct.consumes_target() { with_target(target.clone()) } else { arguments.to_vec() };
         return Some(context.call_method(direct.method(), &all, line_info).map(|_| ()));
     }
     if let Some(adder) = any.downcast_ref::<AdderSetter>() {
@@ -719,6 +719,20 @@ fn load_method_delegate(node: &Rc<XamlLoadMethodDelegateNode>, context: &mut Eva
     }
     let method = node.method.clone();
     let is_static = method.is_static();
+    let name = method.name();
+    let metadata = declaring_type.as_any().downcast_ref::<RuntimeType>().and_then(RuntimeType::markup);
+    let ordinal = declaring_type.methods().into_iter().filter(|m| m.name() == name).position(|m| m.equals(&*method));
+    if let (Some(metadata), Some(ordinal)) = (metadata, ordinal) {
+        if let Some(declared) = metadata.find_methods(&name).nth(ordinal) {
+            let delegate = if is_static {
+                MarkupDelegate::for_method(None, metadata, declared)
+            } else {
+                let instance = instance.as_ref().ok_or_else(|| XamlError::load_exception("A named handler needs a target object", Some(&**node)))?;
+                MarkupDelegate::for_method_of_source(instance, metadata, declared)
+            };
+            return Ok(EvalResult::value(node.delegate_type.clone(), Some(Rc::new(delegate))));
+        }
+    }
     // The delegate does not keep its target alive: the target (the root object) owns
     // the element the handler is attached to, and a strong reference would close a
     // cycle root -> element -> handler -> root. A handler whose target is gone does

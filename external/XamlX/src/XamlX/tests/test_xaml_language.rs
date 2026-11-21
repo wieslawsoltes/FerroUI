@@ -476,6 +476,11 @@ fn define_test_classes(ts: &Rc<FakeTypeSystem>, asm: &Rc<FakeAssembly>) {
     );
 
     // Constructor arguments and generics
+    let enumerable_ctor = asm.define_class(NS, "EnumerableCtorClass");
+    enumerable_ctor.add_constructor(vec![ts.get("System.Collections.IEnumerable")]);
+    let value_ctor = asm.define_struct(NS, "ValueCtorStruct");
+    value_ctor.add_constructor(vec![]);
+    value_ctor.add_constructor(vec![int32.clone(), string.clone()]);
     let ctor_class = asm.define_class(NS, "CtorClass");
     ctor_class.add_constructor(vec![int32.clone(), string.clone()]);
     let generic = asm.define_generic_class(NS, "GenericClass`1", &["T"]);

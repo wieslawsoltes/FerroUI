@@ -26,7 +26,7 @@
 //! | constructor | its parameters |
 //! | instance method, static method | the instance and its parameters; its parameters |
 //! | static field | none |
-//! | event | the instance and the handler |
+//! | instance event, static event | the instance and the handler; the handler |
 //! | getter, setter of a property | the instance; the instance and the value |
 //! | getter, setter of a static property | none; the value |
 //! | getter, setter of an indexer | the instance and the indices; the same and the value |
@@ -285,7 +285,8 @@ fn visit(type_: &TypeModel, visit: &mut dyn FnMut(&CallableModel, usize)) {
         visit(&field.callable, 0);
     }
     for event in &type_.events {
-        visit(&event.callable, 2);
+        visit(&event.callable, 1 + usize::from(!event.is_static));
+        if let Some(remove) = &event.event_remove { visit(&remove.callable, 1 + usize::from(!event.is_static)); }
     }
     let mut accessors = |getter: &Option<AccessorModel>, setter: &Option<AccessorModel>, instance: usize| {
         if let Some(getter) = getter {
@@ -311,8 +312,12 @@ fn assign(type_: &mut TypeModel, next: &mut dyn FnMut() -> Option<CallForm>) {
     if type_.parse.is_some() {
         type_.parse_call = next();
     }
-    for member in type_.constructors.iter_mut().chain(&mut type_.methods).chain(&mut type_.fields).chain(&mut type_.events) {
+    for member in type_.constructors.iter_mut().chain(&mut type_.methods).chain(&mut type_.fields) {
         member.call = next();
+    }
+    for event in &mut type_.events {
+        event.call = next();
+        if let Some(remove) = &mut event.event_remove { remove.call = next(); }
     }
     for property in type_.properties.iter_mut().chain(&mut type_.static_properties).chain(&mut type_.indexers) {
         if let Some(getter) = &mut property.getter {

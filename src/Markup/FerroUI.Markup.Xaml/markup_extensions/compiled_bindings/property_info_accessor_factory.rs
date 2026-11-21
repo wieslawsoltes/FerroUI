@@ -11,7 +11,7 @@ use ferroui_base::data::model::{CollectionChange, ModelTypes};
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{ferro_markup_type, BoxedValue};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// The accessor factories compiled binding paths use for their property
@@ -71,6 +71,7 @@ pub(crate) struct InpcPropertyAccessor {
     reference: WeakValue,
     property: Rc<dyn IPropertyInfo>,
     token: Cell<Option<u64>>,
+    native_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 impl InpcPropertyAccessor {
@@ -81,6 +82,7 @@ impl InpcPropertyAccessor {
             reference,
             property,
             token: Cell::new(None),
+            native_subscription: RefCell::new(None),
         })
     }
 
@@ -108,10 +110,30 @@ impl InpcPropertyAccessor {
                 }
             }));
             self.token.set(Some(token));
+        } else if let Some(target) = ValueTypes::as_object(&*o) {
+            // Keep this accessor's own write/publication ordering. The Base
+            // accessor intentionally has different conversion and duplicate
+            // notification behavior, so do not replace this class with it.
+            if let Some(property) = ferroui_base::FerroPropertyRegistry::instance()
+                .find_registered_for(&target, self.property.name())
+            {
+                let id = property.id();
+                let weak = self.this.clone();
+                self.native_subscription.replace(Some(target.property_changed(move |e| {
+                    if e.property().id() == id {
+                        if let Some(this) = weak.upgrade() {
+                            this.send_current_value();
+                        }
+                    }
+                })));
+            }
         }
     }
 
     fn unsubscribe_from_changes(&self) {
+        if let Some(subscription) = self.native_subscription.take() {
+            subscription.dispose();
+        }
         let Some(token) = self.token.take() else { return };
         let Some(o) = self.reference.upgrade() else { return };
         if let Some(inpc) = BaseInpcPropertyAccessor::find_notifier(&*o) {
@@ -289,3 +311,49 @@ ferro_markup_type!(static PropertyInfoAccessorFactory {
             },
     ],
 });
+
+#[cfg(test)]
+mod native_notification_tests {
+    use super::*;
+    use ferroui_base::{FerroObject,FerroObjectImpl,FerroProperty,Ref,StyledProperty,instantiate};
+    use ferroui_base::data::core::{ClrPropertyInfo,Value};
+    #[repr(C)]
+    struct NativeBacking {base:FerroObject}
+    ferroui_base::ferro_class!(NativeBacking:FerroObject);
+    ferroui_base::ferro_impl_classes!(NativeBacking:FerroObjectImpl);
+    ferroui_base::ferro_properties! {impl NativeBacking {
+        fn number_property()->StyledProperty<i32>{FerroProperty::register::<NativeBacking,_>("Number",1)}
+    }}
+    fn source()->(Ref<NativeBacking>,BoxedValue){
+        let source=instantiate(NativeBacking{base:FerroObject::construct()});let boxed:BoxedValue=Rc::new(source.clone());(source,boxed)
+    }
+    fn property()->Rc<dyn IPropertyInfo>{Rc::new(ClrPropertyInfo::read_write::<Ref<NativeBacking>,Value<i32>>(
+        "Number",|v|v.get_value(NativeBacking::number_property())+100,|v,n|v.set_value(NativeBacking::number_property(),n-100),
+    ))}
+    #[test]
+    fn compiled_accessor_follows_native_changes_and_keeps_declared_write_publication_order(){
+        let (source,boxed)=source();let baseline=source.property_changed_subscriber_count();
+        let accessor=PropertyInfoAccessorFactory::create_inpc_property_accessor(&WeakValue::new(&boxed),property());
+        let values=Rc::new(RefCell::new(Vec::new()));let capture=values.clone();
+        accessor.subscribe(Rc::new(move|v|capture.borrow_mut().push(*v.unwrap().downcast_ref::<i32>().unwrap())));
+        source.set_value(NativeBacking::number_property(),2);
+        assert_eq!(&*values.borrow(),&[101,102]);
+        let input:BoxedValue=Rc::new(109i32);accessor.set_value(Some(&input),BindingPriority::LocalValue).unwrap();
+        assert_eq!(&*values.borrow(),&[101,102,109,109]);assert_eq!(source.get_value(NativeBacking::number_property()),9);
+        accessor.unsubscribe();assert_eq!(source.property_changed_subscriber_count(),baseline);
+        accessor.subscribe(Rc::new(|_|{}));drop(accessor);assert_eq!(source.property_changed_subscriber_count(),baseline);
+    }
+    #[test]
+    fn compiled_native_accessor_keeps_source_weak_and_getter_errors_visible(){
+        let (source,boxed)=source();let weak=source.downgrade();
+        let property=Rc::new(ClrPropertyInfo::read_only_fallible::<Ref<NativeBacking>,Value<i32>>("Number",|v|{
+            let n=v.get_value(NativeBacking::number_property());if n==3{Err(BindingError::message("getter failure"))}else{Ok(n+100)}
+        }));
+        let accessor=PropertyInfoAccessorFactory::create_inpc_property_accessor(&WeakValue::new(&boxed),property);
+        let values=Rc::new(RefCell::new(Vec::new()));let capture=values.clone();
+        accessor.subscribe(Rc::new(move|v|capture.borrow_mut().push(v)));
+        source.set_value(NativeBacking::number_property(),3);
+        assert!(values.borrow().last().unwrap().as_ref().unwrap().downcast_ref::<BindingNotification>().is_some());
+        drop(boxed);drop(source);assert!(weak.upgrade().is_none());assert!(accessor.value().is_none());accessor.unsubscribe();
+    }
+}

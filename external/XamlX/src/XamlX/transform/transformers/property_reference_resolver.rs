@@ -77,14 +77,11 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
                 .into_iter()
                 .find(|p| p.name() == prop_name && p.add().is_some());
             if let Some(add) = clr_event.and_then(|e| e.add()) {
-                return Ok(XamlAstClrProperty::with_setter_methods(
-                    &*prop,
-                    &prop_name,
-                    add.declaring_type(),
-                    None,
-                    Some(vec![Some(add)]),
-                    None,
-                )?);
+                let declaring = add.declaring_type();
+                let setter = crate::ast::XamlDirectCallPropertySetter::for_event(add)?;
+                return Ok(XamlAstClrProperty::with_setters(
+                    &*prop, &prop_name, declaring, None, Some(vec![setter]), None,
+                ));
             }
         }
 

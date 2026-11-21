@@ -1,0 +1,23 @@
+[workspace]
+
+[package]
+name = "value-constructor-fixture"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { path = "../../src/FerroUI.Base", features = ["compiler-metadata"] }
+ferroui-controls = { path = "../../src/FerroUI.Controls" }
+ferroui-markup-xaml = { path = "../../src/Markup/FerroUI.Markup.Xaml" }
+
+[build-dependencies]
+ferroui-build = { path = "../../src/FerroUI.Build.Tasks" }
+
+[dev-dependencies]
+ferroui-markup-xaml-loader = { path = "../../src/Markup/FerroUI.Markup.Xaml.Loader", features = ["emitter"] }

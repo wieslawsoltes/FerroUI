@@ -41,6 +41,8 @@ impl WeakValue {
             WeakValue::Object(object.downgrade(), id)
         } else if ValueTypes::is_reference(id) {
             WeakValue::Reference(Rc::downgrade(value))
+        } else if let Some(object) = ValueTypes::reference_object(value) {
+            WeakValue::Reference(Rc::downgrade(&object))
         } else {
             WeakValue::Value(value.clone())
         }

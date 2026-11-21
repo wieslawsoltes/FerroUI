@@ -1,0 +1,1 @@
+<ContentControl xmlns='https://github.com/ferroui' xmlns:v='urn:value-constructors' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><ContentControl.Content><v:CountedValue><x:Arguments><x:Int32>6</x:Int32><x:Int32>7</x:Int32></x:Arguments></v:CountedValue></ContentControl.Content></ContentControl>

@@ -130,20 +130,26 @@ fn the_crate_file_of_a_closed_plan_names_only_what_the_plan_lists() {
     let modules = vec![module("compiled_xaml", false), module("compiled_main_window", true)];
     let plan = ExportPlan::closed().document("ferres://app/Views/Settings.xaml").asset("/Assets/logo.png");
     let applied = apply(&plan, "app", &documents(), &exported(), &assets()).expect("the plan");
-    let text = crate::crate_file_with_plan("App", &modules, &["crate::compiled_checked_in::try_load".to_string()], &applied, &[]);
+    let public_documents = ["ferres://app/Views/Settings.xaml".to_owned(), "ferres://app/Views/About.xaml".to_owned()];
+    let text = crate::crate_file_with_plan(
+        "App", &modules, &["crate::compiled_checked_in::try_load".to_string()], &applied, &[], &public_documents,
+    );
     assert!(!text.contains("super::compiled_xaml::try_load"), "{text}");
     assert!(!text.contains("super::compiled_main_window::try_load"), "{text}");
     assert!(text.contains("super::compiled_xaml::build_views_settings_xaml("), "{text}");
     let checked_in = text.find("crate::compiled_checked_in::try_load(service_provider, uri)?").expect("the checked-in table");
-    let planned = text.find("\"ferres://app/Views/Settings.xaml\"").expect("the planned document");
+    let planned = text.rfind("\"ferres://app/Views/Settings.xaml\"").expect("the planned document");
     assert!(checked_in < planned, "{text}");
+    assert!(text.contains("pub const PUBLIC_COMPILED_DOCUMENTS: &[&str] = &[\n        \"ferres://app/Views/Settings.xaml\",\n    ];"), "{text}");
+    assert!(!text.contains("ferres://app/Views/About.xaml"), "{text}");
     assert!(text.contains("(\"/Assets/logo.png\", include_bytes!(\"/crate/Assets/logo.png\")),"), "{text}");
     assert!(!text.contains("unused.png"), "{text}");
     // The modules themselves are still declared.
     assert!(text.contains("pub mod compiled_xaml {\n"), "{text}");
     // Without a plan the loader tables of the modules are asked, as before.
     let all = apply(&ExportPlan::all(), "app", &documents(), &exported(), &assets()).expect("no plan");
-    let text = crate::crate_file_with_plan("App", &modules, &[], &all, &[]);
+    let text = crate::crate_file_with_plan("App", &modules, &[], &all, &[], &public_documents);
     assert!(text.contains("super::compiled_xaml::try_load(service_provider, uri)?"), "{text}");
     assert!(text.contains("unused.png"), "{text}");
+    assert!(text.contains("ferres://app/Views/About.xaml"), "{text}");
 }

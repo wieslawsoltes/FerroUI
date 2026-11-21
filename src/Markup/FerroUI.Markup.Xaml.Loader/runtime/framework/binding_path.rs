@@ -322,6 +322,18 @@ fn element(
             // delegate bound to the source.
             let method = e.method.clone();
             let name = method.name();
+            let declaring = method.declaring_type();
+            // Declared metadata uses the same delegate creation as compiled Rust,
+            // retaining method identity/errors without rooting the binding source.
+            let metadata = declaring.as_any().downcast_ref::<RuntimeType>().and_then(RuntimeType::markup);
+            let ordinal = declaring.methods().into_iter().filter(|m| m.name() == name).position(|m| m.equals(&*method));
+            if let (Some(metadata), Some(ordinal)) = (metadata, ordinal) {
+                if metadata.find_methods(&name).nth(ordinal).is_some() {
+                    return ferroui_markup_xaml::xaml_il::runtime::compiled::path_method(
+                        &builder, metadata, &name, ordinal, e.accepts_null, (line_info.line(), line_info.position()),
+                    ).map_err(|e| XamlError::load_exception(e.to_string(), Some(line_info)));
+                }
+            }
             builder.method_untyped(
                 &name,
                 Rc::new(move |owner: &BoxedValue| {

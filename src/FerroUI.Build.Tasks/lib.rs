@@ -975,6 +975,7 @@ impl Build {
             theme_units: Vec::new(),
             references: MarkupReferencesModel::default(),
         };
+        let mut public_compiled_documents: Vec<String> = Vec::new();
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
         // The option of the emitter for the groups of this build (#603), restored after them.
@@ -1101,6 +1102,7 @@ impl Build {
                             }
                         }
                         if group.exported {
+                            public_compiled_documents.extend(file.loadable_documents().iter().cloned());
                             // Every document the compiler consumed for the class, the ones merged
                             // into it included, is left out of the raw assets (#850): its content
                             // is in the compiled markup.
@@ -1178,7 +1180,9 @@ impl Build {
             write_compiled_file(&path, &file.source, &image, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
-                metadata.documents.extend(file.metadata(&self.crate_name, &module_path, &[]).documents);
+                let group_metadata = file.metadata(&self.crate_name, &module_path, &[]);
+                public_compiled_documents.extend(group_metadata.documents.iter().filter(|document| document.public).map(|document| document.uri.clone()));
+                metadata.documents.extend(group_metadata.documents);
                 compiled_documents.extend(documents.iter().map(|(name, _)| format!("/{name}")));
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
@@ -1189,6 +1193,12 @@ impl Build {
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
             match read {
                 Ok(read) if read.name == assembly_name => {
+                    // A checked-in non-class document's public build function is
+                    // explicit metadata. Old class metadata does not state whether
+                    // its constructor is loadable; do not invent availability.
+                    public_compiled_documents.extend(read.documents.iter()
+                        .filter(|document| document.public && document.build_path.is_some())
+                        .map(|document| document.uri.clone()));
                     metadata.documents.extend(read.documents);
                     metadata.theme_units.extend(read.theme_units);
                     // What its documents name, for the applications that trim (#848): the
@@ -1467,7 +1477,9 @@ impl Build {
                 Ok(applied) => {
                     let report = export_plan::report(&self.export_plan, &planned_documents, &applied, &assets);
                     write_if_changed(&xaml_directory.join("exports.txt"), &report, &mut errors);
-                    let text = crate_file_with_plan(&assembly_name, &modules, &self.loaders, &applied, &parts_tables);
+                    let text = crate_file_with_plan(
+                        &assembly_name, &modules, &self.loaders, &applied, &parts_tables, &public_compiled_documents,
+                    );
                     write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
                 }
                 Err(plan_errors) => errors.extend(plan_errors),
@@ -1705,9 +1717,9 @@ fn compile_bindings_by_default(manifest: Option<bool>, build_script: Option<bool
 }
 
 #[cfg(test)]
-fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], assets: &[(String, PathBuf)], parts: &[PartsTable]) -> String {
+fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], assets: &[(String, PathBuf)], parts: &[PartsTable], public_documents: &[String]) -> String {
     let applied = export_plan::Applied { documents: None, assets: assets.to_vec() };
-    crate_file_with_plan(assembly_name, modules, loaders, &applied, parts)
+    crate_file_with_plan(assembly_name, modules, loaders, &applied, parts, public_documents)
 }
 
 /// The file the crate includes, with the documents and the assets of the export plan
@@ -1718,6 +1730,7 @@ fn crate_file_with_plan(
     loaders: &[String],
     applied: &export_plan::Applied,
     parts: &[PartsTable],
+    public_documents: &[String],
 ) -> String {
     let assets = &applied.assets;
     let mut text = String::new();
@@ -1745,6 +1758,16 @@ fn crate_file_with_plan(
     text.push_str("#[doc(hidden)]\n");
     text.push_str("#[rustfmt::skip]\n");
     text.push_str("pub mod compiled_markup {\n");
+    text.push_str("    /// Public, loadable compiled document URIs; no object is built to query this table.\n");
+    text.push_str("    pub const PUBLIC_COMPILED_DOCUMENTS: &[&str] = &[\n");
+    let documents: Vec<&str> = match &applied.documents {
+        Some(documents) => documents.iter().map(|(uri, _)| uri.as_str()).collect(),
+        None => public_documents.iter().map(String::as_str).collect(),
+    };
+    for uri in documents {
+        text.push_str(&format!("        {},\n", rust_string_literal(uri)));
+    }
+    text.push_str("    ];\n\n");
     text.push_str("    /// The assembly of the crate.\n");
     text.push_str(&format!("    pub const ASSEMBLY_NAME: &str = {};\n", rust_string_literal(assembly_name)));
     text.push('\n');
@@ -1809,7 +1832,7 @@ fn crate_file_with_plan(
     text.push_str("    /// document.\n");
     text.push_str("    pub fn register() {\n");
     text.push_str("        ::ferroui_base::platform::register_assets(ASSEMBLY_NAME, ASSETS);\n");
-    text.push_str("        ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY_NAME, try_load);\n");
+    text.push_str("        ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml_with_documents(ASSEMBLY_NAME, try_load, PUBLIC_COMPILED_DOCUMENTS);\n");
     for table in parts {
         text.push_str(&format!(
             "        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts({}, {});\n",
@@ -1867,7 +1890,7 @@ mod tests {
         let module = |name: &str, exported: bool, file: bool| Module { name: name.to_string(), path: PathBuf::from(format!("/out/xaml/{name}.rs")), exported, file };
         let modules = vec![module("compiled_xaml", true, false), module("compiled_xaml_source_info", false, false), module("compiled_main_window", true, true)];
         let assets = vec![("/Assets/a.png".to_string(), PathBuf::from("/crate/Assets/a.png"))];
-        let text = crate_file("Tests", &modules, &["crate::compiled_main::try_load".to_string()], &assets, &[]);
+        let text = crate_file("Tests", &modules, &["crate::compiled_main::try_load".to_string()], &assets, &[], &["ferres://Tests/Public.xaml".into()]);
         assert!(text.contains("pub mod compiled_xaml {\n    include!(\"/out/xaml/compiled_xaml.rs\");\n}\n"), "{text}");
         assert!(text.contains("pub mod compiled_xaml_source_info {\n"), "{text}");
         assert!(text.contains("    pub const ASSEMBLY_NAME: &str = \"Tests\";\n"), "{text}");
@@ -1879,6 +1902,8 @@ mod tests {
         // The file of a class is a module file of its own.
         assert!(text.contains("#[path = \"/out/xaml/compiled_main_window.rs\"]\npub mod compiled_main_window;\n"), "{text}");
         assert!(text.contains("= super::compiled_main_window::try_load(service_provider, uri)?"), "{text}");
+        assert!(text.contains("\"ferres://Tests/Public.xaml\""), "{text}");
+        assert!(text.contains("register_compiled_xaml_with_documents(ASSEMBLY_NAME, try_load, PUBLIC_COMPILED_DOCUMENTS)"), "{text}");
     }
 
     /// Not from upstream (#568, step 3): the parts table of a theme the application trims is a
@@ -1895,7 +1920,8 @@ mod tests {
             ],
             total: 9,
         }];
-        let text = crate_file("App", &[], &[], &[], &parts);
+        let public_documents = ["ferres://App/Resources.xaml".to_string()];
+        let text = crate_file("App", &[], &[], &[], &parts, &public_documents);
         assert!(
             text.contains(
                 "    pub static THEME_PARTS_TESTS_THEME: &[&::ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit] = &[\n        &::tests::compiled_xaml::THEME_UNIT_0, // ambient\n        &::tests::compiled_xaml::THEME_UNIT_3, // Controls/Button.xaml\n    ];\n"
@@ -1907,7 +1933,9 @@ mod tests {
             text.contains("        ::ferroui_markup_xaml::xaml_il::runtime::compiled::register_wider_theme_parts(\"Tests.Theme\", THEME_PARTS_TESTS_THEME);\n    }\n"),
             "{text}"
         );
-        assert!(!crate_file("App", &[], &[], &[], &[]).contains("THEME_PARTS"));
+        assert!(text.contains("\"ferres://App/Resources.xaml\""), "{text}");
+        assert!(text.contains("register_compiled_xaml_with_documents(ASSEMBLY_NAME, try_load, PUBLIC_COMPILED_DOCUMENTS)"), "{text}");
+        assert!(!crate_file("App", &[], &[], &[], &[], &public_documents).contains("THEME_PARTS"));
     }
 
     /// Not from upstream (#568, step 3): a manifest whose opt-in is not one of its forms fails the

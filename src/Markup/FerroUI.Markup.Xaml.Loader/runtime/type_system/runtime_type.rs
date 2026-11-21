@@ -1275,6 +1275,7 @@ pub struct RuntimeEvent {
     pub(crate) name: String,
     pub(crate) declaring_type: Weak<RuntimeType>,
     pub(crate) add: Option<Rc<RuntimeMethod>>,
+    pub(crate) remove: Option<Rc<RuntimeMethod>>,
 }
 
 impl IXamlMember for RuntimeEvent {
@@ -1289,6 +1290,9 @@ impl IXamlMember for RuntimeEvent {
 impl IXamlEventInfo for RuntimeEvent {
     fn add(&self) -> Option<Rc<dyn IXamlMethod>> {
         self.add.clone().map(|m| m as Rc<dyn IXamlMethod>)
+    }
+    fn remove(&self) -> Option<Rc<dyn IXamlMethod>> {
+        self.remove.clone().map(|m| m as Rc<dyn IXamlMethod>)
     }
     fn equals(&self, other: &dyn IXamlEventInfo) -> bool {
         match other.as_any().downcast_ref::<RuntimeEvent>() {

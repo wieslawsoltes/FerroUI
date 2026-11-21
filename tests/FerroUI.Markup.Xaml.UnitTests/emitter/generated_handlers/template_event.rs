@@ -73,7 +73,7 @@ fn populate_handlers_templateevent_xaml_deferred_0(
     // Handlers/TemplateEvent.xaml(1,215) Name
     rt::name_element(name_scope.as_ref(), &border_0, &border_0, "part", 1, 215)?;
     // Handlers/TemplateEvent.xaml(1,208) Tapped
-    rt::add_handler_with_context(&context, &border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::declared_method_handler(&context, rt::class_markup(<crate::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE), "OnTapped", 0, (1, 227))?);
     rt::end_init(&border_0, 1, 208)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }

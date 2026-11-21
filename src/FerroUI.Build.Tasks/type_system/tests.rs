@@ -755,3 +755,35 @@ fn aliases_registered_handles_and_casts_decide_the_type_of_a_text() {
     assert_eq!(stack.base_type().map(|base| base.full_name()), Some("System.Object".to_string()));
     assert!(!list.is_assignable_from(&*stack));
 }
+
+#[test]
+fn static_and_instance_event_adders_keep_their_model_invocation_forms() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests/fixtures/static_events/lib.rs");
+    let model = scan_crate(&ScanOptions::new("static_events_fixture", root)).model;
+    let system = ModelTypeSystem::new(vec![model]);
+    let events = the(&system, "Fixture.StaticEvents.Events").events();
+    for (event, expected) in events.iter().zip([true, true, false]) {
+        let add = event.add().unwrap();
+        assert_eq!(add.is_static(), expected);
+        assert_eq!(add.parameters().len(), 1);
+        assert_eq!(add.return_type().full_name(), "System.Void");
+    }
+}
+
+#[test]
+fn paired_event_model_projects_both_public_accessors_without_duplicate_methods() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests/fixtures/paired_events/lib.rs");
+    let model=scan_crate(&ScanOptions::new("paired_events_fixture",root)).model;
+    let system=ModelTypeSystem::new(vec![model]);
+    for (name,static_) in [("Events",true),("Instance",false)] {
+        let type_=the(&system,&format!("Fixture.PairedEvents.{name}"));
+        let event=type_.events().into_iter().next().unwrap();
+        for (prefix,accessor) in [("add",event.add().unwrap()),("remove",event.remove().unwrap())] {
+            assert_eq!(accessor.name(),format!("{prefix}_Changed"));
+            assert_eq!(accessor.is_static(),static_);
+            assert_eq!(accessor.parameters().len(),1);
+            assert_eq!(accessor.return_type().full_name(),"System.Void");
+            assert_eq!(type_.methods().iter().filter(|m|m.name()==accessor.name()).count(),1);
+        }
+    }
+}

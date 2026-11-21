@@ -2,4 +2,4 @@
 
 mod observable_collection;
 
-pub use observable_collection::{CollectionChangedHandler, ObservableCollection};
+pub use observable_collection::{CollectionItemView, CollectionChangedHandler, ObservableCollection, ObservableCollectionIter};

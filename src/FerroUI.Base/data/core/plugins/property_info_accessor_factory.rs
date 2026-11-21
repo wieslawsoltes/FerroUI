@@ -19,8 +19,10 @@ impl PropertyInfoAccessorFactory {
         Rc::new(|reference, property| InpcPropertyAccessor::for_notifying::<O>(reference.clone(), property))
     }
 
-    /// An accessor for a property of an owner that does not notify: the
-    /// value is read once per source.
+    /// An accessor for a property whose declared owner does not notify. Plain
+    /// model values are read once per source; a runtime native object with a
+    /// registered property of the same name supplies native notifications.
+    /// Declared getters/setters are still used in both cases.
     pub fn create_plain_property_accessor() -> PropertyAccessorFactory {
         Rc::new(|reference, property| InpcPropertyAccessor::new(reference.clone(), property, None))
     }

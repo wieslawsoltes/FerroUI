@@ -129,6 +129,7 @@ impl Hasher for IdHasher {
 
 type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 
+type ErasedBoxFn = fn(Rc<dyn std::any::Any>) -> Result<BoxedValue, Rc<dyn std::any::Any>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
 
 /// A registered conversion between two value types: data, not a closure (rule 2 of the
@@ -298,9 +299,11 @@ type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
+type ReferenceViewFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
 
 #[derive(Default)]
 struct Registry {
+    erased_boxes: IdMap<TypeId, ErasedBoxFn>,
     display: IdMap<TypeId, DisplayFn>,
     /// `Option<T>` → its operation: unwraps to the contained `T`, makes a
     /// boxed `None`, wraps a `T`.
@@ -315,6 +318,8 @@ struct Registry {
     /// Typed interface/class views of an enclosing reference object's identity.
     reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
     conversions: IdMap<(TypeId, TypeId), ErasedConversion>,
+    /// Declared model views (for example `Rc<dyn Trait>`) -> the same object allocation.
+    reference_views: IdMap<TypeId, ReferenceViewFn>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
     casts: IdMap<(TypeId, TypeId), ErasedConversion>,
@@ -699,6 +704,39 @@ impl<T: ?Sized> __NoValueTypeRegistration for __ValueTypeProbe<T> {}
 pub struct ValueTypes;
 
 impl ValueTypes {
+    /// Registers how to recover an untyped property value from an `Rc<dyn Any>`
+    /// whose allocation actually contains `T`. This changes only the trait-object
+    /// view of the SAME allocation; it neither clones `T` nor creates a proxy.
+    ///
+    /// Registrations are thread-local, like the other value-type registrations.
+    /// Nullable, object and reference-type registration install the relevant
+    /// boxers automatically. Other Rust payloads may opt in explicitly.
+    pub fn register_erased_value<T: AnyValue>() {
+        fn box_value<T: AnyValue>(
+            value: Rc<dyn std::any::Any>,
+        ) -> Result<BoxedValue, Rc<dyn std::any::Any>> {
+            value.downcast::<T>().map(|v| v as BoxedValue)
+        }
+        with_registry(|r| {
+            r.erased_boxes.insert(TypeId::of::<T>(), box_value::<T>);
+        });
+    }
+
+    /// Recovers a registered property's native value without changing its
+    /// allocation, reference identity, mutable state or equality implementation.
+    ///
+    /// Unknown types return the original erased reference in `Err`. No value is
+    /// copied, guessed, wrapped, or silently replaced. Register its concrete
+    /// `AnyValue` type with [`Self::register_erased_value`] before retrying.
+    pub fn box_erased(value: Rc<dyn std::any::Any>) -> Result<BoxedValue, Rc<dyn std::any::Any>> {
+        let id = value.as_ref().type_id();
+        let boxer = with_registry(|r| r.erased_boxes.get(&id).copied());
+        match boxer {
+            Some(boxer) => boxer(value),
+            None => Err(value),
+        }
+    }
+
     /// Runs `register` (a function that makes registrations with this table)
     /// now if the table is in use on the thread, and otherwise when it is
     /// first used. This is how classes register their handle types: a
@@ -777,6 +815,8 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
+        Self::register_erased_value::<T>();
+        Self::register_erased_value::<Option<T>>();
         insert_nullable(TypeId::of::<Option<T>>(), ValueType::of::<T>(), nullable_operation::<T>);
     }
 
@@ -1035,10 +1075,16 @@ impl ValueTypes {
 
     /// Normalises a value read from a property for use in a binding chain:
     /// a nullable (`Option<T>`) value becomes null or the contained value.
+    /// An untyped handle boxed by typed generated code retains its payload
+    /// allocation, rather than becoming a new object representing the handle.
     pub fn normalize(value: BoxedValue) -> Option<BoxedValue> {
         let mut value = value;
         loop {
             let id = value_type_id(&*value);
+            if id == TypeId::of::<BoxedValue>() {
+                value = value.downcast_ref::<BoxedValue>()?.clone();
+                continue;
+            }
             if id == TypeId::of::<Option<BoxedValue>>() {
                 match value.downcast_ref::<Option<BoxedValue>>() {
                     Some(Some(inner)) => {
@@ -1134,15 +1180,86 @@ impl ValueTypes {
         }
     }
 
-    /// The object form of a value held as the handle `Rc<T>` of a registered
-    /// reference type `T` (the box that is the shared object itself); `None`
-    /// for every other value.
+    /// The shared object behind a concrete reference handle or a declared
+    /// reference view, including a non-null nullable handle. The raw object
+    /// itself and ordinary values return `None`.
     pub fn reference_object(value: &BoxedValue) -> Option<BoxedValue> {
         let handle = value_type_id(&**value);
-        let cast = with_registry(|r| {
-            r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
-        })?;
-        cast.apply(value)
+        let (cast, view, nullable) = with_registry(|r| {
+            (
+                r.reference_handles
+                    .get(&handle)
+                    .and_then(|object| r.casts.get(&(handle, *object)).cloned()),
+                r.reference_views.get(&handle).cloned(),
+                r.nullable_inner.contains_key(&handle),
+            )
+        });
+        if let Some(cast) = cast {
+            return cast.apply(value);
+        }
+        if let Some(view) = view {
+            return view(value);
+        }
+        if nullable {
+            let inner = Self::normalize(value.clone())?;
+            return if Self::is_reference(value_type_id(&*inner)) {
+                Some(inner)
+            } else {
+                Self::reference_object(&inner)
+            };
+        }
+        None
+    }
+
+    /// Declares a handle which views a plain reference model through a
+    /// contract. `object` must return the SAME allocation, erased to `Any`;
+    /// the actual concrete type must be registered with `register_reference`.
+    /// No payload clone, wrapper object, inferred cast or owning cache is made.
+    ///
+    /// This complements `register_reference::<T>()`, which describes a concrete
+    /// model. Registering `Rc<dyn Trait>` as `T` would describe a different,
+    /// nested allocation and is not a substitute for a reference view.
+    ///
+    /// # Panics
+    /// A declared view returning an unregistered concrete model is an invalid
+    /// registration. It fails explicitly rather than turning a binding source
+    /// into a strongly held plain value.
+    pub fn register_reference_view<I: PropertyValue>(object: fn(&I) -> Rc<dyn std::any::Any>) {
+        Self::register_nullable::<I>();
+        let view = Rc::new(move |value: &BoxedValue| {
+            let model = object(
+                value
+                    .downcast_ref::<I>()
+                    .expect("registered reference view type"),
+            );
+            assert!(
+                Self::is_reference(model.as_ref().type_id()),
+                "Reference view requires register_reference for its concrete model"
+            );
+            Some(Self::box_erased(model)
+                .unwrap_or_else(|_| unreachable!("registered reference model has an erased boxer")))
+        });
+        with_registry(|r| {
+            r.reference_views.insert(TypeId::of::<I>(), view);
+        });
+    }
+
+    /// Registers a reference view whose implementation may decline normalization.
+    /// `None` leaves the original value available to the caller; `Some` must name
+    /// the same allocation of a registered concrete reference model. This keeps
+    /// unregistered custom implementations usable through their existing view,
+    /// without inferring a concrete class or creating an owning payload cache.
+    /// A `Some` unregistered model is a registration error, as in the strict API.
+    pub fn register_reference_view_if<I: PropertyValue>(object: fn(&I) -> Option<Rc<dyn std::any::Any>>) {
+        Self::register_nullable::<I>();
+        let view = Rc::new(move |value: &BoxedValue| {
+            let model = object(value.downcast_ref::<I>().expect("registered reference view type"))?;
+            assert!(Self::is_reference(model.as_ref().type_id()),
+                "Reference view requires register_reference for its concrete model");
+            Some(Self::box_erased(model)
+                .unwrap_or_else(|_| unreachable!("registered reference model has an erased boxer")))
+        });
+        with_registry(|r| { r.reference_views.insert(TypeId::of::<I>(), view); });
     }
 
     /// Registers the enclosing object identity of a typed view. `identity`
@@ -1250,6 +1367,9 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
+        Self::register_erased_value::<T>();
+        Self::register_erased_value::<Rc<T>>();
+        Self::register_erased_value::<Option<Rc<T>>>();
         // The nullable handle of a model unwraps to the model object itself,
         // cloning its Rc, never the object (the type need not be Clone).
         fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
@@ -1376,6 +1496,13 @@ impl ValueTypes {
             // lifting an interface handle to its nullable target. Do not run a
             // registered failing converter twice while looking for that path.
             return Some(Some(v));
+        }
+        // An assignability cast can span reference object/handle forms and a
+        // nullable target without having one direct conversion table entry.
+        // Registered conversions keep their precedence; recover the same value
+        // through the existing cast rules before trying value conversions.
+        if let Some(value) = Self::try_cast(value, target) {
+            return Some(Some(value));
         }
         // A nullable source: convert its contents.
         if with_registry(|r| r.nullable.contains_key(&id)) {
@@ -1632,12 +1759,8 @@ impl ValueTypes {
             // nullable, and the object itself for a model handle.
             let mut untyped = Self::normalize(value.clone());
             if let Some(v) = &untyped {
-                let handle = value_type_id(&**v);
-                let cast = with_registry(|r| {
-                    r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
-                });
-                if let Some(cast) = cast {
-                    untyped = cast.apply(v);
+                if let Some(object) = Self::reference_object(v) {
+                    untyped = Some(object);
                 }
             }
             return if target.is::<Option<BoxedValue>>() {
@@ -1842,6 +1965,14 @@ fn number_as_f64(value: &dyn AnyValue) -> Option<f64> {
     numbers!(f64, f32, i8, i16, i32, i64, u8, u16, u32, u64, isize, usize);
     value.downcast_ref::<crate::utilities::Decimal>().map(|v| v.to_f64())
 }
+
+#[cfg(test)]
+#[path = "model_reference_view_tests.rs"]
+mod model_reference_view_tests;
+
+#[cfg(test)]
+#[path = "reference_conversion_tests.rs"]
+mod reference_conversion_tests;
 
 /// The implicit numeric conversions of the managed original
 /// (`TypeUtilities.ImplicitConversions`), for the numeric types of the port:
@@ -3361,3 +3492,85 @@ mod tests {
         assert_eq!(shown, "pt-BR");
     }
 }
+
+#[cfg(test)]
+mod erased_reference_tests {
+    use super::*;
+    use std::cell::Cell;
+    struct Payload(Cell<i32>);
+    impl PartialEq for Payload {
+        fn eq(&self, other: &Self) -> bool {
+            std::ptr::eq(self, other)
+        }
+    }
+    #[test]
+    fn erased_registered_reference_keeps_allocation_type_mutation_casts_and_lifetime() {
+        ValueTypes::register_reference::<Payload>();
+        let value = Rc::new(Payload(Cell::new(3)));
+        let weak = Rc::downgrade(&value);
+        let erased: Rc<dyn std::any::Any> = value.clone();
+        let boxed = ValueTypes::box_erased(erased.clone()).unwrap();
+        let same: Rc<dyn std::any::Any> = boxed.clone();
+        assert!(Rc::ptr_eq(&same, &erased));
+        boxed.downcast_ref::<Payload>().unwrap().0.set(9);
+        assert_eq!(value.0.get(), 9);
+        let converted = ValueTypes::try_cast(&boxed, ValueType::of::<Rc<Payload>>()).unwrap();
+        assert!(Rc::ptr_eq(
+            converted.downcast_ref::<Rc<Payload>>().unwrap(),
+            &value
+        ));
+        drop(value);
+        drop(erased);
+        drop(same);
+        drop(converted);
+        assert!(weak.upgrade().is_some());
+        drop(boxed);
+        assert!(weak.upgrade().is_none());
+    }
+    #[test]
+    fn built_in_and_nullable_values_recover_without_copying_or_normalizing() {
+        let value: Rc<dyn std::any::Any> = Rc::new(String::from("same"));
+        let boxed = ValueTypes::box_erased(value.clone()).unwrap();
+        let same: Rc<dyn std::any::Any> = boxed.clone();
+        assert!(Rc::ptr_eq(&same, &value));
+        assert_eq!(boxed.downcast_ref::<String>().unwrap(), "same");
+        let none: Rc<dyn std::any::Any> = Rc::new(Option::<String>::None);
+        let boxed = ValueTypes::box_erased(none.clone()).unwrap();
+        let same: Rc<dyn std::any::Any> = boxed.clone();
+        assert!(Rc::ptr_eq(&same, &none));
+        assert!(boxed.downcast_ref::<Option<String>>().unwrap().is_none());
+    }
+    #[test]
+    fn unknown_returns_original_reference_then_explicit_registration_can_retry() {
+        struct Unknown;
+        impl PartialEq for Unknown {
+            fn eq(&self, other: &Self) -> bool {
+                std::ptr::eq(self, other)
+            }
+        }
+        let value: Rc<dyn std::any::Any> = Rc::new(Unknown);
+        let returned = ValueTypes::box_erased(value.clone()).err().unwrap();
+        assert!(Rc::ptr_eq(&value, &returned));
+        ValueTypes::register_erased_value::<Unknown>();
+        let boxed = ValueTypes::box_erased(returned).unwrap();
+        let same: Rc<dyn std::any::Any> = boxed;
+        assert!(Rc::ptr_eq(&same, &value));
+    }
+    #[test]
+    fn object_registration_recovers_same_native_object_without_notifications() {
+        let object = FerroObject::new();
+        let changes = Rc::new(Cell::new(0));
+        let changed = changes.clone();
+        object.add_property_changed_handler(Rc::new(move |_| changed.set(changed.get() + 1)));
+        let erased: Rc<dyn std::any::Any> = Rc::new(object.clone());
+        let boxed = ValueTypes::box_erased(erased.clone()).unwrap();
+        assert_eq!(ValueTypes::as_object(&*boxed), Some(object));
+        let same: Rc<dyn std::any::Any> = boxed;
+        assert!(Rc::ptr_eq(&same, &erased));
+        assert_eq!(changes.get(), 0);
+    }
+}
+
+#[cfg(test)]
+#[path = "conditional_reference_view_tests.rs"]
+mod conditional_reference_view_tests;

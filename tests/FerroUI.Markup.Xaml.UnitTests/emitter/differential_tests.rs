@@ -1524,3 +1524,29 @@ fn compiled_xaml_registry() -> std::sync::MutexGuard<'static, ()> {
     static REGISTRY: std::sync::Mutex<()> = std::sync::Mutex::new(());
     REGISTRY.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
+
+/// An extension result added through a declared typed Add retains the resource,
+/// rather than constructing a duplicate child. Each load still owns its own tree.
+#[test]
+fn shared_resource_collection_arguments_retain_identity_in_both_back_ends() {
+    use ferroui_controls::{Border, StackPanel};
+    let _base = xaml_test_base();
+    let name = "static_resource_collection.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).unwrap();
+    let mut previous = None;
+    for root in [
+        build_generated(name).unwrap().unwrap(), try_load(xaml).unwrap(),
+        build_generated(name).unwrap().unwrap(), try_load(xaml).unwrap(),
+    ] {
+        let panel = ValueTypes::as_object(&*root).unwrap().cast::<StackPanel>().unwrap();
+        let resource = panel.resources().try_get_resource(&"Shared".into(), None).flatten().unwrap();
+        let border = ValueTypes::as_object(&*resource).unwrap().cast::<Border>().unwrap();
+        assert_eq!(panel.children().count(), 1);
+        assert!(panel.children().get(0).ptr_eq(&border));
+        border.set_width(31.0);
+        assert_eq!(panel.children().get(0).width(), 31.0);
+        if let Some(previous) = previous.replace(border) {
+            assert!(!panel.children().get(0).ptr_eq(&previous));
+        }
+    }
+}

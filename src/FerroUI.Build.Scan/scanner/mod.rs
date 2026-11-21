@@ -924,6 +924,11 @@ impl Builder {
             callable: self.callable(&raw.callable, site, self_type),
             typed_function,
             call: None,
+            event_handler_nullable: raw.event_handler_nullable,
+            event_remove: raw.event_remove.as_ref().map(|remove| AccessorModel {
+                fallible: remove.fallible, callable: self.callable(&remove.callable, site, self_type),
+                typed_function: None, call: None,
+            }),
         }
     }
 

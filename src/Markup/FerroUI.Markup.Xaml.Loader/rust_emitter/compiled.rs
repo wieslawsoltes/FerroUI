@@ -1036,6 +1036,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         crate_name: own_crate.to_string(),
         documents: exported,
         theme_units,
+        loadable_documents: constructor.iter().map(|_| 0).chain(loadable.iter().copied())
+            .filter_map(|index| documents[index].2.clone()).collect(),
     })
 }
 
@@ -1071,6 +1073,7 @@ pub struct ClassFile {
     documents: Vec<DocumentModel>,
     /// The unit graph of the theme of the class (#568), when its markup is partitioned into units.
     theme_units: Option<ThemeUnitsModel>,
+    loadable_documents: Vec<String>,
 }
 
 impl ClassFile {
@@ -1079,6 +1082,11 @@ impl ClassFile {
         self.theme_units.as_ref()
     }
 
+    /// Exact public URI entries of this class file's loader, including the class
+    /// only when it has a callable constructor. Reading this list never constructs it.
+    pub fn loadable_documents(&self) -> &[String] {
+        &self.loadable_documents
+    }
     /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
     /// for crates that include them. `dependencies` are the `.xamlmeta` files of the
     /// crates the documents include documents of, relative to the file the metadata is

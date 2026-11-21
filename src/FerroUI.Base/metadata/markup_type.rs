@@ -81,6 +81,7 @@ struct MarkupDelegateMethod {
     target: DelegateTarget,
     declaring_type: &'static MarkupType,
     method: &'static MarkupMethod,
+    identity: DelegateIdentity,
 }
 
 /// The instance the delegate of a declared method is bound to.
@@ -103,6 +104,124 @@ impl DelegateTarget {
     }
 }
 
+// A delegate compares its target by reference, even when the target overrides
+// equality. Keep only a weak identity key; this adds no new ownership edge.
+#[derive(Clone)]
+enum DelegateIdentity {
+    Null,
+    Object(crate::WeakRef<crate::FerroObject>),
+    Box(Weak<dyn crate::AnyValue>),
+}
+impl DelegateIdentity {
+    fn of(target: &DelegateTarget) -> Self {
+        match target {
+            DelegateTarget::Strong(value) => Self::value(value.clone()),
+            DelegateTarget::Weak(WeakValue::Object(object, _)) => Self::Object(object.clone()),
+            DelegateTarget::Weak(WeakValue::Reference(value)) => Self::Box(value.clone()),
+            DelegateTarget::Weak(WeakValue::Value(value)) => Self::value(Some(value.clone())),
+        }
+    }
+    fn value(value: MarkupValue) -> Self {
+        match value.and_then(ValueTypes::normalize) {
+            None => Self::Null,
+            Some(value) => match ValueTypes::as_object(&*value) {
+                Some(object) => Self::Object(object.downgrade()),
+                None => Self::Box(Rc::downgrade(&value)),
+            },
+        }
+    }
+}
+impl PartialEq for DelegateIdentity {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Null, Self::Null) => true,
+            (Self::Object(a), Self::Object(b)) => a.ptr_eq(b),
+            (Self::Box(a), Self::Box(b)) => std::ptr::addr_eq(a.as_ptr(), b.as_ptr()),
+            _ => false,
+        }
+    }
+}
+
+/// An explicit nominal delegate type and its invocation signature.
+///
+/// Declare one `static` descriptor per delegate type. Identity is the descriptor
+/// address, not its name or signature: two custom delegate types can have the
+/// same method shape. This supplies identity to erased callback values without
+/// runtime reflection. It is not a complete CLR Type/CreateDelegate model.
+pub struct MarkupDelegateType {
+    pub name: &'static str,
+    pub parameters: &'static [TypeOf],
+    pub return_type: Option<TypeOf>,
+}
+impl MarkupDelegateType {
+    pub const fn new(
+        name: &'static str,
+        parameters: &'static [TypeOf],
+        return_type: Option<TypeOf>,
+    ) -> Self {
+        Self {
+            name,
+            parameters,
+            return_type,
+        }
+    }
+    fn accepts_method(&self, method: &MarkupMethod) -> bool {
+        self.parameters.len() == method.parameters.len()
+            && self
+                .parameters
+                .iter()
+                .zip(method.parameters)
+                .all(|(a, b)| a() == b())
+            && Self::value_return_type(self.return_type) == Self::value_return_type(method.return_type)
+    }
+    // Explicit Rust `-> ()` and an omitted return both mean System.Void.
+    fn value_return_type(type_: Option<TypeOf>) -> Option<ValueType> {
+        type_.map(|t| t()).filter(|t| !t.is::<()>())
+    }
+    fn check_arguments(&self, arguments: &[MarkupValue]) -> Result<(), MarkupInvokeError> {
+        if arguments.len() != self.parameters.len() {
+            return Err(MarkupInvokeError::ArgumentCount {
+                expected: self.parameters.len(),
+                actual: arguments.len(),
+            });
+        }
+        for (index, (value, expected)) in arguments.iter().zip(self.parameters).enumerate() {
+            let expected = expected();
+            if !Self::accepts_value(value, expected) {
+                return Err(MarkupArguments::argument_error(
+                    index,
+                    expected.name(),
+                    value,
+                ));
+            }
+        }
+        Ok(())
+    }
+    fn accepts_value(value: &MarkupValue, expected: ValueType) -> bool {
+        match value.clone().and_then(ValueTypes::normalize) {
+            Some(value) => ValueTypes::try_cast(&value, expected).is_some(),
+            None => ValueTypes::accepts_null(expected),
+        }
+    }
+    fn check_result(&self, result: &MarkupValue) -> Result<(), MarkupInvokeError> {
+        let valid = match Self::value_return_type(self.return_type) {
+            Some(expected) => Self::accepts_value(result, expected),
+            None => result.is_none(),
+        };
+        if valid {
+            Ok(())
+        } else {
+            Err(MarkupInvokeError::Failed(format!(
+                "Delegate {} returned a value outside its declared signature",
+                self.name
+            )))
+        }
+    }
+}
+/// The nominal parameterless System.Action. Custom void delegates are distinct.
+pub static SYSTEM_ACTION_DELEGATE: MarkupDelegateType =
+    MarkupDelegateType::new("System.Action", &[], None);
+
 /// An untyped callback (the equivalent of a delegate instance): what an
 /// event subscription declared in metadata receives as its handler, and what
 /// a binding to a method produces.
@@ -110,11 +229,99 @@ impl DelegateTarget {
 pub struct MarkupDelegate {
     call: Rc<dyn Fn(&[MarkupValue]) -> MarkupValue>,
     method: Option<Rc<MarkupDelegateMethod>>,
+    invocation_list: Option<Rc<[MarkupDelegate]>>,
+    nominal_type: Option<&'static MarkupDelegateType>,
 }
 
 impl MarkupDelegate {
     pub fn new(f: impl Fn(&[MarkupValue]) -> MarkupValue + 'static) -> Self {
-        Self { call: Rc::new(f), method: None }
+        Self {
+            call: Rc::new(f),
+            method: None,
+            invocation_list: None,
+            nominal_type: None,
+        }
+    }
+
+    /// An explicitly typed erased callback. Arguments and result are checked by
+    /// `try_invoke`; the caller supplies the correct nominal descriptor.
+    pub fn new_typed(
+        type_: &'static MarkupDelegateType,
+        f: impl Fn(&[MarkupValue]) -> MarkupValue + 'static,
+    ) -> Self {
+        Self {
+            call: Rc::new(f),
+            method: None,
+            invocation_list: None,
+            nominal_type: Some(type_),
+        }
+    }
+
+    /// A parameterless System.Action, with its unit result enforced by Rust.
+    pub fn action(f: impl Fn() + 'static) -> Self {
+        Self::new_typed(&SYSTEM_ACTION_DELEGATE, move |_| {
+            f();
+            None
+        })
+    }
+
+    /// The declared nominal type; `None` for legacy untyped callbacks. Never
+    /// infer it from the method's argument and return shape.
+    pub fn delegate_type(&self) -> Option<&'static MarkupDelegateType> {
+        self.nominal_type
+    }
+
+    pub fn is_of_type(&self, type_: &'static MarkupDelegateType) -> bool {
+        self.nominal_type
+            .is_some_and(|own| std::ptr::eq(own, type_))
+    }
+
+    /// Binds an exact-signature method with a strong target, as a new instance
+    /// of the specified nominal delegate type. Signature variance, open-instance
+    /// delegates and a complete CLR Type/CreateDelegate API are not supplied.
+    pub fn for_typed_method(
+        type_: &'static MarkupDelegateType,
+        target: MarkupValue,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+    ) -> Result<Self, MarkupInvokeError> {
+        if !type_.accepts_method(method) {
+            return Err(MarkupInvokeError::Failed(format!(
+                "Method {} does not match delegate {}",
+                method.name, type_.name
+            )));
+        }
+        if !method.is_static {
+            let Some(value) = target.as_ref() else {
+                return Err(MarkupInvokeError::Failed(
+                    "An instance delegate requires a target".into(),
+                ));
+            };
+            if !declaring_type
+                .handles
+                .iter()
+                .any(|handle| ValueTypes::try_cast(value, handle()).is_some())
+            {
+                return Err(MarkupInvokeError::Failed(
+                    "Delegate target is not assignable to the declaring type".into(),
+                ));
+            }
+        }
+        let target = DelegateTarget::Strong(if method.is_static { None } else { target });
+        Ok(Self::bound_with_type(
+            target,
+            declaring_type,
+            method,
+            Some(type_),
+        ))
+    }
+
+    pub fn for_action_method(
+        target: MarkupValue,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+    ) -> Result<Self, MarkupInvokeError> {
+        Self::for_typed_method(&SYSTEM_ACTION_DELEGATE, target, declaring_type, method)
     }
 
     /// The delegate of a method declared in metadata, bound to `target`
@@ -126,7 +333,11 @@ impl MarkupDelegate {
     /// [`invoke`](Self::invoke) calls the method with the arguments given
     /// (after the instance) and raises a failure on the dispatcher;
     /// [`try_invoke`](Self::try_invoke) returns it.
-    pub fn for_method(target: MarkupValue, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
+    pub fn for_method(
+        target: MarkupValue,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+    ) -> Self {
         let target = DelegateTarget::Strong(if method.is_static { None } else { target });
         Self::bound(target, declaring_type, method)
     }
@@ -157,7 +368,20 @@ impl MarkupDelegate {
         Self::bound(target, declaring_type, method)
     }
 
-    fn bound(target: DelegateTarget, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
+    fn bound(
+        target: DelegateTarget,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+    ) -> Self {
+        Self::bound_with_type(target, declaring_type, method, None)
+    }
+
+    fn bound_with_type(
+        target: DelegateTarget,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+        nominal_type: Option<&'static MarkupDelegateType>,
+    ) -> Self {
         let bound = target.clone();
         Self {
             call: Rc::new(move |arguments| match bound.get() {
@@ -172,7 +396,107 @@ impl MarkupDelegate {
                 },
                 Err(()) => None,
             }),
-            method: Some(Rc::new(MarkupDelegateMethod { target, declaring_type, method })),
+            method: Some(Rc::new(MarkupDelegateMethod {
+                identity: DelegateIdentity::of(&target),
+                target,
+                declaring_type,
+                method,
+            })),
+            invocation_list: None,
+            nominal_type,
+        }
+    }
+
+    /// Whether both handles share the same delegate allocation, independently of
+    /// target/method equality (the managed ReferenceEquals distinction).
+    pub fn ptr_eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.call, &other.call)
+    }
+
+    /// Concatenates invocation lists of handlers of the same event. Null is the
+    /// identity. Explicitly typed callbacks must have the same nominal type.
+    /// Mixing typed and untyped values is rejected. Two legacy untyped values
+    /// retain their previous behavior; their nominal CLR identity is unknown.
+    pub fn combine(a: Option<&Self>, b: Option<&Self>) -> Option<Self> {
+        match (a, b) {
+            (None, b) => b.cloned(),
+            (a, None) => a.cloned(),
+            (Some(a), Some(b)) => {
+                Self::assert_compatible(a, b);
+                let mut list = a.invocation_list();
+                list.extend(b.invocation_list());
+                Self::from_invocations(list)
+            }
+        }
+    }
+
+    /// Removes the last contiguous equal invocation list, including one spanning
+    /// separate additions. A missing/null value leaves the original allocation.
+    pub fn remove(source: Option<&Self>, value: Option<&Self>) -> Option<Self> {
+        let source = source?;
+        let Some(value) = value else {
+            return Some(source.clone());
+        };
+        Self::assert_compatible(source, value);
+        let mut list = source.invocation_list();
+        let remove = value.invocation_list();
+        let Some(start) = list
+            .windows(remove.len())
+            .rposition(|window| window == remove)
+        else {
+            return Some(source.clone());
+        };
+        list.drain(start..start + remove.len());
+        Self::from_invocations(list)
+    }
+
+    fn same_nominal_type(&self, other: &Self) -> bool {
+        match (self.nominal_type, other.nominal_type) {
+            (None, None) => true,
+            (Some(a), Some(b)) => std::ptr::eq(a, b),
+            _ => false,
+        }
+    }
+
+    fn assert_compatible(a: &Self, b: &Self) {
+        assert!(
+            a.same_nominal_type(b),
+            "ArgumentException: delegates must have the same nominal type"
+        );
+    }
+
+    /// Ordered single-cast handlers, preserving the targets/callbacks themselves.
+    pub fn invocation_list(&self) -> Vec<Self> {
+        self.invocation_list
+            .as_ref()
+            .map_or_else(|| vec![self.clone()], |list| list.to_vec())
+    }
+
+    fn from_invocations(mut list: Vec<Self>) -> Option<Self> {
+        match list.len() {
+            0 => None,
+            1 => list.pop(),
+            _ => {
+                let method = list.last().unwrap().method.clone();
+                let nominal_type = list.last().unwrap().nominal_type;
+                let list: Rc<[Self]> = list.into();
+                let calls = list.clone();
+                Some(Self {
+                    call: Rc::new(move |args| {
+                        match calls.iter().try_fold(None, |_, item| item.try_invoke(args)) {
+                            Ok(value) => value,
+                            Err(error) => {
+                                crate::threading::Dispatcher::current_dispatcher()
+                                    .raise_unhandled_exception(error);
+                                None
+                            }
+                        }
+                    }),
+                    method,
+                    invocation_list: Some(list),
+                    nominal_type,
+                })
+            }
         }
     }
 
@@ -183,34 +507,60 @@ impl MarkupDelegate {
     /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
     /// and the result is `None`; [`try_invoke`](Self::try_invoke) returns it.
     pub fn invoke(&self, arguments: &[MarkupValue]) -> MarkupValue {
-        (self.call)(arguments)
+        if self.nominal_type.is_some() {
+            self.try_invoke(arguments)
+                .unwrap_or_else(|error| panic!("{error}"))
+        } else {
+            (self.call)(arguments)
+        }
     }
 
     /// Calls the callback. For the delegate of a declared method
     /// ([`for_method`](Self::for_method)) a failure of the call (wrong
     /// arguments, a failing member) is returned.
     pub fn try_invoke(&self, arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
-        match &self.method {
+        if let Some(type_) = self.nominal_type {
+            type_.check_arguments(arguments)?;
+        }
+        if let Some(list) = &self.invocation_list {
+            return list
+                .iter()
+                .try_fold(None, |_, item| item.try_invoke(arguments));
+        }
+        let result = match &self.method {
             Some(bound) => match bound.target.get() {
                 Ok(target) => invoke_method(bound.method, &target, arguments),
                 Err(()) => Ok(None),
             },
             None => Ok((self.call)(arguments)),
+        }?;
+        if let Some(type_) = self.nominal_type {
+            type_.check_result(&result)?;
         }
+        Ok(result)
     }
 
     /// The instance the delegate of a declared instance method is bound to
     /// (the `Target` of the managed original). `None` for a static method
     /// and for a delegate that was not created from a declared method.
     pub fn target(&self) -> MarkupValue {
-        self.method.as_ref().and_then(|bound| bound.target.get().ok().flatten())
+        self.method
+            .as_ref()
+            .and_then(|bound| bound.target.get().ok().flatten())
     }
 
     /// Whether the delegate can still call what it was created for: false
     /// once the target of the delegate of a binding source
     /// ([`for_method_of_source`](Self::for_method_of_source)) is gone.
     pub fn is_target_alive(&self) -> bool {
-        self.method.as_ref().is_none_or(|bound| bound.target.get().is_ok())
+        self.invocation_list.as_ref().map_or_else(
+            || {
+                self.method
+                    .as_ref()
+                    .is_none_or(|bound| bound.target.get().is_ok())
+            },
+            |list| list.iter().all(Self::is_target_alive),
+        )
     }
 
     /// The declared method the delegate was created from (the `Method` of
@@ -242,7 +592,22 @@ fn invoke_method(
 
 impl PartialEq for MarkupDelegate {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.call, &other.call)
+        if !self.same_nominal_type(other) {
+            return false;
+        }
+        match (&self.invocation_list, &other.invocation_list) {
+            (Some(a), Some(b)) => a == b,
+            (Some(_), None) | (None, Some(_)) => false,
+            (None, None) => match (&self.method, &other.method) {
+                (Some(a), Some(b)) => {
+                    std::ptr::eq(a.declaring_type, b.declaring_type)
+                        && std::ptr::eq(a.method, b.method)
+                        && a.identity == b.identity
+                }
+                (None, None) => Rc::ptr_eq(&self.call, &other.call),
+                _ => false,
+            },
+        }
     }
 }
 
@@ -258,11 +623,17 @@ impl fmt::Debug for MarkupDelegate {
 /// declared method; `System.Delegate` otherwise.
 impl fmt::Display for MarkupDelegate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(type_) = self.nominal_type {
+            return f.write_str(type_.name);
+        }
         let Some(method) = self.method() else {
             return f.write_str("System.Delegate");
         };
-        let mut types: Vec<String> =
-            method.parameters.iter().map(|parameter| ValueTypes::type_full_name(parameter())).collect();
+        let mut types: Vec<String> = method
+            .parameters
+            .iter()
+            .map(|parameter| ValueTypes::type_full_name(parameter()))
+            .collect();
         let definition = match method.return_type {
             Some(return_type) => {
                 types.push(ValueTypes::type_full_name(return_type()));
@@ -728,16 +1099,26 @@ pub struct MarkupField {
 /// `add` (or [`subscribe`](Self::subscribe)).
 #[derive(Clone, Copy)]
 pub struct MarkupEvent {
+    /// A static event subscribes with `(handler)`, without an instance.
+    pub is_static: bool,
     pub name: &'static str,
     /// The types of the arguments the event passes to its handlers
     /// (sender first, where the event has one).
     pub arguments: &'static [TypeOf],
-    /// Subscribes a handler: `(instance, handler)`, where the handler is a
+    /// Subscribes a handler: `(instance, handler)`, or `(handler)` for a static
+    /// event, where the handler is a
     /// [`MarkupDelegate`] called with the event arguments in untyped form.
     /// Returns the subscription as an untyped `Rc<dyn IDisposable>`
     /// ([`subscription_of`](Self::subscription_of)), or null when the event
     /// offers no way to remove the handler.
     pub add: MarkupInvoke,
+    /// Optional removal with the same receiver convention as add.
+    pub remove: Option<MarkupInvoke>,
+    /// Whether this event's accessor declarations accept a null delegate.
+    pub handler_nullable: bool,
+    /// Public add_/remove_ descriptors of a paired declaration. These are separate
+    /// from explicit methods so declaration order cannot overwrite either list.
+    pub accessor_methods: &'static [MarkupMethod],
 }
 
 impl MarkupEvent {
@@ -922,8 +1303,8 @@ pub struct MarkupType {
     pub is_flags: bool,
     /// Converts a numeric value to a value of the enumeration: the cast
     /// `(TEnum)value` of the managed original. For a plain enumeration the
-    /// value must be the value of a member; for a set of flags any
-    /// combination of the bits of its members.
+    /// value normally names a member; integer-backed declarations may accept
+    /// unnamed values. A flags declaration accepts combinations of its members.
     pub enum_from_value: Option<fn(i64) -> Option<BoxedValue>>,
     /// The numeric value of a value of the enumeration: the cast
     /// `(int)value` of the managed original. `None` for a value that is not
@@ -1101,9 +1482,14 @@ impl MarkupType {
         self.property_attributes.iter().find(|(n, _)| *n == name).map_or(&[], |(_, attributes)| *attributes)
     }
 
+    /// Explicit methods and the public accessors of paired event declarations.
+    pub fn declared_methods(&self) -> impl Iterator<Item = &'static MarkupMethod> + 'static {
+        self.methods.iter().chain(self.events.iter().flat_map(|event| event.accessor_methods))
+    }
+
     /// The methods named `name` declared by this type.
     pub fn find_methods<'a>(&self, name: &'a str) -> impl Iterator<Item = &'static MarkupMethod> + 'a {
-        self.methods.iter().filter(move |m| m.name == name)
+        self.declared_methods().filter(move |m| m.name == name)
     }
 
     /// The static field `name` declared by this type.

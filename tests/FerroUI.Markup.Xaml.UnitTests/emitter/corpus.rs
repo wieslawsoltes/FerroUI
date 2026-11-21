@@ -147,6 +147,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("items_source_indexer.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Note'>\n  <TextBlock Text='{CompiledBinding Words[1]}'/>\n  <Border Tag='{CompiledBinding Words[0]}'/>\n</StackPanel>\n"),
     ("scoped_namespace_types.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><Border xmlns:p="clr-namespace:FerroUI.Media;assembly=FerroUI.Base" Tag="{x:Type p:SolidColorBrush}"/><Border Tag="{x:Type p:Button}"/></StackPanel>"#),
     ("scoped_namespace_bindings.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:p="clr-namespace:Wrong.Scope"><TextBlock xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls" Grid.Row="7" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/><TextBlock xmlns:p='clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls' Grid.Row='9' Text='{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}'/><Button><Button.Template><ControlTemplate xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><TextBlock Name="PART_Value" Grid.Row="11" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/></ControlTemplate></Button.Template></Button></StackPanel>"#),
+    ("static_resource_collection.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n <StackPanel.Resources><Border x:Key='Shared' Width='17'/></StackPanel.Resources>\n <StaticResource ResourceKey='Shared'/>\n</StackPanel>"),
+    ("static_resource_collection_invalid.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n <StackPanel.Resources><SolidColorBrush x:Key='Shared' Color='Red'/></StackPanel.Resources>\n <StaticResource ResourceKey='Shared'/>\n</StackPanel>"),
+    ("static_resource_collection_missing.xaml", "<StackPanel xmlns='https://github.com/ferroui'>\n <StaticResource ResourceKey='Missing'/>\n</StackPanel>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -282,6 +285,9 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "items_source_indexer.xaml",
     "scoped_namespace_types.xaml",
     "scoped_namespace_bindings.xaml",
+    "static_resource_collection.xaml",
+    "static_resource_collection_invalid.xaml",
+    "static_resource_collection_missing.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

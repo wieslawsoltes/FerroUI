@@ -650,3 +650,20 @@ fn emit_context_with_locals_tracks_compiler_locals() {
     assert_eq!(*ran.borrow(), 1);
     assert!(as_context.context_local().is_err());
 }
+
+#[test]
+fn static_event_setters_do_not_drop_the_handler_as_an_attached_target() {
+    let host = TestHost::new();
+    let owner = host.asm.define_class("StaticEventTests", "Owner");
+    let handler = host.ts.get("System.Object");
+    let void = host.ts.get("System.Void");
+    let add = owner.add_method("add_Changed", void.clone(), vec![handler.clone()], true);
+    let setter = XamlDirectCallPropertySetter::for_event(add).unwrap();
+    assert!(setter.target_type().equals(&*owner.as_type()));
+    assert_eq!(setter.parameters().len(), 1);
+    assert!(!setter.consumes_target());
+    let attached = owner.add_method("SetAttached", void.clone(), vec![owner.as_type(), handler.clone()], true);
+    assert!(XamlDirectCallPropertySetter::new(attached).unwrap().consumes_target());
+    let instance = owner.add_method("add_Instance", void, vec![handler], false);
+    assert!(XamlDirectCallPropertySetter::for_event(instance).unwrap().consumes_target());
+}

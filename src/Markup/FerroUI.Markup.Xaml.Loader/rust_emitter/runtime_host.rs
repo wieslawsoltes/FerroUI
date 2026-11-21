@@ -300,6 +300,54 @@ mod tests {
         assert!(!compiles_bindings_by_default(Some(&STATED_OFF)));
     }
 
+    #[test]
+    fn metadata_value_constructor_is_emitted_for_root_and_resource() {
+        ferroui_markup_xaml::register_types();
+        for xaml in [
+            "<Thickness xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:Double>2.5</x:Double></x:Arguments></Thickness>",
+            "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Thickness x:Key='value'><x:Arguments><x:Double>1</x:Double><x:Double>2</x:Double><x:Double>3</x:Double><x:Double>4</x:Double></x:Arguments></Thickness></ResourceDictionary>",
+        ] {
+            let docs = compile_documents(
+                &[("ValueConstructor.xaml", xaml)],
+                Some("ferres://ValueConstructorTests/"),
+                &RuntimeXamlLoaderConfiguration::new(),
+                &[],
+            );
+            assert!(docs[0].source.is_ok(), "{:?}", docs[0].source);
+        }
+    }
+
+    #[test]
+    fn object_valued_constructor_resource_emits_checked_typed_argument() {
+        ferroui_markup_xaml::register_types();
+        let xaml="<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:String x:Key='path'>Name</x:String><ReflectionBinding x:Key='binding'><x:Arguments><StaticResource ResourceKey='path'/></x:Arguments></ReflectionBinding></ResourceDictionary>";
+        let documents=compile_documents(&[("Constructor.xaml",xaml)],Some("ferres://ConstructorTests/"),&RuntimeXamlLoaderConfiguration::new(),&[]);
+        let source=documents[0].source.as_ref().unwrap();
+        assert!(source.contains("rt::cast_checked("),"{source}");
+        assert!(source.contains("rt::exact(cast_"),"{source}");
+    }
+
+    #[test]
+    fn class_file_availability_uses_actual_constructor_and_public_loader_entries() {
+        use ferroui_base::{StaticType, controls::{ResourceDictionary,ResourceProvider}};
+        ferroui_markup_xaml::register_types();
+        let host=EmitterHost::runtime(&[]).unwrap();
+        for (class,tag,loadable) in [
+            (<ResourceDictionary as StaticType>::TYPE,"ResourceDictionary",true),
+            (<ResourceProvider as StaticType>::TYPE,"ResourceProvider",false),
+        ] {
+            let class_type=crate::FerroXamlIlRuntimeCompiler::type_system().type_of_class(class);
+            let full_name=class_type.full_name();
+            let document=format!("<{tag} xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Class=\"{full_name}\" />");
+            let uri=format!("ferres://Availability/{tag}.xaml");
+            let documents=vec![(format!("{tag}.xaml"),document,Some(uri.clone()))];
+            let group=ClassGroup{class:class_type,documents:&documents,constructor:None,module_path:"::availability::compiled"};
+            let file=generate_class_file_with(&host,&group,&TransformOptions::of(&RuntimeXamlLoaderConfiguration::new())).unwrap();
+            assert_eq!(file.loadable_documents(),if loadable {vec![uri]}else{vec![]});
+            assert_eq!(file.warnings.is_empty(),loadable);
+        }
+    }
+
     fn reason(compiled: &[CompiledDocument], name: &str) -> Option<String> {
         compiled.iter().find(|document| document.name == name).and_then(|document| document.source.clone().err())
     }

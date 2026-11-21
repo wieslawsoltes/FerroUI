@@ -3,7 +3,7 @@
 //!
 //! Upstream the class derives from the IL compiler of XamlX and also drives IL generation.
 //! The port keeps everything that is independent of a back end: the transformer pipeline with
-//! exactly the upstream order, the group transformers, document parsing with root type
+//! the upstream relative order plus native-object name registration, the group transformers, document parsing with root type
 //! substitution, and the configuration properties. Code generation is the business of the two
 //! back ends (the run-time interpreter and the Rust source emitter); the contract they have to
 //! fulfil is described below.
@@ -235,6 +235,7 @@ impl FerroXamlIlCompiler {
         insert_before::<PropertyReferenceResolver>(
             &mut transformers,
             vec![
+                Box::new(FerroXamlIlRegisterNamedObjectTransformer),
                 Box::new(FerroXamlIlResolveClassesPropertiesTransformer),
                 Box::new(FerroXamlIlTransformInstanceAttachedProperties),
                 Box::new(FerroXamlIlTransformSyntheticCompiledBindingMembers),

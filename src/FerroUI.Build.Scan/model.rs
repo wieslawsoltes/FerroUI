@@ -338,6 +338,8 @@ pub struct MemberModel {
     pub typed_function: Option<String>,
     /// The call form (9.5.3), once it is chosen.
     pub call: Option<CallForm>,
+    pub event_remove: Option<AccessorModel>,
+    pub event_handler_nullable: bool,
 }
 
 impl MemberModel {
@@ -347,7 +349,9 @@ impl MemberModel {
             .list("parameters", &self.parameters, ParameterModel::to_json)
             .optional("return_type", self.return_type.as_ref().map(RustType::to_json))
             .flag("is_static", self.is_static)
-            .flag("fallible", self.fallible);
+            .flag("fallible", self.fallible)
+            .flag("event_handler_nullable", self.event_handler_nullable)
+            .optional("event_remove", self.event_remove.as_ref().map(AccessorModel::to_json));
         Json::object(
             attributes_to_json(members, &self.attributes)
                 .always("callable", self.callable.to_json())
@@ -368,6 +372,8 @@ impl MemberModel {
             callable: fields.optional("callable", CallableModel::from_json)?.unwrap_or_default(),
             typed_function: fields.optional_text("typed_function")?,
             call: fields.optional("call", CallForm::from_json)?,
+            event_remove: fields.optional("event_remove", AccessorModel::from_json)?,
+            event_handler_nullable: fields.flag("event_handler_nullable")?,
         })
     }
 }

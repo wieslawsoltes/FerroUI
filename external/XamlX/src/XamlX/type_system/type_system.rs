@@ -285,6 +285,8 @@ pub trait IXamlProperty: IXamlMember {
 
 pub trait IXamlEventInfo: IXamlMember {
     fn add(&self) -> Option<Rc<dyn IXamlMethod>>;
+    /// Absent when the metadata source declares only an adder.
+    fn remove(&self) -> Option<Rc<dyn IXamlMethod>> { None }
     fn equals(&self, other: &dyn IXamlEventInfo) -> bool;
     fn as_any(&self) -> &dyn Any;
 }

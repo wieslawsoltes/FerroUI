@@ -172,3 +172,6 @@ pub use decimal::Decimal;
 pub use number_format::NumberParseError;
 pub use number_format_info::NumberFormatInfo;
 pub use number_styles::NumberStyles;
+
+#[cfg(test)]
+mod float_number_tests;

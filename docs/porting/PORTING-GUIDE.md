@@ -142,6 +142,10 @@ The rules below come from measuring hello world ([binary-size.md](../binary-size
 - Overloads get suffixes describing the difference (`contains` / `contains_rect`, `bind` / `bind_untyped`).
 - Property definitions: C# `public static readonly StyledProperty<IBrush?> BackgroundProperty` → `Border::background_property()`.
 - Routed events: `Button.ClickEvent` → `Button::click_event()`.
+- When an existing native event must provide local notification of every handler,
+  use `Interactive::raise_event_local` at the control's invocation boundary. It
+  retains the event identity and subscription tokens, without ancestor routing
+  or Handled filtering. Ordinary `raise_event` retains its routed semantics.
 - Names visible to XAML stay PascalCase strings: property name `"Background"`, type name `Border`.
 - The names of controls, members, events and upstream interfaces stay close to .NET; the types in their signatures are Rust and std types ("API shape" above).
 
@@ -403,3 +407,18 @@ File inventory (Rust path ← C# path, complete/partial), every skipped or defer
 - **Properties that reference an element they do not own.** A property whose upstream type is a reference to another element that the owner of the property does not own (`Popup.PlacementTarget`, `Label.Target`, `AdornerLayer.AdornedElement`, flyout, context-menu and tooltip targets) is stored as `Option<ElementRef<T>>` (`ferroui_base::ElementRef`: a weak reference with identity equality), because such a reference usually points at an ancestor and a strong value would make the two keep each other alive. The property definition calls `ValueTypes::register_element_ref::<T>()`; the getter returns `Option<Ref<T>>` (`ElementRef::resolve`), the setter takes `impl Into<Nullable<T>>` (`ElementRef::from_nullable`). Untyped access and bindings accept and produce `Ref<T>` / `Option<Ref<T>>`. A referenced element that has been dropped reads as `None`, without a change notification. Children, content and anything else the owner does own stay `Ref<T>`.
 - **Top-level lifetime.** A top-level is kept alive by the closed callback of its platform implementation until the implementation reports that it has closed (as the delegates of the platform implementation root a window upstream), and releases the implementation and its callbacks in the closed path. A window whose implementation was created but which is never closed stays alive, as upstream; close it (or dispose the embeddable root). Handlers that come and go on the lost-focus, deactivated and position-changed notifications of a platform implementation are added through `TopLevel::platform_lost_focus` / `platform_deactivated` / `platform_position_changed`, never chained onto the callback property.
 - **Third-party notices.** Attribution lives in the root `NOTICE.md`. A crate- or module-level `NOTICE.md` is added only when code derives from a third party other than the upstream project (WPF, WebKit, ...) whose licence requires its notice to travel with the code.
+
+
+### Interface properties backed by native properties
+
+Static metadata for a CLR/interface property can expose a property registered by
+the runtime native control. Compiled paths retain the declared accessors and,
+when no INPC listener is installed, follow the matching native property's change
+event. Register interface-to-object conversions with ValueTypes so this works
+through interface handles as well as Ref<T>. Do not add synthetic application
+INPC events merely to mirror an existing registered property. Plain model members
+without a matching native property still require their declared notifications.
+
+Both the Base path builder and the Markup.Xaml compiled-binding factory apply
+this fallback. Their distinct getter/setter conversion, subscription-before/after
+initial-read, and post-write publication ordering are retained independently.

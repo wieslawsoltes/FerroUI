@@ -717,7 +717,10 @@ pub fn bindings_pipeline(options: BindingsPipelineOptions) -> Vec<Box<dyn IXamlA
     insert_all(
         &mut transformers,
         index,
-        vec![Box::new(FerroXamlIlTransformSyntheticCompiledBindingMembers)],
+        vec![
+            Box::new(crate::compiler_extensions::transformers::FerroXamlIlRegisterNamedObjectTransformer),
+            Box::new(FerroXamlIlTransformSyntheticCompiledBindingMembers),
+        ],
     );
 
     let index = index_of(&transformers, "PropertyReferenceResolver") + 1;

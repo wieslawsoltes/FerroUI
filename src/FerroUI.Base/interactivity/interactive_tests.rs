@@ -856,6 +856,197 @@ fn a_class_handler_is_reached_when_no_instance_handler_is_attached() {
 }
 
 #[test]
+fn local_delivery_invokes_all_source_handlers_without_visiting_ancestors() {
+    let event = RoutedEvent::<RoutedEventArgs>::new("local", BUBBLE_TUNNEL, TestInteractive::TYPE);
+    let source = TestInteractive::new("source");
+    let parent = TestInteractive::with_children("parent", vec![source.clone()]);
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let t = trace.clone();
+    parent.add_handler_with(
+        &event,
+        move |_, _| t.borrow_mut().push("parent"),
+        BUBBLE_TUNNEL,
+        true,
+    );
+    let t = trace.clone();
+    source.add_handler(&event, move |_, e| {
+        t.borrow_mut().push("first");
+        e.set_handled(true);
+    });
+    let t = trace.clone();
+    source.add_handler(&event, move |sender, e| {
+        assert_eq!(label_of(sender), "source");
+        assert!(e.handled());
+        assert_eq!(e.route(), RoutingStrategies::DIRECT);
+        assert!(e.is_source(sender));
+        t.borrow_mut().push("second");
+    });
+    source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    assert_eq!(*trace.borrow(), ["first", "second"]);
+}
+
+#[test]
+fn local_delivery_uses_a_snapshot_when_handlers_change() {
+    let event = RoutedEvent::<RoutedEventArgs>::new(
+        "local",
+        RoutingStrategies::BUBBLE,
+        TestInteractive::TYPE,
+    );
+    let source = TestInteractive::new("source");
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let removed = Rc::new(Cell::new(None));
+    let once = Rc::new(Cell::new(false));
+    let t = trace.clone();
+    let token = removed.clone();
+    source.add_handler(&event, move |sender, e| {
+        t.borrow_mut().push("first");
+        e.set_handled(true);
+        if !once.replace(true) {
+            assert!(sender.remove_handler(&event, token.get().unwrap()));
+            let t = t.clone();
+            sender.add_handler(&event, move |_, _| t.borrow_mut().push("added"));
+        }
+    });
+    let t = trace.clone();
+    removed.set(Some(
+        source.add_handler(&event, move |_, _| t.borrow_mut().push("removed")),
+    ));
+    source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    assert_eq!(*trace.borrow(), ["first", "removed", "first", "added"]);
+}
+
+#[test]
+fn local_delivery_keeps_nested_args_and_handler_order_independent() {
+    let event = RoutedEvent::<RoutedEventArgs>::new(
+        "local",
+        RoutingStrategies::BUBBLE,
+        TestInteractive::TYPE,
+    );
+    let source = TestInteractive::new("source");
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let nested = Rc::new(Cell::new(false));
+    let t = trace.clone();
+    let n = nested.clone();
+    source.add_handler(&event, move |sender, e| {
+        let inner = n.get();
+        t.borrow_mut()
+            .push(if inner { "inner-first" } else { "outer-first" });
+        assert!(!e.handled());
+        if !inner {
+            n.set(true);
+            sender.raise_event_local(&RoutedEventArgs::with_event(&event));
+            n.set(false);
+            assert!(!e.handled());
+        }
+        e.set_handled(true);
+    });
+    let t = trace.clone();
+    source.add_handler(&event, move |_, e| {
+        assert!(e.handled());
+        t.borrow_mut().push(if nested.get() {
+            "inner-second"
+        } else {
+            "outer-second"
+        });
+    });
+    source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    assert_eq!(
+        *trace.borrow(),
+        ["outer-first", "inner-first", "inner-second", "outer-second"]
+    );
+}
+
+#[test]
+fn local_delivery_propagates_panics_and_releases_its_snapshot() {
+    let event = RoutedEvent::<RoutedEventArgs>::new(
+        "local",
+        RoutingStrategies::BUBBLE,
+        TestInteractive::TYPE,
+    );
+    let source = TestInteractive::new("source");
+    let owner = source.downgrade();
+    let calls = Rc::new(Cell::new(0));
+    let first = source.add_handler(&event, |_, _| panic!("local handler failure"));
+    let c = calls.clone();
+    source.add_handler(&event, move |_, _| c.set(c.get() + 1));
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    }));
+    assert!(result.is_err());
+    assert_eq!(calls.get(), 0);
+    assert!(source.remove_handler(&event, first));
+    source.raise_event_local(&RoutedEventArgs::with_event(&event));
+    assert_eq!(calls.get(), 1);
+    drop(source);
+    assert!(owner.upgrade().is_none());
+}
+
+#[test]
+fn local_delivery_invokes_prehandled_args_without_route_filtering() {
+    let event = RoutedEvent::<RoutedEventArgs>::new(
+        "local",
+        RoutingStrategies::BUBBLE,
+        TestInteractive::TYPE,
+    );
+    let source = TestInteractive::new("source");
+    let calls = Rc::new(Cell::new(0));
+    for routes in [
+        RoutingStrategies::empty(),
+        RoutingStrategies::TUNNEL,
+        RoutingStrategies::BUBBLE,
+        RoutingStrategies::DIRECT,
+    ] {
+        let calls = calls.clone();
+        source.add_handler_with(
+            &event,
+            move |_, e| {
+                assert!(e.handled());
+                calls.set(calls.get() + 1);
+            },
+            routes,
+            false,
+        );
+    }
+    let args = RoutedEventArgs::with_event(&event);
+    args.set_handled(true);
+    source.raise_event_local(&args);
+    assert_eq!(calls.get(), 4);
+    assert!(args.handled());
+    assert_eq!(event.routing_strategies(), RoutingStrategies::BUBBLE);
+}
+
+#[test]
+fn local_delivery_notifies_class_and_finished_observers_once_with_shared_args() {
+    let event = RoutedEvent::<RoutedEventArgs>::new("local", BUBBLE_TUNNEL, TestInteractive::TYPE);
+    let source = TestInteractive::new("source");
+    let parent = TestInteractive::with_children("parent", vec![source.clone()]);
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let args = RoutedEventArgs::with_event(&event);
+    let shared = args.clone();
+    let t = trace.clone();
+    let raised = event.raised().subscribe(move |sender, e| {
+        assert_eq!(label_of(sender), "source");
+        assert_eq!(e.route(), RoutingStrategies::DIRECT);
+        assert!(*e.downcast_ref::<RoutedEventArgs>().unwrap() == shared);
+        t.borrow_mut().push("raised");
+        e.set_handled(true);
+    });
+    let t = trace.clone();
+    let finished = event.route_finished().subscribe(move |e| {
+        assert!(e.handled());
+        t.borrow_mut().push("finished");
+    });
+    let t = trace.clone();
+    source.add_handler(&event, move |_, _| t.borrow_mut().push("handler"));
+    source.raise_event_local(&args);
+    assert_eq!(*trace.borrow(), ["raised", "handler", "finished"]);
+    raised.dispose();
+    finished.dispose();
+    drop(parent);
+}
+
+#[test]
 fn an_error_a_fallible_handler_returns_reaches_the_dispatcher_and_the_route_goes_on() {
     #[derive(Debug)]
     struct HandlerFailed;

@@ -1,4 +1,4 @@
-use super::{IResourceDictionary, IResourceNode, ResourceHostRef};
+use super::{IResourceDictionary, IResourceNode, ResourceDictionary, ResourceHostRef};
 use crate::reactive::IDisposable;
 use crate::FerroObject;
 use std::any::Any;
@@ -21,6 +21,18 @@ pub trait IResourceProvider: IResourceNode {
     /// providers of the framework return themselves.
     fn as_any(&self) -> Option<&dyn Any> {
         None
+    }
+
+    /// The dictionary represented by this provider, when it represents one.
+    ///
+    /// This preserves dictionary identity and permits native consumers to inspect
+    /// own entries and child dictionaries without changing normal resource lookup
+    /// precedence. Lazy includes load on first use and propagate their usual load
+    /// failures. Providers that do not represent dictionaries return `None`.
+    fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        self.as_object()
+            .and_then(|object| object.to_ref().cast::<ResourceDictionary>())
+            .map(Into::into)
     }
 
     /// The owner of the resource provider.

@@ -47,8 +47,14 @@ pub trait IRuntimeXamlLoader {
 pub type CompiledXamlLoader =
     fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError>;
 
-fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
-    static LOADERS: OnceLock<RwLock<HashMap<String, CompiledXamlLoader>>> = OnceLock::new();
+#[derive(Clone, Copy)]
+struct CompiledRegistration {
+    load: CompiledXamlLoader,
+    public_documents: &'static [&'static str],
+}
+
+fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledRegistration>> {
+    static LOADERS: OnceLock<RwLock<HashMap<String, CompiledRegistration>>> = OnceLock::new();
     LOADERS.get_or_init(Default::default)
 }
 
@@ -66,8 +72,21 @@ impl FerroXamlLoader {
     /// The assembly of a URI is the one the asset loader reports for it
     /// (`IAssetLoader::get_assembly`).
     pub fn register_compiled_xaml(assembly_name: &str, try_load: CompiledXamlLoader) {
+        Self::register_compiled_xaml_with_documents(assembly_name, try_load, &[]);
+    }
+
+    /// Registers a loader with its exact public, loadable document URIs. Generated
+    /// builds supply this table from the same availability decisions as the loader;
+    /// probing it never constructs a document. Legacy registrations without a table
+    /// continue loading by URI but cannot advertise documents to runtime includes.
+    /// Replacing a registration replaces both its loader and its document table.
+    pub fn register_compiled_xaml_with_documents(
+        assembly_name: &str,
+        try_load: CompiledXamlLoader,
+        public_documents: &'static [&'static str],
+    ) {
         let mut loaders = compiled_loaders().write().unwrap_or_else(|e| e.into_inner());
-        loaders.insert(assembly_name.to_string(), try_load);
+        loaders.insert(assembly_name.to_string(), CompiledRegistration { load: try_load, public_documents });
     }
 
     /// Removes the registration of an assembly. Returns whether there was
@@ -78,7 +97,26 @@ impl FerroXamlLoader {
     }
 
     fn compiled_loader(assembly_name: &str) -> Option<CompiledXamlLoader> {
-        compiled_loaders().read().unwrap_or_else(|e| e.into_inner()).get(assembly_name).copied()
+        compiled_loaders().read().unwrap_or_else(|e| e.into_inner()).get(assembly_name).map(|r| r.load)
+    }
+
+    /// Whether this URI names a public compiled document in the current registry.
+    /// Uses the actual asset-loader assembly resolution and generated URI comparison.
+    /// Missing/private/unknown documents return false; no loader or constructor runs.
+    pub fn has_public_compiled_document(uri: &UriRef, base_uri: Option<&url::Url>) -> bool {
+        let Some(assets) = FerroLocator::current().get_service::<dyn IAssetLoader>() else { return false };
+        let absolute = match (uri.as_url(), base_uri) {
+            (Some(url), _) => url.clone(),
+            (None, Some(base_uri)) => {
+                let Ok(url) = uri.resolve(base_uri) else { return false };
+                url
+            }
+            (None, None) => return false,
+        };
+        let Some(assembly) = assets.get_assembly(uri, base_uri) else { return false };
+        let registration = compiled_loaders().read().unwrap_or_else(|e| e.into_inner()).get(assembly.name()).copied();
+        registration.is_some_and(|r| r.public_documents.iter().any(|document|
+            crate::xaml_il::runtime::compiled::uri_equals(absolute.as_str(), document, "")))
     }
 
     /// Loads the XAML into a FerroUI component.

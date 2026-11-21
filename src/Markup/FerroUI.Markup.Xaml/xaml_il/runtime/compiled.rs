@@ -20,7 +20,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
     from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
 };
-use ferroui_base::utilities::UriRef;
+use ferroui_base::utilities::{UriExtensions, UriRef};
 use ferroui_base::data::core::{
     BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
 };
@@ -150,12 +150,12 @@ pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i
     )
 }
 
-/// Whether `uri` is the URI `root` followed by `name`, compared as upstream's
-/// generated loader compares a requested URI with the URI of a document:
-/// `string.Equals(uri, documentUri, StringComparison.OrdinalIgnoreCase)`, an
-/// ordinal comparison of the characters after their simple (one character to
-/// one character) upper-case mapping, for every script, not only ASCII.
+/// Whether `uri` names the document at `root` followed by `name`.
+/// Asset paths use the same unescaping as the asset loader before applying
+/// the generated loader's ordinal, case-insensitive comparison.
 pub fn uri_equals(uri: &str, root: &str, name: &str) -> bool {
+    use url::Position::{AfterPath, BeforePath};
+
     fn fold(character: char) -> char {
         let mut upper = character.to_uppercase();
         match (upper.next(), upper.next()) {
@@ -164,14 +164,29 @@ pub fn uri_equals(uri: &str, root: &str, name: &str) -> bool {
             _ => character,
         }
     }
-    let mut expected = root.chars().chain(name.chars());
-    let mut actual = uri.chars();
-    loop {
-        match (actual.next(), expected.next()) {
-            (None, None) => return true,
-            (Some(a), Some(b)) if a == b || fold(a) == fold(b) => {}
-            _ => return false,
+    fn equals(mut actual: impl Iterator<Item = char>, mut expected: impl Iterator<Item = char>) -> bool {
+        loop {
+            match (actual.next(), expected.next()) {
+                (None, None) => return true,
+                (Some(a), Some(b)) if a == b || fold(a) == fold(b) => {}
+                _ => return false,
+            }
         }
+    }
+
+    let direct = || equals(uri.chars(), root.chars().chain(name.chars()));
+    if !(uri.contains('%') || root.contains('%') || name.contains('%')) {
+        return direct();
+    }
+    match (url::Url::parse(uri), url::Url::parse(&format!("{root}{name}"))) {
+        (Ok(actual), Ok(expected)) if UriExtensions::is_asset(&actual) && UriExtensions::is_asset(&expected) => {
+            let actual_path = UriExtensions::get_unescape_absolute_path(&actual);
+            let expected_path = UriExtensions::get_unescape_absolute_path(&expected);
+            equals(actual[..BeforePath].chars(), expected[..BeforePath].chars())
+                && equals(actual_path.chars(), expected_path.chars())
+                && equals(actual[AfterPath..].chars(), expected[AfterPath..].chars())
+        }
+        _ => direct(),
     }
 }
 
@@ -938,9 +953,8 @@ fn path_property_of(
 /// argument that `markup` declares, at `index`
 /// (`builder.Property(indexer info, accessorFactory)`): the description of the indexer over
 /// its declared accessors, named as the indexer of a type is, and the accessor factory
-/// the run-time loader takes: the one that follows the collection changes of the owner
-/// when the indexed type is a notifying collection (`notifying`), else the one that
-/// follows its property change notifications.
+/// the run-time loader takes, which detects collection notifications on the actual
+/// owner even when its declared type is a read-only interface.
 ///
 /// # Panics
 /// Panics if `markup` declares no such indexer: the emitter writes the call only for a
@@ -949,7 +963,7 @@ pub fn path_indexer(
     builder: &CompiledBindingPathBuilder,
     markup: &'static MarkupType,
     index: i32,
-    notifying: bool,
+    _notifying: bool,
 ) -> CompiledBindingPathBuilder {
     let declared = markup
         .indexers
@@ -957,10 +971,9 @@ pub fn path_indexer(
         .find(|indexer| matches!(indexer.parameters, [parameter] if parameter().is::<i32>()))
         .unwrap_or_else(|| panic!("{} declares no indexer with one 32-bit integer argument", markup.full_name()));
     let info = declared_indexer_info(markup, declared, Rc::new(move || into_markup_value(index)));
-    let factory: PropertyAccessorFactory = match notifying {
-        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
-        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
-    };
+    let factory: PropertyAccessorFactory = Rc::new(move |target, property| {
+        PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)
+    });
     builder.property(info, factory)
 }
 
@@ -1954,6 +1967,39 @@ fn command_element<This: Clone + 'static>(
     builder.command_untyped(name, execute, can_execute, depends_on_properties, declaring.notify_property_changed)
 }
 
+/// The selected descriptor of a named root handler. Root ownership follows the
+/// native weak handler convention while method/target identity remains observable.
+pub fn declared_method_handler(
+    context: &Rc<XamlIlContext>, markup: &'static MarkupType,
+    name: &str, overload: usize, location: (i32, i32),
+) -> Result<ferroui_base::metadata::MarkupDelegate, XamlLoadError> {
+    let method = markup.find_methods(name).nth(overload).ok_or_else(|| {
+        at("MissingMethodException", format!("{}.{}: overload {overload} is absent from metadata", markup.full_name(), name), location.0, location.1)
+    })?;
+    if method.is_static { return Ok(ferroui_base::metadata::MarkupDelegate::for_method(None, markup, method)); }
+    let owner = context.root_object_field().ok_or_else(|| at("InvalidOperationException", "A method handler needs a root object", location.0, location.1))?;
+    Ok(ferroui_base::metadata::MarkupDelegate::for_method_of_source(&owner, markup, method))
+}
+
+/// A declared method as a binding value. The compiler records the overload's
+/// ordinal among equally named methods; no arity-only overload guess is made.
+/// Binding-source targets follow the native weak-owner convention.
+pub fn path_method(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    name: &str,
+    overload: usize,
+    accepts_null: bool,
+    location: (i32, i32),
+) -> Result<CompiledBindingPathBuilder, XamlLoadError> {
+    let method = markup.find_methods(name).nth(overload).ok_or_else(|| {
+        at("MissingMethodException", format!("{}.{}: overload {overload} is absent from metadata", markup.full_name(), name), location.0, location.1)
+    })?;
+    Ok(builder.method_untyped(name, Rc::new(move |owner| {
+        Rc::new(ferroui_base::metadata::MarkupDelegate::for_method_of_source(owner, markup, method)) as BoxedValue
+    }), accepts_null))
+}
+
 /// The element of a compiled binding path for a method used as a command
 /// (`builder.Command(methodName, execute, canExecute, dependsOnProperties)`, the last
 /// element of a path bound to a command property), as the run-time loader builds it:
@@ -2235,7 +2281,8 @@ pub fn add_event_handler(
         return Err(at(TARGET_INVOCATION_EXCEPTION, format!("Method {member} has no invoker"), line, position));
     };
     let handler: BoxedValue = Rc::new(handler);
-    match (declared.add)(&[target, Some(handler)]) {
+    let result = if declared.is_static { (declared.add)(&[Some(handler)]) } else { (declared.add)(&[target, Some(handler)]) };
+    match result {
         Ok(_) => Ok(()),
         Err(error @ MarkupInvokeError::Argument { .. }) => Err(at("InvalidCastException", format!("{member}: {error}"), line, position)),
         Err(error @ MarkupInvokeError::ArgumentCount { .. }) => {
@@ -2248,6 +2295,37 @@ pub fn add_event_handler(
 #[cfg(test)]
 mod tests {
     use super::uri_equals;
+
+    /// Generated x:Static calls return typed BoxedValue handles. Conversion to
+    /// an object property must keep the object, rather than box its handle.
+    #[test]
+    fn compiled_untyped_values_preserve_identity_null_and_lifetime() {
+        use super::{exact, to_value};
+        use ferroui_base::{metadata::into_markup_value, BoxedValue};
+        use std::rc::Rc;
+
+        #[derive(PartialEq)]
+        struct Token(u8);
+        let original: BoxedValue = Rc::new(Token(7));
+        let weak = Rc::downgrade(&original);
+        let runtime = into_markup_value(original.clone()).unwrap();
+        let compiled = to_value(original.clone()).unwrap();
+        assert!(Rc::ptr_eq(&compiled, &runtime));
+        let assigned: Option<BoxedValue> =
+            exact(Some(compiled.clone()), "Control.Tag", 0, 1, 1).unwrap();
+        let assigned = assigned.unwrap();
+        assert!(Rc::ptr_eq(&assigned, &original));
+        assert_eq!(assigned.downcast_ref::<Token>().unwrap().0, 7);
+        assert!(to_value(Option::<BoxedValue>::None).is_none());
+        let null: BoxedValue = Rc::new(Option::<BoxedValue>::None);
+        assert!(to_value(null).is_none());
+        drop(original);
+        drop(runtime);
+        drop(compiled);
+        assert!(weak.upgrade().is_some());
+        drop(assigned);
+        assert!(weak.upgrade().is_none());
+    }
 
     /// Not from upstream (#603): the description of a declared property at its position is the one
     /// found by name (one per property and thread), and a position that names another property, or
@@ -2323,6 +2401,16 @@ mod tests {
         assert!(!uri_equals("ferres://App/Views/Main.xaml", root, "Views/Main.xam"));
         assert!(!uri_equals("ferres://App/Views/Main.xam", root, "Views/Main.xaml"));
         assert!(!uri_equals("ferres://Other/Views/Main.xaml", root, "Views/Main.xaml"));
+    }
+
+    #[test]
+    fn compiled_asset_paths_compare_decoded_spellings_once() {
+        let root = "ferres://App/";
+        assert!(uri_equals("ferres://app/Caf%C3%89%20menu.xaml", root, "Café menu.xaml"));
+        assert!(uri_equals("ferres://app/Caf%C3%89.xaml", root, "Caf%C3%A9.xaml"));
+        assert!(uri_equals("ferres://app/Name%2520.xaml", root, "Name%2520.xaml"));
+        assert!(!uri_equals("ferres://app/Name%2520.xaml", root, "Name%20.xaml"));
+        assert!(!uri_equals("ferres://app/Name%3Fpart.xaml", root, "Name?part.xaml"));
     }
 }
 

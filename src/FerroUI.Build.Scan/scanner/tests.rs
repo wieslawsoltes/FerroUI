@@ -1651,3 +1651,35 @@ fn media_controls_publish_their_public_xaml_namespaces() {
         assert!(scan.model.namespaces.iter().any(|(module, name)| module == crate_name && name == namespace));
     }
 }
+
+#[test]
+fn static_events_retain_their_flag_call_arity_and_model_round_trip() {
+    let path = fixture_directory().with_file_name("static_events").join("lib.rs");
+    let scan = scan_crate(&ScanOptions::new("static_events_fixture", path));
+    assert!(!scan.diagnostics.iter().any(|d| d.severity == Severity::Error), "{:?}", scan.diagnostics);
+    let events = &scan.model.types.iter().find(|t| t.name == "Events").unwrap().events;
+    assert_eq!(events.iter().map(|e| (e.name.as_str(), e.is_static, e.fallible)).collect::<Vec<_>>(), [("Changed", true, false), ("Failed", true, true), ("Instance", false, false)]);
+    assert!(matches!(&events[0].call, Some(CallForm::Path(path)) if path.ends_with("::subscribe")), "{:?} / {:?}", events[0], scan.functions);
+    assert!(matches!(&events[2].call, Some(CallForm::Path(path)) if path.ends_with("::instance")));
+    assert_eq!(AssemblyModel::parse(&scan.model.to_json()).unwrap(), scan.model);
+}
+
+#[test]
+fn paired_events_retain_nullable_accessors_call_arity_and_json() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/paired_events/lib.rs");
+    let result = scan_crate(&ScanOptions::new("paired_events", root));
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+    let static_ = result.model.types.iter().find(|t| t.name == "Events").unwrap();
+    let event = &static_.events[0];
+    assert!(event.is_static && event.event_handler_nullable);
+    assert!(!event.fallible);
+    let remove=event.event_remove.as_ref().unwrap();assert!(remove.fallible);
+    assert!(matches!(event.call,Some(CallForm::Path(_))));
+    assert!(matches!(remove.call,Some(CallForm::Path(_))));
+    let instance=result.model.types.iter().find(|t|t.name=="Instance").unwrap();
+    assert!(!instance.events[0].is_static);
+    assert!(matches!(instance.events[0].event_remove.as_ref().unwrap().call,Some(CallForm::Path(_))));
+    let json=result.model.to_json();
+    assert!(json.contains("event_remove") && json.contains("event_handler_nullable"));
+    assert_eq!(AssemblyModel::parse(&json).unwrap(),result.model);
+}

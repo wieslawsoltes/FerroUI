@@ -150,6 +150,8 @@ mod tests {
         static CUSTOM: MarkupType = MarkupType {
             explicit_namespace: Some("Manifest.Runtime"),
             events: &[MarkupEvent {
+                remove: None, handler_nullable: false, accessor_methods: &[],
+                is_static: false,
                 name: "Recomputed",
                 arguments: &[],
                 add: |_| panic!("manifest generation must not invoke event accessors"),

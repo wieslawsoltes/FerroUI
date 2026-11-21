@@ -678,6 +678,10 @@ impl IResourceProvider for ResourceDictionaryHandle {
         Some(self)
     }
 
+    fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        Some(self.0.clone().into())
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.0.owner()
     }

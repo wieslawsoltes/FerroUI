@@ -201,3 +201,5 @@ pub use input_scope_name_value::InputScopeNameValue;
 
 #[cfg(test)]
 mod input_scope_tests;
+#[cfg(test)]
+mod pointer_capture_tests;

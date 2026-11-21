@@ -144,11 +144,16 @@ pub const FRAMEWORK_EVALUATORS: &[(&str, FrameworkEvaluatorKind)] = {
 pub fn configure_configuration(configuration: &TransformerConfiguration) {
     configuration.get_or_create_extra::<XamlCompileTimeValueParsers>().add(Rc::new(RuntimeCompileTimeValueParser));
     configuration.get_or_create_extra::<XamlRuntimeIncludeFallback>().set(Some(Rc::new(can_load_at_run_time)));
+    configuration.get_or_create_extra::<XamlRuntimeIncludeFallback>().set_public_compiled(Some(Rc::new(|uri| {
+        ferroui_base::utilities::UriRef::parse_absolute(uri).is_ok_and(|uri|
+            ferroui_markup_xaml::FerroXamlLoader::has_public_compiled_document(&uri.into(), None))
+    })));
 }
 
 /// The predicate of [`XamlRuntimeIncludeFallback`] of the run-time back end: the document
-/// with the absolute URI is an asset the asset loader has, and a loader of documents
-/// without compiled markup is registered (`IRuntimeXamlLoader`, what
+/// with the absolute URI is an advertised public compiled document, or an asset
+/// the asset loader has and a loader of source documents is registered
+/// (`IRuntimeXamlLoader`, what
 /// `FerroRuntimeXamlLoader::register` installs), so that the `Loaded` of an include left
 /// with its `Source` can load it (`FerroXamlLoader::load`).
 fn can_load_at_run_time(absolute_uri: &str) -> bool {
@@ -156,13 +161,16 @@ fn can_load_at_run_time(absolute_uri: &str) -> bool {
     use ferroui_base::utilities::UriRef;
     use ferroui_base::{FerroLocator, LocatorExtensions};
     let locator = FerroLocator::current();
-    if locator.get_service::<dyn ferroui_markup_xaml::IRuntimeXamlLoader>().is_none() {
-        return false;
+    let Ok(url) = UriRef::parse_absolute(absolute_uri) else { return false };
+    let uri = UriRef::from(url);
+    if ferroui_markup_xaml::FerroXamlLoader::has_public_compiled_document(&uri, None) {
+        return true;
     }
+    if locator.get_service::<dyn ferroui_markup_xaml::IRuntimeXamlLoader>().is_none() { return false; }
     let Some(assets) = locator.get_service::<dyn IAssetLoader>() else {
         return false;
     };
-    UriRef::parse_absolute(absolute_uri).is_ok_and(|uri| assets.exists(&UriRef::from(uri), None))
+    assets.exists(&uri, None)
 }
 
 /// Creates the interpreter of the framework language over `configuration`:
@@ -192,3 +200,8 @@ pub fn create_interpreter(
 mod evaluator_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod compiled_include_tests;
+
+#[cfg(test)]
+mod named_objects_tests;

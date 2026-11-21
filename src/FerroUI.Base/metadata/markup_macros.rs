@@ -96,8 +96,9 @@
 ///   — static PROPERTIES (`static T Name { get; set; }`): `get` is called
 ///   with `()`, `set` with `(value: T)`; `try_get:` / `try_set:` as for
 ///   instance properties.
-/// * `events: [Name(A, B) => callable, ..]` — the callable subscribes a
-///   handler: it is called with `(&this, MarkupDelegate)`. The listed types
+/// * `events: [Name(A, B) => callable, static Name(A, B) => callable, ..]` — the callable subscribes a
+///   handler: it is called with `(&this, MarkupDelegate)` for an instance
+///   event and `(MarkupDelegate)` for a `static` event. The listed types
 ///   are the parameters of the handler as the managed original declares
 ///   them and the delegate is invoked with exactly that many untyped
 ///   values: `Name(Option<BoxedValue>, EventArgs)` for an
@@ -626,16 +627,60 @@ macro_rules! __ferro_markup_items {
     };
 }
 
-/// `[Name(A, B) => callable, try Name() => callable, ..]` as a constant slice
+/// `[Name(A, B) => callable, static Name() => callable, static try Name() => callable, ..]` as a constant slice
 /// of `MarkupEvent`.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_events {
+    ($this:ty; [$($done:expr,)*] static $name:ident ($($argument:ty),* $(,)?) {
+        $add_kind:ident: $add:expr, $remove_kind:ident: $remove:expr $(,)?
+    } $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_events!($this; [$($done,)*
+            $crate::__ferro_markup_paired_event!($this; true, static, $name; [$($argument),*]; $add_kind: $add, $remove_kind: $remove),
+        ] $($($rest)*)?)
+    };
+    ($this:ty; [$($done:expr,)*] $name:ident ($($argument:ty),* $(,)?) {
+        $add_kind:ident: $add:expr, $remove_kind:ident: $remove:expr $(,)?
+    } $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_events!($this; [$($done,)*
+            $crate::__ferro_markup_paired_event!($this; false, instance, $name; [$($argument),*]; $add_kind: $add, $remove_kind: $remove),
+        ] $($($rest)*)?)
+    };
     ($this:ty; [$($done:expr,)*]) => {
         &[$($done),*]
     };
+    ($this:ty; [$($done:expr,)*] static $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
+            remove: ::std::option::Option::None, handler_nullable: false, accessor_methods: &[],
+            is_static: true,
+            name: ::std::stringify!($name),
+            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            add: |arguments| {
+                let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
+                let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
+                let _ = ($add)(handler);
+                ::std::result::Result::Ok(::std::option::Option::None)
+            },
+        },] $($($rest)*)?)
+    };
+    ($this:ty; [$($done:expr,)*] static try $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
+            remove: ::std::option::Option::None, handler_nullable: false, accessor_methods: &[],
+            is_static: true,
+            name: ::std::stringify!($name),
+            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            add: |arguments| {
+                let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
+                let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
+                let _ = $crate::metadata::markup_result(($add)(handler))?;
+                ::std::result::Result::Ok(::std::option::Option::None)
+            },
+        },] $($($rest)*)?)
+    };
     ($this:ty; [$($done:expr,)*] $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
+            remove: ::std::option::Option::None, handler_nullable: false, accessor_methods: &[],
+            is_static: false,
             name: ::std::stringify!($name),
             arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
@@ -649,6 +694,8 @@ macro_rules! __ferro_markup_events {
     };
     ($this:ty; [$($done:expr,)*] try $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
+            remove: ::std::option::Option::None, handler_nullable: false, accessor_methods: &[],
+            is_static: false,
             name: ::std::stringify!($name),
             arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
@@ -661,6 +708,73 @@ macro_rules! __ferro_markup_events {
             },
         },] $($($rest)*)?)
     };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_event_result {
+    (add, $call:expr) => {{ let _ = $call; ::std::result::Result::Ok(::std::option::Option::None) }};
+    (remove, $call:expr) => {{ let _ = $call; ::std::result::Result::Ok(::std::option::Option::None) }};
+    (try_add, $call:expr) => {{ let _ = $crate::metadata::markup_result($call)?; ::std::result::Result::Ok(::std::option::Option::None) }};
+    (try_remove, $call:expr) => {{ let _ = $crate::metadata::markup_result($call)?; ::std::result::Result::Ok(::std::option::Option::None) }};
+}
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_event_invoke {
+    ($this:ty; static; $kind:ident: $call:expr) => {
+        |values| {
+            let mut values = $crate::metadata::MarkupArguments::new(values, 1)?;
+            let handler = values.next::<::std::option::Option<$crate::metadata::MarkupDelegate>>()?;
+            $crate::__ferro_markup_event_result!($kind, ($call)(handler))
+        }
+    };
+    ($this:ty; instance; $kind:ident: $call:expr) => {
+        |values| {
+            let mut values = $crate::metadata::MarkupArguments::new(values, 2)?;
+            let this = values.next::<$this>()?;
+            let handler = values.next::<::std::option::Option<$crate::metadata::MarkupDelegate>>()?;
+            $crate::__ferro_markup_event_result!($kind, ($call)(&this, handler))
+        }
+    };
+}
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_event_kind {
+    (add; add) => {};
+    (add; try_add) => {};
+    (remove; remove) => {};
+    (remove; try_remove) => {};
+    ($expected:ident; $actual:ident) => { ::std::compile_error!("Paired events require add/try_add followed by remove/try_remove"); };
+}
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_paired_event {
+    ($this:ty; $static:literal, $receiver:ident, $name:ident; [$($argument:ty),*]; $add_kind:ident: $add:expr, $remove_kind:ident: $remove:expr) => {{
+        $crate::__ferro_markup_event_kind!(add; $add_kind);
+        $crate::__ferro_markup_event_kind!(remove; $remove_kind);
+        $crate::metadata::MarkupEvent {
+            is_static: $static, name: ::std::stringify!($name), handler_nullable: true,
+            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            add: $crate::__ferro_markup_event_invoke!($this; $receiver; $add_kind: $add),
+            remove: ::std::option::Option::Some($crate::__ferro_markup_event_invoke!($this; $receiver; $remove_kind: $remove)),
+            accessor_methods: &[
+                $crate::metadata::MarkupMethod {
+                    name: ::std::concat!("add_", ::std::stringify!($name)), is_static: $static,
+                    parameters: &[|| $crate::data::core::ValueType::of::<::std::option::Option<$crate::metadata::MarkupDelegate>>()],
+                    return_type: ::std::option::Option::None,
+                    invoke: $crate::__ferro_markup_event_invoke!($this; $receiver; $add_kind: $add),
+                    attributes: &[], emit: $crate::metadata::not_recorded(),
+                },
+                $crate::metadata::MarkupMethod {
+                    name: ::std::concat!("remove_", ::std::stringify!($name)), is_static: $static,
+                    parameters: &[|| $crate::data::core::ValueType::of::<::std::option::Option<$crate::metadata::MarkupDelegate>>()],
+                    return_type: ::std::option::Option::None,
+                    invoke: $crate::__ferro_markup_event_invoke!($this; $receiver; $remove_kind: $remove),
+                    attributes: &[], emit: $crate::metadata::not_recorded(),
+                },
+            ],
+        }
+    }};
 }
 
 /// `[(A, B) => callable, try (A) => callable, (name: A [Attribute(..)], b: B) => callable, ..]`

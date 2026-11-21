@@ -1857,3 +1857,182 @@ fn static_properties_are_not_static_fields() {
     assert!(matches!(set(&[into_markup_value("x".to_string())]), Err(MarkupInvokeError::Argument { index: 0, .. })));
     assert_eq!(from_markup_value::<i32>(&get(&[]).unwrap()), Some(7));
 }
+
+// A static event must not require Clone, a constructor, or a fabricated instance.
+pub struct MetaStaticEvents;
+ferro_static_type!(MetaStaticEvents);
+ferro_markup_type!(static MetaStaticEvents {
+    type_info: MetaStaticEvents,
+    events: [
+        static Changed(crate::utilities::EventArgs) => |handler: MarkupDelegate| { handler.invoke(&[boxed(crate::utilities::EventArgs::EMPTY)]); },
+        static try Closed() => |_: MarkupDelegate| Err::<(), _>("Already closed."),
+    ],
+});
+
+#[test]
+fn static_event_subscriptions_need_only_the_handler_and_propagate_failure() {
+    assert!(MetaStaticEvents::TYPE.default_constructor().is_none());
+    let changed = MetaStaticEvents::MARKUP.find_event("Changed").unwrap();
+    assert!(changed.is_static);
+    let calls = Rc::new(Cell::new(0));
+    let called = calls.clone();
+    let handler = MarkupDelegate::new(move |args| { assert_eq!(unbox::<crate::utilities::EventArgs>(&args[0]), crate::utilities::EventArgs::EMPTY); called.set(called.get() + 1); None });
+    (changed.add)(&[boxed(handler.clone())]).unwrap();
+    assert_eq!(calls.get(), 1);
+    assert!(matches!((changed.add)(&[None, boxed(handler)]), Err(MarkupInvokeError::ArgumentCount { .. })));
+    let closed = MetaStaticEvents::MARKUP.find_event("Closed").unwrap();
+    assert!(closed.is_static);
+    assert_eq!((closed.add)(&[boxed(MarkupDelegate::new(|_| None))]), Err(MarkupInvokeError::Failed("Already closed.".to_string())));
+    assert!(!MetaItem::MARKUP.find_event("NameChanged").unwrap().is_static);
+}
+
+pub struct DelegateTargetWithValueEquality;
+impl PartialEq for DelegateTargetWithValueEquality {
+    fn eq(&self, _: &Self) -> bool { true }
+}
+ferro_markup_type!(class DelegateTargetWithValueEquality {
+    this: Rc<DelegateTargetWithValueEquality>, handles: [DelegateTargetWithValueEquality, Rc<DelegateTargetWithValueEquality>],
+    methods: [
+        fn First() => |_: &Rc<DelegateTargetWithValueEquality>| {},
+        fn Second() => |_: &Rc<DelegateTargetWithValueEquality>| {},
+        static fn Static() => || {},
+        static try fn Fail() => || Err::<(), _>("delegate-failed"),
+    ],
+});
+
+#[test]
+fn delegate_equality_preserves_reference_identity_instead_of_target_equals() {
+    ValueTypes::register_reference::<DelegateTargetWithValueEquality>();
+    let markup = DelegateTargetWithValueEquality::MARKUP;
+    let target: BoxedValue = Rc::new(DelegateTargetWithValueEquality);
+    let other: BoxedValue = Rc::new(DelegateTargetWithValueEquality);
+    let method = markup.find_methods("First").next().unwrap();
+    let a = MarkupDelegate::for_method(Some(target.clone()), markup, method);
+    assert_eq!(a, MarkupDelegate::for_method(Some(target.clone()), markup, method));
+    assert_ne!(a, MarkupDelegate::for_method(Some(other), markup, method));
+    assert_ne!(a, MarkupDelegate::for_method(Some(target.clone()), markup, markup.find_methods("Second").next().unwrap()));
+    let weak = MarkupDelegate::for_method_of_source(&target, markup, method);
+    assert_eq!(a, weak);
+    drop(a);
+    let again = MarkupDelegate::for_method_of_source(&target, markup, method);
+    drop(target);
+    assert!(!weak.is_target_alive());
+    assert_eq!(weak, again);
+    let static_ = markup.find_methods("Static").next().unwrap();
+    assert_eq!(MarkupDelegate::for_method(None, markup, static_), MarkupDelegate::for_method(None, markup, static_));
+    let callback = MarkupDelegate::new(|_| None);
+    assert_eq!(callback, callback.clone());
+    assert_ne!(callback, MarkupDelegate::new(|_| None));
+}
+
+#[test]
+fn multicast_removal_uses_last_equal_subsequence_and_preserves_error_order() {
+    let trace = Rc::new(RefCell::new(Vec::new()));
+    let make = |name| {
+        let trace = trace.clone();
+        MarkupDelegate::new(move |_| { trace.borrow_mut().push(name); None })
+    };
+    let a = make("a");
+    let b = make("b");
+    let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
+    let two_pairs = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap();
+    assert_eq!(two_pairs.invocation_list(), [a.clone(), b.clone(), a.clone(), b.clone()]);
+    let remaining = MarkupDelegate::remove(Some(&two_pairs), Some(&pair)).unwrap();
+    assert_eq!(remaining, pair);
+    assert!(MarkupDelegate::remove(Some(&remaining), Some(&pair)).is_none());
+    let cross = MarkupDelegate::combine(Some(&pair), Some(&a)).unwrap();
+    assert_eq!(MarkupDelegate::remove(Some(&cross), Some(&pair)).unwrap(), a);
+    let fail = MarkupDelegate::for_method(None, DelegateTargetWithValueEquality::MARKUP,
+        DelegateTargetWithValueEquality::MARKUP.find_methods("Fail").next().unwrap());
+    let first_fail = MarkupDelegate::combine(Some(&a), Some(&fail)).unwrap();
+    let all = MarkupDelegate::combine(Some(&first_fail), Some(&b)).unwrap();
+    assert_eq!(all.try_invoke(&[]), Err(MarkupInvokeError::Failed("delegate-failed".into())));
+    assert_eq!(*trace.borrow(), ["a"]);
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let dispatcher = crate::threading::Dispatcher::current_dispatcher();
+    let reported = dispatcher.capture_unhandled_exceptions(|| {
+        assert_eq!(all.invoke(&[]), None);
+    });
+    assert!(reported.unwrap_err().contains("delegate-failed"));
+    assert_eq!(*trace.borrow(), ["a", "a"]);
+    assert_eq!(MarkupDelegate::combine(None, Some(&a)), Some(a.clone()));
+    assert_eq!(MarkupDelegate::remove(Some(&a), None), Some(a.clone()));
+    assert_eq!(MarkupDelegate::remove(Some(&a), Some(&b)), Some(a));
+    assert!(MarkupDelegate::combine(None, None).is_none());
+    assert!(MarkupDelegate::remove(None, Some(&b)).is_none());
+}
+
+#[test]
+fn delegate_multicast_keeps_targets_until_removed_and_reports_last_method() {
+    ValueTypes::register_reference::<DelegateTargetWithValueEquality>();
+    let markup = DelegateTargetWithValueEquality::MARKUP;
+    let target: BoxedValue = Rc::new(DelegateTargetWithValueEquality);
+    let weak = Rc::downgrade(&target);
+    let first = markup.find_methods("First").next().unwrap();
+    let second = markup.find_methods("Second").next().unwrap();
+    let a = MarkupDelegate::for_method(Some(target.clone()), markup, first);
+    let b = MarkupDelegate::for_method(Some(target.clone()), markup, second);
+    let list = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
+    assert!(std::ptr::eq(list.method().unwrap(), second));
+    assert!(Rc::ptr_eq(&list.target().unwrap(), &target));
+    drop(target);
+    drop(a);
+    drop(b);
+    assert!(weak.upgrade().is_some());
+    let removed = MarkupDelegate::remove(Some(&list), Some(&list));
+    assert!(removed.is_none());
+    drop(list);
+    assert!(weak.upgrade().is_none());
+}
+
+pub struct MetaPairedEvents;
+ferro_static_type!(MetaPairedEvents);
+ferro_markup_type!(static MetaPairedEvents {
+    type_info: MetaPairedEvents,
+    events: [
+        static Changed() {add: |_: Option<MarkupDelegate>| {}, remove: |_: Option<MarkupDelegate>| {}},
+        static Failing() {try_add: |_: Option<MarkupDelegate>| Err::<(),_>("add-failed"), try_remove: |_: Option<MarkupDelegate>| Err::<(),_>("remove-failed")},
+    ],
+});
+#[test]
+fn paired_events_expose_nullable_fallible_static_accessor_methods() {
+    let m = MetaPairedEvents::MARKUP;
+    assert!(MetaPairedEvents::TYPE.default_constructor().is_none());
+    let event = m.find_event("Changed").unwrap();
+    assert!(event.handler_nullable && event.is_static);
+    assert_eq!((event.add)(&[None]), Ok(None));
+    assert_eq!((event.remove.unwrap())(&[None]), Ok(None));
+    let handler = boxed(MarkupDelegate::new(|_| None));
+    for name in ["add_Changed", "remove_Changed"] {
+        let method = m.find_methods(name).next().unwrap();
+        assert!(method.is_static && method.return_type.is_none());
+        assert_eq!((method.parameters[0])(), ValueType::of::<Option<MarkupDelegate>>());
+        assert_eq!((method.invoke)(&[None]), Ok(None));
+        assert_eq!((method.invoke)(&[handler.clone()]), Ok(None));
+        assert!(matches!((method.invoke)(&[boxed(1i32)]), Err(MarkupInvokeError::Argument { .. })));
+        assert!(matches!((method.invoke)(&[]), Err(MarkupInvokeError::ArgumentCount { .. })));
+    }
+    assert_eq!(m.declared_methods().count(), 4);
+    assert_eq!((m.find_methods("add_Failing").next().unwrap().invoke)(&[None]), Err(MarkupInvokeError::Failed("add-failed".into())));
+    assert_eq!((m.find_methods("remove_Failing").next().unwrap().invoke)(&[None]), Err(MarkupInvokeError::Failed("remove-failed".into())));
+    assert!(MetaItem::MARKUP.find_event("NameChanged").unwrap().remove.is_none());
+}
+
+#[derive(PartialEq)]
+pub struct MetaPairedInstance(Rc<Cell<i32>>);
+ferro_markup_type!(struct MetaPairedInstance {
+    this: MetaPairedInstance,
+    events: [Changed() {add: |this:&MetaPairedInstance,_:Option<MarkupDelegate>|this.0.set(this.0.get()+1), remove: |this:&MetaPairedInstance,_:Option<MarkupDelegate>|this.0.set(this.0.get()-1)}],
+});
+impl Clone for MetaPairedInstance { fn clone(&self)->Self {Self(self.0.clone())} }
+#[test]
+fn paired_instance_events_keep_receiver_dispatch_and_do_not_require_a_constructor() {
+    let count=Rc::new(Cell::new(0));let object=boxed(MetaPairedInstance(count.clone()));
+    let event=MetaPairedInstance::MARKUP.find_event("Changed").unwrap();
+    assert!(!event.is_static);
+    (event.add)(&[object.clone(),None]).unwrap();assert_eq!(count.get(),1);
+    (event.remove.unwrap())(&[object.clone(),None]).unwrap();assert_eq!(count.get(),0);
+    assert!(matches!((event.add)(&[None,None]),Err(MarkupInvokeError::Argument{index:0,..})));
+    assert_eq!((MetaPairedInstance::MARKUP.find_methods("remove_Changed").next().unwrap().invoke)(&[object,None]),Ok(None));
+    assert_eq!(count.get(),-1);
+}
