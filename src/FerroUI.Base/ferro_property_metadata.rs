@@ -306,7 +306,15 @@ pub struct StyledPropertyMetadata<T> {
     /// The metadata of the storage type of a value type that is not its own storage type
     /// ([`StyledValue::Storage`]): what the property store reads, made the first time it is
     /// asked for (`for_storage`). Empty for a type that is its own storage type.
-    storage: OnceCell<Rc<dyn Any>>,
+    storage: OnceCell<StorageMetadata>,
+}
+
+/// The metadata of the storage type of a value type: the one of an enumeration named as what it
+/// is, so that the store reads it with no call to find its type (the check of the type is decided
+/// when `for_storage` is compiled), any other as a value of any type.
+enum StorageMetadata {
+    Enumeration(Rc<StyledPropertyMetadata<crate::EnumValue>>),
+    Other(Rc<dyn Any>),
 }
 
 impl<T: Clone> Clone for StyledPropertyMetadata<T> {
@@ -398,7 +406,12 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
             Some(copy) => copy,
             None => self.make_storage_copy(),
         };
-        match copy.clone().downcast() {
+        let copy = match copy {
+            // Of a type known here: the downcast is decided when the function is compiled.
+            StorageMetadata::Enumeration(copy) => (copy.clone() as Rc<dyn Any>).downcast(),
+            StorageMetadata::Other(copy) => copy.clone().downcast(),
+        };
+        match copy {
             Ok(copy) => copy,
             Err(_) => unreachable!("the storage metadata has the storage type"),
         }
@@ -406,7 +419,7 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
 
     #[cold]
     #[inline(never)]
-    fn make_storage_copy(&self) -> &Rc<dyn Any> {
+    fn make_storage_copy(&self) -> &StorageMetadata {
         self.storage.get_or_init(|| {
             let coerce = self.coerce.as_ref().map(|coerce| {
                 let callback = coerce.callback().clone();
@@ -414,12 +427,16 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
                     Rc::new(move |owner, value| T::into_storage(callback(owner, T::from_storage(value))));
                 Coercion::new(wrapped)
             });
-            Rc::new(StyledPropertyMetadata::<T::Storage> {
+            let copy = Rc::new(StyledPropertyMetadata::<T::Storage> {
                 base: self.base.clone(),
                 default_value: self.default_value.clone().map(T::into_storage),
                 coerce,
                 storage: OnceCell::new(),
-            }) as Rc<dyn Any>
+            }) as Rc<dyn Any>;
+            match copy.downcast() {
+                Ok(enumeration) => StorageMetadata::Enumeration(enumeration),
+                Err(other) => StorageMetadata::Other(other),
+            }
         })
     }
 }
