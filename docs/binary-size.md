@@ -1365,7 +1365,138 @@ Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-
 `a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
 create both through their markup constructors.
 
-### 4.27 One property store per storage type (#986)
+### 4.27 A setter's markup extension describes `Setter.Value` alone (#612)
+
+A markup extension in the value of a setter (`<Setter Property=".." Value="{StaticResource
+..}" />`) asks for its target property; compiled markup gives it the description of
+`Setter.Value` (`rt::setter_value_property()`), which the runtime library built from the markup
+declaration of the setter. Naming the declaration keeps all of it: every member of the setter
+and what the members reach, the target property path of the setters of visual states and its
+typed bindings among them. `ircut.py` on the whole-program module after section 4.26: 93.6 kB
+reachable only through `setter_value_property`.
+
+`Setter.Value` is now also a `MarkupProperty` of its own in `ferroui-base`, built with the
+accessor forms of the declaration macros from the same functions and attributes as the member
+of the declaration (`Setter::__value_markup_property`), and the runtime library describes the
+target property from it, with the owner name the declaration gives for the messages of its
+accessors. The description is one per thread, as it was.
+
+| `samples/HelloWorld`, macOS | 4.26 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,563,848 bytes | 18,461,208 bytes | -102,640 bytes (-0.6 %) |
+| release, `__TEXT,__text` | 14,551,128 bytes | 14,473,576 bytes | -77,552 bytes (-0.5 %) |
+| `dist`, file | 15,917,456 bytes | 15,834,272 bytes | -83,184 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 13,007,668 bytes | 12,933,984 bytes | -73,684 bytes (-0.6 %) |
+
+Test: `the_setter_value_target_property_is_the_declared_member`
+(`ferroui-markup-xaml`, `xaml_il/runtime/compiled.rs`).
+
+### 4.28 The state mappers reach the visual state manager through what it states (#612)
+
+The state mappers of section 4.25 named `VisualStateManager::implementation_root` and
+`go_to_state`, so an application with a button linked the visual state manager and everything a
+change of state can run: the storyboards, the key-frame animations of its transitions, the
+easing functions, the adaptive and state triggers, and the content page and page classes that
+the root of the visual states is looked up through. An element has groups of visual states only
+once the manager is initialised on its thread (the groups are its attached property, whose
+accessor initialises the class), and hello world's templates have none.
+
+The manager's static constructor now states the two functions the mappers call
+(`state_mappers::states_in_use`); before that no mapper is installed, which is what happened
+anyway, as no element can have groups. The mappers name nothing of the manager. `ircut.py
+--edges` predicted 74 kB; the classes behind the manager made it more:
+
+| `samples/HelloWorld`, macOS | 4.27 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,461,208 bytes | 17,897,688 bytes | -563,520 bytes (-3.1 %) |
+| release, `__TEXT,__text` | 14,473,576 bytes | 14,017,584 bytes | -455,992 bytes (-3.2 %) |
+| Class initialisers linked | 150 | 123 | -27 |
+| `dist`, file | 15,834,272 bytes | 15,368,416 bytes | -465,856 bytes (-2.9 %) |
+| `dist`, `__TEXT,__text` | 12,933,984 bytes | 12,535,144 bytes | -398,840 bytes (-3.1 %) |
+
+The classes that left: the visual state manager, the storyboard and timeline, the double,
+color, point and object animations and their key frames (plain, easing and spline), the
+easing functions, the adaptive and state triggers, the content page and the page.
+
+Test: `the_manager_is_named_by_the_mappers_once_an_element_has_groups`
+(`visual_state/state_mapper_tests.rs`, on a thread of its own).
+
+### 4.29 The tool tips are followed from the initialisation of their class (#612)
+
+The tool tip service, which the application creates at start-up as upstream does, subscribed to
+`ToolTip.ServiceEnabled` and `ToolTip.Tip`; the static constructor of the top-level subscribed to
+`ToolTip.ServiceEnabled`; and the help text of an automation peer read `ToolTip.Tip`. An accessor
+of an attached property initialises its owner, so every application initialised the tool tip
+class at start-up and linked it, the popup it opens and the automation peers of both. A control
+has a tip only once the class is initialised on its thread: the tip is the class's attached
+property.
+
+The class's static constructor now subscribes the services made before it and the top-level (in
+the order of before: the services, then the top-level), and states what the service does with
+tool tips on raw input and on an update for the control under the pointer, and how others read
+a tip (`tool_tip::tip_if_any`). Before that the service has no tip control and nothing to do; a
+service made later subscribes at once.
+
+| `samples/HelloWorld`, macOS | 4.28 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 17,897,688 bytes | 17,758,584 bytes | -139,104 bytes (-0.8 %) |
+| release, `__TEXT,__text` | 14,017,584 bytes | 13,895,200 bytes | -122,384 bytes (-0.9 %) |
+| Class initialisers linked | 123 | 120 | -3 (the tool tip and the automation peers of the tool tip and the popup) |
+| `dist`, file | 15,368,416 bytes | 15,268,688 bytes | -99,728 bytes (-0.6 %) |
+| `dist`, `__TEXT,__text` | 12,535,144 bytes | 12,438,468 bytes | -96,676 bytes (-0.8 %) |
+
+Without the automation peer's read, the first step alone gave 17 kB: one reader of the property
+is enough to keep the class. With sections 4.25 to 4.28, hello world is 13.5 % smaller than main
+in release (20,529,288 bytes) and 12.5 % in `dist` (17,446,112 bytes).
+
+Tests: the 395 tool tip, top-level and automation tests of `ferroui-controls`, each on a thread of
+its own, so each goes through the service made before the class's initialisation.
+
+The catalog and the WinUI gallery show tool tips and keep the class; they grow by the stated
+functions (release: the catalog +15.8 kB, the gallery -0.9 kB).
+
+### 4.30 The declarative applications (#612, #570)
+
+The same trace on the applications of the declarative layer, at section 4.29 (release, macOS):
+
+- **`hello-world-builders` against the XAML hello world.** 17,856,464 against 17,758,584 bytes
+  stripped (+97,880 bytes), 118 against 120 class initialisers (the XAML application has its
+  `App` and `MainWindow` classes). The difference is the declarative layer itself: `ferroui_view`
+  80 kB (the reactive runtime, mounting and the builders) and the generic code it instantiates
+  in `alloc`, `std` and `hashbrown`, about 40 kB. The builders link no class, no unit of the
+  theme and no part of the framework that the XAML version does not: there is nothing of the
+  framework to cut there.
+- **`samples/TodoMvc`.** 22,221,960 bytes stripped, 18,598,960 in `dist`, 189
+  class initialisers. Most of what it links beyond hello world are its controls and their units
+  of the theme (the text box with the menu flyout of its context menu, the check box, the grid,
+  the scroll bars) and units of the WinUI theme (reveal and acrylic brushes, theme shadows, the
+  lights); those belong to theme trimming. One root is outside the theme:
+
+**The automation peer of an items control read `ListBox.Scroll`.** `ItemsControlAutomationPeer`
+looked for the element that scrolls the items with `get_direct_value(ListBox::scroll_property())`;
+the accessor initialises the list box class, so every application with an items control linked
+the list box and its virtualizing panel. In TodoMvc the items control is the presenter of the
+menu flyout of the text box's context menu. The peer now reads the element from the list box
+itself (`downcast_ref::<ListBox>().and_then(ListBox::scroll)`, the getter the property is
+registered with); for an items control of another class the property is not registered, and the
+read panicked (`Property 'ListBox.Scroll' not registered on 'ItemsControl'`, the new test run on
+the code before the change): the peer now finds no element to scroll.
+
+| `samples/TodoMvc`, macOS | 4.29 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 22,221,960 bytes | 22,133,560 bytes | -88,400 bytes (-0.4 %) |
+| release, `__TEXT,__text` | 17,549,496 bytes | 17,458,504 bytes | -90,992 bytes (-0.5 %) |
+| Class initialisers linked | 189 | 187 | -2 (the list box, the virtualizing stack panel) |
+| `dist`, file | 18,598,960 bytes | 18,499,472 bytes | -99,488 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 15,232,428 bytes | 15,154,576 bytes | -77,852 bytes (-0.5 %) |
+
+Hello world, the catalog and the WinUI gallery are unchanged (they have no items control, or
+use the list box).
+
+Test: `the_peer_of_an_items_control_scrolls_with_the_element_of_a_list_box_only`
+(`automation/peers/items_automation_peer_tests.rs`).
+
+### 4.31 One property store per storage type (#986)
 
 The property store was compiled once for every value type of a styled property:
 `EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of
