@@ -238,8 +238,16 @@ impl LayoutableImpl for Layoutable {
 
         this.apply_template();
 
-        let min_max = MinMax::new(this);
-        let constrained_size = LayoutHelper::apply_layout_constraints_min_max(min_max, available_size.deflate(margin));
+        let winui_measure_rounding = use_layout_rounding && this.use_winui_measure_rounding();
+        let mut content_available = available_size.deflate(margin);
+        if winui_measure_rounding {
+            content_available = LayoutHelper::round_winui_measure_constraint(content_available, scale);
+        }
+        let mut min_max = MinMax::new(this);
+        if winui_measure_rounding {
+            min_max = min_max.round_for_winui(scale);
+        }
+        let constrained_size = LayoutHelper::apply_layout_constraints_min_max(min_max, content_available);
 
         let mut container_sizing = ContainerSizing::Normal;
         // Only a container that is queried has a provider to tell its size: the sizing is asked
@@ -256,7 +264,9 @@ impl LayoutableImpl for Layoutable {
         // Without a hold of its own an element holds at the constraint it got: an axis fixed by an
         // explicit size (or equal limits) gives `measure_override` that constraint at every
         // available size, so it holds there for all of them (section 9.15).
-        let hold = if container_sizing == ContainerSizing::Normal {
+        // The ordinary hold maps constraint ranges back to available sizes by
+        // adding the margins. The pixel floor changes that mapping.
+        let hold = if container_sizing == ContainerSizing::Normal && !winui_measure_rounding {
             Some(this.measure_hold_override(constrained_size).unwrap_or_else(|| crate::layout::MeasureHold::exactly(constrained_size)))
         } else {
             None
@@ -281,7 +291,12 @@ impl LayoutableImpl for Layoutable {
         }
 
         if use_layout_rounding {
-            let rounded = LayoutHelper::round_layout_size_up(Size::new(width, height), scale);
+            let size = Size::new(width, height);
+            let rounded = if winui_measure_rounding {
+                LayoutHelper::round_winui_size(size, scale)
+            } else {
+                LayoutHelper::round_layout_size_up(size, scale)
+            };
             width = rounded.width;
             height = rounded.height;
         }
@@ -398,9 +413,17 @@ impl LayoutableImpl for Layoutable {
             size = size.with_height(size.height.min(desired_size.height - margin.top - margin.bottom));
         }
 
-        size = LayoutHelper::apply_layout_constraints_min_max(MinMax::new(this), size);
+        let mut min_max = MinMax::new(this);
+        let winui_measure_rounding = use_layout_rounding && this.use_winui_measure_rounding();
+        if winui_measure_rounding {
+            min_max = min_max.round_for_winui(scale);
+        }
+        size = LayoutHelper::apply_layout_constraints_min_max(min_max, size);
 
-        if use_layout_rounding {
+        if winui_measure_rounding {
+            size = LayoutHelper::round_winui_size(size, scale);
+            available_size_minus_margins = LayoutHelper::round_winui_size(available_size_minus_margins, scale);
+        } else if use_layout_rounding {
             size = LayoutHelper::round_layout_size_up(size, scale);
             available_size_minus_margins = LayoutHelper::round_layout_size_up(available_size_minus_margins, scale);
         }
@@ -434,7 +457,12 @@ impl LayoutableImpl for Layoutable {
         }
 
         let mut origin = Point::new(origin_x, origin_y);
-        if use_layout_rounding {
+        if winui_measure_rounding {
+            origin = Point::new(
+                LayoutHelper::round_winui_dimension(origin.x, scale),
+                LayoutHelper::round_winui_dimension(origin.y, scale),
+            );
+        } else if use_layout_rounding {
             origin = LayoutHelper::round_layout_point(origin, scale);
         }
 
@@ -557,6 +585,19 @@ crate::ferro_properties! { impl Layoutable {
             )
         }
     );
+
+    ferro_property!(
+        /// Defines the inherited `UseWinUiMeasureRounding` property.
+        ///
+        /// When layout rounding is enabled, this uses WinUI's physical-pixel
+        /// rounding for layout sizes, offsets and border insets.
+        pub fn use_winui_measure_rounding_property() -> StyledProperty<bool> {
+            FerroProperty::register_with::<Layoutable, _>(
+                "UseWinUiMeasureRounding",
+                StyledPropertyOptions::new(false).inherits(true),
+            )
+        }
+    );
 } }
 
 impl Layoutable {
@@ -582,6 +623,7 @@ impl Layoutable {
             // measure holds that measure may not come, so the change invalidates the measure
             // (desktop-performance.md section 9.15).
             Self::use_layout_rounding_property().as_property(),
+            Self::use_winui_measure_rounding_property().as_property(),
         ]);
     }
 
@@ -859,6 +901,16 @@ impl Layoutable {
 
     pub fn set_use_layout_rounding(&self, value: bool) {
         self.set_value(Self::use_layout_rounding_property(), value)
+    }
+
+    /// Whether to use WinUI's physical-pixel rounding rules during layout.
+    /// This inherited option applies when layout rounding is enabled.
+    pub fn use_winui_measure_rounding(&self) -> bool {
+        self.get_value(Self::use_winui_measure_rounding_property())
+    }
+
+    pub fn set_use_winui_measure_rounding(&self, value: bool) {
+        self.set_value(Self::use_winui_measure_rounding_property(), value)
     }
 
     /// How the element is queried as a container (`Container.Sizing`), which the measure of

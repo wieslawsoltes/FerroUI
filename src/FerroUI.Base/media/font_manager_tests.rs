@@ -1057,6 +1057,20 @@ fn try_get_glyph_typeface_should_use_perfect_match_in_collection_before_nearest_
 }
 
 #[test]
+fn composite_family_keeps_a_system_alias_ahead_of_its_fallback() {
+    let backend = TestFontManagerImpl::new("Noto Mono");
+    backend.add_font(test_fonts::noto_mono().build());
+    backend.add_font(test_fonts::inter_regular().build());
+    backend.add_alias("Noto Mono Small", "Noto Mono");
+    let _scope = TestFontScope::with_font_manager(backend);
+
+    let selected = Typeface::from_name("Noto Mono Small").glyph_typeface();
+    let composite = Typeface::from_name("Noto Mono Small, Inter").glyph_typeface();
+    assert!(Rc::ptr_eq(&selected, &composite));
+    assert_eq!(Typeface::from_name("Missing Family, Inter").glyph_typeface().family_name(), "Inter");
+}
+
+#[test]
 fn try_get_glyph_typeface_should_cache_matched_glyph_typeface_under_requested_family_name() {
     let font_manager_impl = TestFontManagerImpl::new("Noto Mono");
 

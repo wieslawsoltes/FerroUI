@@ -4,12 +4,50 @@
 use crate::unit_tests::media::CustomFontManagerImpl;
 use crate::unit_tests::mock_platform_render_interface;
 use crate::PlatformRenderInterface;
+use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::text_formatting::unicode::Codepoint;
-use ferroui_base::media::text_formatting::{TextShaper, TextShaperOptions};
+use ferroui_base::media::text_formatting::{TextLayout, TextLayoutOptions, TextShaper, TextShaperOptions};
 use ferroui_base::media::{FontFamily, FontManager, FontStretch, FontStyle, FontWeight, Typeface};
 use ferroui_base::utilities::{current_locale, Locale, ReadOnlyMemory};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
+
+#[test]
+fn optical_sizing_selects_and_reuses_the_face_that_shapes_and_draws_text() {
+    let _scope = start();
+    let family = FontFamily::new("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia#Inter Variable");
+    let default_face = Typeface::new(family.clone()).glyph_typeface();
+    let optical = OpenTypeTag::parse("opsz");
+    let weight = OpenTypeTag::parse("wght");
+    let base_variations = default_face.platform_typeface().variation_settings();
+    assert_eq!(base_variations.try_get_value(optical), Some(14.0));
+
+    let layout = |family, font_size| {
+        TextLayout::new("Picture", Typeface::new(family), TextLayoutOptions { font_size, ..Default::default() })
+    };
+    let face = |layout: &TextLayout| {
+        layout.text_lines()[0].text_runs()[0].properties().unwrap().cached_glyph_typeface()
+    };
+    let default_layout = layout(family.clone(), 24.0);
+    let automatic = family.with_automatic_optical_sizing();
+    let small = face(&layout(automatic.clone(), 16.0));
+    let sized = layout(automatic.clone(), 24.0);
+    let sized_face = face(&sized);
+    assert_eq!(
+        face(&default_layout).platform_typeface().variation_settings().try_get_value(optical),
+        Some(24.0),
+    );
+    assert!(Rc::ptr_eq(&default_face, &small));
+    assert!(Rc::ptr_eq(&sized_face, &face(&layout(automatic.clone(), 24.0))));
+    assert_eq!(
+        face(&layout(automatic, 25.0)).platform_typeface().variation_settings().try_get_value(optical),
+        Some(18.75),
+    );
+    let sized_variations = sized_face.platform_typeface().variation_settings();
+    assert_eq!(sized_variations.try_get_value(optical), Some(18.0));
+    assert_eq!(sized_variations.try_get_value(weight), base_variations.try_get_value(weight));
+    assert_ne!(sized.width(), default_layout.width(), "optical size changes shaping advances");
+}
 
 #[test]
 fn should_form_clusters_for_break_pairs() {

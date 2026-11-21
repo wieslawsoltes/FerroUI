@@ -6,10 +6,12 @@ use ferroui_base::media::{
     IPlatformTypeface,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
-use skia_safe::{Font, Typeface};
+use skia_safe::font_arguments::{VariationPosition, variation_position::Coordinate};
+use skia_safe::{Font, FontArguments, FourByteTag, Typeface};
 use std::any::Any;
 use std::io::{Cursor, Read};
 use std::rc::Rc;
+use std::sync::OnceLock;
 
 /// A platform typeface over a Skia typeface.
 pub struct SkiaTypeface {
@@ -18,6 +20,7 @@ pub struct SkiaTypeface {
     weight: FontWeight,
     style: FontStyle,
     stretch: FontStretch,
+    collection_index: OnceLock<u32>,
     /// The glyph bounds its glyph runs measured, by size (`glyph_bounds_cache`).
     glyph_bounds: GlyphBoundsCache,
 }
@@ -34,6 +37,7 @@ impl SkiaTypeface {
             stretch: FontStretch::from_i32(*font_style.width()).unwrap_or(FontStretch::Normal),
             sk_typeface: typeface,
             font_simulations,
+            collection_index: OnceLock::new(),
             glyph_bounds: GlyphBoundsCache::default(),
         })
     }
@@ -120,10 +124,6 @@ impl IPlatformTypeface for SkiaTypeface {
     /// design position): the axes of `settings` take their values, the others the values of this
     /// typeface. The optical size of a text is chosen with it (#859).
     fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
-        use skia_safe::font_arguments::variation_position::Coordinate;
-        use skia_safe::font_arguments::VariationPosition;
-        use skia_safe::{FontArguments, FourByteTag};
-
         let mut coordinates: Vec<Coordinate> = self.sk_typeface.variation_design_position().unwrap_or_default();
         for variation in settings.variations() {
             let axis = FourByteTag::new(variation.tag.value());
@@ -133,8 +133,15 @@ impl IPlatformTypeface for SkiaTypeface {
                 None => coordinates.push(Coordinate { axis, value }),
             }
         }
-        let position = VariationPosition { coordinates: &coordinates };
-        let arguments = FontArguments::new().set_variation_design_position(position);
+        // A variable face can come from a nonzero index in a font collection.
+        let index = *self.collection_index.get_or_init(|| {
+            self.sk_typeface.to_existing_font_data().map(|(_, index)| index)
+                .or_else(|| self.sk_typeface.to_font_bytes().map(|(_, index)| index))
+                .unwrap_or_default()
+        });
+        let mut arguments = FontArguments::new();
+        arguments.set_collection_index(index as usize);
+        let arguments = arguments.set_variation_design_position(VariationPosition { coordinates: &coordinates });
         let typeface = self.sk_typeface.clone_with_arguments(&arguments)?;
         let typeface: Rc<dyn IPlatformTypeface> = SkiaTypeface::new(typeface, self.font_simulations);
         Some(typeface)

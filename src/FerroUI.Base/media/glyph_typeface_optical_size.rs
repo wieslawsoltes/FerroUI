@@ -72,8 +72,12 @@ pub(crate) fn names_optical_size(family: &FontFamily) -> bool {
 pub(crate) fn glyph_typeface_for_text(
     glyph_typeface: Rc<GlyphTypeface>,
     family: &FontFamily,
+    requested_family: &FontFamily,
     em_size: f64,
 ) -> Rc<GlyphTypeface> {
+    if requested_family.automatic_optical_sizing() {
+        return glyph_typeface.at_optical_size_in_points(em_size * (72.0 / 96.0));
+    }
     // The axis first: it is read once per typeface, and most fonts have none, so the name of the
     // family is looked at only for a font that has the axis.
     if glyph_typeface.optical_size_axis().is_none() || names_optical_size(family) {
@@ -100,15 +104,28 @@ impl GlyphTypeface {
         if !em_size.is_finite() || em_size <= 0.0 {
             return self.clone();
         }
-        let optical_size = em_size.clamp(min, max).round().clamp(min.ceil(), max.floor().max(min.ceil())) as i32;
+        let optical_size = em_size.clamp(min, max).round().clamp(min.ceil(), max.floor().max(min.ceil()));
+        self.at_optical_axis_value(optical_size, 0.5)
+    }
+
+    /// An explicit request uses physical points, with the fractional size preserved.
+    fn at_optical_size_in_points(self: &Rc<Self>, points: f64) -> Rc<GlyphTypeface> {
+        let Some((min, max)) = self.optical_size_axis() else { return self.clone() };
+        if !points.is_finite() || points <= 0.0 {
+            return self.clone();
+        }
+        self.at_optical_axis_value(points.clamp(min, max), f32::EPSILON.into())
+    }
+
+    fn at_optical_axis_value(self: &Rc<Self>, optical_size: f64, tolerance: f64) -> Rc<GlyphTypeface> {
         if let Some((_, instance)) = self.optical_sizes.borrow().iter().find(|(size, _)| *size == optical_size) {
             return instance.clone();
         }
         let current = self.platform_typeface().variation_settings().try_get_value(OPSZ);
-        if current.is_some_and(|current| (current - optical_size as f64).abs() < 0.5) {
+        if current.is_some_and(|current| (current - optical_size).abs() < tolerance) {
             return self.clone();
         }
-        let settings = FontVariationSettings::new([FontVariation::new(OPSZ, optical_size as f64)]);
+        let settings = FontVariationSettings::new([FontVariation::new(OPSZ, optical_size)]);
         let Some(platform_typeface) = self.platform_typeface().with_variation_settings(&settings) else {
             return self.clone();
         };
@@ -117,7 +134,11 @@ impl GlyphTypeface {
         };
         // The instance is at its optical size: it is not asked for others.
         let _ = instance.optical_size_axis.set(None);
-        self.optical_sizes.borrow_mut().push((optical_size, instance.clone()));
+        let mut variants = self.optical_sizes.borrow_mut();
+        if variants.len() == 128 {
+            variants.clear();
+        }
+        variants.push((optical_size, instance.clone()));
         instance
     }
 }

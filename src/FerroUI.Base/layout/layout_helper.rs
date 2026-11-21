@@ -30,14 +30,10 @@ impl LayoutHelper {
     /// 9.15); without a child, every size.
     pub fn measure_hold_with_border(
         control: Option<&Layoutable>,
-        mut padding: Thickness,
-        mut border_thickness: Thickness,
+        padding: Thickness,
+        border_thickness: Thickness,
     ) -> Option<crate::layout::MeasureHold> {
-        if let Some(scale) = Self::is_parent_layout_rounded(control) {
-            padding = Self::round_layout_thickness(padding, scale);
-            border_thickness = Self::round_layout_thickness(border_thickness, scale);
-        }
-        let around = padding + border_thickness;
+        let around = Self::layout_border_insets(control, padding, border_thickness);
         match control {
             Some(control) => control
                 .measure_hold()
@@ -49,27 +45,24 @@ impl LayoutHelper {
     pub fn measure_child_with_border(
         control: Option<&Layoutable>,
         available_size: Size,
-        mut padding: Thickness,
-        mut border_thickness: Thickness,
+        padding: Thickness,
+        border_thickness: Thickness,
     ) -> Size {
-        if let Some(scale) = Self::is_parent_layout_rounded(control) {
-            padding = Self::round_layout_thickness(padding, scale);
-            border_thickness = Self::round_layout_thickness(border_thickness, scale);
-        }
+        let around = Self::layout_border_insets(control, padding, border_thickness);
 
         match control {
             Some(control) => {
-                control.measure(available_size.deflate(padding + border_thickness));
-                control.desired_size().inflate(padding + border_thickness)
+                control.measure(available_size.deflate(around));
+                control.desired_size().inflate(around)
             }
-            None => Size::default().inflate(padding + border_thickness),
+            None => Size::default().inflate(around),
         }
     }
 
     /// Measures a child with padding, returning the desired size including
     /// the padding.
     pub fn measure_child(control: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
-        if let Some(scale) = Self::is_parent_layout_rounded(control) {
+        if let Some((scale, _)) = Self::parent_layout_rounding(control) {
             padding = Self::round_layout_thickness(padding, scale);
         }
 
@@ -86,19 +79,16 @@ impl LayoutHelper {
     pub fn arrange_child_with_border(
         child: Option<&Layoutable>,
         available_size: Size,
-        mut padding: Thickness,
-        mut border_thickness: Thickness,
+        padding: Thickness,
+        border_thickness: Thickness,
     ) -> Size {
-        if let Some(scale) = Self::is_parent_layout_rounded(child) {
-            padding = Self::round_layout_thickness(padding, scale);
-            border_thickness = Self::round_layout_thickness(border_thickness, scale);
-        }
-        Self::arrange_child_internal(child, available_size, padding + border_thickness)
+        let around = Self::layout_border_insets(child, padding, border_thickness);
+        Self::arrange_child_internal(child, available_size, around)
     }
 
     /// Arranges a child inside padding.
     pub fn arrange_child(child: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
-        if let Some(scale) = Self::is_parent_layout_rounded(child) {
+        if let Some((scale, _)) = Self::parent_layout_rounding(child) {
             padding = Self::round_layout_thickness(padding, scale);
         }
         Self::arrange_child_internal(child, available_size, padding)
@@ -111,15 +101,24 @@ impl LayoutHelper {
         available_size
     }
 
-    /// Returns the layout scale of the child's parent if the parent uses
-    /// layout rounding.
-    fn is_parent_layout_rounded(child: Option<&Layoutable>) -> Option<f64> {
+    fn layout_border_insets(child: Option<&Layoutable>, padding: Thickness, border: Thickness) -> Thickness {
+        let Some((scale, winui)) = Self::parent_layout_rounding(child) else {
+            return padding + border;
+        };
+        // WinUI rounds the painted border on each side. Padding participates
+        // in layout at its original size.
+        let padding = if winui { padding } else { Self::round_layout_thickness(padding, scale) };
+        padding + Self::round_layout_thickness(border, scale)
+    }
+
+    /// Returns the layout scale and WinUI mode of the child's layout-rounded parent.
+    fn parent_layout_rounding(child: Option<&Layoutable>) -> Option<(f64, bool)> {
         let parent = child?.visual_parent()?;
         let parent = parent.downcast_ref::<Layoutable>()?;
         if !parent.use_layout_rounding() {
             return None;
         }
-        Some(Self::get_layout_scale(parent))
+        Some((Self::get_layout_scale(parent), parent.use_winui_measure_rounding()))
     }
 
     /// Invalidates measure for the control and all of its visual descendants.
@@ -152,6 +151,32 @@ impl LayoutHelper {
     /// root.
     pub fn get_layout_scale(control: &Layoutable) -> f64 {
         control.layout_scaling_of_presentation_source().unwrap_or(1.0)
+    }
+
+    pub(crate) fn round_winui_measure_constraint(size: Size, dpi_scale: f64) -> Size {
+        // WinUI's layout size is single precision. Its pixel conversion and
+        // floor use doubles, then the result crosses the float boundary again.
+        fn round_axis(value: f64, scale: f64) -> f64 {
+            let value = value as f32;
+            let rounded = if value.is_finite() {
+                ((f64::from(value) * scale).floor() / scale) as f32
+            } else {
+                value
+            };
+            f64::from(rounded)
+        }
+        Size::new(round_axis(size.width, dpi_scale), round_axis(size.height, dpi_scale))
+    }
+
+    /// Rounds a WinUI layout dimension to the nearest physical pixel.
+    pub(crate) fn round_winui_dimension(value: f64, scale: f64) -> f64 {
+        // WinUI rounds single-precision layout values in double-precision
+        // pixel coordinates. Keep the snapped size in native DIP precision.
+        (f64::from(value as f32) * scale).round() / scale
+    }
+
+    pub(crate) fn round_winui_size(size: Size, scale: f64) -> Size {
+        Size::new(Self::round_winui_dimension(size.width, scale), Self::round_winui_dimension(size.height, scale))
     }
 
     /// Rounds a size to an integer number of device pixels, rounding up.

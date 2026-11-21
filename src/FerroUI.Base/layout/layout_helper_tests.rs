@@ -3,6 +3,70 @@
 use super::LayoutHelper;
 
 #[test]
+fn winui_measure_constraint_rounding_follows_the_inherited_layout_option() {
+    use super::{Layoutable, LayoutableImpl};
+    use crate::threading::Dispatcher;
+    use crate::tree_tests::{TestRoot, TestSource};
+    use crate::{FerroObjectImpl, Rect, Size, StyledElementImpl, Thickness, VisualImpl, ferro_class, ferro_impl_classes, instantiate};
+    use std::cell::Cell;
+
+    #[repr(C)]
+    struct ConstraintRecorder {
+        base: Layoutable,
+        available: Cell<Size>,
+    }
+
+    ferro_class!(ConstraintRecorder: Layoutable);
+    ferro_impl_classes!(ConstraintRecorder: FerroObjectImpl, StyledElementImpl, VisualImpl);
+    impl LayoutableImpl for ConstraintRecorder {
+        fn measure_override(this: &Self, available: Size) -> Size {
+            this.available.set(available);
+            Size::new(0.0, 73.2)
+        }
+    }
+
+    let _scope = Dispatcher::unit_test_scope();
+    let root = TestRoot::new();
+    let child = instantiate(ConstraintRecorder {
+        base: Layoutable::construct(),
+        available: Cell::new(Size::default()),
+    });
+    root.logical_children().add(child.clone().upcast());
+    root.visual_children().add(child.clone().upcast());
+    let source = TestSource::new(root.clone(), 1.25);
+    root.set_presentation_source_for_root_visual(Some(source));
+
+    let available = Size::new(781.6, f64::INFINITY);
+    child.measure(available);
+    assert_eq!(child.available.get(), available);
+    assert_eq!(child.desired_size().height, 73.6);
+
+    root.set_use_winui_measure_rounding(true);
+    child.measure(available);
+    assert_eq!(child.available.get(), Size::new(f64::from(780.8_f32), f64::INFINITY));
+    child.measure(Size::new(f64::from(780.8_f32), f64::INFINITY));
+    assert_eq!(child.available.get(), Size::new(780.0, f64::INFINITY));
+    // The source treats 73.2 DIP as a float before rounding at 125%.
+    assert_eq!(child.desired_size().height, 72.8);
+    let padded = LayoutHelper::measure_child_with_border(
+        Some(&child), Size::INFINITY, Thickness::new(4.0, 3.0, 4.0, 3.0), Thickness::default(),
+    );
+    assert_eq!(padded.height, 78.8);
+    child.set_height(17.0);
+    child.measure(available);
+    assert_eq!(child.available.get().height, 16.8);
+    assert_eq!(child.desired_size().height, 16.8);
+    child.arrange(Rect::new(0.0, 45.2, 20.0, 16.8));
+    assert_eq!(child.bounds().height, 16.8);
+    assert_eq!(child.bounds().y, 45.6);
+
+    child.set_height(f64::NAN);
+    child.set_use_layout_rounding(false);
+    child.measure(available);
+    assert_eq!(child.available.get(), available);
+}
+
+#[test]
 fn round_layout_value_without_dpi_aware() {
     const VALUE: f64 = 42.5;
     let expected_value = VALUE.round_ties_even();

@@ -24,7 +24,12 @@ impl FontFamilyLineMetrics {
         font_rendering_em_size: f64,
         text_line_bounds: TextLineBounds,
     ) -> Self {
-        let typeface = Typeface::new(font_family.clone()).glyph_typeface();
+        let typeface = crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
+            Typeface::new(font_family.clone()).glyph_typeface(),
+            font_family,
+            font_family,
+            font_rendering_em_size,
+        );
         Self::from_font_metrics(typeface.metrics(), font_rendering_em_size, text_line_bounds)
     }
 

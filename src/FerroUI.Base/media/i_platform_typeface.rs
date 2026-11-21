@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::io::Read;
+use std::rc::Rc;
 
 use crate::media::{FontSimulations, FontStretch, FontStyle, FontVariationSettings, FontWeight, IFontMemory};
 
@@ -33,7 +34,7 @@ pub trait IPlatformTypeface: IFontMemory {
     /// `settings` take their values, the other axes keep the values of this typeface. `None`,
     /// the default, where the backend cannot make one (the font is then used as it is). The
     /// optical size of a text is chosen with it (`GlyphTypeface::at_optical_size`).
-    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<std::rc::Rc<dyn IPlatformTypeface>> {
+    fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
         let _ = settings;
         None
     }
