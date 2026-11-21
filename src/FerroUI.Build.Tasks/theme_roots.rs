@@ -434,11 +434,13 @@ pub fn keys_live_by_entry(theme: &ThemeUnitsModel, kept: &[u32], roots: &Roots) 
     }
     loop {
         let before = live.len();
-        for unit in &units {
-            for entry in unit.entries.iter().filter(|entry| live.contains(&entry.key)) {
-                live.extend(entry.references.iter().cloned());
-            }
-        }
+        let named: Vec<String> = units
+            .iter()
+            .flat_map(|unit| unit.entries.iter())
+            .filter(|entry| live.contains(&entry.key))
+            .flat_map(|entry| entry.references.iter().cloned())
+            .collect();
+        live.extend(named);
         if live.len() == before {
             break;
         }
