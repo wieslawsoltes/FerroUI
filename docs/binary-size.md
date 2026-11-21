@@ -1391,6 +1391,36 @@ accessors. The description is one per thread, as it was.
 Test: `the_setter_value_target_property_is_the_declared_member`
 (`ferroui-markup-xaml`, `xaml_il/runtime/compiled.rs`).
 
+### 4.28 The state mappers reach the visual state manager through what it states (#612)
+
+The state mappers of section 4.25 named `VisualStateManager::implementation_root` and
+`go_to_state`, so an application with a button linked the visual state manager and everything a
+change of state can run: the storyboards, the key-frame animations of its transitions, the
+easing functions, the adaptive and state triggers, and the content page and page classes that
+the root of the visual states is looked up through. An element has groups of visual states only
+once the manager is initialised on its thread (the groups are its attached property, whose
+accessor initialises the class), and hello world's templates have none.
+
+The manager's static constructor now states the two functions the mappers call
+(`state_mappers::states_in_use`); before that no mapper is installed, which is what happened
+anyway, as no element can have groups. The mappers name nothing of the manager. `ircut.py
+--edges` predicted 74 kB; the classes behind the manager made it more:
+
+| `samples/HelloWorld`, macOS | 4.27 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,461,208 bytes | 17,897,688 bytes | -563,520 bytes (-3.1 %) |
+| release, `__TEXT,__text` | 14,473,576 bytes | 14,017,584 bytes | -455,992 bytes (-3.2 %) |
+| Class initialisers linked | 150 | 123 | -27 |
+| `dist`, file | 15,834,272 bytes | 15,368,416 bytes | -465,856 bytes (-2.9 %) |
+| `dist`, `__TEXT,__text` | 12,933,984 bytes | 12,535,144 bytes | -398,840 bytes (-3.1 %) |
+
+The classes that left: the visual state manager, the storyboard and timeline, the double,
+color, point and object animations and their key frames (plain, easing and spline), the
+easing functions, the adaptive and state triggers, the content page and the page.
+
+Test: `the_manager_is_named_by_the_mappers_once_an_element_has_groups`
+(`visual_state/state_mapper_tests.rs`, on a thread of its own).
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
