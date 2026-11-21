@@ -89,7 +89,9 @@ jobs:
     name: Native studio, MCP and render smoke
     if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # One native build feeds Studio and both VS Code hosts. Cold runners have
+    # reached 45 minutes while the minimum-version host is still running.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -127,14 +129,19 @@ jobs:
         run: |
           cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview \
             -p todo-workbench --features todo-workbench/app-preview,todo-workbench/hot-reload,todo-workbench/mcp
-      - name: VS Code extension host smoke
+      - name: Current VS Code extension host
         working-directory: editors/vscode
         env:
           FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
         run: |
           npm ci
           xvfb-run -a npm test
-          FERROUI_TEST_VSCODE_VERSION=1.102.0 xvfb-run -a node test/run.mjs
+      - name: Minimum VS Code extension host (1.102.0)
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
+          FERROUI_TEST_VSCODE_VERSION: '1.102.0'
+        run: xvfb-run -a node test/run.mjs
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
