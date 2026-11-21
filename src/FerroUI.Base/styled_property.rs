@@ -128,7 +128,10 @@ impl<T: PropertyValue> StyledProperty<T> {
         self.default_for(|| owner.get_type())
     }
 
-    #[inline]
+    // Inlined into every read of a value: an unset property is the common case of the reads of a
+    // layout pass, per child. With `#[inline]` alone it became a call of its own when the typed
+    // read of the codec added a caller (`PanelMeasureArrange`, +3 % instructions, #997).
+    #[inline(always)]
     fn default_for(&self, host: impl FnOnce() -> &'static TypeInfo) -> T {
         if let Some(value) = &*self.single_default_value.borrow() {
             return value.clone();

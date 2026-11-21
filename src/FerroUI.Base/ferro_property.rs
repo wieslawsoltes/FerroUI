@@ -1293,6 +1293,16 @@ macro_rules! __record_property_accessor {
     ($owner:ident, $vis:vis, $name:ident, $property:expr) => {};
 }
 
+/// The first read of a property accessor on a thread, which registers the property. Out of the
+/// accessor, so that what is inlined into every read of a property is the read of a cell: with
+/// the registration in it, whether an accessor was inlined changed with unrelated code.
+#[doc(hidden)]
+#[cold]
+#[inline(never)]
+pub fn __first_property_read<R>(register: impl FnOnce() -> R) -> R {
+    register()
+}
+
 /// Declares the accessor of a single property definition.
 ///
 /// ```ignore
@@ -1338,7 +1348,7 @@ macro_rules! ferro_property {
             }
             match CELL.get() {
                 ::std::option::Option::Some(property) => property,
-                ::std::option::Option::None => {
+                ::std::option::Option::None => $crate::__first_property_read(|| {
                     <$owner as $crate::StaticType>::TYPE.ensure_class_init();
                     match CELL.get() {
                         ::std::option::Option::Some(property) => property,
@@ -1353,7 +1363,7 @@ macro_rules! ferro_property {
                             property
                         }
                     }
-                }
+                }),
             }
         }
     };
@@ -1368,12 +1378,12 @@ macro_rules! ferro_property {
             }
             match CELL.get() {
                 ::std::option::Option::Some(property) => property,
-                ::std::option::Option::None => {
+                ::std::option::Option::None => $crate::__first_property_read(|| {
                     let property: &'static $ty = $body;
                     CELL.set(::std::option::Option::Some(property));
                     $crate::__register_value_markup!(property);
                     property
-                }
+                }),
             }
         }
     };
