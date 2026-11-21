@@ -5703,9 +5703,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_2: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemErrorTextColor", value: 4294963200_u32, line: 95, position: 43 },
 ];
 
+/// The keys and targets of the packed tables of the unit 1 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS: &str = "SystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColorSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemErrorTextColorSystemControlDescriptionTextForegroundBrushSliderContainerBackgroundSystemControlTransparentBrushThumbBackgroundThumbBackgroundPointerOverThumbBackgroundPressedThumbBorderBrushThumbBorderBrushPointerOverThumbBorderBrushPressedAppBarEllipsisButtonBackgroundAppBarEllipsisButtonBackgroundPointerOverAppBarEllipsisButtonBackgroundPressedAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundAppBarEllipsisButtonForegroundPointerOverAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundAppBarForegroundAppBarHighContrastBorderLoopingSelectorButtonBackgroundTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlButtonBackgroundTextControlHighlighterForegroundTextControlHighlighterBackgroundToggleMenuFlyoutItemBackgroundToggleMenuFlyoutItemBackgroundPointerOverToggleMenuFlyoutItemBackgroundPressedToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundToggleMenuFlyoutItemForegroundPointerOverToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledToggleMenuFlyoutItemCheckGlyphForegroundToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundJumpListDefaultEnabledForegroundJumpListDefaultDisabledBackgroundJumpListDefaultDisabledForegroundAppBarBackgroundThemeBrushAppBarBorderThemeBrushAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushAppBarItemForegroundThemeBrushAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushApplicationForegroundThemeBrushApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushAutoSuggestBackgroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushFocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrushHyperlinkButtonBackgroundThemeBrushHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushHyperlinkForegroundThemeBrushHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrushLoopingSelectorForegroundThemeBrushLoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColorLoopingSelectorSelectionForegroundThemeBrushMediaButtonForegroundThemeBrushMediaButtonBackgroundThemeBrushMediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrushMediaButtonPressedBorderThemeBrushMediaControlPanelVideoThemeBrushMediaControlPanelAudioThemeBrushMediaDownloadProgressIndicatorThemeBrushMediaErrorBackgroundThemeBrushMediaTextThemeBrushTextSelectionHighlightColorThemeBrushThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrushWindowCaptionBackgroundWindowCaptionBackgroundDisabledWindowCaptionForegroundWindowCaptionForegroundDisabledWindowCaptionButtonBackgroundPointerOverWindowCaptionButtonBackgroundPressedWindowCaptionButtonStrokeWindowCaptionButtonStrokePointerOverWindowCaptionButtonStrokePressedCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressedSystemColorButtonFaceColorSystemColorGrayTextColorSystemColorButtonTextColorSystemColorHighlightTextColorSystemControlHighlightAltListAccentHighBrushSystemControlHighlightAltListAccentLowBrushSystemControlHighlightAltListAccentMediumBrushSystemControlHighlightListAccentHighBrushSystemControlHighlightListAccentLowBrushSystemControlHighlightListAccentMediumBrushSystemColorHotlightColorSystemColorWindowTextColorSystemColorWindowColorTextControlForegroundTextControlForegroundPointerOverTextControlForegroundDisabledTextControlBackgroundTextControlBackgroundPointerOverTextControlBackgroundDisabledTextControlBorderBrushFocusedTextControlBorderBrushDisabledTextControlPlaceholderForegroundTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledTextControlSelectionHighlightColorTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressed";
+
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 34, 34, 17, 1, 96, 8, 96, 67,
@@ -5714,256 +5717,256 @@ static POPULATE_WINUITHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 18, 1, 97, 8, 97, 68,
-        53, 41, 94, 24, 1, 98, 8, 98, 74,
-        118, 37, 155, 20, 1, 99, 8, 99, 70,
-        175, 40, 215, 23, 1, 100, 8, 100, 73,
-        238, 36, 274, 19, 1, 101, 8, 101, 69,
-        293, 35, 328, 18, 1, 102, 8, 102, 68,
-        346, 38, 384, 21, 1, 103, 8, 103, 71,
-        405, 42, 447, 25, 1, 104, 8, 104, 75,
-        472, 41, 513, 24, 1, 105, 8, 105, 74,
-        537, 43, 580, 26, 1, 106, 8, 106, 76,
-        606, 45, 651, 28, 1, 107, 8, 107, 78,
-        679, 42, 721, 25, 1, 108, 8, 108, 75,
-        746, 48, 794, 31, 1, 109, 8, 109, 81,
-        825, 40, 865, 23, 1, 110, 8, 110, 73,
-        888, 43, 931, 26, 1, 111, 8, 111, 76,
-        957, 39, 996, 22, 1, 112, 8, 112, 72,
-        1018, 35, 1053, 18, 1, 113, 8, 113, 68,
-        1071, 38, 1109, 21, 1, 114, 8, 114, 71,
+        51, 35, 86, 18, 1, 97, 8, 97, 68,
+        104, 41, 145, 24, 1, 98, 8, 98, 74,
+        169, 37, 206, 20, 1, 99, 8, 99, 70,
+        226, 40, 266, 23, 1, 100, 8, 100, 73,
+        289, 36, 325, 19, 1, 101, 8, 101, 69,
+        344, 35, 379, 18, 1, 102, 8, 102, 68,
+        397, 38, 435, 21, 1, 103, 8, 103, 71,
+        456, 42, 498, 25, 1, 104, 8, 104, 75,
+        523, 41, 564, 24, 1, 105, 8, 105, 74,
+        588, 43, 631, 26, 1, 106, 8, 106, 76,
+        657, 45, 702, 28, 1, 107, 8, 107, 78,
+        730, 42, 772, 25, 1, 108, 8, 108, 75,
+        797, 48, 845, 31, 1, 109, 8, 109, 81,
+        876, 40, 916, 23, 1, 110, 8, 110, 73,
+        939, 43, 982, 26, 1, 111, 8, 111, 76,
+        1008, 39, 1047, 22, 1, 112, 8, 112, 72,
+        1069, 35, 1104, 18, 1, 113, 8, 113, 68,
+        1122, 38, 1160, 21, 1, 114, 8, 114, 71,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 17, 1, 115, 8, 115, 65,
+        1181, 32, 34, 17, 1, 115, 8, 115, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 19, 1, 116, 8, 116, 67,
-        53, 33, 86, 18, 1, 117, 8, 117, 66,
-        104, 39, 143, 24, 1, 118, 8, 118, 72,
-        167, 44, 211, 29, 1, 119, 8, 119, 77,
-        240, 43, 283, 28, 1, 120, 8, 120, 76,
-        311, 36, 347, 21, 1, 121, 8, 121, 69,
-        368, 41, 409, 26, 1, 122, 8, 122, 74,
-        435, 36, 471, 21, 1, 123, 8, 123, 69,
+        1213, 34, 325, 19, 1, 116, 8, 116, 67,
+        1247, 33, 379, 18, 1, 117, 8, 117, 66,
+        1280, 39, 564, 24, 1, 118, 8, 118, 72,
+        1319, 44, 1363, 29, 1, 119, 8, 119, 77,
+        1392, 43, 1435, 28, 1, 120, 8, 120, 76,
+        1463, 36, 1499, 21, 1, 121, 8, 121, 69,
+        1520, 41, 982, 26, 1, 122, 8, 122, 74,
+        1561, 36, 1160, 21, 1, 123, 8, 123, 69,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 65535, 255, 1, 124, 8,
+        1597, 37, 65535, 255, 1, 124, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 17, 1, 125, 8, 125, 68,
-        52, 34, 35, 17, 1, 126, 8, 126, 67,
+        1634, 35, 34, 17, 1, 125, 8, 125, 68,
+        1669, 34, 34, 17, 1, 126, 8, 126, 67,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 18, 1, 127, 8, 127, 68,
-        53, 41, 94, 24, 1, 128, 8, 128, 74,
-        118, 36, 154, 19, 1, 129, 8, 129, 69,
-        173, 35, 208, 18, 1, 130, 8, 130, 68,
-        226, 38, 264, 21, 1, 131, 8, 131, 71,
-        285, 42, 327, 25, 1, 132, 8, 132, 75,
-        352, 41, 393, 24, 1, 133, 8, 133, 74,
-        417, 43, 460, 26, 1, 134, 8, 134, 76,
-        486, 38, 524, 21, 1, 135, 8, 135, 71,
-        545, 40, 585, 23, 1, 136, 8, 136, 73,
-        608, 39, 647, 22, 1, 137, 8, 137, 72,
-        669, 45, 714, 28, 1, 138, 8, 138, 78,
-        742, 38, 780, 21, 1, 139, 8, 139, 71,
-        801, 35, 836, 18, 1, 140, 8, 140, 68,
-        854, 38, 892, 21, 1, 141, 8, 141, 71,
+        1703, 35, 86, 18, 1, 127, 8, 127, 68,
+        1738, 41, 145, 24, 1, 128, 8, 128, 74,
+        1779, 36, 325, 19, 1, 129, 8, 129, 69,
+        1815, 35, 379, 18, 1, 130, 8, 130, 68,
+        1850, 38, 435, 21, 1, 131, 8, 131, 71,
+        1888, 42, 498, 25, 1, 132, 8, 132, 75,
+        1930, 41, 564, 24, 1, 133, 8, 133, 74,
+        1971, 43, 631, 26, 1, 134, 8, 134, 76,
+        2014, 38, 1499, 21, 1, 135, 8, 135, 71,
+        2052, 40, 916, 23, 1, 136, 8, 136, 73,
+        2092, 39, 1047, 22, 1, 137, 8, 137, 72,
+        2131, 45, 1435, 28, 1, 138, 8, 138, 78,
+        2176, 38, 2214, 21, 1, 139, 8, 139, 71,
+        2235, 35, 1104, 18, 1, 140, 8, 140, 68,
+        2270, 38, 1160, 21, 1, 141, 8, 141, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 65535, 255, 1, 142, 8,
+        2308, 39, 65535, 255, 1, 142, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 28, 1, 143, 8, 143, 78,
-        73, 48, 121, 31, 1, 144, 8, 144, 81,
+        2347, 45, 702, 28, 1, 143, 8, 143, 78,
+        2392, 48, 845, 31, 1, 144, 8, 144, 81,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 17, 1, 145, 8, 145, 66,
-        50, 36, 33, 17, 1, 146, 8, 146, 69,
+        2440, 33, 34, 17, 1, 145, 8, 145, 66,
+        2473, 36, 34, 17, 1, 146, 8, 146, 69,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 18, 1, 147, 8, 147, 70,
-        55, 38, 93, 19, 1, 148, 8, 148, 71,
-        112, 37, 149, 18, 1, 149, 8, 149, 70,
-        167, 40, 207, 21, 1, 150, 8, 150, 73,
-        228, 44, 272, 25, 1, 151, 8, 151, 77,
-        297, 43, 340, 24, 1, 152, 8, 152, 76,
-        364, 43, 407, 24, 1, 153, 8, 153, 76,
+        2509, 37, 86, 18, 1, 147, 8, 147, 70,
+        2546, 38, 325, 19, 1, 148, 8, 148, 71,
+        2584, 37, 379, 18, 1, 149, 8, 149, 70,
+        2621, 40, 435, 21, 1, 150, 8, 150, 73,
+        2661, 44, 498, 25, 1, 151, 8, 151, 77,
+        2705, 43, 145, 24, 1, 152, 8, 152, 76,
+        2748, 43, 564, 24, 1, 153, 8, 153, 76,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 41, 22, 1, 157, 8, 157, 74,
+        2791, 41, 1047, 22, 1, 157, 8, 157, 74,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 65535, 255, 1, 158, 8,
+        2832, 41, 65535, 255, 1, 158, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 19, 1, 159, 8, 159, 68,
-        54, 34, 88, 18, 1, 160, 8, 160, 67,
-        106, 37, 143, 21, 1, 161, 8, 161, 70,
-        164, 41, 205, 25, 1, 162, 8, 162, 74,
-        230, 40, 270, 24, 1, 163, 8, 163, 73,
-        294, 39, 333, 23, 1, 164, 8, 164, 72,
-        356, 37, 393, 21, 1, 165, 8, 165, 70,
+        2873, 35, 325, 19, 1, 159, 8, 159, 68,
+        2908, 34, 379, 18, 1, 160, 8, 160, 67,
+        2942, 37, 435, 21, 1, 161, 8, 161, 70,
+        2979, 41, 498, 25, 1, 162, 8, 162, 74,
+        3020, 40, 564, 24, 1, 163, 8, 163, 73,
+        3060, 39, 3099, 23, 1, 164, 8, 164, 72,
+        3122, 37, 1499, 21, 1, 165, 8, 165, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 21, 1, 169, 8, 169, 70,
-        58, 34, 92, 18, 1, 170, 8, 170, 67,
-        110, 38, 148, 22, 1, 171, 8, 171, 71,
+        3159, 37, 1160, 21, 1, 169, 8, 169, 70,
+        3196, 34, 1104, 18, 1, 170, 8, 170, 67,
+        3230, 38, 1047, 22, 1, 171, 8, 171, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_18: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 65535, 255, 1, 172, 8,
+        3268, 38, 65535, 255, 1, 172, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 17, 1, 173, 8, 173, 64,
+        3306, 31, 34, 17, 1, 173, 8, 173, 64,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 19, 1, 174, 8, 174, 68,
-        54, 37, 91, 21, 1, 175, 8, 175, 70,
-        112, 41, 153, 25, 1, 176, 8, 176, 74,
-        178, 41, 219, 20, 1, 177, 8, 177, 74,
-        239, 39, 278, 18, 1, 178, 8, 178, 72,
-        296, 47, 219, 20, 1, 179, 8, 179, 80,
-        343, 39, 382, 18, 1, 180, 8, 180, 72,
-        400, 42, 91, 21, 1, 181, 8, 181, 75,
-        442, 39, 481, 18, 1, 182, 8, 182, 72,
-        499, 41, 540, 20, 1, 183, 8, 183, 74,
-        560, 47, 607, 26, 1, 184, 8, 184, 80,
+        3337, 35, 325, 19, 1, 174, 8, 174, 68,
+        3372, 37, 435, 21, 1, 175, 8, 175, 70,
+        3409, 41, 498, 25, 1, 176, 8, 176, 74,
+        3450, 41, 206, 20, 1, 177, 8, 177, 74,
+        3491, 39, 86, 18, 1, 178, 8, 178, 72,
+        3530, 47, 206, 20, 1, 179, 8, 179, 80,
+        3577, 39, 379, 18, 1, 180, 8, 180, 72,
+        3616, 42, 435, 21, 1, 181, 8, 181, 75,
+        3658, 39, 1104, 18, 1, 182, 8, 182, 72,
+        3697, 41, 3738, 20, 1, 183, 8, 183, 74,
+        3758, 47, 982, 26, 1, 184, 8, 184, 80,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageBackgroundTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 65535, 255, 1, 185, 8,
+        3805, 43, 65535, 255, 1, 185, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 19, 1, 186, 8, 186, 67,
-        53, 36, 89, 21, 1, 187, 8, 187, 69,
-        110, 46, 156, 31, 1, 188, 8, 188, 79,
-        187, 37, 224, 20, 1, 189, 8, 189, 70,
+        3848, 34, 325, 19, 1, 186, 8, 186, 67,
+        3882, 36, 435, 21, 1, 187, 8, 187, 69,
+        3918, 46, 845, 31, 1, 188, 8, 188, 79,
+        3964, 37, 4001, 20, 1, 189, 8, 189, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_23: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrushSliderContainerBackgroundSystemControlTransparentBrushThumbBackgroundSystemControlBackgroundBaseLowBrushThumbBackgroundPointerOverSystemControlHighlightBaseMediumLowBrushThumbBackgroundPressedSystemControlHighlightBaseMediumBrushThumbBorderBrushSystemControlHighlightTransparentBrushThumbBorderBrushPointerOverThumbBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 43, 36, 1, 190, 8, 190, 8,
-        79, 25, 104, 29, 1, 191, 8, 191, 8,
-        133, 15, 148, 35, 1, 192, 8, 192, 8,
-        183, 26, 209, 40, 1, 193, 8, 193, 8,
-        249, 22, 271, 37, 1, 194, 8, 194, 8,
-        308, 16, 324, 38, 1, 195, 8, 195, 8,
-        362, 27, 324, 38, 1, 196, 8, 196, 8,
-        389, 23, 324, 38, 1, 197, 8, 197, 8,
+        4021, 43, 3882, 36, 1, 190, 8, 190, 8,
+        4064, 25, 4089, 29, 1, 191, 8, 191, 8,
+        4118, 15, 344, 35, 1, 192, 8, 192, 8,
+        4133, 26, 3020, 40, 1, 193, 8, 193, 8,
+        4159, 22, 2942, 37, 1, 194, 8, 194, 8,
+        4181, 16, 3268, 38, 1, 195, 8, 195, 8,
+        4197, 27, 3268, 38, 1, 196, 8, 196, 8,
+        4224, 23, 3268, 38, 1, 197, 8, 197, 8,
     ],
 };
 
@@ -5975,188 +5978,191 @@ static POPULATE_WINUITHEME_XAML_ROWS_24: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_25: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarEllipsisButtonBackgroundSystemControlTransparentBrushAppBarEllipsisButtonBackgroundPointerOverSystemControlHighlightListLowBrushAppBarEllipsisButtonBackgroundPressedSystemControlHighlightListMediumBrushAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundSystemControlForegroundBaseHighBrushAppBarEllipsisButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundSystemControlBackgroundChromeMediumBrushAppBarForegroundAppBarHighContrastBorderSystemControlForegroundTransparentBrushLoopingSelectorButtonBackgroundTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlButtonBackgroundTextControlHighlighterForegroundSystemControlForegroundAltHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 29, 1, 200, 8, 200, 8,
-        59, 41, 100, 34, 1, 201, 8, 201, 8,
-        134, 37, 171, 37, 1, 202, 8, 202, 8,
-        208, 38, 30, 29, 1, 203, 8, 203, 8,
-        246, 30, 276, 36, 1, 204, 8, 204, 8,
-        312, 41, 353, 38, 1, 205, 8, 205, 8,
-        391, 37, 276, 36, 1, 206, 8, 206, 8,
-        428, 38, 466, 39, 1, 207, 8, 207, 8,
-        505, 31, 30, 29, 1, 208, 8, 208, 8,
-        536, 42, 30, 29, 1, 209, 8, 209, 8,
-        578, 38, 30, 29, 1, 210, 8, 210, 8,
-        616, 39, 30, 29, 1, 211, 8, 211, 8,
-        655, 16, 671, 40, 1, 212, 8, 212, 8,
-        711, 16, 276, 36, 1, 213, 8, 213, 8,
-        727, 24, 751, 39, 1, 214, 8, 214, 8,
-        790, 31, 671, 40, 1, 215, 8, 215, 8,
-        821, 27, 276, 36, 1, 216, 8, 216, 8,
-        848, 35, 466, 39, 1, 217, 8, 217, 8,
-        883, 27, 30, 29, 1, 218, 8, 218, 8,
-        910, 32, 942, 35, 1, 219, 8, 219, 8,
+        4247, 30, 4089, 29, 1, 200, 8, 200, 8,
+        4277, 41, 3196, 34, 1, 201, 8, 201, 8,
+        4318, 37, 3159, 37, 1, 202, 8, 202, 8,
+        4355, 38, 4089, 29, 1, 203, 8, 203, 8,
+        4393, 30, 1779, 36, 1, 204, 8, 204, 8,
+        4423, 41, 2546, 38, 1, 205, 8, 205, 8,
+        4464, 37, 1779, 36, 1, 206, 8, 206, 8,
+        4501, 38, 1280, 39, 1, 207, 8, 207, 8,
+        4539, 31, 4089, 29, 1, 208, 8, 208, 8,
+        4570, 42, 4089, 29, 1, 209, 8, 209, 8,
+        4612, 38, 4089, 29, 1, 210, 8, 210, 8,
+        4650, 39, 4089, 29, 1, 211, 8, 211, 8,
+        4689, 16, 876, 40, 1, 212, 8, 212, 8,
+        4705, 16, 1779, 36, 1, 213, 8, 213, 8,
+        4721, 24, 2308, 39, 1, 214, 8, 214, 8,
+        4745, 31, 876, 40, 1, 215, 8, 215, 8,
+        4776, 27, 1779, 36, 1, 216, 8, 216, 8,
+        4803, 35, 1280, 39, 1, 217, 8, 217, 8,
+        4838, 27, 4089, 29, 1, 218, 8, 218, 8,
+        4865, 32, 1703, 35, 1, 219, 8, 219, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_26: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlHighlighterBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65280, 65535, 1, 220, 8,
+        4897, 32, 65280, 65535, 1, 220, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleMenuFlyoutItemBackgroundSystemControlTransparentBrushToggleMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushToggleMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushToggleMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleMenuFlyoutItemCheckGlyphForegroundSystemControlForegroundBaseMediumHighBrushToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundSystemControlBackgroundAccentBrushJumpListDefaultEnabledForegroundSystemControlForegroundChromeWhiteBrushJumpListDefaultDisabledBackgroundSystemControlBackgroundBaseLowBrushJumpListDefaultDisabledForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 29, 1, 221, 8, 221, 8,
-        59, 41, 100, 34, 1, 222, 8, 222, 8,
-        134, 37, 171, 37, 1, 223, 8, 223, 8,
-        208, 38, 30, 29, 1, 224, 8, 224, 8,
-        246, 30, 276, 36, 1, 225, 8, 225, 8,
-        312, 41, 353, 38, 1, 226, 8, 226, 8,
-        391, 37, 353, 38, 1, 227, 8, 227, 8,
-        428, 38, 466, 39, 1, 228, 8, 228, 8,
-        505, 40, 545, 42, 1, 229, 8, 229, 8,
-        587, 51, 353, 38, 1, 230, 8, 230, 8,
-        638, 47, 353, 38, 1, 231, 8, 231, 8,
-        685, 48, 466, 39, 1, 232, 8, 232, 8,
-        733, 35, 768, 47, 1, 233, 8, 233, 8,
-        815, 35, 768, 47, 1, 234, 8, 234, 8,
-        850, 34, 768, 47, 1, 235, 8, 235, 8,
-        884, 32, 916, 34, 1, 236, 8, 236, 8,
-        950, 32, 982, 39, 1, 237, 8, 237, 8,
-        1021, 33, 1054, 35, 1, 238, 8, 238, 8,
-        1089, 33, 466, 39, 1, 239, 8, 239, 8,
+        4929, 30, 4089, 29, 1, 221, 8, 221, 8,
+        4959, 41, 3196, 34, 1, 222, 8, 222, 8,
+        5000, 37, 3159, 37, 1, 223, 8, 223, 8,
+        5037, 38, 4089, 29, 1, 224, 8, 224, 8,
+        5075, 30, 1779, 36, 1, 225, 8, 225, 8,
+        5105, 41, 2546, 38, 1, 226, 8, 226, 8,
+        5146, 37, 2546, 38, 1, 227, 8, 227, 8,
+        5183, 38, 1280, 39, 1, 228, 8, 228, 8,
+        5221, 40, 1888, 42, 1, 229, 8, 229, 8,
+        5261, 51, 2546, 38, 1, 230, 8, 230, 8,
+        5312, 47, 2546, 38, 1, 231, 8, 231, 8,
+        5359, 48, 1280, 39, 1, 232, 8, 232, 8,
+        5407, 35, 3530, 47, 1, 233, 8, 233, 8,
+        5442, 35, 3530, 47, 1, 234, 8, 234, 8,
+        5477, 34, 3530, 47, 1, 235, 8, 235, 8,
+        5511, 32, 0, 34, 1, 236, 8, 236, 8,
+        5543, 32, 2092, 39, 1, 237, 8, 237, 8,
+        5575, 33, 344, 35, 1, 238, 8, 238, 8,
+        5608, 33, 1280, 39, 1, 239, 8, 239, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarBackgroundThemeBrushAppBarBorderThemeBrushAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushAppBarItemForegroundThemeBrushAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushApplicationForegroundThemeBrushApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushAutoSuggestBackgroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushFocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrushHyperlinkButtonBackgroundThemeBrushHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushHyperlinkForegroundThemeBrushHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrushLoopingSelectorForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 0, 65280, 1, 240, 8,
-        26, 22, 0, 65280, 1, 241, 8,
-        48, 30, 65535, 255, 1, 242, 8,
-        78, 38, 65535, 26367, 1, 243, 8,
-        116, 30, 65535, 65535, 1, 244, 8,
-        146, 41, 65535, 8703, 1, 245, 8,
-        187, 41, 65535, 65535, 1, 246, 8,
-        228, 37, 0, 65280, 1, 247, 8,
-        265, 35, 31611, 65403, 1, 248, 8,
-        300, 31, 65535, 57087, 1, 249, 8,
-        331, 37, 65535, 65535, 1, 250, 8,
-        368, 42, 65535, 52479, 1, 251, 8,
-        410, 38, 65535, 26367, 1, 252, 8,
-        448, 40, 65535, 39423, 1, 253, 8,
-        488, 31, 65535, 65535, 1, 254, 8,
-        519, 30, 65535, 255, 1, 255, 8,
-        549, 38, 65535, 26367, 1, 256, 8,
-        587, 30, 65535, 65535, 1, 257, 8,
-        617, 41, 65535, 8703, 1, 258, 8,
-        658, 41, 65535, 65535, 1, 259, 8,
-        699, 37, 0, 65280, 1, 260, 8,
-        736, 26, 0, 65280, 1, 261, 8,
-        762, 32, 0, 65280, 1, 262, 8,
-        794, 32, 65535, 65535, 1, 263, 8,
-        826, 35, 65535, 255, 1, 264, 8,
-        861, 31, 65535, 255, 1, 265, 8,
-        892, 27, 65535, 26367, 1, 266, 8,
-        919, 29, 29439, 65436, 1, 267, 8,
-        948, 40, 29439, 52380, 1, 268, 8,
-        988, 36, 29439, 39324, 1, 269, 8,
-        1024, 39, 65535, 65535, 1, 270, 8,
-        1063, 50, 65535, 52479, 1, 271, 8,
-        1113, 46, 65535, 26367, 1, 272, 8,
-        1159, 35, 65535, 29695, 1, 273, 8,
+        5641, 26, 0, 65280, 1, 240, 8,
+        5667, 22, 0, 65280, 1, 241, 8,
+        5689, 30, 65535, 255, 1, 242, 8,
+        5719, 38, 65535, 26367, 1, 243, 8,
+        5757, 30, 65535, 65535, 1, 244, 8,
+        5787, 41, 65535, 8703, 1, 245, 8,
+        5828, 41, 65535, 65535, 1, 246, 8,
+        5869, 37, 0, 65280, 1, 247, 8,
+        5906, 35, 31611, 65403, 1, 248, 8,
+        5941, 31, 65535, 57087, 1, 249, 8,
+        5972, 37, 65535, 65535, 1, 250, 8,
+        6009, 42, 65535, 52479, 1, 251, 8,
+        6051, 38, 65535, 26367, 1, 252, 8,
+        6089, 40, 65535, 39423, 1, 253, 8,
+        6129, 31, 65535, 65535, 1, 254, 8,
+        6160, 30, 65535, 255, 1, 255, 8,
+        6190, 38, 65535, 26367, 1, 256, 8,
+        6228, 30, 65535, 65535, 1, 257, 8,
+        6258, 41, 65535, 8703, 1, 258, 8,
+        6299, 41, 65535, 65535, 1, 259, 8,
+        6340, 37, 0, 65280, 1, 260, 8,
+        6377, 26, 0, 65280, 1, 261, 8,
+        6403, 32, 0, 65280, 1, 262, 8,
+        6435, 32, 65535, 65535, 1, 263, 8,
+        6467, 35, 65535, 255, 1, 264, 8,
+        6502, 31, 65535, 255, 1, 265, 8,
+        6533, 27, 65535, 26367, 1, 266, 8,
+        6560, 29, 29439, 65436, 1, 267, 8,
+        6589, 40, 29439, 52380, 1, 268, 8,
+        6629, 36, 29439, 39324, 1, 269, 8,
+        6665, 39, 65535, 65535, 1, 270, 8,
+        6704, 50, 65535, 52479, 1, 271, 8,
+        6754, 46, 65535, 26367, 1, 272, 8,
+        6800, 35, 65535, 29695, 1, 273, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_29: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 25, 1, 274, 8, 274, 77,
+        6835, 44, 6879, 25, 1, 274, 8, 274, 77,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_30: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionForegroundThemeBrushMediaButtonForegroundThemeBrushMediaButtonBackgroundThemeBrushMediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrushMediaButtonPressedBorderThemeBrushMediaControlPanelVideoThemeBrushMediaControlPanelAudioThemeBrushMediaDownloadProgressIndicatorThemeBrushMediaErrorBackgroundThemeBrushMediaTextThemeBrushTextSelectionHighlightColorThemeBrushThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 65535, 65535, 1, 275, 8,
-        44, 31, 65535, 65535, 1, 276, 8,
-        75, 31, 65535, 255, 1, 277, 8,
-        106, 42, 65535, 65535, 1, 278, 8,
-        148, 42, 65535, 8703, 1, 279, 8,
-        190, 38, 0, 65280, 1, 280, 8,
-        228, 38, 65535, 65535, 1, 281, 8,
-        266, 34, 65535, 65535, 1, 282, 8,
-        300, 32, 0, 65280, 1, 283, 8,
-        332, 32, 0, 65280, 1, 284, 8,
-        364, 40, 65535, 14591, 1, 285, 8,
-        404, 30, 0, 65280, 1, 286, 8,
-        434, 19, 65535, 65535, 1, 287, 8,
-        453, 37, 6068, 65350, 1, 288, 8,
-        490, 25, 52685, 65485, 1, 289, 8,
-        515, 21, 21845, 15189, 1, 290, 8,
-        536, 36, 56026, 65498, 1, 291, 8,
-        572, 32, 47031, 27575, 1, 292, 8,
-        604, 32, 0, 39168, 1, 293, 8,
-        636, 28, 21845, 60757, 1, 294, 8,
+        6904, 44, 65535, 65535, 1, 275, 8,
+        6948, 31, 65535, 65535, 1, 276, 8,
+        6979, 31, 65535, 255, 1, 277, 8,
+        7010, 42, 65535, 65535, 1, 278, 8,
+        7052, 42, 65535, 8703, 1, 279, 8,
+        7094, 38, 0, 65280, 1, 280, 8,
+        7132, 38, 65535, 65535, 1, 281, 8,
+        7170, 34, 65535, 65535, 1, 282, 8,
+        7204, 32, 0, 65280, 1, 283, 8,
+        7236, 32, 0, 65280, 1, 284, 8,
+        7268, 40, 65535, 14591, 1, 285, 8,
+        7308, 30, 0, 65280, 1, 286, 8,
+        7338, 19, 65535, 65535, 1, 287, 8,
+        7357, 37, 6068, 65350, 1, 288, 8,
+        7394, 25, 52685, 65485, 1, 289, 8,
+        7419, 21, 21845, 15189, 1, 290, 8,
+        7440, 36, 56026, 65498, 1, 291, 8,
+        7476, 32, 47031, 27575, 1, 292, 8,
+        7508, 32, 0, 39168, 1, 293, 8,
+        7540, 28, 21845, 60757, 1, 294, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_31: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionBackgroundSystemControlBackgroundBaseLowBrushWindowCaptionBackgroundDisabledWindowCaptionForegroundSystemControlForegroundBaseHighBrushWindowCaptionForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 295, 8, 295, 8,
-        58, 31, 23, 35, 1, 296, 8, 296, 8,
-        89, 23, 112, 36, 1, 297, 8, 297, 8,
-        148, 31, 179, 39, 1, 298, 8, 298, 8,
+        7568, 23, 344, 35, 1, 295, 8, 295, 8,
+        7591, 31, 344, 35, 1, 296, 8, 296, 8,
+        7622, 23, 1779, 36, 1, 297, 8, 297, 8,
+        7645, 31, 1280, 39, 1, 298, 8, 298, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_32: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionButtonBackgroundPointerOverSystemControlBackgroundBaseLowBrushWindowCaptionButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushWindowCaptionButtonStrokeSystemControlForegroundBaseHighBrushWindowCaptionButtonStrokePointerOverWindowCaptionButtonStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 35, 1, 300, 8, 300, 8,
-        75, 36, 111, 41, 1, 301, 8, 301, 8,
-        152, 25, 177, 36, 1, 302, 8, 302, 8,
-        213, 36, 177, 36, 1, 303, 8, 303, 8,
-        249, 32, 177, 36, 1, 304, 8, 304, 8,
+        7676, 40, 344, 35, 1, 300, 8, 300, 8,
+        7716, 36, 523, 41, 1, 301, 8, 301, 8,
+        7752, 25, 1779, 36, 1, 302, 8, 302, 8,
+        7777, 36, 1779, 36, 1, 303, 8, 303, 8,
+        7813, 32, 1779, 36, 1, 304, 8, 304, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_33: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionButtonBackgroundCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 65535, 255, 1, 305, 8,
-        29, 32, 4387, 65512, 1, 306, 8,
-        61, 28, 65535, 65535, 1, 307, 8,
-        89, 28, 28794, 65521, 1, 308, 8,
-        117, 24, 0, 65280, 1, 309, 8,
+        7676, 29, 65535, 255, 1, 305, 8,
+        7845, 32, 4387, 65512, 1, 306, 8,
+        7877, 28, 65535, 65535, 1, 307, 8,
+        7905, 28, 28794, 65521, 1, 308, 8,
+        7933, 24, 0, 65280, 1, 309, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 2 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS: &str = "SystemControlTransparentBrushApplicationPageBackgroundThemeBrushSolidBackgroundFillColorBaseDefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrushSystemControlHighlightListAccentVeryHighBrushSystemColorHighlightColorSystemControlHighlightListAccentMediumLowBrushSystemColorWindowColor";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_34: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 65535, 255, 1, 16, 8,
@@ -6172,21 +6178,21 @@ static POPULATE_WINUITHEME_XAML_ROWS_35: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_36: rt::PackedRows = rt::PackedRows {
-    strings: "ApplicationPageBackgroundThemeBrushSolidBackgroundFillColorBase",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 28, 1, 22, 8, 22, 68,
+        29, 35, 64, 28, 1, 22, 8, 22, 68,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_37: rt::PackedRows = rt::PackedRows {
-    strings: "DefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 25, 1, 23, 8, 23, 8,
-        56, 36, 92, 26, 1, 24, 8, 24, 8,
-        118, 38, 156, 26, 1, 25, 8, 25, 8,
+        92, 31, 123, 25, 1, 23, 8, 23, 8,
+        148, 36, 184, 26, 1, 24, 8, 24, 8,
+        210, 38, 248, 26, 1, 25, 8, 25, 8,
     ],
 };
 
@@ -6277,9 +6283,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_38: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemFillColorSolidNeutralBackground", value: 4281216558_u32, line: 97, position: 60 },
 ];
 
+/// The keys and targets of the packed tables of the unit 3 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS: &str = "TextFillColorPrimaryBrushTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushTextFillColorInverseBrushAccentTextFillColorPrimaryBrushSystemAccentColorLight3AccentTextFillColorSecondaryBrushAccentTextFillColorTertiaryBrushSystemAccentColorLight2AccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrushControlFillColorTransparentBrushControlFillColorInputActiveBrushControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrushSubtleFillColorTransparentBrushSubtleFillColorSecondaryBrushSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrushControlAltFillColorTransparentBrushControlAltFillColorSecondaryBrushControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrushAccentFillColorSelectedTextBackgroundBrushAccentFillColorDefaultBrushControlStrokeColorDefaultBrushControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrushSystemFillColorAttentionBrushSystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrushSystemAccentColorDark2SystemAccentColorDark3SystemAccentColorDark1AccentFillColorTertiaryBrushControlElevationBorderBrushCircleElevationBorderBrushAccentControlElevationBorderBrush";
+
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_39: rt::PackedRows = rt::PackedRows {
-    strings: "TextFillColorPrimaryBrushTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushTextFillColorInverseBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 0, 20, 1, 98, 8, 98, 58,
@@ -6292,148 +6301,148 @@ static POPULATE_WINUITHEME_XAML_ROWS_39: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_40: rt::PackedRows = rt::PackedRows {
-    strings: "AccentTextFillColorPrimaryBrushSystemAccentColorLight3AccentTextFillColorSecondaryBrushAccentTextFillColorTertiaryBrushSystemAccentColorLight2",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 23, 1, 103, 8, 103, 64,
-        54, 33, 31, 23, 1, 104, 8, 104, 66,
-        87, 32, 119, 23, 1, 105, 8, 105, 65,
+        129, 31, 160, 23, 1, 103, 8, 103, 64,
+        183, 33, 160, 23, 1, 104, 8, 104, 66,
+        216, 32, 248, 23, 1, 105, 8, 105, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_41: rt::PackedRows = rt::PackedRows {
-    strings: "AccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrushControlFillColorTransparentBrushControlFillColorInputActiveBrushControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrushSubtleFillColorTransparentBrushSubtleFillColorSecondaryBrushSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrushControlAltFillColorTransparentBrushControlAltFillColorSecondaryBrushControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 0, 27, 1, 106, 8, 106, 65,
-        32, 38, 32, 33, 1, 107, 8, 107, 71,
-        70, 33, 70, 28, 1, 108, 8, 108, 66,
-        103, 35, 103, 30, 1, 109, 8, 109, 68,
-        138, 34, 138, 29, 1, 110, 8, 110, 67,
-        172, 28, 172, 23, 1, 111, 8, 111, 61,
-        200, 30, 200, 25, 1, 112, 8, 112, 63,
-        230, 29, 230, 24, 1, 113, 8, 113, 62,
-        259, 32, 259, 27, 1, 114, 8, 114, 65,
-        291, 29, 291, 24, 1, 115, 8, 115, 62,
-        320, 32, 320, 27, 1, 116, 8, 116, 65,
-        352, 32, 352, 27, 1, 117, 8, 117, 65,
-        384, 34, 384, 29, 1, 118, 8, 118, 67,
-        418, 35, 418, 30, 1, 119, 8, 119, 68,
-        453, 33, 453, 28, 1, 120, 8, 120, 66,
-        486, 31, 486, 26, 1, 121, 8, 121, 64,
-        517, 29, 517, 24, 1, 122, 8, 122, 62,
-        546, 28, 546, 23, 1, 123, 8, 123, 61,
-        574, 28, 574, 23, 1, 124, 8, 124, 61,
-        602, 35, 602, 30, 1, 125, 8, 125, 68,
-        637, 33, 637, 28, 1, 126, 8, 126, 66,
-        670, 32, 670, 27, 1, 127, 8, 127, 65,
-        702, 35, 702, 30, 1, 128, 8, 128, 68,
-        737, 32, 737, 27, 1, 129, 8, 129, 65,
-        769, 35, 769, 30, 1, 130, 8, 130, 68,
-        804, 37, 804, 32, 1, 131, 8, 131, 70,
-        841, 36, 841, 31, 1, 132, 8, 132, 69,
-        877, 36, 877, 31, 1, 133, 8, 133, 69,
+        271, 32, 271, 27, 1, 106, 8, 106, 65,
+        303, 38, 303, 33, 1, 107, 8, 107, 71,
+        341, 33, 341, 28, 1, 108, 8, 108, 66,
+        374, 35, 374, 30, 1, 109, 8, 109, 68,
+        409, 34, 409, 29, 1, 110, 8, 110, 67,
+        443, 28, 443, 23, 1, 111, 8, 111, 61,
+        471, 30, 471, 25, 1, 112, 8, 112, 63,
+        501, 29, 501, 24, 1, 113, 8, 113, 62,
+        530, 32, 530, 27, 1, 114, 8, 114, 65,
+        562, 29, 562, 24, 1, 115, 8, 115, 62,
+        591, 32, 591, 27, 1, 116, 8, 116, 65,
+        623, 32, 623, 27, 1, 117, 8, 117, 65,
+        655, 34, 655, 29, 1, 118, 8, 118, 67,
+        689, 35, 689, 30, 1, 119, 8, 119, 68,
+        724, 33, 724, 28, 1, 120, 8, 120, 66,
+        757, 31, 757, 26, 1, 121, 8, 121, 64,
+        788, 29, 788, 24, 1, 122, 8, 122, 62,
+        817, 28, 817, 23, 1, 123, 8, 123, 61,
+        845, 28, 845, 23, 1, 124, 8, 124, 61,
+        873, 35, 873, 30, 1, 125, 8, 125, 68,
+        908, 33, 908, 28, 1, 126, 8, 126, 66,
+        941, 32, 941, 27, 1, 127, 8, 127, 65,
+        973, 35, 973, 30, 1, 128, 8, 128, 68,
+        1008, 32, 1008, 27, 1, 129, 8, 129, 65,
+        1040, 35, 1040, 30, 1, 130, 8, 130, 68,
+        1075, 37, 1075, 32, 1, 131, 8, 131, 70,
+        1112, 36, 1112, 31, 1, 132, 8, 132, 69,
+        1148, 36, 1148, 31, 1, 133, 8, 133, 69,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_42: rt::PackedRows = rt::PackedRows {
-    strings: "AccentFillColorSelectedTextBackgroundBrushSystemAccentColorAccentFillColorDefaultBrushSystemAccentColorLight2",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 17, 1, 134, 8, 134, 75,
-        59, 27, 86, 23, 1, 135, 8, 135, 60,
+        1184, 42, 160, 17, 1, 134, 8, 134, 75,
+        1226, 27, 248, 23, 1, 135, 8, 135, 60,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_43: rt::PackedRows = rt::PackedRows {
-    strings: "AccentFillColorDisabledBrushControlStrokeColorDefaultBrushControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 0, 23, 1, 138, 8, 138, 61,
-        28, 30, 28, 25, 1, 139, 8, 139, 63,
-        58, 32, 58, 27, 1, 140, 8, 140, 65,
-        90, 38, 90, 33, 1, 141, 8, 141, 71,
-        128, 40, 128, 35, 1, 142, 8, 142, 73,
-        168, 39, 168, 34, 1, 143, 8, 143, 72,
-        207, 39, 207, 34, 1, 144, 8, 144, 72,
-        246, 47, 246, 42, 1, 145, 8, 145, 80,
-        293, 27, 293, 22, 1, 146, 8, 146, 60,
-        320, 32, 320, 27, 1, 147, 8, 147, 65,
-        352, 36, 352, 31, 1, 148, 8, 148, 69,
-        388, 37, 388, 32, 1, 149, 8, 149, 70,
-        425, 30, 425, 25, 1, 150, 8, 150, 63,
-        455, 29, 455, 24, 1, 151, 8, 151, 62,
-        484, 30, 484, 25, 1, 152, 8, 152, 63,
-        514, 30, 514, 25, 1, 153, 8, 153, 63,
-        544, 26, 544, 21, 1, 154, 8, 154, 59,
-        570, 26, 570, 21, 1, 155, 8, 155, 59,
-        596, 35, 596, 30, 1, 156, 8, 156, 68,
-        631, 37, 631, 32, 1, 157, 8, 157, 70,
-        668, 36, 668, 31, 1, 158, 8, 158, 69,
-        704, 26, 704, 21, 1, 159, 8, 159, 59,
-        730, 26, 730, 21, 1, 160, 8, 160, 59,
-        756, 22, 756, 17, 1, 161, 8, 161, 55,
-        778, 35, 778, 30, 1, 162, 8, 162, 68,
-        813, 41, 813, 36, 1, 163, 8, 163, 74,
-        854, 39, 854, 34, 1, 164, 8, 164, 72,
-        893, 41, 893, 36, 1, 165, 8, 165, 74,
-        934, 40, 934, 35, 1, 166, 8, 166, 73,
-        974, 43, 974, 38, 1, 167, 8, 167, 76,
-        1017, 33, 1017, 28, 1, 168, 8, 168, 66,
-        1050, 38, 1050, 33, 1, 169, 8, 169, 71,
-        1088, 37, 1088, 32, 1, 170, 8, 170, 70,
-        1125, 40, 1125, 35, 1, 171, 8, 171, 73,
-        1165, 36, 1165, 31, 1, 172, 8, 172, 69,
-        1201, 35, 1201, 30, 1, 173, 8, 173, 68,
-        1236, 36, 1236, 31, 1, 174, 8, 174, 69,
+        415, 28, 415, 23, 1, 138, 8, 138, 61,
+        1253, 30, 1253, 25, 1, 139, 8, 139, 63,
+        1283, 32, 1283, 27, 1, 140, 8, 140, 65,
+        1315, 38, 1315, 33, 1, 141, 8, 141, 71,
+        1353, 40, 1353, 35, 1, 142, 8, 142, 73,
+        1393, 39, 1393, 34, 1, 143, 8, 143, 72,
+        1432, 39, 1432, 34, 1, 144, 8, 144, 72,
+        1471, 47, 1471, 42, 1, 145, 8, 145, 80,
+        1518, 27, 1518, 22, 1, 146, 8, 146, 60,
+        1545, 32, 1545, 27, 1, 147, 8, 147, 65,
+        1577, 36, 1577, 31, 1, 148, 8, 148, 69,
+        1613, 37, 1613, 32, 1, 149, 8, 149, 70,
+        1650, 30, 1650, 25, 1, 150, 8, 150, 63,
+        1680, 29, 1680, 24, 1, 151, 8, 151, 62,
+        1709, 30, 1709, 25, 1, 152, 8, 152, 63,
+        1739, 30, 1739, 25, 1, 153, 8, 153, 63,
+        1769, 26, 1769, 21, 1, 154, 8, 154, 59,
+        1795, 26, 1795, 21, 1, 155, 8, 155, 59,
+        1821, 35, 1821, 30, 1, 156, 8, 156, 68,
+        1856, 37, 1856, 32, 1, 157, 8, 157, 70,
+        1893, 36, 1893, 31, 1, 158, 8, 158, 69,
+        1929, 26, 1929, 21, 1, 159, 8, 159, 59,
+        1955, 26, 1955, 21, 1, 160, 8, 160, 59,
+        1981, 22, 1981, 17, 1, 161, 8, 161, 55,
+        2003, 35, 2003, 30, 1, 162, 8, 162, 68,
+        2038, 41, 2038, 36, 1, 163, 8, 163, 74,
+        2079, 39, 2079, 34, 1, 164, 8, 164, 72,
+        2118, 41, 2118, 36, 1, 165, 8, 165, 74,
+        2159, 40, 2159, 35, 1, 166, 8, 166, 73,
+        2199, 43, 2199, 38, 1, 167, 8, 167, 76,
+        2242, 33, 2242, 28, 1, 168, 8, 168, 66,
+        2275, 38, 2275, 33, 1, 169, 8, 169, 71,
+        2313, 37, 2313, 32, 1, 170, 8, 170, 70,
+        2350, 40, 2350, 35, 1, 171, 8, 171, 73,
+        2390, 36, 2390, 31, 1, 172, 8, 172, 69,
+        2426, 35, 2426, 30, 1, 173, 8, 173, 68,
+        2461, 36, 2461, 31, 1, 174, 8, 174, 69,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_44: rt::PackedRows = rt::PackedRows {
-    strings: "SystemFillColorAttentionBrushSystemAccentColorLight2",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 23, 1, 175, 8, 175, 62,
+        2497, 29, 248, 23, 1, 175, 8, 175, 62,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_45: rt::PackedRows = rt::PackedRows {
-    strings: "SystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 0, 22, 1, 176, 8, 176, 60,
-        27, 27, 27, 22, 1, 177, 8, 177, 60,
-        54, 28, 54, 23, 1, 178, 8, 178, 61,
-        82, 27, 82, 22, 1, 179, 8, 179, 60,
-        109, 32, 109, 27, 1, 180, 8, 180, 65,
-        141, 39, 141, 34, 1, 181, 8, 181, 72,
-        180, 37, 180, 32, 1, 182, 8, 182, 70,
-        217, 37, 217, 32, 1, 183, 8, 183, 70,
-        254, 38, 254, 33, 1, 184, 8, 184, 71,
-        292, 37, 292, 32, 1, 185, 8, 185, 70,
-        329, 44, 329, 39, 1, 186, 8, 186, 77,
-        373, 42, 373, 37, 1, 187, 8, 187, 75,
+        2526, 27, 2526, 22, 1, 176, 8, 176, 60,
+        2553, 27, 2553, 22, 1, 177, 8, 177, 60,
+        2580, 28, 2580, 23, 1, 178, 8, 178, 61,
+        2608, 27, 2608, 22, 1, 179, 8, 179, 60,
+        2635, 32, 2635, 27, 1, 180, 8, 180, 65,
+        2667, 39, 2667, 34, 1, 181, 8, 181, 72,
+        2706, 37, 2706, 32, 1, 182, 8, 182, 70,
+        2743, 37, 2743, 32, 1, 183, 8, 183, 70,
+        2780, 38, 2780, 33, 1, 184, 8, 184, 71,
+        2818, 37, 2818, 32, 1, 185, 8, 185, 70,
+        2855, 44, 2855, 39, 1, 186, 8, 186, 77,
+        2899, 42, 2899, 37, 1, 187, 8, 187, 75,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_46: rt::PackedRows = rt::PackedRows {
-    strings: "SystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 255, 65535, 1, 188, 8,
-        31, 27, 255, 65535, 1, 189, 8,
-        58, 31, 255, 65535, 1, 190, 8,
-        89, 31, 255, 65535, 1, 191, 8,
-        120, 30, 255, 65535, 1, 192, 8,
-        150, 34, 255, 65535, 1, 193, 8,
-        184, 29, 255, 65535, 1, 194, 8,
-        213, 29, 255, 65535, 1, 195, 8,
+        2941, 31, 255, 65535, 1, 188, 8,
+        2972, 27, 255, 65535, 1, 189, 8,
+        2999, 31, 255, 65535, 1, 190, 8,
+        3030, 31, 255, 65535, 1, 191, 8,
+        3061, 30, 255, 65535, 1, 192, 8,
+        3091, 34, 255, 65535, 1, 193, 8,
+        3125, 29, 255, 65535, 1, 194, 8,
+        3154, 29, 255, 65535, 1, 195, 8,
     ],
 };
 
@@ -6451,9 +6460,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_47: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "ControlAAStrokeColorDisabled", value: 687865855_u32, line: 25, position: 51 },
 ];
 
+/// The keys and targets of the packed tables of the unit 4 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS: &str = "TextOnAccentFillColorDefaultBrushTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushControlAAFillColorDefaultBrushControlAAFillColorDisabledBrushAccentAAFillColorDefaultBrushSystemAccentColorLight2SystemAccentColorLight3AccentAAFillColorTertiaryBrushSystemAccentColorLight1ControlStrokeColorForAAFillOnImageBrushControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrushSystemAccentColorDark1SystemAccentColorDark2SystemColorWindowTextColorSystemColorGrayTextColorSystemColorButtonFaceColorSystemColorWindowColorSystemColorButtonTextColor";
+
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
-    strings: "TextOnAccentFillColorDefaultBrushTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushControlAAFillColorDefaultBrushControlAAFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 0, 28, 1, 26, 8, 26, 66,
@@ -6467,30 +6479,33 @@ static POPULATE_WINUITHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_49: rt::PackedRows = rt::PackedRows {
-    strings: "AccentAAFillColorDefaultBrushSystemAccentColorLight2AccentAAFillColorSecondaryBrushSystemAccentColorLight3AccentAAFillColorTertiaryBrushSystemAccentColorLight1",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 23, 1, 32, 8, 32, 62,
-        52, 31, 83, 23, 1, 33, 8, 33, 64,
-        106, 30, 136, 23, 1, 34, 8, 34, 63,
+        202, 29, 231, 23, 1, 32, 8, 32, 62,
+        74, 31, 254, 23, 1, 33, 8, 33, 64,
+        277, 30, 307, 23, 1, 34, 8, 34, 63,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_50: rt::PackedRows = rt::PackedRows {
-    strings: "AccentAAFillColorDisabledBrushControlStrokeColorForAAFillOnImageBrushControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 0, 25, 1, 35, 8, 35, 63,
-        30, 39, 30, 34, 1, 36, 8, 36, 72,
-        69, 32, 69, 27, 1, 37, 8, 37, 65,
-        101, 33, 101, 28, 1, 38, 8, 38, 66,
+        111, 30, 111, 25, 1, 35, 8, 35, 63,
+        330, 39, 330, 34, 1, 36, 8, 36, 72,
+        369, 32, 369, 27, 1, 37, 8, 37, 65,
+        401, 33, 401, 28, 1, 38, 8, 38, 66,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 7 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS: &str = "TextBoxForegroundHeaderThemeBrushTextBoxPlaceholderTextThemeBrushTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushTextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrushTextBoxButtonForegroundThemeBrushTextBoxButtonPointerOverBackgroundThemeBrushTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrushTextControlBackgroundControlFillColorDefaultBrushTextControlBackgroundPointerOverControlFillColorSecondaryBrushTextControlBackgroundFocusedControlFillColorInputActiveBrushTextControlBackgroundDisabledControlFillColorDisabledBrushTextControlBorderBrushTextControlElevationBorderBrushTextControlBorderBrushPointerOverTextControlBorderBrushFocusedTextControlElevationBorderFocusedBrushTextControlBorderBrushDisabledControlStrokeColorDefaultBrushTextControlForegroundTextFillColorPrimaryBrushTextControlForegroundPointerOverTextControlForegroundFocusedTextControlForegroundDisabledTemporaryTextFillColorDisabledTextControlPlaceholderForegroundTextFillColorSecondaryBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundFocusedTextControlPlaceholderForegroundDisabledTextFillColorDisabledBrushTextControlSelectionHighlightColorAccentFillColorSelectedTextBackgroundBrushTextControlButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTextControlButtonBackgroundPressedSubtleFillColorTertiaryBrushTextControlButtonBorderBrushControlFillColorTransparentTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextFillColorTertiaryBrushSystemColorButtonFaceColorSystemColorGrayTextColorSystemColorButtonTextColorSystemColorHighlightColorSystemColorHighlightTextColorSystemControlBackgroundAltHighBrushSystemControlForegroundBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseMediumLowBrush";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_51: rt::PackedRows = rt::PackedRows {
-    strings: "TextBoxForegroundHeaderThemeBrushTextBoxPlaceholderTextThemeBrushTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushTextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrushTextBoxButtonForegroundThemeBrushTextBoxButtonPointerOverBackgroundThemeBrushTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 65535, 65535, 1, 15, 8,
@@ -6515,40 +6530,43 @@ static POPULATE_WINUITHEME_XAML_ROWS_51: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_52: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlBackgroundControlFillColorDefaultBrushTextControlBackgroundPointerOverControlFillColorSecondaryBrushTextControlBackgroundFocusedControlFillColorInputActiveBrushTextControlBackgroundDisabledControlFillColorDisabledBrushTextControlBorderBrushTextControlElevationBorderBrushTextControlBorderBrushPointerOverTextControlBorderBrushFocusedTextControlElevationBorderFocusedBrushTextControlBorderBrushDisabledControlStrokeColorDefaultBrushTextControlForegroundTextFillColorPrimaryBrushTextControlForegroundPointerOverTextControlForegroundFocusedTextControlForegroundDisabledTemporaryTextFillColorDisabledTextControlPlaceholderForegroundTextFillColorSecondaryBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundFocusedTextControlPlaceholderForegroundDisabledTextFillColorDisabledBrushTextControlSelectionHighlightColorAccentFillColorSelectedTextBackgroundBrushTextControlButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTextControlButtonBackgroundPressedSubtleFillColorTertiaryBrushTextControlButtonBorderBrushControlFillColorTransparentTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 28, 1, 33, 8, 33, 8,
-        49, 32, 81, 30, 1, 34, 8, 34, 8,
-        111, 28, 139, 32, 1, 35, 8, 35, 8,
-        171, 29, 200, 29, 1, 36, 8, 36, 8,
-        229, 22, 251, 31, 1, 37, 8, 37, 8,
-        282, 33, 251, 31, 1, 38, 8, 38, 8,
-        315, 29, 344, 38, 1, 39, 8, 39, 8,
-        382, 30, 412, 30, 1, 40, 8, 40, 8,
-        442, 21, 463, 25, 1, 41, 8, 41, 8,
-        488, 32, 463, 25, 1, 42, 8, 42, 8,
-        520, 28, 463, 25, 1, 43, 8, 43, 8,
-        548, 29, 577, 30, 1, 44, 8, 44, 8,
-        607, 32, 639, 27, 1, 45, 8, 45, 8,
-        666, 43, 639, 27, 1, 46, 8, 46, 8,
-        709, 39, 639, 27, 1, 47, 8, 47, 8,
-        748, 40, 788, 26, 1, 48, 8, 48, 8,
-        814, 34, 848, 42, 1, 49, 8, 49, 8,
-        890, 38, 928, 29, 1, 50, 8, 50, 8,
-        957, 34, 991, 28, 1, 51, 8, 51, 8,
-        1019, 28, 1047, 27, 1, 52, 8, 52, 8,
-        1074, 39, 1047, 27, 1, 53, 8, 53, 8,
-        1113, 35, 1047, 27, 1, 54, 8, 54, 8,
-        1148, 27, 639, 27, 1, 55, 8, 55, 8,
-        1175, 38, 639, 27, 1, 56, 8, 56, 8,
-        1213, 34, 1247, 26, 1, 57, 8, 57, 8,
+        582, 21, 603, 28, 1, 33, 8, 33, 8,
+        631, 32, 663, 30, 1, 34, 8, 34, 8,
+        693, 28, 721, 32, 1, 35, 8, 35, 8,
+        753, 29, 782, 29, 1, 36, 8, 36, 8,
+        811, 22, 833, 31, 1, 37, 8, 37, 8,
+        864, 33, 833, 31, 1, 38, 8, 38, 8,
+        897, 29, 926, 38, 1, 39, 8, 39, 8,
+        964, 30, 994, 30, 1, 40, 8, 40, 8,
+        1024, 21, 1045, 25, 1, 41, 8, 41, 8,
+        1070, 32, 1045, 25, 1, 42, 8, 42, 8,
+        1102, 28, 1045, 25, 1, 43, 8, 43, 8,
+        1130, 29, 1159, 30, 1, 44, 8, 44, 8,
+        1189, 32, 1221, 27, 1, 45, 8, 45, 8,
+        1248, 43, 1221, 27, 1, 46, 8, 46, 8,
+        1291, 39, 1221, 27, 1, 47, 8, 47, 8,
+        1330, 40, 1370, 26, 1, 48, 8, 48, 8,
+        1396, 34, 1430, 42, 1, 49, 8, 49, 8,
+        1472, 38, 1510, 29, 1, 50, 8, 50, 8,
+        1539, 34, 1573, 28, 1, 51, 8, 51, 8,
+        1601, 28, 1629, 27, 1, 52, 8, 52, 8,
+        1656, 39, 1629, 27, 1, 53, 8, 53, 8,
+        1695, 35, 1629, 27, 1, 54, 8, 54, 8,
+        1730, 27, 1221, 27, 1, 55, 8, 55, 8,
+        1757, 38, 1221, 27, 1, 56, 8, 56, 8,
+        1795, 34, 1829, 26, 1, 57, 8, 57, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 8 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS: &str = "MenuFlyoutSeparatorBackgroundDividerStrokeColorDefaultBrushMenuFlyoutItemBackgroundSubtleFillColorTransparentBrushMenuFlyoutItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuFlyoutItemBackgroundPressedSubtleFillColorTertiaryBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundTextFillColorPrimaryBrushMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledTextFillColorDisabledBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverMenuFlyoutSubItemBackgroundPressedMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronTextFillColorSecondaryBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedTextFillColorTertiaryBrushMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundDesktopAcrylicTransparentBrushMenuFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushMenuFlyoutItemFocusedBackgroundThemeBrushMenuFlyoutItemFocusedForegroundThemeBrushMenuFlyoutItemDisabledForegroundThemeBrushMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushMenuFlyoutItemPressedForegroundThemeBrushMenuFlyoutSeparatorThemeBrushMenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushMenuFlyoutItemRevealBackgroundDisabledMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverToggleMenuFlyoutItemRevealBackgroundPressedToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabledSystemColorWindowTextColorBrushSystemControlTransparentBrushSystemColorHighlightColorBrushSystemColorButtonTextColorBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorMenuFlyoutSystemBackdropAcrylicBackgroundFillColorDefaultBackdrop";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_53: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutSeparatorBackgroundDividerStrokeColorDefaultBrushMenuFlyoutItemBackgroundSubtleFillColorTransparentBrushMenuFlyoutItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuFlyoutItemBackgroundPressedSubtleFillColorTertiaryBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundTextFillColorPrimaryBrushMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledTextFillColorDisabledBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverMenuFlyoutSubItemBackgroundPressedMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronTextFillColorSecondaryBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedTextFillColorTertiaryBrushMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundDesktopAcrylicTransparentBrushMenuFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 29, 30, 1, 15, 8, 15, 8,
@@ -6605,52 +6623,52 @@ static POPULATE_WINUITHEME_XAML_ROWS_54: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_55: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutItemFocusedBackgroundThemeBrushMenuFlyoutItemFocusedForegroundThemeBrushMenuFlyoutItemDisabledForegroundThemeBrushMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushMenuFlyoutItemPressedForegroundThemeBrushMenuFlyoutSeparatorThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 8481, 65313, 1, 60, 8,
-        41, 41, 65535, 65535, 1, 61, 8,
-        82, 42, 65535, 26367, 1, 62, 8,
-        124, 45, 8481, 65313, 1, 63, 8,
-        169, 45, 65535, 65535, 1, 64, 8,
-        214, 41, 65535, 65535, 1, 65, 8,
-        255, 41, 0, 65280, 1, 66, 8,
-        296, 29, 31354, 65402, 1, 67, 8,
+        1670, 41, 8481, 65313, 1, 60, 8,
+        1711, 41, 65535, 65535, 1, 61, 8,
+        1752, 42, 65535, 26367, 1, 62, 8,
+        1794, 45, 8481, 65313, 1, 63, 8,
+        1839, 45, 65535, 65535, 1, 64, 8,
+        1884, 41, 65535, 65535, 1, 65, 8,
+        1925, 41, 0, 65280, 1, 66, 8,
+        1966, 29, 31354, 65402, 1, 67, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_56: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushMenuFlyoutItemRevealBackgroundDisabledSubtleFillColorTransparentBrushMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverToggleMenuFlyoutItemRevealBackgroundPressedToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 47, 1, 68, 8, 68, 8,
-        86, 30, 116, 45, 1, 69, 8, 69, 8,
-        161, 41, 202, 50, 1, 70, 8, 70, 8,
-        252, 37, 289, 53, 1, 71, 8, 71, 8,
-        342, 38, 380, 31, 1, 72, 8, 72, 8,
-        411, 31, 380, 31, 1, 73, 8, 73, 8,
-        442, 38, 480, 41, 1, 74, 8, 74, 8,
-        521, 42, 480, 41, 1, 75, 8, 75, 8,
-        563, 39, 380, 31, 1, 76, 8, 76, 8,
-        602, 36, 116, 45, 1, 77, 8, 77, 8,
-        638, 47, 202, 50, 1, 78, 8, 78, 8,
-        685, 43, 289, 53, 1, 79, 8, 79, 8,
-        728, 44, 380, 31, 1, 80, 8, 80, 8,
-        772, 37, 380, 31, 1, 81, 8, 81, 8,
-        809, 44, 480, 41, 1, 82, 8, 82, 8,
-        853, 48, 480, 41, 1, 83, 8, 83, 8,
-        901, 45, 380, 31, 1, 84, 8, 84, 8,
-        946, 33, 116, 45, 1, 85, 8, 85, 8,
-        979, 44, 202, 50, 1, 86, 8, 86, 8,
-        1023, 40, 1063, 49, 1, 87, 8, 87, 8,
-        1112, 46, 202, 50, 1, 88, 8, 88, 8,
-        1158, 41, 380, 31, 1, 89, 8, 89, 8,
-        1199, 34, 380, 31, 1, 90, 8, 90, 8,
-        1233, 41, 480, 41, 1, 91, 8, 91, 8,
-        1274, 45, 480, 41, 1, 92, 8, 92, 8,
-        1319, 47, 480, 41, 1, 93, 8, 93, 8,
-        1366, 42, 380, 31, 1, 94, 8, 94, 8,
+        1995, 39, 2034, 47, 1, 68, 8, 68, 8,
+        2081, 30, 2111, 45, 1, 69, 8, 69, 8,
+        2156, 41, 2197, 50, 1, 70, 8, 70, 8,
+        2247, 37, 2284, 53, 1, 71, 8, 71, 8,
+        2337, 38, 83, 31, 1, 72, 8, 72, 8,
+        2375, 31, 83, 31, 1, 73, 8, 73, 8,
+        2406, 38, 2444, 41, 1, 74, 8, 74, 8,
+        2485, 42, 2444, 41, 1, 75, 8, 75, 8,
+        2527, 39, 83, 31, 1, 76, 8, 76, 8,
+        2566, 36, 2111, 45, 1, 77, 8, 77, 8,
+        2602, 47, 2197, 50, 1, 78, 8, 78, 8,
+        2649, 43, 2284, 53, 1, 79, 8, 79, 8,
+        2692, 44, 83, 31, 1, 80, 8, 80, 8,
+        2736, 37, 83, 31, 1, 81, 8, 81, 8,
+        2773, 44, 2444, 41, 1, 82, 8, 82, 8,
+        2817, 48, 2444, 41, 1, 83, 8, 83, 8,
+        2865, 45, 83, 31, 1, 84, 8, 84, 8,
+        2910, 33, 2111, 45, 1, 85, 8, 85, 8,
+        2943, 44, 2197, 50, 1, 86, 8, 86, 8,
+        2987, 40, 3027, 49, 1, 87, 8, 87, 8,
+        3076, 46, 2197, 50, 1, 88, 8, 88, 8,
+        3122, 41, 83, 31, 1, 89, 8, 89, 8,
+        3163, 34, 83, 31, 1, 90, 8, 90, 8,
+        3197, 41, 2444, 41, 1, 91, 8, 91, 8,
+        3238, 45, 2444, 41, 1, 92, 8, 92, 8,
+        3283, 47, 2444, 41, 1, 93, 8, 93, 8,
+        3330, 42, 83, 31, 1, 94, 8, 94, 8,
     ],
 };
 
@@ -6661,9 +6679,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_57: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemChromeAltHighColor", value: 4280032284_u32, line: 17, position: 47 },
 ];
 
+/// The keys and targets of the packed tables of the unit 9 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS: &str = "DesktopAcrylicTransparentBrushSystemControlAcrylicWindowBrushSystemColorWindowColorSystemControlAcrylicElementBrushSystemControlAccentAcrylicWindowAccentMediumHighBrushSystemControlAccentAcrylicElementAccentMediumHighBrushSystemControlAccentDark1AcrylicWindowAccentDark1BrushSystemControlAccentDark1AcrylicElementAccentDark1BrushSystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrushSystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrushSystemControlAcrylicWindowMediumHighBrushSystemControlAcrylicElementMediumHighBrushSystemControlChromeMediumLowAcrylicWindowMediumBrushSystemControlChromeMediumLowAcrylicElementMediumBrushSystemControlBaseHighAcrylicWindowBrushSystemControlBaseHighAcrylicElementBrushSystemControlBaseHighAcrylicWindowMediumHighBrushSystemControlBaseHighAcrylicElementMediumHighBrushSystemControlBaseHighAcrylicWindowMediumBrushSystemControlBaseHighAcrylicElementMediumBrushSystemControlChromeLowAcrylicWindowBrushSystemControlChromeLowAcrylicElementBrushSystemControlChromeMediumAcrylicWindowMediumBrushSystemControlChromeMediumAcrylicElementMediumBrushSystemControlChromeHighAcrylicWindowMediumBrushSystemControlChromeHighAcrylicElementMediumBrushSystemControlBaseLowAcrylicWindowBrushSystemControlBaseLowAcrylicElementBrushSystemControlBaseMediumLowAcrylicWindowMediumBrushSystemControlBaseMediumLowAcrylicElementMediumBrushSystemControlAltLowAcrylicWindowBrushSystemControlAltLowAcrylicElementBrushSystemControlAltMediumLowAcrylicWindowMediumBrushSystemControlAltMediumLowAcrylicElementMediumBrushSystemControlAltHighAcrylicWindowBrushSystemControlAltHighAcrylicElementBrushSystemControlTransientBorderBrushSystemColorWindowTextColorAcrylicBackgroundFillColorDefaultBrushAcrylicInAppFillColorDefaultBrushAcrylicBackgroundFillColorDefaultInverseBrushAcrylicInAppFillColorDefaultInverseBrushAcrylicBackgroundFillColorBaseBrushAcrylicInAppFillColorBaseBrushAccentAcrylicBackgroundFillColorDefaultBrushAccentAcrylicInAppFillColorDefaultBrushAccentAcrylicBackgroundFillColorBaseBrushAccentAcrylicInAppFillColorBaseBrush";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_58: rt::PackedRows = rt::PackedRows {
-    strings: "DesktopAcrylicTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 30, 0, 0, 1, 63, 8,
@@ -6704,9 +6725,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_60: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ToggleButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 77, position: 65 },
 ];
 
+/// The keys and targets of the packed tables of the unit 10 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS: &str = "ButtonRevealBackgroundSystemControlBackgroundBaseLowRevealBackgroundBrushButtonRevealBackgroundPointerOverButtonRevealBackgroundPressedSystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrushButtonRevealBackgroundDisabledControlFillColorTertiaryBrushButtonRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushButtonRevealBorderBrushPointerOverSystemControlHighlightBaseMediumLowRevealBorderBrushButtonRevealBorderBrushPressedSystemControlHighlightTransparentRevealBorderBrushButtonRevealBorderBrushDisabledSubtleFillColorDisabledBrushRepeatButtonRevealBackgroundRepeatButtonRevealBackgroundPointerOverRepeatButtonRevealBackgroundPressedRepeatButtonRevealBackgroundDisabledRepeatButtonRevealBorderBrushRepeatButtonRevealBorderBrushPointerOverRepeatButtonRevealBorderBrushPressedRepeatButtonRevealBorderBrushDisabledToggleButtonRevealBackgroundToggleButtonRevealBackgroundPointerOverToggleButtonRevealBackgroundPressedToggleButtonRevealBackgroundDisabledToggleButtonRevealBackgroundCheckedSystemControlHighlightAccentRevealBackgroundBrushToggleButtonRevealBackgroundCheckedPointerOverToggleButtonRevealBackgroundCheckedPressedSystemControlHighlightBaseMediumLowRevealAccentBackgroundBrushToggleButtonRevealBackgroundCheckedDisabledTextFillColorDisabledBrushToggleButtonRevealBackgroundIndeterminateToggleButtonRevealBackgroundIndeterminatePointerOverToggleButtonRevealBackgroundIndeterminatePressedToggleButtonRevealBackgroundIndeterminateDisabledToggleButtonRevealBorderBrushToggleButtonRevealBorderBrushPointerOverToggleButtonRevealBorderBrushPressedToggleButtonRevealBorderBrushDisabledToggleButtonRevealBorderBrushCheckedSystemControlHighlightAltTransparentRevealBorderBrushToggleButtonRevealBorderBrushCheckedPointerOverToggleButtonRevealBorderBrushCheckedPressedToggleButtonRevealBorderBrushCheckedDisabledToggleButtonRevealBorderBrushIndeterminateToggleButtonRevealBorderBrushIndeterminatePointerOverToggleButtonRevealBorderBrushIndeterminatePressedToggleButtonRevealBorderBrushIndeterminateDisabledSystemColorButtonFaceColorSystemControlTransparentRevealBackgroundBrushSystemControlBackgroundAltHighRevealBackgroundBrushSystemColorHighlightColorSystemControlHighlightAccent3RevealBackgroundBrushSystemControlHighlightAccent2RevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlHighlightListLowRevealBackgroundBrushSystemControlHighlightListMediumRevealListLowBackgroundBrushSystemControlHighlightAccent3RevealAccent2BackgroundBrushSystemControlBackgroundAccentRevealBorderBrushSystemControlBackgroundBaseHighRevealBorderBrushSystemControlBackgroundBaseLowRevealBorderBrushSystemControlBackgroundBaseMediumRevealBorderBrushSystemControlBackgroundBaseMediumHighRevealBorderBrushSystemControlBackgroundBaseMediumLowRevealBorderBrushSystemControlBackgroundChromeBlackHighRevealBorderBrushSystemControlBackgroundChromeBlackMediumRevealChromeBorderBrushSystemControlBackgroundChromeMediumRevealBorderBrushSystemControlBackgroundChromeMediumLowRevealBorderBrushSystemControlBackgroundChromeWhiteRevealBorderBrushSystemControlTransparentRevealListLowBorderBrushSystemControlBackgroundListLowRevealBorderBrushSystemControlBackgroundListMediumRevealBorderBrushSystemControlTransparentRevealBorderBrushSystemControlForegroundRevealTransparentBorderBrushSystemColorButtonTextColorSystemColorHighlightTextColorSystemControlHighlightAccentRevealBorderBrushSystemControlHighlightBaseHighRevealBorderBrushSystemControlHighlightBaseLowRevealBorderBrushSystemControlHighlightBaseMediumRevealBorderBrushSystemControlHighlightBaseMediumHighRevealBorderBrushSystemControlBackgroundBaseLowBrushSystemControlDisabledTransparentBrushSystemControlDisabledBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonRevealBackgroundSystemControlBackgroundBaseLowRevealBackgroundBrushButtonRevealBackgroundPointerOverButtonRevealBackgroundPressedSystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrushButtonRevealBackgroundDisabledControlFillColorTertiaryBrushButtonRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushButtonRevealBorderBrushPointerOverSystemControlHighlightBaseMediumLowRevealBorderBrushButtonRevealBorderBrushPressedSystemControlHighlightTransparentRevealBorderBrushButtonRevealBorderBrushDisabledSubtleFillColorDisabledBrushRepeatButtonRevealBackgroundRepeatButtonRevealBackgroundPointerOverRepeatButtonRevealBackgroundPressedRepeatButtonRevealBackgroundDisabledRepeatButtonRevealBorderBrushRepeatButtonRevealBorderBrushPointerOverRepeatButtonRevealBorderBrushPressedRepeatButtonRevealBorderBrushDisabledToggleButtonRevealBackgroundToggleButtonRevealBackgroundPointerOverToggleButtonRevealBackgroundPressedToggleButtonRevealBackgroundDisabledToggleButtonRevealBackgroundCheckedSystemControlHighlightAccentRevealBackgroundBrushToggleButtonRevealBackgroundCheckedPointerOverToggleButtonRevealBackgroundCheckedPressedSystemControlHighlightBaseMediumLowRevealAccentBackgroundBrushToggleButtonRevealBackgroundCheckedDisabledTextFillColorDisabledBrushToggleButtonRevealBackgroundIndeterminateToggleButtonRevealBackgroundIndeterminatePointerOverToggleButtonRevealBackgroundIndeterminatePressedToggleButtonRevealBackgroundIndeterminateDisabledToggleButtonRevealBorderBrushToggleButtonRevealBorderBrushPointerOverToggleButtonRevealBorderBrushPressedToggleButtonRevealBorderBrushDisabledToggleButtonRevealBorderBrushCheckedSystemControlHighlightAltTransparentRevealBorderBrushToggleButtonRevealBorderBrushCheckedPointerOverToggleButtonRevealBorderBrushCheckedPressedToggleButtonRevealBorderBrushCheckedDisabledToggleButtonRevealBorderBrushIndeterminateToggleButtonRevealBorderBrushIndeterminatePointerOverToggleButtonRevealBorderBrushIndeterminatePressedToggleButtonRevealBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 51, 1, 78, 8, 78, 8,
@@ -6752,9 +6776,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 11 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS: &str = "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocusedProgressBarBackgroundThemeBrushProgressBarBorderThemeBrushProgressBarForegroundThemeBrushProgressBarIndeterminateForegroundThemeBrushContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushContentDialogBackgroundThemeBrushContentDialogBorderThemeBrushSystemAccentColorContentDialogContentForegroundBrushContentDialogDimmingThemeBrushExpanderBackgroundCardBackgroundFillColorDefaultBrushExpanderForegroundTextFillColorPrimaryBrushExpanderForegroundPointerOverExpanderForegroundPressedExpanderBorderBrushCardStrokeColorDefaultBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundCardBackgroundFillColorSecondaryBrushExpanderDropDownBorderBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrushSystemColorButtonFaceColorSystemColorButtonTextColorSystemColorHighlightColorSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrushSystemControlTransientBackgroundBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_62: rt::PackedRows = rt::PackedRows {
-    strings: "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocused",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 44, 44, 33, 1, 15, 8, 15, 8,
@@ -6771,13 +6798,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_63: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_64: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarBackgroundThemeBrushProgressBarBorderThemeBrushProgressBarForegroundThemeBrushProgressBarIndeterminateForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 23039, 1, 21, 8,
-        31, 27, 65535, 255, 1, 22, 8,
-        58, 31, 11973, 65371, 1, 23, 8,
-        89, 44, 22527, 65418, 1, 24, 8,
+        217, 31, 65535, 23039, 1, 21, 8,
+        248, 27, 65535, 255, 1, 22, 8,
+        275, 31, 11973, 65371, 1, 23, 8,
+        306, 44, 22527, 65418, 1, 24, 8,
     ],
 };
 
@@ -6806,38 +6833,38 @@ static POPULATE_WINUITHEME_XAML_ROWS_67: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_68: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 47, 1, 37, 8, 37, 8,
+        350, 42, 392, 47, 1, 37, 8, 37, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_69: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 54227, 65491, 1, 38, 8,
+        439, 33, 54227, 65491, 1, 38, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogBorderThemeBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 17, 1, 39, 8, 39, 62,
+        472, 29, 501, 17, 1, 39, 8, 39, 62,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_71: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogContentForegroundBrushContentDialogDimmingThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 65280, 1, 40, 8,
-        35, 30, 65535, 39423, 1, 41, 8,
+        518, 35, 0, 65280, 1, 40, 8,
+        553, 30, 65535, 39423, 1, 41, 8,
     ],
 };
 
@@ -6849,26 +6876,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_72: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_73: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderBackgroundCardBackgroundFillColorDefaultBrushExpanderForegroundTextFillColorPrimaryBrushExpanderForegroundPointerOverExpanderForegroundPressedExpanderBorderBrushCardStrokeColorDefaultBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundCardBackgroundFillColorSecondaryBrushExpanderDropDownBorderBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 18, 35, 1, 46, 8, 46, 8,
-        53, 18, 71, 25, 1, 47, 8, 47, 8,
-        96, 29, 71, 25, 1, 48, 8, 48, 8,
-        125, 25, 71, 25, 1, 49, 8, 49, 8,
-        150, 19, 169, 27, 1, 50, 8, 50, 8,
-        196, 30, 169, 27, 1, 51, 8, 51, 8,
-        226, 26, 169, 27, 1, 52, 8, 52, 8,
-        252, 26, 278, 37, 1, 53, 8, 53, 8,
-        315, 27, 150, 19, 1, 54, 8, 54, 8,
-        342, 26, 368, 26, 1, 55, 8, 55, 8,
-        394, 27, 150, 19, 1, 56, 8, 56, 8,
+        583, 18, 601, 35, 1, 46, 8, 46, 8,
+        636, 18, 654, 25, 1, 47, 8, 47, 8,
+        679, 29, 654, 25, 1, 48, 8, 48, 8,
+        708, 25, 654, 25, 1, 49, 8, 49, 8,
+        733, 19, 752, 27, 1, 50, 8, 50, 8,
+        779, 30, 752, 27, 1, 51, 8, 51, 8,
+        809, 26, 752, 27, 1, 52, 8, 52, 8,
+        835, 26, 861, 37, 1, 53, 8, 53, 8,
+        898, 27, 733, 19, 1, 54, 8, 54, 8,
+        925, 26, 951, 26, 1, 55, 8, 55, 8,
+        977, 27, 733, 19, 1, 56, 8, 56, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 12 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS: &str = "HyperlinkForegroundAccentTextFillColorPrimaryBrushHyperlinkForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkForegroundPressedAccentTextFillColorTertiaryBrushSystemControlHyperlinkTextBrushSystemControlPageTextBaseMediumBrushSystemControlHighlightBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkForegroundAccentTextFillColorPrimaryBrushHyperlinkForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkForegroundPressedAccentTextFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 31, 1, 15, 8, 15, 8,
@@ -6877,9 +6907,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 13 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS: &str = "HyperlinkButtonForegroundAccentTextFillColorPrimaryBrushHyperlinkButtonForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkButtonForegroundPressedAccentTextFillColorTertiaryBrushHyperlinkButtonForegroundDisabledAccentTextFillColorDisabledBrushHyperlinkButtonBackgroundSubtleFillColorTransparentBrushHyperlinkButtonBackgroundPointerOverSubtleFillColorSecondaryBrushHyperlinkButtonBackgroundPressedSubtleFillColorTertiaryBrushHyperlinkButtonBackgroundDisabledSubtleFillColorDisabledBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabledSystemControlHyperlinkTextBrushSystemControlPageTextBaseMediumBrushSystemControlHighlightBaseMediumLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlTransparentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundAccentTextFillColorPrimaryBrushHyperlinkButtonForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkButtonForegroundPressedAccentTextFillColorTertiaryBrushHyperlinkButtonForegroundDisabledAccentTextFillColorDisabledBrushHyperlinkButtonBackgroundSubtleFillColorTransparentBrushHyperlinkButtonBackgroundPointerOverSubtleFillColorSecondaryBrushHyperlinkButtonBackgroundPressedSubtleFillColorTertiaryBrushHyperlinkButtonBackgroundDisabledSubtleFillColorDisabledBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 31, 1, 15, 8, 15, 8,
@@ -6897,9 +6930,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 14 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS: &str = "RadioButtonForegroundTextFillColorPrimaryBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledTextFillColorDisabledBrushRadioButtonBackgroundControlFillColorTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeControlStrongStrokeColorDefaultBrushRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedControlStrongStrokeColorDisabledBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillControlAltFillColorSecondaryBrushRadioButtonOuterEllipseFillPointerOverControlAltFillColorTertiaryBrushRadioButtonOuterEllipseFillPressedControlAltFillColorQuarternaryBrushRadioButtonOuterEllipseFillDisabledControlAltFillColorDisabledBrushRadioButtonOuterEllipseCheckedStrokeAccentFillColorDefaultBrushRadioButtonOuterEllipseCheckedStrokePointerOverAccentFillColorSecondaryBrushRadioButtonOuterEllipseCheckedStrokePressedAccentFillColorTertiaryBrushRadioButtonOuterEllipseCheckedStrokeDisabledAccentFillColorDisabledBrushRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillTextOnAccentFillColorPrimaryBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeCircleElevationBorderBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledRadioButtonCheckGlyphStrokeCheckedAccentControlElevationBorderBrushRadioButtonCheckGlyphStrokeCheckedPointerOverRadioButtonCheckGlyphStrokeCheckedPressedRadioButtonCheckGlyphStrokeCheckedDisabledRadioButtonBackgroundThemeBrushRadioButtonBorderThemeBrushRadioButtonContentDisabledForegroundThemeBrushRadioButtonContentForegroundThemeBrushRadioButtonDisabledBackgroundThemeBrushRadioButtonDisabledBorderThemeBrushRadioButtonDisabledForegroundThemeBrushRadioButtonForegroundThemeBrushRadioButtonPointerOverBackgroundThemeBrushRadioButtonPointerOverBorderThemeBrushRadioButtonPointerOverForegroundThemeBrushRadioButtonPressedBackgroundThemeBrushRadioButtonPressedBorderThemeBrushRadioButtonPressedForegroundThemeBrushRadioButtonContentPointerOverForegroundThemeBrushSystemColorHighlightTextColorSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemControlTransparentBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorButtonFaceColorBrushSystemColorWindowColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_76: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonForegroundTextFillColorPrimaryBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledTextFillColorDisabledBrushRadioButtonBackgroundControlFillColorTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeControlStrongStrokeColorDefaultBrushRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedControlStrongStrokeColorDisabledBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillControlAltFillColorSecondaryBrushRadioButtonOuterEllipseFillPointerOverControlAltFillColorTertiaryBrushRadioButtonOuterEllipseFillPressedControlAltFillColorQuarternaryBrushRadioButtonOuterEllipseFillDisabledControlAltFillColorDisabledBrushRadioButtonOuterEllipseCheckedStrokeAccentFillColorDefaultBrushRadioButtonOuterEllipseCheckedStrokePointerOverAccentFillColorSecondaryBrushRadioButtonOuterEllipseCheckedStrokePressedAccentFillColorTertiaryBrushRadioButtonOuterEllipseCheckedStrokeDisabledAccentFillColorDisabledBrushRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillTextOnAccentFillColorPrimaryBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeCircleElevationBorderBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledRadioButtonCheckGlyphStrokeCheckedAccentControlElevationBorderBrushRadioButtonCheckGlyphStrokeCheckedPointerOverRadioButtonCheckGlyphStrokeCheckedPressedRadioButtonCheckGlyphStrokeCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 25, 1, 16, 8, 16, 8,
@@ -6947,38 +6983,41 @@ static POPULATE_WINUITHEME_XAML_ROWS_76: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_77: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonBackgroundThemeBrushRadioButtonBorderThemeBrushRadioButtonContentDisabledForegroundThemeBrushRadioButtonContentForegroundThemeBrushRadioButtonDisabledBackgroundThemeBrushRadioButtonDisabledBorderThemeBrushRadioButtonDisabledForegroundThemeBrushRadioButtonForegroundThemeBrushRadioButtonPointerOverBackgroundThemeBrushRadioButtonPointerOverBorderThemeBrushRadioButtonPointerOverForegroundThemeBrushRadioButtonPressedBackgroundThemeBrushRadioButtonPressedBorderThemeBrushRadioButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 52479, 1, 56, 8,
-        31, 27, 65535, 52479, 1, 57, 8,
-        58, 46, 65535, 26367, 1, 58, 8,
-        104, 38, 65535, 65535, 1, 59, 8,
-        142, 39, 65535, 26367, 1, 60, 8,
-        181, 35, 65535, 26367, 1, 61, 8,
-        216, 39, 0, 26112, 1, 62, 8,
-        255, 31, 0, 65280, 1, 63, 8,
-        286, 42, 65535, 57087, 1, 64, 8,
-        328, 38, 65535, 57087, 1, 65, 8,
-        366, 42, 0, 65280, 1, 66, 8,
-        408, 38, 65535, 65535, 1, 67, 8,
-        446, 34, 65535, 65535, 1, 68, 8,
-        480, 38, 0, 65280, 1, 69, 8,
+        1856, 31, 65535, 52479, 1, 56, 8,
+        1887, 27, 65535, 52479, 1, 57, 8,
+        1914, 46, 65535, 26367, 1, 58, 8,
+        1960, 38, 65535, 65535, 1, 59, 8,
+        1998, 39, 65535, 26367, 1, 60, 8,
+        2037, 35, 65535, 26367, 1, 61, 8,
+        2072, 39, 0, 26112, 1, 62, 8,
+        2111, 31, 0, 65280, 1, 63, 8,
+        2142, 42, 65535, 57087, 1, 64, 8,
+        2184, 38, 65535, 57087, 1, 65, 8,
+        2222, 42, 0, 65280, 1, 66, 8,
+        2264, 38, 65535, 65535, 1, 67, 8,
+        2302, 34, 65535, 65535, 1, 68, 8,
+        2336, 38, 0, 65280, 1, 69, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_78: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonContentPointerOverForegroundThemeBrushSystemColorHighlightTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 49, 49, 29, 1, 70, 8, 70, 82,
+        2374, 49, 2423, 29, 1, 70, 8, 70, 82,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 15 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS: &str = "AppBarButtonBackgroundSubtleFillColorTransparentBrushAppBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarButtonForegroundTextFillColorPrimaryBrushAppBarButtonForegroundPointerOverAppBarButtonForegroundPressedTextFillColorSecondaryBrushAppBarButtonForegroundDisabledTextFillColorDisabledBrushAppBarButtonBorderBrushControlFillColorTransparentBrushAppBarButtonBorderBrushPointerOverAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledAppBarButtonKeyboardAcceleratorTextForegroundAppBarButtonKeyboardAcceleratorTextForegroundPointerOverAppBarButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabledSystemControlTransparentBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemControlForegroundBaseHighBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlForegroundTransparentBrushSystemControlHighlightTransparentBrushSystemControlDisabledTransparentBrushSystemControlForegroundBaseMediumBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightListAccentLowBrushSystemControlForegroundBaseMediumHighBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_79: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarButtonBackgroundSubtleFillColorTransparentBrushAppBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarButtonForegroundTextFillColorPrimaryBrushAppBarButtonForegroundPointerOverAppBarButtonForegroundPressedTextFillColorSecondaryBrushAppBarButtonForegroundDisabledTextFillColorDisabledBrushAppBarButtonBorderBrushControlFillColorTransparentBrushAppBarButtonBorderBrushPointerOverAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledAppBarButtonKeyboardAcceleratorTextForegroundAppBarButtonKeyboardAcceleratorTextForegroundPointerOverAppBarButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 15, 8, 15, 8,
@@ -7029,18 +7068,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_82: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 48, position: 68 },
 ];
 
+/// The keys and targets of the packed tables of the unit 16 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS: &str = "AppBarSeparatorForegroundDividerStrokeColorDefaultBrushSystemControlForegroundBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_83: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarSeparatorForegroundDividerStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 30, 1, 15, 8, 15, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 17 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS: &str = "AppBarToggleButtonBackgroundSubtleFillColorTransparentBrushAppBarToggleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarToggleButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarToggleButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarToggleButtonBackgroundCheckedAccentFillColorDefaultBrushAppBarToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushAppBarToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushAppBarToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushAppBarToggleButtonBackgroundHighLightOverlayAppBarToggleButtonBackgroundHighLightOverlayPointerOverAppBarToggleButtonBackgroundHighLightOverlayPressedAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundTextFillColorPrimaryBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedTextFillColorSecondaryBrushAppBarToggleButtonForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushAppBarToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledAppBarToggleButtonBorderBrushControlFillColorTransparentBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabledAppBarToggleButtonCheckedBackgroundThemeBrushAppBarToggleButtonCheckedBorderThemeBrushAppBarToggleButtonCheckedDisabledBackgroundThemeBrushAppBarToggleButtonCheckedDisabledBorderThemeBrushAppBarToggleButtonCheckedDisabledForegroundThemeBrushAppBarToggleButtonCheckedForegroundThemeBrushAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushAppBarToggleButtonCheckedPointerOverBorderThemeBrushAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabledSystemColorButtonFaceColorBrushSystemColorHighlightColorBrushSystemColorWindowColorBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrushSystemControlTransparentBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemColorButtonTextColorBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlForegroundBaseMediumBrushSystemControlHighlightAltBaseMediumBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_84: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonBackgroundSubtleFillColorTransparentBrushAppBarToggleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarToggleButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarToggleButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarToggleButtonBackgroundCheckedAccentFillColorDefaultBrushAppBarToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushAppBarToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushAppBarToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushAppBarToggleButtonBackgroundHighLightOverlayAppBarToggleButtonBackgroundHighLightOverlayPointerOverAppBarToggleButtonBackgroundHighLightOverlayPressedAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundTextFillColorPrimaryBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedTextFillColorSecondaryBrushAppBarToggleButtonForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushAppBarToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledAppBarToggleButtonBorderBrushControlFillColorTransparentBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 31, 1, 15, 8, 15, 8,
@@ -7091,43 +7136,46 @@ static POPULATE_WINUITHEME_XAML_ROWS_84: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_85: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonCheckedBackgroundThemeBrushAppBarToggleButtonCheckedBorderThemeBrushAppBarToggleButtonCheckedDisabledBackgroundThemeBrushAppBarToggleButtonCheckedDisabledBorderThemeBrushAppBarToggleButtonCheckedDisabledForegroundThemeBrushAppBarToggleButtonCheckedForegroundThemeBrushAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushAppBarToggleButtonCheckedPointerOverBorderThemeBrushAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 65535, 65535, 1, 58, 8,
-        45, 41, 65535, 65535, 1, 59, 8,
-        86, 53, 65535, 26367, 1, 60, 8,
-        139, 49, 65535, 255, 1, 61, 8,
-        188, 53, 0, 65280, 1, 62, 8,
-        241, 45, 0, 65280, 1, 63, 8,
-        286, 56, 65535, 39423, 1, 64, 8,
-        342, 52, 65535, 39423, 1, 65, 8,
-        394, 52, 65535, 255, 1, 66, 8,
-        446, 48, 65535, 65535, 1, 67, 8,
-        494, 52, 65535, 65535, 1, 68, 8,
-        546, 49, 65535, 8703, 1, 69, 8,
+        2361, 45, 65535, 65535, 1, 58, 8,
+        2406, 41, 65535, 65535, 1, 59, 8,
+        2447, 53, 65535, 26367, 1, 60, 8,
+        2500, 49, 65535, 255, 1, 61, 8,
+        2549, 53, 0, 65280, 1, 62, 8,
+        2602, 45, 0, 65280, 1, 63, 8,
+        2647, 56, 65535, 39423, 1, 64, 8,
+        2703, 52, 65535, 39423, 1, 65, 8,
+        2755, 52, 65535, 255, 1, 66, 8,
+        2807, 48, 65535, 65535, 1, 67, 8,
+        2855, 52, 65535, 65535, 1, 68, 8,
+        2907, 49, 65535, 8703, 1, 69, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_86: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonKeyboardAcceleratorTextForegroundTextFillColorSecondaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 27, 1, 70, 8, 70, 8,
-        78, 62, 51, 27, 1, 71, 8, 71, 8,
-        140, 58, 198, 26, 1, 72, 8, 72, 8,
-        224, 59, 283, 26, 1, 73, 8, 73, 8,
-        309, 58, 51, 27, 1, 74, 8, 74, 8,
-        367, 69, 51, 27, 1, 75, 8, 75, 8,
-        436, 65, 198, 26, 1, 76, 8, 76, 8,
-        501, 66, 283, 26, 1, 77, 8, 77, 8,
+        2956, 51, 929, 27, 1, 70, 8, 70, 8,
+        3007, 62, 929, 27, 1, 71, 8, 71, 8,
+        3069, 58, 3127, 26, 1, 72, 8, 72, 8,
+        3153, 59, 992, 26, 1, 73, 8, 73, 8,
+        3212, 58, 929, 27, 1, 74, 8, 74, 8,
+        3270, 69, 929, 27, 1, 75, 8, 75, 8,
+        3339, 65, 3127, 26, 1, 76, 8, 76, 8,
+        3404, 66, 992, 26, 1, 77, 8, 77, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 18 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS: &str = "ListBoxForegroundTextFillColorPrimaryBrushListBoxBackgroundSystemControlBackgroundChromeMediumLowBrushListBoxBorderListBoxItemForegroundListBoxItemForegroundDisabledTextFillColorDisabledBrushListBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushListBoxItemBackgroundPressedSubtleFillColorTertiaryBrushListBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushListBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushListBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushListBoxBackgroundThemeBrushListBoxBorderThemeBrushListBoxDisabledForegroundThemeBrushListBoxFocusBackgroundThemeBrushListBoxForegroundThemeBrushListBoxItemDisabledForegroundThemeBrushListBoxItemPointerOverBackgroundThemeBrushListBoxItemPointerOverForegroundThemeBrushListBoxItemPressedBackgroundThemeBrushListBoxItemPressedForegroundThemeBrushListBoxItemSelectedBackgroundThemeBrushListBoxItemSelectedDisabledBackgroundThemeBrushListBoxItemSelectedDisabledForegroundThemeBrushListBoxItemSelectedForegroundThemeBrushListBoxItemSelectedPointerOverBackgroundThemeBrushSystemControlForegroundBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemControlHighlightListAccentMediumLowBrushSystemControlHighlightListAccentVeryHighBrushSystemColorWindowColorSystemColorButtonTextColorSystemColorGrayTextColorSystemColorButtonFaceColorSystemColorHighlightColorSystemColorHighlightTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_87: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxForegroundTextFillColorPrimaryBrushListBoxBackgroundSystemControlBackgroundChromeMediumLowBrushListBoxBorderListBoxItemForegroundListBoxItemForegroundDisabledTextFillColorDisabledBrushListBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushListBoxItemBackgroundPressedSubtleFillColorTertiaryBrushListBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushListBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushListBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 25, 1, 16, 8, 16, 8,
@@ -7145,40 +7193,40 @@ static POPULATE_WINUITHEME_XAML_ROWS_87: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_88: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxBackgroundThemeBrushListBoxBorderThemeBrushListBoxDisabledForegroundThemeBrushListBoxFocusBackgroundThemeBrushListBoxForegroundThemeBrushListBoxItemDisabledForegroundThemeBrushListBoxItemPointerOverBackgroundThemeBrushListBoxItemPointerOverForegroundThemeBrushListBoxItemPressedBackgroundThemeBrushListBoxItemPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 52479, 1, 26, 8,
-        27, 23, 65535, 255, 1, 27, 8,
-        50, 35, 65535, 26367, 1, 28, 8,
-        85, 32, 65535, 65535, 1, 29, 8,
-        117, 27, 0, 65280, 1, 30, 8,
-        144, 39, 65535, 26367, 1, 31, 8,
-        183, 42, 0, 8448, 1, 32, 8,
-        225, 42, 0, 65280, 1, 33, 8,
-        267, 38, 54227, 65491, 1, 34, 8,
-        305, 38, 0, 65280, 1, 35, 8,
+        537, 27, 65535, 52479, 1, 26, 8,
+        564, 23, 65535, 255, 1, 27, 8,
+        587, 35, 65535, 26367, 1, 28, 8,
+        622, 32, 65535, 65535, 1, 29, 8,
+        654, 27, 0, 65280, 1, 30, 8,
+        681, 39, 65535, 26367, 1, 31, 8,
+        720, 42, 0, 8448, 1, 32, 8,
+        762, 42, 0, 65280, 1, 33, 8,
+        804, 38, 54227, 65491, 1, 34, 8,
+        842, 38, 0, 65280, 1, 35, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_89: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxItemSelectedBackgroundThemeBrushSystemControlHighlightListAccentLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 40, 1, 36, 8, 36, 8,
+        880, 39, 337, 40, 1, 36, 8, 36, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_90: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxItemSelectedDisabledBackgroundThemeBrushListBoxItemSelectedDisabledForegroundThemeBrushListBoxItemSelectedForegroundThemeBrushListBoxItemSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 65535, 26367, 1, 37, 8,
-        47, 47, 0, 39168, 1, 38, 8,
-        94, 39, 65535, 65535, 1, 39, 8,
-        133, 50, 14270, 65375, 1, 40, 8,
+        919, 47, 65535, 26367, 1, 37, 8,
+        966, 47, 0, 39168, 1, 38, 8,
+        1013, 39, 65535, 65535, 1, 39, 8,
+        1052, 50, 14270, 65375, 1, 40, 8,
     ],
 };
 
@@ -7188,9 +7236,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_91: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: 1.0_f64, line: 16, position: 64 },
 ];
 
+/// The keys and targets of the packed tables of the unit 19 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS: &str = "ToggleSwitchContentForegroundTextFillColorPrimaryBrushToggleSwitchContentForegroundDisabledTextFillColorDisabledBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSubtleFillColorTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffControlAltFillColorSecondaryBrushToggleSwitchFillOffPointerOverControlAltFillColorTertiaryToggleSwitchFillOffPressedControlAltFillColorQuarternaryToggleSwitchFillOffDisabledControlAltFillColorDisabledToggleSwitchStrokeOffControlStrongStrokeColorDefaultBrushToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledControlStrongStrokeColorDisabledToggleSwitchFillOnAccentFillColorDefaultBrushToggleSwitchFillOnPointerOverAccentFillColorSecondaryBrushToggleSwitchFillOnPressedAccentFillColorTertiaryBrushToggleSwitchFillOnDisabledAccentFillColorDisabledBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffTextFillColorSecondaryBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnTextOnAccentFillColorPrimaryBrushToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledTextOnAccentFillColorDisabledBrushToggleSwitchKnobStrokeOnCircleElevationBorderBrushToggleSwitchCurtainBackgroundThemeBrushToggleSwitchCurtainDisabledBackgroundThemeBrushToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushToggleSwitchForegroundThemeBrushToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrushToggleSwitchTrackBorderThemeBrushToggleSwitchTrackDisabledBackgroundThemeBrushToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrushSystemColorWindowTextColorBrushSystemColorGrayTextColorBrushSystemControlTransparentBrushSystemControlTransparentColorSystemColorButtonFaceColorBrushSystemColorHighlightTextColorSystemColorWindowColorSystemColorButtonTextColorBrushSystemColorHighlightColorSystemColorHighlightColorBrushSystemColorWindowColorBrushSystemColorHighlightTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_92: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchContentForegroundTextFillColorPrimaryBrushToggleSwitchContentForegroundDisabledTextFillColorDisabledBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSubtleFillColorTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffControlAltFillColorSecondaryBrushToggleSwitchFillOffPointerOverControlAltFillColorTertiaryToggleSwitchFillOffPressedControlAltFillColorQuarternaryToggleSwitchFillOffDisabledControlAltFillColorDisabledToggleSwitchStrokeOffControlStrongStrokeColorDefaultBrushToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledControlStrongStrokeColorDisabledToggleSwitchFillOnAccentFillColorDefaultBrushToggleSwitchFillOnPointerOverAccentFillColorSecondaryBrushToggleSwitchFillOnPressedAccentFillColorTertiaryBrushToggleSwitchFillOnDisabledAccentFillColorDisabledBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffTextFillColorSecondaryBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnTextOnAccentFillColorPrimaryBrushToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledTextOnAccentFillColorDisabledBrushToggleSwitchKnobStrokeOnCircleElevationBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 29, 25, 1, 17, 8, 17, 8,
@@ -7231,32 +7282,32 @@ static POPULATE_WINUITHEME_XAML_ROWS_92: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_93: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchCurtainBackgroundThemeBrushToggleSwitchCurtainDisabledBackgroundThemeBrushToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushToggleSwitchForegroundThemeBrushToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrushToggleSwitchTrackBorderThemeBrushToggleSwitchTrackDisabledBackgroundThemeBrushToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 10689, 65367, 1, 50, 8,
-        39, 47, 65535, 255, 1, 51, 8,
-        86, 50, 18122, 65390, 1, 52, 8,
-        136, 46, 20460, 65406, 1, 53, 8,
-        182, 40, 65535, 26367, 1, 54, 8,
-        222, 32, 65535, 65535, 1, 55, 8,
-        254, 46, 65535, 26367, 1, 56, 8,
-        300, 38, 65535, 65535, 1, 57, 8,
-        338, 39, 65535, 23039, 1, 58, 8,
-        377, 47, 65535, 13311, 1, 59, 8,
-        424, 37, 65535, 65535, 1, 60, 8,
-        461, 33, 65535, 65535, 1, 61, 8,
-        494, 45, 32382, 65406, 1, 62, 8,
-        539, 41, 32382, 65406, 1, 63, 8,
-        580, 48, 65535, 65535, 1, 64, 8,
-        628, 44, 65535, 65535, 1, 65, 8,
-        672, 44, 65535, 65535, 1, 66, 8,
-        716, 44, 65535, 65535, 1, 67, 8,
-        760, 37, 65535, 17151, 1, 68, 8,
-        797, 33, 65535, 255, 1, 69, 8,
-        830, 45, 65535, 8191, 1, 70, 8,
-        875, 48, 65535, 19199, 1, 71, 8,
-        923, 44, 65535, 23039, 1, 72, 8,
+        1451, 39, 10689, 65367, 1, 50, 8,
+        1490, 47, 65535, 255, 1, 51, 8,
+        1537, 50, 18122, 65390, 1, 52, 8,
+        1587, 46, 20460, 65406, 1, 53, 8,
+        1633, 40, 65535, 26367, 1, 54, 8,
+        1673, 32, 65535, 65535, 1, 55, 8,
+        1705, 46, 65535, 26367, 1, 56, 8,
+        1751, 38, 65535, 65535, 1, 57, 8,
+        1789, 39, 65535, 23039, 1, 58, 8,
+        1828, 47, 65535, 13311, 1, 59, 8,
+        1875, 37, 65535, 65535, 1, 60, 8,
+        1912, 33, 65535, 65535, 1, 61, 8,
+        1945, 45, 32382, 65406, 1, 62, 8,
+        1990, 41, 32382, 65406, 1, 63, 8,
+        2031, 48, 65535, 65535, 1, 64, 8,
+        2079, 44, 65535, 65535, 1, 65, 8,
+        2123, 44, 65535, 65535, 1, 66, 8,
+        2167, 44, 65535, 65535, 1, 67, 8,
+        2211, 37, 65535, 17151, 1, 68, 8,
+        2248, 33, 65535, 255, 1, 69, 8,
+        2281, 45, 65535, 8191, 1, 70, 8,
+        2326, 48, 65535, 19199, 1, 71, 8,
+        2374, 44, 65535, 23039, 1, 72, 8,
     ],
 };
 
@@ -7268,9 +7319,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_94: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CommandBarOverflowMaxHeight", value: 198.0_f64, line: 18, position: 53 },
 ];
 
+/// The keys and targets of the packed tables of the unit 20 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS: &str = "CommandBarBackgroundControlFillColorTransparentBrushCommandBarBackgroundOpenAcrylicInAppFillColorDefaultBrushCommandBarBorderBrushOpenCardStrokeColorDefaultSolidBrushCommandBarForegroundTextFillColorPrimaryBrushCommandBarHighContrastBorderCommandBarEllipsisIconForegroundDisabledTextFillColorDisabledBrushCommandBarOverflowPresenterBackgroundCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushSystemControlBackgroundChromeMediumBrushSystemControlForegroundBaseHighBrushSystemControlForegroundTransparentBrushSystemControlDisabledBaseMediumLowBrushSystemControlBackgroundChromeMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarBackgroundControlFillColorTransparentBrushCommandBarBackgroundOpenAcrylicInAppFillColorDefaultBrushCommandBarBorderBrushOpenCardStrokeColorDefaultSolidBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 32, 1, 19, 8, 19, 8,
@@ -7281,15 +7335,15 @@ static POPULATE_WINUITHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_96: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarForegroundTextFillColorPrimaryBrushCommandBarHighContrastBorderControlFillColorTransparentBrushCommandBarEllipsisIconForegroundDisabledTextFillColorDisabledBrushCommandBarOverflowPresenterBackgroundAcrylicInAppFillColorDefaultBrushCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 25, 1, 23, 8, 23, 8,
-        45, 28, 73, 32, 1, 24, 8, 24, 8,
-        105, 40, 145, 26, 1, 25, 8, 25, 8,
-        171, 37, 208, 33, 1, 26, 8, 26, 8,
-        241, 38, 279, 33, 1, 27, 8, 27, 8,
-        312, 39, 351, 47, 1, 28, 8, 28, 8,
+        166, 20, 186, 25, 1, 23, 8, 23, 8,
+        211, 28, 20, 32, 1, 24, 8, 24, 8,
+        239, 40, 279, 26, 1, 25, 8, 25, 8,
+        305, 37, 76, 33, 1, 26, 8, 26, 8,
+        342, 38, 380, 33, 1, 27, 8, 27, 8,
+        413, 39, 452, 47, 1, 28, 8, 28, 8,
     ],
 };
 
@@ -7303,9 +7357,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_97: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 34, position: 69 },
 ];
 
+/// The keys and targets of the packed tables of the unit 21 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS: &str = "GridViewItemBackgroundSubtleFillColorTransparentBrushGridViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushGridViewItemBackgroundPressedSubtleFillColorTertiaryBrushGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundTextFillColorPrimaryBrushGridViewItemForegroundPointerOverTextFillColorSecondaryBrushGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushGridViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushGridViewItemFocusBorderBrushGridViewItemFocusSecondaryBorderBrushGridViewItemCheckBrushTextOnAccentFillColorPrimaryBrushGridViewItemCheckBoxBrushControlOnImageFillColorDefaultBrushGridViewItemDragBackgroundGridViewItemDragForegroundGridViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushGridViewItemPointerOverBorderBrushControlStrokeColorOnAccentTertiaryBrushGridViewItemSelectedBorderBrushAccentFillColorDefaultBrushGridViewItemSelectedPointerOverBorderBrushAccentFillColorSecondaryBrushGridViewItemSelectedPressedBorderBrushAccentFillColorTertiaryBrushGridViewItemSelectedDisabledBorderBrushAccentFillColorDisabledBrushGridViewItemSelectedInnerBorderBrushControlSolidFillColorDefaultBrushGridViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushGridViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushGridViewItemCheckBoxPointerOverBrushControlOnImageFillColorSecondaryBrushGridViewItemCheckBoxPressedBrushControlOnImageFillColorTertiaryBrushGridViewItemCheckBoxDisabledBrushControlOnImageFillColorDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushControlStrongStrokeColorDisabledBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabledSystemColorWindowColorSystemColorWindowTextColorSystemControlForegroundAltHighBrushSystemControlForegroundBaseHighBrushSystemColorButtonFaceColorSystemControlTransparentBrushSystemControlHighlightAltChromeWhiteBrushSystemControlDisabledChromeDisabledHighBrushSystemColorHighlightColorSystemColorGrayTextColorSystemColorButtonTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_98: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemBackgroundSubtleFillColorTransparentBrushGridViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushGridViewItemBackgroundPressedSubtleFillColorTertiaryBrushGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundTextFillColorPrimaryBrushGridViewItemForegroundPointerOverTextFillColorSecondaryBrushGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushGridViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushGridViewItemFocusBorderBrushGridViewItemFocusSecondaryBorderBrushGridViewItemCheckBrushTextOnAccentFillColorPrimaryBrushGridViewItemCheckBoxBrushControlOnImageFillColorDefaultBrushGridViewItemDragBackgroundGridViewItemDragForegroundGridViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 15, 8, 15, 8,
@@ -7337,29 +7394,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_99: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_100: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemPointerOverBorderBrushControlStrokeColorOnAccentTertiaryBrushGridViewItemSelectedBorderBrushAccentFillColorDefaultBrushGridViewItemSelectedPointerOverBorderBrushAccentFillColorSecondaryBrushGridViewItemSelectedPressedBorderBrushAccentFillColorTertiaryBrushGridViewItemSelectedDisabledBorderBrushAccentFillColorDisabledBrushGridViewItemSelectedInnerBorderBrushControlSolidFillColorDefaultBrushGridViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushGridViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushGridViewItemCheckBoxPointerOverBrushControlOnImageFillColorSecondaryBrushGridViewItemCheckBoxPressedBrushControlOnImageFillColorTertiaryBrushGridViewItemCheckBoxDisabledBrushControlOnImageFillColorDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushControlStrongStrokeColorDisabledBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabledSubtleFillColorSecondaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 39, 1, 36, 8, 36, 8,
-        73, 31, 104, 27, 1, 37, 8, 37, 8,
-        131, 42, 173, 29, 1, 38, 8, 38, 8,
-        202, 38, 240, 28, 1, 39, 8, 39, 8,
-        268, 39, 307, 28, 1, 40, 8, 40, 8,
-        335, 36, 371, 33, 1, 41, 8, 41, 8,
-        404, 29, 433, 35, 1, 42, 8, 42, 8,
-        468, 30, 498, 34, 1, 43, 8, 43, 8,
-        532, 36, 568, 37, 1, 44, 8, 44, 8,
-        605, 32, 637, 36, 1, 45, 8, 45, 8,
-        673, 33, 706, 36, 1, 46, 8, 46, 8,
-        742, 33, 104, 27, 1, 47, 8, 47, 8,
-        775, 44, 173, 29, 1, 48, 8, 48, 8,
-        819, 40, 240, 28, 1, 49, 8, 49, 8,
-        859, 41, 307, 28, 1, 50, 8, 50, 8,
-        900, 31, 931, 36, 1, 51, 8, 51, 8,
-        967, 42, 931, 36, 1, 52, 8, 52, 8,
-        1009, 38, 1047, 37, 1, 53, 8, 53, 8,
-        1084, 39, 1047, 37, 1, 54, 8, 54, 8,
-        1123, 38, 1161, 29, 1, 55, 8, 55, 8,
+        841, 34, 875, 39, 1, 36, 8, 36, 8,
+        914, 31, 945, 27, 1, 37, 8, 37, 8,
+        972, 42, 1014, 29, 1, 38, 8, 38, 8,
+        1043, 38, 1081, 28, 1, 39, 8, 39, 8,
+        1109, 39, 1148, 28, 1, 40, 8, 40, 8,
+        1176, 36, 1212, 33, 1, 41, 8, 41, 8,
+        1245, 29, 1274, 35, 1, 42, 8, 42, 8,
+        1309, 30, 1339, 34, 1, 43, 8, 43, 8,
+        1373, 36, 1409, 37, 1, 44, 8, 44, 8,
+        1446, 32, 1478, 36, 1, 45, 8, 45, 8,
+        1514, 33, 1547, 36, 1, 46, 8, 46, 8,
+        1583, 33, 945, 27, 1, 47, 8, 47, 8,
+        1616, 44, 1014, 29, 1, 48, 8, 48, 8,
+        1660, 40, 1081, 28, 1, 49, 8, 49, 8,
+        1700, 41, 1148, 28, 1, 50, 8, 50, 8,
+        1741, 31, 1772, 36, 1, 51, 8, 51, 8,
+        1808, 42, 1772, 36, 1, 52, 8, 52, 8,
+        1850, 38, 1888, 37, 1, 53, 8, 53, 8,
+        1925, 39, 1888, 37, 1, 54, 8, 54, 8,
+        1964, 38, 86, 29, 1, 55, 8, 55, 8,
     ],
 };
 
@@ -7377,9 +7434,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_101: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ListViewItemMinHeight", value: 40.0_f64, line: 24, position: 47 },
 ];
 
+/// The keys and targets of the packed tables of the unit 22 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS: &str = "ListViewItemBorderBackgroundSubtleFillColorTertiaryBrushListViewItemBackgroundSubtleFillColorTransparentBrushListViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushListViewItemBackgroundPressedListViewItemBackgroundSelectedListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundTextFillColorPrimaryBrushListViewItemForegroundPointerOverListViewItemForegroundPressedListViewItemForegroundSelectedListViewItemForegroundSelectedPointerOverListViewItemForegroundSelectedPressedListViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushListViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushTextOnAccentFillColorPrimaryBrushListViewItemCheckBoxBrushControlAltFillColorSecondaryBrushListViewItemDragBackgroundListViewItemDragForegroundListViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundAccentFillColorDefaultBrushListViewItemCheckHintThemeBrushListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushListViewItemDragBackgroundThemeBrushListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushListViewItemOverlayBackgroundThemeBrushListViewItemOverlayForegroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrushListViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushListViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushListViewItemCheckBoxPointerOverBrushListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushAccentFillColorTertiaryBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushControlStrongStrokeColorDisabledBrushListViewItemBackgroundSelectedDisabledListViewItemSelectionIndicatorBrushListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrushSystemColorButtonFaceColorSystemColorWindowColorSystemColorHighlightColorSystemColorButtonTextColorSystemColorHighlightTextColorSystemColorWindowTextColorSystemColorGrayTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_102: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemBorderBackgroundSubtleFillColorTertiaryBrushListViewItemBackgroundSubtleFillColorTransparentBrushListViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushListViewItemBackgroundPressedListViewItemBackgroundSelectedListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundTextFillColorPrimaryBrushListViewItemForegroundPointerOverListViewItemForegroundPressedListViewItemForegroundSelectedListViewItemForegroundSelectedPointerOverListViewItemForegroundSelectedPressedListViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushListViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushTextOnAccentFillColorPrimaryBrushListViewItemCheckBoxBrushControlAltFillColorSecondaryBrushListViewItemDragBackgroundListViewItemDragForegroundListViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 28, 1, 26, 8, 26, 8,
@@ -7411,24 +7471,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_102: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_103: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckHintThemeBrushListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushListViewItemDragBackgroundThemeBrushListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushListViewItemOverlayBackgroundThemeBrushListViewItemOverlayForegroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 65535, 1, 50, 8,
-        31, 36, 65535, 65535, 1, 51, 8,
-        67, 27, 65535, 65535, 1, 52, 8,
-        94, 36, 6068, 39238, 1, 53, 8,
-        130, 36, 65535, 65535, 1, 54, 8,
-        166, 33, 65535, 65535, 1, 55, 8,
-        199, 39, 0, 42496, 1, 56, 8,
-        238, 39, 65535, 65535, 1, 57, 8,
-        277, 48, 65535, 39423, 1, 58, 8,
-        325, 43, 15677, 65341, 1, 59, 8,
-        368, 43, 65535, 19967, 1, 60, 8,
-        411, 40, 6068, 65350, 1, 61, 8,
-        451, 40, 65535, 65535, 1, 62, 8,
-        491, 51, 14270, 65375, 1, 63, 8,
-        542, 47, 14270, 65375, 1, 64, 8,
+        1060, 31, 65535, 65535, 1, 50, 8,
+        1091, 36, 65535, 65535, 1, 51, 8,
+        1127, 27, 65535, 65535, 1, 52, 8,
+        1154, 36, 6068, 39238, 1, 53, 8,
+        1190, 36, 65535, 65535, 1, 54, 8,
+        1226, 33, 65535, 65535, 1, 55, 8,
+        1259, 39, 0, 42496, 1, 56, 8,
+        1298, 39, 65535, 65535, 1, 57, 8,
+        1337, 48, 65535, 39423, 1, 58, 8,
+        1385, 43, 15677, 65341, 1, 59, 8,
+        1428, 43, 65535, 19967, 1, 60, 8,
+        1471, 40, 6068, 65350, 1, 61, 8,
+        1511, 40, 65535, 65535, 1, 62, 8,
+        1551, 51, 14270, 65375, 1, 63, 8,
+        1602, 47, 14270, 65375, 1, 64, 8,
     ],
 };
 
@@ -7441,33 +7501,36 @@ static POPULATE_WINUITHEME_XAML_ROWS_104: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_105: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushListViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushListViewItemCheckBoxPointerOverBrushControlAltFillColorSecondaryBrushListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushAccentFillColorDefaultBrushListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushAccentFillColorTertiaryBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushControlStrongStrokeColorDisabledBrushListViewItemBackgroundSelectedDisabledSubtleFillColorSecondaryBrushListViewItemSelectionIndicatorBrushListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 35, 1, 68, 8, 68, 8,
-        64, 30, 94, 34, 1, 69, 8, 69, 8,
-        128, 36, 164, 33, 1, 70, 8, 70, 8,
-        197, 32, 164, 33, 1, 71, 8, 71, 8,
-        229, 33, 164, 33, 1, 72, 8, 72, 8,
-        262, 33, 295, 27, 1, 73, 8, 73, 8,
-        322, 44, 35, 29, 1, 74, 8, 74, 8,
-        366, 40, 406, 28, 1, 75, 8, 75, 8,
-        434, 41, 100, 28, 1, 76, 8, 76, 8,
-        475, 31, 506, 36, 1, 77, 8, 77, 8,
-        542, 42, 506, 36, 1, 78, 8, 78, 8,
-        584, 38, 506, 36, 1, 79, 8, 79, 8,
-        622, 39, 661, 37, 1, 80, 8, 80, 8,
-        698, 38, 736, 29, 1, 81, 8, 81, 8,
-        765, 35, 295, 27, 1, 82, 8, 82, 8,
-        800, 46, 295, 27, 1, 83, 8, 83, 8,
-        846, 42, 295, 27, 1, 84, 8, 84, 8,
-        888, 43, 100, 28, 1, 85, 8, 85, 8,
+        1649, 29, 1678, 35, 1, 68, 8, 68, 8,
+        1713, 30, 1743, 34, 1, 69, 8, 69, 8,
+        1777, 36, 794, 33, 1, 70, 8, 70, 8,
+        1813, 32, 794, 33, 1, 71, 8, 71, 8,
+        1845, 33, 794, 33, 1, 72, 8, 72, 8,
+        1878, 33, 1033, 27, 1, 73, 8, 73, 8,
+        1911, 44, 1684, 29, 1, 74, 8, 74, 8,
+        1955, 40, 1995, 28, 1, 75, 8, 75, 8,
+        2023, 41, 1749, 28, 1, 76, 8, 76, 8,
+        2064, 31, 2095, 36, 1, 77, 8, 77, 8,
+        2131, 42, 2095, 36, 1, 78, 8, 78, 8,
+        2173, 38, 2095, 36, 1, 79, 8, 79, 8,
+        2211, 39, 2250, 37, 1, 80, 8, 80, 8,
+        2287, 38, 142, 29, 1, 81, 8, 81, 8,
+        2325, 35, 1033, 27, 1, 82, 8, 82, 8,
+        2360, 46, 1033, 27, 1, 83, 8, 83, 8,
+        2406, 42, 1033, 27, 1, 84, 8, 84, 8,
+        2448, 43, 1749, 28, 1, 85, 8, 85, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 25 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS: &str = "FlyoutPresenterBackgroundAcrylicInAppFillColorDefaultBrushFlyoutBorderThemeBrushSurfaceStrokeColorFlyoutBrushSystemColorWindowColorBrushSystemColorWindowTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
-    strings: "FlyoutPresenterBackgroundAcrylicInAppFillColorDefaultBrushFlyoutBorderThemeBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 33, 1, 15, 8, 15, 8,
@@ -7475,9 +7538,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 26 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS: &str = "AccentButtonBackgroundAccentFillColorDefaultBrushAccentButtonBackgroundPointerOverAccentFillColorSecondaryBrushAccentButtonBackgroundPressedAccentFillColorTertiaryBrushAccentButtonBackgroundDisabledAccentFillColorDisabledBrushAccentButtonForegroundTextOnAccentFillColorPrimaryBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedTextOnAccentFillColorSecondaryBrushAccentButtonForegroundDisabledTextOnAccentFillColorDisabledAccentButtonBorderBrushAccentControlElevationBorderBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedControlFillColorTransparentBrushAccentButtonBorderBrushDisabledSubtleButtonBackgroundSubtleFillColorTransparentBrushSubtleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushSubtleButtonBackgroundPressedSubtleFillColorTertiaryBrushSubtleButtonBackgroundDisabledSubtleButtonForegroundTextFillColorPrimaryBrushSubtleButtonForegroundPointerOverSubtleButtonForegroundPressedTextFillColorSecondaryBrushSubtleButtonForegroundDisabledTextFillColorDisabledBrushSubtleButtonBorderBrushSubtleButtonBorderBrushPointerOverSubtleButtonBorderBrushPressedSubtleButtonBorderBrushDisabledControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorDisabledBrushControlStrokeColorDefaultBrushButtonBackgroundThemeBrushButtonBorderThemeBrushButtonDisabledBackgroundThemeBrushButtonDisabledBorderThemeBrushButtonDisabledForegroundThemeBrushButtonForegroundThemeBrushButtonPointerOverBackgroundThemeBrushButtonPointerOverForegroundThemeBrushButtonPressedBackgroundThemeBrushButtonPressedForegroundThemeBrushSystemControlHighlightAccentBrushSystemControlForegroundAccentBrushSystemControlBackgroundBaseMediumLowBrushSystemControlBackgroundBaseLowBrushSystemControlHighlightAltAccentBrushSystemControlBackgroundChromeWhiteBrushSystemControlHighlightBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightTransparentBrushSystemControlDisabledTransparentBrushSystemColorHighlightTextColorBrushSystemColorButtonTextColorBrushSystemControlForegroundTransparentBrushSystemColorHighlightColorBrushSystemColorButtonFaceColorSystemColorGrayTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_107: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundAccentFillColorDefaultBrushAccentButtonBackgroundPointerOverAccentFillColorSecondaryBrushAccentButtonBackgroundPressedAccentFillColorTertiaryBrushAccentButtonBackgroundDisabledAccentFillColorDisabledBrushAccentButtonForegroundTextOnAccentFillColorPrimaryBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedTextOnAccentFillColorSecondaryBrushAccentButtonForegroundDisabledTextOnAccentFillColorDisabledAccentButtonBorderBrushAccentControlElevationBorderBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedControlFillColorTransparentBrushAccentButtonBorderBrushDisabledSubtleButtonBackgroundSubtleFillColorTransparentBrushSubtleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushSubtleButtonBackgroundPressedSubtleFillColorTertiaryBrushSubtleButtonBackgroundDisabledSubtleButtonForegroundTextFillColorPrimaryBrushSubtleButtonForegroundPointerOverSubtleButtonForegroundPressedTextFillColorSecondaryBrushSubtleButtonForegroundDisabledTextFillColorDisabledBrushSubtleButtonBorderBrushSubtleButtonBorderBrushPointerOverSubtleButtonBorderBrushPressedSubtleButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 27, 1, 15, 8, 15, 8,
@@ -7509,45 +7575,48 @@ static POPULATE_WINUITHEME_XAML_ROWS_107: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_108: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundControlFillColorDefaultBrushButtonBackgroundPointerOverControlFillColorSecondaryBrushButtonBackgroundPressedControlFillColorTertiaryBrushButtonBackgroundDisabledControlFillColorDisabledBrushButtonForegroundTextFillColorPrimaryBrushButtonForegroundPointerOverButtonForegroundPressedTextFillColorSecondaryBrushButtonForegroundDisabledTextFillColorDisabledBrushButtonBorderBrushControlElevationBorderBrushButtonBorderBrushPointerOverButtonBorderBrushPressedControlStrokeColorDefaultBrushButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 16, 16, 28, 1, 40, 8, 40, 8,
-        44, 27, 71, 30, 1, 41, 8, 41, 8,
-        101, 23, 124, 29, 1, 42, 8, 42, 8,
-        153, 24, 177, 29, 1, 43, 8, 43, 8,
-        206, 16, 222, 25, 1, 44, 8, 44, 8,
-        247, 27, 222, 25, 1, 45, 8, 45, 8,
-        274, 23, 297, 27, 1, 46, 8, 46, 8,
-        324, 24, 348, 26, 1, 47, 8, 47, 8,
-        374, 17, 391, 27, 1, 48, 8, 48, 8,
-        418, 28, 391, 27, 1, 49, 8, 49, 8,
-        446, 24, 470, 30, 1, 50, 8, 50, 8,
-        500, 25, 470, 30, 1, 51, 8, 51, 8,
+        6, 16, 1132, 28, 1, 40, 8, 40, 8,
+        55, 27, 1160, 30, 1, 41, 8, 41, 8,
+        117, 23, 1190, 29, 1, 42, 8, 42, 8,
+        174, 24, 1219, 29, 1, 43, 8, 43, 8,
+        232, 16, 844, 25, 1, 44, 8, 44, 8,
+        287, 27, 844, 25, 1, 45, 8, 45, 8,
+        320, 23, 931, 27, 1, 46, 8, 46, 8,
+        384, 24, 988, 26, 1, 47, 8, 47, 8,
+        443, 17, 466, 27, 1, 48, 8, 48, 8,
+        499, 28, 466, 27, 1, 49, 8, 49, 8,
+        533, 24, 1248, 30, 1, 50, 8, 50, 8,
+        595, 25, 1248, 30, 1, 51, 8, 51, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_109: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundThemeBrushButtonBorderThemeBrushButtonDisabledBackgroundThemeBrushButtonDisabledBorderThemeBrushButtonDisabledForegroundThemeBrushButtonForegroundThemeBrushButtonPointerOverBackgroundThemeBrushButtonPointerOverForegroundThemeBrushButtonPressedBackgroundThemeBrushButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 65535, 255, 1, 52, 8,
-        26, 22, 65535, 65535, 1, 53, 8,
-        48, 34, 65535, 255, 1, 54, 8,
-        82, 30, 65535, 26367, 1, 55, 8,
-        112, 34, 65535, 26367, 1, 56, 8,
-        146, 26, 65535, 65535, 1, 57, 8,
-        172, 37, 65535, 8703, 1, 58, 8,
-        209, 37, 65535, 65535, 1, 59, 8,
-        246, 33, 65535, 65535, 1, 60, 8,
-        279, 33, 0, 65280, 1, 61, 8,
+        1278, 26, 65535, 255, 1, 52, 8,
+        1304, 22, 65535, 65535, 1, 53, 8,
+        1326, 34, 65535, 255, 1, 54, 8,
+        1360, 30, 65535, 26367, 1, 55, 8,
+        1390, 34, 65535, 26367, 1, 56, 8,
+        1424, 26, 65535, 65535, 1, 57, 8,
+        1450, 37, 65535, 8703, 1, 58, 8,
+        1487, 37, 65535, 65535, 1, 59, 8,
+        1524, 33, 65535, 65535, 1, 60, 8,
+        1557, 33, 0, 65280, 1, 61, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 27 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS: &str = "ToggleButtonBackgroundControlFillColorDefaultBrushToggleButtonBackgroundPointerOverControlFillColorSecondaryBrushToggleButtonBackgroundPressedControlFillColorTertiaryBrushToggleButtonBackgroundDisabledControlFillColorDisabledBrushToggleButtonBackgroundCheckedAccentFillColorDefaultBrushToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundTextFillColorPrimaryBrushToggleButtonForegroundPointerOverToggleButtonForegroundPressedTextFillColorSecondaryBrushToggleButtonForegroundDisabledTextFillColorDisabledBrushToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushControlElevationBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedControlStrokeColorDefaultBrushToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedControlFillColorTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabledToggleButtonBackgroundThemeBrushToggleButtonBorderThemeBrushToggleButtonCheckedBackgroundThemeBrushToggleButtonCheckedBorderThemeBrushToggleButtonCheckedDisabledBackgroundThemeBrushToggleButtonCheckedDisabledForegroundThemeBrushToggleButtonCheckedForegroundThemeBrushToggleButtonCheckedPointerOverBackgroundThemeBrushToggleButtonCheckedPointerOverBorderThemeBrushToggleButtonCheckedPressedBackgroundThemeBrushToggleButtonCheckedPressedBorderThemeBrushToggleButtonCheckedPressedForegroundThemeBrushToggleButtonDisabledBorderThemeBrushToggleButtonDisabledForegroundThemeBrushToggleButtonForegroundThemeBrushToggleButtonPointerOverBackgroundThemeBrushToggleButtonPressedBackgroundThemeBrushToggleButtonPressedForegroundThemeBrushSystemControlBackgroundBaseLowBrushSystemColorHighlightTextColorBrushSystemControlHighlightAccentBrushSystemColorButtonTextColorBrushSystemControlBackgroundBaseMediumLowBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemColorButtonFaceColorBrushSystemColorHighlightColorBrushSystemControlForegroundTransparentBrushSystemControlHighlightBaseMediumLowBrushSystemControlDisabledTransparentBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightTransparentBrushSystemColorGrayTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_110: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundControlFillColorDefaultBrushToggleButtonBackgroundPointerOverControlFillColorSecondaryBrushToggleButtonBackgroundPressedControlFillColorTertiaryBrushToggleButtonBackgroundDisabledControlFillColorDisabledBrushToggleButtonBackgroundCheckedAccentFillColorDefaultBrushToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundTextFillColorPrimaryBrushToggleButtonForegroundPointerOverToggleButtonForegroundPressedTextFillColorSecondaryBrushToggleButtonForegroundDisabledTextFillColorDisabledBrushToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushControlElevationBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedControlStrokeColorDefaultBrushToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedControlFillColorTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 28, 1, 17, 8, 17, 8,
@@ -7591,27 +7660,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_110: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_111: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundThemeBrushToggleButtonBorderThemeBrushToggleButtonCheckedBackgroundThemeBrushToggleButtonCheckedBorderThemeBrushToggleButtonCheckedDisabledBackgroundThemeBrushToggleButtonCheckedDisabledForegroundThemeBrushToggleButtonCheckedForegroundThemeBrushToggleButtonCheckedPointerOverBackgroundThemeBrushToggleButtonCheckedPointerOverBorderThemeBrushToggleButtonCheckedPressedBackgroundThemeBrushToggleButtonCheckedPressedBorderThemeBrushToggleButtonCheckedPressedForegroundThemeBrushToggleButtonDisabledBorderThemeBrushToggleButtonDisabledForegroundThemeBrushToggleButtonForegroundThemeBrushToggleButtonPointerOverBackgroundThemeBrushToggleButtonPressedBackgroundThemeBrushToggleButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65535, 255, 1, 53, 8,
-        32, 28, 65535, 65535, 1, 54, 8,
-        60, 39, 65535, 65535, 1, 55, 8,
-        99, 35, 65535, 65535, 1, 56, 8,
-        134, 47, 65535, 26367, 1, 57, 8,
-        181, 47, 0, 65280, 1, 58, 8,
-        228, 39, 0, 65280, 1, 59, 8,
-        267, 50, 65535, 39423, 1, 60, 8,
-        317, 46, 65535, 39423, 1, 61, 8,
-        363, 46, 65535, 255, 1, 62, 8,
-        409, 42, 65535, 65535, 1, 63, 8,
-        451, 46, 65535, 65535, 1, 64, 8,
-        497, 36, 65535, 26367, 1, 65, 8,
-        533, 40, 65535, 26367, 1, 66, 8,
-        573, 32, 65535, 65535, 1, 67, 8,
-        605, 43, 65535, 8703, 1, 68, 8,
-        648, 39, 65535, 65535, 1, 69, 8,
-        687, 39, 0, 65280, 1, 70, 8,
+        1803, 32, 65535, 255, 1, 53, 8,
+        1835, 28, 65535, 65535, 1, 54, 8,
+        1863, 39, 65535, 65535, 1, 55, 8,
+        1902, 35, 65535, 65535, 1, 56, 8,
+        1937, 47, 65535, 26367, 1, 57, 8,
+        1984, 47, 0, 65280, 1, 58, 8,
+        2031, 39, 0, 65280, 1, 59, 8,
+        2070, 50, 65535, 39423, 1, 60, 8,
+        2120, 46, 65535, 39423, 1, 61, 8,
+        2166, 46, 65535, 255, 1, 62, 8,
+        2212, 42, 65535, 65535, 1, 63, 8,
+        2254, 46, 65535, 65535, 1, 64, 8,
+        2300, 36, 65535, 26367, 1, 65, 8,
+        2336, 40, 65535, 26367, 1, 66, 8,
+        2376, 32, 65535, 65535, 1, 67, 8,
+        2408, 43, 65535, 8703, 1, 68, 8,
+        2451, 39, 65535, 65535, 1, 69, 8,
+        2490, 39, 0, 65280, 1, 70, 8,
     ],
 };
 
@@ -7621,9 +7690,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_112: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "OverlayCornerRadius", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 18, position: 49 },
 ];
 
+/// The keys and targets of the packed tables of the unit 29 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS: &str = "MediaTransportControlsPanelBackgroundAcrylicInAppFillColorDefaultBrushMediaTransportControlsFlyoutBackgroundAcrylicBackgroundFillColorDefaultBrushMediaTransportControlsThumbBorderBackgroundControlStrongFillColorDefaultBrushMediaTransportControlsFillTimeElapsedTextTextFillColorSecondaryBrushMediaTransportControlsFillMediaTextTextFillColorPrimaryBrushMediaTransportControlsBorderBrushSurfaceStrokeColorFlyoutBrushSystemControlPageBackgroundAltMediumBrushSystemControlBackgroundBaseMediumBrushSystemControlPageTextBaseMediumBrushSystemControlForegroundBaseHighBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_113: rt::PackedRows = rt::PackedRows {
-    strings: "MediaTransportControlsPanelBackgroundAcrylicInAppFillColorDefaultBrushMediaTransportControlsFlyoutBackgroundAcrylicBackgroundFillColorDefaultBrushMediaTransportControlsThumbBorderBackgroundControlStrongFillColorDefaultBrushMediaTransportControlsFillTimeElapsedTextTextFillColorSecondaryBrushMediaTransportControlsFillMediaTextTextFillColorPrimaryBrushMediaTransportControlsBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 37, 37, 33, 1, 15, 8, 15, 8,
@@ -7653,9 +7725,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_115: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MediaTransportControlsMaxWidth", value: 720.0_f64, line: 30, position: 56 },
 ];
 
+/// The keys and targets of the packed tables of the unit 30 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS: &str = "RepeatButtonBackgroundControlFillColorDefaultBrushRepeatButtonBackgroundPointerOverControlFillColorSecondaryBrushRepeatButtonBackgroundPressedControlFillColorTertiaryBrushRepeatButtonBackgroundDisabledControlFillColorDisabledBrushRepeatButtonForegroundTextFillColorPrimaryBrushRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedTextFillColorSecondaryBrushRepeatButtonForegroundDisabledTextFillColorDisabledBrushRepeatButtonBorderBrushControlElevationBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedControlStrokeColorDefaultBrushRepeatButtonBorderBrushDisabledRepeatButtonBorderThemeBrushRepeatButtonDisabledBackgroundThemeBrushRepeatButtonDisabledBorderThemeBrushRepeatButtonDisabledForegroundThemeBrushRepeatButtonForegroundThemeBrushRepeatButtonPointerOverBackgroundThemeBrushRepeatButtonPointerOverForegroundThemeBrushRepeatButtonPressedBackgroundThemeBrushRepeatButtonPressedForegroundThemeBrushSystemControlBackgroundBaseLowBrushSystemControlBackgroundBaseMediumLowBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlForegroundTransparentBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightTransparentBrushSystemControlDisabledTransparentBrushSystemColorButtonTextColorSystemColorButtonFaceColorSystemColorGrayTextColorSystemColorHighlightColorSystemColorHighlightTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_116: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBackgroundControlFillColorDefaultBrushRepeatButtonBackgroundPointerOverControlFillColorSecondaryBrushRepeatButtonBackgroundPressedControlFillColorTertiaryBrushRepeatButtonBackgroundDisabledControlFillColorDisabledBrushRepeatButtonForegroundTextFillColorPrimaryBrushRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedTextFillColorSecondaryBrushRepeatButtonForegroundDisabledTextFillColorDisabledBrushRepeatButtonBorderBrushControlElevationBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedControlStrokeColorDefaultBrushRepeatButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 28, 1, 16, 8, 16, 8,
@@ -7675,24 +7750,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_116: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_117: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBorderThemeBrushRepeatButtonDisabledBackgroundThemeBrushRepeatButtonDisabledBorderThemeBrushRepeatButtonDisabledForegroundThemeBrushRepeatButtonForegroundThemeBrushRepeatButtonPointerOverBackgroundThemeBrushRepeatButtonPointerOverForegroundThemeBrushRepeatButtonPressedBackgroundThemeBrushRepeatButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 65535, 65535, 1, 28, 8,
-        28, 40, 65535, 255, 1, 29, 8,
-        68, 36, 65535, 26367, 1, 30, 8,
-        104, 40, 65535, 26367, 1, 31, 8,
-        144, 32, 65535, 65535, 1, 32, 8,
-        176, 43, 65535, 8703, 1, 33, 8,
-        219, 43, 65535, 65535, 1, 34, 8,
-        262, 39, 65535, 65535, 1, 35, 8,
-        301, 39, 0, 65280, 1, 36, 8,
+        597, 28, 65535, 65535, 1, 28, 8,
+        625, 40, 65535, 255, 1, 29, 8,
+        665, 36, 65535, 26367, 1, 30, 8,
+        701, 40, 65535, 26367, 1, 31, 8,
+        741, 32, 65535, 65535, 1, 32, 8,
+        773, 43, 65535, 8703, 1, 33, 8,
+        816, 43, 65535, 65535, 1, 34, 8,
+        859, 39, 65535, 65535, 1, 35, 8,
+        898, 39, 0, 65280, 1, 36, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 31 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS: &str = "CalendarDatePickerForegroundTextFillColorPrimaryBrushCalendarDatePickerForegroundDisabledTextFillColorDisabledBrushCalendarDatePickerCalendarGlyphForegroundTextFillColorSecondaryBrushCalendarDatePickerCalendarGlyphForegroundPointerOverCalendarDatePickerCalendarGlyphForegroundPressedCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundPointerOverCalendarDatePickerTextForegroundPressedCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerHeaderForegroundCalendarDatePickerHeaderForegroundDisabledCalendarDatePickerBackgroundControlFillColorDefaultBrushCalendarDatePickerBackgroundPointerOverControlFillColorSecondaryBrushCalendarDatePickerBackgroundPressedControlFillColorTertiaryBrushCalendarDatePickerBackgroundDisabledControlFillColorDisabledBrushCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushControlElevationBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedControlStrokeColorDefaultBrushCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemColorHighlightColorBrushSystemColorButtonFaceColorBrushSystemColorHighlightTextColorBrushSystemColorWindowColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_118: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarDatePickerForegroundTextFillColorPrimaryBrushCalendarDatePickerForegroundDisabledTextFillColorDisabledBrushCalendarDatePickerCalendarGlyphForegroundTextFillColorSecondaryBrushCalendarDatePickerCalendarGlyphForegroundPointerOverCalendarDatePickerCalendarGlyphForegroundPressedCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundPointerOverCalendarDatePickerTextForegroundPressedCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerHeaderForegroundCalendarDatePickerHeaderForegroundDisabledCalendarDatePickerBackgroundControlFillColorDefaultBrushCalendarDatePickerBackgroundPointerOverControlFillColorSecondaryBrushCalendarDatePickerBackgroundPressedControlFillColorTertiaryBrushCalendarDatePickerBackgroundDisabledControlFillColorDisabledBrushCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushControlElevationBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedControlStrokeColorDefaultBrushCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 25, 1, 16, 8, 16, 8,
@@ -7721,9 +7799,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_118: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 32 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS: &str = "CalendarViewFocusBorderBrushAccentFillColorSecondaryBrushCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushSubtleFillColorTertiaryBrushCalendarViewSelectedBorderBrushAccentFillColorDefaultBrushCalendarViewHoverBorderBrushSubtleFillColorSecondaryBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundTextOnAccentFillColorPrimaryBrushCalendarViewBlackoutForegroundTextFillColorPrimaryBrushCalendarViewSelectedForegroundAccentTextFillColorPrimaryBrushCalendarViewPressedForegroundTextFillColorSecondaryBrushCalendarViewOutOfScopeForegroundCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSubtleFillColorTransparentBrushCalendarViewCalendarItemBackgroundCalendarViewForegroundCalendarViewBackgroundControlFillColorInputActiveBrushCalendarViewBorderBrushControlStrokeColorDefaultBrushCalendarViewWeekDayForegroundDisabledTextFillColorDisabledBrushCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverControlStrongFillColorDefaultBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledControlStrongFillColorDisabledBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushFocusStrokeColorOuterBrushCalendarViewFocusVisualSecondaryBrushFocusStrokeColorInnerBrushCalendarViewBlackoutStrikethroughBrushControlStrongStrokeColorDefaultBrushCalendarViewSelectedDisabledBorderBrushAccentFillColorDisabledBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundAccentTextFillColorTertiaryBrushCalendarViewSelectedDisabledForegroundAccentTextFillColorDisabledBrushCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundCalendarViewTodayBlackoutBackgroundAccentFillColorTertiaryBrushCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSizeSystemControlForegroundBaseHighBrushSystemControlHighlightListAccentMediumBrushSystemControlHighlightListAccentHighBrushSystemControlHighlightAccentBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightAltChromeWhiteBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightBaseHighBrushSystemControlHyperlinkBaseHighBrushSystemControlDisabledChromeMediumLowBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlBackgroundAltHighBrushSystemControlForegroundChromeMediumBrushSystemControlTransparentBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_119: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarViewFocusBorderBrushAccentFillColorSecondaryBrushCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushSubtleFillColorTertiaryBrushCalendarViewSelectedBorderBrushAccentFillColorDefaultBrushCalendarViewHoverBorderBrushSubtleFillColorSecondaryBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundTextOnAccentFillColorPrimaryBrushCalendarViewBlackoutForegroundTextFillColorPrimaryBrushCalendarViewSelectedForegroundAccentTextFillColorPrimaryBrushCalendarViewPressedForegroundTextFillColorSecondaryBrushCalendarViewOutOfScopeForegroundCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSubtleFillColorTransparentBrushCalendarViewCalendarItemBackgroundCalendarViewForegroundCalendarViewBackgroundControlFillColorInputActiveBrushCalendarViewBorderBrushControlStrokeColorDefaultBrushCalendarViewWeekDayForegroundDisabledTextFillColorDisabledBrushCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverControlStrongFillColorDefaultBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledControlStrongFillColorDisabledBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushFocusStrokeColorOuterBrushCalendarViewFocusVisualSecondaryBrushFocusStrokeColorInnerBrushCalendarViewBlackoutStrikethroughBrushControlStrongStrokeColorDefaultBrushCalendarViewSelectedDisabledBorderBrushAccentFillColorDisabledBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundAccentTextFillColorTertiaryBrushCalendarViewSelectedDisabledForegroundAccentTextFillColorDisabledBrushCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundCalendarViewTodayBlackoutBackgroundAccentFillColorTertiaryBrushCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSize",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 29, 1, 15, 8, 15, 8,
@@ -7810,9 +7891,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_121: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CalendarViewNavigationButtonFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 87, position: 72 },
 ];
 
+/// The keys and targets of the packed tables of the unit 33 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS: &str = "CheckBoxForegroundUncheckedTextFillColorPrimaryBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledTextFillColorDisabledBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSubtleFillColorTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedControlStrongStrokeColorDefaultBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedControlStrongStrokeColorDisabledBrushCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedAccentFillColorDefaultBrushCheckBoxCheckBackgroundStrokeCheckedPointerOverAccentFillColorSecondaryBrushCheckBoxCheckBackgroundStrokeCheckedPressedAccentFillColorTertiaryBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedControlAltFillColorSecondaryBrushCheckBoxCheckBackgroundFillUncheckedPointerOverControlAltFillColorTertiaryBrushCheckBoxCheckBackgroundFillUncheckedPressedControlAltFillColorQuarternaryBrushCheckBoxCheckBackgroundFillUncheckedDisabledControlAltFillColorDisabledBrushCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledAccentFillColorDisabledBrushCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedTextOnAccentFillColorPrimaryBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledTextOnAccentFillColorDisabledBrushCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCheckBoxBackgroundThemeBrushCheckBoxBorderThemeBrushCheckBoxContentDisabledForegroundThemeBrushCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushCheckBoxPointerOverBorderThemeBrushCheckBoxPointerOverForegroundThemeBrushCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrushSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorHighlightColorBrushSystemColorButtonFaceColorBrushSystemColorHighlightTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_122: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxForegroundUncheckedTextFillColorPrimaryBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledTextFillColorDisabledBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSubtleFillColorTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedControlStrongStrokeColorDefaultBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedControlStrongStrokeColorDisabledBrushCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedAccentFillColorDefaultBrushCheckBoxCheckBackgroundStrokeCheckedPointerOverAccentFillColorSecondaryBrushCheckBoxCheckBackgroundStrokeCheckedPressedAccentFillColorTertiaryBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedControlAltFillColorSecondaryBrushCheckBoxCheckBackgroundFillUncheckedPointerOverControlAltFillColorTertiaryBrushCheckBoxCheckBackgroundFillUncheckedPressedControlAltFillColorQuarternaryBrushCheckBoxCheckBackgroundFillUncheckedDisabledControlAltFillColorDisabledBrushCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledAccentFillColorDisabledBrushCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedTextOnAccentFillColorPrimaryBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledTextOnAccentFillColorDisabledBrushCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 27, 27, 25, 1, 15, 8, 15, 8,
@@ -7892,29 +7976,32 @@ static POPULATE_WINUITHEME_XAML_ROWS_122: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_123: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxBackgroundThemeBrushCheckBoxBorderThemeBrushCheckBoxContentDisabledForegroundThemeBrushCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushCheckBoxPointerOverBorderThemeBrushCheckBoxPointerOverForegroundThemeBrushCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 65535, 52479, 1, 87, 8,
-        28, 24, 65535, 52479, 1, 88, 8,
-        52, 43, 65535, 26367, 1, 89, 8,
-        95, 35, 65535, 65535, 1, 90, 8,
-        130, 36, 65535, 26367, 1, 91, 8,
-        166, 32, 65535, 26367, 1, 92, 8,
-        198, 36, 0, 26112, 1, 93, 8,
-        234, 28, 0, 65280, 1, 94, 8,
-        262, 39, 65535, 57087, 1, 95, 8,
-        301, 35, 65535, 57087, 1, 96, 8,
-        336, 39, 0, 65280, 1, 97, 8,
-        375, 35, 65535, 65535, 1, 98, 8,
-        410, 31, 65535, 65535, 1, 99, 8,
-        441, 35, 0, 65280, 1, 100, 8,
+        3333, 28, 65535, 52479, 1, 87, 8,
+        3361, 24, 65535, 52479, 1, 88, 8,
+        3385, 43, 65535, 26367, 1, 89, 8,
+        3428, 35, 65535, 65535, 1, 90, 8,
+        3463, 36, 65535, 26367, 1, 91, 8,
+        3499, 32, 65535, 26367, 1, 92, 8,
+        3531, 36, 0, 26112, 1, 93, 8,
+        3567, 28, 0, 65280, 1, 94, 8,
+        3595, 39, 65535, 57087, 1, 95, 8,
+        3634, 35, 65535, 57087, 1, 96, 8,
+        3669, 39, 0, 65280, 1, 97, 8,
+        3708, 35, 65535, 65535, 1, 98, 8,
+        3743, 31, 65535, 65535, 1, 99, 8,
+        3774, 35, 0, 65280, 1, 100, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 34 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS: &str = "ContentDialogForegroundTextFillColorPrimaryBrushContentDialogBackgroundSolidBackgroundFillColorBaseBrushContentDialogSmokeFillSmokeFillColorDefaultBrushContentDialogTopOverlayLayerFillColorAltBrushContentDialogBorderBrushSurfaceStrokeColorDefaultBrushContentDialogSeparatorBorderBrushCardStrokeColorDefaultBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemControlTransparentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_124: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogForegroundTextFillColorPrimaryBrushContentDialogBackgroundSolidBackgroundFillColorBaseBrushContentDialogSmokeFillSmokeFillColorDefaultBrushContentDialogTopOverlayLayerFillColorAltBrushContentDialogBorderBrushSurfaceStrokeColorDefaultBrushContentDialogSeparatorBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 23, 23, 25, 1, 15, 8, 15, 8,
@@ -7949,9 +8036,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_127: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "DatePickerSpacingThemeHeight", value: 20.0_f64, line: 18, position: 54 },
 ];
 
+/// The keys and targets of the packed tables of the unit 35 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS: &str = "DatePickerSpacerFillControlStrokeColorDefaultBrushDatePickerSpacerFillDisabledDatePickerHeaderForegroundTextFillColorPrimaryBrushDatePickerHeaderForegroundDisabledTextFillColorDisabledBrushDatePickerButtonBorderBrushControlElevationBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundControlFillColorDefaultBrushDatePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushDatePickerButtonBackgroundPressedControlFillColorTertiaryBrushDatePickerButtonBackgroundDisabledControlFillColorDisabledBrushDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultTextFillColorSecondaryBrushDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushDatePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushDatePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushDatePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushDatePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushDatePickerHeaderForegroundThemeBrushDatePickerForegroundThemeBrushSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemColorHighlightColorBrushSystemColorButtonFaceColorBrushSystemColorHighlightTextColorBrushSystemColorWindowColorBrushSystemColorWindowTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_128: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerSpacerFillControlStrokeColorDefaultBrushDatePickerSpacerFillDisabledDatePickerHeaderForegroundTextFillColorPrimaryBrushDatePickerHeaderForegroundDisabledTextFillColorDisabledBrushDatePickerButtonBorderBrushControlElevationBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundControlFillColorDefaultBrushDatePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushDatePickerButtonBackgroundPressedControlFillColorTertiaryBrushDatePickerButtonBackgroundDisabledControlFillColorDisabledBrushDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultTextFillColorSecondaryBrushDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushDatePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushDatePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushDatePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushDatePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 30, 1, 21, 8, 21, 8,
@@ -7984,17 +8074,20 @@ static POPULATE_WINUITHEME_XAML_ROWS_128: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_129: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerHeaderForegroundThemeBrushDatePickerForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 65535, 65535, 1, 46, 8,
-        36, 30, 0, 65280, 1, 47, 8,
+        1287, 36, 65535, 65535, 1, 46, 8,
+        1323, 30, 0, 65280, 1, 47, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 36 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS: &str = "DateTimePickerFlyoutButtonBackgroundSubtleFillColorTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSubtleFillColorSecondaryBrushDateTimePickerFlyoutButtonBackgroundPressedSubtleFillColorTertiaryBrushDateTimePickerFlyoutButtonBorderBrushControlStrokeColorDefaultBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverTextFillColorPrimaryBrushDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundTextFillColorSecondaryBrushLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundAcrylicBackgroundFillColorDefaultBrushLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressedSystemColorWindowColorBrushSystemColorHighlightTextColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_130: rt::PackedRows = rt::PackedRows {
-    strings: "DateTimePickerFlyoutButtonBackgroundSubtleFillColorTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSubtleFillColorSecondaryBrushDateTimePickerFlyoutButtonBackgroundPressedSubtleFillColorTertiaryBrushDateTimePickerFlyoutButtonBorderBrushControlStrokeColorDefaultBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverTextFillColorPrimaryBrushDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundTextFillColorSecondaryBrushLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundAcrylicBackgroundFillColorDefaultBrushLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 36, 36, 31, 1, 15, 8, 15, 8,
@@ -8021,9 +8114,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_130: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 37 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS: &str = "FlipViewBackgroundSolidBackgroundFillColorBaseBrushFlipViewNextPreviousButtonBackgroundAcrylicInAppFillColorDefaultBrushFlipViewNextPreviousButtonBackgroundPointerOverFlipViewNextPreviousButtonBackgroundPressedFlipViewNextPreviousArrowForegroundControlStrongFillColorDefaultBrushFlipViewNextPreviousArrowForegroundPointerOverTextFillColorSecondaryBrushFlipViewNextPreviousArrowForegroundPressedFlipViewNextPreviousButtonBorderBrushControlStrokeColorDefaultBrushFlipViewNextPreviousButtonBorderBrushPointerOverFlipViewNextPreviousButtonBorderBrushPressedFlipViewButtonBackgroundThemeBrushFlipViewButtonBorderThemeBrushFlipViewButtonForegroundThemeBrushFlipViewButtonPointerOverBackgroundThemeBrushFlipViewButtonPointerOverBorderThemeBrushFlipViewButtonPointerOverForegroundThemeBrushFlipViewButtonPressedBackgroundThemeBrushFlipViewButtonPressedBorderThemeBrushFlipViewButtonPressedForegroundThemeBrushSystemColorButtonFaceColorBrushSystemColorHighlightColorBrushSystemColorButtonTextColorBrushSystemColorHighlightTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_131: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewBackgroundSolidBackgroundFillColorBaseBrushFlipViewNextPreviousButtonBackgroundAcrylicInAppFillColorDefaultBrushFlipViewNextPreviousButtonBackgroundPointerOverFlipViewNextPreviousButtonBackgroundPressedFlipViewNextPreviousArrowForegroundControlStrongFillColorDefaultBrushFlipViewNextPreviousArrowForegroundPointerOverTextFillColorSecondaryBrushFlipViewNextPreviousArrowForegroundPressedFlipViewNextPreviousButtonBorderBrushControlStrokeColorDefaultBrushFlipViewNextPreviousButtonBorderBrushPointerOverFlipViewNextPreviousButtonBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 18, 18, 33, 1, 16, 8, 16, 8,
@@ -8041,24 +8137,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_131: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_132: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewButtonBackgroundThemeBrushFlipViewButtonBorderThemeBrushFlipViewButtonForegroundThemeBrushFlipViewButtonPointerOverBackgroundThemeBrushFlipViewButtonPointerOverBorderThemeBrushFlipViewButtonPointerOverForegroundThemeBrushFlipViewButtonPressedBackgroundThemeBrushFlipViewButtonPressedBorderThemeBrushFlipViewButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 54741, 22997, 1, 26, 8,
-        34, 30, 54741, 22997, 1, 27, 8,
-        64, 34, 0, 39168, 1, 28, 8,
-        98, 45, 55255, 61655, 1, 29, 8,
-        143, 41, 49601, 40641, 1, 30, 8,
-        184, 45, 0, 65280, 1, 31, 8,
-        229, 41, 10537, 48425, 1, 32, 8,
-        270, 37, 10537, 48425, 1, 33, 8,
-        307, 41, 65535, 65535, 1, 34, 8,
+        553, 34, 54741, 22997, 1, 26, 8,
+        587, 30, 54741, 22997, 1, 27, 8,
+        617, 34, 0, 39168, 1, 28, 8,
+        651, 45, 55255, 61655, 1, 29, 8,
+        696, 41, 49601, 40641, 1, 30, 8,
+        737, 45, 0, 65280, 1, 31, 8,
+        782, 41, 10537, 48425, 1, 32, 8,
+        823, 37, 10537, 48425, 1, 33, 8,
+        860, 41, 65535, 65535, 1, 34, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 38 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS: &str = "FlipViewItemBackgroundSubtleFillColorTransparentBrushSystemControlTransparentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_133: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewItemBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 15, 8, 15, 8,
@@ -8082,9 +8181,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_135: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "PivotPortraitThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 26, position: 52 },
 ];
 
+/// The keys and targets of the packed tables of the unit 39 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS: &str = "PivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFillAccentFillColorDefaultBrushPivotForegroundThemeBrushPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushPivotNavButtonBorderThemeBrushPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrushSystemColorHighlightColorSystemColorHighlightTextColorSystemColorButtonFaceColorSystemColorButtonTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_136: rt::PackedRows = rt::PackedRows {
-    strings: "PivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFillAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 15, 15, 29, 1, 29, 8, 29, 8,
@@ -8129,29 +8231,32 @@ static POPULATE_WINUITHEME_XAML_ROWS_136: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_137: rt::PackedRows = rt::PackedRows {
-    strings: "PivotForegroundThemeBrushPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushPivotNavButtonBorderThemeBrushPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 65535, 65535, 1, 66, 8,
-        25, 34, 65535, 255, 1, 67, 8,
-        59, 36, 65535, 255, 1, 68, 8,
-        95, 34, 65535, 65535, 1, 69, 8,
-        129, 36, 65535, 26367, 1, 70, 8,
-        165, 34, 54741, 22997, 1, 71, 8,
-        199, 30, 54741, 22997, 1, 72, 8,
-        229, 34, 0, 39168, 1, 73, 8,
-        263, 45, 55255, 61655, 1, 74, 8,
-        308, 41, 49601, 40641, 1, 75, 8,
-        349, 45, 0, 65280, 1, 76, 8,
-        394, 41, 10537, 48425, 1, 77, 8,
-        435, 37, 10537, 48425, 1, 78, 8,
-        472, 41, 65535, 65535, 1, 79, 8,
+        1791, 25, 65535, 65535, 1, 66, 8,
+        1816, 34, 65535, 255, 1, 67, 8,
+        1850, 36, 65535, 255, 1, 68, 8,
+        1886, 34, 65535, 65535, 1, 69, 8,
+        1920, 36, 65535, 26367, 1, 70, 8,
+        1956, 34, 54741, 22997, 1, 71, 8,
+        1990, 30, 54741, 22997, 1, 72, 8,
+        2020, 34, 0, 39168, 1, 73, 8,
+        2054, 45, 55255, 61655, 1, 74, 8,
+        2099, 41, 49601, 40641, 1, 75, 8,
+        2140, 45, 0, 65280, 1, 76, 8,
+        2185, 41, 10537, 48425, 1, 77, 8,
+        2226, 37, 10537, 48425, 1, 78, 8,
+        2263, 41, 65535, 65535, 1, 79, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 40 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS: &str = "ScrollBarBackgroundSubtleFillColorTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushScrollBarButtonBackgroundPressedControlStrongFillColorDefaultBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverTextFillColorSecondaryBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledControlStrongFillColorDisabledBrushScrollBarThumbFillScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarThumbBorderBrushControlFillColorTransparentBrushScrollBarTrackFillAcrylicInAppFillColorDefaultBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabledScrollBarButtonForegroundThemeBrushScrollBarButtonPointerOverBackgroundThemeBrushScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrushScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColorSystemControlTransparentBrushSystemControlBackgroundListLowBrushSystemControlBackgroundBaseMediumBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushSystemControlDisabledBaseHighBrushSystemControlForegroundChromeDisabledLowBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightBaseMediumBrushSystemControlPageBackgroundChromeLowBrushSystemControlDisabledTransparentBrushSystemControlForegroundTransparentBrushSystemControlDisabledChromeHighBrushSystemColorButtonTextColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorButtonFaceColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_138: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarBackgroundSubtleFillColorTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushScrollBarButtonBackgroundPressedControlStrongFillColorDefaultBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverTextFillColorSecondaryBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledControlStrongFillColorDisabledBrushScrollBarThumbFillScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarThumbBorderBrushControlFillColorTransparentBrushScrollBarTrackFillAcrylicInAppFillColorDefaultBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 31, 1, 17, 8, 17, 8,
@@ -8192,42 +8297,45 @@ static POPULATE_WINUITHEME_XAML_ROWS_138: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_139: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarButtonForegroundThemeBrushScrollBarButtonPointerOverBackgroundThemeBrushScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 39168, 1, 50, 8,
-        35, 46, 56026, 65498, 1, 51, 8,
-        81, 42, 56026, 65498, 1, 52, 8,
-        123, 46, 0, 65280, 1, 53, 8,
-        169, 42, 0, 39168, 1, 54, 8,
-        211, 38, 0, 39168, 1, 55, 8,
-        249, 42, 65535, 65535, 1, 56, 8,
-        291, 36, 52685, 65485, 1, 57, 8,
-        327, 32, 39578, 32154, 1, 58, 8,
-        359, 34, 52685, 65485, 1, 59, 8,
-        393, 30, 21845, 15189, 1, 60, 8,
-        423, 45, 56026, 65498, 1, 61, 8,
-        468, 41, 47031, 27575, 1, 62, 8,
-        509, 41, 0, 39168, 1, 63, 8,
-        550, 37, 21845, 60757, 1, 64, 8,
-        587, 34, 54741, 22997, 1, 65, 8,
-        621, 30, 54741, 22997, 1, 66, 8,
+        1166, 35, 0, 39168, 1, 50, 8,
+        1201, 46, 56026, 65498, 1, 51, 8,
+        1247, 42, 56026, 65498, 1, 52, 8,
+        1289, 46, 0, 65280, 1, 53, 8,
+        1335, 42, 0, 39168, 1, 54, 8,
+        1377, 38, 0, 39168, 1, 55, 8,
+        1415, 42, 65535, 65535, 1, 56, 8,
+        1457, 36, 52685, 65485, 1, 57, 8,
+        1493, 32, 39578, 32154, 1, 58, 8,
+        1525, 34, 52685, 65485, 1, 59, 8,
+        1559, 30, 21845, 15189, 1, 60, 8,
+        1589, 45, 56026, 65498, 1, 61, 8,
+        1634, 41, 47031, 27575, 1, 62, 8,
+        1675, 41, 0, 39168, 1, 63, 8,
+        1716, 37, 21845, 60757, 1, 64, 8,
+        1753, 34, 54741, 22997, 1, 65, 8,
+        1787, 30, 54741, 22997, 1, 66, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_140: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarThumbBackgroundColorControlStrongFillColorDefaultScrollBarPanningThumbBackgroundColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 29, 1, 67, 8, 67, 8,
-        58, 36, 29, 29, 1, 68, 8, 68, 8,
+        1817, 29, 327, 29, 1, 67, 8, 67, 8,
+        1846, 36, 327, 29, 1, 68, 8, 68, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 41 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS: &str = "ScrollViewerScrollBarSeparatorBackgroundControlFillColorTransparentBrushSystemControlTransparentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_141: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollViewerScrollBarSeparatorBackgroundControlFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 40, 40, 32, 1, 15, 8, 15, 8,
@@ -8246,9 +8354,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_143: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 18, position: 50 },
 ];
 
+/// The keys and targets of the packed tables of the unit 42 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS: &str = "SliderContainerBackgroundPointerOverControlFillColorTransparentBrushSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundAccentFillColorDefaultBrushSliderThumbBackgroundPointerOverAccentFillColorSecondaryBrushSliderThumbBackgroundPressedAccentFillColorTertiaryBrushSliderThumbBackgroundDisabledAccentFillColorDisabledBrushSliderThumbBorderBrushControlElevationBorderBrushSliderOuterThumbBackgroundControlSolidFillColorDefaultBrushSliderTrackFillControlStrongFillColorDefaultBrushSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledControlStrongFillColorDisabledBrushSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderHeaderForegroundTextFillColorPrimaryBrushSliderHeaderForegroundDisabledTextFillColorDisabledBrushSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillControlFillColorInputActiveBrushSliderBorderThemeBrushSliderDisabledBorderThemeBrushSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrushSystemControlTransparentBrushSystemControlForegroundAccentBrushSystemColorHighlightColorBrushSystemColorHotlightColorBrushSystemControlDisabledChromeDisabledHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundBaseMediumBrushSystemControlHighlightAccentBrushSystemControlForegroundBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemColorGrayTextColorSystemControlBackgroundAltHighBrushSystemColorButtonTextColorSystemColorHighlightTextColorSystemColorButtonFaceColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
-    strings: "SliderContainerBackgroundPointerOverControlFillColorTransparentBrushSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundAccentFillColorDefaultBrushSliderThumbBackgroundPointerOverAccentFillColorSecondaryBrushSliderThumbBackgroundPressedAccentFillColorTertiaryBrushSliderThumbBackgroundDisabledAccentFillColorDisabledBrushSliderThumbBorderBrushControlElevationBorderBrushSliderOuterThumbBackgroundControlSolidFillColorDefaultBrushSliderTrackFillControlStrongFillColorDefaultBrushSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledControlStrongFillColorDisabledBrushSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderHeaderForegroundTextFillColorPrimaryBrushSliderHeaderForegroundDisabledTextFillColorDisabledBrushSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillControlFillColorInputActiveBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 36, 36, 32, 1, 20, 8, 20, 8,
@@ -8278,37 +8389,40 @@ static POPULATE_WINUITHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_145: rt::PackedRows = rt::PackedRows {
-    strings: "SliderBorderThemeBrushSliderDisabledBorderThemeBrushSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 65535, 255, 1, 42, 8,
-        22, 30, 65535, 255, 1, 43, 8,
-        52, 31, 65535, 65535, 1, 44, 8,
-        83, 27, 65535, 65535, 1, 45, 8,
-        110, 39, 32382, 65406, 1, 46, 8,
-        149, 42, 65535, 65535, 1, 47, 8,
-        191, 38, 65535, 65535, 1, 48, 8,
-        229, 38, 65535, 65535, 1, 49, 8,
-        267, 34, 65535, 65535, 1, 50, 8,
-        301, 40, 0, 65280, 1, 51, 8,
-        341, 48, 0, 65280, 1, 52, 8,
-        389, 41, 65535, 33023, 1, 53, 8,
-        430, 49, 65535, 33023, 1, 54, 8,
-        479, 31, 65535, 10751, 1, 55, 8,
-        510, 39, 11973, 65371, 1, 56, 8,
-        549, 47, 65535, 8191, 1, 57, 8,
-        596, 50, 19405, 65394, 1, 58, 8,
-        646, 46, 21231, 65409, 1, 59, 8,
-        692, 39, 65535, 10751, 1, 60, 8,
-        731, 42, 65535, 18175, 1, 61, 8,
-        773, 38, 65535, 23039, 1, 62, 8,
-        811, 32, 65535, 65535, 1, 63, 8,
+        924, 22, 65535, 255, 1, 42, 8,
+        946, 30, 65535, 255, 1, 43, 8,
+        976, 31, 65535, 65535, 1, 44, 8,
+        1007, 27, 65535, 65535, 1, 45, 8,
+        1034, 39, 32382, 65406, 1, 46, 8,
+        1073, 42, 65535, 65535, 1, 47, 8,
+        1115, 38, 65535, 65535, 1, 48, 8,
+        1153, 38, 65535, 65535, 1, 49, 8,
+        1191, 34, 65535, 65535, 1, 50, 8,
+        1225, 40, 0, 65280, 1, 51, 8,
+        1265, 48, 0, 65280, 1, 52, 8,
+        1313, 41, 65535, 33023, 1, 53, 8,
+        1354, 49, 65535, 33023, 1, 54, 8,
+        1403, 31, 65535, 10751, 1, 55, 8,
+        1434, 39, 11973, 65371, 1, 56, 8,
+        1473, 47, 65535, 8191, 1, 57, 8,
+        1520, 50, 19405, 65394, 1, 58, 8,
+        1570, 46, 21231, 65409, 1, 59, 8,
+        1616, 39, 65535, 10751, 1, 60, 8,
+        1655, 42, 65535, 18175, 1, 61, 8,
+        1697, 38, 65535, 23039, 1, 62, 8,
+        1735, 32, 65535, 65535, 1, 63, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 43 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS: &str = "TimePickerSpacerFillControlStrokeColorDefaultBrushTimePickerSpacerFillDisabledTimePickerHeaderForegroundTextFillColorPrimaryBrushTimePickerHeaderForegroundDisabledTextFillColorDisabledBrushTimePickerButtonBorderBrushControlElevationBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundControlFillColorDefaultBrushTimePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushTimePickerButtonBackgroundPressedControlFillColorTertiaryBrushTimePickerButtonBackgroundDisabledControlFillColorDisabledBrushTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTextFillColorSecondaryBrushTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushTimePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushTimePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushTimePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushTimePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryTimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushTimePickerHeaderForegroundThemeBrushTimePickerForegroundThemeBrushSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemColorHighlightColorBrushSystemColorButtonFaceColorBrushSystemColorHighlightTextColorBrushSystemColorWindowColorBrushSystemColorWindowTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_146: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerSpacerFillControlStrokeColorDefaultBrushTimePickerSpacerFillDisabledTimePickerHeaderForegroundTextFillColorPrimaryBrushTimePickerHeaderForegroundDisabledTextFillColorDisabledBrushTimePickerButtonBorderBrushControlElevationBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundControlFillColorDefaultBrushTimePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushTimePickerButtonBackgroundPressedControlFillColorTertiaryBrushTimePickerButtonBackgroundDisabledControlFillColorDisabledBrushTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTextFillColorSecondaryBrushTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushTimePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushTimePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushTimePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushTimePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryTimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 30, 1, 15, 8, 15, 8,
@@ -8341,11 +8455,11 @@ static POPULATE_WINUITHEME_XAML_ROWS_146: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_147: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerHeaderForegroundThemeBrushTimePickerForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 65535, 65535, 1, 40, 8,
-        36, 30, 0, 65280, 1, 41, 8,
+        1287, 36, 65535, 65535, 1, 40, 8,
+        1323, 30, 0, 65280, 1, 41, 8,
     ],
 };
 
@@ -8363,9 +8477,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_149: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TimePickerThirdHostThemeMargin", value: [20.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 47, position: 57 },
 ];
 
+/// The keys and targets of the packed tables of the unit 44 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS: &str = "ToolTipForegroundTextFillColorPrimaryBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSurfaceStrokeColorFlyoutBrushToolTipBackgroundThemeBrushToolTipBorderThemeBrushToolTipForegroundThemeBrushToolTipForegroundBrushToolTipBackgroundBrushAcrylicInAppFillColorDefaultBrushSystemControlForegroundBaseHighBrushSystemColorWindowTextColorBrushSystemColorWindowColorSystemColorWindowColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundTextFillColorPrimaryBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 25, 1, 17, 8, 17, 8,
@@ -8376,28 +8493,31 @@ static POPULATE_WINUITHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_151: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipBackgroundThemeBrushToolTipBorderThemeBrushToolTipForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 65535, 1, 20, 8,
-        27, 23, 32896, 65408, 1, 21, 8,
-        50, 27, 26214, 65382, 1, 22, 8,
+        149, 27, 65535, 65535, 1, 20, 8,
+        176, 23, 32896, 65408, 1, 21, 8,
+        199, 27, 26214, 65382, 1, 22, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_152: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundBrushTextFillColorPrimaryBrushToolTipBackgroundBrushAcrylicInAppFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 25, 1, 23, 8, 23, 8,
-        47, 22, 69, 33, 1, 24, 8, 24, 8,
+        226, 22, 17, 25, 1, 23, 8, 23, 8,
+        248, 22, 270, 33, 1, 24, 8, 24, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 45 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS: &str = "RatingControlUnselectedForegroundTextFillColorSecondaryBrushRatingControlSelectedForegroundAccentFillColorDefaultBrushRatingControlPlaceholderForegroundTextFillColorPrimaryBrushRatingControlPointerOverPlaceholderForegroundControlAltFillColorTertiaryBrushRatingControlPointerOverUnselectedForegroundRatingControlPointerOverSelectedForegroundRatingControlDisabledSelectedForegroundTextFillColorDisabledBrushRatingControlCaptionForegroundSystemControlForegroundBaseLowBrushSystemControlHighlightAccentBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseMediumBrushSystemColorGrayTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_153: rt::PackedRows = rt::PackedRows {
-    strings: "RatingControlUnselectedForegroundTextFillColorSecondaryBrushRatingControlSelectedForegroundAccentFillColorDefaultBrushRatingControlPlaceholderForegroundTextFillColorPrimaryBrushRatingControlPointerOverPlaceholderForegroundControlAltFillColorTertiaryBrushRatingControlPointerOverUnselectedForegroundRatingControlPointerOverSelectedForegroundRatingControlDisabledSelectedForegroundTextFillColorDisabledBrushRatingControlCaptionForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 15, 8, 15, 8,
@@ -8411,9 +8531,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_153: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 46 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS: &str = "InfoBadgeForegroundTextOnAccentFillColorPrimaryBrushInfoBadgeBackgroundAccentFillColorDefaultBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAccentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_154: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBadgeForegroundTextOnAccentFillColorPrimaryBrushInfoBadgeBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 33, 1, 15, 8, 15, 8,
@@ -8439,9 +8562,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_156: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "IconInfoBadgeIconMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 26, position: 50 },
 ];
 
+/// The keys and targets of the packed tables of the unit 47 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS: &str = "NavigationViewDefaultPaneBackgroundAcrylicInAppFillColorDefaultBrushNavigationViewExpandedPaneBackgroundSolidBackgroundFillColorTransparentNavigationViewTopPaneBackgroundNavigationViewContentBackgroundLayerFillColorDefaultBrushNavigationViewItemBackgroundSubtleFillColorTransparentBrushNavigationViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushNavigationViewItemBackgroundPressedSubtleFillColorTertiaryBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundTextFillColorPrimaryBrushNavigationViewItemForegroundPointerOverNavigationViewItemForegroundPressedTextFillColorSecondaryBrushNavigationViewItemForegroundDisabledTextFillColorDisabledBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushNavigationViewItemBorderBrushPointerOverNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundSystemControlTransparentBrushNavigationViewItemSeparatorForegroundDividerStrokeColorDefaultBrushNavigationViewItemHeaderForegroundNavigationViewSelectionIndicatorForegroundAccentFillColorDefaultBrushNavigationViewContentGridBorderBrushCardStrokeColorDefaultBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledTopNavigationViewItemBackgroundPointerOverTopNavigationViewItemBackgroundPressedTopNavigationViewItemBackgroundSelectedTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundSelectedPointerOverTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundNavigationViewButtonBackgroundPointerOverNavigationViewButtonBackgroundPressedNavigationViewButtonBackgroundDisabledControlFillColorDisabledBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabledSystemControlBackgroundBaseLowBrushSystemColorWindowColorSystemControlHighlightListLowRevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlTransparentRevealBackgroundBrushSystemControlForegroundBaseHighBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushSystemColorWindowTextColorBrushSystemColorHighlightTextColorSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_157: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewDefaultPaneBackgroundAcrylicInAppFillColorDefaultBrushNavigationViewExpandedPaneBackgroundSolidBackgroundFillColorTransparentNavigationViewTopPaneBackgroundNavigationViewContentBackgroundLayerFillColorDefaultBrushNavigationViewItemBackgroundSubtleFillColorTransparentBrushNavigationViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushNavigationViewItemBackgroundPressedSubtleFillColorTertiaryBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundTextFillColorPrimaryBrushNavigationViewItemForegroundPointerOverNavigationViewItemForegroundPressedTextFillColorSecondaryBrushNavigationViewItemForegroundDisabledTextFillColorDisabledBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushNavigationViewItemBorderBrushPointerOverNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundSystemControlTransparentBrushNavigationViewItemSeparatorForegroundDividerStrokeColorDefaultBrushNavigationViewItemHeaderForegroundNavigationViewSelectionIndicatorForegroundAccentFillColorDefaultBrushNavigationViewContentGridBorderBrushCardStrokeColorDefaultBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledTopNavigationViewItemBackgroundPointerOverTopNavigationViewItemBackgroundPressedTopNavigationViewItemBackgroundSelectedTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundSelectedPointerOverTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundNavigationViewButtonBackgroundPointerOverNavigationViewButtonBackgroundPressedNavigationViewButtonBackgroundDisabledControlFillColorDisabledBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 35, 35, 33, 1, 15, 8, 15, 8,
@@ -8511,18 +8637,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_157: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 48 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS: &str = "NavigationViewBackButtonBackgroundSubtleFillColorTransparentBrushSystemControlBackgroundBaseLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_158: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewBackButtonBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 34, 34, 31, 1, 15, 8, 15, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 49 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS: &str = "PersonPictureForegroundThemeBrushTextFillColorPrimaryBrushPersonPictureEllipseBadgeForegroundThemeBrushTextOnAccentFillColorPrimaryBrushPersonPictureEllipseBadgeFillThemeBrushAccentFillColorDefaultBrushPersonPictureEllipseBadgeStrokeThemeBrushControlFillColorTransparentBrushPersonPictureEllipseFillThemeBrushControlAltFillColorQuarternaryPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrushSystemControlForegroundBaseHighBrushSystemColorButtonTextColorSystemColorButtonFaceColorSystemColorHighlightTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_159: rt::PackedRows = rt::PackedRows {
-    strings: "PersonPictureForegroundThemeBrushTextFillColorPrimaryBrushPersonPictureEllipseBadgeForegroundThemeBrushTextOnAccentFillColorPrimaryBrushPersonPictureEllipseBadgeFillThemeBrushAccentFillColorDefaultBrushPersonPictureEllipseBadgeStrokeThemeBrushControlFillColorTransparentBrushPersonPictureEllipseFillThemeBrushControlAltFillColorQuarternaryPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 25, 1, 15, 8, 15, 8,
@@ -8542,9 +8674,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_160: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeThickness", value: 2.0_f64, line: 24, position: 66 },
 ];
 
+/// The keys and targets of the packed tables of the unit 50 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS: &str = "RefreshContainerForegroundBrushRefreshContainerBackgroundBrushSystemColorHighlightTextColor";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshContainerForegroundBrushRefreshContainerBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 31, 65535, 65535, 1, 15, 8,
@@ -8552,9 +8687,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 51 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS: &str = "RefreshVisualizerForegroundRefreshVisualizerBackgroundSystemColorHighlightTextColor";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_162: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 27, 65535, 65535, 1, 15, 8,
@@ -8562,9 +8700,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_162: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 52 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS: &str = "MenuBarBackgroundSubtleFillColorTransparentBrushMenuBarItemForegroundTextFillColorPrimaryBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuBarItemBackgroundPressedSubtleFillColorTertiaryBrushMenuBarItemBackgroundSelectedMenuBarItemBorderBrushControlAltFillColorTertiaryBrushMenuBarItemBorderBrushPointerOverControlStrokeColorDefaultBrushMenuBarItemBorderBrushPressedMenuBarItemBorderBrushSelectedSystemControlTransparentBrushSystemColorButtonTextColorBrushSystemControlBackgroundListLowBrushSystemControlBackgroundListMediumBrushSystemControlForegroundBaseMediumLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarBackgroundSubtleFillColorTransparentBrushMenuBarItemForegroundTextFillColorPrimaryBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuBarItemBackgroundPressedSubtleFillColorTertiaryBrushMenuBarItemBackgroundSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 31, 1, 15, 8, 15, 8,
@@ -8578,19 +8719,22 @@ static POPULATE_WINUITHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_164: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarItemBorderBrushControlAltFillColorTertiaryBrushMenuBarItemBorderBrushPointerOverControlStrokeColorDefaultBrushMenuBarItemBorderBrushPressedMenuBarItemBorderBrushSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 32, 1, 22, 8, 22, 8,
-        54, 33, 87, 30, 1, 23, 8, 23, 8,
-        117, 29, 87, 30, 1, 24, 8, 24, 8,
-        146, 30, 87, 30, 1, 25, 8, 25, 8,
+        261, 22, 283, 32, 1, 22, 8, 22, 8,
+        315, 33, 348, 30, 1, 23, 8, 23, 8,
+        378, 29, 348, 30, 1, 24, 8, 24, 8,
+        407, 30, 348, 30, 1, 25, 8, 25, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 53 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS: &str = "TreeViewItemBackgroundSubtleFillColorTransparentBrushTreeViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushTreeViewItemBackgroundPressedSubtleFillColorTertiaryBrushTreeViewItemBackgroundDisabledSubtleFillColorDisabledBrushTreeViewItemBackgroundSelectedTreeViewItemBackgroundSelectedPointerOverTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTextFillColorPrimaryBrushTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTextFillColorSecondaryBrushTreeViewItemForegroundDisabledTextFillColorDisabledBrushTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedTreeViewItemSelectionIndicatorForegroundAccentFillColorDefaultBrushTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabledSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorGrayTextColorBrushSystemColorWindowTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_165: rt::PackedRows = rt::PackedRows {
-    strings: "TreeViewItemBackgroundSubtleFillColorTransparentBrushTreeViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushTreeViewItemBackgroundPressedSubtleFillColorTertiaryBrushTreeViewItemBackgroundDisabledSubtleFillColorDisabledBrushTreeViewItemBackgroundSelectedTreeViewItemBackgroundSelectedPointerOverTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTextFillColorPrimaryBrushTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTextFillColorSecondaryBrushTreeViewItemForegroundDisabledTextFillColorDisabledBrushTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedTreeViewItemSelectionIndicatorForegroundAccentFillColorDefaultBrushTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 15, 8, 15, 8,
@@ -8643,9 +8787,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_167: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TreeViewItemContentHeight", value: 20.0_f64, line: 53, position: 51 },
 ];
 
+/// The keys and targets of the packed tables of the unit 54 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS: &str = "SwipeItemBackgroundControlFillColorTertiaryBrushSwipeItemForegroundTextFillColorPrimaryBrushSwipeItemBackgroundPressedControlAltFillColorQuarternaryBrushSwipeItemPreThresholdExecuteForegroundControlStrongFillColorDefaultBrushSwipeItemPreThresholdExecuteBackgroundSwipeItemPostThresholdExecuteForegroundTextOnAccentFillColorPrimaryBrushSwipeItemPostThresholdExecuteBackgroundAccentFillColorDefaultBrushSystemControlBackgroundBaseLowBrushSystemControlForegroundBaseHighBrushSystemControlBackgroundBaseMediumLowBrushSystemControlBackgroundBaseMediumBrushSystemControlForegroundChromeWhiteBrushSystemControlBackgroundAccentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
-    strings: "SwipeItemBackgroundControlFillColorTertiaryBrushSwipeItemForegroundTextFillColorPrimaryBrushSwipeItemBackgroundPressedControlAltFillColorQuarternaryBrushSwipeItemPreThresholdExecuteForegroundControlStrongFillColorDefaultBrushSwipeItemPreThresholdExecuteBackgroundSwipeItemPostThresholdExecuteForegroundTextOnAccentFillColorPrimaryBrushSwipeItemPostThresholdExecuteBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 29, 1, 15, 8, 15, 8,
@@ -8658,9 +8805,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 55 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS: &str = "SplitButtonBackgroundControlFillColorDefaultBrushSplitButtonBackgroundPointerOverControlFillColorSecondaryBrushSplitButtonBackgroundPressedControlFillColorTertiaryBrushSplitButtonBackgroundDisabledControlFillColorDisabledBrushSplitButtonBackgroundCheckedAccentFillColorDefaultBrushSplitButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushSplitButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushSplitButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushSplitButtonForegroundTextFillColorPrimaryBrushSplitButtonForegroundPointerOverSplitButtonForegroundPressedTextFillColorSecondaryBrushSplitButtonForegroundDisabledTextFillColorDisabledBrushSplitButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushSplitButtonForegroundCheckedDisabledSplitButtonForegroundSecondarySplitButtonForegroundSecondaryPressedTextFillColorTertiaryBrushSplitButtonBorderBrushControlElevationBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedControlStrokeColorDefaultBrushSplitButtonBorderBrushDisabledSplitButtonBorderBrushDividerSplitButtonBorderBrushCheckedAccentControlElevationBorderBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedControlFillColorTransparentBrushSplitButtonBorderBrushCheckedDisabledSplitButtonBorderBrushCheckedDividerControlStrokeColorOnAccentTertiaryBrushSplitButtonInAppBarUnfocusedPointerOverSubtleFillColorTertiaryBrushSystemColorButtonFaceColorBrushSystemColorHighlightTextColorBrushSystemColorWindowColorBrushSystemColorHighlightColorBrushSystemColorButtonTextColorBrushSystemColorGrayTextColorBrushSystemControlForegroundTransparentBrushSystemControlDisabledTransparentBrushSystemControlDisabledBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_169: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundControlFillColorDefaultBrushSplitButtonBackgroundPointerOverControlFillColorSecondaryBrushSplitButtonBackgroundPressedControlFillColorTertiaryBrushSplitButtonBackgroundDisabledControlFillColorDisabledBrushSplitButtonBackgroundCheckedAccentFillColorDefaultBrushSplitButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushSplitButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushSplitButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushSplitButtonForegroundTextFillColorPrimaryBrushSplitButtonForegroundPointerOverSplitButtonForegroundPressedTextFillColorSecondaryBrushSplitButtonForegroundDisabledTextFillColorDisabledBrushSplitButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushSplitButtonForegroundCheckedDisabledSplitButtonForegroundSecondarySplitButtonForegroundSecondaryPressedTextFillColorTertiaryBrushSplitButtonBorderBrushControlElevationBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedControlStrokeColorDefaultBrushSplitButtonBorderBrushDisabledSplitButtonBorderBrushDividerSplitButtonBorderBrushCheckedAccentControlElevationBorderBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedControlFillColorTransparentBrushSplitButtonBorderBrushCheckedDisabledSplitButtonBorderBrushCheckedDividerControlStrokeColorOnAccentTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 28, 1, 15, 8, 15, 8,
@@ -8696,16 +8846,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_169: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_170: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonInAppBarUnfocusedPointerOverSubtleFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 28, 1, 44, 8, 44, 8,
+        1445, 39, 1484, 28, 1, 44, 8, 44, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 56 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS: &str = "DropDownButtonForegroundSecondaryTextFillColorSecondaryBrushDropDownButtonForegroundSecondaryPointerOverTextFillColorTertiaryBrushDropDownButtonForegroundSecondaryPressedSystemColorButtonTextColorBrushSystemColorHighlightColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_171: rt::PackedRows = rt::PackedRows {
-    strings: "DropDownButtonForegroundSecondaryTextFillColorSecondaryBrushDropDownButtonForegroundSecondaryPointerOverTextFillColorTertiaryBrushDropDownButtonForegroundSecondaryPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 15, 8, 15, 8,
@@ -8714,9 +8867,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_171: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 57 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS: &str = "RadioButtonsHeaderForegroundTextFillColorPrimaryBrushRadioButtonsHeaderForegroundDisabledTextFillColorDisabledBrushSystemControlForegroundBaseHighBrushSystemControlDisabledBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_172: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonsHeaderForegroundTextFillColorPrimaryBrushRadioButtonsHeaderForegroundDisabledTextFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 25, 1, 15, 8, 15, 8,
@@ -8724,9 +8880,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_172: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 58 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS: &str = "TabViewBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderBackgroundLayerOnMicaBaseAltFillColorTransparentBrushTabViewItemHeaderBackgroundSelectedSolidBackgroundFillColorTertiaryBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverLayerOnMicaBaseAltFillColorSecondaryBrushTabViewItemHeaderBackgroundPressedLayerOnMicaBaseAltFillColorDefaultBrushTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundTextFillColorSecondaryBrushTabViewItemHeaderForegroundPressedTextFillColorTertiaryBrushTabViewItemHeaderForegroundSelectedTextFillColorPrimaryBrushTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledTextFillColorDisabledBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedSubtleFillColorTertiaryBrushTabViewButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTabViewButtonBackgroundDisabledTabViewButtonForegroundTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorDividerStrokeColorDefaultBrushTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabControlStrongFillColorDefaultBrushTabViewBorderBrushCardStrokeColorDefaultTabViewItemBorderBrushSystemColorButtonFaceColorBrushSystemColorWindowColorBrushSystemColorHighlightColorBrushSystemColorWindowTextColorBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrushSystemColorButtonTextColorBrushSystemControlBackgroundBaseMediumBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_173: rt::PackedRows = rt::PackedRows {
-    strings: "TabViewBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderBackgroundLayerOnMicaBaseAltFillColorTransparentBrushTabViewItemHeaderBackgroundSelectedSolidBackgroundFillColorTertiaryBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverLayerOnMicaBaseAltFillColorSecondaryBrushTabViewItemHeaderBackgroundPressedLayerOnMicaBaseAltFillColorDefaultBrushTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundTextFillColorSecondaryBrushTabViewItemHeaderForegroundPressedTextFillColorTertiaryBrushTabViewItemHeaderForegroundSelectedTextFillColorPrimaryBrushTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledTextFillColorDisabledBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedSubtleFillColorTertiaryBrushTabViewButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTabViewButtonBackgroundDisabledTabViewButtonForegroundTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorDividerStrokeColorDefaultBrushTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabControlStrongFillColorDefaultBrushTabViewBorderBrushCardStrokeColorDefaultTabViewItemBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 31, 1, 15, 8, 15, 8,
@@ -8803,9 +8962,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_174: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 81, position: 70 },
 ];
 
+/// The keys and targets of the packed tables of the unit 59 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS: &str = "AutoSuggestBoxSuggestionsListBackgroundAcrylicBackgroundFillColorDefaultBrushAutoSuggestBoxSuggestionsListBorderBrushSurfaceStrokeColorFlyoutBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushSystemControlBackgroundChromeMediumLowBrushSystemControlTransientBorderBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_175: rt::PackedRows = rt::PackedRows {
-    strings: "AutoSuggestBoxSuggestionsListBackgroundAcrylicBackgroundFillColorDefaultBrushAutoSuggestBoxSuggestionsListBorderBrushSurfaceStrokeColorFlyoutBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 39, 39, 38, 1, 15, 8, 15, 8,
@@ -8814,9 +8976,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_175: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 60 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS: &str = "ComboBoxItemForegroundTextFillColorPrimaryBrushComboBoxItemForegroundPressedTextFillColorSecondaryBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledTextFillColorDisabledBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSubtleFillColorTransparentBrushComboBoxItemBackgroundPressedSubtleFillColorTertiaryBrushComboBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxItemBackgroundDisabledSubtleFillColorDisabledBrushComboBoxItemBackgroundSelectedComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedComboBoxItemBackgroundSelectedPointerOverComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundControlFillColorDefaultBrushComboBoxBackgroundPointerOverControlFillColorSecondaryBrushComboBoxBackgroundPressedControlFillColorTertiaryBrushComboBoxBackgroundDisabledControlFillColorDisabledBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedFocusStrokeColorOuterBrushComboBoxBackgroundBorderBrushUnfocusedControlStrokeColorDefaultBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedTextFillColorTertiaryBrushComboBoxPlaceHolderForegroundDisabledComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushControlElevationBorderBrushComboBoxBorderBrushPointerOverComboBoxBorderBrushPressedComboBoxBorderBrushDisabledComboBoxDropDownGlyphForegroundComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownForegroundComboBoxDropDownBackgroundAcrylicInAppFillColorDefaultBrushComboBoxDropDownBorderBrushSurfaceStrokeColorFlyoutBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushComboBoxArrowDisabledForegroundThemeBrushComboBoxArrowForegroundThemeBrushComboBoxArrowPressedForegroundThemeBrushComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrushComboBoxPlaceholderTextForegroundThemeBrushComboBoxPointerOverBackgroundThemeBrushComboBoxPointerOverBorderThemeBrushComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushComboBoxSelectedPointerOverBackgroundThemeBrushComboBoxDropDownBackgroundPointerOverComboBoxDropDownBackgroundPointerPressedComboBoxFocusedDropDownBackgroundPointerOverComboBoxFocusedDropDownBackgroundPointerPressedControlAltFillColorQuarternaryBrushComboBoxEditableDropDownGlyphForegroundComboBoxItemPillFillBrushAccentFillColorDefaultBrushSystemControlForegroundBaseHighBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlTransparentBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightListAccentLowBrushSystemControlHighlightListAccentHighBrushSystemControlHighlightListAccentMediumBrushSystemControlBackgroundAltMediumLowBrushSystemControlPageBackgroundAltMediumBrushSystemControlBackgroundListMediumBrushSystemControlBackgroundBaseLowBrushSystemControlHighlightTransparentBrushSystemControlHighlightBaseMediumLowBrushSystemControlPageTextBaseMediumBrushSystemControlDisabledChromeDisabledLowBrushSystemControlForegroundBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumBrushSystemControlDisabledBaseLowBrushSystemControlForegroundBaseMediumHighBrushSystemControlBackgroundChromeMediumLowBrushSystemControlForegroundChromeHighBrushSystemColorGrayTextColorSystemColorButtonTextColorSystemColorButtonFaceColorSystemColorHighlightTextColorSystemColorHighlightColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_176: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxItemForegroundTextFillColorPrimaryBrushComboBoxItemForegroundPressedTextFillColorSecondaryBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledTextFillColorDisabledBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSubtleFillColorTransparentBrushComboBoxItemBackgroundPressedSubtleFillColorTertiaryBrushComboBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxItemBackgroundDisabledSubtleFillColorDisabledBrushComboBoxItemBackgroundSelectedComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedComboBoxItemBackgroundSelectedPointerOverComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundControlFillColorDefaultBrushComboBoxBackgroundPointerOverControlFillColorSecondaryBrushComboBoxBackgroundPressedControlFillColorTertiaryBrushComboBoxBackgroundDisabledControlFillColorDisabledBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedFocusStrokeColorOuterBrushComboBoxBackgroundBorderBrushUnfocusedControlStrokeColorDefaultBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedTextFillColorTertiaryBrushComboBoxPlaceHolderForegroundDisabledComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushControlElevationBorderBrushComboBoxBorderBrushPointerOverComboBoxBorderBrushPressedComboBoxBorderBrushDisabledComboBoxDropDownGlyphForegroundComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownForegroundComboBoxDropDownBackgroundAcrylicInAppFillColorDefaultBrushComboBoxDropDownBorderBrushSurfaceStrokeColorFlyoutBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 25, 1, 15, 8, 15, 8,
@@ -8885,58 +9050,58 @@ static POPULATE_WINUITHEME_XAML_ROWS_176: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_177: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxArrowDisabledForegroundThemeBrushComboBoxArrowForegroundThemeBrushComboBoxArrowPressedForegroundThemeBrushComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrushComboBoxPlaceholderTextForegroundThemeBrushComboBoxPointerOverBackgroundThemeBrushComboBoxPointerOverBorderThemeBrushComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushComboBoxSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 65535, 26367, 1, 76, 8,
-        41, 33, 0, 65280, 1, 77, 8,
-        74, 40, 0, 65280, 1, 78, 8,
-        114, 28, 65535, 52479, 1, 79, 8,
-        142, 24, 65535, 52479, 1, 80, 8,
-        166, 36, 65535, 255, 1, 81, 8,
-        202, 32, 65535, 26367, 1, 82, 8,
-        234, 36, 65535, 26367, 1, 83, 8,
-        270, 35, 65535, 65535, 1, 84, 8,
-        305, 31, 65535, 65535, 1, 85, 8,
-        336, 35, 65535, 65535, 1, 86, 8,
-        371, 28, 0, 65280, 1, 87, 8,
-        399, 34, 65535, 65535, 1, 88, 8,
-        433, 40, 0, 26112, 1, 89, 8,
-        473, 43, 0, 8448, 1, 90, 8,
-        516, 43, 0, 65280, 1, 91, 8,
-        559, 39, 54227, 65491, 1, 92, 8,
-        598, 39, 0, 65280, 1, 93, 8,
-        637, 40, 6068, 65350, 1, 94, 8,
-        677, 48, 0, 35840, 1, 95, 8,
-        725, 48, 65535, 39423, 1, 96, 8,
-        773, 40, 65535, 65535, 1, 97, 8,
-        813, 51, 14270, 65375, 1, 98, 8,
-        864, 43, 0, 34816, 1, 99, 8,
-        907, 39, 65535, 57087, 1, 100, 8,
-        946, 35, 65535, 57087, 1, 101, 8,
-        981, 33, 65535, 65535, 1, 102, 8,
-        1014, 29, 8481, 65313, 1, 103, 8,
-        1043, 33, 0, 65280, 1, 104, 8,
-        1076, 35, 65535, 65535, 1, 105, 8,
-        1111, 31, 65535, 65535, 1, 106, 8,
-        1142, 34, 54227, 65491, 1, 107, 8,
-        1176, 35, 0, 65280, 1, 108, 8,
-        1211, 36, 6068, 65350, 1, 109, 8,
-        1247, 47, 14270, 65375, 1, 110, 8,
+        2505, 41, 65535, 26367, 1, 76, 8,
+        2546, 33, 0, 65280, 1, 77, 8,
+        2579, 40, 0, 65280, 1, 78, 8,
+        2619, 28, 65535, 52479, 1, 79, 8,
+        2647, 24, 65535, 52479, 1, 80, 8,
+        2671, 36, 65535, 255, 1, 81, 8,
+        2707, 32, 65535, 26367, 1, 82, 8,
+        2739, 36, 65535, 26367, 1, 83, 8,
+        2775, 35, 65535, 65535, 1, 84, 8,
+        2810, 31, 65535, 65535, 1, 85, 8,
+        2841, 35, 65535, 65535, 1, 86, 8,
+        2876, 28, 0, 65280, 1, 87, 8,
+        2904, 34, 65535, 65535, 1, 88, 8,
+        2938, 40, 0, 26112, 1, 89, 8,
+        2978, 43, 0, 8448, 1, 90, 8,
+        3021, 43, 0, 65280, 1, 91, 8,
+        3064, 39, 54227, 65491, 1, 92, 8,
+        3103, 39, 0, 65280, 1, 93, 8,
+        3142, 40, 6068, 65350, 1, 94, 8,
+        3182, 48, 0, 35840, 1, 95, 8,
+        3230, 48, 65535, 39423, 1, 96, 8,
+        3278, 40, 65535, 65535, 1, 97, 8,
+        3318, 51, 14270, 65375, 1, 98, 8,
+        3369, 43, 0, 34816, 1, 99, 8,
+        3412, 39, 65535, 57087, 1, 100, 8,
+        3451, 35, 65535, 57087, 1, 101, 8,
+        3486, 33, 65535, 65535, 1, 102, 8,
+        3519, 29, 8481, 65313, 1, 103, 8,
+        3548, 33, 0, 65280, 1, 104, 8,
+        3581, 35, 65535, 65535, 1, 105, 8,
+        3616, 31, 65535, 65535, 1, 106, 8,
+        3647, 34, 54227, 65491, 1, 107, 8,
+        3681, 35, 0, 65280, 1, 108, 8,
+        3716, 36, 6068, 65350, 1, 109, 8,
+        3752, 47, 14270, 65375, 1, 110, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_178: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxDropDownBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxDropDownBackgroundPointerPressedSubtleFillColorTertiaryBrushComboBoxFocusedDropDownBackgroundPointerOverControlFillColorTertiaryBrushComboBoxFocusedDropDownBackgroundPointerPressedControlAltFillColorQuarternaryBrushComboBoxEditableDropDownGlyphForegroundTextFillColorSecondaryBrushComboBoxItemPillFillBrushAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 29, 1, 111, 8, 111, 8,
-        66, 40, 106, 28, 1, 112, 8, 112, 8,
-        134, 44, 178, 29, 1, 113, 8, 113, 8,
-        207, 47, 254, 35, 1, 114, 8, 114, 8,
-        289, 39, 328, 27, 1, 115, 8, 115, 8,
-        355, 25, 380, 27, 1, 116, 8, 116, 8,
+        3799, 37, 520, 29, 1, 111, 8, 111, 8,
+        3836, 40, 459, 28, 1, 112, 8, 112, 8,
+        3876, 44, 1230, 29, 1, 113, 8, 113, 8,
+        3920, 47, 3967, 35, 1, 114, 8, 114, 8,
+        4002, 39, 76, 27, 1, 115, 8, 115, 8,
+        4041, 25, 4066, 27, 1, 116, 8, 116, 8,
     ],
 };
 
@@ -8952,9 +9117,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_180: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 18, position: 61 },
 ];
 
+/// The keys and targets of the packed tables of the unit 61 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS: &str = "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_181: rt::PackedRows = rt::PackedRows {
-    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 38, 38, 47, 1, 19, 8, 19, 8,
@@ -8968,9 +9136,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_182: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 22, position: 61 },
 ];
 
+/// The keys and targets of the packed tables of the unit 62 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS: &str = "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCriticalSystemColorHighlightColorSystemColorWindowColorSystemColorWindowTextColorSystemColorHotlightColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCritical",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 27, 1, 16, 8, 16, 8,
@@ -8981,9 +9152,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 63 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS: &str = "ProgressRingForegroundThemeBrushAccentFillColorDefaultBrushProgressRingBackgroundThemeBrushControlFillColorTransparentBrushSystemControlHighlightAccentBrushSystemControlBackgroundBaseLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressRingForegroundThemeBrushAccentFillColorDefaultBrushProgressRingBackgroundThemeBrushControlFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 32, 32, 27, 1, 15, 8, 15, 8,
@@ -8991,9 +9165,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 64 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS: &str = "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrushNumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrushSystemControlForegroundBaseMediumBrushSystemControlBackgroundBaseHighBrushSystemControlTransientBorderBrushSystemControlTransparentBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 15, 8, 15, 8,
@@ -9004,16 +9181,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 31, 1, 19, 8, 19, 8,
+        176, 34, 210, 31, 1, 19, 8, 19, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 65 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS: &str = "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrushExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrushExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemControlTransparentBrushSystemColorWindowColorBrushSystemColorWindowTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 24, 24, 35, 1, 15, 8, 15, 8,
@@ -9030,34 +9210,37 @@ static POPULATE_WINUITHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundTextFillColorPrimaryBrushExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 31, 1, 25, 8, 25, 8,
-        56, 36, 92, 29, 1, 26, 8, 26, 8,
-        121, 32, 153, 28, 1, 27, 8, 27, 8,
-        181, 25, 206, 25, 1, 28, 8, 28, 8,
-        231, 36, 206, 25, 1, 29, 8, 29, 8,
-        267, 32, 206, 25, 1, 30, 8, 30, 8,
-        299, 26, 25, 31, 1, 31, 8, 31, 8,
-        325, 37, 25, 31, 1, 32, 8, 32, 8,
-        362, 33, 25, 31, 1, 33, 8, 33, 8,
+        385, 25, 410, 31, 1, 25, 8, 25, 8,
+        441, 36, 477, 29, 1, 26, 8, 26, 8,
+        506, 32, 538, 28, 1, 27, 8, 27, 8,
+        566, 25, 83, 25, 1, 28, 8, 28, 8,
+        591, 36, 83, 25, 1, 29, 8, 29, 8,
+        627, 32, 83, 25, 1, 30, 8, 30, 8,
+        659, 26, 410, 31, 1, 31, 8, 31, 8,
+        685, 37, 410, 31, 1, 32, 8, 32, 8,
+        722, 33, 410, 31, 1, 33, 8, 33, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 37, 1, 35, 8, 35, 8,
-        62, 26, 88, 27, 1, 36, 8, 36, 8,
+        755, 25, 780, 37, 1, 35, 8, 35, 8,
+        817, 26, 199, 27, 1, 36, 8, 36, 8,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 66 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS: &str = "PagerControlSelectionIndicatorForegroundAccentFillColorDefaultBrushPagerControlPageNavigationButtonBackgroundPointerOverSubtleFillColorSecondaryBrushPagerControlPageNavigationButtonBackgroundPressedSubtleFillColorTertiaryBrushPagerControlPageNavigationButtonBackgroundDisabledSubtleFillColorDisabledBrushPagerControlPageNavigationButtonForegroundPointerOverTextFillColorPrimaryBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledTextFillColorDisabledBrushSystemControlForegroundAccentBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemControlTransparentBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
-    strings: "PagerControlSelectionIndicatorForegroundAccentFillColorDefaultBrushPagerControlPageNavigationButtonBackgroundPointerOverSubtleFillColorSecondaryBrushPagerControlPageNavigationButtonBackgroundPressedSubtleFillColorTertiaryBrushPagerControlPageNavigationButtonBackgroundDisabledSubtleFillColorDisabledBrushPagerControlPageNavigationButtonForegroundPointerOverTextFillColorPrimaryBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledTextFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 40, 40, 27, 1, 15, 8, 15, 8,
@@ -9070,9 +9253,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 67 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS: &str = "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrushSystemColorWindowColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorWindowTextColorBrushSystemColorHotlightColorBrushSystemControlTransientBorderBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 35, 35, 38, 1, 15, 8, 15, 8,
@@ -9094,9 +9280,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 68 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabledSystemColorButtonFaceColorBrushSystemColorHighlightColorBrushSystemColorButtonTextColorBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 37, 37, 32, 1, 15, 8, 15, 8,
@@ -9129,9 +9318,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 69 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS: &str = "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabledSystemColorHighlightColorSystemControlForegroundBaseHighBrushSystemColorGrayTextColor";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
-    strings: "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 29, 1, 15, 8, 15, 8,
@@ -9168,9 +9360,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_194: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SelectorBarItemFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 41, position: 59 },
 ];
 
+/// The keys and targets of the packed tables of the unit 70 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS: &str = "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabledSystemControlForegroundBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightAltBaseHighBrushSystemControlBackgroundBaseLowBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrush";
+
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_195: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 23, 23, 25, 1, 15, 8, 15, 8,
@@ -9196,9 +9391,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_195: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 71 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS: &str = "TabularSurfaceRowBackgroundBrushTabularSurfaceRowBackgroundPointerOverBrushTabularSurfaceRowBackgroundPressedBrushTabularSurfaceRowBackgroundSelectedBrushTabularSurfaceRowBackgroundSelectedPointerOverBrushTabularSurfaceRowBackgroundSelectedPressedBrushTabularSurfaceRowBackgroundDisabledBrushTabularSurfaceSelectionIndicatorBrushSystemAccentColorTabularSurfaceSelectionIndicatorDisabledBrushTabularSurfaceRowForegroundBrushTabularSurfaceRowForegroundSelectedBrushTabularSurfaceRowForegroundSelectedPointerOverBrushTabularSurfaceRowForegroundSelectedPressedBrushTabularSurfaceRowForegroundPointerOverBrushTabularSurfaceRowForegroundPressedBrushTabularSurfaceRowForegroundDisabledBrushTabularSurfaceHeaderBackgroundBrushTabularSurfaceHeaderForegroundBrushTabularSurfaceHeaderSeparatorBrushTabularSurfaceHeaderBackgroundPointerOverBrushTabularSurfaceHeaderBackgroundPressedBrushTabularSurfaceHeaderForegroundPointerOverBrushTabularSurfaceHeaderForegroundPressedBrushTabularSurfaceGroupHeaderBackgroundBrushTabularSurfaceGroupHeaderForegroundBrushTabularSurfaceGroupHeaderBorderBrushTabularSurfaceGridLineBrushSystemColorWindowColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorGrayTextColorSystemColorWindowTextColor";
+
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceRowBackgroundBrushTabularSurfaceRowBackgroundPointerOverBrushTabularSurfaceRowBackgroundPressedBrushTabularSurfaceRowBackgroundSelectedBrushTabularSurfaceRowBackgroundSelectedPointerOverBrushTabularSurfaceRowBackgroundSelectedPressedBrushTabularSurfaceRowBackgroundDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 32, 65535, 255, 1, 16, 8,
@@ -9213,53 +9411,53 @@ static POPULATE_WINUITHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceSelectionIndicatorBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 17, 1, 23, 8, 23, 70,
+        292, 37, 329, 17, 1, 23, 8, 23, 70,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceSelectionIndicatorDisabledBrushTabularSurfaceRowForegroundBrushTabularSurfaceRowForegroundSelectedBrushTabularSurfaceRowForegroundSelectedPointerOverBrushTabularSurfaceRowForegroundSelectedPressedBrushTabularSurfaceRowForegroundPointerOverBrushTabularSurfaceRowForegroundPressedBrushTabularSurfaceRowForegroundDisabledBrushTabularSurfaceHeaderBackgroundBrushTabularSurfaceHeaderForegroundBrushTabularSurfaceHeaderSeparatorBrushTabularSurfaceHeaderBackgroundPointerOverBrushTabularSurfaceHeaderBackgroundPressedBrushTabularSurfaceHeaderForegroundPointerOverBrushTabularSurfaceHeaderForegroundPressedBrushTabularSurfaceGroupHeaderBackgroundBrushTabularSurfaceGroupHeaderForegroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 65535, 24063, 1, 24, 8,
-        45, 32, 65535, 65535, 1, 25, 8,
-        77, 40, 65535, 65535, 1, 26, 8,
-        117, 51, 65535, 65535, 1, 27, 8,
-        168, 47, 65535, 65535, 1, 28, 8,
-        215, 43, 65535, 65535, 1, 29, 8,
-        258, 39, 65535, 65535, 1, 30, 8,
-        297, 40, 65535, 24063, 1, 31, 8,
-        337, 35, 65535, 9983, 1, 32, 8,
-        372, 35, 65535, 50687, 1, 33, 8,
-        407, 34, 65535, 4863, 1, 34, 8,
-        441, 46, 65535, 4095, 1, 35, 8,
-        487, 42, 65535, 2815, 1, 36, 8,
-        529, 46, 65535, 65535, 1, 37, 8,
-        575, 42, 65535, 65535, 1, 38, 8,
-        617, 40, 14906, 19514, 1, 39, 8,
-        657, 40, 65535, 65535, 1, 40, 8,
+        346, 45, 65535, 24063, 1, 24, 8,
+        391, 32, 65535, 65535, 1, 25, 8,
+        423, 40, 65535, 65535, 1, 26, 8,
+        463, 51, 65535, 65535, 1, 27, 8,
+        514, 47, 65535, 65535, 1, 28, 8,
+        561, 43, 65535, 65535, 1, 29, 8,
+        604, 39, 65535, 65535, 1, 30, 8,
+        643, 40, 65535, 24063, 1, 31, 8,
+        683, 35, 65535, 9983, 1, 32, 8,
+        718, 35, 65535, 50687, 1, 33, 8,
+        753, 34, 65535, 4863, 1, 34, 8,
+        787, 46, 65535, 4095, 1, 35, 8,
+        833, 42, 65535, 2815, 1, 36, 8,
+        875, 46, 65535, 65535, 1, 37, 8,
+        921, 42, 65535, 65535, 1, 38, 8,
+        963, 40, 14906, 19514, 1, 39, 8,
+        1003, 40, 65535, 65535, 1, 40, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGroupHeaderBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 65535, 255, 1, 42, 8,
+        1043, 36, 65535, 255, 1, 42, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGridLineBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 10751, 1, 44, 8,
+        1079, 27, 65535, 10751, 1, 44, 8,
     ],
 };
 
@@ -9290,9 +9488,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_204: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TableViewHeaderCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 28, position: 64 },
 ];
 
+/// The keys and targets of the packed tables of the unit 73 of `WinUITheme.xaml`, each once (#855).
+const POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS: &str = "ResizeGripperSeparatorBrushSystemAccentColorLight2SystemAccentColorDark1SystemColorHighlightColor";
+
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
-    strings: "ResizeGripperSeparatorBrushSystemAccentColorLight2",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 27, 27, 23, 1, 16, 8, 16, 60,
@@ -9390,7 +9591,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_208: &[rt::ValueRow<u32>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 34, 34, 17, 1, 393, 8, 393, 67,
@@ -9399,247 +9600,247 @@ static POPULATE_WINUITHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 18, 1, 394, 8, 394, 68,
-        53, 41, 94, 24, 1, 395, 8, 395, 74,
-        118, 37, 155, 20, 1, 396, 8, 396, 70,
-        175, 40, 215, 23, 1, 397, 8, 397, 73,
-        238, 36, 274, 19, 1, 398, 8, 398, 69,
-        293, 35, 328, 18, 1, 399, 8, 399, 68,
-        346, 38, 384, 21, 1, 400, 8, 400, 71,
-        405, 42, 447, 25, 1, 401, 8, 401, 75,
-        472, 41, 513, 24, 1, 402, 8, 402, 74,
-        537, 43, 580, 26, 1, 403, 8, 403, 76,
-        606, 45, 651, 28, 1, 404, 8, 404, 78,
-        679, 42, 721, 25, 1, 405, 8, 405, 75,
-        746, 48, 794, 31, 1, 406, 8, 406, 81,
-        825, 40, 865, 23, 1, 407, 8, 407, 73,
-        888, 43, 931, 26, 1, 408, 8, 408, 76,
-        957, 39, 996, 22, 1, 409, 8, 409, 72,
-        1018, 35, 1053, 18, 1, 410, 8, 410, 68,
-        1071, 38, 1109, 21, 1, 411, 8, 411, 71,
+        51, 35, 86, 18, 1, 394, 8, 394, 68,
+        104, 41, 145, 24, 1, 395, 8, 395, 74,
+        169, 37, 206, 20, 1, 396, 8, 396, 70,
+        226, 40, 266, 23, 1, 397, 8, 397, 73,
+        289, 36, 325, 19, 1, 398, 8, 398, 69,
+        344, 35, 379, 18, 1, 399, 8, 399, 68,
+        397, 38, 435, 21, 1, 400, 8, 400, 71,
+        456, 42, 498, 25, 1, 401, 8, 401, 75,
+        523, 41, 564, 24, 1, 402, 8, 402, 74,
+        588, 43, 631, 26, 1, 403, 8, 403, 76,
+        657, 45, 702, 28, 1, 404, 8, 404, 78,
+        730, 42, 772, 25, 1, 405, 8, 405, 75,
+        797, 48, 845, 31, 1, 406, 8, 406, 81,
+        876, 40, 916, 23, 1, 407, 8, 407, 73,
+        939, 43, 982, 26, 1, 408, 8, 408, 76,
+        1008, 39, 1047, 22, 1, 409, 8, 409, 72,
+        1069, 35, 1104, 18, 1, 410, 8, 410, 68,
+        1122, 38, 1160, 21, 1, 411, 8, 411, 71,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 17, 1, 412, 8, 412, 65,
+        1181, 32, 34, 17, 1, 412, 8, 412, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 19, 1, 413, 8, 413, 67,
-        53, 33, 86, 18, 1, 414, 8, 414, 66,
-        104, 39, 143, 24, 1, 415, 8, 415, 72,
-        167, 44, 211, 29, 1, 416, 8, 416, 77,
-        240, 43, 283, 28, 1, 417, 8, 417, 76,
-        311, 36, 347, 21, 1, 418, 8, 418, 69,
-        368, 41, 409, 26, 1, 419, 8, 419, 74,
-        435, 36, 471, 21, 1, 420, 8, 420, 69,
+        1213, 34, 325, 19, 1, 413, 8, 413, 67,
+        1247, 33, 379, 18, 1, 414, 8, 414, 66,
+        1280, 39, 564, 24, 1, 415, 8, 415, 72,
+        1319, 44, 1363, 29, 1, 416, 8, 416, 77,
+        1392, 43, 1435, 28, 1, 417, 8, 417, 76,
+        1463, 36, 1499, 21, 1, 418, 8, 418, 69,
+        1520, 41, 982, 26, 1, 419, 8, 419, 74,
+        1561, 36, 1160, 21, 1, 420, 8, 420, 69,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 65535, 255, 1, 421, 8,
+        1597, 37, 65535, 255, 1, 421, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 17, 1, 422, 8, 422, 68,
-        52, 34, 35, 17, 1, 423, 8, 423, 67,
+        1634, 35, 34, 17, 1, 422, 8, 422, 68,
+        1669, 34, 34, 17, 1, 423, 8, 423, 67,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 18, 1, 424, 8, 424, 68,
-        53, 41, 94, 24, 1, 425, 8, 425, 74,
-        118, 36, 154, 19, 1, 426, 8, 426, 69,
-        173, 35, 208, 18, 1, 427, 8, 427, 68,
-        226, 38, 264, 21, 1, 428, 8, 428, 71,
-        285, 42, 327, 25, 1, 429, 8, 429, 75,
-        352, 41, 393, 24, 1, 430, 8, 430, 74,
-        417, 43, 460, 26, 1, 431, 8, 431, 76,
-        486, 38, 524, 21, 1, 432, 8, 432, 71,
-        545, 40, 585, 23, 1, 433, 8, 433, 73,
-        608, 45, 653, 28, 1, 434, 8, 434, 78,
-        681, 39, 720, 22, 1, 435, 8, 435, 72,
-        742, 45, 787, 28, 1, 436, 8, 436, 78,
-        815, 48, 863, 31, 1, 437, 8, 437, 81,
-        894, 38, 932, 21, 1, 438, 8, 438, 71,
-        953, 35, 988, 18, 1, 439, 8, 439, 68,
-        1006, 38, 1044, 21, 1, 440, 8, 440, 71,
+        1703, 35, 86, 18, 1, 424, 8, 424, 68,
+        1738, 41, 145, 24, 1, 425, 8, 425, 74,
+        1779, 36, 325, 19, 1, 426, 8, 426, 69,
+        1815, 35, 379, 18, 1, 427, 8, 427, 68,
+        1850, 38, 435, 21, 1, 428, 8, 428, 71,
+        1888, 42, 498, 25, 1, 429, 8, 429, 75,
+        1930, 41, 564, 24, 1, 430, 8, 430, 74,
+        1971, 43, 631, 26, 1, 431, 8, 431, 76,
+        2014, 38, 1499, 21, 1, 432, 8, 432, 71,
+        2052, 40, 916, 23, 1, 433, 8, 433, 73,
+        2131, 45, 1435, 28, 1, 434, 8, 434, 78,
+        2092, 39, 1047, 22, 1, 435, 8, 435, 72,
+        2347, 45, 702, 28, 1, 436, 8, 436, 78,
+        2392, 48, 845, 31, 1, 437, 8, 437, 81,
+        2176, 38, 2214, 21, 1, 438, 8, 438, 71,
+        2235, 35, 1104, 18, 1, 439, 8, 439, 68,
+        2270, 38, 1160, 21, 1, 440, 8, 440, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 65535, 255, 1, 441, 8,
+        2308, 39, 65535, 255, 1, 441, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 17, 1, 442, 8, 442, 66,
-        50, 36, 33, 17, 1, 443, 8, 443, 69,
+        2440, 33, 34, 17, 1, 442, 8, 442, 66,
+        2473, 36, 34, 17, 1, 443, 8, 443, 69,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 18, 1, 444, 8, 444, 70,
-        55, 38, 93, 19, 1, 445, 8, 445, 71,
-        112, 37, 149, 18, 1, 446, 8, 446, 70,
-        167, 40, 207, 21, 1, 447, 8, 447, 73,
-        228, 44, 272, 25, 1, 448, 8, 448, 77,
-        297, 43, 340, 24, 1, 449, 8, 449, 76,
-        364, 43, 407, 24, 1, 450, 8, 450, 76,
+        2509, 37, 86, 18, 1, 444, 8, 444, 70,
+        2546, 38, 325, 19, 1, 445, 8, 445, 71,
+        2584, 37, 379, 18, 1, 446, 8, 446, 70,
+        2621, 40, 435, 21, 1, 447, 8, 447, 73,
+        2661, 44, 498, 25, 1, 448, 8, 448, 77,
+        2705, 43, 145, 24, 1, 449, 8, 449, 76,
+        2748, 43, 564, 24, 1, 450, 8, 450, 76,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 41, 22, 1, 454, 8, 454, 74,
+        2791, 41, 1047, 22, 1, 454, 8, 454, 74,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_220: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 65535, 255, 1, 455, 8,
+        2832, 41, 65535, 255, 1, 455, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_221: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 19, 1, 456, 8, 456, 68,
-        54, 34, 88, 18, 1, 457, 8, 457, 67,
-        106, 37, 143, 21, 1, 458, 8, 458, 70,
-        164, 41, 205, 25, 1, 459, 8, 459, 74,
-        230, 40, 270, 24, 1, 460, 8, 460, 73,
-        294, 39, 333, 23, 1, 461, 8, 461, 72,
-        356, 37, 393, 21, 1, 462, 8, 462, 70,
+        2873, 35, 325, 19, 1, 456, 8, 456, 68,
+        2908, 34, 379, 18, 1, 457, 8, 457, 67,
+        2942, 37, 435, 21, 1, 458, 8, 458, 70,
+        2979, 41, 498, 25, 1, 459, 8, 459, 74,
+        3020, 40, 564, 24, 1, 460, 8, 460, 73,
+        3060, 39, 3099, 23, 1, 461, 8, 461, 72,
+        3122, 37, 1499, 21, 1, 462, 8, 462, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_222: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 21, 1, 466, 8, 466, 70,
-        58, 34, 92, 18, 1, 467, 8, 467, 67,
-        110, 38, 148, 22, 1, 468, 8, 468, 71,
+        3159, 37, 1160, 21, 1, 466, 8, 466, 70,
+        3196, 34, 1104, 18, 1, 467, 8, 467, 67,
+        3230, 38, 1047, 22, 1, 468, 8, 468, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_223: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 65535, 255, 1, 469, 8,
+        3268, 38, 65535, 255, 1, 469, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_224: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 17, 1, 470, 8, 470, 64,
+        3306, 31, 34, 17, 1, 470, 8, 470, 64,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_225: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 19, 1, 471, 8, 471, 68,
-        54, 37, 91, 21, 1, 472, 8, 472, 70,
-        112, 41, 153, 25, 1, 473, 8, 473, 74,
-        178, 41, 219, 20, 1, 474, 8, 474, 74,
-        239, 39, 278, 18, 1, 475, 8, 475, 72,
-        296, 47, 219, 20, 1, 476, 8, 476, 80,
-        343, 39, 382, 18, 1, 477, 8, 477, 72,
-        400, 42, 91, 21, 1, 478, 8, 478, 75,
-        442, 39, 481, 18, 1, 479, 8, 479, 72,
-        499, 41, 540, 20, 1, 480, 8, 480, 74,
-        560, 47, 607, 26, 1, 481, 8, 481, 80,
+        3337, 35, 325, 19, 1, 471, 8, 471, 68,
+        3372, 37, 435, 21, 1, 472, 8, 472, 70,
+        3409, 41, 498, 25, 1, 473, 8, 473, 74,
+        3450, 41, 206, 20, 1, 474, 8, 474, 74,
+        3491, 39, 86, 18, 1, 475, 8, 475, 72,
+        3530, 47, 206, 20, 1, 476, 8, 476, 80,
+        3577, 39, 379, 18, 1, 477, 8, 477, 72,
+        3616, 42, 435, 21, 1, 478, 8, 478, 75,
+        3658, 39, 1104, 18, 1, 479, 8, 479, 72,
+        3697, 41, 3738, 20, 1, 480, 8, 480, 74,
+        3758, 47, 982, 26, 1, 481, 8, 481, 80,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_226: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageBackgroundTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 65535, 255, 1, 482, 8,
+        3805, 43, 65535, 255, 1, 482, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_227: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 19, 1, 483, 8, 483, 67,
-        53, 36, 89, 21, 1, 484, 8, 484, 69,
-        110, 46, 156, 31, 1, 485, 8, 485, 79,
-        187, 37, 224, 20, 1, 486, 8, 486, 70,
+        3848, 34, 325, 19, 1, 483, 8, 483, 67,
+        3882, 36, 435, 21, 1, 484, 8, 484, 69,
+        3918, 46, 845, 31, 1, 485, 8, 485, 79,
+        3964, 37, 4001, 20, 1, 486, 8, 486, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_228: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrushThumbBackgroundSystemControlBackgroundBaseLowBrushThumbBackgroundPointerOverSystemControlHighlightBaseMediumLowBrushThumbBackgroundPressedSystemControlHighlightBaseMediumBrushThumbBorderBrushSystemControlHighlightTransparentBrushThumbBorderBrushPointerOverThumbBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 43, 36, 1, 487, 8, 487, 8,
-        79, 15, 94, 35, 1, 488, 8, 488, 8,
-        129, 26, 155, 40, 1, 489, 8, 489, 8,
-        195, 22, 217, 37, 1, 490, 8, 490, 8,
-        254, 16, 270, 38, 1, 491, 8, 491, 8,
-        308, 27, 270, 38, 1, 492, 8, 492, 8,
-        335, 23, 270, 38, 1, 493, 8, 493, 8,
+        4021, 43, 3882, 36, 1, 487, 8, 487, 8,
+        4118, 15, 344, 35, 1, 488, 8, 488, 8,
+        4133, 26, 3020, 40, 1, 489, 8, 489, 8,
+        4159, 22, 2942, 37, 1, 490, 8, 490, 8,
+        4181, 16, 3268, 38, 1, 491, 8, 491, 8,
+        4197, 27, 3268, 38, 1, 492, 8, 492, 8,
+        4224, 23, 3268, 38, 1, 493, 8, 493, 8,
     ],
 };
 
@@ -9651,188 +9852,188 @@ static POPULATE_WINUITHEME_XAML_ROWS_229: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_230: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarEllipsisButtonBackgroundSystemControlTransparentBrushAppBarEllipsisButtonBackgroundPointerOverSystemControlHighlightListLowBrushAppBarEllipsisButtonBackgroundPressedSystemControlHighlightListMediumBrushAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundSystemControlForegroundBaseHighBrushAppBarEllipsisButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundSystemControlBackgroundChromeMediumBrushAppBarForegroundAppBarHighContrastBorderSystemControlForegroundTransparentBrushLoopingSelectorButtonBackgroundTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlButtonBackgroundTextControlHighlighterForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 29, 1, 496, 8, 496, 8,
-        59, 41, 100, 34, 1, 497, 8, 497, 8,
-        134, 37, 171, 37, 1, 498, 8, 498, 8,
-        208, 38, 30, 29, 1, 499, 8, 499, 8,
-        246, 30, 276, 36, 1, 500, 8, 500, 8,
-        312, 41, 353, 38, 1, 501, 8, 501, 8,
-        391, 37, 276, 36, 1, 502, 8, 502, 8,
-        428, 38, 466, 39, 1, 503, 8, 503, 8,
-        505, 31, 30, 29, 1, 504, 8, 504, 8,
-        536, 42, 30, 29, 1, 505, 8, 505, 8,
-        578, 38, 30, 29, 1, 506, 8, 506, 8,
-        616, 39, 30, 29, 1, 507, 8, 507, 8,
-        655, 16, 671, 40, 1, 508, 8, 508, 8,
-        711, 16, 276, 36, 1, 509, 8, 509, 8,
-        727, 24, 751, 39, 1, 510, 8, 510, 8,
-        790, 31, 671, 40, 1, 511, 8, 511, 8,
-        821, 27, 276, 36, 1, 512, 8, 512, 8,
-        848, 35, 466, 39, 1, 513, 8, 513, 8,
-        883, 27, 30, 29, 1, 514, 8, 514, 8,
-        910, 32, 276, 36, 1, 515, 8, 515, 8,
+        4247, 30, 4089, 29, 1, 496, 8, 496, 8,
+        4277, 41, 3196, 34, 1, 497, 8, 497, 8,
+        4318, 37, 3159, 37, 1, 498, 8, 498, 8,
+        4355, 38, 4089, 29, 1, 499, 8, 499, 8,
+        4393, 30, 1779, 36, 1, 500, 8, 500, 8,
+        4423, 41, 2546, 38, 1, 501, 8, 501, 8,
+        4464, 37, 1779, 36, 1, 502, 8, 502, 8,
+        4501, 38, 1280, 39, 1, 503, 8, 503, 8,
+        4539, 31, 4089, 29, 1, 504, 8, 504, 8,
+        4570, 42, 4089, 29, 1, 505, 8, 505, 8,
+        4612, 38, 4089, 29, 1, 506, 8, 506, 8,
+        4650, 39, 4089, 29, 1, 507, 8, 507, 8,
+        4689, 16, 876, 40, 1, 508, 8, 508, 8,
+        4705, 16, 1779, 36, 1, 509, 8, 509, 8,
+        4721, 24, 2308, 39, 1, 510, 8, 510, 8,
+        4745, 31, 876, 40, 1, 511, 8, 511, 8,
+        4776, 27, 1779, 36, 1, 512, 8, 512, 8,
+        4803, 35, 1280, 39, 1, 513, 8, 513, 8,
+        4838, 27, 4089, 29, 1, 514, 8, 514, 8,
+        4865, 32, 1779, 36, 1, 515, 8, 515, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_231: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlHighlighterBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65280, 65535, 1, 516, 8,
+        4897, 32, 65280, 65535, 1, 516, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_232: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleMenuFlyoutItemBackgroundSystemControlTransparentBrushToggleMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushToggleMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushToggleMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleMenuFlyoutItemCheckGlyphForegroundSystemControlForegroundBaseMediumHighBrushToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundSystemControlBackgroundAccentBrushJumpListDefaultEnabledForegroundSystemControlForegroundChromeWhiteBrushJumpListDefaultDisabledBackgroundSystemControlBackgroundBaseLowBrushJumpListDefaultDisabledForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 29, 1, 517, 8, 517, 8,
-        59, 41, 100, 34, 1, 518, 8, 518, 8,
-        134, 37, 171, 37, 1, 519, 8, 519, 8,
-        208, 38, 30, 29, 1, 520, 8, 520, 8,
-        246, 30, 276, 36, 1, 521, 8, 521, 8,
-        312, 41, 353, 38, 1, 522, 8, 522, 8,
-        391, 37, 353, 38, 1, 523, 8, 523, 8,
-        428, 38, 466, 39, 1, 524, 8, 524, 8,
-        505, 40, 545, 42, 1, 525, 8, 525, 8,
-        587, 51, 353, 38, 1, 526, 8, 526, 8,
-        638, 47, 353, 38, 1, 527, 8, 527, 8,
-        685, 48, 466, 39, 1, 528, 8, 528, 8,
-        733, 35, 768, 47, 1, 529, 8, 529, 8,
-        815, 35, 768, 47, 1, 530, 8, 530, 8,
-        850, 34, 768, 47, 1, 531, 8, 531, 8,
-        884, 32, 916, 34, 1, 532, 8, 532, 8,
-        950, 32, 982, 39, 1, 533, 8, 533, 8,
-        1021, 33, 1054, 35, 1, 534, 8, 534, 8,
-        1089, 33, 466, 39, 1, 535, 8, 535, 8,
+        4929, 30, 4089, 29, 1, 517, 8, 517, 8,
+        4959, 41, 3196, 34, 1, 518, 8, 518, 8,
+        5000, 37, 3159, 37, 1, 519, 8, 519, 8,
+        5037, 38, 4089, 29, 1, 520, 8, 520, 8,
+        5075, 30, 1779, 36, 1, 521, 8, 521, 8,
+        5105, 41, 2546, 38, 1, 522, 8, 522, 8,
+        5146, 37, 2546, 38, 1, 523, 8, 523, 8,
+        5183, 38, 1280, 39, 1, 524, 8, 524, 8,
+        5221, 40, 1888, 42, 1, 525, 8, 525, 8,
+        5261, 51, 2546, 38, 1, 526, 8, 526, 8,
+        5312, 47, 2546, 38, 1, 527, 8, 527, 8,
+        5359, 48, 1280, 39, 1, 528, 8, 528, 8,
+        5407, 35, 3530, 47, 1, 529, 8, 529, 8,
+        5442, 35, 3530, 47, 1, 530, 8, 530, 8,
+        5477, 34, 3530, 47, 1, 531, 8, 531, 8,
+        5511, 32, 0, 34, 1, 532, 8, 532, 8,
+        5543, 32, 2092, 39, 1, 533, 8, 533, 8,
+        5575, 33, 344, 35, 1, 534, 8, 534, 8,
+        5608, 33, 1280, 39, 1, 535, 8, 535, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_233: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarBackgroundThemeBrushAppBarBorderThemeBrushAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushAppBarItemForegroundThemeBrushAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushAutoSuggestBackgroundThemeBrushApplicationForegroundThemeBrushApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushFocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrushHyperlinkButtonBackgroundThemeBrushHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushHyperlinkForegroundThemeBrushHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrushLoopingSelectorForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 61680, 65520, 1, 536, 8,
-        26, 22, 61680, 65520, 1, 537, 8,
-        48, 30, 65535, 255, 1, 538, 8,
-        78, 38, 0, 26112, 1, 539, 8,
-        116, 30, 0, 65280, 1, 540, 8,
-        146, 41, 0, 15616, 1, 541, 8,
-        187, 41, 0, 65280, 1, 542, 8,
-        228, 37, 65535, 65535, 1, 543, 8,
-        265, 35, 31611, 65403, 1, 544, 8,
-        300, 31, 65535, 65535, 1, 545, 8,
-        331, 31, 0, 56832, 1, 546, 8,
-        362, 37, 0, 65280, 1, 547, 8,
-        399, 42, 0, 52224, 1, 548, 8,
-        441, 38, 0, 26112, 1, 549, 8,
-        479, 40, 0, 39168, 1, 550, 8,
-        519, 30, 65535, 255, 1, 551, 8,
-        549, 38, 0, 26112, 1, 552, 8,
-        587, 30, 0, 65280, 1, 553, 8,
-        617, 41, 0, 15616, 1, 554, 8,
-        658, 41, 0, 65280, 1, 555, 8,
-        699, 37, 65535, 65535, 1, 556, 8,
-        736, 26, 65535, 65535, 1, 557, 8,
-        762, 32, 0, 65280, 1, 558, 8,
-        794, 32, 65535, 65535, 1, 559, 8,
-        826, 35, 65535, 255, 1, 560, 8,
-        861, 31, 65535, 255, 1, 561, 8,
-        892, 27, 0, 26112, 1, 562, 8,
-        919, 29, 6859, 65359, 1, 563, 8,
-        948, 40, 6859, 52303, 1, 564, 8,
-        988, 36, 6859, 39247, 1, 565, 8,
-        1024, 39, 0, 65280, 1, 566, 8,
-        1063, 50, 0, 52224, 1, 567, 8,
-        1113, 46, 0, 26112, 1, 568, 8,
-        1159, 35, 0, 16384, 1, 569, 8,
+        5641, 26, 61680, 65520, 1, 536, 8,
+        5667, 22, 61680, 65520, 1, 537, 8,
+        5689, 30, 65535, 255, 1, 538, 8,
+        5719, 38, 0, 26112, 1, 539, 8,
+        5757, 30, 0, 65280, 1, 540, 8,
+        5787, 41, 0, 15616, 1, 541, 8,
+        5828, 41, 0, 65280, 1, 542, 8,
+        5869, 37, 65535, 65535, 1, 543, 8,
+        5906, 35, 31611, 65403, 1, 544, 8,
+        6129, 31, 65535, 65535, 1, 545, 8,
+        5941, 31, 0, 56832, 1, 546, 8,
+        5972, 37, 0, 65280, 1, 547, 8,
+        6009, 42, 0, 52224, 1, 548, 8,
+        6051, 38, 0, 26112, 1, 549, 8,
+        6089, 40, 0, 39168, 1, 550, 8,
+        6160, 30, 65535, 255, 1, 551, 8,
+        6190, 38, 0, 26112, 1, 552, 8,
+        6228, 30, 0, 65280, 1, 553, 8,
+        6258, 41, 0, 15616, 1, 554, 8,
+        6299, 41, 0, 65280, 1, 555, 8,
+        6340, 37, 65535, 65535, 1, 556, 8,
+        6377, 26, 65535, 65535, 1, 557, 8,
+        6403, 32, 0, 65280, 1, 558, 8,
+        6435, 32, 65535, 65535, 1, 559, 8,
+        6467, 35, 65535, 255, 1, 560, 8,
+        6502, 31, 65535, 255, 1, 561, 8,
+        6533, 27, 0, 26112, 1, 562, 8,
+        6560, 29, 6859, 65359, 1, 563, 8,
+        6589, 40, 6859, 52303, 1, 564, 8,
+        6629, 36, 6859, 39247, 1, 565, 8,
+        6665, 39, 0, 65280, 1, 566, 8,
+        6704, 50, 0, 52224, 1, 567, 8,
+        6754, 46, 0, 26112, 1, 568, 8,
+        6800, 35, 0, 16384, 1, 569, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_234: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 25, 1, 570, 8, 570, 77,
+        6835, 44, 6879, 25, 1, 570, 8, 570, 77,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_235: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionForegroundThemeBrushMediaButtonForegroundThemeBrushMediaButtonBackgroundThemeBrushMediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrushMediaButtonPressedBorderThemeBrushMediaControlPanelVideoThemeBrushMediaControlPanelAudioThemeBrushMediaDownloadProgressIndicatorThemeBrushMediaErrorBackgroundThemeBrushMediaTextThemeBrushTextSelectionHighlightColorThemeBrushThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 0, 65280, 1, 571, 8,
-        44, 31, 65535, 65535, 1, 572, 8,
-        75, 31, 65535, 255, 1, 573, 8,
-        106, 42, 65535, 65535, 1, 574, 8,
-        148, 42, 65535, 8703, 1, 575, 8,
-        190, 38, 0, 65280, 1, 576, 8,
-        228, 38, 65535, 65535, 1, 577, 8,
-        266, 34, 65535, 65535, 1, 578, 8,
-        300, 32, 0, 65280, 1, 579, 8,
-        332, 32, 0, 65280, 1, 580, 8,
-        364, 40, 65535, 14591, 1, 581, 8,
-        404, 30, 0, 65280, 1, 582, 8,
-        434, 19, 65535, 65535, 1, 583, 8,
-        453, 37, 6068, 65350, 1, 584, 8,
-        490, 25, 52685, 65485, 1, 585, 8,
-        515, 21, 21845, 15189, 1, 586, 8,
-        536, 36, 56026, 65498, 1, 587, 8,
-        572, 32, 47031, 27575, 1, 588, 8,
-        604, 32, 0, 39168, 1, 589, 8,
-        636, 28, 21845, 60757, 1, 590, 8,
+        6904, 44, 0, 65280, 1, 571, 8,
+        6948, 31, 65535, 65535, 1, 572, 8,
+        6979, 31, 65535, 255, 1, 573, 8,
+        7010, 42, 65535, 65535, 1, 574, 8,
+        7052, 42, 65535, 8703, 1, 575, 8,
+        7094, 38, 0, 65280, 1, 576, 8,
+        7132, 38, 65535, 65535, 1, 577, 8,
+        7170, 34, 65535, 65535, 1, 578, 8,
+        7204, 32, 0, 65280, 1, 579, 8,
+        7236, 32, 0, 65280, 1, 580, 8,
+        7268, 40, 65535, 14591, 1, 581, 8,
+        7308, 30, 0, 65280, 1, 582, 8,
+        7338, 19, 65535, 65535, 1, 583, 8,
+        7357, 37, 6068, 65350, 1, 584, 8,
+        7394, 25, 52685, 65485, 1, 585, 8,
+        7419, 21, 21845, 15189, 1, 586, 8,
+        7440, 36, 56026, 65498, 1, 587, 8,
+        7476, 32, 47031, 27575, 1, 588, 8,
+        7508, 32, 0, 39168, 1, 589, 8,
+        7540, 28, 21845, 60757, 1, 590, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_236: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionBackgroundSystemControlBackgroundBaseLowBrushWindowCaptionBackgroundDisabledWindowCaptionForegroundSystemControlForegroundBaseHighBrushWindowCaptionForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 591, 8, 591, 8,
-        58, 31, 23, 35, 1, 592, 8, 592, 8,
-        89, 23, 112, 36, 1, 593, 8, 593, 8,
-        148, 31, 179, 39, 1, 594, 8, 594, 8,
+        7568, 23, 344, 35, 1, 591, 8, 591, 8,
+        7591, 31, 344, 35, 1, 592, 8, 592, 8,
+        7622, 23, 1779, 36, 1, 593, 8, 593, 8,
+        7645, 31, 1280, 39, 1, 594, 8, 594, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_237: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionButtonBackgroundPointerOverSystemControlBackgroundBaseLowBrushWindowCaptionButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushWindowCaptionButtonStrokeSystemControlForegroundBaseHighBrushWindowCaptionButtonStrokePointerOverWindowCaptionButtonStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 35, 1, 596, 8, 596, 8,
-        75, 36, 111, 41, 1, 597, 8, 597, 8,
-        152, 25, 177, 36, 1, 598, 8, 598, 8,
-        213, 36, 177, 36, 1, 599, 8, 599, 8,
-        249, 32, 177, 36, 1, 600, 8, 600, 8,
+        7676, 40, 344, 35, 1, 596, 8, 596, 8,
+        7716, 36, 523, 41, 1, 597, 8, 597, 8,
+        7752, 25, 1779, 36, 1, 598, 8, 598, 8,
+        7777, 36, 1779, 36, 1, 599, 8, 599, 8,
+        7813, 32, 1779, 36, 1, 600, 8, 600, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_238: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionButtonBackgroundCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 65535, 255, 1, 601, 8,
-        29, 32, 4387, 65512, 1, 602, 8,
-        61, 28, 65535, 65535, 1, 603, 8,
-        89, 28, 28794, 65521, 1, 604, 8,
-        117, 24, 0, 65280, 1, 605, 8,
+        7676, 29, 65535, 255, 1, 601, 8,
+        7845, 32, 4387, 65512, 1, 602, 8,
+        7877, 28, 65535, 65535, 1, 603, 8,
+        7905, 28, 28794, 65521, 1, 604, 8,
+        7933, 24, 0, 65280, 1, 605, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_239: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 65535, 255, 1, 29, 8,
@@ -9848,21 +10049,21 @@ static POPULATE_WINUITHEME_XAML_ROWS_240: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_241: rt::PackedRows = rt::PackedRows {
-    strings: "ApplicationPageBackgroundThemeBrushSolidBackgroundFillColorBase",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 28, 1, 35, 8, 35, 68,
+        29, 35, 64, 28, 1, 35, 8, 35, 68,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_242: rt::PackedRows = rt::PackedRows {
-    strings: "DefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 25, 1, 36, 8, 36, 8,
-        56, 36, 92, 26, 1, 37, 8, 37, 8,
-        118, 38, 156, 26, 1, 38, 8, 38, 8,
+        92, 31, 123, 25, 1, 36, 8, 36, 8,
+        148, 36, 184, 26, 1, 37, 8, 37, 8,
+        210, 38, 248, 26, 1, 38, 8, 38, 8,
     ],
 };
 
@@ -9955,7 +10156,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_243: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_244: rt::PackedRows = rt::PackedRows {
-    strings: "TextFillColorPrimaryBrushTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushTextFillColorInverseBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 0, 20, 1, 302, 8, 302, 58,
@@ -9968,148 +10169,148 @@ static POPULATE_WINUITHEME_XAML_ROWS_244: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_245: rt::PackedRows = rt::PackedRows {
-    strings: "AccentTextFillColorPrimaryBrushSystemAccentColorDark2AccentTextFillColorSecondaryBrushSystemAccentColorDark3AccentTextFillColorTertiaryBrushSystemAccentColorDark1",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 22, 1, 307, 8, 307, 64,
-        53, 33, 86, 22, 1, 308, 8, 308, 66,
-        108, 32, 140, 22, 1, 309, 8, 309, 65,
+        129, 31, 3183, 22, 1, 307, 8, 307, 64,
+        183, 33, 3205, 22, 1, 308, 8, 308, 66,
+        216, 32, 3227, 22, 1, 309, 8, 309, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_246: rt::PackedRows = rt::PackedRows {
-    strings: "AccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrushControlFillColorTransparentBrushControlFillColorInputActiveBrushControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrushSubtleFillColorTransparentBrushSubtleFillColorSecondaryBrushSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrushControlAltFillColorTransparentBrushControlAltFillColorSecondaryBrushControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 0, 27, 1, 310, 8, 310, 65,
-        32, 38, 32, 33, 1, 311, 8, 311, 71,
-        70, 33, 70, 28, 1, 312, 8, 312, 66,
-        103, 35, 103, 30, 1, 313, 8, 313, 68,
-        138, 34, 138, 29, 1, 314, 8, 314, 67,
-        172, 28, 172, 23, 1, 315, 8, 315, 61,
-        200, 30, 200, 25, 1, 316, 8, 316, 63,
-        230, 29, 230, 24, 1, 317, 8, 317, 62,
-        259, 32, 259, 27, 1, 318, 8, 318, 65,
-        291, 29, 291, 24, 1, 319, 8, 319, 62,
-        320, 32, 320, 27, 1, 320, 8, 320, 65,
-        352, 32, 352, 27, 1, 321, 8, 321, 65,
-        384, 34, 384, 29, 1, 322, 8, 322, 67,
-        418, 35, 418, 30, 1, 323, 8, 323, 68,
-        453, 33, 453, 28, 1, 324, 8, 324, 66,
-        486, 31, 486, 26, 1, 325, 8, 325, 64,
-        517, 29, 517, 24, 1, 326, 8, 326, 62,
-        546, 28, 546, 23, 1, 327, 8, 327, 61,
-        574, 28, 574, 23, 1, 328, 8, 328, 61,
-        602, 35, 602, 30, 1, 329, 8, 329, 68,
-        637, 33, 637, 28, 1, 330, 8, 330, 66,
-        670, 32, 670, 27, 1, 331, 8, 331, 65,
-        702, 35, 702, 30, 1, 332, 8, 332, 68,
-        737, 32, 737, 27, 1, 333, 8, 333, 65,
-        769, 35, 769, 30, 1, 334, 8, 334, 68,
-        804, 37, 804, 32, 1, 335, 8, 335, 70,
-        841, 36, 841, 31, 1, 336, 8, 336, 69,
-        877, 36, 877, 31, 1, 337, 8, 337, 69,
+        271, 32, 271, 27, 1, 310, 8, 310, 65,
+        303, 38, 303, 33, 1, 311, 8, 311, 71,
+        341, 33, 341, 28, 1, 312, 8, 312, 66,
+        374, 35, 374, 30, 1, 313, 8, 313, 68,
+        409, 34, 409, 29, 1, 314, 8, 314, 67,
+        443, 28, 443, 23, 1, 315, 8, 315, 61,
+        471, 30, 471, 25, 1, 316, 8, 316, 63,
+        501, 29, 501, 24, 1, 317, 8, 317, 62,
+        530, 32, 530, 27, 1, 318, 8, 318, 65,
+        562, 29, 562, 24, 1, 319, 8, 319, 62,
+        591, 32, 591, 27, 1, 320, 8, 320, 65,
+        623, 32, 623, 27, 1, 321, 8, 321, 65,
+        655, 34, 655, 29, 1, 322, 8, 322, 67,
+        689, 35, 689, 30, 1, 323, 8, 323, 68,
+        724, 33, 724, 28, 1, 324, 8, 324, 66,
+        757, 31, 757, 26, 1, 325, 8, 325, 64,
+        788, 29, 788, 24, 1, 326, 8, 326, 62,
+        817, 28, 817, 23, 1, 327, 8, 327, 61,
+        845, 28, 845, 23, 1, 328, 8, 328, 61,
+        873, 35, 873, 30, 1, 329, 8, 329, 68,
+        908, 33, 908, 28, 1, 330, 8, 330, 66,
+        941, 32, 941, 27, 1, 331, 8, 331, 65,
+        973, 35, 973, 30, 1, 332, 8, 332, 68,
+        1008, 32, 1008, 27, 1, 333, 8, 333, 65,
+        1040, 35, 1040, 30, 1, 334, 8, 334, 68,
+        1075, 37, 1075, 32, 1, 335, 8, 335, 70,
+        1112, 36, 1112, 31, 1, 336, 8, 336, 69,
+        1148, 36, 1148, 31, 1, 337, 8, 337, 69,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_247: rt::PackedRows = rt::PackedRows {
-    strings: "AccentFillColorSelectedTextBackgroundBrushSystemAccentColorAccentFillColorDefaultBrushSystemAccentColorDark1",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 17, 1, 338, 8, 338, 75,
-        59, 27, 86, 22, 1, 339, 8, 339, 60,
+        1184, 42, 160, 17, 1, 338, 8, 338, 75,
+        1226, 27, 3227, 22, 1, 339, 8, 339, 60,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_248: rt::PackedRows = rt::PackedRows {
-    strings: "AccentFillColorDisabledBrushControlStrokeColorDefaultBrushControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 0, 23, 1, 342, 8, 342, 61,
-        28, 30, 28, 25, 1, 343, 8, 343, 63,
-        58, 32, 58, 27, 1, 344, 8, 344, 65,
-        90, 38, 90, 33, 1, 345, 8, 345, 71,
-        128, 40, 128, 35, 1, 346, 8, 346, 73,
-        168, 39, 168, 34, 1, 347, 8, 347, 72,
-        207, 39, 207, 34, 1, 348, 8, 348, 72,
-        246, 47, 246, 42, 1, 349, 8, 349, 80,
-        293, 27, 293, 22, 1, 350, 8, 350, 60,
-        320, 32, 320, 27, 1, 351, 8, 351, 65,
-        352, 36, 352, 31, 1, 352, 8, 352, 69,
-        388, 37, 388, 32, 1, 353, 8, 353, 70,
-        425, 30, 425, 25, 1, 354, 8, 354, 63,
-        455, 29, 455, 24, 1, 355, 8, 355, 62,
-        484, 30, 484, 25, 1, 356, 8, 356, 63,
-        514, 30, 514, 25, 1, 357, 8, 357, 63,
-        544, 26, 544, 21, 1, 358, 8, 358, 59,
-        570, 26, 570, 21, 1, 359, 8, 359, 59,
-        596, 35, 596, 30, 1, 360, 8, 360, 68,
-        631, 37, 631, 32, 1, 361, 8, 361, 70,
-        668, 36, 668, 31, 1, 362, 8, 362, 69,
-        704, 26, 704, 21, 1, 363, 8, 363, 59,
-        730, 26, 730, 21, 1, 364, 8, 364, 59,
-        756, 22, 756, 17, 1, 365, 8, 365, 55,
-        778, 35, 778, 30, 1, 366, 8, 366, 68,
-        813, 41, 813, 36, 1, 367, 8, 367, 74,
-        854, 39, 854, 34, 1, 368, 8, 368, 72,
-        893, 41, 893, 36, 1, 369, 8, 369, 74,
-        934, 40, 934, 35, 1, 370, 8, 370, 73,
-        974, 43, 974, 38, 1, 371, 8, 371, 76,
-        1017, 33, 1017, 28, 1, 372, 8, 372, 66,
-        1050, 38, 1050, 33, 1, 373, 8, 373, 71,
-        1088, 37, 1088, 32, 1, 374, 8, 374, 70,
-        1125, 40, 1125, 35, 1, 375, 8, 375, 73,
-        1165, 36, 1165, 31, 1, 376, 8, 376, 69,
-        1201, 35, 1201, 30, 1, 377, 8, 377, 68,
-        1236, 36, 1236, 31, 1, 378, 8, 378, 69,
+        415, 28, 415, 23, 1, 342, 8, 342, 61,
+        1253, 30, 1253, 25, 1, 343, 8, 343, 63,
+        1283, 32, 1283, 27, 1, 344, 8, 344, 65,
+        1315, 38, 1315, 33, 1, 345, 8, 345, 71,
+        1353, 40, 1353, 35, 1, 346, 8, 346, 73,
+        1393, 39, 1393, 34, 1, 347, 8, 347, 72,
+        1432, 39, 1432, 34, 1, 348, 8, 348, 72,
+        1471, 47, 1471, 42, 1, 349, 8, 349, 80,
+        1518, 27, 1518, 22, 1, 350, 8, 350, 60,
+        1545, 32, 1545, 27, 1, 351, 8, 351, 65,
+        1577, 36, 1577, 31, 1, 352, 8, 352, 69,
+        1613, 37, 1613, 32, 1, 353, 8, 353, 70,
+        1650, 30, 1650, 25, 1, 354, 8, 354, 63,
+        1680, 29, 1680, 24, 1, 355, 8, 355, 62,
+        1709, 30, 1709, 25, 1, 356, 8, 356, 63,
+        1739, 30, 1739, 25, 1, 357, 8, 357, 63,
+        1769, 26, 1769, 21, 1, 358, 8, 358, 59,
+        1795, 26, 1795, 21, 1, 359, 8, 359, 59,
+        1821, 35, 1821, 30, 1, 360, 8, 360, 68,
+        1856, 37, 1856, 32, 1, 361, 8, 361, 70,
+        1893, 36, 1893, 31, 1, 362, 8, 362, 69,
+        1929, 26, 1929, 21, 1, 363, 8, 363, 59,
+        1955, 26, 1955, 21, 1, 364, 8, 364, 59,
+        1981, 22, 1981, 17, 1, 365, 8, 365, 55,
+        2003, 35, 2003, 30, 1, 366, 8, 366, 68,
+        2038, 41, 2038, 36, 1, 367, 8, 367, 74,
+        2079, 39, 2079, 34, 1, 368, 8, 368, 72,
+        2118, 41, 2118, 36, 1, 369, 8, 369, 74,
+        2159, 40, 2159, 35, 1, 370, 8, 370, 73,
+        2199, 43, 2199, 38, 1, 371, 8, 371, 76,
+        2242, 33, 2242, 28, 1, 372, 8, 372, 66,
+        2275, 38, 2275, 33, 1, 373, 8, 373, 71,
+        2313, 37, 2313, 32, 1, 374, 8, 374, 70,
+        2350, 40, 2350, 35, 1, 375, 8, 375, 73,
+        2390, 36, 2390, 31, 1, 376, 8, 376, 69,
+        2426, 35, 2426, 30, 1, 377, 8, 377, 68,
+        2461, 36, 2461, 31, 1, 378, 8, 378, 69,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_249: rt::PackedRows = rt::PackedRows {
-    strings: "SystemFillColorAttentionBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 17, 1, 379, 8, 379, 62,
+        2497, 29, 160, 17, 1, 379, 8, 379, 62,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_250: rt::PackedRows = rt::PackedRows {
-    strings: "SystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 0, 22, 1, 380, 8, 380, 60,
-        27, 27, 27, 22, 1, 381, 8, 381, 60,
-        54, 28, 54, 23, 1, 382, 8, 382, 61,
-        82, 27, 82, 22, 1, 383, 8, 383, 60,
-        109, 32, 109, 27, 1, 384, 8, 384, 65,
-        141, 39, 141, 34, 1, 385, 8, 385, 72,
-        180, 37, 180, 32, 1, 386, 8, 386, 70,
-        217, 37, 217, 32, 1, 387, 8, 387, 70,
-        254, 38, 254, 33, 1, 388, 8, 388, 71,
-        292, 37, 292, 32, 1, 389, 8, 389, 70,
-        329, 44, 329, 39, 1, 390, 8, 390, 77,
-        373, 42, 373, 37, 1, 391, 8, 391, 75,
+        2526, 27, 2526, 22, 1, 380, 8, 380, 60,
+        2553, 27, 2553, 22, 1, 381, 8, 381, 60,
+        2580, 28, 2580, 23, 1, 382, 8, 382, 61,
+        2608, 27, 2608, 22, 1, 383, 8, 383, 60,
+        2635, 32, 2635, 27, 1, 384, 8, 384, 65,
+        2667, 39, 2667, 34, 1, 385, 8, 385, 72,
+        2706, 37, 2706, 32, 1, 386, 8, 386, 70,
+        2743, 37, 2743, 32, 1, 387, 8, 387, 70,
+        2780, 38, 2780, 33, 1, 388, 8, 388, 71,
+        2818, 37, 2818, 32, 1, 389, 8, 389, 70,
+        2855, 44, 2855, 39, 1, 390, 8, 390, 77,
+        2899, 42, 2899, 37, 1, 391, 8, 391, 75,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_251: rt::PackedRows = rt::PackedRows {
-    strings: "SystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 255, 65535, 1, 416, 8,
-        31, 27, 255, 65535, 1, 417, 8,
-        58, 31, 255, 65535, 1, 418, 8,
-        89, 31, 255, 65535, 1, 419, 8,
-        120, 30, 255, 65535, 1, 420, 8,
-        150, 34, 255, 65535, 1, 421, 8,
-        184, 29, 255, 65535, 1, 422, 8,
-        213, 29, 255, 65535, 1, 423, 8,
+        2941, 31, 255, 65535, 1, 416, 8,
+        2972, 27, 255, 65535, 1, 417, 8,
+        2999, 31, 255, 65535, 1, 418, 8,
+        3030, 31, 255, 65535, 1, 419, 8,
+        3061, 30, 255, 65535, 1, 420, 8,
+        3091, 34, 255, 65535, 1, 421, 8,
+        3125, 29, 255, 65535, 1, 422, 8,
+        3154, 29, 255, 65535, 1, 423, 8,
     ],
 };
 
@@ -10129,7 +10330,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_252: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_253: rt::PackedRows = rt::PackedRows {
-    strings: "TextOnAccentFillColorDefaultBrushTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushControlAAFillColorDefaultBrushControlAAFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 0, 28, 1, 52, 8, 52, 66,
@@ -10143,30 +10344,30 @@ static POPULATE_WINUITHEME_XAML_ROWS_253: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_254: rt::PackedRows = rt::PackedRows {
-    strings: "AccentAAFillColorDefaultBrushSystemAccentColorDark1AccentAAFillColorSecondaryBrushSystemAccentColorDark2AccentAAFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 22, 1, 58, 8, 58, 62,
-        51, 31, 82, 22, 1, 59, 8, 59, 64,
-        104, 30, 29, 17, 1, 60, 8, 60, 63,
+        202, 29, 434, 22, 1, 58, 8, 58, 62,
+        74, 31, 456, 22, 1, 59, 8, 59, 64,
+        277, 30, 231, 17, 1, 60, 8, 60, 63,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_255: rt::PackedRows = rt::PackedRows {
-    strings: "AccentAAFillColorDisabledBrushControlStrokeColorForAAFillOnImageBrushControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 0, 25, 1, 61, 8, 61, 63,
-        30, 39, 30, 34, 1, 62, 8, 62, 72,
-        69, 32, 69, 27, 1, 63, 8, 63, 65,
-        101, 33, 101, 28, 1, 64, 8, 64, 66,
+        111, 30, 111, 25, 1, 61, 8, 61, 63,
+        330, 39, 330, 34, 1, 62, 8, 62, 72,
+        369, 32, 369, 27, 1, 63, 8, 63, 65,
+        401, 33, 401, 28, 1, 64, 8, 64, 66,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_256: rt::PackedRows = rt::PackedRows {
-    strings: "TextBoxForegroundHeaderThemeBrushTextBoxPlaceholderTextThemeBrushTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushTextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrushTextBoxButtonForegroundThemeBrushTextBoxButtonPointerOverBackgroundThemeBrushTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 0, 65280, 1, 78, 8,
@@ -10191,40 +10392,40 @@ static POPULATE_WINUITHEME_XAML_ROWS_256: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_257: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlBackgroundControlFillColorDefaultBrushTextControlBackgroundPointerOverControlFillColorSecondaryBrushTextControlBackgroundFocusedControlFillColorInputActiveBrushTextControlBackgroundDisabledControlFillColorDisabledBrushTextControlBorderBrushTextControlElevationBorderBrushTextControlBorderBrushPointerOverTextControlBorderBrushFocusedTextControlElevationBorderFocusedBrushTextControlBorderBrushDisabledControlStrokeColorDefaultBrushTextControlForegroundTextFillColorPrimaryBrushTextControlForegroundPointerOverTextControlForegroundFocusedTextControlForegroundDisabledTemporaryTextFillColorDisabledTextControlPlaceholderForegroundTextFillColorSecondaryBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundFocusedTextControlPlaceholderForegroundDisabledTextFillColorDisabledBrushTextControlSelectionHighlightColorAccentFillColorSelectedTextBackgroundBrushTextControlButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTextControlButtonBackgroundPressedSubtleFillColorTertiaryBrushTextControlButtonBorderBrushControlFillColorTransparentTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 28, 1, 96, 8, 96, 8,
-        49, 32, 81, 30, 1, 97, 8, 97, 8,
-        111, 28, 139, 32, 1, 98, 8, 98, 8,
-        171, 29, 200, 29, 1, 99, 8, 99, 8,
-        229, 22, 251, 31, 1, 100, 8, 100, 8,
-        282, 33, 251, 31, 1, 101, 8, 101, 8,
-        315, 29, 344, 38, 1, 102, 8, 102, 8,
-        382, 30, 412, 30, 1, 103, 8, 103, 8,
-        442, 21, 463, 25, 1, 104, 8, 104, 8,
-        488, 32, 463, 25, 1, 105, 8, 105, 8,
-        520, 28, 463, 25, 1, 106, 8, 106, 8,
-        548, 29, 577, 30, 1, 107, 8, 107, 8,
-        607, 32, 639, 27, 1, 108, 8, 108, 8,
-        666, 43, 639, 27, 1, 109, 8, 109, 8,
-        709, 39, 639, 27, 1, 110, 8, 110, 8,
-        748, 40, 788, 26, 1, 111, 8, 111, 8,
-        814, 34, 848, 42, 1, 112, 8, 112, 8,
-        890, 38, 928, 29, 1, 113, 8, 113, 8,
-        957, 34, 991, 28, 1, 114, 8, 114, 8,
-        1019, 28, 1047, 27, 1, 115, 8, 115, 8,
-        1074, 39, 1047, 27, 1, 116, 8, 116, 8,
-        1113, 35, 1047, 27, 1, 117, 8, 117, 8,
-        1148, 27, 639, 27, 1, 118, 8, 118, 8,
-        1175, 38, 639, 27, 1, 119, 8, 119, 8,
-        1213, 34, 1247, 26, 1, 120, 8, 120, 8,
+        582, 21, 603, 28, 1, 96, 8, 96, 8,
+        631, 32, 663, 30, 1, 97, 8, 97, 8,
+        693, 28, 721, 32, 1, 98, 8, 98, 8,
+        753, 29, 782, 29, 1, 99, 8, 99, 8,
+        811, 22, 833, 31, 1, 100, 8, 100, 8,
+        864, 33, 833, 31, 1, 101, 8, 101, 8,
+        897, 29, 926, 38, 1, 102, 8, 102, 8,
+        964, 30, 994, 30, 1, 103, 8, 103, 8,
+        1024, 21, 1045, 25, 1, 104, 8, 104, 8,
+        1070, 32, 1045, 25, 1, 105, 8, 105, 8,
+        1102, 28, 1045, 25, 1, 106, 8, 106, 8,
+        1130, 29, 1159, 30, 1, 107, 8, 107, 8,
+        1189, 32, 1221, 27, 1, 108, 8, 108, 8,
+        1248, 43, 1221, 27, 1, 109, 8, 109, 8,
+        1291, 39, 1221, 27, 1, 110, 8, 110, 8,
+        1330, 40, 1370, 26, 1, 111, 8, 111, 8,
+        1396, 34, 1430, 42, 1, 112, 8, 112, 8,
+        1472, 38, 1510, 29, 1, 113, 8, 113, 8,
+        1539, 34, 1573, 28, 1, 114, 8, 114, 8,
+        1601, 28, 1629, 27, 1, 115, 8, 115, 8,
+        1656, 39, 1629, 27, 1, 116, 8, 116, 8,
+        1695, 35, 1629, 27, 1, 117, 8, 117, 8,
+        1730, 27, 1221, 27, 1, 118, 8, 118, 8,
+        1757, 38, 1221, 27, 1, 119, 8, 119, 8,
+        1795, 34, 1829, 26, 1, 120, 8, 120, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_258: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutSeparatorBackgroundDividerStrokeColorDefaultBrushMenuFlyoutItemBackgroundSubtleFillColorTransparentBrushMenuFlyoutItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuFlyoutItemBackgroundPressedSubtleFillColorTertiaryBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundTextFillColorPrimaryBrushMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledTextFillColorDisabledBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverMenuFlyoutSubItemBackgroundPressedMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronTextFillColorSecondaryBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedTextFillColorTertiaryBrushMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundDesktopAcrylicTransparentBrushMenuFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 29, 30, 1, 97, 8, 97, 8,
@@ -10257,13 +10458,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_258: rt::PackedRows = rt::PackedRows {
         1110, 58, 875, 27, 1, 124, 8, 124, 8,
         1168, 54, 875, 27, 1, 125, 8, 125, 8,
         1222, 55, 445, 26, 1, 126, 8, 126, 8,
-        1277, 37, 29, 30, 1, 127, 8, 127, 8,
-        1314, 29, 1343, 30, 1, 128, 8, 128, 8,
-        1373, 30, 1403, 29, 1, 129, 8, 129, 8,
-        1432, 53, 875, 27, 1, 130, 8, 130, 8,
-        1485, 64, 875, 27, 1, 131, 8, 131, 8,
-        1549, 60, 875, 27, 1, 132, 8, 132, 8,
-        1609, 61, 445, 26, 1, 133, 8, 133, 8,
+        1515, 37, 29, 30, 1, 127, 8, 127, 8,
+        1552, 29, 1581, 30, 1, 128, 8, 128, 8,
+        1611, 30, 1641, 29, 1, 129, 8, 129, 8,
+        1277, 53, 875, 27, 1, 130, 8, 130, 8,
+        1330, 64, 875, 27, 1, 131, 8, 131, 8,
+        1394, 60, 875, 27, 1, 132, 8, 132, 8,
+        1454, 61, 445, 26, 1, 133, 8, 133, 8,
     ],
 };
 
@@ -10281,52 +10482,52 @@ static POPULATE_WINUITHEME_XAML_ROWS_259: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_260: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutItemFocusedBackgroundThemeBrushMenuFlyoutItemFocusedForegroundThemeBrushMenuFlyoutItemDisabledForegroundThemeBrushMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushMenuFlyoutItemPressedForegroundThemeBrushMenuFlyoutSeparatorThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 58853, 65509, 1, 142, 8,
-        41, 41, 0, 65280, 1, 143, 8,
-        82, 42, 0, 26112, 1, 144, 8,
-        124, 45, 58853, 65509, 1, 145, 8,
-        169, 45, 0, 65280, 1, 146, 8,
-        214, 41, 0, 65280, 1, 147, 8,
-        255, 41, 65535, 65535, 1, 148, 8,
-        296, 29, 31354, 65402, 1, 149, 8,
+        1670, 41, 58853, 65509, 1, 142, 8,
+        1711, 41, 0, 65280, 1, 143, 8,
+        1752, 42, 0, 26112, 1, 144, 8,
+        1794, 45, 58853, 65509, 1, 145, 8,
+        1839, 45, 0, 65280, 1, 146, 8,
+        1884, 41, 0, 65280, 1, 147, 8,
+        1925, 41, 65535, 65535, 1, 148, 8,
+        1966, 29, 31354, 65402, 1, 149, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_261: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushMenuFlyoutItemRevealBackgroundDisabledSubtleFillColorTransparentBrushMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverToggleMenuFlyoutItemRevealBackgroundPressedToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 47, 1, 150, 8, 150, 8,
-        86, 30, 116, 45, 1, 151, 8, 151, 8,
-        161, 41, 202, 50, 1, 152, 8, 152, 8,
-        252, 37, 289, 53, 1, 153, 8, 153, 8,
-        342, 38, 380, 31, 1, 154, 8, 154, 8,
-        411, 31, 380, 31, 1, 155, 8, 155, 8,
-        442, 38, 480, 41, 1, 156, 8, 156, 8,
-        521, 42, 480, 41, 1, 157, 8, 157, 8,
-        563, 39, 380, 31, 1, 158, 8, 158, 8,
-        602, 36, 116, 45, 1, 159, 8, 159, 8,
-        638, 47, 202, 50, 1, 160, 8, 160, 8,
-        685, 43, 289, 53, 1, 161, 8, 161, 8,
-        728, 44, 380, 31, 1, 162, 8, 162, 8,
-        772, 37, 380, 31, 1, 163, 8, 163, 8,
-        809, 44, 480, 41, 1, 164, 8, 164, 8,
-        853, 48, 480, 41, 1, 165, 8, 165, 8,
-        901, 45, 380, 31, 1, 166, 8, 166, 8,
-        946, 33, 116, 45, 1, 167, 8, 167, 8,
-        979, 44, 202, 50, 1, 168, 8, 168, 8,
-        1023, 40, 1063, 49, 1, 169, 8, 169, 8,
-        1112, 46, 202, 50, 1, 170, 8, 170, 8,
-        1158, 41, 380, 31, 1, 171, 8, 171, 8,
-        1199, 34, 380, 31, 1, 172, 8, 172, 8,
-        1233, 41, 480, 41, 1, 173, 8, 173, 8,
-        1274, 45, 480, 41, 1, 174, 8, 174, 8,
-        1319, 47, 480, 41, 1, 175, 8, 175, 8,
-        1366, 42, 380, 31, 1, 176, 8, 176, 8,
+        1995, 39, 2034, 47, 1, 150, 8, 150, 8,
+        2081, 30, 2111, 45, 1, 151, 8, 151, 8,
+        2156, 41, 2197, 50, 1, 152, 8, 152, 8,
+        2247, 37, 2284, 53, 1, 153, 8, 153, 8,
+        2337, 38, 83, 31, 1, 154, 8, 154, 8,
+        2375, 31, 83, 31, 1, 155, 8, 155, 8,
+        2406, 38, 2444, 41, 1, 156, 8, 156, 8,
+        2485, 42, 2444, 41, 1, 157, 8, 157, 8,
+        2527, 39, 83, 31, 1, 158, 8, 158, 8,
+        2566, 36, 2111, 45, 1, 159, 8, 159, 8,
+        2602, 47, 2197, 50, 1, 160, 8, 160, 8,
+        2649, 43, 2284, 53, 1, 161, 8, 161, 8,
+        2692, 44, 83, 31, 1, 162, 8, 162, 8,
+        2736, 37, 83, 31, 1, 163, 8, 163, 8,
+        2773, 44, 2444, 41, 1, 164, 8, 164, 8,
+        2817, 48, 2444, 41, 1, 165, 8, 165, 8,
+        2865, 45, 83, 31, 1, 166, 8, 166, 8,
+        2910, 33, 2111, 45, 1, 167, 8, 167, 8,
+        2943, 44, 2197, 50, 1, 168, 8, 168, 8,
+        2987, 40, 3027, 49, 1, 169, 8, 169, 8,
+        3076, 46, 2197, 50, 1, 170, 8, 170, 8,
+        3122, 41, 83, 31, 1, 171, 8, 171, 8,
+        3163, 34, 83, 31, 1, 172, 8, 172, 8,
+        3197, 41, 2444, 41, 1, 173, 8, 173, 8,
+        3238, 45, 2444, 41, 1, 174, 8, 174, 8,
+        3283, 47, 2444, 41, 1, 175, 8, 175, 8,
+        3330, 42, 83, 31, 1, 176, 8, 176, 8,
     ],
 };
 
@@ -10339,7 +10540,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_262: &[rt::ValueRow<u32>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_263: rt::PackedRows = rt::PackedRows {
-    strings: "DesktopAcrylicTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 30, 0, 0, 1, 115, 8,
@@ -10382,7 +10583,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_265: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_266: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonRevealBackgroundSystemControlBackgroundBaseLowRevealBackgroundBrushButtonRevealBackgroundPointerOverButtonRevealBackgroundPressedSystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrushButtonRevealBackgroundDisabledControlFillColorTertiaryBrushButtonRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushButtonRevealBorderBrushPointerOverSystemControlHighlightBaseMediumLowRevealBorderBrushButtonRevealBorderBrushPressedSystemControlHighlightTransparentRevealBorderBrushButtonRevealBorderBrushDisabledSubtleFillColorDisabledBrushRepeatButtonRevealBackgroundRepeatButtonRevealBackgroundPointerOverRepeatButtonRevealBackgroundPressedRepeatButtonRevealBackgroundDisabledRepeatButtonRevealBorderBrushRepeatButtonRevealBorderBrushPointerOverRepeatButtonRevealBorderBrushPressedRepeatButtonRevealBorderBrushDisabledToggleButtonRevealBackgroundToggleButtonRevealBackgroundPointerOverToggleButtonRevealBackgroundPressedToggleButtonRevealBackgroundDisabledToggleButtonRevealBackgroundCheckedSystemControlHighlightAccentRevealBackgroundBrushToggleButtonRevealBackgroundCheckedPointerOverToggleButtonRevealBackgroundCheckedPressedSystemControlHighlightBaseMediumLowRevealAccentBackgroundBrushToggleButtonRevealBackgroundCheckedDisabledTextFillColorDisabledBrushToggleButtonRevealBackgroundIndeterminateToggleButtonRevealBackgroundIndeterminatePointerOverToggleButtonRevealBackgroundIndeterminatePressedToggleButtonRevealBackgroundIndeterminateDisabledToggleButtonRevealBorderBrushToggleButtonRevealBorderBrushPointerOverToggleButtonRevealBorderBrushPressedToggleButtonRevealBorderBrushDisabledToggleButtonRevealBorderBrushCheckedSystemControlHighlightAltTransparentRevealBorderBrushToggleButtonRevealBorderBrushCheckedPointerOverToggleButtonRevealBorderBrushCheckedPressedToggleButtonRevealBorderBrushCheckedDisabledToggleButtonRevealBorderBrushIndeterminateToggleButtonRevealBorderBrushIndeterminatePointerOverToggleButtonRevealBorderBrushIndeterminatePressedToggleButtonRevealBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 51, 1, 183, 8, 183, 8,
@@ -10430,7 +10631,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_266: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_267: rt::PackedRows = rt::PackedRows {
-    strings: "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocused",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 44, 44, 33, 1, 60, 8, 60, 8,
@@ -10447,21 +10648,21 @@ static POPULATE_WINUITHEME_XAML_ROWS_268: &[rt::ValueRow<f64>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_269: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarBackgroundThemeBrushSystemColorButtonFaceColorProgressBarBorderThemeBrushSystemColorButtonTextColorProgressBarForegroundThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 26, 1, 66, 8, 66, 64,
-        57, 27, 84, 26, 1, 67, 8, 67, 60,
-        110, 31, 141, 25, 1, 68, 8, 68, 64,
+        217, 31, 1004, 26, 1, 66, 8, 66, 64,
+        248, 27, 1030, 26, 1, 67, 8, 67, 60,
+        275, 31, 1056, 25, 1, 68, 8, 68, 64,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_270: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarIndeterminateForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 6068, 65350, 1, 69, 8,
+        306, 44, 6068, 65350, 1, 69, 8,
     ],
 };
 
@@ -10490,38 +10691,38 @@ static POPULATE_WINUITHEME_XAML_ROWS_273: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_274: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 47, 1, 82, 8, 82, 8,
+        350, 42, 392, 47, 1, 82, 8, 82, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_275: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 54227, 65491, 1, 83, 8,
+        439, 33, 54227, 65491, 1, 83, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_276: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogBorderThemeBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 17, 1, 84, 8, 84, 62,
+        472, 29, 501, 17, 1, 84, 8, 84, 62,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_277: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogContentForegroundBrushContentDialogDimmingThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 65280, 1, 85, 8,
-        35, 30, 65535, 39423, 1, 86, 8,
+        518, 35, 0, 65280, 1, 85, 8,
+        553, 30, 65535, 39423, 1, 86, 8,
     ],
 };
 
@@ -10533,26 +10734,26 @@ static POPULATE_WINUITHEME_XAML_ROWS_278: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_279: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderBackgroundCardBackgroundFillColorDefaultBrushExpanderForegroundTextFillColorPrimaryBrushExpanderForegroundPointerOverExpanderForegroundPressedExpanderBorderBrushCardStrokeColorDefaultBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundCardBackgroundFillColorSecondaryBrushExpanderDropDownBorderBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 18, 35, 1, 91, 8, 91, 8,
-        53, 18, 71, 25, 1, 92, 8, 92, 8,
-        96, 29, 71, 25, 1, 93, 8, 93, 8,
-        125, 25, 71, 25, 1, 94, 8, 94, 8,
-        150, 19, 169, 27, 1, 95, 8, 95, 8,
-        196, 30, 169, 27, 1, 96, 8, 96, 8,
-        226, 26, 169, 27, 1, 97, 8, 97, 8,
-        252, 26, 278, 37, 1, 98, 8, 98, 8,
-        315, 27, 150, 19, 1, 99, 8, 99, 8,
-        342, 26, 368, 26, 1, 100, 8, 100, 8,
-        394, 27, 150, 19, 1, 101, 8, 101, 8,
+        583, 18, 601, 35, 1, 91, 8, 91, 8,
+        636, 18, 654, 25, 1, 92, 8, 92, 8,
+        679, 29, 654, 25, 1, 93, 8, 93, 8,
+        708, 25, 654, 25, 1, 94, 8, 94, 8,
+        733, 19, 752, 27, 1, 95, 8, 95, 8,
+        779, 30, 752, 27, 1, 96, 8, 96, 8,
+        809, 26, 752, 27, 1, 97, 8, 97, 8,
+        835, 26, 861, 37, 1, 98, 8, 98, 8,
+        898, 27, 733, 19, 1, 99, 8, 99, 8,
+        925, 26, 951, 26, 1, 100, 8, 100, 8,
+        977, 27, 733, 19, 1, 101, 8, 101, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_280: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkForegroundAccentTextFillColorPrimaryBrushHyperlinkForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkForegroundPressedAccentTextFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 31, 1, 20, 8, 20, 8,
@@ -10563,7 +10764,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_280: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_281: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundAccentTextFillColorPrimaryBrushHyperlinkButtonForegroundPointerOverAccentTextFillColorSecondaryBrushHyperlinkButtonForegroundPressedAccentTextFillColorTertiaryBrushHyperlinkButtonForegroundDisabledAccentTextFillColorDisabledBrushHyperlinkButtonBackgroundSubtleFillColorTransparentBrushHyperlinkButtonBackgroundPointerOverSubtleFillColorSecondaryBrushHyperlinkButtonBackgroundPressedSubtleFillColorTertiaryBrushHyperlinkButtonBackgroundDisabledSubtleFillColorDisabledBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 31, 1, 30, 8, 30, 8,
@@ -10583,7 +10784,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_281: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_282: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonForegroundTextFillColorPrimaryBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledTextFillColorDisabledBrushRadioButtonBackgroundControlFillColorTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeControlStrongStrokeColorDefaultBrushRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedControlStrongStrokeColorDisabledBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillControlAltFillColorSecondaryBrushRadioButtonOuterEllipseFillPointerOverControlAltFillColorTertiaryBrushRadioButtonOuterEllipseFillPressedControlAltFillColorQuarternaryBrushRadioButtonOuterEllipseFillDisabledControlAltFillColorDisabledBrushRadioButtonOuterEllipseCheckedStrokeAccentFillColorDefaultBrushRadioButtonOuterEllipseCheckedStrokePointerOverAccentFillColorSecondaryBrushRadioButtonOuterEllipseCheckedStrokePressedAccentFillColorTertiaryBrushRadioButtonOuterEllipseCheckedStrokeDisabledAccentFillColorDisabledBrushRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillTextOnAccentFillColorPrimaryBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeCircleElevationBorderBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledRadioButtonCheckGlyphStrokeCheckedAccentControlElevationBorderBrushRadioButtonCheckGlyphStrokeCheckedPointerOverRadioButtonCheckGlyphStrokeCheckedPressedRadioButtonCheckGlyphStrokeCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 25, 1, 74, 8, 74, 8,
@@ -10631,38 +10832,38 @@ static POPULATE_WINUITHEME_XAML_ROWS_282: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_283: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonBackgroundThemeBrushRadioButtonBorderThemeBrushRadioButtonContentDisabledForegroundThemeBrushRadioButtonContentForegroundThemeBrushRadioButtonDisabledBackgroundThemeBrushRadioButtonDisabledBorderThemeBrushRadioButtonDisabledForegroundThemeBrushRadioButtonForegroundThemeBrushRadioButtonPointerOverBackgroundThemeBrushRadioButtonPointerOverBorderThemeBrushRadioButtonPointerOverForegroundThemeBrushRadioButtonPressedBackgroundThemeBrushRadioButtonPressedBorderThemeBrushRadioButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 52479, 1, 114, 8,
-        31, 27, 0, 17664, 1, 115, 8,
-        58, 46, 0, 26112, 1, 116, 8,
-        104, 38, 0, 65280, 1, 117, 8,
-        142, 39, 51914, 26314, 1, 118, 8,
-        181, 35, 0, 9728, 1, 119, 8,
-        216, 39, 0, 26112, 1, 120, 8,
-        255, 31, 0, 65280, 1, 121, 8,
-        286, 42, 65535, 57087, 1, 122, 8,
-        328, 38, 0, 28672, 1, 123, 8,
-        366, 42, 0, 65280, 1, 124, 8,
-        408, 38, 0, 65280, 1, 125, 8,
-        446, 34, 0, 65280, 1, 126, 8,
-        480, 38, 65535, 65535, 1, 127, 8,
+        1856, 31, 65535, 52479, 1, 114, 8,
+        1887, 27, 0, 17664, 1, 115, 8,
+        1914, 46, 0, 26112, 1, 116, 8,
+        1960, 38, 0, 65280, 1, 117, 8,
+        1998, 39, 51914, 26314, 1, 118, 8,
+        2037, 35, 0, 9728, 1, 119, 8,
+        2072, 39, 0, 26112, 1, 120, 8,
+        2111, 31, 0, 65280, 1, 121, 8,
+        2142, 42, 65535, 57087, 1, 122, 8,
+        2184, 38, 0, 28672, 1, 123, 8,
+        2222, 42, 0, 65280, 1, 124, 8,
+        2264, 38, 0, 65280, 1, 125, 8,
+        2302, 34, 0, 65280, 1, 126, 8,
+        2336, 38, 65535, 65535, 1, 127, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_284: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonContentPointerOverForegroundThemeBrushSystemColorHighlightTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 49, 49, 29, 1, 128, 8, 128, 82,
+        2374, 49, 2423, 29, 1, 128, 8, 128, 82,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_285: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarButtonBackgroundSubtleFillColorTransparentBrushAppBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarButtonForegroundTextFillColorPrimaryBrushAppBarButtonForegroundPointerOverAppBarButtonForegroundPressedTextFillColorSecondaryBrushAppBarButtonForegroundDisabledTextFillColorDisabledBrushAppBarButtonBorderBrushControlFillColorTransparentBrushAppBarButtonBorderBrushPointerOverAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledAppBarButtonKeyboardAcceleratorTextForegroundAppBarButtonKeyboardAcceleratorTextForegroundPointerOverAppBarButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 51, 8, 51, 8,
@@ -10715,7 +10916,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_288: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_289: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarSeparatorForegroundDividerStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 30, 1, 18, 8, 18, 8,
@@ -10724,7 +10925,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_289: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_290: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonBackgroundSubtleFillColorTransparentBrushAppBarToggleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarToggleButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarToggleButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarToggleButtonBackgroundCheckedAccentFillColorDefaultBrushAppBarToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushAppBarToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushAppBarToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushAppBarToggleButtonBackgroundHighLightOverlayAppBarToggleButtonBackgroundHighLightOverlayPointerOverAppBarToggleButtonBackgroundHighLightOverlayPressedAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundTextFillColorPrimaryBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedTextFillColorSecondaryBrushAppBarToggleButtonForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushAppBarToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledAppBarToggleButtonBorderBrushControlFillColorTransparentBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 31, 1, 80, 8, 80, 8,
@@ -10775,43 +10976,43 @@ static POPULATE_WINUITHEME_XAML_ROWS_290: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_291: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonCheckedBackgroundThemeBrushAppBarToggleButtonCheckedBorderThemeBrushAppBarToggleButtonCheckedDisabledBackgroundThemeBrushAppBarToggleButtonCheckedDisabledBorderThemeBrushAppBarToggleButtonCheckedDisabledForegroundThemeBrushAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushAppBarToggleButtonCheckedPointerOverBorderThemeBrushAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonCheckedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 0, 65280, 1, 123, 8,
-        45, 41, 0, 65280, 1, 124, 8,
-        86, 53, 0, 26112, 1, 125, 8,
-        139, 49, 65535, 255, 1, 126, 8,
-        188, 53, 65535, 65535, 1, 127, 8,
-        241, 56, 0, 39168, 1, 128, 8,
-        297, 52, 0, 39168, 1, 129, 8,
-        349, 52, 65535, 255, 1, 130, 8,
-        401, 48, 0, 65280, 1, 131, 8,
-        449, 52, 0, 65280, 1, 132, 8,
-        501, 45, 65535, 65535, 1, 133, 8,
-        546, 49, 0, 15616, 1, 134, 8,
+        2361, 45, 0, 65280, 1, 123, 8,
+        2406, 41, 0, 65280, 1, 124, 8,
+        2447, 53, 0, 26112, 1, 125, 8,
+        2500, 49, 65535, 255, 1, 126, 8,
+        2549, 53, 65535, 65535, 1, 127, 8,
+        2647, 56, 0, 39168, 1, 128, 8,
+        2703, 52, 0, 39168, 1, 129, 8,
+        2755, 52, 65535, 255, 1, 130, 8,
+        2807, 48, 0, 65280, 1, 131, 8,
+        2855, 52, 0, 65280, 1, 132, 8,
+        2602, 45, 65535, 65535, 1, 133, 8,
+        2907, 49, 0, 15616, 1, 134, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_292: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonKeyboardAcceleratorTextForegroundTextFillColorSecondaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 27, 1, 135, 8, 135, 8,
-        78, 62, 51, 27, 1, 136, 8, 136, 8,
-        140, 58, 198, 26, 1, 137, 8, 137, 8,
-        224, 59, 283, 26, 1, 138, 8, 138, 8,
-        309, 58, 51, 27, 1, 139, 8, 139, 8,
-        367, 69, 51, 27, 1, 140, 8, 140, 8,
-        436, 65, 198, 26, 1, 141, 8, 141, 8,
-        501, 66, 283, 26, 1, 142, 8, 142, 8,
+        2956, 51, 929, 27, 1, 135, 8, 135, 8,
+        3007, 62, 929, 27, 1, 136, 8, 136, 8,
+        3069, 58, 3127, 26, 1, 137, 8, 137, 8,
+        3153, 59, 992, 26, 1, 138, 8, 138, 8,
+        3212, 58, 929, 27, 1, 139, 8, 139, 8,
+        3270, 69, 929, 27, 1, 140, 8, 140, 8,
+        3339, 65, 3127, 26, 1, 141, 8, 141, 8,
+        3404, 66, 992, 26, 1, 142, 8, 142, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_293: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxForegroundTextFillColorPrimaryBrushListBoxBackgroundSystemControlBackgroundChromeMediumLowBrushListBoxBorderListBoxItemForegroundListBoxItemForegroundDisabledTextFillColorDisabledBrushListBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushListBoxItemBackgroundPressedSubtleFillColorTertiaryBrushListBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushListBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushListBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 25, 1, 44, 8, 44, 8,
@@ -10829,40 +11030,40 @@ static POPULATE_WINUITHEME_XAML_ROWS_293: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_294: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxBackgroundThemeBrushListBoxBorderThemeBrushListBoxDisabledForegroundThemeBrushListBoxFocusBackgroundThemeBrushListBoxForegroundThemeBrushListBoxItemDisabledForegroundThemeBrushListBoxItemPointerOverBackgroundThemeBrushListBoxItemPointerOverForegroundThemeBrushListBoxItemPressedBackgroundThemeBrushListBoxItemPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 52479, 1, 54, 8,
-        27, 23, 0, 17664, 1, 55, 8,
-        50, 35, 0, 26112, 1, 56, 8,
-        85, 32, 65535, 65535, 1, 57, 8,
-        117, 27, 0, 65280, 1, 58, 8,
-        144, 39, 0, 26112, 1, 59, 8,
-        183, 42, 0, 8448, 1, 60, 8,
-        225, 42, 0, 65280, 1, 61, 8,
-        267, 38, 54227, 65491, 1, 62, 8,
-        305, 38, 0, 65280, 1, 63, 8,
+        537, 27, 65535, 52479, 1, 54, 8,
+        564, 23, 0, 17664, 1, 55, 8,
+        587, 35, 0, 26112, 1, 56, 8,
+        622, 32, 65535, 65535, 1, 57, 8,
+        654, 27, 0, 65280, 1, 58, 8,
+        681, 39, 0, 26112, 1, 59, 8,
+        720, 42, 0, 8448, 1, 60, 8,
+        762, 42, 0, 65280, 1, 61, 8,
+        804, 38, 54227, 65491, 1, 62, 8,
+        842, 38, 0, 65280, 1, 63, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_295: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxItemSelectedBackgroundThemeBrushSystemControlHighlightListAccentLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 40, 1, 64, 8, 64, 8,
+        880, 39, 337, 40, 1, 64, 8, 64, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_296: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxItemSelectedDisabledBackgroundThemeBrushListBoxItemSelectedDisabledForegroundThemeBrushListBoxItemSelectedForegroundThemeBrushListBoxItemSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 0, 35840, 1, 65, 8,
-        47, 47, 65535, 39423, 1, 66, 8,
-        94, 39, 65535, 65535, 1, 67, 8,
-        133, 50, 14270, 65375, 1, 68, 8,
+        919, 47, 0, 35840, 1, 65, 8,
+        966, 47, 65535, 39423, 1, 66, 8,
+        1013, 39, 65535, 65535, 1, 67, 8,
+        1052, 50, 14270, 65375, 1, 68, 8,
     ],
 };
 
@@ -10874,7 +11075,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_297: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_298: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchContentForegroundTextFillColorPrimaryBrushToggleSwitchContentForegroundDisabledTextFillColorDisabledBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSubtleFillColorTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffControlAltFillColorSecondaryBrushToggleSwitchFillOffPointerOverControlAltFillColorTertiaryToggleSwitchFillOffPressedControlAltFillColorQuarternaryToggleSwitchFillOffDisabledControlAltFillColorDisabledToggleSwitchStrokeOffControlStrongStrokeColorDefaultBrushToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledControlStrongStrokeColorDisabledToggleSwitchFillOnAccentFillColorDefaultBrushToggleSwitchFillOnPointerOverAccentFillColorSecondaryBrushToggleSwitchFillOnPressedAccentFillColorTertiaryBrushToggleSwitchFillOnDisabledAccentFillColorDisabledBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffTextFillColorSecondaryBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnTextOnAccentFillColorPrimaryBrushToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledTextOnAccentFillColorDisabledBrushToggleSwitchKnobStrokeOnCircleElevationBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 29, 25, 1, 77, 8, 77, 8,
@@ -10915,32 +11116,32 @@ static POPULATE_WINUITHEME_XAML_ROWS_298: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_299: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchCurtainBackgroundThemeBrushToggleSwitchCurtainDisabledBackgroundThemeBrushToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushToggleSwitchForegroundThemeBrushToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrushToggleSwitchTrackBorderThemeBrushToggleSwitchTrackDisabledBackgroundThemeBrushToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 6068, 65350, 1, 110, 8,
-        39, 47, 65535, 255, 1, 111, 8,
-        86, 50, 14270, 65375, 1, 112, 8,
-        136, 46, 16868, 65394, 1, 113, 8,
-        182, 40, 0, 26112, 1, 114, 8,
-        222, 32, 0, 65280, 1, 115, 8,
-        254, 46, 0, 26112, 1, 116, 8,
-        300, 38, 0, 65280, 1, 117, 8,
-        338, 39, 0, 22784, 1, 118, 8,
-        377, 47, 0, 13056, 1, 119, 8,
-        424, 37, 0, 65280, 1, 120, 8,
-        461, 33, 0, 65280, 1, 121, 8,
-        494, 45, 37522, 65426, 1, 122, 8,
-        539, 41, 37522, 65426, 1, 123, 8,
-        580, 48, 0, 65280, 1, 124, 8,
-        628, 44, 0, 65280, 1, 125, 8,
-        672, 44, 0, 65280, 1, 126, 8,
-        716, 44, 0, 65280, 1, 127, 8,
-        760, 37, 0, 22784, 1, 128, 8,
-        797, 33, 65535, 255, 1, 129, 8,
-        830, 45, 0, 7936, 1, 130, 8,
-        875, 48, 0, 18944, 1, 131, 8,
-        923, 44, 0, 16896, 1, 132, 8,
+        1451, 39, 6068, 65350, 1, 110, 8,
+        1490, 47, 65535, 255, 1, 111, 8,
+        1537, 50, 14270, 65375, 1, 112, 8,
+        1587, 46, 16868, 65394, 1, 113, 8,
+        1633, 40, 0, 26112, 1, 114, 8,
+        1673, 32, 0, 65280, 1, 115, 8,
+        1705, 46, 0, 26112, 1, 116, 8,
+        1751, 38, 0, 65280, 1, 117, 8,
+        1789, 39, 0, 22784, 1, 118, 8,
+        1828, 47, 0, 13056, 1, 119, 8,
+        1875, 37, 0, 65280, 1, 120, 8,
+        1912, 33, 0, 65280, 1, 121, 8,
+        1945, 45, 37522, 65426, 1, 122, 8,
+        1990, 41, 37522, 65426, 1, 123, 8,
+        2031, 48, 0, 65280, 1, 124, 8,
+        2079, 44, 0, 65280, 1, 125, 8,
+        2123, 44, 0, 65280, 1, 126, 8,
+        2167, 44, 0, 65280, 1, 127, 8,
+        2211, 37, 0, 22784, 1, 128, 8,
+        2248, 33, 65535, 255, 1, 129, 8,
+        2281, 45, 0, 7936, 1, 130, 8,
+        2326, 48, 0, 18944, 1, 131, 8,
+        2374, 44, 0, 16896, 1, 132, 8,
     ],
 };
 
@@ -10954,7 +11155,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_300: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_301: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarBackgroundControlFillColorTransparentBrushCommandBarBackgroundOpenAcrylicInAppFillColorDefaultBrushCommandBarBorderBrushOpenCardStrokeColorDefaultSolidBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 32, 1, 41, 8, 41, 8,
@@ -10965,15 +11166,15 @@ static POPULATE_WINUITHEME_XAML_ROWS_301: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_302: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarForegroundTextFillColorPrimaryBrushCommandBarHighContrastBorderControlFillColorTransparentBrushCommandBarEllipsisIconForegroundDisabledTextFillColorDisabledBrushCommandBarOverflowPresenterBackgroundAcrylicInAppFillColorDefaultBrushCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 25, 1, 45, 8, 45, 8,
-        45, 28, 73, 32, 1, 46, 8, 46, 8,
-        105, 40, 145, 26, 1, 47, 8, 47, 8,
-        171, 37, 208, 33, 1, 48, 8, 48, 8,
-        241, 38, 279, 33, 1, 49, 8, 49, 8,
-        312, 39, 351, 47, 1, 50, 8, 50, 8,
+        166, 20, 186, 25, 1, 45, 8, 45, 8,
+        211, 28, 20, 32, 1, 46, 8, 46, 8,
+        239, 40, 279, 26, 1, 47, 8, 47, 8,
+        305, 37, 76, 33, 1, 48, 8, 48, 8,
+        342, 38, 380, 33, 1, 49, 8, 49, 8,
+        413, 39, 452, 47, 1, 50, 8, 50, 8,
     ],
 };
 
@@ -10989,7 +11190,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_303: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_304: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemBackgroundSubtleFillColorTransparentBrushGridViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushGridViewItemBackgroundPressedSubtleFillColorTertiaryBrushGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundTextFillColorPrimaryBrushGridViewItemForegroundPointerOverTextFillColorSecondaryBrushGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushGridViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushGridViewItemFocusBorderBrushGridViewItemFocusSecondaryBorderBrushGridViewItemCheckBrushTextOnAccentFillColorPrimaryBrushGridViewItemCheckBoxBrushControlOnImageFillColorDefaultBrushGridViewItemDragBackgroundGridViewItemDragForegroundGridViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 58, 8, 58, 8,
@@ -11021,29 +11222,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_305: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_306: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemPointerOverBorderBrushControlStrokeColorOnAccentTertiaryBrushGridViewItemSelectedBorderBrushAccentFillColorDefaultBrushGridViewItemSelectedPointerOverBorderBrushAccentFillColorSecondaryBrushGridViewItemSelectedPressedBorderBrushAccentFillColorTertiaryBrushGridViewItemSelectedDisabledBorderBrushAccentFillColorDisabledBrushGridViewItemSelectedInnerBorderBrushControlSolidFillColorDefaultBrushGridViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushGridViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushGridViewItemCheckBoxPointerOverBrushControlOnImageFillColorSecondaryBrushGridViewItemCheckBoxPressedBrushControlOnImageFillColorTertiaryBrushGridViewItemCheckBoxDisabledBrushControlOnImageFillColorDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushControlStrongStrokeColorDisabledBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabledSubtleFillColorSecondaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 39, 1, 79, 8, 79, 8,
-        73, 31, 104, 27, 1, 80, 8, 80, 8,
-        131, 42, 173, 29, 1, 81, 8, 81, 8,
-        202, 38, 240, 28, 1, 82, 8, 82, 8,
-        268, 39, 307, 28, 1, 83, 8, 83, 8,
-        335, 36, 371, 33, 1, 84, 8, 84, 8,
-        404, 29, 433, 35, 1, 85, 8, 85, 8,
-        468, 30, 498, 34, 1, 86, 8, 86, 8,
-        532, 36, 568, 37, 1, 87, 8, 87, 8,
-        605, 32, 637, 36, 1, 88, 8, 88, 8,
-        673, 33, 706, 36, 1, 89, 8, 89, 8,
-        742, 33, 104, 27, 1, 90, 8, 90, 8,
-        775, 44, 173, 29, 1, 91, 8, 91, 8,
-        819, 40, 240, 28, 1, 92, 8, 92, 8,
-        859, 41, 307, 28, 1, 93, 8, 93, 8,
-        900, 31, 931, 36, 1, 94, 8, 94, 8,
-        967, 42, 931, 36, 1, 95, 8, 95, 8,
-        1009, 38, 1047, 37, 1, 96, 8, 96, 8,
-        1084, 39, 1047, 37, 1, 97, 8, 97, 8,
-        1123, 38, 1161, 29, 1, 98, 8, 98, 8,
+        841, 34, 875, 39, 1, 79, 8, 79, 8,
+        914, 31, 945, 27, 1, 80, 8, 80, 8,
+        972, 42, 1014, 29, 1, 81, 8, 81, 8,
+        1043, 38, 1081, 28, 1, 82, 8, 82, 8,
+        1109, 39, 1148, 28, 1, 83, 8, 83, 8,
+        1176, 36, 1212, 33, 1, 84, 8, 84, 8,
+        1245, 29, 1274, 35, 1, 85, 8, 85, 8,
+        1309, 30, 1339, 34, 1, 86, 8, 86, 8,
+        1373, 36, 1409, 37, 1, 87, 8, 87, 8,
+        1446, 32, 1478, 36, 1, 88, 8, 88, 8,
+        1514, 33, 1547, 36, 1, 89, 8, 89, 8,
+        1583, 33, 945, 27, 1, 90, 8, 90, 8,
+        1616, 44, 1014, 29, 1, 91, 8, 91, 8,
+        1660, 40, 1081, 28, 1, 92, 8, 92, 8,
+        1700, 41, 1148, 28, 1, 93, 8, 93, 8,
+        1741, 31, 1772, 36, 1, 94, 8, 94, 8,
+        1808, 42, 1772, 36, 1, 95, 8, 95, 8,
+        1850, 38, 1888, 37, 1, 96, 8, 96, 8,
+        1925, 39, 1888, 37, 1, 97, 8, 97, 8,
+        1964, 38, 86, 29, 1, 98, 8, 98, 8,
     ],
 };
 
@@ -11063,7 +11264,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_307: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_308: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemBorderBackgroundSubtleFillColorTertiaryBrushListViewItemBackgroundSubtleFillColorTransparentBrushListViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushListViewItemBackgroundPressedListViewItemBackgroundSelectedListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundTextFillColorPrimaryBrushListViewItemForegroundPointerOverListViewItemForegroundPressedListViewItemForegroundSelectedListViewItemForegroundSelectedPointerOverListViewItemForegroundSelectedPressedListViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushListViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushTextOnAccentFillColorPrimaryBrushListViewItemCheckBoxBrushControlAltFillColorSecondaryBrushListViewItemDragBackgroundListViewItemDragForegroundListViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 28, 1, 99, 8, 99, 8,
@@ -11095,24 +11296,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_308: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_309: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckHintThemeBrushListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushListViewItemDragBackgroundThemeBrushListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushListViewItemOverlayBackgroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemOverlayForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 6068, 65350, 1, 123, 8,
-        31, 36, 6068, 65350, 1, 124, 8,
-        67, 27, 65535, 65535, 1, 125, 8,
-        94, 36, 6068, 39238, 1, 126, 8,
-        130, 36, 65535, 65535, 1, 127, 8,
-        166, 33, 0, 65280, 1, 128, 8,
-        199, 39, 0, 42496, 1, 129, 8,
-        238, 48, 65535, 39423, 1, 130, 8,
-        286, 39, 65535, 65535, 1, 131, 8,
-        325, 43, 15677, 65341, 1, 132, 8,
-        368, 43, 0, 19712, 1, 133, 8,
-        411, 40, 6068, 65350, 1, 134, 8,
-        451, 40, 0, 65280, 1, 135, 8,
-        491, 51, 14270, 65375, 1, 136, 8,
-        542, 47, 14270, 65375, 1, 137, 8,
+        1060, 31, 6068, 65350, 1, 123, 8,
+        1091, 36, 6068, 65350, 1, 124, 8,
+        1127, 27, 65535, 65535, 1, 125, 8,
+        1154, 36, 6068, 39238, 1, 126, 8,
+        1190, 36, 65535, 65535, 1, 127, 8,
+        1226, 33, 0, 65280, 1, 128, 8,
+        1259, 39, 0, 42496, 1, 129, 8,
+        1337, 48, 65535, 39423, 1, 130, 8,
+        1298, 39, 65535, 65535, 1, 131, 8,
+        1385, 43, 15677, 65341, 1, 132, 8,
+        1428, 43, 0, 19712, 1, 133, 8,
+        1471, 40, 6068, 65350, 1, 134, 8,
+        1511, 40, 0, 65280, 1, 135, 8,
+        1551, 51, 14270, 65375, 1, 136, 8,
+        1602, 47, 14270, 65375, 1, 137, 8,
     ],
 };
 
@@ -11125,33 +11326,33 @@ static POPULATE_WINUITHEME_XAML_ROWS_310: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_311: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushListViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushListViewItemCheckBoxPointerOverBrushControlAltFillColorSecondaryBrushListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushAccentFillColorDefaultBrushListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushAccentFillColorTertiaryBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushControlStrongStrokeColorDisabledBrushListViewItemBackgroundSelectedDisabledSubtleFillColorSecondaryBrushListViewItemSelectionIndicatorBrushListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 35, 1, 141, 8, 141, 8,
-        64, 30, 94, 34, 1, 142, 8, 142, 8,
-        128, 36, 164, 33, 1, 143, 8, 143, 8,
-        197, 32, 164, 33, 1, 144, 8, 144, 8,
-        229, 33, 164, 33, 1, 145, 8, 145, 8,
-        262, 33, 295, 27, 1, 146, 8, 146, 8,
-        322, 44, 35, 29, 1, 147, 8, 147, 8,
-        366, 40, 406, 28, 1, 148, 8, 148, 8,
-        434, 41, 100, 28, 1, 149, 8, 149, 8,
-        475, 31, 506, 36, 1, 150, 8, 150, 8,
-        542, 42, 506, 36, 1, 151, 8, 151, 8,
-        584, 38, 506, 36, 1, 152, 8, 152, 8,
-        622, 39, 661, 37, 1, 153, 8, 153, 8,
-        698, 38, 736, 29, 1, 154, 8, 154, 8,
-        765, 35, 295, 27, 1, 155, 8, 155, 8,
-        800, 46, 295, 27, 1, 156, 8, 156, 8,
-        846, 42, 295, 27, 1, 157, 8, 157, 8,
-        888, 43, 100, 28, 1, 158, 8, 158, 8,
+        1649, 29, 1678, 35, 1, 141, 8, 141, 8,
+        1713, 30, 1743, 34, 1, 142, 8, 142, 8,
+        1777, 36, 794, 33, 1, 143, 8, 143, 8,
+        1813, 32, 794, 33, 1, 144, 8, 144, 8,
+        1845, 33, 794, 33, 1, 145, 8, 145, 8,
+        1878, 33, 1033, 27, 1, 146, 8, 146, 8,
+        1911, 44, 1684, 29, 1, 147, 8, 147, 8,
+        1955, 40, 1995, 28, 1, 148, 8, 148, 8,
+        2023, 41, 1749, 28, 1, 149, 8, 149, 8,
+        2064, 31, 2095, 36, 1, 150, 8, 150, 8,
+        2131, 42, 2095, 36, 1, 151, 8, 151, 8,
+        2173, 38, 2095, 36, 1, 152, 8, 152, 8,
+        2211, 39, 2250, 37, 1, 153, 8, 153, 8,
+        2287, 38, 142, 29, 1, 154, 8, 154, 8,
+        2325, 35, 1033, 27, 1, 155, 8, 155, 8,
+        2360, 46, 1033, 27, 1, 156, 8, 156, 8,
+        2406, 42, 1033, 27, 1, 157, 8, 157, 8,
+        2448, 43, 1749, 28, 1, 158, 8, 158, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
-    strings: "FlyoutPresenterBackgroundAcrylicInAppFillColorDefaultBrushFlyoutBorderThemeBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 25, 25, 33, 1, 20, 8, 20, 8,
@@ -11161,7 +11362,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_313: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundAccentFillColorDefaultBrushAccentButtonBackgroundPointerOverAccentFillColorSecondaryBrushAccentButtonBackgroundPressedAccentFillColorTertiaryBrushAccentButtonBackgroundDisabledAccentFillColorDisabledBrushAccentButtonForegroundTextOnAccentFillColorPrimaryBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedTextOnAccentFillColorSecondaryBrushAccentButtonForegroundDisabledTextOnAccentFillColorDisabledAccentButtonBorderBrushAccentControlElevationBorderBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedControlFillColorTransparentBrushAccentButtonBorderBrushDisabledSubtleButtonBackgroundSubtleFillColorTransparentBrushSubtleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushSubtleButtonBackgroundPressedSubtleFillColorTertiaryBrushSubtleButtonBackgroundDisabledSubtleButtonForegroundTextFillColorPrimaryBrushSubtleButtonForegroundPointerOverSubtleButtonForegroundPressedTextFillColorSecondaryBrushSubtleButtonForegroundDisabledTextFillColorDisabledBrushSubtleButtonBorderBrushSubtleButtonBorderBrushPointerOverSubtleButtonBorderBrushPressedSubtleButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 27, 1, 64, 8, 64, 8,
@@ -11193,45 +11394,45 @@ static POPULATE_WINUITHEME_XAML_ROWS_313: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_314: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundControlFillColorDefaultBrushButtonBackgroundPointerOverControlFillColorSecondaryBrushButtonBackgroundPressedControlFillColorTertiaryBrushButtonBackgroundDisabledControlFillColorDisabledBrushButtonForegroundTextFillColorPrimaryBrushButtonForegroundPointerOverButtonForegroundPressedTextFillColorSecondaryBrushButtonForegroundDisabledTextFillColorDisabledBrushButtonBorderBrushControlElevationBorderBrushButtonBorderBrushPointerOverButtonBorderBrushPressedControlStrokeColorDefaultBrushButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 16, 16, 28, 1, 89, 8, 89, 8,
-        44, 27, 71, 30, 1, 90, 8, 90, 8,
-        101, 23, 124, 29, 1, 91, 8, 91, 8,
-        153, 24, 177, 29, 1, 92, 8, 92, 8,
-        206, 16, 222, 25, 1, 93, 8, 93, 8,
-        247, 27, 222, 25, 1, 94, 8, 94, 8,
-        274, 23, 297, 27, 1, 95, 8, 95, 8,
-        324, 24, 348, 26, 1, 96, 8, 96, 8,
-        374, 17, 391, 27, 1, 97, 8, 97, 8,
-        418, 28, 391, 27, 1, 98, 8, 98, 8,
-        446, 24, 470, 30, 1, 99, 8, 99, 8,
-        500, 25, 470, 30, 1, 100, 8, 100, 8,
+        6, 16, 1132, 28, 1, 89, 8, 89, 8,
+        55, 27, 1160, 30, 1, 90, 8, 90, 8,
+        117, 23, 1190, 29, 1, 91, 8, 91, 8,
+        174, 24, 1219, 29, 1, 92, 8, 92, 8,
+        232, 16, 844, 25, 1, 93, 8, 93, 8,
+        287, 27, 844, 25, 1, 94, 8, 94, 8,
+        320, 23, 931, 27, 1, 95, 8, 95, 8,
+        384, 24, 988, 26, 1, 96, 8, 96, 8,
+        443, 17, 466, 27, 1, 97, 8, 97, 8,
+        499, 28, 466, 27, 1, 98, 8, 98, 8,
+        533, 24, 1248, 30, 1, 99, 8, 99, 8,
+        595, 25, 1248, 30, 1, 100, 8, 100, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_315: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundThemeBrushButtonBorderThemeBrushButtonDisabledBackgroundThemeBrushButtonDisabledBorderThemeBrushButtonDisabledForegroundThemeBrushButtonForegroundThemeBrushButtonPointerOverBackgroundThemeBrushButtonPointerOverForegroundThemeBrushButtonPressedBackgroundThemeBrushButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 46774, 46006, 1, 101, 8,
-        26, 22, 0, 13056, 1, 102, 8,
-        48, 34, 51914, 26314, 1, 103, 8,
-        82, 30, 0, 6656, 1, 104, 8,
-        112, 34, 0, 26112, 1, 105, 8,
-        146, 26, 0, 65280, 1, 106, 8,
-        172, 37, 52685, 53709, 1, 107, 8,
-        209, 37, 0, 65280, 1, 108, 8,
-        246, 33, 0, 65280, 1, 109, 8,
-        279, 33, 65535, 65535, 1, 110, 8,
+        1278, 26, 46774, 46006, 1, 101, 8,
+        1304, 22, 0, 13056, 1, 102, 8,
+        1326, 34, 51914, 26314, 1, 103, 8,
+        1360, 30, 0, 6656, 1, 104, 8,
+        1390, 34, 0, 26112, 1, 105, 8,
+        1424, 26, 0, 65280, 1, 106, 8,
+        1450, 37, 52685, 53709, 1, 107, 8,
+        1487, 37, 0, 65280, 1, 108, 8,
+        1524, 33, 0, 65280, 1, 109, 8,
+        1557, 33, 65535, 65535, 1, 110, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_316: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundControlFillColorDefaultBrushToggleButtonBackgroundPointerOverControlFillColorSecondaryBrushToggleButtonBackgroundPressedControlFillColorTertiaryBrushToggleButtonBackgroundDisabledControlFillColorDisabledBrushToggleButtonBackgroundCheckedAccentFillColorDefaultBrushToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundTextFillColorPrimaryBrushToggleButtonForegroundPointerOverToggleButtonForegroundPressedTextFillColorSecondaryBrushToggleButtonForegroundDisabledTextFillColorDisabledBrushToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushControlElevationBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedControlStrokeColorDefaultBrushToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedControlFillColorTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 28, 1, 75, 8, 75, 8,
@@ -11275,27 +11476,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_316: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_317: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundThemeBrushToggleButtonBorderThemeBrushToggleButtonCheckedBackgroundThemeBrushToggleButtonCheckedBorderThemeBrushToggleButtonCheckedDisabledBackgroundThemeBrushToggleButtonCheckedDisabledForegroundThemeBrushToggleButtonCheckedForegroundThemeBrushToggleButtonCheckedPointerOverBackgroundThemeBrushToggleButtonCheckedPointerOverBorderThemeBrushToggleButtonCheckedPressedBackgroundThemeBrushToggleButtonCheckedPressedBorderThemeBrushToggleButtonCheckedPressedForegroundThemeBrushToggleButtonDisabledBorderThemeBrushToggleButtonDisabledForegroundThemeBrushToggleButtonForegroundThemeBrushToggleButtonPointerOverBackgroundThemeBrushToggleButtonPressedBackgroundThemeBrushToggleButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65535, 255, 1, 111, 8,
-        32, 28, 0, 65280, 1, 112, 8,
-        60, 39, 0, 65280, 1, 113, 8,
-        99, 35, 0, 65280, 1, 114, 8,
-        134, 47, 0, 26112, 1, 115, 8,
-        181, 47, 65535, 65535, 1, 116, 8,
-        228, 39, 65535, 65535, 1, 117, 8,
-        267, 50, 0, 39168, 1, 118, 8,
-        317, 46, 0, 39168, 1, 119, 8,
-        363, 46, 65535, 255, 1, 120, 8,
-        409, 42, 0, 65280, 1, 121, 8,
-        451, 46, 0, 65280, 1, 122, 8,
-        497, 36, 0, 26112, 1, 123, 8,
-        533, 40, 0, 26112, 1, 124, 8,
-        573, 32, 0, 65280, 1, 125, 8,
-        605, 43, 0, 8448, 1, 126, 8,
-        648, 39, 0, 65280, 1, 127, 8,
-        687, 39, 65535, 65535, 1, 128, 8,
+        1803, 32, 65535, 255, 1, 111, 8,
+        1835, 28, 0, 65280, 1, 112, 8,
+        1863, 39, 0, 65280, 1, 113, 8,
+        1902, 35, 0, 65280, 1, 114, 8,
+        1937, 47, 0, 26112, 1, 115, 8,
+        1984, 47, 65535, 65535, 1, 116, 8,
+        2031, 39, 65535, 65535, 1, 117, 8,
+        2070, 50, 0, 39168, 1, 118, 8,
+        2120, 46, 0, 39168, 1, 119, 8,
+        2166, 46, 65535, 255, 1, 120, 8,
+        2212, 42, 0, 65280, 1, 121, 8,
+        2254, 46, 0, 65280, 1, 122, 8,
+        2300, 36, 0, 26112, 1, 123, 8,
+        2336, 40, 0, 26112, 1, 124, 8,
+        2376, 32, 0, 65280, 1, 125, 8,
+        2408, 43, 0, 8448, 1, 126, 8,
+        2451, 39, 0, 65280, 1, 127, 8,
+        2490, 39, 65535, 65535, 1, 128, 8,
     ],
 };
 
@@ -11307,7 +11508,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_318: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_319: rt::PackedRows = rt::PackedRows {
-    strings: "MediaTransportControlsPanelBackgroundAcrylicInAppFillColorDefaultBrushMediaTransportControlsFlyoutBackgroundAcrylicBackgroundFillColorDefaultBrushMediaTransportControlsThumbBorderBackgroundControlStrongFillColorDefaultBrushMediaTransportControlsFillTimeElapsedTextTextFillColorSecondaryBrushMediaTransportControlsFillMediaTextTextFillColorPrimaryBrushMediaTransportControlsBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 37, 37, 33, 1, 33, 8, 33, 8,
@@ -11339,7 +11540,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_321: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_322: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBackgroundControlFillColorDefaultBrushRepeatButtonBackgroundPointerOverControlFillColorSecondaryBrushRepeatButtonBackgroundPressedControlFillColorTertiaryBrushRepeatButtonBackgroundDisabledControlFillColorDisabledBrushRepeatButtonForegroundTextFillColorPrimaryBrushRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedTextFillColorSecondaryBrushRepeatButtonForegroundDisabledTextFillColorDisabledBrushRepeatButtonBorderBrushControlElevationBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedControlStrokeColorDefaultBrushRepeatButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 28, 1, 40, 8, 40, 8,
@@ -11359,24 +11560,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_322: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_323: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBorderThemeBrushRepeatButtonDisabledBackgroundThemeBrushRepeatButtonDisabledBorderThemeBrushRepeatButtonDisabledForegroundThemeBrushRepeatButtonForegroundThemeBrushRepeatButtonPointerOverBackgroundThemeBrushRepeatButtonPointerOverForegroundThemeBrushRepeatButtonPressedBackgroundThemeBrushRepeatButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 0, 13056, 1, 52, 8,
-        28, 40, 51914, 26314, 1, 53, 8,
-        68, 36, 0, 6656, 1, 54, 8,
-        104, 40, 0, 26112, 1, 55, 8,
-        144, 32, 0, 65280, 1, 56, 8,
-        176, 43, 52685, 53709, 1, 57, 8,
-        219, 43, 0, 65280, 1, 58, 8,
-        262, 39, 0, 65280, 1, 59, 8,
-        301, 39, 65535, 65535, 1, 60, 8,
+        597, 28, 0, 13056, 1, 52, 8,
+        625, 40, 51914, 26314, 1, 53, 8,
+        665, 36, 0, 6656, 1, 54, 8,
+        701, 40, 0, 26112, 1, 55, 8,
+        741, 32, 0, 65280, 1, 56, 8,
+        773, 43, 52685, 53709, 1, 57, 8,
+        816, 43, 0, 65280, 1, 58, 8,
+        859, 39, 0, 65280, 1, 59, 8,
+        898, 39, 65535, 65535, 1, 60, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_324: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarDatePickerForegroundTextFillColorPrimaryBrushCalendarDatePickerForegroundDisabledTextFillColorDisabledBrushCalendarDatePickerCalendarGlyphForegroundTextFillColorSecondaryBrushCalendarDatePickerCalendarGlyphForegroundPointerOverCalendarDatePickerCalendarGlyphForegroundPressedCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundPointerOverCalendarDatePickerTextForegroundPressedCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerHeaderForegroundCalendarDatePickerHeaderForegroundDisabledCalendarDatePickerBackgroundControlFillColorDefaultBrushCalendarDatePickerBackgroundPointerOverControlFillColorSecondaryBrushCalendarDatePickerBackgroundPressedControlFillColorTertiaryBrushCalendarDatePickerBackgroundDisabledControlFillColorDisabledBrushCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushControlElevationBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedControlStrokeColorDefaultBrushCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 25, 1, 42, 8, 42, 8,
@@ -11407,24 +11608,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_324: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_325: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarViewFocusBorderBrushTextFillColorPrimaryBrushCalendarViewSelectedHoverBorderBrushAccentFillColorSecondaryBrushCalendarViewSelectedPressedBorderBrushSubtleFillColorTertiaryBrushCalendarViewSelectedBorderBrushAccentFillColorDefaultBrushCalendarViewHoverBorderBrushSubtleFillColorSecondaryBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundTextOnAccentFillColorPrimaryBrushCalendarViewBlackoutForegroundCalendarViewSelectedForegroundAccentTextFillColorPrimaryBrushCalendarViewPressedForegroundTextFillColorSecondaryBrushCalendarViewOutOfScopeForegroundCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSubtleFillColorTransparentBrushCalendarViewCalendarItemBackgroundCalendarViewForegroundCalendarViewBackgroundControlFillColorInputActiveBrushCalendarViewBorderBrushControlStrokeColorDefaultBrushCalendarViewWeekDayForegroundDisabledTextFillColorDisabledBrushCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverControlStrongFillColorDefaultBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledControlStrongFillColorDisabledBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushFocusStrokeColorOuterBrushCalendarViewFocusVisualSecondaryBrushFocusStrokeColorInnerBrushCalendarViewBlackoutStrikethroughBrushControlStrongStrokeColorDefaultBrushCalendarViewSelectedDisabledBorderBrushAccentFillColorDisabledBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundAccentTextFillColorTertiaryBrushCalendarViewSelectedDisabledForegroundAccentTextFillColorDisabledBrushCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundCalendarViewTodayBlackoutBackgroundAccentFillColorTertiaryBrushCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSize",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 25, 1, 93, 8, 93, 8,
-        53, 36, 89, 29, 1, 94, 8, 94, 8,
-        118, 38, 156, 28, 1, 95, 8, 95, 8,
-        184, 31, 215, 27, 1, 96, 8, 96, 8,
-        242, 28, 270, 29, 1, 97, 8, 97, 8,
-        299, 30, 156, 28, 1, 98, 8, 98, 8,
-        329, 27, 356, 33, 1, 99, 8, 99, 8,
-        389, 30, 28, 25, 1, 100, 8, 100, 8,
+        0, 28, 394, 25, 1, 93, 8, 93, 8,
+        57, 36, 28, 29, 1, 94, 8, 94, 8,
+        93, 38, 131, 28, 1, 95, 8, 95, 8,
+        159, 31, 190, 27, 1, 96, 8, 96, 8,
+        217, 28, 245, 29, 1, 97, 8, 97, 8,
+        274, 30, 131, 28, 1, 98, 8, 98, 8,
+        304, 27, 331, 33, 1, 99, 8, 99, 8,
+        364, 30, 394, 25, 1, 100, 8, 100, 8,
         419, 30, 449, 31, 1, 101, 8, 101, 8,
         480, 29, 509, 27, 1, 102, 8, 102, 8,
         536, 32, 509, 27, 1, 103, 8, 103, 8,
-        568, 34, 28, 25, 1, 104, 8, 104, 8,
+        568, 34, 394, 25, 1, 104, 8, 104, 8,
         602, 32, 634, 31, 1, 105, 8, 105, 8,
         665, 34, 634, 31, 1, 106, 8, 106, 8,
-        699, 22, 28, 25, 1, 107, 8, 107, 8,
+        699, 22, 394, 25, 1, 107, 8, 107, 8,
         721, 22, 743, 32, 1, 108, 8, 108, 8,
         775, 23, 798, 30, 1, 109, 8, 109, 8,
         828, 37, 865, 26, 1, 110, 8, 110, 8,
@@ -11440,29 +11641,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_325: rt::PackedRows = rt::PackedRows {
         1416, 37, 1453, 26, 1, 120, 8, 120, 8,
         1479, 38, 1517, 36, 1, 121, 8, 121, 8,
         1553, 39, 1592, 28, 1, 122, 8, 122, 8,
-        1620, 41, 356, 33, 1, 123, 8, 123, 8,
+        1620, 41, 331, 33, 1, 123, 8, 123, 8,
         1661, 30, 865, 26, 1, 124, 8, 124, 8,
         1691, 35, 449, 31, 1, 125, 8, 125, 8,
         1726, 37, 1763, 32, 1, 126, 8, 126, 8,
         1795, 38, 1833, 32, 1, 127, 8, 127, 8,
-        1865, 37, 28, 25, 1, 128, 8, 128, 8,
+        1865, 37, 394, 25, 1, 128, 8, 128, 8,
         1902, 39, 1769, 26, 1, 129, 8, 129, 8,
-        1941, 39, 270, 29, 1, 130, 8, 130, 8,
-        1980, 41, 156, 28, 1, 131, 8, 131, 8,
+        1941, 39, 245, 29, 1, 130, 8, 130, 8,
+        1980, 41, 131, 28, 1, 131, 8, 131, 8,
         2021, 42, 634, 31, 1, 132, 8, 132, 8,
         2063, 35, 634, 31, 1, 133, 8, 133, 8,
-        2098, 27, 215, 27, 1, 134, 8, 134, 8,
+        2098, 27, 190, 27, 1, 134, 8, 134, 8,
         2125, 35, 2160, 28, 1, 135, 8, 135, 8,
-        2188, 35, 356, 33, 1, 136, 8, 136, 8,
-        2223, 32, 89, 29, 1, 137, 8, 137, 8,
+        2188, 35, 331, 33, 1, 136, 8, 136, 8,
+        2223, 32, 28, 29, 1, 137, 8, 137, 8,
         2255, 34, 2160, 28, 1, 138, 8, 138, 8,
         2289, 35, 1592, 28, 1, 139, 8, 139, 8,
         2324, 30, 634, 31, 1, 140, 8, 140, 8,
-        2354, 49, 270, 29, 1, 141, 8, 141, 8,
-        2403, 45, 156, 28, 1, 142, 8, 142, 8,
+        2354, 49, 245, 29, 1, 141, 8, 141, 8,
+        2403, 45, 131, 28, 1, 142, 8, 142, 8,
         929, 38, 978, 34, 1, 143, 8, 143, 8,
-        2448, 44, 28, 25, 1, 144, 8, 144, 8,
-        2492, 55, 28, 25, 1, 145, 8, 145, 8,
+        2448, 44, 394, 25, 1, 144, 8, 144, 8,
+        2492, 55, 394, 25, 1, 145, 8, 145, 8,
         2547, 51, 509, 27, 1, 146, 8, 146, 8,
         2598, 52, 865, 26, 1, 147, 8, 147, 8,
         2650, 27, 2677, 27, 1, 148, 8, 148, 8,
@@ -11496,7 +11697,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_327: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_328: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxForegroundUncheckedTextFillColorPrimaryBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledTextFillColorDisabledBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSubtleFillColorTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedControlStrongStrokeColorDefaultBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedControlStrongStrokeColorDisabledBrushCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedAccentFillColorDefaultBrushCheckBoxCheckBackgroundStrokeCheckedPointerOverAccentFillColorSecondaryBrushCheckBoxCheckBackgroundStrokeCheckedPressedAccentFillColorTertiaryBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedControlAltFillColorSecondaryBrushCheckBoxCheckBackgroundFillUncheckedPointerOverControlAltFillColorTertiaryBrushCheckBoxCheckBackgroundFillUncheckedPressedControlAltFillColorQuarternaryBrushCheckBoxCheckBackgroundFillUncheckedDisabledControlAltFillColorDisabledBrushCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledAccentFillColorDisabledBrushCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedTextOnAccentFillColorPrimaryBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledTextOnAccentFillColorDisabledBrushCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 27, 27, 25, 1, 103, 8, 103, 8,
@@ -11576,29 +11777,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_328: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_329: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxBackgroundThemeBrushCheckBoxBorderThemeBrushCheckBoxContentDisabledForegroundThemeBrushCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushCheckBoxPointerOverForegroundThemeBrushCheckBoxPointerOverBorderThemeBrushCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 65535, 52479, 1, 175, 8,
-        28, 24, 0, 17664, 1, 176, 8,
-        52, 43, 0, 26112, 1, 177, 8,
-        95, 35, 0, 65280, 1, 178, 8,
-        130, 36, 51914, 26314, 1, 179, 8,
-        166, 32, 0, 9728, 1, 180, 8,
-        198, 36, 0, 26112, 1, 181, 8,
-        234, 28, 0, 65280, 1, 182, 8,
-        262, 39, 65535, 57087, 1, 183, 8,
-        301, 39, 0, 65280, 1, 184, 8,
-        340, 35, 0, 28672, 1, 185, 8,
-        375, 35, 0, 65280, 1, 186, 8,
-        410, 31, 0, 65280, 1, 187, 8,
-        441, 35, 65535, 65535, 1, 188, 8,
+        3333, 28, 65535, 52479, 1, 175, 8,
+        3361, 24, 0, 17664, 1, 176, 8,
+        3385, 43, 0, 26112, 1, 177, 8,
+        3428, 35, 0, 65280, 1, 178, 8,
+        3463, 36, 51914, 26314, 1, 179, 8,
+        3499, 32, 0, 9728, 1, 180, 8,
+        3531, 36, 0, 26112, 1, 181, 8,
+        3567, 28, 0, 65280, 1, 182, 8,
+        3595, 39, 65535, 57087, 1, 183, 8,
+        3669, 39, 0, 65280, 1, 184, 8,
+        3634, 35, 0, 28672, 1, 185, 8,
+        3708, 35, 0, 65280, 1, 186, 8,
+        3743, 31, 0, 65280, 1, 187, 8,
+        3774, 35, 65535, 65535, 1, 188, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_330: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogForegroundTextFillColorPrimaryBrushContentDialogBackgroundSolidBackgroundFillColorBaseBrushContentDialogSmokeFillSmokeFillColorDefaultBrushContentDialogTopOverlayLayerFillColorAltBrushContentDialogBorderBrushSurfaceStrokeColorDefaultBrushContentDialogSeparatorBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 23, 23, 25, 1, 32, 8, 32, 8,
@@ -11635,7 +11836,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_333: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_334: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerSpacerFillControlStrokeColorDefaultBrushDatePickerSpacerFillDisabledDatePickerHeaderForegroundTextFillColorPrimaryBrushDatePickerHeaderForegroundDisabledTextFillColorDisabledBrushDatePickerButtonBorderBrushControlElevationBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundControlFillColorDefaultBrushDatePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushDatePickerButtonBackgroundPressedControlFillColorTertiaryBrushDatePickerButtonBackgroundDisabledControlFillColorDisabledBrushDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultTextFillColorSecondaryBrushDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushDatePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushDatePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 30, 1, 57, 8, 57, 8,
@@ -11660,33 +11861,33 @@ static POPULATE_WINUITHEME_XAML_ROWS_334: rt::PackedRows = rt::PackedRows {
         852, 35, 887, 38, 1, 76, 8, 76, 8,
         925, 36, 961, 29, 1, 77, 8, 77, 8,
         990, 35, 1025, 30, 1, 78, 8, 78, 8,
-        1055, 39, 1094, 47, 1, 79, 8, 79, 8,
+        1201, 39, 1240, 47, 1, 79, 8, 79, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_335: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerHeaderForegroundThemeBrushDatePickerForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 0, 65280, 1, 80, 8,
-        36, 30, 0, 65280, 1, 81, 8,
+        1287, 36, 0, 65280, 1, 80, 8,
+        1323, 30, 0, 65280, 1, 81, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_336: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushDatePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimary",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 29, 1, 83, 8, 83, 8,
-        67, 49, 116, 30, 1, 84, 8, 84, 8,
+        1055, 38, 1093, 29, 1, 83, 8, 83, 8,
+        1122, 49, 1171, 30, 1, 84, 8, 84, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_337: rt::PackedRows = rt::PackedRows {
-    strings: "DateTimePickerFlyoutButtonBackgroundSubtleFillColorTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSubtleFillColorSecondaryBrushDateTimePickerFlyoutButtonBackgroundPressedSubtleFillColorTertiaryBrushDateTimePickerFlyoutButtonBorderBrushControlStrokeColorDefaultBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverTextFillColorPrimaryBrushDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundTextFillColorSecondaryBrushLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundAcrylicBackgroundFillColorDefaultBrushLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 36, 36, 31, 1, 38, 8, 38, 8,
@@ -11715,7 +11916,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_337: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_338: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewBackgroundSolidBackgroundFillColorBaseBrushFlipViewNextPreviousButtonBackgroundAcrylicInAppFillColorDefaultBrushFlipViewNextPreviousButtonBackgroundPointerOverFlipViewNextPreviousButtonBackgroundPressedFlipViewNextPreviousArrowForegroundControlStrongFillColorDefaultBrushFlipViewNextPreviousArrowForegroundPointerOverTextFillColorSecondaryBrushFlipViewNextPreviousArrowForegroundPressedFlipViewNextPreviousButtonBorderBrushControlStrokeColorDefaultBrushFlipViewNextPreviousButtonBorderBrushPointerOverFlipViewNextPreviousButtonBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 18, 18, 33, 1, 38, 8, 38, 8,
@@ -11733,24 +11934,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_338: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_339: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewButtonBackgroundThemeBrushFlipViewButtonBorderThemeBrushFlipViewButtonForegroundThemeBrushFlipViewButtonPointerOverBackgroundThemeBrushFlipViewButtonPointerOverBorderThemeBrushFlipViewButtonPointerOverForegroundThemeBrushFlipViewButtonPressedBackgroundThemeBrushFlipViewButtonPressedBorderThemeBrushFlipViewButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 54741, 22997, 1, 48, 8,
-        34, 30, 54741, 22997, 1, 49, 8,
-        64, 34, 0, 39168, 1, 50, 8,
-        98, 45, 55255, 61655, 1, 51, 8,
-        143, 41, 49601, 40641, 1, 52, 8,
-        184, 45, 0, 65280, 1, 53, 8,
-        229, 41, 10537, 48425, 1, 54, 8,
-        270, 37, 10537, 48425, 1, 55, 8,
-        307, 41, 65535, 65535, 1, 56, 8,
+        553, 34, 54741, 22997, 1, 48, 8,
+        587, 30, 54741, 22997, 1, 49, 8,
+        617, 34, 0, 39168, 1, 50, 8,
+        651, 45, 55255, 61655, 1, 51, 8,
+        696, 41, 49601, 40641, 1, 52, 8,
+        737, 45, 0, 65280, 1, 53, 8,
+        782, 41, 10537, 48425, 1, 54, 8,
+        823, 37, 10537, 48425, 1, 55, 8,
+        860, 41, 65535, 65535, 1, 56, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_340: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewItemBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 18, 8, 18, 8,
@@ -11776,7 +11977,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_342: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_343: rt::PackedRows = rt::PackedRows {
-    strings: "PivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFillAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 15, 15, 29, 1, 96, 8, 96, 8,
@@ -11821,29 +12022,29 @@ static POPULATE_WINUITHEME_XAML_ROWS_343: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_344: rt::PackedRows = rt::PackedRows {
-    strings: "PivotForegroundThemeBrushPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushPivotNavButtonBorderThemeBrushPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 0, 65280, 1, 133, 8,
-        25, 34, 65535, 255, 1, 134, 8,
-        59, 36, 65535, 255, 1, 135, 8,
-        95, 34, 0, 65280, 1, 136, 8,
-        129, 36, 0, 26112, 1, 137, 8,
-        165, 34, 54741, 22997, 1, 138, 8,
-        199, 30, 54741, 22997, 1, 139, 8,
-        229, 34, 0, 39168, 1, 140, 8,
-        263, 45, 55255, 61655, 1, 141, 8,
-        308, 41, 49601, 40641, 1, 142, 8,
-        349, 45, 0, 65280, 1, 143, 8,
-        394, 41, 10537, 48425, 1, 144, 8,
-        435, 37, 10537, 48425, 1, 145, 8,
-        472, 41, 65535, 65535, 1, 146, 8,
+        1791, 25, 0, 65280, 1, 133, 8,
+        1816, 34, 65535, 255, 1, 134, 8,
+        1850, 36, 65535, 255, 1, 135, 8,
+        1886, 34, 0, 65280, 1, 136, 8,
+        1920, 36, 0, 26112, 1, 137, 8,
+        1956, 34, 54741, 22997, 1, 138, 8,
+        1990, 30, 54741, 22997, 1, 139, 8,
+        2020, 34, 0, 39168, 1, 140, 8,
+        2054, 45, 55255, 61655, 1, 141, 8,
+        2099, 41, 49601, 40641, 1, 142, 8,
+        2140, 45, 0, 65280, 1, 143, 8,
+        2185, 41, 10537, 48425, 1, 144, 8,
+        2226, 37, 10537, 48425, 1, 145, 8,
+        2263, 41, 65535, 65535, 1, 146, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_345: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarBackgroundSubtleFillColorTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushScrollBarButtonBackgroundPressedControlStrongFillColorDefaultBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverTextFillColorSecondaryBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledControlStrongFillColorDisabledBrushScrollBarThumbFillScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarThumbBorderBrushControlFillColorTransparentBrushScrollBarTrackFillAcrylicInAppFillColorDefaultBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 31, 1, 73, 8, 73, 8,
@@ -11884,42 +12085,42 @@ static POPULATE_WINUITHEME_XAML_ROWS_345: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_346: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarButtonForegroundThemeBrushScrollBarButtonPointerOverBackgroundThemeBrushScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 39168, 1, 106, 8,
-        35, 46, 56026, 65498, 1, 107, 8,
-        81, 42, 56026, 65498, 1, 108, 8,
-        123, 46, 0, 65280, 1, 109, 8,
-        169, 42, 0, 39168, 1, 110, 8,
-        211, 38, 0, 39168, 1, 111, 8,
-        249, 42, 65535, 65535, 1, 112, 8,
-        291, 36, 52685, 65485, 1, 113, 8,
-        327, 32, 39578, 32154, 1, 114, 8,
-        359, 34, 52685, 65485, 1, 115, 8,
-        393, 30, 21845, 15189, 1, 116, 8,
-        423, 45, 56026, 65498, 1, 117, 8,
-        468, 41, 47031, 27575, 1, 118, 8,
-        509, 41, 0, 39168, 1, 119, 8,
-        550, 37, 21845, 60757, 1, 120, 8,
-        587, 34, 54741, 22997, 1, 121, 8,
-        621, 30, 54741, 22997, 1, 122, 8,
+        1166, 35, 0, 39168, 1, 106, 8,
+        1201, 46, 56026, 65498, 1, 107, 8,
+        1247, 42, 56026, 65498, 1, 108, 8,
+        1289, 46, 0, 65280, 1, 109, 8,
+        1335, 42, 0, 39168, 1, 110, 8,
+        1377, 38, 0, 39168, 1, 111, 8,
+        1415, 42, 65535, 65535, 1, 112, 8,
+        1457, 36, 52685, 65485, 1, 113, 8,
+        1493, 32, 39578, 32154, 1, 114, 8,
+        1525, 34, 52685, 65485, 1, 115, 8,
+        1559, 30, 21845, 15189, 1, 116, 8,
+        1589, 45, 56026, 65498, 1, 117, 8,
+        1634, 41, 47031, 27575, 1, 118, 8,
+        1675, 41, 0, 39168, 1, 119, 8,
+        1716, 37, 21845, 60757, 1, 120, 8,
+        1753, 34, 54741, 22997, 1, 121, 8,
+        1787, 30, 54741, 22997, 1, 122, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_347: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarThumbBackgroundColorControlStrongFillColorDefaultScrollBarPanningThumbBackgroundColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 29, 1, 123, 8, 123, 8,
-        58, 36, 29, 29, 1, 124, 8, 124, 8,
+        1817, 29, 327, 29, 1, 123, 8, 123, 8,
+        1846, 36, 327, 29, 1, 124, 8, 124, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_348: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollViewerScrollBarSeparatorBackgroundControlFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 40, 40, 32, 1, 18, 8, 18, 8,
@@ -11940,68 +12141,68 @@ static POPULATE_WINUITHEME_XAML_ROWS_350: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_351: rt::PackedRows = rt::PackedRows {
-    strings: "SliderContainerBackgroundControlFillColorTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundAccentFillColorDefaultBrushSliderThumbBackgroundPointerOverAccentFillColorSecondaryBrushSliderThumbBackgroundPressedAccentFillColorTertiaryBrushSliderThumbBackgroundDisabledAccentFillColorDisabledBrushSliderThumbBorderBrushControlElevationBorderBrushSliderOuterThumbBackgroundControlSolidFillColorDefaultBrushSliderTrackFillControlStrongFillColorDefaultBrushSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledControlStrongFillColorDisabledBrushSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderHeaderForegroundTextFillColorPrimaryBrushSliderHeaderForegroundDisabledTextFillColorDisabledBrushSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillControlFillColorInputActiveBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 32, 1, 71, 8, 71, 8,
-        57, 36, 25, 32, 1, 72, 8, 72, 8,
-        93, 32, 25, 32, 1, 73, 8, 73, 8,
-        125, 33, 25, 32, 1, 74, 8, 74, 8,
-        158, 21, 179, 27, 1, 75, 8, 75, 8,
-        206, 32, 238, 29, 1, 76, 8, 76, 8,
-        267, 28, 295, 28, 1, 77, 8, 77, 8,
-        323, 29, 352, 28, 1, 78, 8, 78, 8,
-        380, 22, 402, 27, 1, 79, 8, 79, 8,
-        429, 26, 455, 33, 1, 80, 8, 80, 8,
-        488, 15, 503, 34, 1, 81, 8, 81, 8,
-        537, 26, 503, 34, 1, 82, 8, 82, 8,
-        563, 22, 503, 34, 1, 83, 8, 83, 8,
-        585, 23, 608, 35, 1, 84, 8, 84, 8,
-        643, 20, 179, 27, 1, 85, 8, 85, 8,
-        663, 31, 238, 29, 1, 86, 8, 86, 8,
-        694, 27, 295, 28, 1, 87, 8, 87, 8,
-        721, 28, 352, 28, 1, 88, 8, 88, 8,
-        749, 22, 771, 25, 1, 89, 8, 89, 8,
-        796, 30, 826, 26, 1, 90, 8, 90, 8,
-        852, 17, 503, 34, 1, 91, 8, 91, 8,
-        869, 25, 608, 35, 1, 92, 8, 92, 8,
-        894, 23, 917, 32, 1, 93, 8, 93, 8,
+        0, 25, 36, 32, 1, 71, 8, 71, 8,
+        0, 36, 36, 32, 1, 72, 8, 72, 8,
+        68, 32, 36, 32, 1, 73, 8, 73, 8,
+        100, 33, 36, 32, 1, 74, 8, 74, 8,
+        133, 21, 154, 27, 1, 75, 8, 75, 8,
+        181, 32, 213, 29, 1, 76, 8, 76, 8,
+        242, 28, 270, 28, 1, 77, 8, 77, 8,
+        298, 29, 327, 28, 1, 78, 8, 78, 8,
+        355, 22, 377, 27, 1, 79, 8, 79, 8,
+        404, 26, 430, 33, 1, 80, 8, 80, 8,
+        463, 15, 478, 34, 1, 81, 8, 81, 8,
+        512, 26, 478, 34, 1, 82, 8, 82, 8,
+        538, 22, 478, 34, 1, 83, 8, 83, 8,
+        560, 23, 583, 35, 1, 84, 8, 84, 8,
+        618, 20, 154, 27, 1, 85, 8, 85, 8,
+        638, 31, 213, 29, 1, 86, 8, 86, 8,
+        669, 27, 270, 28, 1, 87, 8, 87, 8,
+        696, 28, 327, 28, 1, 88, 8, 88, 8,
+        724, 22, 746, 25, 1, 89, 8, 89, 8,
+        771, 30, 801, 26, 1, 90, 8, 90, 8,
+        827, 17, 478, 34, 1, 91, 8, 91, 8,
+        844, 25, 583, 35, 1, 92, 8, 92, 8,
+        869, 23, 892, 32, 1, 93, 8, 93, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_352: rt::PackedRows = rt::PackedRows {
-    strings: "SliderBorderThemeBrushSliderDisabledBorderThemeBrushSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 65535, 255, 1, 94, 8,
-        22, 30, 65535, 255, 1, 95, 8,
-        52, 31, 65535, 65535, 1, 96, 8,
-        83, 27, 65535, 65535, 1, 97, 8,
-        110, 39, 32382, 65406, 1, 98, 8,
-        149, 42, 65535, 65535, 1, 99, 8,
-        191, 38, 65535, 65535, 1, 100, 8,
-        229, 38, 65535, 65535, 1, 101, 8,
-        267, 34, 65535, 65535, 1, 102, 8,
-        301, 40, 0, 65280, 1, 103, 8,
-        341, 48, 0, 65280, 1, 104, 8,
-        389, 41, 65535, 33023, 1, 105, 8,
-        430, 49, 65535, 33023, 1, 106, 8,
-        479, 31, 65535, 10751, 1, 107, 8,
-        510, 39, 11973, 65371, 1, 108, 8,
-        549, 47, 65535, 8191, 1, 109, 8,
-        596, 50, 19405, 65394, 1, 110, 8,
-        646, 46, 21231, 65409, 1, 111, 8,
-        692, 39, 65535, 10751, 1, 112, 8,
-        731, 42, 65535, 18175, 1, 113, 8,
-        773, 38, 65535, 23039, 1, 114, 8,
-        811, 32, 65535, 65535, 1, 115, 8,
+        924, 22, 65535, 255, 1, 94, 8,
+        946, 30, 65535, 255, 1, 95, 8,
+        976, 31, 65535, 65535, 1, 96, 8,
+        1007, 27, 65535, 65535, 1, 97, 8,
+        1034, 39, 32382, 65406, 1, 98, 8,
+        1073, 42, 65535, 65535, 1, 99, 8,
+        1115, 38, 65535, 65535, 1, 100, 8,
+        1153, 38, 65535, 65535, 1, 101, 8,
+        1191, 34, 65535, 65535, 1, 102, 8,
+        1225, 40, 0, 65280, 1, 103, 8,
+        1265, 48, 0, 65280, 1, 104, 8,
+        1313, 41, 65535, 33023, 1, 105, 8,
+        1354, 49, 65535, 33023, 1, 106, 8,
+        1403, 31, 65535, 10751, 1, 107, 8,
+        1434, 39, 11973, 65371, 1, 108, 8,
+        1473, 47, 65535, 8191, 1, 109, 8,
+        1520, 50, 19405, 65394, 1, 110, 8,
+        1570, 46, 21231, 65409, 1, 111, 8,
+        1616, 39, 65535, 10751, 1, 112, 8,
+        1655, 42, 65535, 18175, 1, 113, 8,
+        1697, 38, 65535, 23039, 1, 114, 8,
+        1735, 32, 65535, 65535, 1, 115, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_353: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerSpacerFillControlStrokeColorDefaultBrushTimePickerSpacerFillDisabledTimePickerHeaderForegroundTextFillColorPrimaryBrushTimePickerHeaderForegroundDisabledTextFillColorDisabledBrushTimePickerButtonBorderBrushControlElevationBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundControlFillColorDefaultBrushTimePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushTimePickerButtonBackgroundPressedControlFillColorTertiaryBrushTimePickerButtonBackgroundDisabledControlFillColorDisabledBrushTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTextFillColorSecondaryBrushTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushTimePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushTimePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushTimePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushTimePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryTimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 20, 20, 30, 1, 51, 8, 51, 8,
@@ -12034,11 +12235,11 @@ static POPULATE_WINUITHEME_XAML_ROWS_353: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_354: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerForegroundThemeBrushTimePickerHeaderForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 0, 65280, 1, 76, 8,
-        30, 36, 0, 65280, 1, 77, 8,
+        1323, 30, 0, 65280, 1, 76, 8,
+        1287, 36, 0, 65280, 1, 77, 8,
     ],
 };
 
@@ -12058,7 +12259,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_356: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_357: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundTextFillColorPrimaryBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 25, 1, 29, 8, 29, 8,
@@ -12069,28 +12270,28 @@ static POPULATE_WINUITHEME_XAML_ROWS_357: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_358: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipBackgroundThemeBrushToolTipBorderThemeBrushToolTipForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 65535, 1, 32, 8,
-        27, 23, 32896, 65408, 1, 33, 8,
-        50, 27, 26214, 65382, 1, 34, 8,
+        149, 27, 65535, 65535, 1, 32, 8,
+        176, 23, 32896, 65408, 1, 33, 8,
+        199, 27, 26214, 65382, 1, 34, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_359: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundBrushTextFillColorPrimaryBrushToolTipBackgroundBrushAcrylicInAppFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 25, 1, 35, 8, 35, 8,
-        47, 22, 69, 33, 1, 36, 8, 36, 8,
+        226, 22, 17, 25, 1, 35, 8, 35, 8,
+        248, 22, 270, 33, 1, 36, 8, 36, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_360: rt::PackedRows = rt::PackedRows {
-    strings: "RatingControlUnselectedForegroundTextFillColorSecondaryBrushRatingControlSelectedForegroundAccentFillColorDefaultBrushRatingControlPlaceholderForegroundTextFillColorPrimaryBrushRatingControlPointerOverPlaceholderForegroundControlAltFillColorTertiaryBrushRatingControlPointerOverUnselectedForegroundRatingControlPointerOverSelectedForegroundRatingControlDisabledSelectedForegroundTextFillColorDisabledBrushRatingControlCaptionForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 25, 8, 25, 8,
@@ -12106,7 +12307,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_360: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_361: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBadgeForegroundTextOnAccentFillColorPrimaryBrushInfoBadgeBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 33, 1, 29, 8, 29, 8,
@@ -12134,7 +12335,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_363: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewDefaultPaneBackgroundAcrylicInAppFillColorDefaultBrushNavigationViewExpandedPaneBackgroundSolidBackgroundFillColorTransparentNavigationViewTopPaneBackgroundNavigationViewContentBackgroundLayerFillColorDefaultBrushNavigationViewItemBackgroundSubtleFillColorTransparentBrushNavigationViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushNavigationViewItemBackgroundPressedSubtleFillColorTertiaryBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundTextFillColorPrimaryBrushNavigationViewItemForegroundPointerOverNavigationViewItemForegroundPressedTextFillColorSecondaryBrushNavigationViewItemForegroundDisabledTextFillColorDisabledBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushNavigationViewItemBorderBrushPointerOverNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundSystemControlTransparentBrushNavigationViewItemSeparatorForegroundDividerStrokeColorDefaultBrushNavigationViewItemHeaderForegroundNavigationViewSelectionIndicatorForegroundAccentFillColorDefaultBrushNavigationViewContentGridBorderBrushCardStrokeColorDefaultBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundPointerOverTopNavigationViewItemBackgroundPressedTopNavigationViewItemBackgroundSelectedTopNavigationViewItemBackgroundSelectedPointerOverTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundNavigationViewButtonBackgroundPointerOverNavigationViewButtonBackgroundPressedNavigationViewButtonBackgroundDisabledControlFillColorDisabledBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 35, 35, 33, 1, 81, 8, 81, 8,
@@ -12186,12 +12387,12 @@ static POPULATE_WINUITHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
         2152, 42, 817, 25, 1, 127, 8, 127, 8,
         2194, 38, 916, 27, 1, 128, 8, 128, 8,
         2232, 39, 979, 26, 1, 129, 8, 129, 8,
-        2271, 39, 817, 25, 1, 130, 8, 130, 8,
-        2310, 50, 817, 25, 1, 131, 8, 131, 8,
-        2360, 46, 916, 27, 1, 132, 8, 132, 8,
-        2406, 42, 325, 29, 1, 133, 8, 133, 8,
-        2448, 38, 389, 28, 1, 134, 8, 134, 8,
-        2486, 39, 255, 31, 1, 135, 8, 135, 8,
+        2390, 39, 817, 25, 1, 130, 8, 130, 8,
+        2429, 50, 817, 25, 1, 131, 8, 131, 8,
+        2479, 46, 916, 27, 1, 132, 8, 132, 8,
+        2271, 42, 325, 29, 1, 133, 8, 133, 8,
+        2313, 38, 389, 28, 1, 134, 8, 134, 8,
+        2351, 39, 255, 31, 1, 135, 8, 135, 8,
         2525, 50, 255, 31, 1, 136, 8, 136, 8,
         2575, 46, 255, 31, 1, 137, 8, 137, 8,
         2621, 40, 1925, 30, 1, 138, 8, 138, 8,
@@ -12206,7 +12407,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_365: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewBackButtonBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 34, 34, 31, 1, 18, 8, 18, 8,
@@ -12215,7 +12416,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_365: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_366: rt::PackedRows = rt::PackedRows {
-    strings: "PersonPictureForegroundThemeBrushTextFillColorPrimaryBrushPersonPictureEllipseBadgeForegroundThemeBrushTextOnAccentFillColorPrimaryBrushPersonPictureEllipseBadgeFillThemeBrushAccentFillColorDefaultBrushPersonPictureEllipseBadgeStrokeThemeBrushControlFillColorTransparentBrushPersonPictureEllipseFillThemeBrushControlAltFillColorQuarternaryPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 25, 1, 28, 8, 28, 8,
@@ -12237,7 +12438,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_367: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_368: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshContainerForegroundBrushRefreshContainerBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 31, 0, 65280, 1, 19, 8,
@@ -12247,7 +12448,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_368: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_369: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 27, 0, 65280, 1, 19, 8,
@@ -12257,7 +12458,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_369: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_370: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarBackgroundSubtleFillColorTransparentBrushMenuBarItemForegroundTextFillColorPrimaryBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuBarItemBackgroundPressedSubtleFillColorTertiaryBrushMenuBarItemBackgroundSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 31, 1, 28, 8, 28, 8,
@@ -12271,19 +12472,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_370: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_371: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarItemBorderBrushControlAltFillColorTertiaryBrushMenuBarItemBorderBrushPointerOverControlStrokeColorDefaultBrushMenuBarItemBorderBrushPressedMenuBarItemBorderBrushSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 32, 1, 35, 8, 35, 8,
-        54, 33, 87, 30, 1, 36, 8, 36, 8,
-        117, 29, 87, 30, 1, 37, 8, 37, 8,
-        146, 30, 87, 30, 1, 38, 8, 38, 8,
+        261, 22, 283, 32, 1, 35, 8, 35, 8,
+        315, 33, 348, 30, 1, 36, 8, 36, 8,
+        378, 29, 348, 30, 1, 37, 8, 37, 8,
+        407, 30, 348, 30, 1, 38, 8, 38, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_372: rt::PackedRows = rt::PackedRows {
-    strings: "TreeViewItemBackgroundSubtleFillColorTransparentBrushTreeViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushTreeViewItemBackgroundPressedSubtleFillColorTertiaryBrushTreeViewItemBackgroundDisabledSubtleFillColorDisabledBrushTreeViewItemBackgroundSelectedTreeViewItemBackgroundSelectedPointerOverTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTextFillColorPrimaryBrushTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTextFillColorSecondaryBrushTreeViewItemForegroundDisabledTextFillColorDisabledBrushTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedTreeViewItemSelectionIndicatorForegroundAccentFillColorDefaultBrushTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 31, 1, 56, 8, 56, 8,
@@ -12338,7 +12539,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_374: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_375: rt::PackedRows = rt::PackedRows {
-    strings: "SwipeItemBackgroundControlFillColorTertiaryBrushSwipeItemForegroundTextFillColorPrimaryBrushSwipeItemBackgroundPressedControlAltFillColorQuarternaryBrushSwipeItemPreThresholdExecuteForegroundControlStrongFillColorDefaultBrushSwipeItemPreThresholdExecuteBackgroundSwipeItemPostThresholdExecuteForegroundTextOnAccentFillColorPrimaryBrushSwipeItemPostThresholdExecuteBackgroundAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 19, 19, 29, 1, 24, 8, 24, 8,
@@ -12353,7 +12554,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_375: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_376: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundControlFillColorDefaultBrushSplitButtonBackgroundPointerOverControlFillColorSecondaryBrushSplitButtonBackgroundPressedControlFillColorTertiaryBrushSplitButtonBackgroundDisabledControlFillColorDisabledBrushSplitButtonBackgroundCheckedAccentFillColorDefaultBrushSplitButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushSplitButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushSplitButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushSplitButtonForegroundTextFillColorPrimaryBrushSplitButtonForegroundPointerOverSplitButtonForegroundPressedTextFillColorSecondaryBrushSplitButtonForegroundDisabledTextFillColorDisabledBrushSplitButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushSplitButtonForegroundCheckedDisabledSplitButtonForegroundSecondarySplitButtonForegroundSecondaryPressedTextFillColorTertiaryBrushSplitButtonBorderBrushControlElevationBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedControlStrokeColorDefaultBrushSplitButtonBorderBrushDisabledSplitButtonBorderBrushDividerSplitButtonBorderBrushCheckedAccentControlElevationBorderBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedControlFillColorTransparentBrushSplitButtonBorderBrushCheckedDisabledSplitButtonBorderBrushCheckedDividerControlStrokeColorOnAccentTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 28, 1, 47, 8, 47, 8,
@@ -12389,16 +12590,16 @@ static POPULATE_WINUITHEME_XAML_ROWS_376: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_377: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonInAppBarUnfocusedPointerOverSubtleFillColorTertiaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 28, 1, 76, 8, 76, 8,
+        1445, 39, 1484, 28, 1, 76, 8, 76, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_378: rt::PackedRows = rt::PackedRows {
-    strings: "DropDownButtonForegroundSecondaryTextFillColorSecondaryBrushDropDownButtonForegroundSecondaryPointerOverTextFillColorTertiaryBrushDropDownButtonForegroundSecondaryPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 20, 8, 20, 8,
@@ -12409,7 +12610,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_378: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_379: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonsHeaderForegroundTextFillColorPrimaryBrushRadioButtonsHeaderForegroundDisabledTextFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 28, 28, 25, 1, 19, 8, 19, 8,
@@ -12419,7 +12620,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_379: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_380: rt::PackedRows = rt::PackedRows {
-    strings: "TabViewBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderBackgroundLayerOnMicaBaseAltFillColorTransparentBrushTabViewItemHeaderBackgroundSelectedSolidBackgroundFillColorTertiaryBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverLayerOnMicaBaseAltFillColorSecondaryBrushTabViewItemHeaderBackgroundPressedLayerOnMicaBaseAltFillColorDefaultBrushTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundTextFillColorSecondaryBrushTabViewItemHeaderForegroundPressedTextFillColorTertiaryBrushTabViewItemHeaderForegroundSelectedTextFillColorPrimaryBrushTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledTextFillColorDisabledBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedSubtleFillColorTertiaryBrushTabViewButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTabViewButtonBackgroundDisabledTabViewButtonForegroundTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorDividerStrokeColorDefaultBrushTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabControlStrongFillColorDefaultBrushTabViewBorderBrushCardStrokeColorDefaultTabViewItemBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 17, 17, 31, 1, 93, 8, 93, 8,
@@ -12498,7 +12699,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_381: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_382: rt::PackedRows = rt::PackedRows {
-    strings: "AutoSuggestBoxSuggestionsListBackgroundAcrylicBackgroundFillColorDefaultBrushAutoSuggestBoxSuggestionsListBorderBrushSurfaceStrokeColorFlyoutBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 39, 39, 38, 1, 21, 8, 21, 8,
@@ -12509,7 +12710,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_382: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_383: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxItemForegroundTextFillColorPrimaryBrushComboBoxItemForegroundPressedTextFillColorSecondaryBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledTextFillColorDisabledBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSubtleFillColorTransparentBrushComboBoxItemBackgroundPressedSubtleFillColorTertiaryBrushComboBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxItemBackgroundDisabledSubtleFillColorDisabledBrushComboBoxItemBackgroundSelectedComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedComboBoxItemBackgroundSelectedPointerOverComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundControlFillColorDefaultBrushComboBoxBackgroundPointerOverControlFillColorSecondaryBrushComboBoxBackgroundPressedControlFillColorTertiaryBrushComboBoxBackgroundDisabledControlFillColorDisabledBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedFocusStrokeColorOuterBrushComboBoxBackgroundBorderBrushUnfocusedControlStrokeColorDefaultBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedTextFillColorTertiaryBrushComboBoxPlaceHolderForegroundDisabledComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushControlElevationBorderBrushComboBoxBorderBrushPointerOverComboBoxBorderBrushPressedComboBoxBorderBrushDisabledComboBoxDropDownGlyphForegroundComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownForegroundComboBoxDropDownBackgroundAcrylicInAppFillColorDefaultBrushComboBoxDropDownBorderBrushSurfaceStrokeColorFlyoutBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 25, 1, 120, 8, 120, 8,
@@ -12578,58 +12779,58 @@ static POPULATE_WINUITHEME_XAML_ROWS_383: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_384: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxArrowDisabledForegroundThemeBrushComboBoxArrowForegroundThemeBrushComboBoxArrowPressedForegroundThemeBrushComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrushComboBoxPlaceholderTextForegroundThemeBrushComboBoxPointerOverBackgroundThemeBrushComboBoxPointerOverBorderThemeBrushComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushComboBoxSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 0, 26112, 1, 181, 8,
-        41, 33, 0, 65280, 1, 182, 8,
-        74, 40, 0, 65280, 1, 183, 8,
-        114, 28, 65535, 52479, 1, 184, 8,
-        142, 24, 0, 17664, 1, 185, 8,
-        166, 36, 51914, 26314, 1, 186, 8,
-        202, 32, 0, 9728, 1, 187, 8,
-        234, 36, 0, 26112, 1, 188, 8,
-        270, 35, 65535, 65535, 1, 189, 8,
-        305, 31, 0, 28672, 1, 190, 8,
-        336, 35, 65535, 65535, 1, 191, 8,
-        371, 28, 0, 65280, 1, 192, 8,
-        399, 34, 0, 65280, 1, 193, 8,
-        433, 40, 0, 26112, 1, 194, 8,
-        473, 43, 0, 8448, 1, 195, 8,
-        516, 43, 0, 65280, 1, 196, 8,
-        559, 39, 54227, 65491, 1, 197, 8,
-        598, 39, 0, 65280, 1, 198, 8,
-        637, 40, 6068, 65350, 1, 199, 8,
-        677, 40, 65535, 65535, 1, 200, 8,
-        717, 48, 0, 35840, 1, 201, 8,
-        765, 48, 65535, 39423, 1, 202, 8,
-        813, 51, 14270, 65375, 1, 203, 8,
-        864, 43, 0, 34816, 1, 204, 8,
-        907, 39, 65535, 57087, 1, 205, 8,
-        946, 35, 0, 28672, 1, 206, 8,
-        981, 33, 65535, 65535, 1, 207, 8,
-        1014, 29, 8481, 65313, 1, 208, 8,
-        1043, 33, 0, 65280, 1, 209, 8,
-        1076, 35, 65535, 65535, 1, 210, 8,
-        1111, 31, 0, 41728, 1, 211, 8,
-        1142, 34, 54227, 65491, 1, 212, 8,
-        1176, 35, 0, 65280, 1, 213, 8,
-        1211, 36, 6068, 65350, 1, 214, 8,
-        1247, 47, 14270, 65375, 1, 215, 8,
+        2505, 41, 0, 26112, 1, 181, 8,
+        2546, 33, 0, 65280, 1, 182, 8,
+        2579, 40, 0, 65280, 1, 183, 8,
+        2619, 28, 65535, 52479, 1, 184, 8,
+        2647, 24, 0, 17664, 1, 185, 8,
+        2671, 36, 51914, 26314, 1, 186, 8,
+        2707, 32, 0, 9728, 1, 187, 8,
+        2739, 36, 0, 26112, 1, 188, 8,
+        2775, 35, 65535, 65535, 1, 189, 8,
+        2810, 31, 0, 28672, 1, 190, 8,
+        2841, 35, 65535, 65535, 1, 191, 8,
+        2876, 28, 0, 65280, 1, 192, 8,
+        2904, 34, 0, 65280, 1, 193, 8,
+        2938, 40, 0, 26112, 1, 194, 8,
+        2978, 43, 0, 8448, 1, 195, 8,
+        3021, 43, 0, 65280, 1, 196, 8,
+        3064, 39, 54227, 65491, 1, 197, 8,
+        3103, 39, 0, 65280, 1, 198, 8,
+        3142, 40, 6068, 65350, 1, 199, 8,
+        3278, 40, 65535, 65535, 1, 200, 8,
+        3182, 48, 0, 35840, 1, 201, 8,
+        3230, 48, 65535, 39423, 1, 202, 8,
+        3318, 51, 14270, 65375, 1, 203, 8,
+        3369, 43, 0, 34816, 1, 204, 8,
+        3412, 39, 65535, 57087, 1, 205, 8,
+        3451, 35, 0, 28672, 1, 206, 8,
+        3486, 33, 65535, 65535, 1, 207, 8,
+        3519, 29, 8481, 65313, 1, 208, 8,
+        3548, 33, 0, 65280, 1, 209, 8,
+        3581, 35, 65535, 65535, 1, 210, 8,
+        3616, 31, 0, 41728, 1, 211, 8,
+        3647, 34, 54227, 65491, 1, 212, 8,
+        3681, 35, 0, 65280, 1, 213, 8,
+        3716, 36, 6068, 65350, 1, 214, 8,
+        3752, 47, 14270, 65375, 1, 215, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_385: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxDropDownBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxDropDownBackgroundPointerPressedSubtleFillColorTertiaryBrushComboBoxFocusedDropDownBackgroundPointerOverControlFillColorTertiaryBrushComboBoxFocusedDropDownBackgroundPointerPressedControlAltFillColorQuarternaryBrushComboBoxEditableDropDownGlyphForegroundTextFillColorSecondaryBrushComboBoxItemPillFillBrushAccentFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 29, 1, 216, 8, 216, 8,
-        66, 40, 106, 28, 1, 217, 8, 217, 8,
-        134, 44, 178, 29, 1, 218, 8, 218, 8,
-        207, 47, 254, 35, 1, 219, 8, 219, 8,
-        289, 39, 328, 27, 1, 220, 8, 220, 8,
-        355, 25, 380, 27, 1, 221, 8, 221, 8,
+        3799, 37, 520, 29, 1, 216, 8, 216, 8,
+        3836, 40, 459, 28, 1, 217, 8, 217, 8,
+        3876, 44, 1230, 29, 1, 218, 8, 218, 8,
+        3920, 47, 3967, 35, 1, 219, 8, 219, 8,
+        4002, 39, 76, 27, 1, 220, 8, 220, 8,
+        4041, 25, 4066, 27, 1, 221, 8, 221, 8,
     ],
 };
 
@@ -12647,7 +12848,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_387: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_388: rt::PackedRows = rt::PackedRows {
-    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 38, 38, 47, 1, 30, 8, 30, 8,
@@ -12663,7 +12864,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_389: &[rt::ValueRow<&'static str>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_390: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCritical",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 27, 1, 24, 8, 24, 8,
@@ -12676,7 +12877,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_390: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_391: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressRingForegroundThemeBrushAccentFillColorDefaultBrushProgressRingBackgroundThemeBrushControlFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 32, 32, 27, 1, 19, 8, 19, 8,
@@ -12686,7 +12887,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_391: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 33, 33, 27, 1, 23, 8, 23, 8,
@@ -12697,16 +12898,16 @@ static POPULATE_WINUITHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_393: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 31, 1, 27, 8, 27, 8,
+        176, 34, 210, 31, 1, 27, 8, 27, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_394: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 24, 24, 35, 1, 39, 8, 39, 8,
@@ -12723,34 +12924,34 @@ static POPULATE_WINUITHEME_XAML_ROWS_394: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_395: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundTextFillColorPrimaryBrushExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 31, 1, 49, 8, 49, 8,
-        56, 36, 92, 29, 1, 50, 8, 50, 8,
-        121, 32, 153, 28, 1, 51, 8, 51, 8,
-        181, 25, 206, 25, 1, 52, 8, 52, 8,
-        231, 36, 206, 25, 1, 53, 8, 53, 8,
-        267, 32, 206, 25, 1, 54, 8, 54, 8,
-        299, 26, 25, 31, 1, 55, 8, 55, 8,
-        325, 37, 25, 31, 1, 56, 8, 56, 8,
-        362, 33, 25, 31, 1, 57, 8, 57, 8,
+        385, 25, 410, 31, 1, 49, 8, 49, 8,
+        441, 36, 477, 29, 1, 50, 8, 50, 8,
+        506, 32, 538, 28, 1, 51, 8, 51, 8,
+        566, 25, 83, 25, 1, 52, 8, 52, 8,
+        591, 36, 83, 25, 1, 53, 8, 53, 8,
+        627, 32, 83, 25, 1, 54, 8, 54, 8,
+        659, 26, 410, 31, 1, 55, 8, 55, 8,
+        685, 37, 410, 31, 1, 56, 8, 56, 8,
+        722, 33, 410, 31, 1, 57, 8, 57, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_396: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 37, 1, 59, 8, 59, 8,
-        62, 26, 88, 27, 1, 60, 8, 60, 8,
+        755, 25, 780, 37, 1, 59, 8, 59, 8,
+        817, 26, 199, 27, 1, 60, 8, 60, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
-    strings: "PagerControlSelectionIndicatorForegroundAccentFillColorDefaultBrushPagerControlPageNavigationButtonBackgroundPointerOverSubtleFillColorSecondaryBrushPagerControlPageNavigationButtonBackgroundPressedSubtleFillColorTertiaryBrushPagerControlPageNavigationButtonBackgroundDisabledSubtleFillColorDisabledBrushPagerControlPageNavigationButtonForegroundPointerOverTextFillColorPrimaryBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledTextFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 40, 40, 27, 1, 24, 8, 24, 8,
@@ -12765,7 +12966,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 35, 35, 38, 1, 34, 8, 34, 8,
@@ -12789,7 +12990,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_399: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 37, 37, 32, 1, 44, 8, 44, 8,
@@ -12824,7 +13025,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_399: rt::PackedRows = rt::PackedRows {
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_400: rt::PackedRows = rt::PackedRows {
-    strings: "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 29, 1, 44, 8, 44, 8,
@@ -12863,7 +13064,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_401: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_402: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 23, 23, 25, 1, 37, 8, 37, 8,
@@ -12891,7 +13092,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_402: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_403: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceRowBackgroundBrushTabularSurfaceRowBackgroundPointerOverBrushTabularSurfaceRowBackgroundPressedBrushTabularSurfaceRowBackgroundSelectedBrushTabularSurfaceRowBackgroundSelectedPointerOverBrushTabularSurfaceRowBackgroundSelectedPressedBrushTabularSurfaceRowBackgroundDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 32, 65535, 255, 1, 47, 8,
@@ -12906,53 +13107,53 @@ static POPULATE_WINUITHEME_XAML_ROWS_403: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_404: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceSelectionIndicatorBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 17, 1, 54, 8, 54, 70,
+        292, 37, 329, 17, 1, 54, 8, 54, 70,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_405: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceSelectionIndicatorDisabledBrushTabularSurfaceRowForegroundBrushTabularSurfaceRowForegroundSelectedBrushTabularSurfaceRowForegroundSelectedPointerOverBrushTabularSurfaceRowForegroundSelectedPressedBrushTabularSurfaceRowForegroundPointerOverBrushTabularSurfaceRowForegroundPressedBrushTabularSurfaceRowForegroundDisabledBrushTabularSurfaceHeaderBackgroundBrushTabularSurfaceHeaderForegroundBrushTabularSurfaceHeaderSeparatorBrushTabularSurfaceHeaderBackgroundPointerOverBrushTabularSurfaceHeaderBackgroundPressedBrushTabularSurfaceHeaderForegroundPointerOverBrushTabularSurfaceHeaderForegroundPressedBrushTabularSurfaceGroupHeaderBackgroundBrushTabularSurfaceGroupHeaderForegroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 0, 23552, 1, 55, 8,
-        45, 32, 0, 58368, 1, 56, 8,
-        77, 40, 0, 58368, 1, 57, 8,
-        117, 51, 0, 58368, 1, 58, 8,
-        168, 47, 0, 58368, 1, 59, 8,
-        215, 43, 0, 58368, 1, 60, 8,
-        258, 39, 0, 58368, 1, 61, 8,
-        297, 40, 0, 23552, 1, 62, 8,
-        337, 35, 0, 9728, 1, 63, 8,
-        372, 35, 0, 40448, 1, 64, 8,
-        407, 34, 0, 3840, 1, 65, 8,
-        441, 46, 0, 2304, 1, 66, 8,
-        487, 42, 0, 1536, 1, 67, 8,
-        529, 46, 0, 58368, 1, 68, 8,
-        575, 42, 0, 58368, 1, 69, 8,
-        617, 40, 0, 5120, 1, 70, 8,
-        657, 40, 0, 58368, 1, 71, 8,
+        346, 45, 0, 23552, 1, 55, 8,
+        391, 32, 0, 58368, 1, 56, 8,
+        423, 40, 0, 58368, 1, 57, 8,
+        463, 51, 0, 58368, 1, 58, 8,
+        514, 47, 0, 58368, 1, 59, 8,
+        561, 43, 0, 58368, 1, 60, 8,
+        604, 39, 0, 58368, 1, 61, 8,
+        643, 40, 0, 23552, 1, 62, 8,
+        683, 35, 0, 9728, 1, 63, 8,
+        718, 35, 0, 40448, 1, 64, 8,
+        753, 34, 0, 3840, 1, 65, 8,
+        787, 46, 0, 2304, 1, 66, 8,
+        833, 42, 0, 1536, 1, 67, 8,
+        875, 46, 0, 58368, 1, 68, 8,
+        921, 42, 0, 58368, 1, 69, 8,
+        963, 40, 0, 5120, 1, 70, 8,
+        1003, 40, 0, 58368, 1, 71, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_406: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGroupHeaderBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 65535, 255, 1, 73, 8,
+        1043, 36, 65535, 255, 1, 73, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_407: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGridLineBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 0, 10496, 1, 75, 8,
+        1079, 27, 0, 10496, 1, 75, 8,
     ],
 };
 
@@ -12985,10 +13186,10 @@ static POPULATE_WINUITHEME_XAML_ROWS_411: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_412: rt::PackedRows = rt::PackedRows {
-    strings: "ResizeGripperSeparatorBrushSystemAccentColorDark1",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 22, 1, 19, 8, 19, 60,
+        0, 27, 50, 22, 1, 19, 8, 19, 60,
     ],
 };
 
@@ -13024,125 +13225,125 @@ static POPULATE_WINUITHEME_XAML_ROWS_413: &[rt::ValueRow<u32>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_414: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAccentBrushSystemColorButtonFaceColorSystemControlBackgroundAltHighBrushSystemControlBackgroundAltMediumHighBrushSystemControlBackgroundAltMediumBrushSystemControlBackgroundAltMediumLowBrushSystemControlBackgroundBaseHighBrushSystemControlBackgroundBaseLowBrushSystemControlBackgroundBaseMediumBrushSystemControlBackgroundBaseMediumHighBrushSystemControlBackgroundBaseMediumLowBrushSystemControlBackgroundChromeBlackHighBrushSystemControlBackgroundChromeBlackMediumBrushSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemControlBackgroundChromeMediumLowBrushSystemControlBackgroundChromeWhiteBrushSystemControlBackgroundListLowBrushSystemControlBackgroundListMediumBrushSystemControlDisabledAccentBrushSystemColorGrayTextColorSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemControlDisabledChromeDisabledLowBrushSystemControlDisabledChromeHighBrushSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrushSystemColorButtonTextColorSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlForegroundChromeGrayBrushSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlHighlightAccentBrushSystemColorHighlightColorSystemControlHighlightAltAccentBrushSystemColorHighlightTextColorSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltListAccentHighBrushSystemControlHighlightAltListAccentLowBrushSystemControlHighlightAltListAccentMediumBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemControlHighlightChromeHighBrushSystemControlHighlightListAccentHighBrushSystemControlHighlightListAccentLowBrushSystemControlHighlightListAccentMediumBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemColorHotlightColorSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemColorWindowTextColorSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemColorWindowColorSystemControlPageBackgroundAltHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 26, 1, 634, 8, 634, 67,
-        60, 35, 34, 26, 1, 635, 8, 635, 68,
-        95, 41, 34, 26, 1, 636, 8, 636, 74,
-        136, 37, 34, 26, 1, 637, 8, 637, 70,
-        173, 40, 34, 26, 1, 638, 8, 638, 73,
-        213, 36, 34, 26, 1, 639, 8, 639, 69,
-        249, 35, 34, 26, 1, 640, 8, 640, 68,
-        284, 38, 34, 26, 1, 641, 8, 641, 71,
-        322, 42, 34, 26, 1, 642, 8, 642, 75,
-        364, 41, 34, 26, 1, 643, 8, 643, 74,
-        405, 43, 34, 26, 1, 644, 8, 644, 76,
-        448, 45, 34, 26, 1, 645, 8, 645, 78,
-        493, 42, 535, 25, 1, 646, 8, 646, 75,
-        560, 48, 608, 31, 1, 647, 8, 647, 81,
-        639, 40, 34, 26, 1, 648, 8, 648, 73,
-        679, 43, 34, 26, 1, 649, 8, 649, 76,
-        722, 39, 34, 26, 1, 650, 8, 650, 72,
-        761, 35, 34, 26, 1, 651, 8, 651, 68,
-        796, 38, 34, 26, 1, 652, 8, 652, 71,
-        834, 32, 866, 24, 1, 653, 8, 653, 65,
-        890, 34, 866, 24, 1, 654, 8, 654, 67,
-        924, 33, 866, 24, 1, 655, 8, 655, 66,
-        957, 39, 866, 24, 1, 656, 8, 656, 72,
-        996, 44, 866, 24, 1, 657, 8, 657, 77,
-        1040, 43, 866, 24, 1, 658, 8, 658, 76,
-        1083, 36, 866, 24, 1, 659, 8, 659, 69,
-        1119, 41, 34, 26, 1, 660, 8, 660, 74,
-        1160, 36, 866, 24, 1, 661, 8, 661, 69,
-        1196, 37, 866, 24, 1, 662, 8, 662, 70,
-        1233, 35, 1268, 17, 1, 663, 8, 663, 68,
-        1285, 34, 1319, 26, 1, 664, 8, 664, 67,
-        1345, 35, 1319, 26, 1, 665, 8, 665, 68,
-        1380, 41, 1319, 26, 1, 666, 8, 666, 74,
-        1421, 36, 1319, 26, 1, 667, 8, 667, 69,
-        1457, 35, 1319, 26, 1, 668, 8, 668, 68,
-        1492, 38, 1319, 26, 1, 669, 8, 669, 71,
-        1530, 42, 1319, 26, 1, 670, 8, 670, 75,
-        1572, 41, 1319, 26, 1, 671, 8, 671, 74,
-        1613, 43, 1319, 26, 1, 672, 8, 672, 76,
-        1656, 38, 1319, 26, 1, 673, 8, 673, 71,
-        1694, 40, 1319, 26, 1, 674, 8, 674, 73,
-        1734, 45, 1319, 26, 1, 675, 8, 675, 78,
-        1779, 39, 1319, 26, 1, 676, 8, 676, 72,
-        1818, 45, 1319, 26, 1, 677, 8, 677, 78,
-        1863, 48, 34, 26, 1, 678, 8, 678, 81,
-        1911, 38, 1319, 26, 1, 679, 8, 679, 71,
-        1949, 35, 1319, 26, 1, 680, 8, 680, 68,
-        1984, 38, 1319, 26, 1, 681, 8, 681, 71,
-        2022, 39, 1319, 26, 1, 682, 8, 682, 72,
-        2061, 33, 2094, 25, 1, 683, 8, 683, 66,
-        2119, 36, 2155, 29, 1, 684, 8, 684, 69,
-        2184, 37, 2155, 29, 1, 685, 8, 685, 70,
-        2221, 38, 2155, 29, 1, 686, 8, 686, 71,
-        2259, 37, 2155, 29, 1, 687, 8, 687, 70,
-        2296, 40, 2155, 29, 1, 688, 8, 688, 73,
-        2336, 44, 2155, 29, 1, 689, 8, 689, 77,
-        2380, 43, 2155, 29, 1, 690, 8, 690, 76,
-        2423, 43, 2155, 29, 1, 691, 8, 691, 76,
-        2466, 44, 2155, 29, 1, 692, 8, 692, 77,
-        2510, 43, 2155, 29, 1, 693, 8, 693, 76,
-        2553, 46, 2155, 29, 1, 694, 8, 694, 79,
-        2599, 41, 2155, 29, 1, 695, 8, 695, 74,
-        2640, 41, 2155, 29, 1, 696, 8, 696, 74,
-        2681, 35, 2094, 25, 1, 697, 8, 697, 68,
-        2716, 34, 2094, 25, 1, 698, 8, 698, 67,
-        2750, 37, 2094, 25, 1, 699, 8, 699, 70,
-        2787, 41, 2094, 25, 1, 700, 8, 700, 74,
-        2828, 40, 2094, 25, 1, 701, 8, 701, 73,
-        2868, 39, 2094, 25, 1, 702, 8, 702, 72,
-        2907, 37, 2094, 25, 1, 703, 8, 703, 70,
-        2944, 41, 2094, 25, 1, 704, 8, 704, 74,
-        2985, 40, 2094, 25, 1, 705, 8, 705, 73,
-        3025, 43, 2094, 25, 1, 706, 8, 706, 76,
-        3068, 37, 2094, 25, 1, 707, 8, 707, 70,
-        3105, 34, 2094, 25, 1, 708, 8, 708, 67,
-        3139, 38, 2094, 25, 1, 709, 8, 709, 71,
-        3177, 38, 2094, 25, 1, 710, 8, 710, 71,
-        3215, 31, 3246, 24, 1, 711, 8, 711, 64,
-        3270, 35, 3246, 24, 1, 712, 8, 712, 68,
-        3305, 37, 3342, 26, 1, 713, 8, 713, 70,
-        3368, 41, 3246, 24, 1, 714, 8, 714, 74,
-        3409, 41, 3450, 22, 1, 715, 8, 715, 74,
-        3472, 39, 3450, 22, 1, 716, 8, 716, 72,
+        0, 34, 7957, 26, 1, 634, 8, 634, 67,
+        51, 35, 7957, 26, 1, 635, 8, 635, 68,
+        104, 41, 7957, 26, 1, 636, 8, 636, 74,
+        169, 37, 7957, 26, 1, 637, 8, 637, 70,
+        226, 40, 7957, 26, 1, 638, 8, 638, 73,
+        289, 36, 7957, 26, 1, 639, 8, 639, 69,
+        344, 35, 7957, 26, 1, 640, 8, 640, 68,
+        397, 38, 7957, 26, 1, 641, 8, 641, 71,
+        456, 42, 7957, 26, 1, 642, 8, 642, 75,
+        523, 41, 7957, 26, 1, 643, 8, 643, 74,
+        588, 43, 7957, 26, 1, 644, 8, 644, 76,
+        657, 45, 7957, 26, 1, 645, 8, 645, 78,
+        730, 42, 772, 25, 1, 646, 8, 646, 75,
+        797, 48, 845, 31, 1, 647, 8, 647, 81,
+        876, 40, 7957, 26, 1, 648, 8, 648, 73,
+        939, 43, 7957, 26, 1, 649, 8, 649, 76,
+        1008, 39, 7957, 26, 1, 650, 8, 650, 72,
+        1069, 35, 7957, 26, 1, 651, 8, 651, 68,
+        1122, 38, 7957, 26, 1, 652, 8, 652, 71,
+        1181, 32, 7983, 24, 1, 653, 8, 653, 65,
+        1213, 34, 7983, 24, 1, 654, 8, 654, 67,
+        1247, 33, 7983, 24, 1, 655, 8, 655, 66,
+        1280, 39, 7983, 24, 1, 656, 8, 656, 72,
+        1319, 44, 7983, 24, 1, 657, 8, 657, 77,
+        1392, 43, 7983, 24, 1, 658, 8, 658, 76,
+        1463, 36, 7983, 24, 1, 659, 8, 659, 69,
+        1520, 41, 7957, 26, 1, 660, 8, 660, 74,
+        1561, 36, 7983, 24, 1, 661, 8, 661, 69,
+        1597, 37, 7983, 24, 1, 662, 8, 662, 70,
+        1634, 35, 34, 17, 1, 663, 8, 663, 68,
+        1669, 34, 8007, 26, 1, 664, 8, 664, 67,
+        1703, 35, 8007, 26, 1, 665, 8, 665, 68,
+        1738, 41, 8007, 26, 1, 666, 8, 666, 74,
+        1779, 36, 8007, 26, 1, 667, 8, 667, 69,
+        1815, 35, 8007, 26, 1, 668, 8, 668, 68,
+        1850, 38, 8007, 26, 1, 669, 8, 669, 71,
+        1888, 42, 8007, 26, 1, 670, 8, 670, 75,
+        1930, 41, 8007, 26, 1, 671, 8, 671, 74,
+        1971, 43, 8007, 26, 1, 672, 8, 672, 76,
+        2014, 38, 8007, 26, 1, 673, 8, 673, 71,
+        2052, 40, 8007, 26, 1, 674, 8, 674, 73,
+        2131, 45, 8007, 26, 1, 675, 8, 675, 78,
+        2092, 39, 8007, 26, 1, 676, 8, 676, 72,
+        2347, 45, 8007, 26, 1, 677, 8, 677, 78,
+        2392, 48, 7957, 26, 1, 678, 8, 678, 81,
+        2176, 38, 8007, 26, 1, 679, 8, 679, 71,
+        2235, 35, 8007, 26, 1, 680, 8, 680, 68,
+        2270, 38, 8007, 26, 1, 681, 8, 681, 71,
+        2308, 39, 8007, 26, 1, 682, 8, 682, 72,
+        2440, 33, 6879, 25, 1, 683, 8, 683, 66,
+        2473, 36, 8033, 29, 1, 684, 8, 684, 69,
+        2509, 37, 8033, 29, 1, 685, 8, 685, 70,
+        2546, 38, 8033, 29, 1, 686, 8, 686, 71,
+        2584, 37, 8033, 29, 1, 687, 8, 687, 70,
+        2621, 40, 8033, 29, 1, 688, 8, 688, 73,
+        2661, 44, 8033, 29, 1, 689, 8, 689, 77,
+        2705, 43, 8033, 29, 1, 690, 8, 690, 76,
+        2748, 43, 8033, 29, 1, 691, 8, 691, 76,
+        8062, 44, 8033, 29, 1, 692, 8, 692, 77,
+        8106, 43, 8033, 29, 1, 693, 8, 693, 76,
+        8149, 46, 8033, 29, 1, 694, 8, 694, 79,
+        2791, 41, 8033, 29, 1, 695, 8, 695, 74,
+        2832, 41, 8033, 29, 1, 696, 8, 696, 74,
+        2873, 35, 6879, 25, 1, 697, 8, 697, 68,
+        2908, 34, 6879, 25, 1, 698, 8, 698, 67,
+        2942, 37, 6879, 25, 1, 699, 8, 699, 70,
+        2979, 41, 6879, 25, 1, 700, 8, 700, 74,
+        3020, 40, 6879, 25, 1, 701, 8, 701, 73,
+        3060, 39, 6879, 25, 1, 702, 8, 702, 72,
+        3122, 37, 6879, 25, 1, 703, 8, 703, 70,
+        8195, 41, 6879, 25, 1, 704, 8, 704, 74,
+        8236, 40, 6879, 25, 1, 705, 8, 705, 73,
+        8276, 43, 6879, 25, 1, 706, 8, 706, 76,
+        3159, 37, 6879, 25, 1, 707, 8, 707, 70,
+        3196, 34, 6879, 25, 1, 708, 8, 708, 67,
+        3230, 38, 6879, 25, 1, 709, 8, 709, 71,
+        3268, 38, 6879, 25, 1, 710, 8, 710, 71,
+        3306, 31, 8319, 24, 1, 711, 8, 711, 64,
+        3337, 35, 8319, 24, 1, 712, 8, 712, 68,
+        3372, 37, 8343, 26, 1, 713, 8, 713, 70,
+        3409, 41, 8319, 24, 1, 714, 8, 714, 74,
+        3450, 41, 8369, 22, 1, 715, 8, 715, 74,
+        3491, 39, 8369, 22, 1, 716, 8, 716, 72,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_415: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageBackgroundBaseLowBrushSystemColorWindowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemColorWindowTextColorSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 22, 1, 718, 8, 718, 72,
-        61, 42, 39, 22, 1, 719, 8, 719, 75,
-        103, 39, 39, 22, 1, 720, 8, 720, 72,
-        142, 41, 39, 22, 1, 721, 8, 721, 74,
-        183, 47, 39, 22, 1, 722, 8, 722, 80,
-        230, 43, 39, 22, 1, 723, 8, 723, 76,
-        273, 34, 307, 26, 1, 724, 8, 724, 67,
-        333, 36, 307, 26, 1, 725, 8, 725, 69,
-        369, 46, 307, 26, 1, 726, 8, 726, 79,
-        415, 37, 307, 26, 1, 727, 8, 727, 70,
+        3577, 39, 8369, 22, 1, 718, 8, 718, 72,
+        3616, 42, 8369, 22, 1, 719, 8, 719, 75,
+        3658, 39, 8369, 22, 1, 720, 8, 720, 72,
+        3697, 41, 8369, 22, 1, 721, 8, 721, 74,
+        3758, 47, 8369, 22, 1, 722, 8, 722, 80,
+        3805, 43, 8369, 22, 1, 723, 8, 723, 76,
+        3848, 34, 8343, 26, 1, 724, 8, 724, 67,
+        3882, 36, 8343, 26, 1, 725, 8, 725, 69,
+        3918, 46, 8343, 26, 1, 726, 8, 726, 79,
+        3964, 37, 8343, 26, 1, 727, 8, 727, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_416: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrushThumbBackgroundSystemControlBackgroundBaseLowBrushThumbBackgroundPointerOverSystemControlHighlightBaseMediumLowBrushThumbBackgroundPressedSystemControlHighlightBaseMediumBrushThumbBorderBrushSystemControlHighlightTransparentBrushThumbBorderBrushPointerOverThumbBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 43, 36, 1, 728, 8, 728, 8,
-        79, 15, 94, 35, 1, 729, 8, 729, 8,
-        129, 26, 155, 40, 1, 730, 8, 730, 8,
-        195, 22, 217, 37, 1, 731, 8, 731, 8,
-        254, 16, 270, 38, 1, 732, 8, 732, 8,
-        308, 27, 270, 38, 1, 733, 8, 733, 8,
-        335, 23, 270, 38, 1, 734, 8, 734, 8,
+        4021, 43, 3882, 36, 1, 728, 8, 728, 8,
+        4118, 15, 344, 35, 1, 729, 8, 729, 8,
+        4133, 26, 3020, 40, 1, 730, 8, 730, 8,
+        4159, 22, 2942, 37, 1, 731, 8, 731, 8,
+        4181, 16, 3268, 38, 1, 732, 8, 732, 8,
+        4197, 27, 3268, 38, 1, 733, 8, 733, 8,
+        4224, 23, 3268, 38, 1, 734, 8, 734, 8,
     ],
 };
 
@@ -13154,68 +13355,68 @@ static POPULATE_WINUITHEME_XAML_ROWS_417: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_418: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarEllipsisButtonBackgroundSystemControlTransparentBrushAppBarEllipsisButtonBackgroundPointerOverSystemControlHighlightListLowBrushAppBarEllipsisButtonBackgroundPressedSystemControlHighlightListMediumBrushAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundSystemControlForegroundBaseHighBrushAppBarEllipsisButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundSystemControlBackgroundChromeMediumBrushAppBarForegroundAppBarHighContrastBorderSystemControlForegroundTransparentBrushLoopingSelectorButtonBackgroundTextControlForegroundTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundSystemControlBackgroundAltMediumLowBrushTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledSystemControlBackgroundBaseLowBrushTextControlBorderBrushFocusedSystemControlHighlightAccentBrushTextControlBorderBrushDisabledSystemControlDisabledBaseLowBrushTextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlSelectionHighlightColorTextControlButtonBackgroundTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedSystemControlHighlightAltChromeWhiteBrushTextControlHighlighterForegroundTextControlHighlighterBackgroundSystemControlHyperlinkTextBrushToggleMenuFlyoutItemBackgroundToggleMenuFlyoutItemBackgroundPointerOverToggleMenuFlyoutItemBackgroundPressedToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundToggleMenuFlyoutItemForegroundPointerOverToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledToggleMenuFlyoutItemCheckGlyphForegroundSystemControlForegroundBaseMediumHighBrushToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundSystemControlBackgroundAccentBrushJumpListDefaultEnabledForegroundSystemControlForegroundChromeWhiteBrushJumpListDefaultDisabledBackgroundJumpListDefaultDisabledForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 29, 1, 737, 8, 737, 8,
-        59, 41, 100, 34, 1, 738, 8, 738, 8,
-        134, 37, 171, 37, 1, 739, 8, 739, 8,
-        208, 38, 30, 29, 1, 740, 8, 740, 8,
-        246, 30, 276, 36, 1, 741, 8, 741, 8,
-        312, 41, 353, 38, 1, 742, 8, 742, 8,
-        391, 37, 276, 36, 1, 743, 8, 743, 8,
-        428, 38, 466, 39, 1, 744, 8, 744, 8,
-        505, 31, 30, 29, 1, 745, 8, 745, 8,
-        536, 42, 30, 29, 1, 746, 8, 746, 8,
-        578, 38, 30, 29, 1, 747, 8, 747, 8,
-        616, 39, 30, 29, 1, 748, 8, 748, 8,
-        655, 16, 671, 40, 1, 749, 8, 749, 8,
-        711, 16, 276, 36, 1, 750, 8, 750, 8,
-        727, 24, 751, 39, 1, 751, 8, 751, 8,
-        790, 31, 671, 40, 1, 752, 8, 752, 8,
-        821, 21, 276, 36, 1, 753, 8, 753, 8,
-        842, 32, 276, 36, 1, 754, 8, 754, 8,
-        874, 29, 903, 43, 1, 755, 8, 755, 8,
-        946, 21, 967, 40, 1, 756, 8, 756, 8,
-        1007, 32, 1039, 37, 1, 757, 8, 757, 8,
-        1076, 29, 1105, 35, 1, 758, 8, 758, 8,
-        1140, 29, 1169, 33, 1, 759, 8, 759, 8,
-        1202, 30, 1232, 33, 1, 760, 8, 760, 8,
-        1265, 32, 1297, 36, 1, 761, 8, 761, 8,
-        1333, 43, 1297, 36, 1, 762, 8, 762, 8,
-        1376, 40, 903, 43, 1, 763, 8, 763, 8,
-        1416, 27, 276, 36, 1, 764, 8, 764, 8,
-        1443, 35, 466, 39, 1, 765, 8, 765, 8,
-        1478, 34, 1169, 33, 1, 766, 8, 766, 8,
-        1512, 27, 30, 29, 1, 767, 8, 767, 8,
-        1539, 38, 30, 29, 1, 768, 8, 768, 8,
-        1577, 34, 1169, 33, 1, 769, 8, 769, 8,
-        1611, 28, 30, 29, 1, 770, 8, 770, 8,
-        1639, 39, 30, 29, 1, 771, 8, 771, 8,
-        1678, 35, 30, 29, 1, 772, 8, 772, 8,
-        1713, 38, 1169, 33, 1, 773, 8, 773, 8,
-        1751, 34, 1785, 41, 1, 774, 8, 774, 8,
-        1826, 32, 353, 38, 1, 775, 8, 775, 8,
-        1858, 32, 1890, 31, 1, 776, 8, 776, 8,
-        1921, 30, 30, 29, 1, 777, 8, 777, 8,
-        1951, 41, 100, 34, 1, 778, 8, 778, 8,
-        1992, 37, 171, 37, 1, 779, 8, 779, 8,
-        2029, 38, 30, 29, 1, 780, 8, 780, 8,
-        2067, 30, 276, 36, 1, 781, 8, 781, 8,
-        2097, 41, 353, 38, 1, 782, 8, 782, 8,
-        2138, 37, 353, 38, 1, 783, 8, 783, 8,
-        2175, 38, 466, 39, 1, 784, 8, 784, 8,
-        2213, 40, 2253, 42, 1, 785, 8, 785, 8,
-        2295, 51, 353, 38, 1, 786, 8, 786, 8,
-        2346, 47, 353, 38, 1, 787, 8, 787, 8,
-        2393, 48, 466, 39, 1, 788, 8, 788, 8,
-        2441, 35, 2476, 47, 1, 789, 8, 789, 8,
-        2523, 35, 2476, 47, 1, 790, 8, 790, 8,
-        2558, 34, 2476, 47, 1, 791, 8, 791, 8,
-        2592, 32, 2624, 34, 1, 792, 8, 792, 8,
-        2658, 32, 2690, 39, 1, 793, 8, 793, 8,
-        2729, 33, 1105, 35, 1, 794, 8, 794, 8,
-        2762, 33, 466, 39, 1, 795, 8, 795, 8,
+        4247, 30, 4089, 29, 1, 737, 8, 737, 8,
+        4277, 41, 3196, 34, 1, 738, 8, 738, 8,
+        4318, 37, 3159, 37, 1, 739, 8, 739, 8,
+        4355, 38, 4089, 29, 1, 740, 8, 740, 8,
+        4393, 30, 1779, 36, 1, 741, 8, 741, 8,
+        4423, 41, 2546, 38, 1, 742, 8, 742, 8,
+        4464, 37, 1779, 36, 1, 743, 8, 743, 8,
+        4501, 38, 1280, 39, 1, 744, 8, 744, 8,
+        4539, 31, 4089, 29, 1, 745, 8, 745, 8,
+        4570, 42, 4089, 29, 1, 746, 8, 746, 8,
+        4612, 38, 4089, 29, 1, 747, 8, 747, 8,
+        4650, 39, 4089, 29, 1, 748, 8, 748, 8,
+        4689, 16, 876, 40, 1, 749, 8, 749, 8,
+        4705, 16, 1779, 36, 1, 750, 8, 750, 8,
+        4721, 24, 2308, 39, 1, 751, 8, 751, 8,
+        4745, 31, 876, 40, 1, 752, 8, 752, 8,
+        8391, 21, 1779, 36, 1, 753, 8, 753, 8,
+        8412, 32, 1779, 36, 1, 754, 8, 754, 8,
+        8444, 29, 1392, 43, 1, 755, 8, 755, 8,
+        8473, 21, 226, 40, 1, 756, 8, 756, 8,
+        8494, 32, 169, 37, 1, 757, 8, 757, 8,
+        8526, 29, 344, 35, 1, 758, 8, 758, 8,
+        8555, 29, 2440, 33, 1, 759, 8, 759, 8,
+        8584, 30, 1247, 33, 1, 760, 8, 760, 8,
+        8614, 32, 3882, 36, 1, 761, 8, 761, 8,
+        8646, 43, 3882, 36, 1, 762, 8, 762, 8,
+        8689, 40, 1392, 43, 1, 763, 8, 763, 8,
+        4776, 27, 1779, 36, 1, 764, 8, 764, 8,
+        4803, 35, 1280, 39, 1, 765, 8, 765, 8,
+        8729, 34, 2440, 33, 1, 766, 8, 766, 8,
+        4838, 27, 4089, 29, 1, 767, 8, 767, 8,
+        8763, 38, 4089, 29, 1, 768, 8, 768, 8,
+        8801, 34, 2440, 33, 1, 769, 8, 769, 8,
+        8835, 28, 4089, 29, 1, 770, 8, 770, 8,
+        8863, 39, 4089, 29, 1, 771, 8, 771, 8,
+        8902, 35, 4089, 29, 1, 772, 8, 772, 8,
+        8937, 38, 2440, 33, 1, 773, 8, 773, 8,
+        8975, 34, 2791, 41, 1, 774, 8, 774, 8,
+        4865, 32, 2546, 38, 1, 775, 8, 775, 8,
+        4897, 32, 3306, 31, 1, 776, 8, 776, 8,
+        4929, 30, 4089, 29, 1, 777, 8, 777, 8,
+        4959, 41, 3196, 34, 1, 778, 8, 778, 8,
+        5000, 37, 3159, 37, 1, 779, 8, 779, 8,
+        5037, 38, 4089, 29, 1, 780, 8, 780, 8,
+        5075, 30, 1779, 36, 1, 781, 8, 781, 8,
+        5105, 41, 2546, 38, 1, 782, 8, 782, 8,
+        5146, 37, 2546, 38, 1, 783, 8, 783, 8,
+        5183, 38, 1280, 39, 1, 784, 8, 784, 8,
+        5221, 40, 1888, 42, 1, 785, 8, 785, 8,
+        5261, 51, 2546, 38, 1, 786, 8, 786, 8,
+        5312, 47, 2546, 38, 1, 787, 8, 787, 8,
+        5359, 48, 1280, 39, 1, 788, 8, 788, 8,
+        5407, 35, 3530, 47, 1, 789, 8, 789, 8,
+        5442, 35, 3530, 47, 1, 790, 8, 790, 8,
+        5477, 34, 3530, 47, 1, 791, 8, 791, 8,
+        5511, 32, 0, 34, 1, 792, 8, 792, 8,
+        5543, 32, 2092, 39, 1, 793, 8, 793, 8,
+        5575, 33, 344, 35, 1, 794, 8, 794, 8,
+        5608, 33, 1280, 39, 1, 795, 8, 795, 8,
     ],
 };
 
@@ -13280,180 +13481,180 @@ static POPULATE_WINUITHEME_XAML_ROWS_420: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_421: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarBackgroundThemeBrushSystemColorButtonFaceColorAppBarBorderThemeBrushSystemColorHighlightColorAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushSystemColorGrayTextColorAppBarItemForegroundThemeBrushSystemColorButtonTextColorAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushSystemColorHighlightTextColorAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushApplicationForegroundThemeBrushSystemColorWindowTextColorApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushSystemColorHotlightColorApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushAutoSuggestBackgroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 26, 1, 851, 8, 851, 59,
-        52, 22, 74, 25, 1, 852, 8, 852, 55,
-        99, 30, 26, 26, 1, 853, 8, 853, 63,
-        129, 38, 167, 24, 1, 854, 8, 854, 71,
-        191, 30, 221, 26, 1, 855, 8, 855, 63,
-        247, 41, 74, 25, 1, 856, 8, 856, 74,
-        288, 41, 329, 29, 1, 857, 8, 857, 74,
-        358, 37, 26, 26, 1, 858, 8, 858, 70,
-        395, 35, 221, 26, 1, 859, 8, 859, 68,
-        430, 31, 461, 26, 1, 860, 8, 860, 64,
-        487, 37, 461, 26, 1, 861, 8, 861, 70,
-        524, 42, 566, 24, 1, 862, 8, 862, 75,
-        590, 38, 566, 24, 1, 863, 8, 863, 71,
-        628, 40, 461, 26, 1, 864, 8, 864, 73,
-        668, 31, 26, 26, 1, 865, 8, 865, 64,
-        699, 30, 26, 26, 1, 866, 8, 866, 63,
-        729, 38, 167, 24, 1, 867, 8, 867, 71,
-        767, 30, 221, 26, 1, 868, 8, 868, 63,
-        797, 41, 74, 25, 1, 869, 8, 869, 74,
-        838, 41, 329, 29, 1, 870, 8, 870, 74,
-        879, 37, 26, 26, 1, 871, 8, 871, 70,
-        916, 26, 942, 22, 1, 872, 8, 872, 59,
+        5641, 26, 7957, 26, 1, 851, 8, 851, 59,
+        5667, 22, 6879, 25, 1, 852, 8, 852, 55,
+        5689, 30, 7957, 26, 1, 853, 8, 853, 63,
+        5719, 38, 7983, 24, 1, 854, 8, 854, 71,
+        5757, 30, 8007, 26, 1, 855, 8, 855, 63,
+        5787, 41, 6879, 25, 1, 856, 8, 856, 74,
+        5828, 41, 8033, 29, 1, 857, 8, 857, 74,
+        5869, 37, 7957, 26, 1, 858, 8, 858, 70,
+        5906, 35, 8007, 26, 1, 859, 8, 859, 68,
+        5941, 31, 8343, 26, 1, 860, 8, 860, 64,
+        5972, 37, 8343, 26, 1, 861, 8, 861, 70,
+        6009, 42, 8319, 24, 1, 862, 8, 862, 75,
+        6051, 38, 8319, 24, 1, 863, 8, 863, 71,
+        6089, 40, 8343, 26, 1, 864, 8, 864, 73,
+        6129, 31, 7957, 26, 1, 865, 8, 865, 64,
+        6160, 30, 7957, 26, 1, 866, 8, 866, 63,
+        6190, 38, 7983, 24, 1, 867, 8, 867, 71,
+        6228, 30, 8007, 26, 1, 868, 8, 868, 63,
+        6258, 41, 6879, 25, 1, 869, 8, 869, 74,
+        6299, 41, 8033, 29, 1, 870, 8, 870, 74,
+        6340, 37, 7957, 26, 1, 871, 8, 871, 70,
+        6377, 26, 8369, 22, 1, 872, 8, 872, 59,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_422: rt::PackedRows = rt::PackedRows {
-    strings: "FocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 0, 65280, 1, 873, 8,
-        32, 32, 65535, 65535, 1, 874, 8,
+        6403, 32, 0, 65280, 1, 873, 8,
+        6435, 32, 65535, 65535, 1, 874, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_423: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundThemeBrushSystemColorWindowColorHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushSystemColorGrayTextColorHyperlinkForegroundThemeBrushSystemColorHotlightColorHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushSystemColorWindowTextColorListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 22, 1, 875, 8, 875, 68,
-        57, 31, 35, 22, 1, 876, 8, 876, 64,
-        88, 27, 115, 24, 1, 877, 8, 877, 60,
-        139, 29, 168, 24, 1, 878, 8, 878, 62,
-        192, 40, 168, 24, 1, 879, 8, 879, 73,
-        232, 36, 168, 24, 1, 880, 8, 880, 69,
-        268, 39, 307, 26, 1, 881, 8, 881, 72,
-        333, 50, 168, 24, 1, 882, 8, 882, 83,
-        383, 46, 168, 24, 1, 883, 8, 883, 79,
+        6467, 35, 8369, 22, 1, 875, 8, 875, 68,
+        6502, 31, 8369, 22, 1, 876, 8, 876, 64,
+        6533, 27, 7983, 24, 1, 877, 8, 877, 60,
+        6560, 29, 8319, 24, 1, 878, 8, 878, 62,
+        6589, 40, 8319, 24, 1, 879, 8, 879, 73,
+        6629, 36, 8319, 24, 1, 880, 8, 880, 69,
+        6665, 39, 8343, 26, 1, 881, 8, 881, 72,
+        6704, 50, 8319, 24, 1, 882, 8, 882, 83,
+        6754, 46, 8319, 24, 1, 883, 8, 883, 79,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_424: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 65280, 1, 884, 8,
+        6800, 35, 0, 65280, 1, 884, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_425: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 25, 1, 885, 8, 885, 77,
+        6835, 44, 6879, 25, 1, 885, 8, 885, 77,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_426: rt::PackedRows = rt::PackedRows {
-    strings: "LoopingSelectorSelectionForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 65535, 65535, 1, 886, 8,
+        6904, 44, 65535, 65535, 1, 886, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_427: rt::PackedRows = rt::PackedRows {
-    strings: "MediaButtonForegroundThemeBrushSystemColorButtonTextColorMediaButtonBackgroundThemeBrushSystemColorButtonFaceColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 26, 1, 887, 8, 887, 64,
-        57, 31, 88, 26, 1, 888, 8, 888, 64,
+        6948, 31, 8007, 26, 1, 887, 8, 887, 64,
+        6979, 31, 7957, 26, 1, 888, 8, 888, 64,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_428: rt::PackedRows = rt::PackedRows {
-    strings: "MediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 65535, 65535, 1, 889, 8,
-        42, 42, 65535, 8703, 1, 890, 8,
-        84, 38, 0, 65280, 1, 891, 8,
-        122, 38, 65535, 65535, 1, 892, 8,
+        7010, 42, 65535, 65535, 1, 889, 8,
+        7052, 42, 65535, 8703, 1, 890, 8,
+        7094, 38, 0, 65280, 1, 891, 8,
+        7132, 38, 65535, 65535, 1, 892, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_429: rt::PackedRows = rt::PackedRows {
-    strings: "MediaButtonPressedBorderThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 25, 1, 893, 8, 893, 67,
+        7170, 34, 6879, 25, 1, 893, 8, 893, 67,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_430: rt::PackedRows = rt::PackedRows {
-    strings: "MediaControlPanelVideoThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 0, 65280, 1, 894, 8,
+        7204, 32, 0, 65280, 1, 894, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_431: rt::PackedRows = rt::PackedRows {
-    strings: "MediaControlPanelAudioThemeBrushSystemColorButtonFaceColorMediaDownloadProgressIndicatorThemeBrushSystemColorHotlightColorMediaErrorBackgroundThemeBrushMediaTextThemeBrushSystemColorButtonTextColorTextSelectionHighlightColorThemeBrushSystemColorHighlightColorThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 26, 1, 895, 8, 895, 65,
-        58, 40, 98, 24, 1, 896, 8, 896, 73,
-        122, 30, 32, 26, 1, 897, 8, 897, 63,
-        152, 19, 171, 26, 1, 898, 8, 898, 52,
-        197, 37, 234, 25, 1, 899, 8, 899, 70,
-        259, 25, 171, 26, 1, 900, 8, 900, 58,
-        284, 21, 171, 26, 1, 901, 8, 901, 54,
-        305, 36, 234, 25, 1, 902, 8, 902, 69,
-        341, 32, 171, 26, 1, 903, 8, 903, 65,
-        373, 32, 32, 26, 1, 904, 8, 904, 65,
-        405, 28, 171, 26, 1, 905, 8, 905, 61,
+        7236, 32, 7957, 26, 1, 895, 8, 895, 65,
+        7268, 40, 8319, 24, 1, 896, 8, 896, 73,
+        7308, 30, 7957, 26, 1, 897, 8, 897, 63,
+        7338, 19, 8007, 26, 1, 898, 8, 898, 52,
+        7357, 37, 6879, 25, 1, 899, 8, 899, 70,
+        7394, 25, 8007, 26, 1, 900, 8, 900, 58,
+        7419, 21, 8007, 26, 1, 901, 8, 901, 54,
+        7440, 36, 6879, 25, 1, 902, 8, 902, 69,
+        7476, 32, 8007, 26, 1, 903, 8, 903, 65,
+        7508, 32, 7957, 26, 1, 904, 8, 904, 65,
+        7540, 28, 8007, 26, 1, 905, 8, 905, 61,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_432: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionBackgroundSystemControlBackgroundBaseLowBrushWindowCaptionBackgroundDisabledWindowCaptionForegroundSystemControlForegroundBaseHighBrushWindowCaptionForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 906, 8, 906, 8,
-        58, 31, 23, 35, 1, 907, 8, 907, 8,
-        89, 23, 112, 36, 1, 908, 8, 908, 8,
-        148, 31, 179, 39, 1, 909, 8, 909, 8,
+        7568, 23, 344, 35, 1, 906, 8, 906, 8,
+        7591, 31, 344, 35, 1, 907, 8, 907, 8,
+        7622, 23, 1779, 36, 1, 908, 8, 908, 8,
+        7645, 31, 1280, 39, 1, 909, 8, 909, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_433: rt::PackedRows = rt::PackedRows {
-    strings: "WindowCaptionButtonBackgroundSystemColorButtonFaceColorWindowCaptionButtonBackgroundPointerOverSystemControlHighlightBaseLowBrushWindowCaptionButtonBackgroundPressedSystemColorHighlightColorWindowCaptionButtonStrokeSystemColorButtonTextColorWindowCaptionButtonStrokePointerOverSystemColorHighlightTextColorWindowCaptionButtonStrokePressedCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 26, 1, 911, 8, 911, 62,
-        55, 40, 95, 34, 1, 912, 8, 912, 73,
-        129, 36, 165, 25, 1, 913, 8, 913, 69,
-        190, 25, 215, 26, 1, 914, 8, 914, 58,
-        241, 36, 277, 29, 1, 915, 8, 915, 69,
-        306, 32, 277, 29, 1, 916, 8, 916, 65,
-        338, 32, 165, 25, 1, 917, 8, 917, 65,
-        370, 28, 277, 29, 1, 918, 8, 918, 61,
-        398, 28, 165, 25, 1, 919, 8, 919, 61,
-        426, 24, 277, 29, 1, 920, 8, 920, 57,
+        7676, 29, 7957, 26, 1, 911, 8, 911, 62,
+        7676, 40, 2908, 34, 1, 912, 8, 912, 73,
+        7716, 36, 6879, 25, 1, 913, 8, 913, 69,
+        7752, 25, 8007, 26, 1, 914, 8, 914, 58,
+        7777, 36, 8033, 29, 1, 915, 8, 915, 69,
+        7813, 32, 8033, 29, 1, 916, 8, 916, 65,
+        7845, 32, 6879, 25, 1, 917, 8, 917, 65,
+        7877, 28, 8033, 29, 1, 918, 8, 918, 61,
+        7905, 28, 6879, 25, 1, 919, 8, 919, 61,
+        7933, 24, 8033, 29, 1, 920, 8, 920, 57,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 29, 65535, 255, 1, 42, 8,
@@ -13462,11 +13663,11 @@ static POPULATE_WINUITHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_435: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListAccentVeryHighBrushSystemColorHighlightColorSystemControlHighlightListAccentMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 25, 1, 43, 8, 43, 78,
-        70, 46, 45, 25, 1, 44, 8, 44, 79,
+        274, 45, 319, 25, 1, 43, 8, 43, 78,
+        344, 46, 319, 25, 1, 44, 8, 44, 79,
     ],
 };
 
@@ -13479,170 +13680,170 @@ static POPULATE_WINUITHEME_XAML_ROWS_436: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_437: rt::PackedRows = rt::PackedRows {
-    strings: "ApplicationPageBackgroundThemeBrushSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 22, 1, 48, 8, 48, 68,
+        29, 35, 390, 22, 1, 48, 8, 48, 68,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_438: rt::PackedRows = rt::PackedRows {
-    strings: "DefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 25, 1, 49, 8, 49, 8,
-        56, 36, 92, 26, 1, 50, 8, 50, 8,
-        118, 38, 156, 26, 1, 51, 8, 51, 8,
+        92, 31, 123, 25, 1, 49, 8, 49, 8,
+        148, 36, 184, 26, 1, 50, 8, 50, 8,
+        210, 38, 248, 26, 1, 51, 8, 51, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_439: rt::PackedRows = rt::PackedRows {
-    strings: "TextFillColorPrimaryBrushSystemColorWindowTextColorTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushSystemColorGrayTextColorTextFillColorInverseBrushAccentTextFillColorPrimaryBrushAccentTextFillColorSecondaryBrushAccentTextFillColorTertiaryBrushAccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushSystemColorButtonFaceColorControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 26, 1, 426, 8, 426, 58,
-        51, 27, 25, 26, 1, 427, 8, 427, 60,
-        78, 26, 25, 26, 1, 428, 8, 428, 59,
-        104, 26, 130, 24, 1, 429, 8, 429, 59,
-        154, 25, 25, 26, 1, 430, 8, 430, 58,
-        179, 31, 25, 26, 1, 431, 8, 431, 64,
-        210, 33, 25, 26, 1, 432, 8, 432, 66,
-        243, 32, 25, 26, 1, 433, 8, 433, 65,
-        275, 32, 130, 24, 1, 434, 8, 434, 65,
-        307, 38, 25, 26, 1, 435, 8, 435, 71,
-        345, 33, 25, 26, 1, 436, 8, 436, 66,
-        378, 35, 25, 26, 1, 437, 8, 437, 68,
-        413, 34, 130, 24, 1, 438, 8, 438, 67,
-        447, 28, 475, 26, 1, 439, 8, 439, 61,
-        501, 30, 475, 26, 1, 440, 8, 440, 63,
-        531, 29, 475, 26, 1, 441, 8, 441, 62,
-        560, 32, 475, 26, 1, 442, 8, 442, 65,
-        592, 29, 475, 26, 1, 443, 8, 443, 62,
+        0, 25, 2941, 26, 1, 426, 8, 426, 58,
+        25, 27, 2941, 26, 1, 427, 8, 427, 60,
+        52, 26, 2941, 26, 1, 428, 8, 428, 59,
+        78, 26, 3154, 24, 1, 429, 8, 429, 59,
+        104, 25, 2941, 26, 1, 430, 8, 430, 58,
+        129, 31, 2941, 26, 1, 431, 8, 431, 64,
+        183, 33, 2941, 26, 1, 432, 8, 432, 66,
+        216, 32, 2941, 26, 1, 433, 8, 433, 65,
+        271, 32, 3154, 24, 1, 434, 8, 434, 65,
+        303, 38, 2941, 26, 1, 435, 8, 435, 71,
+        341, 33, 2941, 26, 1, 436, 8, 436, 66,
+        374, 35, 2941, 26, 1, 437, 8, 437, 68,
+        409, 34, 3154, 24, 1, 438, 8, 438, 67,
+        443, 28, 2999, 26, 1, 439, 8, 439, 61,
+        471, 30, 2999, 26, 1, 440, 8, 440, 63,
+        501, 29, 2999, 26, 1, 441, 8, 441, 62,
+        530, 32, 2999, 26, 1, 442, 8, 442, 65,
+        562, 29, 2999, 26, 1, 443, 8, 443, 62,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_440: rt::PackedRows = rt::PackedRows {
-    strings: "ControlFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65535, 255, 1, 444, 8,
+        591, 32, 65535, 255, 1, 444, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_441: rt::PackedRows = rt::PackedRows {
-    strings: "ControlFillColorInputActiveBrushSystemColorButtonFaceColorControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 26, 1, 445, 8, 445, 65,
-        58, 34, 32, 26, 1, 446, 8, 446, 67,
-        92, 35, 32, 26, 1, 447, 8, 447, 68,
-        127, 33, 32, 26, 1, 448, 8, 448, 66,
+        623, 32, 2999, 26, 1, 445, 8, 445, 65,
+        655, 34, 2999, 26, 1, 446, 8, 446, 67,
+        689, 35, 2999, 26, 1, 447, 8, 447, 68,
+        724, 33, 2999, 26, 1, 448, 8, 448, 66,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_442: rt::PackedRows = rt::PackedRows {
-    strings: "SubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 255, 1, 449, 8,
+        757, 31, 65535, 255, 1, 449, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_443: rt::PackedRows = rt::PackedRows {
-    strings: "SubtleFillColorSecondaryBrushSystemColorButtonFaceColorSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 26, 1, 450, 8, 450, 62,
-        55, 28, 29, 26, 1, 451, 8, 451, 61,
-        83, 28, 29, 26, 1, 452, 8, 452, 61,
+        788, 29, 2999, 26, 1, 450, 8, 450, 62,
+        817, 28, 2999, 26, 1, 451, 8, 451, 61,
+        845, 28, 2999, 26, 1, 452, 8, 452, 61,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_444: rt::PackedRows = rt::PackedRows {
-    strings: "ControlAltFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 65535, 255, 1, 453, 8,
+        873, 35, 65535, 255, 1, 453, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_445: rt::PackedRows = rt::PackedRows {
-    strings: "ControlAltFillColorSecondaryBrushSystemColorButtonFaceColorControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrushAccentFillColorSelectedTextBackgroundBrushSystemColorWindowColorAccentFillColorDefaultBrushAccentFillColorSecondaryBrushAccentFillColorTertiaryBrushAccentFillColorDisabledBrushControlStrokeColorDefaultBrushSystemColorButtonTextColorControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushSystemColorGrayTextColorControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushSystemColorWindowTextColorCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrushSystemFillColorAttentionBrushSystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrushControlElevationBorderBrushCircleElevationBorderBrushAccentControlElevationBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 26, 1, 454, 8, 454, 66,
-        59, 32, 33, 26, 1, 455, 8, 455, 65,
-        91, 35, 33, 26, 1, 456, 8, 456, 68,
-        126, 32, 33, 26, 1, 457, 8, 457, 65,
-        158, 35, 33, 26, 1, 458, 8, 458, 68,
-        193, 37, 33, 26, 1, 459, 8, 459, 70,
-        230, 36, 33, 26, 1, 460, 8, 460, 69,
-        266, 36, 33, 26, 1, 461, 8, 461, 69,
-        302, 42, 344, 22, 1, 462, 8, 462, 75,
-        366, 27, 344, 22, 1, 463, 8, 463, 60,
-        393, 29, 344, 22, 1, 464, 8, 464, 62,
-        422, 28, 344, 22, 1, 465, 8, 465, 61,
-        450, 28, 344, 22, 1, 466, 8, 466, 61,
-        478, 30, 508, 26, 1, 467, 8, 467, 63,
-        534, 32, 508, 26, 1, 468, 8, 468, 65,
-        566, 38, 508, 26, 1, 469, 8, 469, 71,
-        604, 40, 508, 26, 1, 470, 8, 470, 73,
-        644, 39, 508, 26, 1, 471, 8, 471, 72,
-        683, 39, 722, 24, 1, 472, 8, 472, 72,
-        746, 47, 508, 26, 1, 473, 8, 473, 80,
-        793, 27, 820, 26, 1, 474, 8, 474, 60,
-        846, 32, 820, 26, 1, 475, 8, 475, 65,
-        878, 36, 508, 26, 1, 476, 8, 476, 69,
-        914, 37, 508, 26, 1, 477, 8, 477, 70,
-        951, 30, 820, 26, 1, 478, 8, 478, 63,
-        981, 29, 820, 26, 1, 479, 8, 479, 62,
-        1010, 30, 820, 26, 1, 480, 8, 480, 63,
-        1040, 30, 820, 26, 1, 481, 8, 481, 63,
-        1070, 26, 820, 26, 1, 482, 8, 482, 59,
-        1096, 26, 344, 22, 1, 483, 8, 483, 59,
-        1122, 35, 344, 22, 1, 484, 8, 484, 68,
-        1157, 37, 344, 22, 1, 485, 8, 485, 70,
-        1194, 36, 344, 22, 1, 486, 8, 486, 69,
-        1230, 26, 344, 22, 1, 487, 8, 487, 59,
-        1256, 26, 344, 22, 1, 488, 8, 488, 59,
-        1282, 22, 344, 22, 1, 489, 8, 489, 55,
-        1304, 35, 344, 22, 1, 490, 8, 490, 68,
-        1339, 41, 344, 22, 1, 491, 8, 491, 74,
-        1380, 39, 344, 22, 1, 492, 8, 492, 72,
-        1419, 41, 344, 22, 1, 493, 8, 493, 74,
-        1460, 40, 344, 22, 1, 494, 8, 494, 73,
-        1500, 43, 344, 22, 1, 495, 8, 495, 76,
-        1543, 33, 344, 22, 1, 496, 8, 496, 66,
-        1576, 38, 344, 22, 1, 497, 8, 497, 71,
-        1614, 37, 344, 22, 1, 498, 8, 498, 70,
-        1651, 40, 344, 22, 1, 499, 8, 499, 73,
-        1691, 36, 344, 22, 1, 500, 8, 500, 69,
-        1727, 35, 344, 22, 1, 501, 8, 501, 68,
-        1762, 36, 344, 22, 1, 502, 8, 502, 69,
-        1798, 29, 820, 26, 1, 503, 8, 503, 62,
-        1827, 27, 820, 26, 1, 504, 8, 504, 60,
-        1854, 27, 820, 26, 1, 505, 8, 505, 60,
-        1881, 28, 820, 26, 1, 506, 8, 506, 61,
-        1909, 27, 820, 26, 1, 507, 8, 507, 60,
-        1936, 32, 820, 26, 1, 508, 8, 508, 65,
-        1968, 39, 344, 22, 1, 509, 8, 509, 72,
-        2007, 37, 344, 22, 1, 510, 8, 510, 70,
-        2044, 37, 344, 22, 1, 511, 8, 511, 70,
-        2081, 38, 344, 22, 1, 512, 8, 512, 71,
-        2119, 37, 344, 22, 1, 513, 8, 513, 70,
-        2156, 44, 344, 22, 1, 514, 8, 514, 77,
-        2200, 42, 344, 22, 1, 515, 8, 515, 75,
-        2242, 27, 820, 26, 1, 516, 8, 516, 60,
-        2269, 26, 820, 26, 1, 517, 8, 517, 59,
-        2295, 33, 820, 26, 1, 518, 8, 518, 66,
+        908, 33, 2999, 26, 1, 454, 8, 454, 66,
+        941, 32, 2999, 26, 1, 455, 8, 455, 65,
+        973, 35, 2999, 26, 1, 456, 8, 456, 68,
+        1008, 32, 2999, 26, 1, 457, 8, 457, 65,
+        1040, 35, 2999, 26, 1, 458, 8, 458, 68,
+        1075, 37, 2999, 26, 1, 459, 8, 459, 70,
+        1112, 36, 2999, 26, 1, 460, 8, 460, 69,
+        1148, 36, 2999, 26, 1, 461, 8, 461, 69,
+        1184, 42, 2972, 22, 1, 462, 8, 462, 75,
+        1226, 27, 2972, 22, 1, 463, 8, 463, 60,
+        380, 29, 2972, 22, 1, 464, 8, 464, 62,
+        3249, 28, 2972, 22, 1, 465, 8, 465, 61,
+        415, 28, 2972, 22, 1, 466, 8, 466, 61,
+        1253, 30, 3030, 26, 1, 467, 8, 467, 63,
+        1283, 32, 3030, 26, 1, 468, 8, 468, 65,
+        1315, 38, 3030, 26, 1, 469, 8, 469, 71,
+        1353, 40, 3030, 26, 1, 470, 8, 470, 73,
+        1393, 39, 3030, 26, 1, 471, 8, 471, 72,
+        1432, 39, 3154, 24, 1, 472, 8, 472, 72,
+        1471, 47, 3030, 26, 1, 473, 8, 473, 80,
+        1518, 27, 2941, 26, 1, 474, 8, 474, 60,
+        1545, 32, 2941, 26, 1, 475, 8, 475, 65,
+        1577, 36, 3030, 26, 1, 476, 8, 476, 69,
+        1613, 37, 3030, 26, 1, 477, 8, 477, 70,
+        1650, 30, 2941, 26, 1, 478, 8, 478, 63,
+        1680, 29, 2941, 26, 1, 479, 8, 479, 62,
+        1709, 30, 2941, 26, 1, 480, 8, 480, 63,
+        1739, 30, 2941, 26, 1, 481, 8, 481, 63,
+        1769, 26, 2941, 26, 1, 482, 8, 482, 59,
+        1795, 26, 2972, 22, 1, 483, 8, 483, 59,
+        1821, 35, 2972, 22, 1, 484, 8, 484, 68,
+        1856, 37, 2972, 22, 1, 485, 8, 485, 70,
+        1893, 36, 2972, 22, 1, 486, 8, 486, 69,
+        1929, 26, 2972, 22, 1, 487, 8, 487, 59,
+        1955, 26, 2972, 22, 1, 488, 8, 488, 59,
+        1981, 22, 2972, 22, 1, 489, 8, 489, 55,
+        2003, 35, 2972, 22, 1, 490, 8, 490, 68,
+        2038, 41, 2972, 22, 1, 491, 8, 491, 74,
+        2079, 39, 2972, 22, 1, 492, 8, 492, 72,
+        2118, 41, 2972, 22, 1, 493, 8, 493, 74,
+        2159, 40, 2972, 22, 1, 494, 8, 494, 73,
+        2199, 43, 2972, 22, 1, 495, 8, 495, 76,
+        2242, 33, 2972, 22, 1, 496, 8, 496, 66,
+        2275, 38, 2972, 22, 1, 497, 8, 497, 71,
+        2313, 37, 2972, 22, 1, 498, 8, 498, 70,
+        2350, 40, 2972, 22, 1, 499, 8, 499, 73,
+        2390, 36, 2972, 22, 1, 500, 8, 500, 69,
+        2426, 35, 2972, 22, 1, 501, 8, 501, 68,
+        2461, 36, 2972, 22, 1, 502, 8, 502, 69,
+        2497, 29, 2941, 26, 1, 503, 8, 503, 62,
+        2526, 27, 2941, 26, 1, 504, 8, 504, 60,
+        2553, 27, 2941, 26, 1, 505, 8, 505, 60,
+        2580, 28, 2941, 26, 1, 506, 8, 506, 61,
+        2608, 27, 2941, 26, 1, 507, 8, 507, 60,
+        2635, 32, 2941, 26, 1, 508, 8, 508, 65,
+        2667, 39, 2972, 22, 1, 509, 8, 509, 72,
+        2706, 37, 2972, 22, 1, 510, 8, 510, 70,
+        2743, 37, 2972, 22, 1, 511, 8, 511, 70,
+        2780, 38, 2972, 22, 1, 512, 8, 512, 71,
+        2818, 37, 2972, 22, 1, 513, 8, 513, 70,
+        2855, 44, 2972, 22, 1, 514, 8, 514, 77,
+        2899, 42, 2972, 22, 1, 515, 8, 515, 75,
+        3277, 27, 2941, 26, 1, 516, 8, 516, 60,
+        3304, 26, 2941, 26, 1, 517, 8, 517, 59,
+        3330, 33, 2941, 26, 1, 518, 8, 518, 66,
     ],
 };
 
@@ -13749,122 +13950,122 @@ static POPULATE_WINUITHEME_XAML_ROWS_447: &[rt::ValueRow<u32>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_448: rt::PackedRows = rt::PackedRows {
-    strings: "TextOnAccentFillColorDefaultBrushSystemColorWindowTextColorTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushSystemColorGrayTextColorControlAAFillColorDefaultBrushSystemColorButtonFaceColorControlAAFillColorDisabledBrushAccentAAFillColorDefaultBrushSystemColorWindowColorAccentAAFillColorTertiaryBrushControlStrokeColorForAAFillOnImageBrushSystemColorButtonTextColorControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 26, 1, 77, 8, 77, 66,
-        59, 35, 33, 26, 1, 78, 8, 78, 68,
-        94, 37, 33, 26, 1, 79, 8, 79, 70,
-        131, 36, 167, 24, 1, 80, 8, 80, 69,
-        191, 30, 221, 26, 1, 81, 8, 81, 63,
-        247, 31, 221, 26, 1, 82, 8, 82, 64,
-        278, 29, 307, 22, 1, 83, 8, 83, 62,
-        100, 31, 307, 22, 1, 84, 8, 84, 64,
-        329, 30, 307, 22, 1, 85, 8, 85, 63,
-        137, 30, 307, 22, 1, 86, 8, 86, 63,
-        359, 39, 398, 26, 1, 87, 8, 87, 72,
-        424, 32, 398, 26, 1, 88, 8, 88, 65,
-        456, 33, 398, 26, 1, 89, 8, 89, 66,
+        0, 33, 478, 26, 1, 77, 8, 77, 66,
+        33, 35, 478, 26, 1, 78, 8, 78, 68,
+        68, 37, 478, 26, 1, 79, 8, 79, 70,
+        105, 36, 504, 24, 1, 80, 8, 80, 69,
+        141, 30, 528, 26, 1, 81, 8, 81, 63,
+        171, 31, 528, 26, 1, 82, 8, 82, 64,
+        202, 29, 554, 22, 1, 83, 8, 83, 62,
+        74, 31, 554, 22, 1, 84, 8, 84, 64,
+        277, 30, 554, 22, 1, 85, 8, 85, 63,
+        111, 30, 554, 22, 1, 86, 8, 86, 63,
+        330, 39, 576, 26, 1, 87, 8, 87, 72,
+        369, 32, 576, 26, 1, 88, 8, 88, 65,
+        401, 33, 576, 26, 1, 89, 8, 89, 66,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_449: rt::PackedRows = rt::PackedRows {
-    strings: "TextBoxForegroundHeaderThemeBrushSystemColorButtonFaceColorTextBoxPlaceholderTextThemeBrushSystemColorGrayTextColorTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushSystemColorButtonTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 26, 1, 141, 8, 141, 66,
-        59, 32, 91, 24, 1, 142, 8, 142, 65,
-        115, 27, 33, 26, 1, 143, 8, 143, 60,
-        142, 23, 165, 26, 1, 144, 8, 144, 56,
+        0, 33, 1855, 26, 1, 141, 8, 141, 66,
+        33, 32, 1881, 24, 1, 142, 8, 142, 65,
+        65, 27, 1855, 26, 1, 143, 8, 143, 60,
+        92, 23, 1905, 26, 1, 144, 8, 144, 56,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_450: rt::PackedRows = rt::PackedRows {
-    strings: "TextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 65535, 255, 1, 145, 8,
-        33, 29, 65535, 255, 1, 146, 8,
+        115, 33, 65535, 255, 1, 145, 8,
+        148, 29, 65535, 255, 1, 146, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_451: rt::PackedRows = rt::PackedRows {
-    strings: "TextBoxButtonForegroundThemeBrushSystemColorButtonTextColorTextBoxButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushSystemColorHighlightTextColorTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushSystemColorButtonFaceColorTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushSystemColorGrayTextColorTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 26, 1, 147, 8, 147, 66,
-        59, 44, 103, 25, 1, 148, 8, 148, 77,
-        128, 40, 33, 26, 1, 149, 8, 149, 73,
-        168, 44, 212, 29, 1, 150, 8, 150, 77,
-        241, 40, 33, 26, 1, 151, 8, 151, 73,
-        281, 36, 33, 26, 1, 152, 8, 152, 69,
-        317, 40, 357, 26, 1, 153, 8, 153, 73,
-        383, 35, 357, 26, 1, 154, 8, 154, 68,
-        418, 31, 449, 24, 1, 155, 8, 155, 64,
-        473, 35, 33, 26, 1, 156, 8, 156, 68,
-        508, 27, 33, 26, 1, 157, 8, 157, 60,
+        177, 33, 1905, 26, 1, 147, 8, 147, 66,
+        210, 44, 1931, 25, 1, 148, 8, 148, 77,
+        254, 40, 1905, 26, 1, 149, 8, 149, 73,
+        294, 44, 1956, 29, 1, 150, 8, 150, 77,
+        338, 40, 1905, 26, 1, 151, 8, 151, 73,
+        378, 36, 1905, 26, 1, 152, 8, 152, 69,
+        414, 40, 1855, 26, 1, 153, 8, 153, 73,
+        454, 35, 1855, 26, 1, 154, 8, 154, 68,
+        489, 31, 1881, 24, 1, 155, 8, 155, 64,
+        520, 35, 1905, 26, 1, 156, 8, 156, 68,
+        555, 27, 1905, 26, 1, 157, 8, 157, 60,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_452: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushSystemControlForegroundBaseMediumBrushTextControlBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushTextControlButtonForegroundSystemControlForegroundBaseMediumHighBrushTextControlForegroundFocusedSystemControlForegroundBaseHighBrushTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 35, 1, 159, 8, 159, 8,
-        63, 22, 85, 38, 1, 160, 8, 160, 8,
-        123, 33, 156, 41, 1, 161, 8, 161, 8,
-        197, 27, 224, 42, 1, 162, 8, 162, 8,
-        266, 28, 294, 36, 1, 163, 8, 163, 8,
-        330, 39, 369, 41, 1, 164, 8, 164, 8,
+        693, 28, 1985, 35, 1, 159, 8, 159, 8,
+        811, 22, 2020, 38, 1, 160, 8, 160, 8,
+        864, 33, 2058, 41, 1, 161, 8, 161, 8,
+        1730, 27, 2099, 42, 1, 162, 8, 162, 8,
+        1102, 28, 2141, 36, 1, 163, 8, 163, 8,
+        1291, 39, 2177, 41, 1, 164, 8, 164, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_453: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutSeparatorBackgroundSystemColorWindowTextColorBrushMenuFlyoutItemBackgroundSystemControlTransparentBrushMenuFlyoutItemBackgroundPointerOverSystemColorHighlightColorBrushMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundSystemColorButtonTextColorBrushMenuFlyoutItemForegroundPointerOverSystemColorHighlightTextColorBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledSystemColorGrayTextColorBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverMenuFlyoutSubItemBackgroundPressedMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundSystemColorWindowColorBrushMenuFlyoutPresenterBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 31, 1, 179, 8, 179, 8,
-        60, 24, 84, 29, 1, 180, 8, 180, 8,
-        113, 35, 148, 30, 1, 181, 8, 181, 8,
-        178, 31, 148, 30, 1, 182, 8, 182, 8,
-        209, 32, 84, 29, 1, 183, 8, 183, 8,
-        241, 29, 84, 29, 1, 184, 8, 184, 8,
-        270, 24, 294, 31, 1, 185, 8, 185, 8,
-        325, 35, 360, 34, 1, 186, 8, 186, 8,
-        394, 31, 360, 34, 1, 187, 8, 187, 8,
-        425, 32, 457, 29, 1, 188, 8, 188, 8,
-        486, 27, 84, 29, 1, 189, 8, 189, 8,
-        513, 38, 148, 30, 1, 190, 8, 190, 8,
-        551, 34, 148, 30, 1, 191, 8, 191, 8,
-        585, 40, 84, 29, 1, 192, 8, 192, 8,
-        625, 35, 84, 29, 1, 193, 8, 193, 8,
-        660, 32, 84, 29, 1, 194, 8, 194, 8,
-        692, 27, 294, 31, 1, 195, 8, 195, 8,
-        719, 38, 360, 34, 1, 196, 8, 196, 8,
-        757, 34, 360, 34, 1, 197, 8, 197, 8,
-        791, 40, 148, 30, 1, 198, 8, 198, 8,
-        831, 35, 457, 29, 1, 199, 8, 199, 8,
-        866, 24, 294, 31, 1, 200, 8, 200, 8,
-        890, 35, 360, 34, 1, 201, 8, 201, 8,
-        925, 31, 360, 34, 1, 202, 8, 202, 8,
-        956, 37, 148, 30, 1, 203, 8, 203, 8,
-        993, 32, 457, 29, 1, 204, 8, 204, 8,
-        1025, 47, 29, 31, 1, 205, 8, 205, 8,
-        1072, 58, 360, 34, 1, 206, 8, 206, 8,
-        1130, 54, 360, 34, 1, 207, 8, 207, 8,
-        1184, 55, 457, 29, 1, 208, 8, 208, 8,
-        1239, 53, 29, 31, 1, 209, 8, 209, 8,
-        1292, 64, 360, 34, 1, 210, 8, 210, 8,
-        1356, 60, 360, 34, 1, 211, 8, 211, 8,
-        1416, 61, 457, 29, 1, 212, 8, 212, 8,
-        1477, 37, 29, 31, 1, 213, 8, 213, 8,
-        1514, 29, 1543, 27, 1, 214, 8, 214, 8,
-        1570, 30, 29, 31, 1, 215, 8, 215, 8,
+        0, 29, 3372, 31, 1, 179, 8, 179, 8,
+        59, 24, 3403, 29, 1, 180, 8, 180, 8,
+        114, 35, 3432, 30, 1, 181, 8, 181, 8,
+        178, 31, 3432, 30, 1, 182, 8, 182, 8,
+        237, 32, 3403, 29, 1, 183, 8, 183, 8,
+        269, 29, 3403, 29, 1, 184, 8, 184, 8,
+        298, 24, 3462, 31, 1, 185, 8, 185, 8,
+        347, 35, 3493, 34, 1, 186, 8, 186, 8,
+        382, 31, 3493, 34, 1, 187, 8, 187, 8,
+        413, 32, 3527, 29, 1, 188, 8, 188, 8,
+        471, 27, 3403, 29, 1, 189, 8, 189, 8,
+        498, 38, 3432, 30, 1, 190, 8, 190, 8,
+        536, 34, 3432, 30, 1, 191, 8, 191, 8,
+        570, 40, 3403, 29, 1, 192, 8, 192, 8,
+        610, 35, 3403, 29, 1, 193, 8, 193, 8,
+        645, 32, 3403, 29, 1, 194, 8, 194, 8,
+        677, 27, 3462, 31, 1, 195, 8, 195, 8,
+        704, 38, 3493, 34, 1, 196, 8, 196, 8,
+        742, 34, 3493, 34, 1, 197, 8, 197, 8,
+        776, 40, 3432, 30, 1, 198, 8, 198, 8,
+        816, 35, 3527, 29, 1, 199, 8, 199, 8,
+        851, 24, 3462, 31, 1, 200, 8, 200, 8,
+        902, 35, 3493, 34, 1, 201, 8, 201, 8,
+        937, 31, 3493, 34, 1, 202, 8, 202, 8,
+        994, 37, 3432, 30, 1, 203, 8, 203, 8,
+        1031, 32, 3527, 29, 1, 204, 8, 204, 8,
+        1063, 47, 3372, 31, 1, 205, 8, 205, 8,
+        1110, 58, 3493, 34, 1, 206, 8, 206, 8,
+        1168, 54, 3493, 34, 1, 207, 8, 207, 8,
+        1222, 55, 3527, 29, 1, 208, 8, 208, 8,
+        1277, 53, 3372, 31, 1, 209, 8, 209, 8,
+        1330, 64, 3493, 34, 1, 210, 8, 210, 8,
+        1394, 60, 3493, 34, 1, 211, 8, 211, 8,
+        1454, 61, 3527, 29, 1, 212, 8, 212, 8,
+        1515, 37, 3372, 31, 1, 213, 8, 213, 8,
+        1552, 29, 3556, 27, 1, 214, 8, 214, 8,
+        1611, 30, 3372, 31, 1, 215, 8, 215, 8,
     ],
 };
 
@@ -13882,52 +14083,52 @@ static POPULATE_WINUITHEME_XAML_ROWS_454: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_455: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutItemFocusedBackgroundThemeBrushSystemColorHighlightColorMenuFlyoutItemFocusedForegroundThemeBrushSystemColorHighlightTextColorMenuFlyoutItemDisabledForegroundThemeBrushSystemColorGrayTextColorMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushSystemColorButtonTextColorMenuFlyoutItemPressedForegroundThemeBrushSystemColorButtonFaceColorMenuFlyoutSeparatorThemeBrushSystemColorWindowTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 41, 25, 1, 224, 8, 224, 74,
-        66, 41, 107, 29, 1, 225, 8, 225, 74,
-        136, 42, 178, 24, 1, 226, 8, 226, 75,
-        202, 45, 41, 25, 1, 227, 8, 227, 78,
-        247, 45, 107, 29, 1, 228, 8, 228, 78,
-        292, 41, 333, 26, 1, 229, 8, 229, 74,
-        359, 41, 400, 26, 1, 230, 8, 230, 74,
-        426, 29, 455, 26, 1, 231, 8, 231, 62,
+        1670, 41, 3432, 25, 1, 224, 8, 224, 74,
+        1711, 41, 3493, 29, 1, 225, 8, 225, 74,
+        1752, 42, 3527, 24, 1, 226, 8, 226, 75,
+        1794, 45, 3432, 25, 1, 227, 8, 227, 78,
+        1839, 45, 3493, 29, 1, 228, 8, 228, 78,
+        1884, 41, 3462, 26, 1, 229, 8, 229, 74,
+        1925, 41, 3583, 26, 1, 230, 8, 230, 74,
+        1966, 29, 3372, 26, 1, 231, 8, 231, 62,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_456: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushMenuFlyoutItemRevealBackgroundDisabledSystemControlTransparentBrushMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverToggleMenuFlyoutItemRevealBackgroundPressedToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 47, 1, 232, 8, 232, 8,
-        86, 30, 116, 45, 1, 233, 8, 233, 8,
-        161, 41, 202, 50, 1, 234, 8, 234, 8,
-        252, 37, 289, 53, 1, 235, 8, 235, 8,
-        342, 38, 380, 29, 1, 236, 8, 236, 8,
-        409, 31, 380, 29, 1, 237, 8, 237, 8,
-        440, 38, 478, 41, 1, 238, 8, 238, 8,
-        519, 42, 478, 41, 1, 239, 8, 239, 8,
-        561, 39, 380, 29, 1, 240, 8, 240, 8,
-        600, 36, 116, 45, 1, 241, 8, 241, 8,
-        636, 47, 202, 50, 1, 242, 8, 242, 8,
-        683, 43, 289, 53, 1, 243, 8, 243, 8,
-        726, 44, 380, 29, 1, 244, 8, 244, 8,
-        770, 37, 380, 29, 1, 245, 8, 245, 8,
-        807, 44, 478, 41, 1, 246, 8, 246, 8,
-        851, 48, 478, 41, 1, 247, 8, 247, 8,
-        899, 45, 380, 29, 1, 248, 8, 248, 8,
-        944, 33, 116, 45, 1, 249, 8, 249, 8,
-        977, 44, 202, 50, 1, 250, 8, 250, 8,
-        1021, 40, 1061, 49, 1, 251, 8, 251, 8,
-        1110, 46, 202, 50, 1, 252, 8, 252, 8,
-        1156, 41, 380, 29, 1, 253, 8, 253, 8,
-        1197, 34, 380, 29, 1, 254, 8, 254, 8,
-        1231, 41, 478, 41, 1, 255, 8, 255, 8,
-        1272, 45, 478, 41, 1, 256, 8, 256, 8,
-        1317, 47, 478, 41, 1, 257, 8, 257, 8,
-        1364, 42, 380, 29, 1, 258, 8, 258, 8,
+        1995, 39, 2034, 47, 1, 232, 8, 232, 8,
+        2081, 30, 2111, 45, 1, 233, 8, 233, 8,
+        2156, 41, 2197, 50, 1, 234, 8, 234, 8,
+        2247, 37, 2284, 53, 1, 235, 8, 235, 8,
+        2337, 38, 3403, 29, 1, 236, 8, 236, 8,
+        2375, 31, 3403, 29, 1, 237, 8, 237, 8,
+        2406, 38, 2444, 41, 1, 238, 8, 238, 8,
+        2485, 42, 2444, 41, 1, 239, 8, 239, 8,
+        2527, 39, 3403, 29, 1, 240, 8, 240, 8,
+        2566, 36, 2111, 45, 1, 241, 8, 241, 8,
+        2602, 47, 2197, 50, 1, 242, 8, 242, 8,
+        2649, 43, 2284, 53, 1, 243, 8, 243, 8,
+        2692, 44, 3403, 29, 1, 244, 8, 244, 8,
+        2736, 37, 3403, 29, 1, 245, 8, 245, 8,
+        2773, 44, 2444, 41, 1, 246, 8, 246, 8,
+        2817, 48, 2444, 41, 1, 247, 8, 247, 8,
+        2865, 45, 3403, 29, 1, 248, 8, 248, 8,
+        2910, 33, 2111, 45, 1, 249, 8, 249, 8,
+        2943, 44, 2197, 50, 1, 250, 8, 250, 8,
+        2987, 40, 3027, 49, 1, 251, 8, 251, 8,
+        3076, 46, 2197, 50, 1, 252, 8, 252, 8,
+        3122, 41, 3403, 29, 1, 253, 8, 253, 8,
+        3163, 34, 3403, 29, 1, 254, 8, 254, 8,
+        3197, 41, 2444, 41, 1, 255, 8, 255, 8,
+        3238, 45, 2444, 41, 1, 256, 8, 256, 8,
+        3283, 47, 2444, 41, 1, 257, 8, 257, 8,
+        3330, 42, 3403, 29, 1, 258, 8, 258, 8,
     ],
 };
 
@@ -13940,60 +14141,60 @@ static POPULATE_WINUITHEME_XAML_ROWS_457: &[rt::ValueRow<u32>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_458: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlAcrylicWindowBrushSystemColorWindowColorSystemControlAcrylicElementBrushSystemControlAccentAcrylicWindowAccentMediumHighBrushSystemControlAccentAcrylicElementAccentMediumHighBrushSystemControlAccentDark1AcrylicWindowAccentDark1BrushSystemControlAccentDark1AcrylicElementAccentDark1BrushSystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrushSystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrushSystemControlAcrylicWindowMediumHighBrushSystemControlAcrylicElementMediumHighBrushSystemControlChromeMediumLowAcrylicWindowMediumBrushSystemControlChromeMediumLowAcrylicElementMediumBrushSystemControlBaseHighAcrylicWindowBrushSystemControlBaseHighAcrylicElementBrushSystemControlBaseHighAcrylicWindowMediumHighBrushSystemControlBaseHighAcrylicElementMediumHighBrushSystemControlBaseHighAcrylicWindowMediumBrushSystemControlBaseHighAcrylicElementMediumBrushSystemControlChromeLowAcrylicWindowBrushSystemControlChromeLowAcrylicElementBrushSystemControlChromeMediumAcrylicWindowMediumBrushSystemControlChromeMediumAcrylicElementMediumBrushSystemControlChromeHighAcrylicWindowMediumBrushSystemControlChromeHighAcrylicElementMediumBrushSystemControlBaseLowAcrylicWindowBrushSystemControlBaseLowAcrylicElementBrushSystemControlBaseMediumLowAcrylicWindowMediumBrushSystemControlBaseMediumLowAcrylicElementMediumBrushSystemControlAltLowAcrylicWindowBrushSystemControlAltLowAcrylicElementBrushSystemControlAltMediumLowAcrylicWindowMediumBrushSystemControlAltMediumLowAcrylicElementMediumBrushSystemControlAltHighAcrylicWindowBrushSystemControlAltHighAcrylicElementBrushSystemControlTransientBorderBrushSystemColorWindowTextColorAcrylicBackgroundFillColorDefaultBrushAcrylicInAppFillColorDefaultBrushAcrylicBackgroundFillColorDefaultInverseBrushAcrylicInAppFillColorDefaultInverseBrushAcrylicBackgroundFillColorBaseBrushAcrylicInAppFillColorBaseBrushAccentAcrylicBackgroundFillColorDefaultBrushAccentAcrylicInAppFillColorDefaultBrushAccentAcrylicBackgroundFillColorBaseBrushAccentAcrylicInAppFillColorBaseBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 22, 1, 122, 8, 122, 64,
-        53, 32, 31, 22, 1, 123, 8, 123, 65,
-        85, 53, 31, 22, 1, 124, 8, 124, 86,
-        138, 54, 31, 22, 1, 125, 8, 125, 87,
-        192, 53, 31, 22, 1, 126, 8, 126, 86,
-        245, 54, 31, 22, 1, 127, 8, 127, 87,
-        299, 63, 31, 22, 1, 128, 8, 128, 96,
-        362, 64, 31, 22, 1, 129, 8, 129, 97,
-        426, 41, 31, 22, 1, 130, 8, 130, 74,
-        467, 42, 31, 22, 1, 131, 8, 131, 75,
-        509, 52, 31, 22, 1, 132, 8, 132, 85,
-        561, 53, 31, 22, 1, 133, 8, 133, 86,
-        614, 39, 31, 22, 1, 134, 8, 134, 72,
-        653, 40, 31, 22, 1, 135, 8, 135, 73,
-        693, 49, 31, 22, 1, 136, 8, 136, 82,
-        742, 50, 31, 22, 1, 137, 8, 137, 83,
-        792, 45, 31, 22, 1, 138, 8, 138, 78,
-        837, 46, 31, 22, 1, 139, 8, 139, 79,
-        883, 40, 31, 22, 1, 140, 8, 140, 73,
-        923, 41, 31, 22, 1, 141, 8, 141, 74,
-        964, 49, 31, 22, 1, 142, 8, 142, 82,
-        1013, 50, 31, 22, 1, 143, 8, 143, 83,
-        1063, 47, 31, 22, 1, 144, 8, 144, 80,
-        1110, 48, 31, 22, 1, 145, 8, 145, 81,
-        1158, 38, 31, 22, 1, 146, 8, 146, 71,
-        1196, 39, 31, 22, 1, 147, 8, 147, 72,
-        1235, 50, 31, 22, 1, 148, 8, 148, 83,
-        1285, 51, 31, 22, 1, 149, 8, 149, 84,
-        1336, 37, 31, 22, 1, 150, 8, 150, 70,
-        1373, 38, 31, 22, 1, 151, 8, 151, 71,
-        1411, 49, 31, 22, 1, 152, 8, 152, 82,
-        1460, 50, 31, 22, 1, 153, 8, 153, 83,
-        1510, 38, 31, 22, 1, 154, 8, 154, 71,
-        1548, 39, 31, 22, 1, 155, 8, 155, 72,
-        1587, 33, 1620, 26, 1, 156, 8, 156, 66,
-        1646, 38, 31, 22, 1, 157, 8, 157, 71,
-        1684, 33, 31, 22, 1, 158, 8, 158, 66,
-        1717, 45, 1620, 26, 1, 159, 8, 159, 78,
-        1762, 40, 1620, 26, 1, 160, 8, 160, 73,
-        1802, 35, 31, 22, 1, 161, 8, 161, 68,
-        1837, 30, 31, 22, 1, 162, 8, 162, 63,
-        1867, 44, 31, 22, 1, 163, 8, 163, 77,
-        1911, 39, 31, 22, 1, 164, 8, 164, 72,
-        1950, 41, 31, 22, 1, 165, 8, 165, 74,
-        1991, 36, 31, 22, 1, 166, 8, 166, 69,
+        30, 31, 61, 22, 1, 122, 8, 122, 64,
+        83, 32, 61, 22, 1, 123, 8, 123, 65,
+        115, 53, 61, 22, 1, 124, 8, 124, 86,
+        168, 54, 61, 22, 1, 125, 8, 125, 87,
+        222, 53, 61, 22, 1, 126, 8, 126, 86,
+        275, 54, 61, 22, 1, 127, 8, 127, 87,
+        329, 63, 61, 22, 1, 128, 8, 128, 96,
+        392, 64, 61, 22, 1, 129, 8, 129, 97,
+        456, 41, 61, 22, 1, 130, 8, 130, 74,
+        497, 42, 61, 22, 1, 131, 8, 131, 75,
+        539, 52, 61, 22, 1, 132, 8, 132, 85,
+        591, 53, 61, 22, 1, 133, 8, 133, 86,
+        644, 39, 61, 22, 1, 134, 8, 134, 72,
+        683, 40, 61, 22, 1, 135, 8, 135, 73,
+        723, 49, 61, 22, 1, 136, 8, 136, 82,
+        772, 50, 61, 22, 1, 137, 8, 137, 83,
+        822, 45, 61, 22, 1, 138, 8, 138, 78,
+        867, 46, 61, 22, 1, 139, 8, 139, 79,
+        913, 40, 61, 22, 1, 140, 8, 140, 73,
+        953, 41, 61, 22, 1, 141, 8, 141, 74,
+        994, 49, 61, 22, 1, 142, 8, 142, 82,
+        1043, 50, 61, 22, 1, 143, 8, 143, 83,
+        1093, 47, 61, 22, 1, 144, 8, 144, 80,
+        1140, 48, 61, 22, 1, 145, 8, 145, 81,
+        1188, 38, 61, 22, 1, 146, 8, 146, 71,
+        1226, 39, 61, 22, 1, 147, 8, 147, 72,
+        1265, 50, 61, 22, 1, 148, 8, 148, 83,
+        1315, 51, 61, 22, 1, 149, 8, 149, 84,
+        1366, 37, 61, 22, 1, 150, 8, 150, 70,
+        1403, 38, 61, 22, 1, 151, 8, 151, 71,
+        1441, 49, 61, 22, 1, 152, 8, 152, 82,
+        1490, 50, 61, 22, 1, 153, 8, 153, 83,
+        1540, 38, 61, 22, 1, 154, 8, 154, 71,
+        1578, 39, 61, 22, 1, 155, 8, 155, 72,
+        1617, 33, 1650, 26, 1, 156, 8, 156, 66,
+        1676, 38, 61, 22, 1, 157, 8, 157, 71,
+        1714, 33, 61, 22, 1, 158, 8, 158, 66,
+        1747, 45, 1650, 26, 1, 159, 8, 159, 78,
+        1792, 40, 1650, 26, 1, 160, 8, 160, 73,
+        1832, 35, 61, 22, 1, 161, 8, 161, 68,
+        1867, 30, 61, 22, 1, 162, 8, 162, 63,
+        1897, 44, 61, 22, 1, 163, 8, 163, 77,
+        1941, 39, 61, 22, 1, 164, 8, 164, 72,
+        1980, 41, 61, 22, 1, 165, 8, 165, 74,
+        2021, 36, 61, 22, 1, 166, 8, 166, 69,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_459: rt::PackedRows = rt::PackedRows {
-    strings: "DesktopAcrylicTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 30, 0, 0, 1, 167, 8,
@@ -14029,94 +14230,94 @@ static POPULATE_WINUITHEME_XAML_ROWS_460: &[rt::ValueRow<u32>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_461: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundBaseLowRevealBackgroundBrushSystemColorButtonFaceColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 26, 1, 248, 8, 248, 84,
+        22, 51, 2027, 26, 1, 248, 8, 248, 84,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_462: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentRevealBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 65535, 255, 1, 249, 8,
+        2053, 45, 65535, 255, 1, 249, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_463: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAltHighRevealBackgroundBrushSystemColorButtonFaceColorSystemControlHighlightAccentRevealBackgroundBrushSystemColorHighlightColorSystemControlHighlightAccent3RevealBackgroundBrushSystemControlHighlightAccent2RevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlHighlightListLowRevealBackgroundBrushSystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrushSystemControlHighlightBaseMediumLowRevealAccentBackgroundBrushSystemControlHighlightListMediumRevealListLowBackgroundBrushSystemControlHighlightAccent3RevealAccent2BackgroundBrushSystemControlBackgroundAccentRevealBorderBrushSystemControlBackgroundBaseHighRevealBorderBrushSystemControlBackgroundBaseLowRevealBorderBrushSystemControlBackgroundBaseMediumRevealBorderBrushSystemControlBackgroundBaseMediumHighRevealBorderBrushSystemControlBackgroundBaseMediumLowRevealBorderBrushSystemControlBackgroundChromeBlackHighRevealBorderBrushSystemControlBackgroundChromeBlackMediumRevealChromeBorderBrushSystemControlBackgroundChromeMediumRevealBorderBrushSystemControlBackgroundChromeMediumLowRevealBorderBrushSystemControlBackgroundChromeWhiteRevealBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 26, 1, 250, 8, 250, 84,
-        77, 49, 126, 25, 1, 251, 8, 251, 82,
-        151, 50, 126, 25, 1, 252, 8, 252, 83,
-        201, 50, 126, 25, 1, 253, 8, 253, 83,
-        251, 53, 126, 25, 1, 254, 8, 254, 86,
-        304, 50, 126, 25, 1, 255, 8, 255, 83,
-        354, 64, 51, 26, 1, 256, 8, 256, 97,
-        418, 62, 126, 25, 1, 257, 8, 257, 95,
-        480, 60, 126, 25, 1, 258, 8, 258, 93,
-        540, 57, 126, 25, 1, 259, 8, 259, 90,
-        597, 46, 51, 26, 1, 260, 8, 260, 79,
-        643, 48, 51, 26, 1, 261, 8, 261, 81,
-        691, 47, 51, 26, 1, 262, 8, 262, 80,
-        738, 50, 51, 26, 1, 263, 8, 263, 83,
-        788, 54, 51, 26, 1, 264, 8, 264, 87,
-        842, 53, 51, 26, 1, 265, 8, 265, 86,
-        895, 55, 51, 26, 1, 266, 8, 266, 88,
-        950, 63, 51, 26, 1, 267, 8, 267, 96,
-        1013, 52, 51, 26, 1, 268, 8, 268, 85,
-        1065, 55, 51, 26, 1, 269, 8, 269, 88,
-        1120, 51, 51, 26, 1, 270, 8, 270, 84,
+        2098, 51, 2027, 26, 1, 250, 8, 250, 84,
+        1010, 49, 2149, 25, 1, 251, 8, 251, 82,
+        2174, 50, 2149, 25, 1, 252, 8, 252, 83,
+        2224, 50, 2149, 25, 1, 253, 8, 253, 83,
+        2274, 53, 2149, 25, 1, 254, 8, 254, 86,
+        2327, 50, 2149, 25, 1, 255, 8, 255, 83,
+        135, 64, 2027, 26, 1, 256, 8, 256, 97,
+        1147, 62, 2149, 25, 1, 257, 8, 257, 95,
+        2377, 60, 2149, 25, 1, 258, 8, 258, 93,
+        2437, 57, 2149, 25, 1, 259, 8, 259, 90,
+        2494, 46, 2027, 26, 1, 260, 8, 260, 79,
+        2540, 48, 2027, 26, 1, 261, 8, 261, 81,
+        2588, 47, 2027, 26, 1, 262, 8, 262, 80,
+        2635, 50, 2027, 26, 1, 263, 8, 263, 83,
+        2685, 54, 2027, 26, 1, 264, 8, 264, 87,
+        2739, 53, 2027, 26, 1, 265, 8, 265, 86,
+        2792, 55, 2027, 26, 1, 266, 8, 266, 88,
+        2847, 63, 2027, 26, 1, 267, 8, 267, 96,
+        2910, 52, 2027, 26, 1, 268, 8, 268, 85,
+        2962, 55, 2027, 26, 1, 269, 8, 269, 88,
+        3017, 51, 2027, 26, 1, 270, 8, 270, 84,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_464: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentRevealListLowBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 48, 65535, 255, 1, 271, 8,
+        3068, 48, 65535, 255, 1, 271, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_465: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundListLowRevealBorderBrushSystemColorButtonFaceColorSystemControlBackgroundListMediumRevealBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 47, 26, 1, 272, 8, 272, 80,
-        73, 50, 47, 26, 1, 273, 8, 273, 83,
+        3116, 47, 2027, 26, 1, 272, 8, 272, 80,
+        3163, 50, 2027, 26, 1, 273, 8, 273, 83,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_466: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentRevealBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 65535, 255, 1, 274, 8,
+        3213, 41, 65535, 255, 1, 274, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_467: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundRevealTransparentBorderBrushSystemColorButtonTextColorSystemControlBackgroundTransparentRevealBorderBrushSystemControlHighlightTransparentRevealBorderBrushSystemColorHighlightColorSystemControlHighlightAltTransparentRevealBorderBrushSystemColorHighlightTextColorSystemControlHighlightAccentRevealBorderBrushSystemControlHighlightBaseHighRevealBorderBrushSystemControlHighlightBaseLowRevealBorderBrushSystemControlHighlightBaseMediumRevealBorderBrushSystemControlHighlightBaseMediumHighRevealBorderBrushSystemControlHighlightBaseMediumLowRevealBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 26, 1, 275, 8, 275, 84,
-        77, 51, 51, 26, 1, 276, 8, 276, 84,
-        128, 50, 178, 25, 1, 277, 8, 277, 83,
-        203, 53, 256, 29, 1, 278, 8, 278, 86,
-        285, 45, 178, 25, 1, 279, 8, 279, 78,
-        330, 47, 178, 25, 1, 280, 8, 280, 80,
-        377, 46, 178, 25, 1, 281, 8, 281, 79,
-        423, 49, 178, 25, 1, 282, 8, 282, 82,
-        472, 53, 178, 25, 1, 283, 8, 283, 86,
-        525, 52, 178, 25, 1, 284, 8, 284, 85,
+        3254, 51, 3305, 26, 1, 275, 8, 275, 84,
+        281, 51, 3305, 26, 1, 276, 8, 276, 84,
+        448, 50, 2149, 25, 1, 277, 8, 277, 83,
+        1646, 53, 3331, 29, 1, 278, 8, 278, 86,
+        3360, 45, 2149, 25, 1, 279, 8, 279, 78,
+        3405, 47, 2149, 25, 1, 280, 8, 280, 80,
+        3452, 46, 2149, 25, 1, 281, 8, 281, 79,
+        3498, 49, 2149, 25, 1, 282, 8, 282, 82,
+        3547, 53, 2149, 25, 1, 283, 8, 283, 86,
+        366, 52, 2149, 25, 1, 284, 8, 284, 85,
     ],
 };
 
@@ -14129,71 +14330,71 @@ static POPULATE_WINUITHEME_XAML_ROWS_468: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_469: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonRevealBackgroundSystemControlBackgroundBaseLowRevealBackgroundBrushButtonRevealBackgroundPointerOverButtonRevealBackgroundPressedSystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrushButtonRevealBackgroundDisabledSystemControlBackgroundBaseLowBrushButtonRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushButtonRevealBorderBrushPointerOverSystemControlHighlightBaseMediumLowRevealBorderBrushButtonRevealBorderBrushPressedSystemControlHighlightTransparentRevealBorderBrushButtonRevealBorderBrushDisabledSystemControlDisabledTransparentBrushRepeatButtonRevealBackgroundRepeatButtonRevealBackgroundPointerOverRepeatButtonRevealBackgroundPressedRepeatButtonRevealBackgroundDisabledRepeatButtonRevealBorderBrushRepeatButtonRevealBorderBrushPointerOverRepeatButtonRevealBorderBrushPressedRepeatButtonRevealBorderBrushDisabledToggleButtonRevealBackgroundToggleButtonRevealBackgroundPointerOverToggleButtonRevealBackgroundPressedToggleButtonRevealBackgroundDisabledToggleButtonRevealBackgroundCheckedSystemControlHighlightAccentRevealBackgroundBrushToggleButtonRevealBackgroundCheckedPointerOverToggleButtonRevealBackgroundCheckedPressedSystemControlHighlightBaseMediumLowRevealAccentBackgroundBrushToggleButtonRevealBackgroundCheckedDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonRevealBackgroundIndeterminateToggleButtonRevealBackgroundIndeterminatePointerOverToggleButtonRevealBackgroundIndeterminatePressedToggleButtonRevealBackgroundIndeterminateDisabledToggleButtonRevealBorderBrushToggleButtonRevealBorderBrushPointerOverToggleButtonRevealBorderBrushPressedToggleButtonRevealBorderBrushDisabledToggleButtonRevealBorderBrushCheckedSystemControlHighlightAltTransparentRevealBorderBrushToggleButtonRevealBorderBrushCheckedPointerOverToggleButtonRevealBorderBrushCheckedPressedToggleButtonRevealBorderBrushCheckedDisabledToggleButtonRevealBorderBrushIndeterminateToggleButtonRevealBorderBrushIndeterminatePointerOverToggleButtonRevealBorderBrushIndeterminatePressedToggleButtonRevealBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 51, 1, 288, 8, 288, 8,
         73, 33, 22, 51, 1, 289, 8, 289, 8,
         106, 29, 135, 64, 1, 290, 8, 290, 8,
-        199, 30, 229, 35, 1, 291, 8, 291, 8,
-        264, 23, 287, 51, 1, 292, 8, 292, 8,
-        338, 34, 372, 52, 1, 293, 8, 293, 8,
-        424, 30, 454, 50, 1, 294, 8, 294, 8,
-        504, 31, 535, 37, 1, 295, 8, 295, 8,
-        572, 28, 22, 51, 1, 296, 8, 296, 8,
-        600, 39, 22, 51, 1, 297, 8, 297, 8,
-        639, 35, 135, 64, 1, 298, 8, 298, 8,
-        674, 36, 229, 35, 1, 299, 8, 299, 8,
-        710, 29, 287, 51, 1, 300, 8, 300, 8,
-        739, 40, 372, 52, 1, 301, 8, 301, 8,
-        779, 36, 454, 50, 1, 302, 8, 302, 8,
-        815, 37, 535, 37, 1, 303, 8, 303, 8,
-        852, 28, 22, 51, 1, 304, 8, 304, 8,
-        880, 39, 22, 51, 1, 305, 8, 305, 8,
-        919, 35, 135, 64, 1, 306, 8, 306, 8,
-        954, 36, 229, 35, 1, 307, 8, 307, 8,
-        990, 35, 1025, 49, 1, 308, 8, 308, 8,
-        1074, 46, 1025, 49, 1, 309, 8, 309, 8,
-        1120, 42, 1162, 62, 1, 310, 8, 310, 8,
-        1224, 43, 1267, 39, 1, 311, 8, 311, 8,
-        1306, 41, 22, 51, 1, 312, 8, 312, 8,
-        1347, 52, 22, 51, 1, 313, 8, 313, 8,
-        1399, 48, 135, 64, 1, 314, 8, 314, 8,
-        1447, 49, 229, 35, 1, 315, 8, 315, 8,
-        1496, 29, 287, 51, 1, 316, 8, 316, 8,
-        1525, 40, 372, 52, 1, 317, 8, 317, 8,
-        1565, 36, 454, 50, 1, 318, 8, 318, 8,
-        1601, 37, 535, 37, 1, 319, 8, 319, 8,
-        1638, 36, 1674, 53, 1, 320, 8, 320, 8,
-        1727, 47, 372, 52, 1, 321, 8, 321, 8,
-        1774, 43, 454, 50, 1, 322, 8, 322, 8,
-        1817, 44, 535, 37, 1, 323, 8, 323, 8,
-        1861, 42, 287, 51, 1, 324, 8, 324, 8,
-        1903, 53, 372, 52, 1, 325, 8, 325, 8,
-        1956, 49, 454, 50, 1, 326, 8, 326, 8,
-        2005, 50, 535, 37, 1, 327, 8, 327, 8,
+        199, 30, 3600, 35, 1, 291, 8, 291, 8,
+        258, 23, 281, 51, 1, 292, 8, 292, 8,
+        332, 34, 366, 52, 1, 293, 8, 293, 8,
+        418, 30, 448, 50, 1, 294, 8, 294, 8,
+        498, 31, 3635, 37, 1, 295, 8, 295, 8,
+        557, 28, 22, 51, 1, 296, 8, 296, 8,
+        585, 39, 22, 51, 1, 297, 8, 297, 8,
+        624, 35, 135, 64, 1, 298, 8, 298, 8,
+        659, 36, 3600, 35, 1, 299, 8, 299, 8,
+        695, 29, 281, 51, 1, 300, 8, 300, 8,
+        724, 40, 366, 52, 1, 301, 8, 301, 8,
+        764, 36, 448, 50, 1, 302, 8, 302, 8,
+        800, 37, 3635, 37, 1, 303, 8, 303, 8,
+        837, 28, 22, 51, 1, 304, 8, 304, 8,
+        865, 39, 22, 51, 1, 305, 8, 305, 8,
+        904, 35, 135, 64, 1, 306, 8, 306, 8,
+        939, 36, 3600, 35, 1, 307, 8, 307, 8,
+        975, 35, 1010, 49, 1, 308, 8, 308, 8,
+        1059, 46, 1010, 49, 1, 309, 8, 309, 8,
+        1105, 42, 1147, 62, 1, 310, 8, 310, 8,
+        1209, 43, 3672, 39, 1, 311, 8, 311, 8,
+        1278, 41, 22, 51, 1, 312, 8, 312, 8,
+        1319, 52, 22, 51, 1, 313, 8, 313, 8,
+        1371, 48, 135, 64, 1, 314, 8, 314, 8,
+        1419, 49, 3600, 35, 1, 315, 8, 315, 8,
+        1468, 29, 281, 51, 1, 316, 8, 316, 8,
+        1497, 40, 366, 52, 1, 317, 8, 317, 8,
+        1537, 36, 448, 50, 1, 318, 8, 318, 8,
+        1573, 37, 3635, 37, 1, 319, 8, 319, 8,
+        1610, 36, 1646, 53, 1, 320, 8, 320, 8,
+        1699, 47, 366, 52, 1, 321, 8, 321, 8,
+        1746, 43, 448, 50, 1, 322, 8, 322, 8,
+        1789, 44, 3635, 37, 1, 323, 8, 323, 8,
+        1833, 42, 281, 51, 1, 324, 8, 324, 8,
+        1875, 53, 366, 52, 1, 325, 8, 325, 8,
+        1928, 49, 448, 50, 1, 326, 8, 326, 8,
+        1977, 50, 3635, 37, 1, 327, 8, 327, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_470: rt::PackedRows = rt::PackedRows {
-    strings: "SystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 0, 26, 1, 105, 8, 105, 64,
-        31, 27, 31, 22, 1, 106, 8, 106, 60,
-        58, 31, 58, 26, 1, 107, 8, 107, 64,
-        89, 31, 89, 26, 1, 108, 8, 108, 64,
-        120, 30, 120, 25, 1, 109, 8, 109, 63,
-        150, 34, 150, 29, 1, 110, 8, 110, 67,
-        184, 29, 184, 24, 1, 111, 8, 111, 62,
-        213, 29, 213, 24, 1, 112, 8, 112, 62,
+        1081, 31, 1081, 26, 1, 105, 8, 105, 64,
+        1112, 27, 1112, 22, 1, 106, 8, 106, 60,
+        1139, 31, 1004, 26, 1, 107, 8, 107, 64,
+        1170, 31, 1030, 26, 1, 108, 8, 108, 64,
+        1201, 30, 1056, 25, 1, 109, 8, 109, 63,
+        1231, 34, 1231, 29, 1, 110, 8, 110, 67,
+        1265, 29, 1265, 24, 1, 111, 8, 111, 62,
+        1294, 29, 1294, 24, 1, 112, 8, 112, 62,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_471: rt::PackedRows = rt::PackedRows {
-    strings: "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocused",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 44, 44, 33, 1, 113, 8, 113, 8,
@@ -14210,21 +14411,21 @@ static POPULATE_WINUITHEME_XAML_ROWS_472: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_473: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarBackgroundThemeBrushProgressBarBorderThemeBrushProgressBarForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 0, 12288, 1, 119, 8,
-        31, 27, 65535, 255, 1, 120, 8,
-        58, 31, 6068, 65350, 1, 121, 8,
+        217, 31, 0, 12288, 1, 119, 8,
+        248, 27, 65535, 255, 1, 120, 8,
+        275, 31, 6068, 65350, 1, 121, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_474: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarIndeterminateForegroundThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 25, 1, 122, 8, 122, 77,
+        306, 44, 1056, 25, 1, 122, 8, 122, 77,
     ],
 };
 
@@ -14253,38 +14454,38 @@ static POPULATE_WINUITHEME_XAML_ROWS_477: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_478: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 47, 1, 135, 8, 135, 8,
+        350, 42, 392, 47, 1, 135, 8, 135, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_479: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogBackgroundThemeBrushSystemColorButtonTextColorContentDialogBorderThemeBrushSystemAccentColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 26, 1, 136, 8, 136, 66,
-        59, 29, 88, 17, 1, 137, 8, 137, 62,
+        439, 33, 1030, 26, 1, 136, 8, 136, 66,
+        472, 29, 501, 17, 1, 137, 8, 137, 62,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_480: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogContentForegroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 0, 65280, 1, 138, 8,
+        518, 35, 0, 65280, 1, 138, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_481: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogDimmingThemeBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 25, 1, 139, 8, 139, 63,
+        553, 30, 1056, 25, 1, 139, 8, 139, 63,
     ],
 };
 
@@ -14296,196 +14497,196 @@ static POPULATE_WINUITHEME_XAML_ROWS_482: &[rt::ValueRow<f64>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_483: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransientBackgroundBrushSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 22, 1, 143, 8, 143, 70,
+        1323, 37, 1112, 22, 1, 143, 8, 143, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_484: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderBackgroundSystemColorButtonFaceColorBrushExpanderForegroundSystemColorButtonTextColorBrushExpanderForegroundPointerOverSystemColorHighlightColorBrushExpanderForegroundPressedExpanderBorderBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundSystemColorWindowColorBrushExpanderDropDownBorderBrushSystemColorWindowTextColorBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 18, 31, 1, 145, 8, 145, 8,
-        49, 18, 67, 31, 1, 146, 8, 146, 8,
-        98, 29, 127, 30, 1, 147, 8, 147, 8,
-        157, 25, 127, 30, 1, 148, 8, 148, 8,
-        182, 19, 67, 31, 1, 149, 8, 149, 8,
-        201, 30, 127, 30, 1, 150, 8, 150, 8,
-        231, 26, 127, 30, 1, 151, 8, 151, 8,
-        257, 26, 283, 27, 1, 152, 8, 152, 8,
-        310, 27, 337, 31, 1, 153, 8, 153, 8,
-        368, 26, 394, 26, 1, 154, 8, 154, 8,
-        420, 27, 394, 26, 1, 155, 8, 155, 8,
+        583, 18, 1139, 31, 1, 145, 8, 145, 8,
+        636, 18, 1170, 31, 1, 146, 8, 146, 8,
+        679, 29, 1201, 30, 1, 147, 8, 147, 8,
+        708, 25, 1201, 30, 1, 148, 8, 148, 8,
+        733, 19, 1170, 31, 1, 149, 8, 149, 8,
+        779, 30, 1201, 30, 1, 150, 8, 150, 8,
+        809, 26, 1201, 30, 1, 151, 8, 151, 8,
+        835, 26, 1112, 27, 1, 152, 8, 152, 8,
+        898, 27, 1081, 31, 1, 153, 8, 153, 8,
+        925, 26, 951, 26, 1, 154, 8, 154, 8,
+        977, 27, 951, 26, 1, 155, 8, 155, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_485: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkForegroundSystemControlHyperlinkTextBrushHyperlinkForegroundPointerOverSystemControlPageTextBaseMediumBrushHyperlinkForegroundPressedSystemControlHighlightBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 31, 1, 25, 8, 25, 8,
-        50, 30, 80, 36, 1, 26, 8, 26, 8,
-        116, 26, 142, 40, 1, 27, 8, 27, 8,
+        0, 19, 171, 31, 1, 25, 8, 25, 8,
+        50, 30, 202, 36, 1, 26, 8, 26, 8,
+        113, 26, 238, 40, 1, 27, 8, 27, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_486: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundSystemControlHyperlinkTextBrushHyperlinkButtonForegroundPointerOverSystemControlPageTextBaseMediumBrushHyperlinkButtonForegroundPressedSystemControlHighlightBaseMediumLowBrushHyperlinkButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushHyperlinkButtonBackgroundSystemControlPageBackgroundTransparentBrushHyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressedHyperlinkButtonBackgroundDisabledHyperlinkButtonBorderBrushSystemControlTransparentBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 31, 1, 45, 8, 45, 8,
-        56, 36, 92, 36, 1, 46, 8, 46, 8,
-        128, 32, 160, 40, 1, 47, 8, 47, 8,
-        200, 33, 233, 39, 1, 48, 8, 48, 8,
-        272, 25, 297, 43, 1, 49, 8, 49, 8,
-        340, 36, 297, 43, 1, 50, 8, 50, 8,
-        376, 32, 297, 43, 1, 51, 8, 51, 8,
-        408, 33, 297, 43, 1, 52, 8, 52, 8,
-        441, 26, 467, 29, 1, 53, 8, 53, 8,
-        496, 37, 467, 29, 1, 54, 8, 54, 8,
-        533, 33, 467, 29, 1, 55, 8, 55, 8,
-        566, 34, 467, 29, 1, 56, 8, 56, 8,
+        0, 25, 626, 31, 1, 45, 8, 45, 8,
+        56, 36, 657, 36, 1, 46, 8, 46, 8,
+        125, 32, 693, 40, 1, 47, 8, 47, 8,
+        189, 33, 733, 39, 1, 48, 8, 48, 8,
+        254, 25, 772, 43, 1, 49, 8, 49, 8,
+        310, 36, 772, 43, 1, 50, 8, 50, 8,
+        375, 32, 772, 43, 1, 51, 8, 51, 8,
+        435, 33, 772, 43, 1, 52, 8, 52, 8,
+        496, 26, 815, 29, 1, 53, 8, 53, 8,
+        522, 37, 815, 29, 1, 54, 8, 54, 8,
+        559, 33, 815, 29, 1, 55, 8, 55, 8,
+        592, 34, 815, 29, 1, 56, 8, 56, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_487: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonForegroundSystemColorButtonTextColorBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledSystemColorGrayTextColorBrushRadioButtonBackgroundSystemControlTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeRadioButtonOuterEllipseStrokePointerOverSystemColorHighlightColorBrushRadioButtonOuterEllipseStrokePressedSystemColorHighlightTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 31, 1, 132, 8, 132, 8,
-        52, 32, 21, 31, 1, 133, 8, 133, 8,
-        84, 28, 21, 31, 1, 134, 8, 134, 8,
-        112, 29, 141, 29, 1, 135, 8, 135, 8,
-        170, 21, 191, 29, 1, 136, 8, 136, 8,
-        220, 32, 191, 29, 1, 137, 8, 137, 8,
-        252, 28, 191, 29, 1, 138, 8, 138, 8,
-        280, 29, 191, 29, 1, 139, 8, 139, 8,
-        309, 22, 191, 29, 1, 140, 8, 140, 8,
-        331, 33, 191, 29, 1, 141, 8, 141, 8,
-        364, 29, 191, 29, 1, 142, 8, 142, 8,
-        393, 30, 191, 29, 1, 143, 8, 143, 8,
-        423, 29, 21, 31, 1, 144, 8, 144, 8,
-        452, 40, 492, 30, 1, 145, 8, 145, 8,
-        522, 36, 558, 34, 1, 146, 8, 146, 8,
+        0, 21, 2452, 31, 1, 132, 8, 132, 8,
+        46, 32, 2452, 31, 1, 133, 8, 133, 8,
+        78, 28, 2452, 31, 1, 134, 8, 134, 8,
+        106, 29, 2483, 29, 1, 135, 8, 135, 8,
+        161, 21, 2512, 29, 1, 136, 8, 136, 8,
+        214, 32, 2512, 29, 1, 137, 8, 137, 8,
+        246, 28, 2512, 29, 1, 138, 8, 138, 8,
+        274, 29, 2512, 29, 1, 139, 8, 139, 8,
+        303, 22, 2512, 29, 1, 140, 8, 140, 8,
+        325, 33, 2512, 29, 1, 141, 8, 141, 8,
+        358, 29, 2512, 29, 1, 142, 8, 142, 8,
+        387, 30, 2512, 29, 1, 143, 8, 143, 8,
+        417, 29, 2452, 31, 1, 144, 8, 144, 8,
+        482, 40, 2541, 30, 1, 145, 8, 145, 8,
+        522, 36, 2571, 34, 1, 146, 8, 146, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_488: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseStrokeDisabledSystemColorGrayTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 24, 1, 147, 8, 147, 70,
+        595, 37, 2483, 24, 1, 147, 8, 147, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_489: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseFillSystemColorButtonFaceColorBrushRadioButtonOuterEllipseFillPointerOverSystemColorHighlightTextColorBrushRadioButtonOuterEllipseFillPressedRadioButtonOuterEllipseFillDisabledSystemColorWindowColorBrushRadioButtonOuterEllipseCheckedStrokeSystemColorHighlightColorBrushRadioButtonOuterEllipseCheckedStrokePointerOverSystemColorButtonTextColorBrushRadioButtonOuterEllipseCheckedStrokePressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 31, 1, 148, 8, 148, 8,
-        58, 38, 96, 34, 1, 149, 8, 149, 8,
-        130, 34, 96, 34, 1, 150, 8, 150, 8,
-        164, 35, 199, 27, 1, 151, 8, 151, 8,
-        226, 36, 262, 30, 1, 152, 8, 152, 8,
-        292, 47, 339, 31, 1, 153, 8, 153, 8,
-        370, 43, 27, 31, 1, 154, 8, 154, 8,
+        632, 27, 2605, 31, 1, 148, 8, 148, 8,
+        692, 38, 2571, 34, 1, 149, 8, 149, 8,
+        762, 34, 2571, 34, 1, 150, 8, 150, 8,
+        831, 35, 2636, 27, 1, 151, 8, 151, 8,
+        898, 36, 2541, 30, 1, 152, 8, 152, 8,
+        961, 47, 2452, 31, 1, 153, 8, 153, 8,
+        1037, 43, 2605, 31, 1, 154, 8, 154, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_490: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedStrokeDisabledSystemColorGrayTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 24, 1, 155, 8, 155, 77,
+        1108, 44, 2483, 24, 1, 155, 8, 155, 77,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_491: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedFillSystemColorHighlightTextColorBrushRadioButtonOuterEllipseCheckedFillPointerOverSystemColorButtonFaceColorBrushRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledSystemColorWindowColorBrushRadioButtonCheckGlyphFillSystemColorHighlightColorBrushRadioButtonCheckGlyphFillPointerOverSystemColorButtonTextColorBrushRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledSystemColorGrayTextColorBrushRadioButtonCheckGlyphStrokeSystemControlTransparentBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledRadioButtonCheckGlyphStrokeCheckedRadioButtonCheckGlyphStrokeCheckedPointerOverRadioButtonCheckGlyphStrokeCheckedPressedRadioButtonCheckGlyphStrokeCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 34, 1, 156, 8, 156, 8,
-        68, 45, 113, 31, 1, 157, 8, 157, 8,
-        144, 41, 113, 31, 1, 158, 8, 158, 8,
-        185, 42, 227, 27, 1, 159, 8, 159, 8,
-        254, 25, 279, 30, 1, 160, 8, 160, 8,
-        309, 36, 345, 31, 1, 161, 8, 161, 8,
-        376, 32, 345, 31, 1, 162, 8, 162, 8,
-        408, 33, 441, 29, 1, 163, 8, 163, 8,
-        470, 27, 497, 29, 1, 164, 8, 164, 8,
-        526, 38, 497, 29, 1, 165, 8, 165, 8,
-        564, 34, 497, 29, 1, 166, 8, 166, 8,
-        598, 35, 441, 29, 1, 167, 8, 167, 8,
-        633, 34, 497, 29, 1, 168, 8, 168, 8,
-        667, 45, 345, 31, 1, 169, 8, 169, 8,
-        712, 41, 34, 34, 1, 170, 8, 170, 8,
-        753, 42, 441, 29, 1, 171, 8, 171, 8,
+        1180, 34, 2571, 34, 1, 156, 8, 156, 8,
+        1214, 45, 2605, 31, 1, 157, 8, 157, 8,
+        1259, 41, 2605, 31, 1, 158, 8, 158, 8,
+        1300, 42, 2636, 27, 1, 159, 8, 159, 8,
+        1342, 25, 2541, 30, 1, 160, 8, 160, 8,
+        1400, 36, 2452, 31, 1, 161, 8, 161, 8,
+        1436, 32, 2452, 31, 1, 162, 8, 162, 8,
+        1468, 33, 2483, 29, 1, 163, 8, 163, 8,
+        1501, 27, 2512, 29, 1, 164, 8, 164, 8,
+        1554, 38, 2512, 29, 1, 165, 8, 165, 8,
+        1592, 34, 2512, 29, 1, 166, 8, 166, 8,
+        1626, 35, 2483, 29, 1, 167, 8, 167, 8,
+        1661, 34, 2512, 29, 1, 168, 8, 168, 8,
+        1728, 45, 2452, 31, 1, 169, 8, 169, 8,
+        1773, 41, 2571, 34, 1, 170, 8, 170, 8,
+        1814, 42, 2483, 29, 1, 171, 8, 171, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_492: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonBackgroundThemeBrushSystemColorButtonFaceColorRadioButtonBorderThemeBrushSystemColorButtonTextColorRadioButtonContentDisabledForegroundThemeBrushSystemColorGrayTextColorRadioButtonContentForegroundThemeBrushRadioButtonContentPointerOverForegroundThemeBrushSystemColorHighlightTextColorRadioButtonDisabledBackgroundThemeBrushRadioButtonDisabledBorderThemeBrushRadioButtonDisabledForegroundThemeBrushRadioButtonForegroundThemeBrushRadioButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorRadioButtonPointerOverBorderThemeBrushRadioButtonPointerOverForegroundThemeBrushRadioButtonPressedBackgroundThemeBrushRadioButtonPressedBorderThemeBrushRadioButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 26, 1, 172, 8, 172, 64,
-        57, 27, 84, 26, 1, 173, 8, 173, 60,
-        110, 46, 156, 24, 1, 174, 8, 174, 79,
-        180, 38, 84, 26, 1, 175, 8, 175, 71,
-        218, 49, 267, 29, 1, 176, 8, 176, 82,
-        296, 39, 31, 26, 1, 177, 8, 177, 72,
-        335, 35, 156, 24, 1, 178, 8, 178, 68,
-        370, 39, 156, 24, 1, 179, 8, 179, 72,
-        409, 31, 84, 26, 1, 180, 8, 180, 64,
-        440, 42, 482, 25, 1, 181, 8, 181, 75,
-        507, 38, 84, 26, 1, 182, 8, 182, 71,
-        545, 42, 267, 29, 1, 183, 8, 183, 75,
-        587, 38, 84, 26, 1, 184, 8, 184, 71,
-        625, 34, 84, 26, 1, 185, 8, 185, 67,
-        659, 38, 31, 26, 1, 186, 8, 186, 71,
+        1856, 31, 2605, 26, 1, 172, 8, 172, 64,
+        1887, 27, 2452, 26, 1, 173, 8, 173, 60,
+        1914, 46, 2483, 24, 1, 174, 8, 174, 79,
+        1960, 38, 2452, 26, 1, 175, 8, 175, 71,
+        2374, 49, 2423, 29, 1, 176, 8, 176, 82,
+        1998, 39, 2605, 26, 1, 177, 8, 177, 72,
+        2037, 35, 2483, 24, 1, 178, 8, 178, 68,
+        2072, 39, 2483, 24, 1, 179, 8, 179, 72,
+        2111, 31, 2452, 26, 1, 180, 8, 180, 64,
+        2142, 42, 2541, 25, 1, 181, 8, 181, 75,
+        2184, 38, 2452, 26, 1, 182, 8, 182, 71,
+        2222, 42, 2423, 29, 1, 183, 8, 183, 75,
+        2264, 38, 2452, 26, 1, 184, 8, 184, 71,
+        2302, 34, 2452, 26, 1, 185, 8, 185, 67,
+        2336, 38, 2605, 26, 1, 186, 8, 186, 71,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_493: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarButtonBackgroundSystemControlTransparentBrushAppBarButtonBackgroundPointerOverSystemControlHighlightListLowBrushAppBarButtonBackgroundPressedSystemControlHighlightListMediumBrushAppBarButtonBackgroundDisabledAppBarButtonForegroundSystemControlForegroundBaseHighBrushAppBarButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushAppBarButtonForegroundPressedAppBarButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarButtonBorderBrushSystemControlForegroundTransparentBrushAppBarButtonBorderBrushPointerOverSystemControlHighlightTransparentBrushAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledSystemControlDisabledTransparentBrushAppBarButtonKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushAppBarButtonKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushAppBarButtonKeyboardAcceleratorTextForegroundPressedAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedSystemControlHighlightListAccentLowBrushAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundSystemControlForegroundBaseMediumHighBrushAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 29, 1, 87, 8, 87, 8,
-        51, 33, 84, 34, 1, 88, 8, 88, 8,
-        118, 29, 147, 37, 1, 89, 8, 89, 8,
-        184, 30, 22, 29, 1, 90, 8, 90, 8,
-        214, 22, 236, 36, 1, 91, 8, 91, 8,
-        272, 33, 305, 38, 1, 92, 8, 92, 8,
-        343, 29, 305, 38, 1, 93, 8, 93, 8,
-        372, 30, 402, 39, 1, 94, 8, 94, 8,
-        441, 23, 464, 39, 1, 95, 8, 95, 8,
-        503, 34, 537, 38, 1, 96, 8, 96, 8,
-        575, 30, 537, 38, 1, 97, 8, 97, 8,
-        605, 31, 636, 37, 1, 98, 8, 98, 8,
-        673, 45, 718, 38, 1, 99, 8, 99, 8,
-        756, 56, 812, 40, 1, 100, 8, 100, 8,
-        852, 52, 812, 40, 1, 101, 8, 101, 8,
-        904, 53, 402, 39, 1, 102, 8, 102, 8,
-        957, 35, 992, 40, 1, 103, 8, 103, 8,
-        1032, 35, 305, 38, 1, 104, 8, 104, 8,
-        1067, 58, 812, 40, 1, 105, 8, 105, 8,
-        1125, 36, 22, 29, 1, 106, 8, 106, 8,
-        1161, 36, 1197, 42, 1, 107, 8, 107, 8,
-        1239, 47, 305, 38, 1, 108, 8, 108, 8,
-        1286, 43, 305, 38, 1, 109, 8, 109, 8,
-        1329, 49, 305, 38, 1, 110, 8, 110, 8,
-        1378, 44, 402, 39, 1, 111, 8, 111, 8,
+        0, 22, 1187, 29, 1, 87, 8, 87, 8,
+        53, 33, 1216, 34, 1, 88, 8, 88, 8,
+        115, 29, 1250, 37, 1, 89, 8, 89, 8,
+        172, 30, 1187, 29, 1, 90, 8, 90, 8,
+        230, 22, 1287, 36, 1, 91, 8, 91, 8,
+        277, 33, 1323, 38, 1, 92, 8, 92, 8,
+        310, 29, 1323, 38, 1, 93, 8, 93, 8,
+        366, 30, 1361, 39, 1, 94, 8, 94, 8,
+        422, 23, 1400, 39, 1, 95, 8, 95, 8,
+        477, 34, 1439, 38, 1, 96, 8, 96, 8,
+        511, 30, 1439, 38, 1, 97, 8, 97, 8,
+        541, 31, 1477, 37, 1, 98, 8, 98, 8,
+        572, 45, 1514, 38, 1, 99, 8, 99, 8,
+        617, 56, 1552, 40, 1, 100, 8, 100, 8,
+        673, 52, 1552, 40, 1, 101, 8, 101, 8,
+        751, 53, 1361, 39, 1, 102, 8, 102, 8,
+        804, 35, 1592, 40, 1, 103, 8, 103, 8,
+        839, 35, 1323, 38, 1, 104, 8, 104, 8,
+        874, 58, 1552, 40, 1, 105, 8, 105, 8,
+        932, 36, 1187, 29, 1, 106, 8, 106, 8,
+        968, 36, 1632, 42, 1, 107, 8, 107, 8,
+        1004, 47, 1323, 38, 1, 108, 8, 108, 8,
+        1051, 43, 1323, 38, 1, 109, 8, 109, 8,
+        1094, 49, 1323, 38, 1, 110, 8, 110, 8,
+        1143, 44, 1361, 39, 1, 111, 8, 111, 8,
     ],
 };
 
@@ -14511,154 +14712,154 @@ static POPULATE_WINUITHEME_XAML_ROWS_496: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_497: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarSeparatorForegroundSystemControlForegroundBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 41, 1, 21, 8, 21, 8,
+        0, 25, 55, 41, 1, 21, 8, 21, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_498: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonBackgroundSystemColorButtonFaceColorBrushAppBarToggleButtonBackgroundPointerOverSystemColorHighlightColorBrushAppBarToggleButtonBackgroundPressedAppBarToggleButtonBackgroundDisabledSystemColorWindowColorBrushAppBarToggleButtonBackgroundCheckedAppBarToggleButtonBackgroundCheckedPointerOverSystemColorHighlightTextColorBrushAppBarToggleButtonBackgroundCheckedPressedAppBarToggleButtonBackgroundCheckedDisabledSystemColorGrayTextColorBrushAppBarToggleButtonBackgroundHighLightOverlaySystemControlTransparentBrushAppBarToggleButtonBackgroundHighLightOverlayPointerOverSystemControlHighlightListLowBrushAppBarToggleButtonBackgroundHighLightOverlayPressedSystemControlHighlightListMediumBrushAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundSystemColorButtonTextColorBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedAppBarToggleButtonForegroundDisabledAppBarToggleButtonForegroundCheckedAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedAppBarToggleButtonForegroundCheckedDisabledAppBarToggleButtonBorderBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverSystemControlHighlightAltBaseHighBrushAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 31, 1, 145, 8, 145, 8,
-        59, 39, 98, 30, 1, 146, 8, 146, 8,
-        128, 35, 98, 30, 1, 147, 8, 147, 8,
-        163, 36, 199, 27, 1, 148, 8, 148, 8,
-        226, 35, 98, 30, 1, 149, 8, 149, 8,
-        261, 46, 307, 34, 1, 150, 8, 150, 8,
-        341, 42, 307, 34, 1, 151, 8, 151, 8,
-        383, 43, 426, 29, 1, 152, 8, 152, 8,
-        455, 44, 499, 29, 1, 153, 8, 153, 8,
-        528, 55, 583, 34, 1, 154, 8, 154, 8,
-        617, 51, 668, 37, 1, 155, 8, 155, 8,
-        705, 62, 583, 34, 1, 156, 8, 156, 8,
-        767, 58, 668, 37, 1, 157, 8, 157, 8,
-        825, 28, 853, 31, 1, 158, 8, 158, 8,
-        884, 39, 307, 34, 1, 159, 8, 159, 8,
-        923, 35, 307, 34, 1, 160, 8, 160, 8,
-        958, 36, 426, 29, 1, 161, 8, 161, 8,
-        994, 35, 307, 34, 1, 162, 8, 162, 8,
-        1029, 46, 98, 30, 1, 163, 8, 163, 8,
-        1075, 42, 98, 30, 1, 164, 8, 164, 8,
-        1117, 43, 199, 27, 1, 165, 8, 165, 8,
-        1160, 29, 853, 31, 1, 166, 8, 166, 8,
-        1189, 40, 853, 31, 1, 167, 8, 167, 8,
-        1229, 36, 853, 31, 1, 168, 8, 168, 8,
-        1265, 37, 426, 29, 1, 169, 8, 169, 8,
-        1302, 36, 98, 30, 1, 170, 8, 170, 8,
-        1338, 47, 98, 30, 1, 171, 8, 171, 8,
-        1385, 43, 98, 30, 1, 172, 8, 172, 8,
-        1428, 44, 426, 29, 1, 173, 8, 173, 8,
-        1472, 38, 853, 31, 1, 174, 8, 174, 8,
-        1510, 49, 307, 34, 1, 175, 8, 175, 8,
-        1559, 45, 307, 34, 1, 176, 8, 176, 8,
-        1604, 46, 426, 29, 1, 177, 8, 177, 8,
-        1650, 45, 307, 34, 1, 178, 8, 178, 8,
-        1695, 56, 98, 30, 1, 179, 8, 179, 8,
-        1751, 52, 98, 30, 1, 180, 8, 180, 8,
-        1803, 53, 199, 27, 1, 181, 8, 181, 8,
-        1856, 52, 1908, 38, 1, 182, 8, 182, 8,
-        1946, 48, 1908, 38, 1, 183, 8, 183, 8,
-        1994, 49, 2043, 39, 1, 184, 8, 184, 8,
-        2082, 59, 1908, 38, 1, 185, 8, 185, 8,
-        2141, 55, 1908, 38, 1, 186, 8, 186, 8,
-        2196, 56, 2043, 39, 1, 187, 8, 187, 8,
+        0, 28, 3470, 31, 1, 145, 8, 145, 8,
+        59, 39, 3501, 30, 1, 146, 8, 146, 8,
+        127, 35, 3501, 30, 1, 147, 8, 147, 8,
+        190, 36, 3531, 27, 1, 148, 8, 148, 8,
+        254, 35, 3501, 30, 1, 149, 8, 149, 8,
+        316, 46, 3558, 34, 1, 150, 8, 150, 8,
+        391, 42, 3558, 34, 1, 151, 8, 151, 8,
+        461, 43, 3592, 29, 1, 152, 8, 152, 8,
+        532, 44, 3621, 29, 1, 153, 8, 153, 8,
+        576, 55, 3650, 34, 1, 154, 8, 154, 8,
+        631, 51, 3684, 37, 1, 155, 8, 155, 8,
+        682, 62, 3650, 34, 1, 156, 8, 156, 8,
+        744, 58, 3684, 37, 1, 157, 8, 157, 8,
+        802, 28, 3721, 31, 1, 158, 8, 158, 8,
+        855, 39, 3558, 34, 1, 159, 8, 159, 8,
+        894, 35, 3558, 34, 1, 160, 8, 160, 8,
+        956, 36, 3592, 29, 1, 161, 8, 161, 8,
+        1018, 35, 3558, 34, 1, 162, 8, 162, 8,
+        1086, 46, 3501, 30, 1, 163, 8, 163, 8,
+        1132, 42, 3501, 30, 1, 164, 8, 164, 8,
+        1209, 43, 3531, 27, 1, 165, 8, 165, 8,
+        1281, 29, 3721, 31, 1, 166, 8, 166, 8,
+        1342, 40, 3721, 31, 1, 167, 8, 167, 8,
+        1382, 36, 3721, 31, 1, 168, 8, 168, 8,
+        1418, 37, 3592, 29, 1, 169, 8, 169, 8,
+        1455, 36, 3501, 30, 1, 170, 8, 170, 8,
+        1524, 47, 3501, 30, 1, 171, 8, 171, 8,
+        1571, 43, 3501, 30, 1, 172, 8, 172, 8,
+        1614, 44, 3592, 29, 1, 173, 8, 173, 8,
+        1658, 38, 3721, 31, 1, 174, 8, 174, 8,
+        1696, 49, 3558, 34, 1, 175, 8, 175, 8,
+        1745, 45, 3558, 34, 1, 176, 8, 176, 8,
+        1790, 46, 3592, 29, 1, 177, 8, 177, 8,
+        1836, 45, 3558, 34, 1, 178, 8, 178, 8,
+        1881, 56, 3501, 30, 1, 179, 8, 179, 8,
+        1937, 52, 3501, 30, 1, 180, 8, 180, 8,
+        1989, 53, 3531, 27, 1, 181, 8, 181, 8,
+        2042, 52, 3752, 38, 1, 182, 8, 182, 8,
+        2094, 48, 3752, 38, 1, 183, 8, 183, 8,
+        2142, 49, 3790, 39, 1, 184, 8, 184, 8,
+        2191, 59, 3752, 38, 1, 185, 8, 185, 8,
+        2250, 55, 3752, 38, 1, 186, 8, 186, 8,
+        2305, 56, 3790, 39, 1, 187, 8, 187, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_499: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonCheckedBackgroundThemeBrushSystemColorHighlightColorAppBarToggleButtonCheckedBorderThemeBrushSystemColorButtonTextColorAppBarToggleButtonCheckedDisabledBackgroundThemeBrushSystemColorGrayTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 25, 1, 188, 8, 188, 78,
-        70, 41, 111, 26, 1, 189, 8, 189, 74,
-        137, 53, 190, 24, 1, 190, 8, 190, 86,
+        2361, 45, 3501, 25, 1, 188, 8, 188, 78,
+        2406, 41, 3721, 26, 1, 189, 8, 189, 74,
+        2447, 53, 3592, 24, 1, 190, 8, 190, 86,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_500: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonCheckedDisabledBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 49, 65535, 255, 1, 191, 8,
+        2500, 49, 65535, 255, 1, 191, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_501: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonCheckedDisabledForegroundThemeBrushSystemColorButtonFaceColorAppBarToggleButtonCheckedForegroundThemeBrushSystemColorHighlightTextColorAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushSystemColorHighlightColorAppBarToggleButtonCheckedPointerOverBorderThemeBrushSystemColorButtonTextColorAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 53, 53, 26, 1, 192, 8, 192, 86,
-        79, 45, 124, 29, 1, 193, 8, 193, 78,
-        153, 56, 209, 25, 1, 194, 8, 194, 89,
-        234, 52, 286, 26, 1, 195, 8, 195, 85,
-        312, 52, 286, 26, 1, 196, 8, 196, 85,
-        364, 48, 286, 26, 1, 197, 8, 197, 81,
-        412, 52, 53, 26, 1, 198, 8, 198, 85,
-        464, 49, 209, 25, 1, 199, 8, 199, 82,
+        2549, 53, 3470, 26, 1, 192, 8, 192, 86,
+        2602, 45, 3558, 29, 1, 193, 8, 193, 78,
+        2647, 56, 3501, 25, 1, 194, 8, 194, 89,
+        2703, 52, 3721, 26, 1, 195, 8, 195, 85,
+        2755, 52, 3721, 26, 1, 196, 8, 196, 85,
+        2807, 48, 3721, 26, 1, 197, 8, 197, 81,
+        2855, 52, 3470, 26, 1, 198, 8, 198, 85,
+        2907, 49, 3501, 25, 1, 199, 8, 199, 82,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_502: rt::PackedRows = rt::PackedRows {
-    strings: "AppBarToggleButtonKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledSystemControlDisabledBaseMediumLowBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 38, 1, 200, 8, 200, 8,
-        89, 62, 151, 40, 1, 201, 8, 201, 8,
-        191, 58, 151, 40, 1, 202, 8, 202, 8,
-        249, 59, 308, 39, 1, 203, 8, 203, 8,
-        347, 58, 51, 38, 1, 204, 8, 204, 8,
-        405, 69, 151, 40, 1, 205, 8, 205, 8,
-        474, 65, 151, 40, 1, 206, 8, 206, 8,
-        539, 66, 308, 39, 1, 207, 8, 207, 8,
+        2956, 51, 3829, 38, 1, 200, 8, 200, 8,
+        3007, 62, 3867, 40, 1, 201, 8, 201, 8,
+        3069, 58, 3867, 40, 1, 202, 8, 202, 8,
+        3153, 59, 3790, 39, 1, 203, 8, 203, 8,
+        3212, 58, 3829, 38, 1, 204, 8, 204, 8,
+        3270, 69, 3867, 40, 1, 205, 8, 205, 8,
+        3339, 65, 3867, 40, 1, 206, 8, 206, 8,
+        3404, 66, 3790, 39, 1, 207, 8, 207, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_503: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxForegroundSystemControlForegroundBaseHighBrushListBoxBackgroundSystemControlBackgroundChromeMediumLowBrushListBoxBorderListBoxItemForegroundListBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushListBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushListBoxItemBackgroundPressedSystemControlHighlightListMediumBrushListBoxItemBackgroundSelectedSystemControlHighlightListAccentMediumLowBrushListBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentLowBrushListBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentVeryHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 36, 1, 72, 8, 72, 8,
-        53, 17, 70, 43, 1, 73, 8, 73, 8,
-        113, 13, 17, 36, 1, 74, 8, 74, 8,
-        126, 21, 17, 36, 1, 75, 8, 75, 8,
-        147, 29, 176, 39, 1, 76, 8, 76, 8,
-        215, 32, 247, 34, 1, 77, 8, 77, 8,
-        281, 28, 309, 37, 1, 78, 8, 78, 8,
-        346, 29, 375, 46, 1, 79, 8, 79, 8,
-        421, 40, 461, 40, 1, 80, 8, 80, 8,
-        501, 36, 537, 45, 1, 81, 8, 81, 8,
+        0, 17, 1102, 36, 1, 72, 8, 72, 8,
+        42, 17, 59, 43, 1, 73, 8, 73, 8,
+        102, 13, 1102, 36, 1, 74, 8, 74, 8,
+        115, 21, 1102, 36, 1, 75, 8, 75, 8,
+        136, 29, 1138, 39, 1, 76, 8, 76, 8,
+        191, 32, 1177, 34, 1, 77, 8, 77, 8,
+        252, 28, 1211, 37, 1, 78, 8, 78, 8,
+        308, 29, 1248, 46, 1, 79, 8, 79, 8,
+        377, 40, 337, 40, 1, 80, 8, 80, 8,
+        460, 36, 1294, 45, 1, 81, 8, 81, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_504: rt::PackedRows = rt::PackedRows {
-    strings: "ListBoxBackgroundThemeBrushSystemColorWindowColorListBoxBorderThemeBrushSystemColorButtonTextColorListBoxDisabledForegroundThemeBrushSystemColorGrayTextColorListBoxFocusBackgroundThemeBrushSystemColorButtonFaceColorListBoxForegroundThemeBrushListBoxItemDisabledForegroundThemeBrushListBoxItemPointerOverBackgroundThemeBrushSystemColorHighlightColorListBoxItemPointerOverForegroundThemeBrushSystemColorHighlightTextColorListBoxItemPressedBackgroundThemeBrushListBoxItemPressedForegroundThemeBrushListBoxItemSelectedDisabledBackgroundThemeBrushListBoxItemSelectedDisabledForegroundThemeBrushListBoxItemSelectedBackgroundThemeBrushListBoxItemSelectedForegroundThemeBrushListBoxItemSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 22, 1, 82, 8, 82, 60,
-        49, 23, 72, 26, 1, 83, 8, 83, 56,
-        98, 35, 133, 24, 1, 84, 8, 84, 68,
-        157, 32, 189, 26, 1, 85, 8, 85, 65,
-        215, 27, 72, 26, 1, 86, 8, 86, 60,
-        242, 39, 133, 24, 1, 87, 8, 87, 72,
-        281, 42, 323, 25, 1, 88, 8, 88, 75,
-        348, 42, 390, 29, 1, 89, 8, 89, 75,
-        419, 38, 72, 26, 1, 90, 8, 90, 71,
-        457, 38, 189, 26, 1, 91, 8, 91, 71,
-        495, 47, 133, 24, 1, 92, 8, 92, 80,
-        542, 47, 189, 26, 1, 93, 8, 93, 80,
-        589, 39, 323, 25, 1, 94, 8, 94, 72,
-        628, 39, 390, 29, 1, 95, 8, 95, 72,
-        667, 50, 323, 25, 1, 96, 8, 96, 83,
+        537, 27, 1339, 22, 1, 82, 8, 82, 60,
+        564, 23, 1361, 26, 1, 83, 8, 83, 56,
+        587, 35, 1387, 24, 1, 84, 8, 84, 68,
+        622, 32, 1411, 26, 1, 85, 8, 85, 65,
+        654, 27, 1361, 26, 1, 86, 8, 86, 60,
+        681, 39, 1387, 24, 1, 87, 8, 87, 72,
+        720, 42, 1437, 25, 1, 88, 8, 88, 75,
+        762, 42, 1462, 29, 1, 89, 8, 89, 75,
+        804, 38, 1361, 26, 1, 90, 8, 90, 71,
+        842, 38, 1411, 26, 1, 91, 8, 91, 71,
+        919, 47, 1387, 24, 1, 92, 8, 92, 80,
+        966, 47, 1411, 26, 1, 93, 8, 93, 80,
+        880, 39, 1437, 25, 1, 94, 8, 94, 72,
+        1013, 39, 1462, 29, 1, 95, 8, 95, 72,
+        1052, 50, 1437, 25, 1, 96, 8, 96, 83,
     ],
 };
 
@@ -14670,114 +14871,114 @@ static POPULATE_WINUITHEME_XAML_ROWS_505: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_506: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchContentForegroundSystemColorWindowTextColorBrushToggleSwitchContentForegroundDisabledSystemColorGrayTextColorBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSystemControlTransparentBrushToggleSwitchContainerBackgroundPointerOverSystemControlTransparentColorToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffSystemColorButtonFaceColorBrushToggleSwitchFillOffPointerOverSystemColorHighlightTextColorToggleSwitchFillOffPressedToggleSwitchFillOffDisabledSystemColorWindowColorToggleSwitchStrokeOffSystemColorButtonTextColorBrushToggleSwitchStrokeOffPointerOverSystemColorHighlightColorToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverSystemColorHighlightColorBrushToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchFillOnToggleSwitchFillOnPointerOverToggleSwitchFillOnPressedToggleSwitchFillOnDisabledSystemColorWindowColorBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOnSystemColorHighlightTextColorBrushToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledToggleSwitchKnobStrokeOn",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 31, 1, 137, 8, 137, 8,
-        60, 37, 97, 29, 1, 138, 8, 138, 8,
-        126, 28, 29, 31, 1, 139, 8, 139, 8,
-        154, 36, 97, 29, 1, 140, 8, 140, 8,
-        190, 31, 221, 29, 1, 141, 8, 141, 8,
-        250, 42, 292, 29, 1, 142, 8, 142, 8,
-        321, 38, 292, 29, 1, 143, 8, 143, 8,
-        359, 39, 292, 29, 1, 144, 8, 144, 8,
-        398, 19, 417, 31, 1, 145, 8, 145, 8,
-        448, 30, 478, 29, 1, 146, 8, 146, 8,
-        507, 26, 478, 29, 1, 147, 8, 147, 8,
-        533, 27, 560, 22, 1, 148, 8, 148, 8,
-        582, 21, 603, 31, 1, 149, 8, 149, 8,
-        634, 32, 666, 25, 1, 150, 8, 150, 8,
-        691, 28, 666, 25, 1, 151, 8, 151, 8,
-        719, 29, 97, 24, 1, 152, 8, 152, 8,
-        748, 23, 603, 31, 1, 153, 8, 153, 8,
-        771, 34, 805, 30, 1, 154, 8, 154, 8,
-        835, 30, 805, 30, 1, 155, 8, 155, 8,
-        865, 31, 97, 29, 1, 156, 8, 156, 8,
-        896, 18, 805, 30, 1, 157, 8, 157, 8,
-        914, 29, 417, 31, 1, 158, 8, 158, 8,
-        943, 25, 417, 31, 1, 159, 8, 159, 8,
-        968, 26, 994, 27, 1, 160, 8, 160, 8,
-        1021, 20, 805, 30, 1, 161, 8, 161, 8,
-        1041, 31, 603, 31, 1, 162, 8, 162, 8,
-        1072, 27, 603, 31, 1, 163, 8, 163, 8,
-        1099, 28, 97, 29, 1, 164, 8, 164, 8,
-        1127, 22, 1149, 34, 1, 165, 8, 165, 8,
-        1183, 33, 603, 31, 1, 166, 8, 166, 8,
-        1216, 29, 603, 31, 1, 167, 8, 167, 8,
-        1245, 30, 97, 29, 1, 168, 8, 168, 8,
-        1275, 24, 221, 29, 1, 169, 8, 169, 8,
+        0, 29, 2418, 31, 1, 137, 8, 137, 8,
+        54, 37, 2449, 29, 1, 138, 8, 138, 8,
+        117, 28, 2418, 31, 1, 139, 8, 139, 8,
+        145, 36, 2449, 29, 1, 140, 8, 140, 8,
+        181, 31, 2478, 29, 1, 141, 8, 141, 8,
+        243, 42, 2507, 29, 1, 142, 8, 142, 8,
+        285, 38, 2507, 29, 1, 143, 8, 143, 8,
+        323, 39, 2507, 29, 1, 144, 8, 144, 8,
+        362, 19, 2536, 31, 1, 145, 8, 145, 8,
+        414, 30, 2567, 29, 1, 146, 8, 146, 8,
+        471, 26, 2567, 29, 1, 147, 8, 147, 8,
+        527, 27, 2596, 22, 1, 148, 8, 148, 8,
+        581, 21, 2618, 31, 1, 149, 8, 149, 8,
+        638, 32, 2649, 25, 1, 150, 8, 150, 8,
+        670, 28, 2649, 25, 1, 151, 8, 151, 8,
+        698, 29, 2449, 24, 1, 152, 8, 152, 8,
+        1075, 23, 2618, 31, 1, 153, 8, 153, 8,
+        1125, 34, 2674, 30, 1, 154, 8, 154, 8,
+        1159, 30, 2674, 30, 1, 155, 8, 155, 8,
+        1189, 31, 2449, 29, 1, 156, 8, 156, 8,
+        759, 18, 2674, 30, 1, 157, 8, 157, 8,
+        804, 29, 2536, 31, 1, 158, 8, 158, 8,
+        862, 25, 2536, 31, 1, 159, 8, 159, 8,
+        915, 26, 2704, 27, 1, 160, 8, 160, 8,
+        969, 20, 2674, 30, 1, 161, 8, 161, 8,
+        989, 31, 2618, 31, 1, 162, 8, 162, 8,
+        1020, 27, 2618, 31, 1, 163, 8, 163, 8,
+        1047, 28, 2449, 29, 1, 164, 8, 164, 8,
+        1220, 22, 2731, 34, 1, 165, 8, 165, 8,
+        1275, 33, 2618, 31, 1, 166, 8, 166, 8,
+        1308, 29, 2618, 31, 1, 167, 8, 167, 8,
+        1337, 30, 2449, 29, 1, 168, 8, 168, 8,
+        1401, 24, 2478, 29, 1, 169, 8, 169, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_507: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchCurtainBackgroundThemeBrushSystemColorHighlightColorToggleSwitchCurtainDisabledBackgroundThemeBrushSystemColorButtonFaceColorToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushSystemColorGrayTextColorToggleSwitchForegroundThemeBrushSystemColorButtonTextColorToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 25, 1, 170, 8, 170, 72,
-        64, 47, 111, 26, 1, 171, 8, 171, 80,
-        137, 50, 39, 25, 1, 172, 8, 172, 83,
-        187, 46, 39, 25, 1, 173, 8, 173, 79,
-        233, 40, 273, 24, 1, 174, 8, 174, 73,
-        297, 32, 329, 26, 1, 175, 8, 175, 65,
-        355, 46, 273, 24, 1, 176, 8, 176, 79,
-        401, 38, 329, 26, 1, 177, 8, 177, 71,
-        439, 39, 329, 26, 1, 178, 8, 178, 72,
-        478, 47, 273, 24, 1, 179, 8, 179, 80,
-        525, 37, 329, 26, 1, 180, 8, 180, 70,
-        562, 33, 329, 26, 1, 181, 8, 181, 66,
-        595, 45, 273, 24, 1, 182, 8, 182, 78,
-        640, 41, 273, 24, 1, 183, 8, 183, 74,
-        681, 48, 39, 25, 1, 184, 8, 184, 81,
-        729, 44, 329, 26, 1, 185, 8, 185, 77,
-        773, 44, 111, 26, 1, 186, 8, 186, 77,
-        817, 44, 329, 26, 1, 187, 8, 187, 77,
-        861, 37, 111, 26, 1, 188, 8, 188, 70,
+        1451, 39, 2649, 25, 1, 170, 8, 170, 72,
+        1490, 47, 2536, 26, 1, 171, 8, 171, 80,
+        1537, 50, 2649, 25, 1, 172, 8, 172, 83,
+        1587, 46, 2649, 25, 1, 173, 8, 173, 79,
+        1633, 40, 2449, 24, 1, 174, 8, 174, 73,
+        1673, 32, 2618, 26, 1, 175, 8, 175, 65,
+        1705, 46, 2449, 24, 1, 176, 8, 176, 79,
+        1751, 38, 2618, 26, 1, 177, 8, 177, 71,
+        1789, 39, 2618, 26, 1, 178, 8, 178, 72,
+        1828, 47, 2449, 24, 1, 179, 8, 179, 80,
+        1875, 37, 2618, 26, 1, 180, 8, 180, 70,
+        1912, 33, 2618, 26, 1, 181, 8, 181, 66,
+        1945, 45, 2449, 24, 1, 182, 8, 182, 78,
+        1990, 41, 2449, 24, 1, 183, 8, 183, 74,
+        2031, 48, 2649, 25, 1, 184, 8, 184, 81,
+        2079, 44, 2618, 26, 1, 185, 8, 185, 77,
+        2123, 44, 2536, 26, 1, 186, 8, 186, 77,
+        2167, 44, 2618, 26, 1, 187, 8, 187, 77,
+        2211, 37, 2536, 26, 1, 188, 8, 188, 70,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_508: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchTrackBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 65535, 255, 1, 189, 8,
+        2248, 33, 65535, 255, 1, 189, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_509: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchTrackDisabledBackgroundThemeBrushSystemColorButtonFaceColorToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 26, 1, 190, 8, 190, 78,
-        71, 48, 45, 26, 1, 191, 8, 191, 81,
-        119, 44, 45, 26, 1, 192, 8, 192, 77,
+        2281, 45, 2536, 26, 1, 190, 8, 190, 78,
+        2326, 48, 2536, 26, 1, 191, 8, 191, 81,
+        2374, 44, 2536, 26, 1, 192, 8, 192, 77,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_510: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarBackgroundSystemControlBackgroundChromeMediumBrushCommandBarBackgroundOpenCommandBarBorderBrushOpenSystemControlForegroundBaseHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 40, 1, 59, 8, 59, 8,
-        60, 24, 20, 40, 1, 60, 8, 60, 8,
-        84, 25, 109, 36, 1, 61, 8, 61, 8,
+        0, 20, 499, 40, 1, 59, 8, 59, 8,
+        52, 24, 499, 40, 1, 60, 8, 60, 8,
+        109, 25, 539, 36, 1, 61, 8, 61, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_511: rt::PackedRows = rt::PackedRows {
-    strings: "CommandBarForegroundSystemControlForegroundBaseHighBrushCommandBarHighContrastBorderSystemControlForegroundTransparentBrushCommandBarEllipsisIconForegroundDisabledSystemControlDisabledBaseMediumLowBrushCommandBarOverflowPresenterBackgroundSystemControlBackgroundChromeMediumLowBrushCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 36, 1, 63, 8, 63, 8,
-        56, 28, 84, 39, 1, 64, 8, 64, 8,
-        123, 40, 163, 39, 1, 65, 8, 65, 8,
-        202, 37, 239, 43, 1, 66, 8, 66, 8,
-        282, 38, 320, 33, 1, 67, 8, 67, 8,
-        353, 39, 392, 47, 1, 68, 8, 68, 8,
+        166, 20, 539, 36, 1, 63, 8, 63, 8,
+        211, 28, 575, 39, 1, 64, 8, 64, 8,
+        239, 40, 614, 39, 1, 65, 8, 65, 8,
+        305, 37, 653, 43, 1, 66, 8, 66, 8,
+        342, 38, 380, 33, 1, 67, 8, 67, 8,
+        413, 39, 452, 47, 1, 68, 8, 68, 8,
     ],
 };
 
@@ -14801,51 +15002,51 @@ static POPULATE_WINUITHEME_XAML_ROWS_513: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_514: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemBackgroundSystemColorWindowColorGridViewItemBackgroundPointerOverGridViewItemBackgroundPressedGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundSystemColorWindowTextColorGridViewItemForegroundPointerOverGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushGridViewItemFocusVisualSecondaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 22, 1, 101, 8, 101, 55,
-        44, 33, 22, 22, 1, 102, 8, 102, 66,
-        77, 29, 22, 22, 1, 103, 8, 103, 62,
-        106, 30, 22, 22, 1, 104, 8, 104, 63,
-        136, 41, 22, 22, 1, 105, 8, 105, 74,
-        177, 37, 22, 22, 1, 106, 8, 106, 70,
-        214, 22, 236, 26, 1, 107, 8, 107, 55,
-        262, 33, 236, 26, 1, 108, 8, 108, 66,
-        295, 30, 236, 26, 1, 109, 8, 109, 63,
-        325, 35, 236, 26, 1, 110, 8, 110, 68,
-        360, 37, 22, 22, 1, 111, 8, 111, 70,
+        0, 22, 2002, 22, 1, 101, 8, 101, 55,
+        53, 33, 2002, 22, 1, 102, 8, 102, 66,
+        115, 29, 2002, 22, 1, 103, 8, 103, 62,
+        172, 30, 2002, 22, 1, 104, 8, 104, 63,
+        202, 41, 2002, 22, 1, 105, 8, 105, 74,
+        243, 37, 2002, 22, 1, 106, 8, 106, 70,
+        280, 22, 2024, 26, 1, 107, 8, 107, 55,
+        327, 33, 2024, 26, 1, 108, 8, 108, 66,
+        387, 30, 2024, 26, 1, 109, 8, 109, 63,
+        417, 35, 2024, 26, 1, 110, 8, 110, 68,
+        478, 37, 2002, 22, 1, 111, 8, 111, 70,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_515: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemFocusBorderBrushSystemControlForegroundAltHighBrushGridViewItemFocusSecondaryBorderBrushSystemControlForegroundBaseHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 35, 1, 112, 8, 112, 8,
-        63, 37, 100, 36, 1, 113, 8, 113, 8,
+        541, 28, 2050, 35, 1, 112, 8, 112, 8,
+        569, 37, 2085, 36, 1, 113, 8, 113, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_516: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemCheckBrushSystemColorWindowTextColorGridViewItemCheckBoxBrushSystemColorButtonFaceColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 26, 1, 114, 8, 114, 55,
-        48, 25, 73, 26, 1, 115, 8, 115, 58,
+        606, 22, 2024, 26, 1, 114, 8, 114, 55,
+        661, 25, 2121, 26, 1, 115, 8, 115, 58,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_517: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemDragBackgroundSystemControlTransparentBrushGridViewItemDragForegroundSystemControlHighlightAltChromeWhiteBrushGridViewItemPlaceholderBackgroundSystemControlDisabledChromeDisabledHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 29, 1, 116, 8, 116, 8,
-        55, 26, 81, 41, 1, 117, 8, 117, 8,
-        122, 33, 155, 44, 1, 118, 8, 118, 8,
+        721, 26, 2147, 29, 1, 116, 8, 116, 8,
+        747, 26, 2176, 41, 1, 117, 8, 117, 8,
+        773, 33, 2217, 44, 1, 118, 8, 118, 8,
     ],
 };
 
@@ -14857,77 +15058,77 @@ static POPULATE_WINUITHEME_XAML_ROWS_518: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_519: rt::PackedRows = rt::PackedRows {
-    strings: "GridViewItemPointerOverBorderBrushSystemColorHighlightColorGridViewItemSelectedBorderBrushGridViewItemSelectedPointerOverBorderBrushGridViewItemSelectedPressedBorderBrushGridViewItemSelectedDisabledBorderBrushSystemColorGrayTextColorGridViewItemSelectedInnerBorderBrushSystemColorWindowTextColorGridViewItemCheckPressedBrushSystemColorWindowColorGridViewItemCheckDisabledBrushGridViewItemCheckBoxPointerOverBrushSystemColorButtonFaceColorGridViewItemCheckBoxPressedBrushGridViewItemCheckBoxDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushSystemColorButtonTextColorGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 25, 1, 122, 8, 122, 67,
-        59, 31, 34, 25, 1, 123, 8, 123, 64,
-        90, 42, 34, 25, 1, 124, 8, 124, 75,
-        132, 38, 34, 25, 1, 125, 8, 125, 71,
-        170, 39, 209, 24, 1, 126, 8, 126, 72,
-        233, 36, 269, 26, 1, 127, 8, 127, 69,
-        295, 29, 324, 22, 1, 128, 8, 128, 62,
-        346, 30, 209, 24, 1, 129, 8, 129, 63,
-        376, 36, 412, 26, 1, 130, 8, 130, 69,
-        438, 32, 412, 26, 1, 131, 8, 131, 65,
-        470, 33, 412, 26, 1, 132, 8, 132, 66,
-        503, 33, 324, 22, 1, 133, 8, 133, 66,
-        536, 44, 324, 22, 1, 134, 8, 134, 77,
-        580, 40, 324, 22, 1, 135, 8, 135, 73,
-        620, 41, 324, 22, 1, 136, 8, 136, 74,
-        661, 31, 692, 26, 1, 137, 8, 137, 64,
-        718, 42, 692, 26, 1, 138, 8, 138, 75,
-        760, 38, 692, 26, 1, 139, 8, 139, 71,
-        798, 39, 692, 26, 1, 140, 8, 140, 72,
-        837, 38, 324, 22, 1, 141, 8, 141, 71,
+        841, 34, 2261, 25, 1, 122, 8, 122, 67,
+        914, 31, 2261, 25, 1, 123, 8, 123, 64,
+        972, 42, 2261, 25, 1, 124, 8, 124, 75,
+        1043, 38, 2261, 25, 1, 125, 8, 125, 71,
+        1109, 39, 2286, 24, 1, 126, 8, 126, 72,
+        1176, 36, 2024, 26, 1, 127, 8, 127, 69,
+        1245, 29, 2002, 22, 1, 128, 8, 128, 62,
+        1309, 30, 2286, 24, 1, 129, 8, 129, 63,
+        1373, 36, 2121, 26, 1, 130, 8, 130, 69,
+        1446, 32, 2121, 26, 1, 131, 8, 131, 65,
+        1514, 33, 2121, 26, 1, 132, 8, 132, 66,
+        1583, 33, 2002, 22, 1, 133, 8, 133, 66,
+        1616, 44, 2002, 22, 1, 134, 8, 134, 77,
+        1660, 40, 2002, 22, 1, 135, 8, 135, 73,
+        1700, 41, 2002, 22, 1, 136, 8, 136, 74,
+        1741, 31, 2310, 26, 1, 137, 8, 137, 64,
+        1808, 42, 2310, 26, 1, 138, 8, 138, 75,
+        1850, 38, 2310, 26, 1, 139, 8, 139, 71,
+        1925, 39, 2310, 26, 1, 140, 8, 140, 72,
+        1964, 38, 2002, 22, 1, 141, 8, 141, 71,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_520: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemBorderBackgroundSystemColorButtonFaceColorListViewItemBackgroundSystemColorWindowColorListViewItemBackgroundPointerOverSystemColorHighlightColorListViewItemBackgroundPressedListViewItemBackgroundSelectedListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundSystemColorButtonTextColorListViewItemForegroundPointerOverSystemColorHighlightTextColorListViewItemForegroundPressedListViewItemForegroundSelectedListViewItemForegroundSelectedPressedListViewItemForegroundSelectedPointerOverListViewItemFocusVisualPrimaryBrushSystemColorWindowTextColorListViewItemFocusVisualSecondaryBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushListViewItemCheckBoxBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 26, 1, 161, 8, 161, 61,
-        54, 22, 76, 22, 1, 162, 8, 162, 55,
-        98, 33, 131, 25, 1, 163, 8, 163, 66,
-        156, 29, 131, 25, 1, 164, 8, 164, 62,
-        185, 30, 131, 25, 1, 165, 8, 165, 63,
-        215, 41, 131, 25, 1, 166, 8, 166, 74,
-        256, 37, 131, 25, 1, 167, 8, 167, 70,
-        293, 22, 315, 26, 1, 168, 8, 168, 55,
-        341, 33, 374, 29, 1, 169, 8, 169, 66,
-        403, 29, 374, 29, 1, 170, 8, 170, 62,
-        432, 30, 374, 29, 1, 171, 8, 171, 63,
-        462, 37, 374, 29, 1, 172, 8, 172, 70,
-        499, 41, 374, 29, 1, 173, 8, 173, 74,
-        540, 35, 575, 26, 1, 174, 8, 174, 68,
-        601, 37, 76, 22, 1, 175, 8, 175, 70,
-        638, 28, 575, 26, 1, 176, 8, 176, 61,
-        666, 37, 575, 26, 1, 177, 8, 177, 70,
-        703, 22, 575, 26, 1, 178, 8, 178, 55,
-        725, 25, 28, 26, 1, 179, 8, 179, 58,
+        0, 28, 2491, 26, 1, 161, 8, 161, 61,
+        56, 22, 2517, 22, 1, 162, 8, 162, 55,
+        109, 33, 2539, 25, 1, 163, 8, 163, 66,
+        171, 29, 2539, 25, 1, 164, 8, 164, 62,
+        200, 30, 2539, 25, 1, 165, 8, 165, 63,
+        230, 41, 2539, 25, 1, 166, 8, 166, 74,
+        271, 37, 2539, 25, 1, 167, 8, 167, 70,
+        308, 22, 2564, 26, 1, 168, 8, 168, 55,
+        355, 33, 2590, 29, 1, 169, 8, 169, 66,
+        388, 29, 2590, 29, 1, 170, 8, 170, 62,
+        417, 30, 2590, 29, 1, 171, 8, 171, 63,
+        488, 37, 2590, 29, 1, 172, 8, 172, 70,
+        447, 41, 2590, 29, 1, 173, 8, 173, 74,
+        525, 35, 2619, 26, 1, 174, 8, 174, 68,
+        586, 37, 2517, 22, 1, 175, 8, 175, 70,
+        649, 28, 2619, 26, 1, 176, 8, 176, 61,
+        677, 37, 2619, 26, 1, 177, 8, 177, 70,
+        714, 22, 2619, 26, 1, 178, 8, 178, 55,
+        769, 25, 2491, 26, 1, 179, 8, 179, 58,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_521: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemDragBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 65535, 255, 1, 180, 8,
+        827, 26, 65535, 255, 1, 180, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_522: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemDragForegroundSystemColorWindowTextColorListViewItemPlaceholderBackgroundSystemColorButtonFaceColorListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 26, 1, 181, 8, 181, 59,
-        52, 33, 85, 26, 1, 182, 8, 182, 66,
-        111, 41, 26, 26, 1, 183, 8, 183, 74,
-        152, 45, 197, 22, 1, 184, 8, 184, 78,
+        853, 26, 2619, 26, 1, 181, 8, 181, 59,
+        879, 33, 2491, 26, 1, 182, 8, 182, 66,
+        947, 41, 2619, 26, 1, 183, 8, 183, 74,
+        988, 45, 2517, 22, 1, 184, 8, 184, 78,
     ],
 };
 
@@ -14947,24 +15148,24 @@ static POPULATE_WINUITHEME_XAML_ROWS_523: &[rt::ValueRow<f64>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_524: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckHintThemeBrushSystemColorWindowTextColorListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushSystemColorHighlightTextColorListViewItemDragBackgroundThemeBrushSystemColorHighlightColorListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushSystemColorButtonTextColorListViewItemOverlayBackgroundThemeBrushSystemColorButtonFaceColorListViewItemOverlayForegroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushSystemColorGrayTextColorListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 26, 1, 196, 8, 196, 64,
-        57, 36, 31, 26, 1, 197, 8, 197, 69,
-        93, 27, 120, 29, 1, 198, 8, 198, 60,
-        149, 36, 185, 25, 1, 199, 8, 199, 69,
-        210, 36, 120, 29, 1, 200, 8, 200, 69,
-        246, 33, 279, 26, 1, 201, 8, 201, 66,
-        305, 39, 344, 26, 1, 202, 8, 202, 72,
-        370, 39, 31, 26, 1, 203, 8, 203, 72,
-        409, 48, 31, 26, 1, 204, 8, 204, 81,
-        457, 43, 500, 24, 1, 205, 8, 205, 76,
-        524, 43, 185, 25, 1, 206, 8, 206, 76,
-        567, 40, 185, 25, 1, 207, 8, 207, 73,
-        607, 40, 120, 29, 1, 208, 8, 208, 73,
-        647, 51, 185, 25, 1, 209, 8, 209, 84,
-        698, 47, 185, 25, 1, 210, 8, 210, 80,
+        1060, 31, 2619, 26, 1, 196, 8, 196, 64,
+        1091, 36, 2619, 26, 1, 197, 8, 197, 69,
+        1127, 27, 2590, 29, 1, 198, 8, 198, 60,
+        1154, 36, 2539, 25, 1, 199, 8, 199, 69,
+        1190, 36, 2590, 29, 1, 200, 8, 200, 69,
+        1226, 33, 2564, 26, 1, 201, 8, 201, 66,
+        1259, 39, 2491, 26, 1, 202, 8, 202, 72,
+        1298, 39, 2619, 26, 1, 203, 8, 203, 72,
+        1337, 48, 2619, 26, 1, 204, 8, 204, 81,
+        1385, 43, 2645, 24, 1, 205, 8, 205, 76,
+        1428, 43, 2539, 25, 1, 206, 8, 206, 76,
+        1471, 40, 2539, 25, 1, 207, 8, 207, 73,
+        1511, 40, 2590, 29, 1, 208, 8, 208, 73,
+        1551, 51, 2539, 25, 1, 209, 8, 209, 84,
+        1602, 47, 2539, 25, 1, 210, 8, 210, 80,
     ],
 };
 
@@ -14977,169 +15178,169 @@ static POPULATE_WINUITHEME_XAML_ROWS_525: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_526: rt::PackedRows = rt::PackedRows {
-    strings: "ListViewItemCheckPressedBrushSystemColorWindowTextColorListViewItemCheckDisabledBrushSystemColorGrayTextColorListViewItemCheckBoxPointerOverBrushSystemColorButtonFaceColorListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushSystemColorWindowColorListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushSystemColorButtonTextColorListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushListViewItemBackgroundSelectedDisabledListViewItemSelectionIndicatorBrushSystemColorHighlightTextColorListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 26, 1, 214, 8, 214, 62,
-        55, 30, 85, 24, 1, 215, 8, 215, 63,
-        109, 36, 145, 26, 1, 216, 8, 216, 69,
-        171, 32, 145, 26, 1, 217, 8, 217, 65,
-        203, 33, 145, 26, 1, 218, 8, 218, 66,
-        236, 33, 269, 22, 1, 219, 8, 219, 66,
-        291, 44, 269, 22, 1, 220, 8, 220, 77,
-        335, 40, 269, 22, 1, 221, 8, 221, 73,
-        375, 41, 269, 22, 1, 222, 8, 222, 74,
-        416, 31, 447, 26, 1, 223, 8, 223, 64,
-        473, 42, 447, 26, 1, 224, 8, 224, 75,
-        515, 38, 447, 26, 1, 225, 8, 225, 71,
-        553, 39, 447, 26, 1, 226, 8, 226, 72,
-        592, 38, 269, 22, 1, 227, 8, 227, 71,
-        630, 35, 665, 29, 1, 228, 8, 228, 68,
-        694, 46, 665, 29, 1, 229, 8, 229, 79,
-        740, 42, 665, 29, 1, 230, 8, 230, 75,
-        782, 43, 85, 24, 1, 231, 8, 231, 76,
+        1649, 29, 2619, 26, 1, 214, 8, 214, 62,
+        1713, 30, 2645, 24, 1, 215, 8, 215, 63,
+        1777, 36, 2491, 26, 1, 216, 8, 216, 69,
+        1813, 32, 2491, 26, 1, 217, 8, 217, 65,
+        1845, 33, 2491, 26, 1, 218, 8, 218, 66,
+        1878, 33, 2517, 22, 1, 219, 8, 219, 66,
+        1911, 44, 2517, 22, 1, 220, 8, 220, 77,
+        1955, 40, 2517, 22, 1, 221, 8, 221, 73,
+        2023, 41, 2517, 22, 1, 222, 8, 222, 74,
+        2064, 31, 2564, 26, 1, 223, 8, 223, 64,
+        2131, 42, 2564, 26, 1, 224, 8, 224, 75,
+        2173, 38, 2564, 26, 1, 225, 8, 225, 71,
+        2211, 39, 2564, 26, 1, 226, 8, 226, 72,
+        2287, 38, 2517, 22, 1, 227, 8, 227, 71,
+        2325, 35, 2590, 29, 1, 228, 8, 228, 68,
+        2360, 46, 2590, 29, 1, 229, 8, 229, 79,
+        2406, 42, 2590, 29, 1, 230, 8, 230, 75,
+        2448, 43, 2645, 24, 1, 231, 8, 231, 76,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_527: rt::PackedRows = rt::PackedRows {
-    strings: "FlyoutPresenterBackgroundSystemColorWindowColorBrushFlyoutBorderThemeBrushSystemColorWindowTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 27, 1, 25, 8, 25, 8,
-        52, 22, 74, 31, 1, 26, 8, 26, 8,
+        0, 25, 109, 27, 1, 25, 8, 25, 8,
+        58, 22, 136, 31, 1, 26, 8, 26, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_528: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundSystemControlHighlightAccentBrushAccentButtonBackgroundPointerOverSystemControlForegroundAccentBrushAccentButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushAccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlHighlightAltAccentBrushAccentButtonForegroundPointerOverSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPressedSystemControlHighlightBaseHighBrushAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushAccentButtonBorderBrushPointerOverSystemControlHighlightBaseMediumLowBrushAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSubtleButtonBackgroundSubtleButtonBackgroundPointerOverSystemColorHighlightTextColorBrushSubtleButtonBackgroundPressedSubtleButtonBackgroundDisabledSubtleButtonForegroundSystemColorButtonTextColorBrushSubtleButtonForegroundPointerOverSubtleButtonForegroundPressedSubtleButtonForegroundDisabledSubtleButtonBorderBrushSystemControlForegroundTransparentBrushSubtleButtonBorderBrushPointerOverSystemColorHighlightColorBrushSubtleButtonBorderBrushPressedSubtleButtonBorderBrushDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 33, 1, 113, 8, 113, 8,
-        55, 33, 88, 34, 1, 114, 8, 114, 8,
-        122, 29, 151, 41, 1, 115, 8, 115, 8,
-        192, 30, 222, 35, 1, 116, 8, 116, 8,
-        257, 22, 279, 36, 1, 117, 8, 117, 8,
-        315, 33, 348, 39, 1, 118, 8, 118, 8,
-        387, 29, 416, 35, 1, 119, 8, 119, 8,
-        451, 30, 481, 39, 1, 120, 8, 120, 8,
-        520, 23, 22, 33, 1, 121, 8, 121, 8,
-        543, 34, 577, 40, 1, 122, 8, 122, 8,
-        617, 30, 647, 38, 1, 123, 8, 123, 8,
-        685, 31, 716, 37, 1, 124, 8, 124, 8,
-        753, 22, 222, 35, 1, 125, 8, 125, 8,
-        775, 33, 808, 34, 1, 126, 8, 126, 8,
-        842, 29, 808, 34, 1, 127, 8, 127, 8,
-        871, 30, 222, 35, 1, 128, 8, 128, 8,
-        901, 22, 923, 31, 1, 129, 8, 129, 8,
-        954, 33, 416, 35, 1, 130, 8, 130, 8,
-        987, 29, 416, 35, 1, 131, 8, 131, 8,
-        1016, 30, 481, 39, 1, 132, 8, 132, 8,
-        1046, 23, 1069, 39, 1, 133, 8, 133, 8,
-        1108, 34, 1142, 30, 1, 134, 8, 134, 8,
-        1172, 30, 808, 34, 1, 135, 8, 135, 8,
-        1202, 31, 716, 37, 1, 136, 8, 136, 8,
-        6, 16, 222, 35, 1, 137, 8, 137, 8,
-        61, 27, 808, 34, 1, 138, 8, 138, 8,
-        128, 23, 808, 34, 1, 139, 8, 139, 8,
-        198, 24, 222, 35, 1, 140, 8, 140, 8,
-        263, 16, 923, 31, 1, 141, 8, 141, 8,
-        321, 27, 416, 35, 1, 142, 8, 142, 8,
-        393, 23, 416, 35, 1, 143, 8, 143, 8,
-        457, 24, 481, 39, 1, 144, 8, 144, 8,
-        526, 17, 1069, 39, 1, 145, 8, 145, 8,
-        549, 28, 1142, 30, 1, 146, 8, 146, 8,
-        623, 24, 808, 34, 1, 147, 8, 147, 8,
-        691, 25, 716, 37, 1, 148, 8, 148, 8,
+        0, 22, 1590, 33, 1, 113, 8, 113, 8,
+        49, 33, 1623, 34, 1, 114, 8, 114, 8,
+        111, 29, 1657, 41, 1, 115, 8, 115, 8,
+        168, 30, 1698, 35, 1, 116, 8, 116, 8,
+        226, 22, 1733, 36, 1, 117, 8, 117, 8,
+        281, 33, 1769, 39, 1, 118, 8, 118, 8,
+        314, 29, 1808, 35, 1, 119, 8, 119, 8,
+        378, 30, 1843, 39, 1, 120, 8, 120, 8,
+        437, 23, 1590, 33, 1, 121, 8, 121, 8,
+        493, 34, 1882, 40, 1, 122, 8, 122, 8,
+        527, 30, 1922, 38, 1, 123, 8, 123, 8,
+        589, 31, 1960, 37, 1, 124, 8, 124, 8,
+        620, 22, 1698, 35, 1, 125, 8, 125, 8,
+        673, 33, 1997, 34, 1, 126, 8, 126, 8,
+        735, 29, 1997, 34, 1, 127, 8, 127, 8,
+        792, 30, 1698, 35, 1, 128, 8, 128, 8,
+        822, 22, 2031, 31, 1, 129, 8, 129, 8,
+        869, 33, 1808, 35, 1, 130, 8, 130, 8,
+        902, 29, 1808, 35, 1, 131, 8, 131, 8,
+        958, 30, 1843, 39, 1, 132, 8, 132, 8,
+        1014, 23, 2062, 39, 1, 133, 8, 133, 8,
+        1037, 34, 2101, 30, 1, 134, 8, 134, 8,
+        1071, 30, 1997, 34, 1, 135, 8, 135, 8,
+        1101, 31, 1960, 37, 1, 136, 8, 136, 8,
+        6, 16, 1698, 35, 1, 137, 8, 137, 8,
+        55, 27, 1997, 34, 1, 138, 8, 138, 8,
+        117, 23, 1997, 34, 1, 139, 8, 139, 8,
+        174, 24, 1698, 35, 1, 140, 8, 140, 8,
+        232, 16, 2031, 31, 1, 141, 8, 141, 8,
+        287, 27, 1808, 35, 1, 142, 8, 142, 8,
+        320, 23, 1808, 35, 1, 143, 8, 143, 8,
+        384, 24, 1843, 39, 1, 144, 8, 144, 8,
+        443, 17, 2062, 39, 1, 145, 8, 145, 8,
+        499, 28, 2101, 30, 1, 146, 8, 146, 8,
+        533, 24, 1997, 34, 1, 147, 8, 147, 8,
+        595, 25, 1960, 37, 1, 148, 8, 148, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_529: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundThemeBrushSystemColorButtonFaceColorButtonBorderThemeBrushSystemColorButtonTextColorButtonDisabledBackgroundThemeBrushButtonDisabledBorderThemeBrushSystemColorGrayTextColorButtonDisabledForegroundThemeBrushButtonForegroundThemeBrushButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorButtonPointerOverForegroundThemeBrushSystemColorHighlightTextColorButtonPressedBackgroundThemeBrushButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 26, 1, 150, 8, 150, 59,
-        52, 22, 74, 26, 1, 151, 8, 151, 55,
-        100, 34, 26, 26, 1, 152, 8, 152, 67,
-        134, 30, 164, 24, 1, 153, 8, 153, 63,
-        188, 34, 164, 24, 1, 154, 8, 154, 67,
-        222, 26, 74, 26, 1, 155, 8, 155, 59,
-        248, 37, 285, 25, 1, 156, 8, 156, 70,
-        310, 37, 347, 29, 1, 157, 8, 157, 70,
-        376, 33, 74, 26, 1, 158, 8, 158, 66,
-        409, 33, 26, 26, 1, 159, 8, 159, 66,
+        1278, 26, 2131, 26, 1, 150, 8, 150, 59,
+        1304, 22, 2031, 26, 1, 151, 8, 151, 55,
+        1326, 34, 2131, 26, 1, 152, 8, 152, 67,
+        1360, 30, 2157, 24, 1, 153, 8, 153, 63,
+        1390, 34, 2157, 24, 1, 154, 8, 154, 67,
+        1424, 26, 2031, 26, 1, 155, 8, 155, 59,
+        1450, 37, 2101, 25, 1, 156, 8, 156, 70,
+        1487, 37, 1997, 29, 1, 157, 8, 157, 70,
+        1524, 33, 2031, 26, 1, 158, 8, 158, 66,
+        1557, 33, 2131, 26, 1, 159, 8, 159, 66,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_530: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundSystemControlBackgroundBaseLowBrushToggleButtonBackgroundPointerOverSystemColorHighlightTextColorBrushToggleButtonBackgroundPressedToggleButtonBackgroundDisabledToggleButtonBackgroundCheckedSystemControlHighlightAccentBrushToggleButtonBackgroundCheckedPointerOverSystemColorButtonTextColorBrushToggleButtonBackgroundCheckedPressedToggleButtonBackgroundCheckedDisabledToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundSystemControlForegroundBaseHighBrushToggleButtonForegroundPointerOverSystemControlHighlightBaseHighBrushToggleButtonForegroundPressedToggleButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverSystemColorButtonFaceColorBrushToggleButtonForegroundCheckedPressedSystemColorHighlightColorBrushToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushSystemControlForegroundTransparentBrushToggleButtonBorderBrushPointerOverSystemControlHighlightBaseMediumLowBrushToggleButtonBorderBrushPressedToggleButtonBorderBrushDisabledSystemControlDisabledTransparentBrushToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedSystemControlHighlightTransparentBrushToggleButtonBorderBrushIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 35, 1, 133, 8, 133, 8,
-        57, 33, 90, 34, 1, 134, 8, 134, 8,
-        124, 29, 90, 34, 1, 135, 8, 135, 8,
-        153, 30, 22, 35, 1, 136, 8, 136, 8,
-        183, 29, 212, 33, 1, 137, 8, 137, 8,
-        245, 40, 285, 31, 1, 138, 8, 138, 8,
-        316, 36, 90, 34, 1, 139, 8, 139, 8,
-        352, 37, 22, 35, 1, 140, 8, 140, 8,
-        389, 35, 22, 35, 1, 141, 8, 141, 8,
-        424, 46, 22, 35, 1, 142, 8, 142, 8,
-        470, 42, 512, 41, 1, 143, 8, 143, 8,
-        553, 43, 22, 35, 1, 144, 8, 144, 8,
-        596, 22, 618, 36, 1, 145, 8, 145, 8,
-        654, 33, 687, 35, 1, 146, 8, 146, 8,
-        722, 29, 687, 35, 1, 147, 8, 147, 8,
-        751, 30, 781, 39, 1, 148, 8, 148, 8,
-        820, 29, 849, 41, 1, 149, 8, 149, 8,
-        890, 40, 930, 31, 1, 150, 8, 150, 8,
-        961, 36, 997, 30, 1, 151, 8, 151, 8,
-        1027, 37, 781, 39, 1, 152, 8, 152, 8,
-        1064, 35, 618, 36, 1, 153, 8, 153, 8,
-        1099, 46, 687, 35, 1, 154, 8, 154, 8,
-        1145, 42, 687, 35, 1, 155, 8, 155, 8,
-        1187, 43, 781, 39, 1, 156, 8, 156, 8,
-        1230, 23, 1253, 39, 1, 157, 8, 157, 8,
-        1292, 34, 1326, 40, 1, 158, 8, 158, 8,
-        1366, 30, 90, 34, 1, 159, 8, 159, 8,
-        1396, 31, 1427, 37, 1, 160, 8, 160, 8,
-        1464, 30, 1494, 41, 1, 161, 8, 161, 8,
-        1535, 41, 285, 31, 1, 162, 8, 162, 8,
-        1576, 37, 90, 34, 1, 163, 8, 163, 8,
-        1613, 38, 1427, 37, 1, 164, 8, 164, 8,
-        1651, 36, 1253, 39, 1, 165, 8, 165, 8,
-        1687, 47, 1326, 40, 1, 166, 8, 166, 8,
-        1734, 43, 1777, 38, 1, 167, 8, 167, 8,
-        1815, 44, 1427, 37, 1, 168, 8, 168, 8,
+        0, 22, 2529, 35, 1, 133, 8, 133, 8,
+        50, 33, 2564, 34, 1, 134, 8, 134, 8,
+        113, 29, 2564, 34, 1, 135, 8, 135, 8,
+        171, 30, 2529, 35, 1, 136, 8, 136, 8,
+        230, 29, 2598, 33, 1, 137, 8, 137, 8,
+        286, 40, 2631, 31, 1, 138, 8, 138, 8,
+        355, 36, 2564, 34, 1, 139, 8, 139, 8,
+        419, 37, 2529, 35, 1, 140, 8, 140, 8,
+        484, 35, 2529, 35, 1, 141, 8, 141, 8,
+        519, 46, 2529, 35, 1, 142, 8, 142, 8,
+        565, 42, 2662, 41, 1, 143, 8, 143, 8,
+        607, 43, 2529, 35, 1, 144, 8, 144, 8,
+        650, 22, 2703, 36, 1, 145, 8, 145, 8,
+        697, 33, 2739, 35, 1, 146, 8, 146, 8,
+        730, 29, 2739, 35, 1, 147, 8, 147, 8,
+        786, 30, 2774, 39, 1, 148, 8, 148, 8,
+        842, 29, 2813, 41, 1, 149, 8, 149, 8,
+        904, 40, 2854, 31, 1, 150, 8, 150, 8,
+        944, 36, 2885, 30, 1, 151, 8, 151, 8,
+        1015, 37, 2774, 39, 1, 152, 8, 152, 8,
+        1081, 35, 2703, 36, 1, 153, 8, 153, 8,
+        1116, 46, 2739, 35, 1, 154, 8, 154, 8,
+        1162, 42, 2739, 35, 1, 155, 8, 155, 8,
+        1204, 43, 2774, 39, 1, 156, 8, 156, 8,
+        1247, 23, 2915, 39, 1, 157, 8, 157, 8,
+        1297, 34, 2954, 40, 1, 158, 8, 158, 8,
+        1331, 30, 2564, 34, 1, 159, 8, 159, 8,
+        1391, 31, 2994, 37, 1, 160, 8, 160, 8,
+        1422, 30, 3031, 41, 1, 161, 8, 161, 8,
+        1485, 41, 2631, 31, 1, 162, 8, 162, 8,
+        1526, 37, 2564, 34, 1, 163, 8, 163, 8,
+        1595, 38, 2994, 37, 1, 164, 8, 164, 8,
+        1633, 36, 2915, 39, 1, 165, 8, 165, 8,
+        1669, 47, 2954, 40, 1, 166, 8, 166, 8,
+        1716, 43, 3072, 38, 1, 167, 8, 167, 8,
+        1759, 44, 2994, 37, 1, 168, 8, 168, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_531: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundThemeBrushSystemColorButtonFaceColorToggleButtonBorderThemeBrushSystemColorButtonTextColorToggleButtonCheckedBackgroundThemeBrushSystemColorHighlightColorToggleButtonCheckedBorderThemeBrushToggleButtonCheckedDisabledBackgroundThemeBrushSystemColorGrayTextColorToggleButtonCheckedDisabledForegroundThemeBrushToggleButtonCheckedForegroundThemeBrushSystemColorHighlightTextColorToggleButtonCheckedPointerOverBackgroundThemeBrushToggleButtonCheckedPointerOverBorderThemeBrushToggleButtonCheckedPressedBackgroundThemeBrushToggleButtonCheckedPressedBorderThemeBrushToggleButtonCheckedPressedForegroundThemeBrushToggleButtonDisabledBorderThemeBrushToggleButtonDisabledForegroundThemeBrushToggleButtonForegroundThemeBrushToggleButtonPointerOverBackgroundThemeBrushToggleButtonPressedBackgroundThemeBrushToggleButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 26, 1, 169, 8, 169, 65,
-        58, 28, 86, 26, 1, 170, 8, 170, 61,
-        112, 39, 151, 25, 1, 171, 8, 171, 72,
-        176, 35, 86, 26, 1, 172, 8, 172, 68,
-        211, 47, 258, 24, 1, 173, 8, 173, 80,
-        282, 47, 32, 26, 1, 174, 8, 174, 80,
-        329, 39, 368, 29, 1, 175, 8, 175, 72,
-        397, 50, 151, 25, 1, 176, 8, 176, 83,
-        447, 46, 86, 26, 1, 177, 8, 177, 79,
-        493, 46, 86, 26, 1, 178, 8, 178, 79,
-        539, 42, 86, 26, 1, 179, 8, 179, 75,
-        581, 46, 32, 26, 1, 180, 8, 180, 79,
-        627, 36, 258, 24, 1, 181, 8, 181, 69,
-        663, 40, 258, 24, 1, 182, 8, 182, 73,
-        703, 32, 86, 26, 1, 183, 8, 183, 65,
-        735, 43, 32, 26, 1, 184, 8, 184, 76,
-        778, 39, 86, 26, 1, 185, 8, 185, 72,
-        817, 39, 32, 26, 1, 186, 8, 186, 72,
+        1803, 32, 2854, 26, 1, 169, 8, 169, 65,
+        1835, 28, 2631, 26, 1, 170, 8, 170, 61,
+        1863, 39, 2885, 25, 1, 171, 8, 171, 72,
+        1902, 35, 2631, 26, 1, 172, 8, 172, 68,
+        1937, 47, 3110, 24, 1, 173, 8, 173, 80,
+        1984, 47, 2854, 26, 1, 174, 8, 174, 80,
+        2031, 39, 2564, 29, 1, 175, 8, 175, 72,
+        2070, 50, 2885, 25, 1, 176, 8, 176, 83,
+        2120, 46, 2631, 26, 1, 177, 8, 177, 79,
+        2166, 46, 2631, 26, 1, 178, 8, 178, 79,
+        2212, 42, 2631, 26, 1, 179, 8, 179, 75,
+        2254, 46, 2854, 26, 1, 180, 8, 180, 79,
+        2300, 36, 3110, 24, 1, 181, 8, 181, 69,
+        2336, 40, 3110, 24, 1, 182, 8, 182, 73,
+        2376, 32, 2631, 26, 1, 183, 8, 183, 65,
+        2408, 43, 2854, 26, 1, 184, 8, 184, 76,
+        2451, 39, 2631, 26, 1, 185, 8, 185, 72,
+        2490, 39, 2854, 26, 1, 186, 8, 186, 72,
     ],
 };
 
@@ -15151,15 +15352,15 @@ static POPULATE_WINUITHEME_XAML_ROWS_532: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_533: rt::PackedRows = rt::PackedRows {
-    strings: "MediaTransportControlsPanelBackgroundSystemControlPageBackgroundAltMediumBrushMediaTransportControlsFlyoutBackgroundMediaTransportControlsThumbBorderBackgroundSystemControlBackgroundBaseMediumBrushMediaTransportControlsFillTimeElapsedTextSystemControlPageTextBaseMediumBrushMediaTransportControlsFillMediaTextSystemControlForegroundBaseHighBrushMediaTransportControlsBorderBrushSurfaceStrokeColorFlyoutBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 41, 1, 51, 8, 51, 8,
-        78, 38, 37, 41, 1, 52, 8, 52, 8,
-        116, 43, 159, 38, 1, 53, 8, 53, 8,
-        197, 41, 238, 36, 1, 54, 8, 54, 8,
-        274, 35, 309, 36, 1, 55, 8, 55, 8,
-        345, 33, 378, 29, 1, 56, 8, 56, 8,
+        0, 37, 413, 41, 1, 51, 8, 51, 8,
+        70, 38, 413, 41, 1, 52, 8, 52, 8,
+        146, 43, 454, 38, 1, 53, 8, 53, 8,
+        223, 41, 492, 36, 1, 54, 8, 54, 8,
+        291, 35, 528, 36, 1, 55, 8, 55, 8,
+        351, 33, 384, 29, 1, 56, 8, 56, 8,
     ],
 };
 
@@ -15183,134 +15384,134 @@ static POPULATE_WINUITHEME_XAML_ROWS_535: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_536: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBackgroundSystemControlBackgroundBaseLowBrushRepeatButtonBackgroundPointerOverRepeatButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushRepeatButtonBackgroundDisabledRepeatButtonForegroundSystemControlForegroundBaseHighBrushRepeatButtonForegroundPointerOverSystemControlHighlightBaseHighBrushRepeatButtonForegroundPressedRepeatButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRepeatButtonBorderBrushSystemControlForegroundTransparentBrushRepeatButtonBorderBrushPointerOverSystemControlHighlightBaseMediumLowBrushRepeatButtonBorderBrushPressedSystemControlHighlightTransparentBrushRepeatButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 35, 1, 63, 8, 63, 8,
-        57, 33, 22, 35, 1, 64, 8, 64, 8,
-        90, 29, 119, 41, 1, 65, 8, 65, 8,
-        160, 30, 22, 35, 1, 66, 8, 66, 8,
-        190, 22, 212, 36, 1, 67, 8, 67, 8,
-        248, 33, 281, 35, 1, 68, 8, 68, 8,
-        316, 29, 281, 35, 1, 69, 8, 69, 8,
-        345, 30, 375, 39, 1, 70, 8, 70, 8,
-        414, 23, 437, 39, 1, 71, 8, 71, 8,
-        476, 34, 510, 40, 1, 72, 8, 72, 8,
-        550, 30, 580, 38, 1, 73, 8, 73, 8,
-        618, 31, 649, 37, 1, 74, 8, 74, 8,
+        0, 22, 937, 35, 1, 63, 8, 63, 8,
+        50, 33, 937, 35, 1, 64, 8, 64, 8,
+        113, 29, 972, 41, 1, 65, 8, 65, 8,
+        171, 30, 937, 35, 1, 66, 8, 66, 8,
+        230, 22, 1013, 36, 1, 67, 8, 67, 8,
+        277, 33, 1049, 35, 1, 68, 8, 68, 8,
+        310, 29, 1049, 35, 1, 69, 8, 69, 8,
+        366, 30, 1084, 39, 1, 70, 8, 70, 8,
+        422, 23, 1123, 39, 1, 71, 8, 71, 8,
+        472, 34, 1162, 40, 1, 72, 8, 72, 8,
+        506, 30, 1202, 38, 1, 73, 8, 73, 8,
+        566, 31, 1240, 37, 1, 74, 8, 74, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_537: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBorderThemeBrushSystemColorButtonTextColorRepeatButtonDisabledBackgroundThemeBrushSystemColorButtonFaceColorRepeatButtonDisabledBorderThemeBrushSystemColorGrayTextColorRepeatButtonDisabledForegroundThemeBrushRepeatButtonForegroundThemeBrushRepeatButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorRepeatButtonPointerOverForegroundThemeBrushSystemColorHighlightTextColorRepeatButtonPressedBackgroundThemeBrushRepeatButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 26, 1, 76, 8, 76, 61,
-        54, 40, 94, 26, 1, 77, 8, 77, 73,
-        120, 36, 156, 24, 1, 78, 8, 78, 69,
-        180, 40, 156, 24, 1, 79, 8, 79, 73,
-        220, 32, 28, 26, 1, 80, 8, 80, 65,
-        252, 43, 295, 25, 1, 81, 8, 81, 76,
-        320, 43, 363, 29, 1, 82, 8, 82, 76,
-        392, 39, 28, 26, 1, 83, 8, 83, 72,
-        431, 39, 94, 26, 1, 84, 8, 84, 72,
+        597, 28, 1277, 26, 1, 76, 8, 76, 61,
+        625, 40, 1303, 26, 1, 77, 8, 77, 73,
+        665, 36, 1329, 24, 1, 78, 8, 78, 69,
+        701, 40, 1329, 24, 1, 79, 8, 79, 73,
+        741, 32, 1277, 26, 1, 80, 8, 80, 65,
+        773, 43, 1353, 25, 1, 81, 8, 81, 76,
+        816, 43, 1378, 29, 1, 82, 8, 82, 76,
+        859, 39, 1277, 26, 1, 83, 8, 83, 72,
+        898, 39, 1303, 26, 1, 84, 8, 84, 72,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_538: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarDatePickerForegroundSystemColorButtonTextColorBrushCalendarDatePickerForegroundDisabledSystemColorGrayTextColorBrushCalendarDatePickerCalendarGlyphForegroundCalendarDatePickerCalendarGlyphForegroundPointerOverSystemColorHighlightColorBrushCalendarDatePickerCalendarGlyphForegroundPressedCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundPointerOverCalendarDatePickerTextForegroundPressedCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerHeaderForegroundCalendarDatePickerHeaderForegroundDisabledCalendarDatePickerBackgroundSystemColorButtonFaceColorBrushCalendarDatePickerBackgroundPointerOverSystemColorHighlightTextColorBrushCalendarDatePickerBackgroundPressedSystemColorWindowColorBrushCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 31, 1, 67, 8, 67, 8,
-        59, 36, 95, 29, 1, 68, 8, 68, 8,
-        124, 41, 28, 31, 1, 69, 8, 69, 8,
-        165, 52, 217, 30, 1, 70, 8, 70, 8,
-        247, 48, 217, 30, 1, 71, 8, 71, 8,
-        295, 49, 95, 29, 1, 72, 8, 72, 8,
-        344, 32, 28, 31, 1, 73, 8, 73, 8,
-        376, 43, 217, 30, 1, 74, 8, 74, 8,
-        419, 39, 217, 30, 1, 75, 8, 75, 8,
-        458, 40, 95, 29, 1, 76, 8, 76, 8,
-        498, 40, 217, 30, 1, 77, 8, 77, 8,
-        538, 34, 28, 31, 1, 78, 8, 78, 8,
-        572, 42, 95, 29, 1, 79, 8, 79, 8,
-        614, 28, 642, 31, 1, 80, 8, 80, 8,
-        673, 39, 712, 34, 1, 81, 8, 81, 8,
-        746, 35, 781, 27, 1, 82, 8, 82, 8,
-        808, 36, 781, 27, 1, 83, 8, 83, 8,
-        844, 35, 217, 30, 1, 84, 8, 84, 8,
-        879, 29, 28, 31, 1, 85, 8, 85, 8,
-        908, 40, 217, 30, 1, 86, 8, 86, 8,
-        948, 36, 217, 30, 1, 87, 8, 87, 8,
-        984, 37, 95, 29, 1, 88, 8, 88, 8,
-        1021, 47, 1068, 47, 1, 89, 8, 89, 8,
+        0, 28, 1184, 31, 1, 67, 8, 67, 8,
+        53, 36, 1215, 29, 1, 68, 8, 68, 8,
+        115, 41, 1184, 31, 1, 69, 8, 69, 8,
+        183, 52, 1244, 30, 1, 70, 8, 70, 8,
+        235, 48, 1244, 30, 1, 71, 8, 71, 8,
+        283, 49, 1215, 29, 1, 72, 8, 72, 8,
+        332, 32, 1184, 31, 1, 73, 8, 73, 8,
+        364, 43, 1244, 30, 1, 74, 8, 74, 8,
+        407, 39, 1244, 30, 1, 75, 8, 75, 8,
+        446, 40, 1215, 29, 1, 76, 8, 76, 8,
+        486, 40, 1244, 30, 1, 77, 8, 77, 8,
+        526, 34, 1184, 31, 1, 78, 8, 78, 8,
+        560, 42, 1215, 29, 1, 79, 8, 79, 8,
+        602, 28, 1274, 31, 1, 80, 8, 80, 8,
+        658, 39, 1305, 34, 1, 81, 8, 81, 8,
+        727, 35, 1339, 27, 1, 82, 8, 82, 8,
+        791, 36, 1339, 27, 1, 83, 8, 83, 8,
+        856, 35, 1244, 30, 1, 84, 8, 84, 8,
+        891, 29, 1184, 31, 1, 85, 8, 85, 8,
+        947, 40, 1244, 30, 1, 86, 8, 86, 8,
+        987, 36, 1244, 30, 1, 87, 8, 87, 8,
+        1053, 37, 1215, 29, 1, 88, 8, 88, 8,
+        1090, 47, 1137, 47, 1, 89, 8, 89, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_539: rt::PackedRows = rt::PackedRows {
-    strings: "CalendarViewFocusBorderBrushSystemControlForegroundBaseHighBrushCalendarViewSelectedHoverBorderBrushSystemControlHighlightListAccentMediumBrushCalendarViewSelectedPressedBorderBrushSystemControlHighlightListAccentHighBrushCalendarViewSelectedBorderBrushSystemControlHighlightAccentBrushCalendarViewHoverBorderBrushSystemControlHighlightBaseMediumLowBrushCalendarViewPressedBorderBrushSystemControlHighlightBaseMediumBrushCalendarViewTodayForegroundSystemControlHighlightAltChromeWhiteBrushCalendarViewBlackoutForegroundSystemControlDisabledBaseMediumLowBrushCalendarViewSelectedForegroundSystemControlHighlightBaseHighBrushCalendarViewPressedForegroundCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewCalendarItemBackgroundSubtleFillColorTransparentBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundSystemControlBackgroundAltHighBrushCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundSystemControlTransparentBrushCalendarViewNavigationButtonForegroundPointerOverSystemColorHighlightTextColorBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledSystemColorGrayTextColorBrushCalendarViewCalendarItemRevealBackgroundCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushSystemColorWindowTextColorBrushCalendarViewFocusVisualSecondaryBrushSystemColorWindowColorBrushCalendarViewBlackoutStrikethroughBrushSystemColorButtonTextColorBrushCalendarViewSelectedDisabledBorderBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundCalendarViewSelectedDisabledForegroundCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundSystemColorHighlightColorBrushCalendarViewTodayBlackoutBackgroundCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSize",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 36, 1, 171, 8, 171, 8,
-        64, 36, 100, 43, 1, 172, 8, 172, 8,
-        143, 38, 181, 41, 1, 173, 8, 173, 8,
-        222, 31, 253, 33, 1, 174, 8, 174, 8,
-        286, 28, 314, 40, 1, 175, 8, 175, 8,
-        354, 30, 384, 37, 1, 176, 8, 176, 8,
-        421, 27, 448, 41, 1, 177, 8, 177, 8,
-        489, 30, 519, 39, 1, 178, 8, 178, 8,
-        558, 30, 588, 35, 1, 179, 8, 179, 8,
-        623, 29, 588, 35, 1, 180, 8, 180, 8,
-        652, 32, 684, 35, 1, 181, 8, 181, 8,
-        719, 34, 28, 36, 1, 182, 8, 182, 8,
-        753, 32, 785, 41, 1, 183, 8, 183, 8,
-        826, 34, 860, 31, 1, 184, 8, 184, 8,
-        891, 22, 913, 41, 1, 185, 8, 185, 8,
-        954, 22, 976, 35, 1, 186, 8, 186, 8,
-        1011, 23, 1034, 40, 1, 187, 8, 187, 8,
-        1074, 37, 519, 39, 1, 188, 8, 188, 8,
-        1111, 38, 1149, 29, 1, 189, 8, 189, 8,
-        1178, 49, 1227, 34, 1, 190, 8, 190, 8,
-        1261, 45, 1227, 34, 1, 191, 8, 191, 8,
-        1306, 46, 1352, 29, 1, 192, 8, 192, 8,
-        1381, 40, 976, 35, 1, 193, 8, 193, 8,
-        1421, 41, 1462, 41, 1, 194, 8, 194, 8,
-        1503, 50, 1149, 29, 1, 195, 8, 195, 8,
-        1503, 39, 1149, 29, 1, 196, 8, 196, 8,
-        1553, 35, 1588, 31, 1, 197, 8, 197, 8,
-        1619, 37, 1656, 27, 1, 198, 8, 198, 8,
-        1683, 38, 1721, 31, 1, 199, 8, 199, 8,
-        1752, 39, 1352, 29, 1, 200, 8, 200, 8,
-        1791, 41, 448, 41, 1, 201, 8, 201, 8,
-        1832, 30, 519, 39, 1, 202, 8, 202, 8,
-        1862, 35, 588, 35, 1, 203, 8, 203, 8,
-        1897, 37, 588, 35, 1, 204, 8, 204, 8,
-        1934, 38, 1352, 29, 1, 205, 8, 205, 8,
-        1972, 37, 684, 35, 1, 206, 8, 206, 8,
-        2009, 39, 588, 35, 1, 207, 8, 207, 8,
-        2048, 39, 1656, 27, 1, 208, 8, 208, 8,
-        2087, 41, 1656, 27, 1, 209, 8, 209, 8,
-        2128, 42, 1149, 29, 1, 210, 8, 210, 8,
-        2170, 35, 860, 31, 1, 211, 8, 211, 8,
-        2205, 27, 2232, 30, 1, 212, 8, 212, 8,
-        2262, 35, 2232, 30, 1, 213, 8, 213, 8,
-        2297, 35, 448, 41, 1, 214, 8, 214, 8,
-        2332, 32, 2232, 30, 1, 215, 8, 215, 8,
-        2364, 34, 2232, 30, 1, 216, 8, 216, 8,
-        2398, 35, 2232, 30, 1, 217, 8, 217, 8,
-        2433, 30, 1149, 29, 1, 218, 8, 218, 8,
-        2463, 49, 2232, 30, 1, 219, 8, 219, 8,
-        2512, 45, 2232, 30, 1, 220, 8, 220, 8,
-        1178, 38, 1721, 31, 1, 221, 8, 221, 8,
-        2557, 44, 1721, 31, 1, 222, 8, 222, 8,
-        2601, 55, 1227, 34, 1, 223, 8, 223, 8,
-        2656, 51, 1227, 34, 1, 224, 8, 224, 8,
-        2707, 52, 1352, 29, 1, 225, 8, 225, 8,
-        2759, 27, 2786, 27, 1, 226, 8, 226, 8,
-        2813, 33, 2786, 27, 1, 227, 8, 227, 8,
+        0, 28, 2737, 36, 1, 171, 8, 171, 8,
+        57, 36, 2773, 43, 1, 172, 8, 172, 8,
+        93, 38, 2816, 41, 1, 173, 8, 173, 8,
+        159, 31, 2857, 33, 1, 174, 8, 174, 8,
+        217, 28, 2890, 40, 1, 175, 8, 175, 8,
+        274, 30, 2930, 37, 1, 176, 8, 176, 8,
+        304, 27, 2967, 41, 1, 177, 8, 177, 8,
+        364, 30, 3008, 39, 1, 178, 8, 178, 8,
+        419, 30, 3047, 35, 1, 179, 8, 179, 8,
+        480, 29, 3047, 35, 1, 180, 8, 180, 8,
+        536, 32, 3082, 35, 1, 181, 8, 181, 8,
+        568, 34, 2737, 36, 1, 182, 8, 182, 8,
+        602, 32, 3117, 41, 1, 183, 8, 183, 8,
+        665, 34, 634, 31, 1, 184, 8, 184, 8,
+        699, 22, 3158, 41, 1, 185, 8, 185, 8,
+        721, 22, 3199, 35, 1, 186, 8, 186, 8,
+        775, 23, 3234, 40, 1, 187, 8, 187, 8,
+        828, 37, 3008, 39, 1, 188, 8, 188, 8,
+        891, 38, 3274, 29, 1, 189, 8, 189, 8,
+        929, 49, 3303, 34, 1, 190, 8, 190, 8,
+        1012, 45, 3303, 34, 1, 191, 8, 191, 8,
+        1057, 46, 3337, 29, 1, 192, 8, 192, 8,
+        1138, 40, 3199, 35, 1, 193, 8, 193, 8,
+        1223, 41, 1264, 41, 1, 194, 8, 194, 8,
+        1305, 50, 3274, 29, 1, 195, 8, 195, 8,
+        1305, 39, 3274, 29, 1, 196, 8, 196, 8,
+        1355, 35, 3366, 31, 1, 197, 8, 197, 8,
+        1416, 37, 3397, 27, 1, 198, 8, 198, 8,
+        1479, 38, 3424, 31, 1, 199, 8, 199, 8,
+        1553, 39, 3337, 29, 1, 200, 8, 200, 8,
+        1620, 41, 2967, 41, 1, 201, 8, 201, 8,
+        1661, 30, 3008, 39, 1, 202, 8, 202, 8,
+        1691, 35, 3047, 35, 1, 203, 8, 203, 8,
+        1726, 37, 3047, 35, 1, 204, 8, 204, 8,
+        1795, 38, 3337, 29, 1, 205, 8, 205, 8,
+        1865, 37, 3082, 35, 1, 206, 8, 206, 8,
+        1902, 39, 3047, 35, 1, 207, 8, 207, 8,
+        1941, 39, 3397, 27, 1, 208, 8, 208, 8,
+        1980, 41, 3397, 27, 1, 209, 8, 209, 8,
+        2021, 42, 3274, 29, 1, 210, 8, 210, 8,
+        2063, 35, 634, 31, 1, 211, 8, 211, 8,
+        2098, 27, 3455, 30, 1, 212, 8, 212, 8,
+        2125, 35, 3455, 30, 1, 213, 8, 213, 8,
+        2188, 35, 2967, 41, 1, 214, 8, 214, 8,
+        2223, 32, 3455, 30, 1, 215, 8, 215, 8,
+        2255, 34, 3455, 30, 1, 216, 8, 216, 8,
+        2289, 35, 3455, 30, 1, 217, 8, 217, 8,
+        2324, 30, 3274, 29, 1, 218, 8, 218, 8,
+        2354, 49, 3455, 30, 1, 219, 8, 219, 8,
+        2403, 45, 3455, 30, 1, 220, 8, 220, 8,
+        929, 38, 3424, 31, 1, 221, 8, 221, 8,
+        2448, 44, 3424, 31, 1, 222, 8, 222, 8,
+        2492, 55, 3303, 34, 1, 223, 8, 223, 8,
+        2547, 51, 3303, 34, 1, 224, 8, 224, 8,
+        2598, 52, 3337, 29, 1, 225, 8, 225, 8,
+        2650, 27, 2677, 27, 1, 226, 8, 226, 8,
+        2704, 33, 2677, 27, 1, 227, 8, 227, 8,
     ],
 };
 
@@ -15340,124 +15541,124 @@ static POPULATE_WINUITHEME_XAML_ROWS_541: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_542: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxForegroundUncheckedSystemColorButtonTextColorBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledSystemColorGrayTextColorBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateSystemColorWindowTextColorBrushCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSystemColorWindowColorBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedCheckBoxCheckBackgroundStrokeUncheckedPointerOverSystemColorHighlightColorBrushCheckBoxCheckBackgroundStrokeUncheckedPressedCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedCheckBoxCheckBackgroundStrokeCheckedPointerOverCheckBoxCheckBackgroundStrokeCheckedPressedSystemColorButtonFaceColorBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverSystemColorHighlightTextColorBrushCheckBoxCheckBackgroundFillUncheckedPressedCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 31, 1, 191, 8, 191, 8,
-        58, 38, 27, 31, 1, 192, 8, 192, 8,
-        96, 34, 27, 31, 1, 193, 8, 193, 8,
-        130, 35, 165, 29, 1, 194, 8, 194, 8,
-        194, 25, 27, 31, 1, 195, 8, 195, 8,
-        219, 36, 27, 31, 1, 196, 8, 196, 8,
-        255, 32, 27, 31, 1, 197, 8, 197, 8,
-        287, 33, 165, 29, 1, 198, 8, 198, 8,
-        320, 31, 351, 31, 1, 199, 8, 199, 8,
-        382, 42, 351, 31, 1, 200, 8, 200, 8,
-        424, 38, 351, 31, 1, 201, 8, 201, 8,
-        462, 39, 165, 29, 1, 202, 8, 202, 8,
-        501, 27, 528, 27, 1, 203, 8, 203, 8,
-        555, 38, 528, 27, 1, 204, 8, 204, 8,
-        593, 34, 528, 27, 1, 205, 8, 205, 8,
-        627, 35, 528, 27, 1, 206, 8, 206, 8,
-        662, 25, 528, 27, 1, 207, 8, 207, 8,
-        687, 36, 528, 27, 1, 208, 8, 208, 8,
-        723, 32, 528, 27, 1, 209, 8, 209, 8,
-        755, 33, 528, 27, 1, 210, 8, 210, 8,
-        788, 31, 528, 27, 1, 211, 8, 211, 8,
-        819, 42, 528, 27, 1, 212, 8, 212, 8,
-        861, 38, 528, 27, 1, 213, 8, 213, 8,
-        899, 39, 528, 27, 1, 214, 8, 214, 8,
-        938, 28, 528, 27, 1, 215, 8, 215, 8,
-        966, 39, 528, 27, 1, 216, 8, 216, 8,
-        1005, 35, 528, 27, 1, 217, 8, 217, 8,
-        1040, 36, 528, 27, 1, 218, 8, 218, 8,
-        1076, 26, 528, 27, 1, 219, 8, 219, 8,
-        1102, 37, 528, 27, 1, 220, 8, 220, 8,
-        1139, 33, 528, 27, 1, 221, 8, 221, 8,
-        1172, 34, 528, 27, 1, 222, 8, 222, 8,
-        1206, 32, 528, 27, 1, 223, 8, 223, 8,
-        1238, 43, 528, 27, 1, 224, 8, 224, 8,
-        1281, 39, 528, 27, 1, 225, 8, 225, 8,
-        1320, 40, 528, 27, 1, 226, 8, 226, 8,
-        1360, 38, 27, 31, 1, 227, 8, 227, 8,
-        1398, 49, 1447, 30, 1, 228, 8, 228, 8,
-        1477, 45, 1447, 30, 1, 229, 8, 229, 8,
-        1522, 46, 165, 29, 1, 230, 8, 230, 8,
-        1568, 36, 1447, 30, 1, 231, 8, 231, 8,
-        1604, 47, 27, 31, 1, 232, 8, 232, 8,
-        1651, 43, 1694, 31, 1, 233, 8, 233, 8,
-        1725, 44, 165, 29, 1, 234, 8, 234, 8,
-        1769, 42, 1447, 30, 1, 235, 8, 235, 8,
-        1811, 53, 1447, 30, 1, 236, 8, 236, 8,
-        1864, 49, 1447, 30, 1, 237, 8, 237, 8,
-        1913, 50, 165, 29, 1, 238, 8, 238, 8,
-        1963, 36, 1694, 31, 1, 239, 8, 239, 8,
-        1999, 47, 2046, 34, 1, 240, 8, 240, 8,
-        2080, 43, 1447, 30, 1, 241, 8, 241, 8,
-        2123, 44, 528, 27, 1, 242, 8, 242, 8,
-        2167, 34, 1447, 30, 1, 243, 8, 243, 8,
-        2201, 45, 27, 31, 1, 244, 8, 244, 8,
-        2246, 41, 1694, 31, 1, 245, 8, 245, 8,
-        2287, 42, 165, 29, 1, 246, 8, 246, 8,
-        2329, 40, 1447, 30, 1, 247, 8, 247, 8,
-        2369, 51, 2046, 34, 1, 248, 8, 248, 8,
-        2420, 47, 1447, 30, 1, 249, 8, 249, 8,
-        2467, 48, 165, 29, 1, 250, 8, 250, 8,
-        2515, 37, 1694, 31, 1, 251, 8, 251, 8,
-        2552, 48, 1447, 30, 1, 252, 8, 252, 8,
-        2600, 44, 2046, 34, 1, 253, 8, 253, 8,
-        2644, 45, 165, 29, 1, 254, 8, 254, 8,
-        2689, 35, 2046, 34, 1, 255, 8, 255, 8,
-        2724, 46, 1694, 31, 1, 256, 8, 256, 8,
-        2770, 42, 27, 31, 1, 257, 8, 257, 8,
-        2812, 43, 528, 27, 1, 258, 8, 258, 8,
-        2855, 41, 2046, 34, 1, 259, 8, 259, 8,
-        2896, 52, 1447, 30, 1, 260, 8, 260, 8,
-        2948, 48, 2046, 34, 1, 261, 8, 261, 8,
-        2996, 49, 528, 27, 1, 262, 8, 262, 8,
+        0, 27, 3809, 31, 1, 191, 8, 191, 8,
+        52, 38, 3809, 31, 1, 192, 8, 192, 8,
+        90, 34, 3809, 31, 1, 193, 8, 193, 8,
+        124, 35, 3840, 29, 1, 194, 8, 194, 8,
+        185, 25, 3809, 31, 1, 195, 8, 195, 8,
+        210, 36, 3809, 31, 1, 196, 8, 196, 8,
+        246, 32, 3809, 31, 1, 197, 8, 197, 8,
+        278, 33, 3840, 29, 1, 198, 8, 198, 8,
+        311, 31, 3869, 31, 1, 199, 8, 199, 8,
+        342, 42, 3869, 31, 1, 200, 8, 200, 8,
+        384, 38, 3869, 31, 1, 201, 8, 201, 8,
+        422, 39, 3840, 29, 1, 202, 8, 202, 8,
+        461, 27, 3900, 27, 1, 203, 8, 203, 8,
+        519, 38, 3900, 27, 1, 204, 8, 204, 8,
+        557, 34, 3900, 27, 1, 205, 8, 205, 8,
+        591, 35, 3900, 27, 1, 206, 8, 206, 8,
+        626, 25, 3900, 27, 1, 207, 8, 207, 8,
+        651, 36, 3900, 27, 1, 208, 8, 208, 8,
+        687, 32, 3900, 27, 1, 209, 8, 209, 8,
+        719, 33, 3900, 27, 1, 210, 8, 210, 8,
+        752, 31, 3900, 27, 1, 211, 8, 211, 8,
+        783, 42, 3900, 27, 1, 212, 8, 212, 8,
+        825, 38, 3900, 27, 1, 213, 8, 213, 8,
+        863, 39, 3900, 27, 1, 214, 8, 214, 8,
+        902, 28, 3900, 27, 1, 215, 8, 215, 8,
+        930, 39, 3900, 27, 1, 216, 8, 216, 8,
+        969, 35, 3900, 27, 1, 217, 8, 217, 8,
+        1004, 36, 3900, 27, 1, 218, 8, 218, 8,
+        1040, 26, 3900, 27, 1, 219, 8, 219, 8,
+        1066, 37, 3900, 27, 1, 220, 8, 220, 8,
+        1103, 33, 3900, 27, 1, 221, 8, 221, 8,
+        1136, 34, 3900, 27, 1, 222, 8, 222, 8,
+        1170, 32, 3900, 27, 1, 223, 8, 223, 8,
+        1202, 43, 3900, 27, 1, 224, 8, 224, 8,
+        1245, 39, 3900, 27, 1, 225, 8, 225, 8,
+        1284, 40, 3900, 27, 1, 226, 8, 226, 8,
+        1324, 38, 3809, 31, 1, 227, 8, 227, 8,
+        1398, 49, 3927, 30, 1, 228, 8, 228, 8,
+        1447, 45, 3927, 30, 1, 229, 8, 229, 8,
+        1529, 46, 3840, 29, 1, 230, 8, 230, 8,
+        1575, 36, 3927, 30, 1, 231, 8, 231, 8,
+        1638, 47, 3809, 31, 1, 232, 8, 232, 8,
+        1714, 43, 3957, 31, 1, 233, 8, 233, 8,
+        1785, 44, 3840, 29, 1, 234, 8, 234, 8,
+        1829, 42, 3927, 30, 1, 235, 8, 235, 8,
+        1871, 53, 3927, 30, 1, 236, 8, 236, 8,
+        1924, 49, 3927, 30, 1, 237, 8, 237, 8,
+        1973, 50, 3840, 29, 1, 238, 8, 238, 8,
+        2023, 36, 3957, 31, 1, 239, 8, 239, 8,
+        2092, 47, 3988, 34, 1, 240, 8, 240, 8,
+        2171, 43, 3927, 30, 1, 241, 8, 241, 8,
+        2249, 44, 3900, 27, 1, 242, 8, 242, 8,
+        2325, 34, 3927, 30, 1, 243, 8, 243, 8,
+        2359, 45, 3809, 31, 1, 244, 8, 244, 8,
+        2404, 41, 3957, 31, 1, 245, 8, 245, 8,
+        2445, 42, 3840, 29, 1, 246, 8, 246, 8,
+        2515, 40, 3927, 30, 1, 247, 8, 247, 8,
+        2555, 51, 3988, 34, 1, 248, 8, 248, 8,
+        2606, 47, 3927, 30, 1, 249, 8, 249, 8,
+        2653, 48, 3840, 29, 1, 250, 8, 250, 8,
+        2701, 37, 3957, 31, 1, 251, 8, 251, 8,
+        2771, 48, 3927, 30, 1, 252, 8, 252, 8,
+        2819, 44, 3988, 34, 1, 253, 8, 253, 8,
+        2863, 45, 3840, 29, 1, 254, 8, 254, 8,
+        2942, 35, 3988, 34, 1, 255, 8, 255, 8,
+        2977, 46, 3957, 31, 1, 256, 8, 256, 8,
+        3023, 42, 3809, 31, 1, 257, 8, 257, 8,
+        3100, 43, 3900, 27, 1, 258, 8, 258, 8,
+        3143, 41, 3988, 34, 1, 259, 8, 259, 8,
+        3184, 52, 3927, 30, 1, 260, 8, 260, 8,
+        3236, 48, 3988, 34, 1, 261, 8, 261, 8,
+        3284, 49, 3900, 27, 1, 262, 8, 262, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_543: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxBackgroundThemeBrushSystemColorButtonFaceColorCheckBoxBorderThemeBrushSystemColorButtonTextColorCheckBoxContentDisabledForegroundThemeBrushSystemColorGrayTextColorCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushSystemColorHighlightColorCheckBoxPointerOverBorderThemeBrushCheckBoxPointerOverForegroundThemeBrushSystemColorHighlightTextColorCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 26, 1, 263, 8, 263, 61,
-        54, 24, 78, 26, 1, 264, 8, 264, 57,
-        104, 43, 147, 24, 1, 265, 8, 265, 76,
-        171, 35, 78, 26, 1, 266, 8, 266, 68,
-        206, 36, 28, 26, 1, 267, 8, 267, 69,
-        242, 32, 147, 24, 1, 268, 8, 268, 65,
-        274, 36, 147, 24, 1, 269, 8, 269, 69,
-        310, 28, 78, 26, 1, 270, 8, 270, 61,
-        338, 39, 377, 25, 1, 271, 8, 271, 72,
-        402, 35, 78, 26, 1, 272, 8, 272, 68,
-        437, 39, 476, 29, 1, 273, 8, 273, 72,
-        505, 35, 78, 26, 1, 274, 8, 274, 68,
-        540, 31, 78, 26, 1, 275, 8, 275, 64,
-        571, 35, 28, 26, 1, 276, 8, 276, 68,
+        3333, 28, 3957, 26, 1, 263, 8, 263, 61,
+        3361, 24, 3809, 26, 1, 264, 8, 264, 57,
+        3385, 43, 3840, 24, 1, 265, 8, 265, 76,
+        3428, 35, 3809, 26, 1, 266, 8, 266, 68,
+        3463, 36, 3957, 26, 1, 267, 8, 267, 69,
+        3499, 32, 3840, 24, 1, 268, 8, 268, 65,
+        3531, 36, 3840, 24, 1, 269, 8, 269, 69,
+        3567, 28, 3809, 26, 1, 270, 8, 270, 61,
+        3595, 39, 3927, 25, 1, 271, 8, 271, 72,
+        3634, 35, 3809, 26, 1, 272, 8, 272, 68,
+        3669, 39, 3988, 29, 1, 273, 8, 273, 72,
+        3708, 35, 3809, 26, 1, 274, 8, 274, 68,
+        3743, 31, 3809, 26, 1, 275, 8, 275, 64,
+        3774, 35, 3957, 26, 1, 276, 8, 276, 68,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_544: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogForegroundSystemColorWindowTextColorBrushContentDialogBackgroundSystemColorWindowColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 31, 1, 49, 8, 49, 8,
-        54, 23, 77, 27, 1, 50, 8, 50, 8,
+        0, 23, 311, 31, 1, 49, 8, 49, 8,
+        48, 23, 342, 27, 1, 50, 8, 50, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_545: rt::PackedRows = rt::PackedRows {
-    strings: "ContentDialogTopOverlaySystemControlTransparentBrushContentDialogBorderBrushSystemColorWindowTextColorBrushContentDialogSeparatorBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 29, 1, 52, 8, 52, 8,
-        52, 24, 76, 31, 1, 53, 8, 53, 8,
-        107, 33, 76, 31, 1, 54, 8, 54, 8,
+        152, 23, 369, 29, 1, 52, 8, 52, 8,
+        197, 24, 311, 31, 1, 53, 8, 53, 8,
+        251, 33, 311, 31, 1, 54, 8, 54, 8,
     ],
 };
 
@@ -15478,41 +15679,41 @@ static POPULATE_WINUITHEME_XAML_ROWS_547: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_548: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerSpacerFillSystemColorButtonTextColorBrushDatePickerSpacerFillDisabledSystemColorGrayTextColorBrushDatePickerHeaderForegroundDatePickerHeaderForegroundDisabledDatePickerButtonBorderBrushDatePickerButtonBorderBrushPointerOverSystemColorHighlightColorBrushDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundSystemColorButtonFaceColorBrushDatePickerButtonBackgroundPointerOverSystemColorHighlightTextColorBrushDatePickerButtonBackgroundPressedSystemColorWindowColorBrushDatePickerButtonBackgroundDisabledDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundDatePickerFlyoutPresenterBorderBrushSystemColorWindowTextColorBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFill",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 31, 1, 87, 8, 87, 8,
-        51, 28, 79, 29, 1, 88, 8, 88, 8,
-        108, 26, 20, 31, 1, 89, 8, 89, 8,
-        134, 34, 79, 29, 1, 90, 8, 90, 8,
-        168, 27, 20, 31, 1, 91, 8, 91, 8,
-        195, 38, 233, 30, 1, 92, 8, 92, 8,
-        263, 34, 233, 30, 1, 93, 8, 93, 8,
-        297, 35, 79, 29, 1, 94, 8, 94, 8,
-        332, 26, 358, 31, 1, 95, 8, 95, 8,
-        389, 37, 426, 34, 1, 96, 8, 96, 8,
-        460, 33, 493, 27, 1, 97, 8, 97, 8,
-        520, 34, 493, 27, 1, 98, 8, 98, 8,
-        554, 33, 426, 34, 1, 99, 8, 99, 8,
-        587, 26, 20, 31, 1, 100, 8, 100, 8,
-        613, 33, 20, 31, 1, 101, 8, 101, 8,
-        646, 37, 233, 30, 1, 102, 8, 102, 8,
-        683, 33, 233, 30, 1, 103, 8, 103, 8,
-        716, 34, 79, 29, 1, 104, 8, 104, 8,
-        750, 33, 233, 30, 1, 105, 8, 105, 8,
-        783, 35, 493, 27, 1, 106, 8, 106, 8,
-        818, 36, 854, 31, 1, 107, 8, 107, 8,
-        885, 35, 854, 31, 1, 108, 8, 108, 8,
-        920, 38, 233, 30, 1, 109, 8, 109, 8,
+        0, 20, 1353, 31, 1, 87, 8, 87, 8,
+        50, 28, 1384, 29, 1, 88, 8, 88, 8,
+        78, 26, 1353, 31, 1, 89, 8, 89, 8,
+        129, 34, 1384, 29, 1, 90, 8, 90, 8,
+        189, 27, 1353, 31, 1, 91, 8, 91, 8,
+        243, 38, 1413, 30, 1, 92, 8, 92, 8,
+        281, 34, 1413, 30, 1, 93, 8, 93, 8,
+        315, 35, 1384, 29, 1, 94, 8, 94, 8,
+        350, 26, 1443, 31, 1, 95, 8, 95, 8,
+        404, 37, 1474, 34, 1, 96, 8, 96, 8,
+        471, 33, 1508, 27, 1, 97, 8, 97, 8,
+        533, 34, 1508, 27, 1, 98, 8, 98, 8,
+        596, 33, 1474, 34, 1, 99, 8, 99, 8,
+        629, 26, 1353, 31, 1, 100, 8, 100, 8,
+        655, 33, 1353, 31, 1, 101, 8, 101, 8,
+        715, 37, 1413, 30, 1, 102, 8, 102, 8,
+        752, 33, 1413, 30, 1, 103, 8, 103, 8,
+        785, 34, 1384, 29, 1, 104, 8, 104, 8,
+        819, 33, 1413, 30, 1, 105, 8, 105, 8,
+        852, 35, 1508, 27, 1, 106, 8, 106, 8,
+        925, 36, 1535, 31, 1, 107, 8, 107, 8,
+        990, 35, 1535, 31, 1, 108, 8, 108, 8,
+        1055, 38, 1413, 30, 1, 109, 8, 109, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_549: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 47, 1, 111, 8, 111, 8,
+        1201, 39, 1240, 47, 1, 111, 8, 111, 8,
     ],
 };
 
@@ -15526,90 +15727,90 @@ static POPULATE_WINUITHEME_XAML_ROWS_550: &[rt::ValueRow<f64>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_551: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerHeaderForegroundThemeBrushSystemColorButtonTextColorDatePickerForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 26, 1, 118, 8, 118, 69,
-        62, 30, 36, 26, 1, 119, 8, 119, 63,
+        1287, 36, 1353, 26, 1, 118, 8, 118, 69,
+        1323, 30, 1353, 26, 1, 119, 8, 119, 63,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_552: rt::PackedRows = rt::PackedRows {
-    strings: "DateTimePickerFlyoutButtonBackgroundSystemColorWindowColorBrushDateTimePickerFlyoutButtonBackgroundPointerOverSystemColorHighlightTextColorBrushDateTimePickerFlyoutButtonBackgroundPressedDateTimePickerFlyoutButtonBorderBrushSystemColorButtonTextColorBrushDateTimePickerFlyoutButtonBorderBrushPointerOverSystemColorHighlightColorBrushDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 27, 1, 61, 8, 61, 8,
-        63, 47, 110, 34, 1, 62, 8, 62, 8,
-        144, 43, 36, 27, 1, 63, 8, 63, 8,
-        187, 37, 224, 31, 1, 64, 8, 64, 8,
-        255, 48, 303, 30, 1, 65, 8, 65, 8,
-        333, 44, 303, 30, 1, 66, 8, 66, 8,
-        377, 47, 303, 30, 1, 67, 8, 67, 8,
-        424, 43, 303, 30, 1, 68, 8, 68, 8,
-        467, 37, 224, 31, 1, 69, 8, 69, 8,
-        504, 48, 110, 34, 1, 70, 8, 70, 8,
-        552, 44, 303, 30, 1, 71, 8, 71, 8,
-        596, 37, 36, 27, 1, 72, 8, 72, 8,
-        633, 48, 303, 30, 1, 73, 8, 73, 8,
-        681, 44, 36, 27, 1, 74, 8, 74, 8,
-        725, 29, 224, 31, 1, 75, 8, 75, 8,
-        754, 37, 110, 34, 1, 76, 8, 76, 8,
-        791, 40, 110, 34, 1, 77, 8, 77, 8,
-        831, 36, 303, 30, 1, 78, 8, 78, 8,
-        867, 37, 303, 30, 1, 79, 8, 79, 8,
-        904, 40, 303, 30, 1, 80, 8, 80, 8,
-        944, 36, 36, 27, 1, 81, 8, 81, 8,
+        0, 36, 1066, 27, 1, 61, 8, 61, 8,
+        67, 47, 1093, 34, 1, 62, 8, 62, 8,
+        143, 43, 1066, 27, 1, 63, 8, 63, 8,
+        214, 37, 1127, 31, 1, 64, 8, 64, 8,
+        281, 48, 1158, 30, 1, 65, 8, 65, 8,
+        329, 44, 1158, 30, 1, 66, 8, 66, 8,
+        373, 47, 1158, 30, 1, 67, 8, 67, 8,
+        445, 43, 1158, 30, 1, 68, 8, 68, 8,
+        488, 37, 1127, 31, 1, 69, 8, 69, 8,
+        552, 48, 1093, 34, 1, 70, 8, 70, 8,
+        600, 44, 1158, 30, 1, 71, 8, 71, 8,
+        644, 37, 1066, 27, 1, 72, 8, 72, 8,
+        719, 48, 1158, 30, 1, 73, 8, 73, 8,
+        767, 44, 1066, 27, 1, 74, 8, 74, 8,
+        811, 29, 1127, 31, 1, 75, 8, 75, 8,
+        840, 37, 1093, 34, 1, 76, 8, 76, 8,
+        877, 40, 1093, 34, 1, 77, 8, 77, 8,
+        917, 36, 1158, 30, 1, 78, 8, 78, 8,
+        953, 37, 1158, 30, 1, 79, 8, 79, 8,
+        990, 40, 1158, 30, 1, 80, 8, 80, 8,
+        1030, 36, 1066, 27, 1, 81, 8, 81, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_553: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewBackgroundSystemColorButtonFaceColorBrushFlipViewNextPreviousButtonBackgroundFlipViewNextPreviousButtonBackgroundPointerOverSystemColorHighlightColorBrushFlipViewNextPreviousButtonBackgroundPressedFlipViewNextPreviousArrowForegroundSystemColorButtonTextColorBrushFlipViewNextPreviousArrowForegroundPointerOverSystemColorHighlightTextColorBrushFlipViewNextPreviousArrowForegroundPressedFlipViewNextPreviousButtonBorderBrushFlipViewNextPreviousButtonBorderBrushPointerOverFlipViewNextPreviousButtonBorderBrushPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 18, 31, 1, 60, 8, 60, 8,
-        49, 36, 18, 31, 1, 61, 8, 61, 8,
-        85, 47, 132, 30, 1, 62, 8, 62, 8,
-        162, 43, 132, 30, 1, 63, 8, 63, 8,
-        205, 35, 240, 31, 1, 64, 8, 64, 8,
-        271, 46, 317, 34, 1, 65, 8, 65, 8,
-        351, 42, 317, 34, 1, 66, 8, 66, 8,
-        393, 37, 240, 31, 1, 67, 8, 67, 8,
-        430, 48, 240, 31, 1, 68, 8, 68, 8,
-        478, 44, 240, 31, 1, 69, 8, 69, 8,
+        0, 18, 901, 31, 1, 60, 8, 60, 8,
+        51, 36, 901, 31, 1, 61, 8, 61, 8,
+        120, 47, 932, 30, 1, 62, 8, 62, 8,
+        167, 43, 932, 30, 1, 63, 8, 63, 8,
+        210, 35, 962, 31, 1, 64, 8, 64, 8,
+        279, 46, 993, 34, 1, 65, 8, 65, 8,
+        352, 42, 993, 34, 1, 66, 8, 66, 8,
+        394, 37, 962, 31, 1, 67, 8, 67, 8,
+        461, 48, 962, 31, 1, 68, 8, 68, 8,
+        509, 44, 962, 31, 1, 69, 8, 69, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_554: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewButtonBackgroundThemeBrushSystemColorButtonFaceColorFlipViewButtonBorderThemeBrushSystemColorButtonTextColorFlipViewButtonForegroundThemeBrushFlipViewButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorFlipViewButtonPointerOverBorderThemeBrushFlipViewButtonPointerOverForegroundThemeBrushSystemColorHighlightTextColorFlipViewButtonPressedBackgroundThemeBrushFlipViewButtonPressedBorderThemeBrushFlipViewButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 26, 1, 70, 8, 70, 67,
-        60, 30, 90, 26, 1, 71, 8, 71, 63,
-        116, 34, 90, 26, 1, 72, 8, 72, 67,
-        150, 45, 195, 25, 1, 73, 8, 73, 78,
-        220, 41, 90, 26, 1, 74, 8, 74, 74,
-        261, 45, 306, 29, 1, 75, 8, 75, 78,
-        335, 41, 90, 26, 1, 76, 8, 76, 74,
-        376, 37, 90, 26, 1, 77, 8, 77, 70,
-        413, 41, 34, 26, 1, 78, 8, 78, 74,
+        553, 34, 901, 26, 1, 70, 8, 70, 67,
+        587, 30, 962, 26, 1, 71, 8, 71, 63,
+        617, 34, 962, 26, 1, 72, 8, 72, 67,
+        651, 45, 932, 25, 1, 73, 8, 73, 78,
+        696, 41, 962, 26, 1, 74, 8, 74, 74,
+        737, 45, 993, 29, 1, 75, 8, 75, 78,
+        782, 41, 962, 26, 1, 76, 8, 76, 74,
+        823, 37, 962, 26, 1, 77, 8, 77, 70,
+        860, 41, 901, 26, 1, 78, 8, 78, 74,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_555: rt::PackedRows = rt::PackedRows {
-    strings: "FlipViewItemBackgroundSystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 29, 1, 21, 8, 21, 8,
+        0, 22, 53, 29, 1, 21, 8, 21, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_556: rt::PackedRows = rt::PackedRows {
-    strings: "PivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFill",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 15, 15, 29, 1, 149, 8, 149, 8,
@@ -15671,155 +15872,155 @@ static POPULATE_WINUITHEME_XAML_ROWS_558: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_559: rt::PackedRows = rt::PackedRows {
-    strings: "PivotForegroundThemeBrushSystemColorHighlightColorPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushSystemColorHighlightTextColorPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushSystemColorButtonFaceColorPivotNavButtonBorderThemeBrushSystemColorButtonTextColorPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 25, 1, 200, 8, 200, 58,
-        50, 34, 25, 25, 1, 201, 8, 201, 67,
-        84, 36, 25, 25, 1, 202, 8, 202, 69,
-        120, 34, 154, 29, 1, 203, 8, 203, 67,
-        183, 36, 25, 25, 1, 204, 8, 204, 69,
-        219, 34, 253, 26, 1, 205, 8, 205, 67,
-        279, 30, 309, 26, 1, 206, 8, 206, 63,
-        335, 34, 309, 26, 1, 207, 8, 207, 67,
-        369, 45, 25, 25, 1, 208, 8, 208, 78,
-        414, 41, 309, 26, 1, 209, 8, 209, 74,
-        455, 45, 154, 29, 1, 210, 8, 210, 78,
-        500, 41, 309, 26, 1, 211, 8, 211, 74,
-        541, 37, 309, 26, 1, 212, 8, 212, 70,
-        578, 41, 253, 26, 1, 213, 8, 213, 74,
+        1791, 25, 2304, 25, 1, 200, 8, 200, 58,
+        1816, 34, 2304, 25, 1, 201, 8, 201, 67,
+        1850, 36, 2304, 25, 1, 202, 8, 202, 69,
+        1886, 34, 2329, 29, 1, 203, 8, 203, 67,
+        1920, 36, 2304, 25, 1, 204, 8, 204, 69,
+        1956, 34, 2358, 26, 1, 205, 8, 205, 67,
+        1990, 30, 2384, 26, 1, 206, 8, 206, 63,
+        2020, 34, 2384, 26, 1, 207, 8, 207, 67,
+        2054, 45, 2304, 25, 1, 208, 8, 208, 78,
+        2099, 41, 2384, 26, 1, 209, 8, 209, 74,
+        2140, 45, 2329, 29, 1, 210, 8, 210, 78,
+        2185, 41, 2384, 26, 1, 211, 8, 211, 74,
+        2226, 37, 2384, 26, 1, 212, 8, 212, 70,
+        2263, 41, 2358, 26, 1, 213, 8, 213, 74,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_560: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarBackgroundSystemControlTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundSystemControlForegroundBaseHighBrushScrollBarButtonArrowForegroundPointerOverSystemControlHighlightBaseHighBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledSystemControlDisabledBaseHighBrushScrollBarThumbFillSystemControlForegroundChromeDisabledLowBrushScrollBarThumbFillPointerOverSystemControlHighlightBaseMediumLowBrushScrollBarThumbFillPressedSystemControlHighlightBaseMediumBrushScrollBarThumbFillDisabledScrollBarThumbBorderBrushScrollBarTrackFillSystemControlPageBackgroundChromeLowBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledSystemControlDisabledTransparentBrushScrollBarTrackStrokeSystemControlForegroundTransparentBrushScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabledSystemControlDisabledChromeHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 29, 1, 129, 8, 129, 8,
-        48, 30, 19, 29, 1, 130, 8, 130, 8,
-        78, 27, 19, 29, 1, 131, 8, 131, 8,
-        105, 19, 19, 29, 1, 132, 8, 132, 8,
-        124, 20, 19, 29, 1, 133, 8, 133, 8,
-        144, 31, 19, 29, 1, 134, 8, 134, 8,
-        175, 28, 19, 29, 1, 135, 8, 135, 8,
-        203, 25, 19, 29, 1, 136, 8, 136, 8,
-        228, 36, 264, 35, 1, 137, 8, 137, 8,
-        299, 32, 331, 38, 1, 138, 8, 138, 8,
-        369, 33, 19, 29, 1, 139, 8, 139, 8,
-        402, 26, 19, 29, 1, 140, 8, 140, 8,
-        428, 37, 19, 29, 1, 141, 8, 141, 8,
-        465, 33, 19, 29, 1, 142, 8, 142, 8,
-        498, 34, 19, 29, 1, 143, 8, 143, 8,
-        532, 30, 562, 36, 1, 144, 8, 144, 8,
-        598, 41, 639, 35, 1, 145, 8, 145, 8,
-        674, 37, 639, 35, 1, 146, 8, 146, 8,
-        711, 38, 749, 34, 1, 147, 8, 147, 8,
-        783, 18, 801, 45, 1, 148, 8, 148, 8,
-        846, 29, 875, 40, 1, 149, 8, 149, 8,
-        915, 25, 940, 37, 1, 150, 8, 150, 8,
-        977, 26, 749, 34, 1, 151, 8, 151, 8,
-        1003, 25, 19, 29, 1, 152, 8, 152, 8,
-        1028, 18, 1046, 41, 1, 153, 8, 153, 8,
-        1087, 29, 1046, 41, 1, 154, 8, 154, 8,
-        1116, 26, 1142, 37, 1, 155, 8, 155, 8,
-        1179, 20, 1199, 39, 1, 156, 8, 156, 8,
-        1238, 31, 1199, 39, 1, 157, 8, 157, 8,
-        1269, 28, 1142, 37, 1, 158, 8, 158, 8,
-        1297, 24, 801, 45, 1, 159, 8, 159, 8,
-        1321, 31, 801, 45, 1, 160, 8, 160, 8,
-        1352, 39, 1391, 36, 1, 161, 8, 161, 8,
+        0, 19, 1882, 29, 1, 129, 8, 129, 8,
+        50, 30, 1882, 29, 1, 130, 8, 130, 8,
+        80, 27, 1882, 29, 1, 131, 8, 131, 8,
+        107, 19, 1882, 29, 1, 132, 8, 132, 8,
+        126, 20, 1882, 29, 1, 133, 8, 133, 8,
+        146, 31, 1882, 29, 1, 134, 8, 134, 8,
+        177, 28, 1882, 29, 1, 135, 8, 135, 8,
+        205, 25, 1882, 29, 1, 136, 8, 136, 8,
+        230, 36, 1911, 35, 1, 137, 8, 137, 8,
+        295, 32, 1946, 38, 1, 138, 8, 138, 8,
+        361, 33, 1882, 29, 1, 139, 8, 139, 8,
+        394, 26, 1882, 29, 1, 140, 8, 140, 8,
+        420, 37, 1882, 29, 1, 141, 8, 141, 8,
+        457, 33, 1882, 29, 1, 142, 8, 142, 8,
+        490, 34, 1882, 29, 1, 143, 8, 143, 8,
+        524, 30, 1984, 36, 1, 144, 8, 144, 8,
+        554, 41, 2020, 35, 1, 145, 8, 145, 8,
+        622, 37, 2020, 35, 1, 146, 8, 146, 8,
+        659, 38, 2055, 34, 1, 147, 8, 147, 8,
+        732, 18, 2089, 45, 1, 148, 8, 148, 8,
+        750, 29, 2134, 40, 1, 149, 8, 149, 8,
+        779, 25, 2174, 37, 1, 150, 8, 150, 8,
+        804, 26, 2055, 34, 1, 151, 8, 151, 8,
+        830, 25, 1882, 29, 1, 152, 8, 152, 8,
+        887, 18, 2211, 41, 1, 153, 8, 153, 8,
+        938, 29, 2211, 41, 1, 154, 8, 154, 8,
+        967, 26, 2252, 37, 1, 155, 8, 155, 8,
+        993, 20, 2289, 39, 1, 156, 8, 156, 8,
+        1013, 31, 2289, 39, 1, 157, 8, 157, 8,
+        1044, 28, 2252, 37, 1, 158, 8, 158, 8,
+        1072, 24, 2089, 45, 1, 159, 8, 159, 8,
+        1096, 31, 2089, 45, 1, 160, 8, 160, 8,
+        1127, 39, 2328, 36, 1, 161, 8, 161, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_561: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarButtonForegroundThemeBrushSystemColorButtonTextColorScrollBarButtonPointerOverBackgroundThemeBrushSystemColorHighlightColorScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushSystemColorHighlightTextColorScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushSystemColorButtonFaceColorScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 26, 1, 162, 8, 162, 68,
-        61, 46, 107, 25, 1, 163, 8, 163, 79,
-        132, 42, 35, 26, 1, 164, 8, 164, 75,
-        174, 46, 220, 29, 1, 165, 8, 165, 79,
-        249, 42, 35, 26, 1, 166, 8, 166, 75,
-        291, 38, 35, 26, 1, 167, 8, 167, 71,
-        329, 42, 371, 26, 1, 168, 8, 168, 75,
-        397, 36, 35, 26, 1, 169, 8, 169, 69,
-        433, 32, 371, 26, 1, 170, 8, 170, 65,
-        465, 34, 35, 26, 1, 171, 8, 171, 67,
-        499, 30, 35, 26, 1, 172, 8, 172, 63,
-        529, 45, 107, 25, 1, 173, 8, 173, 78,
-        574, 41, 35, 26, 1, 174, 8, 174, 74,
-        615, 41, 371, 26, 1, 175, 8, 175, 74,
-        656, 37, 35, 26, 1, 176, 8, 176, 70,
-        693, 34, 371, 26, 1, 177, 8, 177, 67,
-        727, 30, 35, 26, 1, 178, 8, 178, 63,
+        1166, 35, 2364, 26, 1, 162, 8, 162, 68,
+        1201, 46, 2390, 25, 1, 163, 8, 163, 79,
+        1247, 42, 2364, 26, 1, 164, 8, 164, 75,
+        1289, 46, 2415, 29, 1, 165, 8, 165, 79,
+        1335, 42, 2364, 26, 1, 166, 8, 166, 75,
+        1377, 38, 2364, 26, 1, 167, 8, 167, 71,
+        1415, 42, 2444, 26, 1, 168, 8, 168, 75,
+        1457, 36, 2364, 26, 1, 169, 8, 169, 69,
+        1493, 32, 2444, 26, 1, 170, 8, 170, 65,
+        1525, 34, 2364, 26, 1, 171, 8, 171, 67,
+        1559, 30, 2364, 26, 1, 172, 8, 172, 63,
+        1589, 45, 2390, 25, 1, 173, 8, 173, 78,
+        1634, 41, 2364, 26, 1, 174, 8, 174, 74,
+        1675, 41, 2444, 26, 1, 175, 8, 175, 74,
+        1716, 37, 2364, 26, 1, 176, 8, 176, 70,
+        1753, 34, 2444, 26, 1, 177, 8, 177, 67,
+        1787, 30, 2364, 26, 1, 178, 8, 178, 63,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_562: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarThumbBackgroundColorSystemColorButtonTextColorScrollBarPanningThumbBackgroundColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 26, 1, 179, 8, 179, 8,
-        55, 36, 29, 26, 1, 180, 8, 180, 8,
+        1817, 29, 2364, 26, 1, 179, 8, 179, 8,
+        1846, 36, 2364, 26, 1, 180, 8, 180, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_563: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollViewerScrollBarSeparatorBackgroundSystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 29, 1, 21, 8, 21, 8,
+        0, 40, 72, 29, 1, 21, 8, 21, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_564: rt::PackedRows = rt::PackedRows {
-    strings: "SliderContainerBackgroundSystemControlTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrushSliderThumbBackgroundPointerOverSystemColorHighlightColorBrushSliderThumbBackgroundPressedSystemColorHotlightColorBrushSliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderThumbBorderBrushSliderOuterThumbBackgroundSliderTrackFillSystemControlForegroundBaseMediumLowBrushSliderTrackFillPointerOverSystemControlForegroundBaseMediumBrushSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSystemControlHighlightAccentBrushSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderHeaderForegroundSystemControlForegroundBaseHighBrushSliderHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushSliderTickBarFill",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 29, 1, 118, 8, 118, 8,
-        54, 36, 25, 29, 1, 119, 8, 119, 8,
-        90, 32, 25, 29, 1, 120, 8, 120, 8,
-        122, 33, 25, 29, 1, 121, 8, 121, 8,
-        155, 21, 176, 34, 1, 122, 8, 122, 8,
-        210, 32, 242, 30, 1, 123, 8, 123, 8,
-        272, 28, 300, 29, 1, 124, 8, 124, 8,
-        329, 29, 358, 44, 1, 125, 8, 125, 8,
-        402, 22, 176, 34, 1, 126, 8, 126, 8,
-        424, 26, 176, 34, 1, 127, 8, 127, 8,
-        450, 15, 465, 41, 1, 128, 8, 128, 8,
-        506, 26, 532, 38, 1, 129, 8, 129, 8,
-        570, 22, 465, 41, 1, 130, 8, 130, 8,
-        592, 23, 358, 44, 1, 131, 8, 131, 8,
-        615, 20, 635, 33, 1, 132, 8, 132, 8,
-        668, 31, 635, 33, 1, 133, 8, 133, 8,
-        699, 27, 635, 33, 1, 134, 8, 134, 8,
-        726, 28, 358, 44, 1, 135, 8, 135, 8,
-        754, 22, 776, 36, 1, 136, 8, 136, 8,
-        812, 30, 842, 39, 1, 137, 8, 137, 8,
-        881, 17, 465, 41, 1, 138, 8, 138, 8,
+        0, 25, 1767, 29, 1, 118, 8, 118, 8,
+        0, 36, 1767, 29, 1, 119, 8, 119, 8,
+        68, 32, 1767, 29, 1, 120, 8, 120, 8,
+        100, 33, 1767, 29, 1, 121, 8, 121, 8,
+        133, 21, 1796, 34, 1, 122, 8, 122, 8,
+        181, 32, 1830, 30, 1, 123, 8, 123, 8,
+        242, 28, 1860, 29, 1, 124, 8, 124, 8,
+        298, 29, 1889, 44, 1, 125, 8, 125, 8,
+        355, 22, 1796, 34, 1, 126, 8, 126, 8,
+        404, 26, 1796, 34, 1, 127, 8, 127, 8,
+        463, 15, 1933, 41, 1, 128, 8, 128, 8,
+        512, 26, 1974, 38, 1, 129, 8, 129, 8,
+        538, 22, 1933, 41, 1, 130, 8, 130, 8,
+        560, 23, 1889, 44, 1, 131, 8, 131, 8,
+        618, 20, 2012, 33, 1, 132, 8, 132, 8,
+        638, 31, 2012, 33, 1, 133, 8, 133, 8,
+        669, 27, 2012, 33, 1, 134, 8, 134, 8,
+        696, 28, 1889, 44, 1, 135, 8, 135, 8,
+        724, 22, 2045, 36, 1, 136, 8, 136, 8,
+        771, 30, 2081, 39, 1, 137, 8, 137, 8,
+        827, 17, 1933, 41, 1, 138, 8, 138, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_565: rt::PackedRows = rt::PackedRows {
-    strings: "SliderTickBarFillDisabledSystemColorGrayTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 24, 1, 139, 8, 139, 58,
+        844, 25, 2120, 24, 1, 139, 8, 139, 58,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_566: rt::PackedRows = rt::PackedRows {
-    strings: "SliderInlineTickBarFillSystemControlBackgroundAltHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 140, 8, 140, 8,
+        869, 23, 2144, 35, 1, 140, 8, 140, 8,
     ],
 };
 
@@ -15837,81 +16038,81 @@ static POPULATE_WINUITHEME_XAML_ROWS_568: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_569: rt::PackedRows = rt::PackedRows {
-    strings: "SliderBorderThemeBrushSystemColorButtonTextColorSliderDisabledBorderThemeBrushSystemColorGrayTextColorSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSystemColorHighlightTextColorSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSystemColorHighlightColorSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSystemColorButtonFaceColorSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 26, 1, 146, 8, 146, 55,
-        48, 30, 78, 24, 1, 147, 8, 147, 63,
-        102, 31, 22, 26, 1, 148, 8, 148, 64,
-        133, 27, 160, 29, 1, 149, 8, 149, 60,
-        189, 39, 78, 24, 1, 150, 8, 150, 72,
-        228, 42, 270, 25, 1, 151, 8, 151, 75,
-        295, 38, 160, 29, 1, 152, 8, 152, 71,
-        333, 38, 160, 29, 1, 153, 8, 153, 71,
-        371, 34, 22, 26, 1, 154, 8, 154, 67,
-        405, 40, 22, 26, 1, 155, 8, 155, 73,
-        445, 48, 78, 24, 1, 156, 8, 156, 81,
-        493, 41, 22, 26, 1, 157, 8, 157, 74,
-        534, 49, 78, 24, 1, 158, 8, 158, 82,
-        583, 31, 614, 26, 1, 159, 8, 159, 64,
-        640, 39, 270, 25, 1, 160, 8, 160, 72,
-        679, 47, 614, 26, 1, 161, 8, 161, 80,
-        726, 50, 270, 25, 1, 162, 8, 162, 83,
-        776, 46, 270, 25, 1, 163, 8, 163, 79,
-        822, 39, 614, 26, 1, 164, 8, 164, 72,
-        861, 42, 614, 26, 1, 165, 8, 165, 75,
-        903, 38, 614, 26, 1, 166, 8, 166, 71,
-        941, 32, 22, 26, 1, 167, 8, 167, 65,
+        924, 22, 2179, 26, 1, 146, 8, 146, 55,
+        946, 30, 2120, 24, 1, 147, 8, 147, 63,
+        976, 31, 2179, 26, 1, 148, 8, 148, 64,
+        1007, 27, 2205, 29, 1, 149, 8, 149, 60,
+        1034, 39, 2120, 24, 1, 150, 8, 150, 72,
+        1073, 42, 1830, 25, 1, 151, 8, 151, 75,
+        1115, 38, 2205, 29, 1, 152, 8, 152, 71,
+        1153, 38, 2205, 29, 1, 153, 8, 153, 71,
+        1191, 34, 2179, 26, 1, 154, 8, 154, 67,
+        1225, 40, 2179, 26, 1, 155, 8, 155, 73,
+        1265, 48, 2120, 24, 1, 156, 8, 156, 81,
+        1313, 41, 2179, 26, 1, 157, 8, 157, 74,
+        1354, 49, 2120, 24, 1, 158, 8, 158, 82,
+        1403, 31, 2234, 26, 1, 159, 8, 159, 64,
+        1434, 39, 1830, 25, 1, 160, 8, 160, 72,
+        1473, 47, 2234, 26, 1, 161, 8, 161, 80,
+        1520, 50, 1830, 25, 1, 162, 8, 162, 83,
+        1570, 46, 1830, 25, 1, 163, 8, 163, 79,
+        1616, 39, 2234, 26, 1, 164, 8, 164, 72,
+        1655, 42, 2234, 26, 1, 165, 8, 165, 75,
+        1697, 38, 2234, 26, 1, 166, 8, 166, 71,
+        1735, 32, 2179, 26, 1, 167, 8, 167, 65,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_570: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerSpacerFillSystemColorButtonTextColorBrushTimePickerSpacerFillDisabledSystemColorGrayTextColorBrushTimePickerHeaderForegroundTimePickerHeaderForegroundDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverSystemColorHighlightColorBrushTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundSystemColorButtonFaceColorBrushTimePickerButtonBackgroundPointerOverSystemColorHighlightTextColorBrushTimePickerButtonBackgroundPressedSystemColorWindowColorBrushTimePickerButtonBackgroundDisabledTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushSystemColorWindowTextColorBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFill",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 31, 1, 87, 8, 87, 8,
-        51, 28, 79, 29, 1, 88, 8, 88, 8,
-        108, 26, 20, 31, 1, 89, 8, 89, 8,
-        134, 34, 79, 29, 1, 90, 8, 90, 8,
-        168, 27, 20, 31, 1, 91, 8, 91, 8,
-        195, 38, 233, 30, 1, 92, 8, 92, 8,
-        263, 34, 233, 30, 1, 93, 8, 93, 8,
-        297, 35, 79, 29, 1, 94, 8, 94, 8,
-        332, 26, 358, 31, 1, 95, 8, 95, 8,
-        389, 37, 426, 34, 1, 96, 8, 96, 8,
-        460, 33, 493, 27, 1, 97, 8, 97, 8,
-        520, 34, 493, 27, 1, 98, 8, 98, 8,
-        554, 33, 426, 34, 1, 99, 8, 99, 8,
-        587, 26, 20, 31, 1, 100, 8, 100, 8,
-        613, 33, 20, 31, 1, 101, 8, 101, 8,
-        646, 37, 233, 30, 1, 102, 8, 102, 8,
-        683, 33, 233, 30, 1, 103, 8, 103, 8,
-        716, 34, 79, 29, 1, 104, 8, 104, 8,
-        750, 33, 233, 30, 1, 105, 8, 105, 8,
-        783, 35, 493, 27, 1, 106, 8, 106, 8,
-        818, 36, 854, 31, 1, 107, 8, 107, 8,
-        885, 35, 854, 31, 1, 108, 8, 108, 8,
-        920, 38, 233, 30, 1, 109, 8, 109, 8,
+        0, 20, 1353, 31, 1, 87, 8, 87, 8,
+        50, 28, 1384, 29, 1, 88, 8, 88, 8,
+        78, 26, 1353, 31, 1, 89, 8, 89, 8,
+        129, 34, 1384, 29, 1, 90, 8, 90, 8,
+        189, 27, 1353, 31, 1, 91, 8, 91, 8,
+        243, 38, 1413, 30, 1, 92, 8, 92, 8,
+        281, 34, 1413, 30, 1, 93, 8, 93, 8,
+        315, 35, 1384, 29, 1, 94, 8, 94, 8,
+        350, 26, 1443, 31, 1, 95, 8, 95, 8,
+        404, 37, 1474, 34, 1, 96, 8, 96, 8,
+        471, 33, 1508, 27, 1, 97, 8, 97, 8,
+        533, 34, 1508, 27, 1, 98, 8, 98, 8,
+        596, 33, 1474, 34, 1, 99, 8, 99, 8,
+        629, 26, 1353, 31, 1, 100, 8, 100, 8,
+        655, 33, 1353, 31, 1, 101, 8, 101, 8,
+        715, 37, 1413, 30, 1, 102, 8, 102, 8,
+        752, 33, 1413, 30, 1, 103, 8, 103, 8,
+        785, 34, 1384, 29, 1, 104, 8, 104, 8,
+        819, 33, 1413, 30, 1, 105, 8, 105, 8,
+        852, 35, 1508, 27, 1, 106, 8, 106, 8,
+        925, 36, 1535, 31, 1, 107, 8, 107, 8,
+        990, 35, 1535, 31, 1, 108, 8, 108, 8,
+        1055, 38, 1413, 30, 1, 109, 8, 109, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_571: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 47, 1, 111, 8, 111, 8,
+        1201, 39, 1240, 47, 1, 111, 8, 111, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_572: rt::PackedRows = rt::PackedRows {
-    strings: "TimePickerForegroundThemeBrushSystemColorButtonTextColorTimePickerHeaderForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 26, 1, 112, 8, 112, 63,
-        56, 36, 30, 26, 1, 113, 8, 113, 69,
+        1323, 30, 1353, 26, 1, 112, 8, 112, 63,
+        1287, 36, 1353, 26, 1, 113, 8, 113, 69,
     ],
 };
 
@@ -15924,59 +16125,59 @@ static POPULATE_WINUITHEME_XAML_ROWS_573: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_574: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundSystemControlForegroundBaseHighBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSystemColorWindowTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 36, 1, 41, 8, 41, 8,
-        53, 17, 70, 43, 1, 42, 8, 42, 8,
-        113, 18, 131, 31, 1, 43, 8, 43, 8,
+        0, 17, 303, 36, 1, 41, 8, 41, 8,
+        42, 17, 59, 43, 1, 42, 8, 42, 8,
+        102, 18, 339, 31, 1, 43, 8, 43, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_575: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipBackgroundThemeBrushSystemColorWindowColorToolTipBorderThemeBrushSystemColorWindowTextColorToolTipForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 22, 1, 44, 8, 44, 60,
-        49, 23, 72, 26, 1, 45, 8, 45, 56,
-        98, 27, 72, 26, 1, 46, 8, 46, 60,
+        149, 27, 370, 22, 1, 44, 8, 44, 60,
+        176, 23, 339, 26, 1, 45, 8, 45, 56,
+        199, 27, 339, 26, 1, 46, 8, 46, 60,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_576: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundBrushSystemColorWindowTextColorBrushToolTipBackgroundBrushSystemColorWindowColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 31, 1, 47, 8, 47, 8,
-        53, 22, 75, 27, 1, 48, 8, 48, 8,
+        226, 22, 339, 31, 1, 47, 8, 47, 8,
+        248, 22, 392, 27, 1, 48, 8, 48, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_577: rt::PackedRows = rt::PackedRows {
-    strings: "RatingControlUnselectedForegroundSystemControlForegroundBaseLowBrushRatingControlSelectedForegroundSystemControlHighlightAccentBrushRatingControlPlaceholderForegroundSystemControlForegroundBaseHighBrushRatingControlPointerOverPlaceholderForegroundSystemControlForegroundBaseMediumBrushRatingControlPointerOverUnselectedForegroundRatingControlPointerOverSelectedForegroundRatingControlDisabledSelectedForegroundSystemColorGrayTextColorRatingControlCaptionForegroundTextFillColorSecondaryBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 35, 1, 35, 8, 35, 8,
-        68, 31, 99, 33, 1, 36, 8, 36, 8,
-        132, 34, 166, 36, 1, 37, 8, 37, 8,
-        202, 45, 247, 38, 1, 38, 8, 38, 8,
-        285, 44, 247, 38, 1, 39, 8, 39, 8,
-        329, 42, 99, 33, 1, 40, 8, 40, 8,
-        371, 39, 410, 24, 1, 41, 8, 41, 8,
-        434, 30, 464, 27, 1, 42, 8, 42, 8,
+        0, 33, 435, 35, 1, 35, 8, 35, 8,
+        60, 31, 470, 33, 1, 36, 8, 36, 8,
+        118, 34, 503, 36, 1, 37, 8, 37, 8,
+        177, 45, 539, 38, 1, 38, 8, 38, 8,
+        254, 44, 539, 38, 1, 39, 8, 39, 8,
+        298, 42, 470, 33, 1, 40, 8, 40, 8,
+        340, 39, 577, 24, 1, 41, 8, 41, 8,
+        405, 30, 33, 27, 1, 42, 8, 42, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_578: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBadgeForegroundSystemControlHighlightAltChromeWhiteBrushInfoBadgeBackgroundSystemControlHighlightAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 41, 1, 43, 8, 43, 8,
-        60, 19, 79, 33, 1, 44, 8, 44, 8,
+        0, 19, 98, 41, 1, 43, 8, 43, 8,
+        52, 19, 139, 33, 1, 44, 8, 44, 8,
     ],
 };
 
@@ -16000,160 +16201,160 @@ static POPULATE_WINUITHEME_XAML_ROWS_580: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_581: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewDefaultPaneBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 35, 1, 147, 8, 147, 8,
+        0, 35, 2922, 35, 1, 147, 8, 147, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_582: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewExpandedPaneBackgroundSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 22, 1, 148, 8, 148, 69,
+        68, 36, 2957, 22, 1, 148, 8, 148, 69,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_583: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewTopPaneBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 35, 1, 149, 8, 149, 8,
+        139, 31, 2922, 35, 1, 149, 8, 149, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_584: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewContentBackgroundSystemColorWindowColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 22, 1, 150, 8, 150, 64,
+        170, 31, 2957, 22, 1, 150, 8, 150, 64,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_585: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewItemBackgroundSystemControlBackgroundBaseLowBrushNavigationViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushNavigationViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedSystemControlTransparentRevealBackgroundBrushNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundSystemControlForegroundBaseHighBrushNavigationViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushNavigationViewItemForegroundPressedNavigationViewItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushSystemControlTransparentBrushNavigationViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedSystemControlBackgroundTransparentRevealBorderBrushNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundNavigationViewItemSeparatorForegroundSystemColorWindowTextColorBrushNavigationViewItemHeaderForeground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 35, 1, 151, 8, 151, 8,
-        63, 39, 102, 50, 1, 152, 8, 152, 8,
-        152, 35, 187, 53, 1, 153, 8, 153, 8,
-        240, 36, 28, 35, 1, 154, 8, 154, 8,
-        276, 35, 311, 45, 1, 155, 8, 155, 8,
-        356, 46, 102, 50, 1, 156, 8, 156, 8,
-        402, 42, 187, 53, 1, 157, 8, 157, 8,
-        444, 43, 311, 45, 1, 158, 8, 158, 8,
-        487, 36, 102, 50, 1, 159, 8, 159, 8,
-        523, 47, 102, 50, 1, 160, 8, 160, 8,
-        570, 43, 187, 53, 1, 161, 8, 161, 8,
-        613, 44, 311, 45, 1, 162, 8, 162, 8,
-        657, 28, 685, 36, 1, 163, 8, 163, 8,
-        721, 39, 760, 38, 1, 164, 8, 164, 8,
-        798, 35, 760, 38, 1, 165, 8, 165, 8,
-        833, 36, 869, 39, 1, 166, 8, 166, 8,
-        908, 35, 760, 38, 1, 167, 8, 167, 8,
-        943, 46, 760, 38, 1, 168, 8, 168, 8,
-        989, 42, 760, 38, 1, 169, 8, 169, 8,
-        1031, 43, 869, 39, 1, 170, 8, 170, 8,
-        1074, 36, 760, 38, 1, 171, 8, 171, 8,
-        1110, 47, 760, 38, 1, 172, 8, 172, 8,
-        1157, 43, 760, 38, 1, 173, 8, 173, 8,
-        1200, 44, 869, 39, 1, 174, 8, 174, 8,
-        1244, 29, 1273, 29, 1, 175, 8, 175, 8,
-        1302, 40, 1342, 53, 1, 176, 8, 176, 8,
-        1395, 36, 1342, 53, 1, 177, 8, 177, 8,
-        1431, 37, 1273, 29, 1, 178, 8, 178, 8,
-        1468, 36, 1504, 51, 1, 179, 8, 179, 8,
-        1555, 47, 1342, 53, 1, 180, 8, 180, 8,
-        1602, 43, 1342, 53, 1, 181, 8, 181, 8,
-        1645, 44, 1273, 29, 1, 182, 8, 182, 8,
-        1689, 37, 1504, 51, 1, 183, 8, 183, 8,
-        1726, 48, 1342, 53, 1, 184, 8, 184, 8,
-        1774, 44, 1342, 53, 1, 185, 8, 185, 8,
-        1818, 45, 1273, 29, 1, 186, 8, 186, 8,
-        1863, 32, 1273, 29, 1, 187, 8, 187, 8,
-        1895, 37, 1932, 31, 1, 188, 8, 188, 8,
-        1963, 34, 685, 36, 1, 189, 8, 189, 8,
+        227, 28, 2922, 35, 1, 151, 8, 151, 8,
+        286, 39, 2979, 50, 1, 152, 8, 152, 8,
+        354, 35, 3029, 53, 1, 153, 8, 153, 8,
+        417, 36, 2922, 35, 1, 154, 8, 154, 8,
+        453, 35, 3082, 45, 1, 155, 8, 155, 8,
+        488, 46, 2979, 50, 1, 156, 8, 156, 8,
+        534, 42, 3029, 53, 1, 157, 8, 157, 8,
+        576, 43, 3082, 45, 1, 158, 8, 158, 8,
+        619, 36, 2979, 50, 1, 159, 8, 159, 8,
+        655, 47, 2979, 50, 1, 160, 8, 160, 8,
+        702, 43, 3029, 53, 1, 161, 8, 161, 8,
+        745, 44, 3082, 45, 1, 162, 8, 162, 8,
+        789, 28, 3127, 36, 1, 163, 8, 163, 8,
+        842, 39, 3163, 38, 1, 164, 8, 164, 8,
+        881, 35, 3163, 38, 1, 165, 8, 165, 8,
+        943, 36, 3201, 39, 1, 166, 8, 166, 8,
+        1005, 35, 3163, 38, 1, 167, 8, 167, 8,
+        1040, 46, 3163, 38, 1, 168, 8, 168, 8,
+        1086, 42, 3163, 38, 1, 169, 8, 169, 8,
+        1128, 43, 3201, 39, 1, 170, 8, 170, 8,
+        1171, 36, 3163, 38, 1, 171, 8, 171, 8,
+        1207, 47, 3163, 38, 1, 172, 8, 172, 8,
+        1254, 43, 3163, 38, 1, 173, 8, 173, 8,
+        1297, 44, 3201, 39, 1, 174, 8, 174, 8,
+        1341, 29, 1859, 29, 1, 175, 8, 175, 8,
+        1370, 40, 3240, 53, 1, 176, 8, 176, 8,
+        1410, 36, 3240, 53, 1, 177, 8, 177, 8,
+        1446, 37, 1859, 29, 1, 178, 8, 178, 8,
+        1483, 36, 3293, 51, 1, 179, 8, 179, 8,
+        1519, 47, 3240, 53, 1, 180, 8, 180, 8,
+        1566, 43, 3240, 53, 1, 181, 8, 181, 8,
+        1609, 44, 1859, 29, 1, 182, 8, 182, 8,
+        1653, 37, 3293, 51, 1, 183, 8, 183, 8,
+        1690, 48, 3240, 53, 1, 184, 8, 184, 8,
+        1738, 44, 3240, 53, 1, 185, 8, 185, 8,
+        1782, 45, 1859, 29, 1, 186, 8, 186, 8,
+        1827, 32, 1859, 29, 1, 187, 8, 187, 8,
+        1888, 37, 3344, 31, 1, 188, 8, 188, 8,
+        1955, 34, 3127, 36, 1, 189, 8, 189, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_586: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewSelectionIndicatorForegroundSystemColorHighlightTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 29, 1, 190, 8, 190, 75,
+        1989, 42, 3375, 29, 1, 190, 8, 190, 75,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_587: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewContentGridBorderBrushSystemControlTransparentBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTopNavigationViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTopNavigationViewItemBackgroundSelectedTopNavigationViewItemBackgroundSelectedPointerOverSubtleFillColorTransparentBrushTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundSystemColorWindowTextColorBrushNavigationViewButtonBackgroundPointerOverSystemControlHighlightListLowBrushNavigationViewButtonBackgroundPressedSystemControlHighlightListMediumBrushNavigationViewButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 29, 1, 191, 8, 191, 8,
-        65, 31, 68, 28, 1, 192, 8, 192, 8,
-        96, 42, 138, 38, 1, 193, 8, 193, 8,
-        176, 38, 138, 38, 1, 194, 8, 194, 8,
-        214, 39, 253, 39, 1, 195, 8, 195, 8,
-        292, 39, 138, 38, 1, 196, 8, 196, 8,
-        331, 50, 68, 28, 1, 197, 8, 197, 8,
-        381, 46, 68, 28, 1, 198, 8, 198, 8,
-        427, 42, 469, 50, 1, 199, 8, 199, 8,
-        519, 38, 557, 53, 1, 200, 8, 200, 8,
-        610, 39, 469, 50, 1, 201, 8, 201, 8,
-        649, 50, 699, 31, 1, 202, 8, 202, 8,
-        730, 46, 699, 31, 1, 203, 8, 203, 8,
-        776, 40, 816, 31, 1, 204, 8, 204, 8,
-        847, 41, 888, 34, 1, 205, 8, 205, 8,
-        922, 37, 959, 37, 1, 206, 8, 206, 8,
-        996, 38, 1034, 35, 1, 207, 8, 207, 8,
-        1069, 41, 138, 38, 1, 208, 8, 208, 8,
-        1110, 37, 138, 38, 1, 209, 8, 209, 8,
-        1147, 38, 253, 39, 1, 210, 8, 210, 8,
+        2058, 36, 1859, 29, 1, 191, 8, 191, 8,
+        2121, 31, 789, 28, 1, 192, 8, 192, 8,
+        2152, 42, 3163, 38, 1, 193, 8, 193, 8,
+        2194, 38, 3163, 38, 1, 194, 8, 194, 8,
+        2232, 39, 3201, 39, 1, 195, 8, 195, 8,
+        2390, 39, 3163, 38, 1, 196, 8, 196, 8,
+        2429, 50, 789, 28, 1, 197, 8, 197, 8,
+        2479, 46, 789, 28, 1, 198, 8, 198, 8,
+        2271, 42, 2979, 50, 1, 199, 8, 199, 8,
+        2313, 38, 3029, 53, 1, 200, 8, 200, 8,
+        2351, 39, 2979, 50, 1, 201, 8, 201, 8,
+        2525, 50, 255, 31, 1, 202, 8, 202, 8,
+        2575, 46, 255, 31, 1, 203, 8, 203, 8,
+        2621, 40, 3344, 31, 1, 204, 8, 204, 8,
+        2661, 41, 3404, 34, 1, 205, 8, 205, 8,
+        2702, 37, 3438, 37, 1, 206, 8, 206, 8,
+        2739, 38, 2922, 35, 1, 207, 8, 207, 8,
+        2806, 41, 3163, 38, 1, 208, 8, 208, 8,
+        2847, 37, 3163, 38, 1, 209, 8, 209, 8,
+        2884, 38, 3201, 39, 1, 210, 8, 210, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_588: rt::PackedRows = rt::PackedRows {
-    strings: "NavigationViewBackButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 35, 1, 21, 8, 21, 8,
+        0, 34, 65, 35, 1, 21, 8, 21, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_589: rt::PackedRows = rt::PackedRows {
-    strings: "PersonPictureForegroundThemeBrushSystemControlForegroundBaseHighBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 36, 1, 41, 8, 41, 8,
+        0, 33, 401, 36, 1, 41, 8, 41, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_590: rt::PackedRows = rt::PackedRows {
-    strings: "PersonPictureEllipseBadgeForegroundThemeBrushSystemColorButtonTextColorPersonPictureEllipseBadgeFillThemeBrushSystemColorButtonFaceColorPersonPictureEllipseBadgeStrokeThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 26, 1, 42, 8, 42, 78,
-        71, 39, 110, 26, 1, 43, 8, 43, 72,
-        136, 41, 45, 26, 1, 44, 8, 44, 74,
+        58, 45, 437, 26, 1, 42, 8, 42, 78,
+        136, 39, 463, 26, 1, 43, 8, 43, 72,
+        202, 41, 437, 26, 1, 44, 8, 44, 74,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_591: rt::PackedRows = rt::PackedRows {
-    strings: "PersonPictureEllipseFillThemeBrushSystemColorHighlightTextColorBrushPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 34, 1, 45, 8, 45, 8,
-        68, 35, 103, 27, 1, 46, 8, 46, 8,
+        275, 34, 489, 34, 1, 45, 8, 45, 8,
+        339, 35, 374, 27, 1, 46, 8, 46, 8,
     ],
 };
 
@@ -16167,103 +16368,103 @@ static POPULATE_WINUITHEME_XAML_ROWS_592: &[rt::ValueRow<f64>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_593: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshContainerForegroundBrushSystemColorHighlightTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 29, 1, 23, 8, 23, 64,
+        0, 31, 62, 29, 1, 23, 8, 23, 64,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_594: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshContainerBackgroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 255, 1, 24, 8,
+        31, 31, 65535, 255, 1, 24, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_595: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundSystemColorHighlightTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 29, 1, 23, 8, 23, 60,
+        0, 27, 54, 29, 1, 23, 8, 23, 60,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_596: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerBackground",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 255, 1, 24, 8,
+        27, 27, 65535, 255, 1, 24, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_597: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarBackgroundSystemControlTransparentBrushMenuBarItemForegroundSystemColorButtonTextColorBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSystemControlBackgroundListLowBrushMenuBarItemBackgroundPressedSystemControlBackgroundListMediumBrushMenuBarItemBackgroundSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 29, 1, 41, 8, 41, 8,
-        46, 21, 67, 31, 1, 42, 8, 42, 8,
-        98, 21, 17, 29, 1, 43, 8, 43, 8,
-        119, 32, 151, 35, 1, 44, 8, 44, 8,
-        186, 28, 214, 38, 1, 45, 8, 45, 8,
-        252, 29, 214, 38, 1, 46, 8, 46, 8,
+        0, 17, 437, 29, 1, 41, 8, 41, 8,
+        48, 21, 466, 31, 1, 42, 8, 42, 8,
+        94, 21, 437, 29, 1, 43, 8, 43, 8,
+        115, 32, 497, 35, 1, 44, 8, 44, 8,
+        176, 28, 532, 38, 1, 45, 8, 45, 8,
+        232, 29, 532, 38, 1, 46, 8, 46, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_598: rt::PackedRows = rt::PackedRows {
-    strings: "MenuBarItemBorderBrushSystemControlForegroundBaseMediumLowBrushMenuBarItemBorderBrushPointerOverSystemControlHighlightBaseMediumBrushMenuBarItemBorderBrushPressedSystemControlHighlightBaseMediumLowBrushMenuBarItemBorderBrushSelected",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 41, 1, 48, 8, 48, 8,
-        63, 33, 96, 37, 1, 49, 8, 49, 8,
-        133, 29, 162, 40, 1, 50, 8, 50, 8,
-        202, 30, 162, 40, 1, 51, 8, 51, 8,
+        261, 22, 570, 41, 1, 48, 8, 48, 8,
+        315, 33, 611, 37, 1, 49, 8, 49, 8,
+        378, 29, 648, 40, 1, 50, 8, 50, 8,
+        407, 30, 648, 40, 1, 51, 8, 51, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_599: rt::PackedRows = rt::PackedRows {
-    strings: "TreeViewItemBackgroundSystemColorWindowColorBrushTreeViewItemBackgroundPointerOverTreeViewItemBackgroundPressedTreeViewItemBackgroundDisabledTreeViewItemBackgroundSelectedTreeViewItemBackgroundSelectedPointerOverSystemColorButtonFaceColorBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundSystemColorButtonTextColorBrushTreeViewItemForegroundPointerOverSystemColorHighlightColorBrushTreeViewItemForegroundPressedTreeViewItemForegroundDisabledSystemColorGrayTextColorBrushTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedSystemColorWindowTextColorBrushTreeViewItemSelectionIndicatorForegroundTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 27, 1, 97, 8, 97, 8,
-        49, 33, 22, 27, 1, 98, 8, 98, 8,
-        82, 29, 22, 27, 1, 99, 8, 99, 8,
-        111, 30, 22, 27, 1, 100, 8, 100, 8,
-        141, 30, 22, 27, 1, 101, 8, 101, 8,
-        171, 41, 212, 31, 1, 102, 8, 102, 8,
-        243, 37, 212, 31, 1, 103, 8, 103, 8,
-        280, 38, 22, 27, 1, 104, 8, 104, 8,
-        318, 22, 340, 31, 1, 105, 8, 105, 8,
-        371, 33, 404, 30, 1, 106, 8, 106, 8,
-        434, 29, 404, 30, 1, 107, 8, 107, 8,
-        463, 30, 493, 29, 1, 108, 8, 108, 8,
-        522, 30, 404, 30, 1, 109, 8, 109, 8,
-        552, 41, 340, 31, 1, 110, 8, 110, 8,
-        593, 37, 340, 31, 1, 111, 8, 111, 8,
-        630, 38, 493, 29, 1, 112, 8, 112, 8,
-        668, 23, 22, 27, 1, 113, 8, 113, 8,
-        691, 34, 404, 30, 1, 114, 8, 114, 8,
-        725, 30, 22, 27, 1, 115, 8, 115, 8,
-        755, 31, 22, 27, 1, 116, 8, 116, 8,
-        786, 31, 404, 30, 1, 117, 8, 117, 8,
-        817, 42, 340, 31, 1, 118, 8, 118, 8,
-        859, 38, 212, 31, 1, 119, 8, 119, 8,
-        897, 39, 493, 29, 1, 120, 8, 120, 8,
-        936, 42, 340, 31, 1, 121, 8, 121, 8,
-        978, 38, 22, 27, 1, 122, 8, 122, 8,
-        1016, 34, 340, 31, 1, 123, 8, 123, 8,
-        1050, 30, 1080, 31, 1, 124, 8, 124, 8,
-        1111, 40, 404, 30, 1, 125, 8, 125, 8,
-        1151, 51, 340, 31, 1, 126, 8, 126, 8,
-        1202, 47, 340, 31, 1, 127, 8, 127, 8,
-        1249, 48, 493, 29, 1, 128, 8, 128, 8,
+        0, 22, 1339, 27, 1, 97, 8, 97, 8,
+        53, 33, 1339, 27, 1, 98, 8, 98, 8,
+        115, 29, 1339, 27, 1, 99, 8, 99, 8,
+        172, 30, 1339, 27, 1, 100, 8, 100, 8,
+        230, 30, 1339, 27, 1, 101, 8, 101, 8,
+        260, 41, 1366, 31, 1, 102, 8, 102, 8,
+        301, 37, 1366, 31, 1, 103, 8, 103, 8,
+        338, 38, 1339, 27, 1, 104, 8, 104, 8,
+        376, 22, 1397, 31, 1, 105, 8, 105, 8,
+        423, 33, 1428, 30, 1, 106, 8, 106, 8,
+        456, 29, 1428, 30, 1, 107, 8, 107, 8,
+        512, 30, 1458, 29, 1, 108, 8, 108, 8,
+        568, 30, 1428, 30, 1, 109, 8, 109, 8,
+        598, 41, 1397, 31, 1, 110, 8, 110, 8,
+        639, 37, 1397, 31, 1, 111, 8, 111, 8,
+        676, 38, 1458, 29, 1, 112, 8, 112, 8,
+        714, 23, 1339, 27, 1, 113, 8, 113, 8,
+        737, 34, 1428, 30, 1, 114, 8, 114, 8,
+        771, 30, 1339, 27, 1, 115, 8, 115, 8,
+        801, 31, 1339, 27, 1, 116, 8, 116, 8,
+        832, 31, 1428, 30, 1, 117, 8, 117, 8,
+        863, 42, 1397, 31, 1, 118, 8, 118, 8,
+        905, 38, 1366, 31, 1, 119, 8, 119, 8,
+        943, 39, 1458, 29, 1, 120, 8, 120, 8,
+        982, 42, 1397, 31, 1, 121, 8, 121, 8,
+        1024, 38, 1339, 27, 1, 122, 8, 122, 8,
+        1062, 34, 1397, 31, 1, 123, 8, 123, 8,
+        1096, 30, 1487, 31, 1, 124, 8, 124, 8,
+        1126, 40, 1428, 30, 1, 125, 8, 125, 8,
+        1193, 51, 1397, 31, 1, 126, 8, 126, 8,
+        1244, 47, 1397, 31, 1, 127, 8, 127, 8,
+        1291, 48, 1458, 29, 1, 128, 8, 128, 8,
     ],
 };
 
@@ -16284,171 +16485,171 @@ static POPULATE_WINUITHEME_XAML_ROWS_601: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_602: rt::PackedRows = rt::PackedRows {
-    strings: "SwipeItemBackgroundSystemControlBackgroundBaseLowBrushSwipeItemForegroundSystemControlForegroundBaseHighBrushSwipeItemBackgroundPressedSystemControlBackgroundBaseMediumLowBrushSwipeItemPreThresholdExecuteForegroundSystemControlBackgroundBaseMediumBrushSwipeItemPreThresholdExecuteBackgroundSwipeItemPostThresholdExecuteForegroundSystemControlForegroundChromeWhiteBrushSwipeItemPostThresholdExecuteBackgroundSystemControlBackgroundAccentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 35, 1, 33, 8, 33, 8,
-        54, 19, 73, 36, 1, 34, 8, 34, 8,
-        109, 26, 135, 41, 1, 35, 8, 35, 8,
-        176, 38, 214, 38, 1, 36, 8, 36, 8,
-        252, 38, 19, 35, 1, 37, 8, 37, 8,
-        290, 39, 329, 39, 1, 38, 8, 38, 8,
-        368, 39, 407, 34, 1, 39, 8, 39, 8,
+        0, 19, 401, 35, 1, 33, 8, 33, 8,
+        48, 19, 436, 36, 1, 34, 8, 34, 8,
+        92, 26, 472, 41, 1, 35, 8, 35, 8,
+        153, 38, 513, 38, 1, 36, 8, 36, 8,
+        225, 38, 401, 35, 1, 37, 8, 37, 8,
+        263, 39, 551, 39, 1, 38, 8, 38, 8,
+        335, 39, 590, 34, 1, 39, 8, 39, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_603: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundSystemColorButtonFaceColorBrushSplitButtonBackgroundPointerOverSystemColorHighlightTextColorBrushSplitButtonBackgroundPressedSplitButtonBackgroundDisabledSystemColorWindowColorBrushSplitButtonBackgroundCheckedSystemColorHighlightColorBrushSplitButtonBackgroundCheckedPointerOverSystemColorButtonTextColorBrushSplitButtonBackgroundCheckedPressedSplitButtonBackgroundCheckedDisabledSystemColorGrayTextColorBrushSplitButtonForegroundSplitButtonForegroundPointerOverSplitButtonForegroundPressedSplitButtonForegroundDisabledSplitButtonForegroundCheckedSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonForegroundSecondarySplitButtonForegroundSecondaryPressedSplitButtonBorderBrushSystemControlForegroundTransparentBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSplitButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSplitButtonBorderBrushDividerSystemControlDisabledBaseMediumLowBrushSplitButtonBorderBrushCheckedSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabledSplitButtonBorderBrushCheckedDivider",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 31, 1, 79, 8, 79, 8,
-        52, 32, 84, 34, 1, 80, 8, 80, 8,
-        118, 28, 84, 34, 1, 81, 8, 81, 8,
-        146, 29, 175, 27, 1, 82, 8, 82, 8,
-        202, 28, 230, 30, 1, 83, 8, 83, 8,
-        260, 39, 299, 31, 1, 84, 8, 84, 8,
-        330, 35, 21, 31, 1, 85, 8, 85, 8,
-        365, 36, 401, 29, 1, 86, 8, 86, 8,
-        430, 21, 299, 31, 1, 87, 8, 87, 8,
-        451, 32, 230, 30, 1, 88, 8, 88, 8,
-        483, 28, 230, 30, 1, 89, 8, 89, 8,
-        511, 29, 401, 29, 1, 90, 8, 90, 8,
-        540, 28, 84, 34, 1, 91, 8, 91, 8,
-        568, 39, 21, 31, 1, 92, 8, 92, 8,
-        607, 35, 299, 31, 1, 93, 8, 93, 8,
-        642, 36, 175, 27, 1, 94, 8, 94, 8,
-        678, 30, 299, 31, 1, 95, 8, 95, 8,
-        708, 37, 230, 30, 1, 96, 8, 96, 8,
-        745, 22, 767, 39, 1, 97, 8, 97, 8,
-        806, 33, 230, 30, 1, 98, 8, 98, 8,
-        839, 29, 84, 34, 1, 99, 8, 99, 8,
-        868, 30, 898, 37, 1, 100, 8, 100, 8,
-        935, 29, 964, 39, 1, 101, 8, 101, 8,
-        1003, 29, 299, 31, 1, 102, 8, 102, 8,
-        1032, 40, 299, 31, 1, 103, 8, 103, 8,
-        1072, 36, 21, 31, 1, 104, 8, 104, 8,
-        1108, 37, 401, 29, 1, 105, 8, 105, 8,
-        1145, 36, 84, 34, 1, 106, 8, 106, 8,
+        0, 21, 1512, 31, 1, 79, 8, 79, 8,
+        49, 32, 1543, 34, 1, 80, 8, 80, 8,
+        111, 28, 1543, 34, 1, 81, 8, 81, 8,
+        168, 29, 1577, 27, 1, 82, 8, 82, 8,
+        226, 28, 1604, 30, 1, 83, 8, 83, 8,
+        281, 39, 1634, 31, 1, 84, 8, 84, 8,
+        349, 35, 1512, 31, 1, 85, 8, 85, 8,
+        412, 36, 1665, 29, 1, 86, 8, 86, 8,
+        476, 21, 1634, 31, 1, 87, 8, 87, 8,
+        522, 32, 1604, 30, 1, 88, 8, 88, 8,
+        554, 28, 1604, 30, 1, 89, 8, 89, 8,
+        609, 29, 1665, 29, 1, 90, 8, 90, 8,
+        664, 28, 1543, 34, 1, 91, 8, 91, 8,
+        725, 39, 1512, 31, 1, 92, 8, 92, 8,
+        764, 35, 1634, 31, 1, 93, 8, 93, 8,
+        834, 36, 1577, 27, 1, 94, 8, 94, 8,
+        870, 30, 1634, 31, 1, 95, 8, 95, 8,
+        900, 37, 1604, 30, 1, 96, 8, 96, 8,
+        963, 22, 1694, 39, 1, 97, 8, 97, 8,
+        1012, 33, 1604, 30, 1, 98, 8, 98, 8,
+        1045, 29, 1543, 34, 1, 99, 8, 99, 8,
+        1104, 30, 1733, 37, 1, 100, 8, 100, 8,
+        1134, 29, 1770, 39, 1, 101, 8, 101, 8,
+        1163, 29, 1634, 31, 1, 102, 8, 102, 8,
+        1225, 40, 1634, 31, 1, 103, 8, 103, 8,
+        1265, 36, 1512, 31, 1, 104, 8, 104, 8,
+        1333, 37, 1665, 29, 1, 105, 8, 105, 8,
+        1370, 36, 1543, 34, 1, 106, 8, 106, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_604: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonInAppBarUnfocusedPointerOverSystemColorButtonFaceColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 31, 1, 108, 8, 108, 8,
+        1445, 39, 1512, 31, 1, 108, 8, 108, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_605: rt::PackedRows = rt::PackedRows {
-    strings: "DropDownButtonForegroundSecondarySystemColorButtonTextColorBrushDropDownButtonForegroundSecondaryPointerOverSystemColorHighlightColorBrushDropDownButtonForegroundSecondaryPressed",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 31, 1, 25, 8, 25, 8,
-        64, 44, 108, 30, 1, 26, 8, 26, 8,
-        138, 40, 108, 30, 1, 27, 8, 27, 8,
+        0, 33, 170, 31, 1, 25, 8, 25, 8,
+        60, 44, 201, 30, 1, 26, 8, 26, 8,
+        130, 40, 201, 30, 1, 27, 8, 27, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_606: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonsHeaderForegroundSystemControlForegroundBaseHighBrushRadioButtonsHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 36, 1, 23, 8, 23, 8,
-        64, 36, 100, 39, 1, 24, 8, 24, 8,
+        0, 28, 115, 36, 1, 23, 8, 23, 8,
+        53, 36, 151, 39, 1, 24, 8, 24, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_607: rt::PackedRows = rt::PackedRows {
-    strings: "TabViewBackgroundSystemColorButtonFaceColorBrushTabViewItemHeaderBackgroundTabViewItemHeaderBackgroundSelectedSystemColorWindowColorBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverSystemColorHighlightColorBrushTabViewItemHeaderBackgroundPressedTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundSystemColorWindowTextColorBrushTabViewItemHeaderForegroundPressedSystemColorHighlightTextColorBrushTabViewItemHeaderForegroundSelectedTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledSystemColorGrayTextColorBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedTabViewButtonBackgroundPointerOverTabViewButtonBackgroundDisabledTabViewButtonForegroundSystemColorButtonTextColorBrushTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabSystemControlBackgroundBaseMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 31, 1, 171, 8, 171, 8,
-        48, 27, 17, 31, 1, 172, 8, 172, 8,
-        75, 35, 110, 27, 1, 173, 8, 173, 8,
-        137, 31, 110, 27, 1, 174, 8, 174, 8,
-        168, 38, 206, 30, 1, 175, 8, 175, 8,
-        236, 34, 206, 30, 1, 176, 8, 176, 8,
-        270, 35, 110, 27, 1, 177, 8, 177, 8,
-        305, 27, 332, 31, 1, 178, 8, 178, 8,
-        363, 34, 397, 34, 1, 179, 8, 179, 8,
-        431, 35, 206, 30, 1, 180, 8, 180, 8,
-        466, 38, 397, 34, 1, 181, 8, 181, 8,
-        504, 35, 539, 29, 1, 182, 8, 182, 8,
-        568, 25, 332, 31, 1, 183, 8, 183, 8,
-        593, 32, 397, 34, 1, 184, 8, 184, 8,
-        625, 33, 206, 30, 1, 185, 8, 185, 8,
-        658, 36, 397, 34, 1, 186, 8, 186, 8,
-        694, 33, 539, 29, 1, 187, 8, 187, 8,
-        727, 23, 17, 31, 1, 188, 8, 188, 8,
-        750, 30, 206, 30, 1, 189, 8, 189, 8,
-        780, 34, 206, 30, 1, 190, 8, 190, 8,
-        814, 31, 110, 27, 1, 191, 8, 191, 8,
-        845, 23, 868, 31, 1, 192, 8, 192, 8,
-        899, 30, 397, 34, 1, 193, 8, 193, 8,
-        929, 34, 397, 34, 1, 194, 8, 194, 8,
-        963, 31, 539, 29, 1, 195, 8, 195, 8,
-        994, 24, 868, 31, 1, 196, 8, 196, 8,
-        1018, 31, 206, 30, 1, 197, 8, 197, 8,
-        1049, 35, 206, 30, 1, 198, 8, 198, 8,
-        1084, 32, 539, 29, 1, 199, 8, 199, 8,
-        1116, 29, 17, 31, 1, 200, 8, 200, 8,
-        1145, 36, 206, 30, 1, 201, 8, 201, 8,
-        1181, 40, 206, 30, 1, 202, 8, 202, 8,
-        1221, 37, 110, 27, 1, 203, 8, 203, 8,
-        1258, 29, 868, 31, 1, 204, 8, 204, 8,
-        1287, 36, 397, 34, 1, 205, 8, 205, 8,
-        1323, 40, 397, 34, 1, 206, 8, 206, 8,
-        1363, 37, 539, 29, 1, 207, 8, 207, 8,
-        1400, 30, 868, 31, 1, 208, 8, 208, 8,
-        1430, 37, 206, 30, 1, 209, 8, 209, 8,
-        1467, 41, 206, 30, 1, 210, 8, 210, 8,
-        1508, 38, 539, 29, 1, 211, 8, 211, 8,
-        1546, 20, 332, 31, 1, 212, 8, 212, 8,
-        1566, 38, 17, 31, 1, 213, 8, 213, 8,
-        1604, 45, 17, 31, 1, 214, 8, 214, 8,
-        1649, 49, 17, 31, 1, 215, 8, 215, 8,
-        1698, 45, 1743, 31, 1, 216, 8, 216, 8,
-        1774, 49, 1743, 31, 1, 217, 8, 217, 8,
-        1823, 46, 1743, 31, 1, 218, 8, 218, 8,
-        1869, 46, 110, 27, 1, 219, 8, 219, 8,
-        1915, 38, 868, 31, 1, 220, 8, 220, 8,
-        1953, 45, 868, 31, 1, 221, 8, 221, 8,
-        1998, 49, 868, 31, 1, 222, 8, 222, 8,
-        2047, 45, 397, 34, 1, 223, 8, 223, 8,
-        2092, 49, 397, 34, 1, 224, 8, 224, 8,
-        2141, 46, 206, 30, 1, 225, 8, 225, 8,
-        2187, 46, 539, 29, 1, 226, 8, 226, 8,
-        2233, 39, 1743, 31, 1, 227, 8, 227, 8,
-        2272, 50, 868, 31, 1, 228, 8, 228, 8,
-        2322, 46, 868, 31, 1, 229, 8, 229, 8,
-        2368, 47, 868, 31, 1, 230, 8, 230, 8,
-        2415, 47, 1743, 31, 1, 231, 8, 231, 8,
-        2462, 32, 1743, 31, 1, 232, 8, 232, 8,
-        2494, 32, 2526, 38, 1, 233, 8, 233, 8,
+        0, 17, 2760, 31, 1, 171, 8, 171, 8,
+        48, 27, 2760, 31, 1, 172, 8, 172, 8,
+        118, 35, 2791, 27, 1, 173, 8, 173, 8,
+        190, 31, 2791, 27, 1, 174, 8, 174, 8,
+        221, 38, 2818, 30, 1, 175, 8, 175, 8,
+        300, 34, 2818, 30, 1, 176, 8, 176, 8,
+        373, 35, 2791, 27, 1, 177, 8, 177, 8,
+        408, 27, 2848, 31, 1, 178, 8, 178, 8,
+        462, 34, 2879, 34, 1, 179, 8, 179, 8,
+        522, 35, 2818, 30, 1, 180, 8, 180, 8,
+        582, 38, 2879, 34, 1, 181, 8, 181, 8,
+        620, 35, 2913, 29, 1, 182, 8, 182, 8,
+        681, 25, 2848, 31, 1, 183, 8, 183, 8,
+        706, 32, 2879, 34, 1, 184, 8, 184, 8,
+        738, 33, 2818, 30, 1, 185, 8, 185, 8,
+        771, 36, 2879, 34, 1, 186, 8, 186, 8,
+        807, 33, 2913, 29, 1, 187, 8, 187, 8,
+        840, 23, 2760, 31, 1, 188, 8, 188, 8,
+        863, 30, 2818, 30, 1, 189, 8, 189, 8,
+        921, 34, 2818, 30, 1, 190, 8, 190, 8,
+        984, 31, 2791, 27, 1, 191, 8, 191, 8,
+        1015, 23, 2942, 31, 1, 192, 8, 192, 8,
+        1038, 30, 2879, 34, 1, 193, 8, 193, 8,
+        1068, 34, 2879, 34, 1, 194, 8, 194, 8,
+        1102, 31, 2913, 29, 1, 195, 8, 195, 8,
+        1133, 24, 2942, 31, 1, 196, 8, 196, 8,
+        1157, 31, 2818, 30, 1, 197, 8, 197, 8,
+        1188, 35, 2818, 30, 1, 198, 8, 198, 8,
+        1223, 32, 2913, 29, 1, 199, 8, 199, 8,
+        1255, 29, 2760, 31, 1, 200, 8, 200, 8,
+        1284, 36, 2818, 30, 1, 201, 8, 201, 8,
+        1320, 40, 2818, 30, 1, 202, 8, 202, 8,
+        1360, 37, 2791, 27, 1, 203, 8, 203, 8,
+        1397, 29, 2942, 31, 1, 204, 8, 204, 8,
+        1426, 36, 2879, 34, 1, 205, 8, 205, 8,
+        1462, 40, 2879, 34, 1, 206, 8, 206, 8,
+        1502, 37, 2913, 29, 1, 207, 8, 207, 8,
+        1539, 30, 2942, 31, 1, 208, 8, 208, 8,
+        1569, 37, 2818, 30, 1, 209, 8, 209, 8,
+        1606, 41, 2818, 30, 1, 210, 8, 210, 8,
+        1647, 38, 2913, 29, 1, 211, 8, 211, 8,
+        1685, 20, 2848, 31, 1, 212, 8, 212, 8,
+        1735, 38, 2760, 31, 1, 213, 8, 213, 8,
+        1773, 45, 2760, 31, 1, 214, 8, 214, 8,
+        1818, 49, 2760, 31, 1, 215, 8, 215, 8,
+        1867, 45, 17, 31, 1, 216, 8, 216, 8,
+        1912, 49, 17, 31, 1, 217, 8, 217, 8,
+        1961, 46, 17, 31, 1, 218, 8, 218, 8,
+        2007, 46, 2791, 27, 1, 219, 8, 219, 8,
+        2053, 38, 2942, 31, 1, 220, 8, 220, 8,
+        2091, 45, 2942, 31, 1, 221, 8, 221, 8,
+        2136, 49, 2942, 31, 1, 222, 8, 222, 8,
+        2185, 45, 2879, 34, 1, 223, 8, 223, 8,
+        2230, 49, 2879, 34, 1, 224, 8, 224, 8,
+        2279, 46, 2818, 30, 1, 225, 8, 225, 8,
+        2325, 46, 2913, 29, 1, 226, 8, 226, 8,
+        2371, 39, 17, 31, 1, 227, 8, 227, 8,
+        2410, 50, 2942, 31, 1, 228, 8, 228, 8,
+        2460, 46, 2942, 31, 1, 229, 8, 229, 8,
+        2506, 47, 2942, 31, 1, 230, 8, 230, 8,
+        2553, 47, 17, 31, 1, 231, 8, 231, 8,
+        2600, 32, 17, 31, 1, 232, 8, 232, 8,
+        2632, 32, 2973, 38, 1, 233, 8, 233, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_608: rt::PackedRows = rt::PackedRows {
-    strings: "TabViewBorderBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 18, 25, 1, 234, 8, 234, 51,
+        2698, 18, 2818, 25, 1, 234, 8, 234, 51,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_609: rt::PackedRows = rt::PackedRows {
-    strings: "TabViewItemBorderBrushSubtleFillColorTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 31, 1, 235, 8, 235, 8,
+        2738, 22, 17, 31, 1, 235, 8, 235, 8,
     ],
 };
 
@@ -16460,160 +16661,160 @@ static POPULATE_WINUITHEME_XAML_ROWS_610: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_611: rt::PackedRows = rt::PackedRows {
-    strings: "AutoSuggestBoxSuggestionsListBackgroundSystemControlBackgroundChromeMediumLowBrushAutoSuggestBoxSuggestionsListBorderBrushSystemControlTransientBorderBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 43, 1, 27, 8, 27, 8,
-        82, 40, 122, 33, 1, 28, 8, 28, 8,
-        155, 43, 198, 47, 1, 29, 8, 29, 8,
+        0, 39, 236, 43, 1, 27, 8, 27, 8,
+        77, 40, 279, 33, 1, 28, 8, 28, 8,
+        146, 43, 189, 47, 1, 29, 8, 29, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_612: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxItemForegroundSystemControlForegroundBaseHighBrushComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSystemControlTransparentBrushComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledSystemControlBackgroundBaseLowBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedSystemControlHighlightTransparentBrushComboBoxBackgroundBorderBrushUnfocusedSystemControlHighlightBaseMediumLowBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundSystemControlPageTextBaseMediumBrushComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedComboBoxPlaceHolderForegroundDisabledSystemControlDisabledChromeDisabledLowBrushComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushSystemControlForegroundBaseMediumBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownForegroundComboBoxDropDownBackgroundSystemControlBackgroundChromeMediumLowBrushComboBoxDropDownBorderBrushSystemControlForegroundChromeHighBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 36, 1, 225, 8, 225, 8,
-        58, 29, 87, 38, 1, 226, 8, 226, 8,
-        125, 33, 87, 38, 1, 227, 8, 227, 8,
-        158, 30, 188, 39, 1, 228, 8, 228, 8,
-        227, 30, 87, 38, 1, 229, 8, 229, 8,
-        257, 39, 87, 38, 1, 230, 8, 230, 8,
-        296, 37, 87, 38, 1, 231, 8, 231, 8,
-        333, 41, 87, 38, 1, 232, 8, 232, 8,
-        374, 38, 188, 39, 1, 233, 8, 233, 8,
-        412, 22, 434, 29, 1, 234, 8, 234, 8,
-        463, 29, 492, 37, 1, 235, 8, 235, 8,
-        529, 33, 562, 34, 1, 236, 8, 236, 8,
-        596, 30, 434, 29, 1, 237, 8, 237, 8,
-        626, 30, 656, 40, 1, 238, 8, 238, 8,
-        696, 39, 656, 40, 1, 239, 8, 239, 8,
-        735, 37, 772, 41, 1, 240, 8, 240, 8,
-        813, 41, 854, 43, 1, 241, 8, 241, 8,
-        897, 38, 434, 29, 1, 242, 8, 242, 8,
-        935, 23, 434, 29, 1, 243, 8, 243, 8,
-        958, 30, 434, 29, 1, 244, 8, 244, 8,
-        988, 34, 434, 29, 1, 245, 8, 245, 8,
-        1022, 31, 434, 29, 1, 246, 8, 246, 8,
-        1053, 31, 434, 29, 1, 247, 8, 247, 8,
-        1084, 40, 434, 29, 1, 248, 8, 248, 8,
-        1124, 38, 434, 29, 1, 249, 8, 249, 8,
-        1162, 42, 434, 29, 1, 250, 8, 250, 8,
-        1204, 39, 434, 29, 1, 251, 8, 251, 8,
-        1243, 18, 1261, 40, 1, 252, 8, 252, 8,
-        1301, 29, 1330, 41, 1, 253, 8, 253, 8,
-        1371, 25, 1396, 38, 1, 254, 8, 254, 8,
-        1434, 26, 1460, 35, 1, 255, 8, 255, 8,
-        1495, 27, 656, 40, 1, 256, 8, 256, 8,
-        1522, 25, 1495, 27, 1, 257, 8, 257, 8,
-        1547, 36, 1583, 38, 1, 258, 8, 258, 8,
-        1621, 38, 1659, 40, 1, 259, 8, 259, 8,
-        1699, 18, 22, 36, 1, 260, 8, 260, 8,
-        1717, 29, 22, 36, 1, 261, 8, 261, 8,
-        1746, 25, 22, 36, 1, 262, 8, 262, 8,
-        1771, 26, 188, 39, 1, 263, 8, 263, 8,
-        1797, 25, 22, 36, 1, 264, 8, 264, 8,
-        1822, 32, 22, 36, 1, 265, 8, 265, 8,
-        1854, 24, 22, 36, 1, 266, 8, 266, 8,
-        1878, 32, 188, 39, 1, 267, 8, 267, 8,
-        1910, 29, 1939, 36, 1, 268, 8, 268, 8,
-        1975, 40, 1939, 36, 1, 269, 8, 269, 8,
-        2015, 36, 1939, 36, 1, 270, 8, 270, 8,
-        2051, 37, 2088, 43, 1, 271, 8, 271, 8,
-        2131, 36, 1939, 36, 1, 272, 8, 272, 8,
-        2167, 43, 1939, 36, 1, 273, 8, 273, 8,
-        2210, 19, 2229, 38, 1, 274, 8, 274, 8,
-        2267, 30, 2297, 41, 1, 275, 8, 275, 8,
-        2338, 26, 2364, 37, 1, 276, 8, 276, 8,
-        2401, 27, 2428, 33, 1, 277, 8, 277, 8,
-        2461, 31, 2492, 42, 1, 278, 8, 278, 8,
-        2534, 39, 188, 39, 1, 279, 8, 279, 8,
-        2573, 38, 22, 36, 1, 280, 8, 280, 8,
-        2611, 45, 22, 36, 1, 281, 8, 281, 8,
-        2656, 26, 22, 36, 1, 282, 8, 282, 8,
-        2682, 26, 2708, 43, 1, 283, 8, 283, 8,
-        2751, 27, 2778, 38, 1, 284, 8, 284, 8,
-        2816, 37, 2853, 47, 1, 285, 8, 285, 8,
+        0, 22, 4093, 36, 1, 225, 8, 225, 8,
+        47, 29, 4129, 38, 1, 226, 8, 226, 8,
+        103, 33, 4129, 38, 1, 227, 8, 227, 8,
+        136, 30, 4167, 39, 1, 228, 8, 228, 8,
+        192, 30, 4129, 38, 1, 229, 8, 229, 8,
+        222, 39, 4129, 38, 1, 230, 8, 230, 8,
+        261, 37, 4129, 38, 1, 231, 8, 231, 8,
+        298, 41, 4129, 38, 1, 232, 8, 232, 8,
+        339, 38, 4167, 39, 1, 233, 8, 233, 8,
+        377, 22, 4206, 29, 1, 234, 8, 234, 8,
+        430, 29, 4235, 37, 1, 235, 8, 235, 8,
+        487, 33, 4272, 34, 1, 236, 8, 236, 8,
+        549, 30, 4206, 29, 1, 237, 8, 237, 8,
+        607, 30, 4306, 40, 1, 238, 8, 238, 8,
+        637, 39, 4306, 40, 1, 239, 8, 239, 8,
+        676, 37, 4346, 41, 1, 240, 8, 240, 8,
+        713, 41, 4387, 43, 1, 241, 8, 241, 8,
+        754, 38, 4206, 29, 1, 242, 8, 242, 8,
+        792, 23, 4206, 29, 1, 243, 8, 243, 8,
+        815, 30, 4206, 29, 1, 244, 8, 244, 8,
+        845, 34, 4206, 29, 1, 245, 8, 245, 8,
+        879, 31, 4206, 29, 1, 246, 8, 246, 8,
+        910, 31, 4206, 29, 1, 247, 8, 247, 8,
+        941, 40, 4206, 29, 1, 248, 8, 248, 8,
+        981, 38, 4206, 29, 1, 249, 8, 249, 8,
+        1019, 42, 4206, 29, 1, 250, 8, 250, 8,
+        1061, 39, 4206, 29, 1, 251, 8, 251, 8,
+        1100, 18, 4430, 40, 1, 252, 8, 252, 8,
+        1146, 29, 4470, 41, 1, 253, 8, 253, 8,
+        1205, 25, 4511, 38, 1, 254, 8, 254, 8,
+        1259, 26, 4549, 35, 1, 255, 8, 255, 8,
+        1314, 27, 4306, 40, 1, 256, 8, 256, 8,
+        1341, 25, 1314, 27, 1, 257, 8, 257, 8,
+        1366, 36, 4584, 38, 1, 258, 8, 258, 8,
+        1428, 38, 4622, 40, 1, 259, 8, 259, 8,
+        1496, 18, 4093, 36, 1, 260, 8, 260, 8,
+        1514, 29, 4093, 36, 1, 261, 8, 261, 8,
+        1543, 25, 4093, 36, 1, 262, 8, 262, 8,
+        1568, 26, 4167, 39, 1, 263, 8, 263, 8,
+        1594, 25, 4093, 36, 1, 264, 8, 264, 8,
+        1619, 32, 4093, 36, 1, 265, 8, 265, 8,
+        1651, 24, 4093, 36, 1, 266, 8, 266, 8,
+        1675, 32, 4167, 39, 1, 267, 8, 267, 8,
+        1707, 29, 4662, 36, 1, 268, 8, 268, 8,
+        1736, 40, 4662, 36, 1, 269, 8, 269, 8,
+        1776, 36, 4662, 36, 1, 270, 8, 270, 8,
+        1838, 37, 4698, 43, 1, 271, 8, 271, 8,
+        1875, 36, 4662, 36, 1, 272, 8, 272, 8,
+        1911, 43, 4662, 36, 1, 273, 8, 273, 8,
+        1954, 19, 4741, 38, 1, 274, 8, 274, 8,
+        2000, 30, 4779, 41, 1, 275, 8, 275, 8,
+        2030, 26, 4820, 37, 1, 276, 8, 276, 8,
+        2056, 27, 4857, 33, 1, 277, 8, 277, 8,
+        2083, 31, 4890, 42, 1, 278, 8, 278, 8,
+        2114, 39, 4167, 39, 1, 279, 8, 279, 8,
+        2153, 38, 4093, 36, 1, 280, 8, 280, 8,
+        2191, 45, 4093, 36, 1, 281, 8, 281, 8,
+        2280, 26, 4093, 36, 1, 282, 8, 282, 8,
+        2306, 26, 4932, 43, 1, 283, 8, 283, 8,
+        2365, 27, 4975, 38, 1, 284, 8, 284, 8,
+        2421, 37, 2458, 47, 1, 285, 8, 285, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_613: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxArrowDisabledForegroundThemeBrushSystemColorGrayTextColorComboBoxArrowForegroundThemeBrushSystemColorButtonTextColorComboBoxArrowPressedForegroundThemeBrushSystemColorButtonFaceColorComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushSystemColorHighlightTextColorComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushSystemColorHighlightColorComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 41, 41, 24, 1, 286, 8, 286, 74,
-        65, 33, 98, 26, 1, 287, 8, 287, 66,
-        124, 40, 164, 26, 1, 288, 8, 288, 73,
-        190, 28, 164, 26, 1, 289, 8, 289, 61,
-        218, 24, 98, 26, 1, 290, 8, 290, 57,
-        242, 36, 164, 26, 1, 291, 8, 291, 69,
-        278, 32, 41, 24, 1, 292, 8, 292, 65,
-        310, 36, 41, 24, 1, 293, 8, 293, 69,
-        346, 35, 164, 26, 1, 294, 8, 294, 68,
-        381, 31, 98, 26, 1, 295, 8, 295, 64,
-        412, 35, 447, 29, 1, 296, 8, 296, 68,
-        476, 28, 98, 26, 1, 297, 8, 297, 61,
-        504, 34, 98, 26, 1, 298, 8, 298, 67,
-        538, 40, 41, 24, 1, 299, 8, 299, 73,
-        578, 43, 621, 25, 1, 300, 8, 300, 76,
-        646, 43, 447, 29, 1, 301, 8, 301, 76,
-        689, 39, 98, 26, 1, 302, 8, 302, 72,
-        728, 39, 164, 26, 1, 303, 8, 303, 72,
-        767, 40, 621, 25, 1, 304, 8, 304, 73,
-        807, 48, 41, 24, 1, 305, 8, 305, 81,
-        855, 48, 164, 26, 1, 306, 8, 306, 81,
-        903, 40, 447, 29, 1, 307, 8, 307, 73,
-        943, 51, 621, 25, 1, 308, 8, 308, 84,
+        2505, 41, 5013, 24, 1, 286, 8, 286, 74,
+        2546, 33, 5037, 26, 1, 287, 8, 287, 66,
+        2579, 40, 5063, 26, 1, 288, 8, 288, 73,
+        2619, 28, 5063, 26, 1, 289, 8, 289, 61,
+        2647, 24, 5037, 26, 1, 290, 8, 290, 57,
+        2671, 36, 5063, 26, 1, 291, 8, 291, 69,
+        2707, 32, 5013, 24, 1, 292, 8, 292, 65,
+        2739, 36, 5013, 24, 1, 293, 8, 293, 69,
+        2775, 35, 5063, 26, 1, 294, 8, 294, 68,
+        2810, 31, 5037, 26, 1, 295, 8, 295, 64,
+        2841, 35, 5089, 29, 1, 296, 8, 296, 68,
+        2876, 28, 5037, 26, 1, 297, 8, 297, 61,
+        2904, 34, 5037, 26, 1, 298, 8, 298, 67,
+        2938, 40, 5013, 24, 1, 299, 8, 299, 73,
+        2978, 43, 5118, 25, 1, 300, 8, 300, 76,
+        3021, 43, 5089, 29, 1, 301, 8, 301, 76,
+        3064, 39, 5037, 26, 1, 302, 8, 302, 72,
+        3103, 39, 5063, 26, 1, 303, 8, 303, 72,
+        3142, 40, 5118, 25, 1, 304, 8, 304, 73,
+        3182, 48, 5013, 24, 1, 305, 8, 305, 81,
+        3230, 48, 5063, 26, 1, 306, 8, 306, 81,
+        3278, 40, 5089, 29, 1, 307, 8, 307, 73,
+        3318, 51, 5118, 25, 1, 308, 8, 308, 84,
     ],
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_614: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxPlaceholderTextForegroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 0, 34816, 1, 309, 8,
+        3369, 43, 0, 34816, 1, 309, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_615: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxPointerOverBackgroundThemeBrushSystemColorButtonFaceColorComboBoxPointerOverBorderThemeBrushSystemColorButtonTextColorComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushSystemColorHighlightColorComboBoxSelectedPointerOverBackgroundThemeBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 26, 1, 310, 8, 310, 72,
-        65, 35, 100, 26, 1, 311, 8, 311, 68,
-        126, 33, 39, 26, 1, 312, 8, 312, 66,
-        159, 29, 100, 26, 1, 313, 8, 313, 62,
-        188, 33, 100, 26, 1, 314, 8, 314, 66,
-        221, 35, 100, 26, 1, 315, 8, 315, 68,
-        256, 31, 100, 26, 1, 316, 8, 316, 64,
-        287, 34, 100, 26, 1, 317, 8, 317, 67,
-        321, 35, 39, 26, 1, 318, 8, 318, 68,
-        356, 36, 392, 25, 1, 319, 8, 319, 69,
-        417, 47, 392, 25, 1, 320, 8, 320, 80,
+        3412, 39, 5063, 26, 1, 310, 8, 310, 72,
+        3451, 35, 5037, 26, 1, 311, 8, 311, 68,
+        3486, 33, 5063, 26, 1, 312, 8, 312, 66,
+        3519, 29, 5037, 26, 1, 313, 8, 313, 62,
+        3548, 33, 5037, 26, 1, 314, 8, 314, 66,
+        3581, 35, 5037, 26, 1, 315, 8, 315, 68,
+        3616, 31, 5037, 26, 1, 316, 8, 316, 64,
+        3647, 34, 5037, 26, 1, 317, 8, 317, 67,
+        3681, 35, 5063, 26, 1, 318, 8, 318, 68,
+        3716, 36, 5118, 25, 1, 319, 8, 319, 69,
+        3752, 47, 5118, 25, 1, 320, 8, 320, 80,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_616: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxDropDownBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxDropDownBackgroundPointerPressedSystemControlBackgroundListMediumBrushComboBoxFocusedDropDownBackgroundPointerOverComboBoxFocusedDropDownBackgroundPointerPressedComboBoxEditableDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxItemPillFillBrushSystemControlHighlightListAccentLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 41, 1, 321, 8, 321, 8,
-        78, 40, 118, 38, 1, 322, 8, 322, 8,
-        156, 44, 37, 41, 1, 323, 8, 323, 8,
-        200, 47, 118, 38, 1, 324, 8, 324, 8,
-        247, 39, 286, 42, 1, 325, 8, 325, 8,
-        328, 25, 353, 40, 1, 326, 8, 326, 8,
+        3799, 37, 4470, 41, 1, 321, 8, 321, 8,
+        3836, 40, 4511, 38, 1, 322, 8, 322, 8,
+        3876, 44, 4470, 41, 1, 323, 8, 323, 8,
+        3920, 47, 4511, 38, 1, 324, 8, 324, 8,
+        4002, 39, 4890, 42, 1, 325, 8, 325, 8,
+        4041, 25, 4306, 40, 1, 326, 8, 326, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_617: rt::PackedRows = rt::PackedRows {
-    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 38, 38, 47, 1, 37, 8, 37, 8,
@@ -16641,188 +16842,188 @@ static POPULATE_WINUITHEME_XAML_ROWS_620: &[rt::ValueRow<&'static str>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_621: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressBarForegroundSystemColorHighlightColorProgressBarBackgroundSystemColorWindowColorProgressBarBorderBrushSystemColorWindowTextColorProgressBarPausedForegroundColorProgressBarErrorForegroundColorSystemColorHotlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 25, 1, 32, 8, 32, 8,
-        46, 21, 67, 22, 1, 33, 8, 33, 8,
-        89, 22, 111, 26, 1, 34, 8, 34, 8,
-        137, 32, 111, 26, 1, 35, 8, 35, 8,
-        169, 31, 200, 24, 1, 36, 8, 36, 8,
+        0, 21, 260, 25, 1, 32, 8, 32, 8,
+        48, 21, 285, 22, 1, 33, 8, 33, 8,
+        100, 22, 307, 26, 1, 34, 8, 34, 8,
+        152, 32, 307, 26, 1, 35, 8, 35, 8,
+        206, 31, 333, 24, 1, 36, 8, 36, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_622: rt::PackedRows = rt::PackedRows {
-    strings: "ProgressRingForegroundThemeBrushSystemControlHighlightAccentBrushProgressRingBackgroundThemeBrushSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 33, 1, 23, 8, 23, 8,
-        65, 32, 97, 35, 1, 24, 8, 24, 8,
+        0, 32, 123, 33, 1, 23, 8, 23, 8,
+        59, 32, 156, 35, 1, 24, 8, 24, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_623: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupIndicatorForegroundSystemControlForegroundBaseMediumBrushNumberBoxPopupBackgroundSystemControlBackgroundBaseHighBrushNumberBoxPopupBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 38, 1, 31, 8, 31, 8,
-        71, 24, 95, 36, 1, 32, 8, 32, 8,
-        131, 25, 156, 33, 1, 33, 8, 33, 8,
+        0, 33, 241, 38, 1, 31, 8, 31, 8,
+        60, 24, 279, 36, 1, 32, 8, 32, 8,
+        122, 25, 315, 33, 1, 33, 8, 33, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_624: rt::PackedRows = rt::PackedRows {
-    strings: "NumberBoxPopupSpinButtonBackgroundSystemControlTransparentBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 29, 1, 35, 8, 35, 8,
+        176, 34, 348, 29, 1, 35, 8, 35, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_625: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderHeaderBackgroundSystemColorButtonFaceColorBrushExpanderHeaderForegroundSystemColorButtonTextColorBrushExpanderHeaderForegroundPointerOverSystemColorHighlightColorBrushExpanderHeaderForegroundPressedExpanderHeaderBorderBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 31, 1, 63, 8, 63, 8,
-        55, 24, 79, 31, 1, 64, 8, 64, 8,
-        110, 35, 145, 30, 1, 65, 8, 65, 8,
-        175, 31, 145, 30, 1, 66, 8, 66, 8,
-        206, 25, 79, 31, 1, 67, 8, 67, 8,
-        231, 36, 145, 30, 1, 68, 8, 68, 8,
-        267, 32, 145, 30, 1, 69, 8, 69, 8,
-        299, 32, 331, 26, 1, 70, 8, 70, 8,
-        357, 33, 331, 26, 1, 71, 8, 71, 8,
+        0, 24, 843, 31, 1, 63, 8, 63, 8,
+        59, 24, 874, 31, 1, 64, 8, 64, 8,
+        108, 35, 905, 30, 1, 65, 8, 65, 8,
+        143, 31, 905, 30, 1, 66, 8, 66, 8,
+        174, 25, 874, 31, 1, 67, 8, 67, 8,
+        226, 36, 905, 30, 1, 68, 8, 68, 8,
+        262, 32, 905, 30, 1, 69, 8, 69, 8,
+        294, 32, 326, 26, 1, 70, 8, 70, 8,
+        352, 33, 326, 26, 1, 71, 8, 71, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_626: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackgroundSystemColorButtonFaceColorBrushExpanderChevronPointerOverBackgroundSystemControlTransparentBrushExpanderChevronPressedBackgroundExpanderChevronForegroundSystemColorButtonTextColorBrushExpanderChevronPointerOverForegroundSystemColorHighlightColorBrushExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 31, 1, 73, 8, 73, 8,
-        56, 36, 92, 29, 1, 74, 8, 74, 8,
-        121, 32, 92, 29, 1, 75, 8, 75, 8,
-        153, 25, 178, 31, 1, 76, 8, 76, 8,
-        209, 36, 245, 30, 1, 77, 8, 77, 8,
-        275, 32, 245, 30, 1, 78, 8, 78, 8,
-        307, 26, 178, 31, 1, 79, 8, 79, 8,
-        333, 37, 245, 30, 1, 80, 8, 80, 8,
-        370, 33, 245, 30, 1, 81, 8, 81, 8,
+        385, 25, 843, 31, 1, 73, 8, 73, 8,
+        441, 36, 935, 29, 1, 74, 8, 74, 8,
+        506, 32, 935, 29, 1, 75, 8, 75, 8,
+        566, 25, 874, 31, 1, 76, 8, 76, 8,
+        591, 36, 905, 30, 1, 77, 8, 77, 8,
+        627, 32, 905, 30, 1, 78, 8, 78, 8,
+        659, 26, 874, 31, 1, 79, 8, 79, 8,
+        685, 37, 905, 30, 1, 80, 8, 80, 8,
+        722, 33, 905, 30, 1, 81, 8, 81, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_627: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderContentBackgroundSystemColorWindowColorBrushExpanderContentBorderBrushSystemColorWindowTextColorBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 27, 1, 83, 8, 83, 8,
-        52, 26, 78, 31, 1, 84, 8, 84, 8,
+        755, 25, 964, 27, 1, 83, 8, 83, 8,
+        817, 26, 991, 31, 1, 84, 8, 84, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_628: rt::PackedRows = rt::PackedRows {
-    strings: "PagerControlSelectionIndicatorForegroundSystemControlForegroundAccentBrushPagerControlPageNavigationButtonBackgroundPointerOverSystemControlHighlightListLowBrushPagerControlPageNavigationButtonBackgroundPressedSystemControlHighlightListMediumBrushPagerControlPageNavigationButtonBackgroundDisabledSystemControlTransparentBrushPagerControlPageNavigationButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 34, 1, 33, 8, 33, 8,
-        74, 53, 127, 34, 1, 34, 8, 34, 8,
-        161, 49, 210, 37, 1, 35, 8, 35, 8,
-        247, 50, 297, 29, 1, 36, 8, 36, 8,
-        326, 53, 379, 38, 1, 37, 8, 37, 8,
-        417, 49, 379, 38, 1, 38, 8, 38, 8,
-        466, 50, 516, 39, 1, 39, 8, 39, 8,
+        0, 40, 507, 34, 1, 33, 8, 33, 8,
+        67, 53, 541, 34, 1, 34, 8, 34, 8,
+        149, 49, 575, 37, 1, 35, 8, 35, 8,
+        226, 50, 612, 29, 1, 36, 8, 36, 8,
+        304, 53, 641, 38, 1, 37, 8, 37, 8,
+        382, 49, 641, 38, 1, 38, 8, 38, 8,
+        431, 50, 679, 39, 1, 39, 8, 39, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_629: rt::PackedRows = rt::PackedRows {
-    strings: "InfoBarErrorSeverityBackgroundBrushSystemColorWindowColorBrushInfoBarWarningSeverityBackgroundBrushInfoBarSuccessSeverityBackgroundBrushInfoBarInformationalSeverityBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemColorHighlightColorBrushInfoBarWarningSeverityIconBackgroundInfoBarSuccessSeverityIconBackgroundInfoBarInformationalSeverityIconBackgroundInfoBarErrorSeverityIconForegroundSystemColorHighlightTextColorBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundSystemColorWindowTextColorBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundSystemColorHotlightColorBrushInfoBarBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 35, 35, 27, 1, 53, 8, 53, 8,
-        62, 37, 35, 27, 1, 54, 8, 54, 8,
-        99, 37, 35, 27, 1, 55, 8, 55, 8,
-        136, 43, 35, 27, 1, 56, 8, 56, 8,
-        179, 34, 213, 30, 1, 57, 8, 57, 8,
-        243, 36, 213, 30, 1, 58, 8, 58, 8,
-        279, 36, 213, 30, 1, 59, 8, 59, 8,
-        315, 42, 213, 30, 1, 60, 8, 60, 8,
-        357, 34, 391, 34, 1, 61, 8, 61, 8,
-        425, 36, 391, 34, 1, 62, 8, 62, 8,
-        461, 36, 391, 34, 1, 63, 8, 63, 8,
-        497, 42, 391, 34, 1, 64, 8, 64, 8,
-        539, 22, 561, 31, 1, 65, 8, 65, 8,
-        592, 24, 561, 31, 1, 66, 8, 66, 8,
-        616, 32, 648, 29, 1, 67, 8, 67, 8,
-        677, 18, 695, 33, 1, 68, 8, 68, 8,
+        0, 35, 914, 27, 1, 53, 8, 53, 8,
+        73, 37, 914, 27, 1, 54, 8, 54, 8,
+        147, 37, 914, 27, 1, 55, 8, 55, 8,
+        221, 43, 914, 27, 1, 56, 8, 56, 8,
+        303, 34, 941, 30, 1, 57, 8, 57, 8,
+        365, 36, 941, 30, 1, 58, 8, 58, 8,
+        428, 36, 941, 30, 1, 59, 8, 59, 8,
+        491, 42, 941, 30, 1, 60, 8, 60, 8,
+        562, 34, 971, 34, 1, 61, 8, 61, 8,
+        621, 36, 971, 34, 1, 62, 8, 62, 8,
+        657, 36, 971, 34, 1, 63, 8, 63, 8,
+        693, 42, 971, 34, 1, 64, 8, 64, 8,
+        735, 22, 1005, 31, 1, 65, 8, 65, 8,
+        782, 24, 1005, 31, 1, 66, 8, 66, 8,
+        806, 32, 1036, 29, 1, 67, 8, 67, 8,
+        869, 18, 1065, 33, 1, 68, 8, 68, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_630: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundSystemColorButtonFaceColorBrushPipsPagerSelectionIndicatorBackgroundPointerOverSystemColorHighlightColorBrushPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundSystemColorButtonTextColorBrushPipsPagerSelectionIndicatorForegroundPointerOverSystemColorHighlightTextColorBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledSystemColorGrayTextColorBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 37, 37, 31, 1, 73, 8, 73, 8,
-        68, 48, 116, 30, 1, 74, 8, 74, 8,
-        146, 44, 116, 30, 1, 75, 8, 75, 8,
-        190, 45, 116, 30, 1, 76, 8, 76, 8,
-        235, 45, 37, 31, 1, 77, 8, 77, 8,
-        280, 38, 37, 31, 1, 78, 8, 78, 8,
-        318, 49, 116, 30, 1, 79, 8, 79, 8,
-        367, 45, 116, 30, 1, 80, 8, 80, 8,
-        412, 46, 116, 30, 1, 81, 8, 81, 8,
-        458, 46, 37, 31, 1, 82, 8, 82, 8,
-        504, 37, 541, 31, 1, 83, 8, 83, 8,
-        572, 48, 620, 34, 1, 84, 8, 84, 8,
-        654, 44, 620, 34, 1, 85, 8, 85, 8,
-        698, 45, 620, 34, 1, 86, 8, 86, 8,
-        743, 45, 788, 29, 1, 87, 8, 87, 8,
-        817, 35, 37, 31, 1, 88, 8, 88, 8,
-        852, 46, 37, 31, 1, 89, 8, 89, 8,
-        898, 42, 37, 31, 1, 90, 8, 90, 8,
-        940, 43, 37, 31, 1, 91, 8, 91, 8,
-        983, 36, 37, 31, 1, 92, 8, 92, 8,
-        1019, 47, 116, 30, 1, 93, 8, 93, 8,
-        1066, 43, 116, 30, 1, 94, 8, 94, 8,
-        1109, 44, 37, 31, 1, 95, 8, 95, 8,
-        1153, 35, 541, 31, 1, 96, 8, 96, 8,
-        1188, 46, 116, 30, 1, 97, 8, 97, 8,
-        1234, 42, 116, 30, 1, 98, 8, 98, 8,
-        1276, 43, 788, 29, 1, 99, 8, 99, 8,
+        0, 37, 1292, 31, 1, 73, 8, 73, 8,
+        69, 48, 1323, 30, 1, 74, 8, 74, 8,
+        117, 44, 1323, 30, 1, 75, 8, 75, 8,
+        161, 45, 1323, 30, 1, 76, 8, 76, 8,
+        206, 45, 1292, 31, 1, 77, 8, 77, 8,
+        251, 38, 1292, 31, 1, 78, 8, 78, 8,
+        289, 49, 1323, 30, 1, 79, 8, 79, 8,
+        338, 45, 1323, 30, 1, 80, 8, 80, 8,
+        383, 46, 1323, 30, 1, 81, 8, 81, 8,
+        429, 46, 1292, 31, 1, 82, 8, 82, 8,
+        475, 37, 1353, 31, 1, 83, 8, 83, 8,
+        546, 48, 1384, 34, 1, 84, 8, 84, 8,
+        621, 44, 1384, 34, 1, 85, 8, 85, 8,
+        665, 45, 1384, 34, 1, 86, 8, 86, 8,
+        710, 45, 1418, 29, 1, 87, 8, 87, 8,
+        790, 35, 1292, 31, 1, 88, 8, 88, 8,
+        825, 46, 1292, 31, 1, 89, 8, 89, 8,
+        871, 42, 1292, 31, 1, 90, 8, 90, 8,
+        913, 43, 1292, 31, 1, 91, 8, 91, 8,
+        956, 36, 1292, 31, 1, 92, 8, 92, 8,
+        992, 47, 1323, 30, 1, 93, 8, 93, 8,
+        1039, 43, 1323, 30, 1, 94, 8, 94, 8,
+        1082, 44, 1292, 31, 1, 95, 8, 95, 8,
+        1126, 35, 1353, 31, 1, 96, 8, 96, 8,
+        1161, 46, 1323, 30, 1, 97, 8, 97, 8,
+        1207, 42, 1323, 30, 1, 98, 8, 98, 8,
+        1249, 43, 1418, 29, 1, 99, 8, 99, 8,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_631: rt::PackedRows = rt::PackedRows {
-    strings: "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillSystemColorHighlightColorSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundSystemControlForegroundBaseHighBrushSelectorBarItemForegroundPointerOverSystemColorGrayTextColorSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedSelectorBarItemForegroundDisabledSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 21, 21, 29, 1, 73, 8, 73, 8,
-        50, 23, 73, 25, 1, 74, 8, 74, 8,
-        98, 31, 129, 28, 1, 75, 8, 75, 8,
-        157, 26, 21, 29, 1, 76, 8, 76, 8,
-        183, 37, 21, 29, 1, 77, 8, 77, 8,
-        220, 34, 21, 29, 1, 78, 8, 78, 8,
-        254, 33, 21, 29, 1, 79, 8, 79, 8,
-        287, 34, 21, 29, 1, 80, 8, 80, 8,
-        321, 25, 346, 36, 1, 81, 8, 81, 8,
-        382, 36, 418, 24, 1, 82, 8, 82, 8,
-        442, 33, 346, 36, 1, 83, 8, 83, 8,
-        475, 32, 418, 24, 1, 84, 8, 84, 8,
-        507, 33, 418, 24, 1, 85, 8, 85, 8,
-        540, 25, 21, 29, 1, 86, 8, 86, 8,
-        565, 36, 21, 29, 1, 87, 8, 87, 8,
-        601, 33, 21, 29, 1, 88, 8, 88, 8,
-        634, 32, 21, 29, 1, 89, 8, 89, 8,
-        666, 33, 21, 29, 1, 90, 8, 90, 8,
+        50, 23, 745, 25, 1, 74, 8, 74, 8,
+        100, 31, 131, 28, 1, 75, 8, 75, 8,
+        159, 26, 21, 29, 1, 76, 8, 76, 8,
+        185, 37, 21, 29, 1, 77, 8, 77, 8,
+        222, 34, 21, 29, 1, 78, 8, 78, 8,
+        256, 33, 21, 29, 1, 79, 8, 79, 8,
+        289, 34, 21, 29, 1, 80, 8, 80, 8,
+        323, 25, 770, 36, 1, 81, 8, 81, 8,
+        373, 36, 806, 24, 1, 82, 8, 82, 8,
+        436, 33, 770, 36, 1, 83, 8, 83, 8,
+        469, 32, 806, 24, 1, 84, 8, 84, 8,
+        527, 33, 806, 24, 1, 85, 8, 85, 8,
+        586, 25, 21, 29, 1, 86, 8, 86, 8,
+        611, 36, 21, 29, 1, 87, 8, 87, 8,
+        647, 33, 21, 29, 1, 88, 8, 88, 8,
+        680, 32, 21, 29, 1, 89, 8, 89, 8,
+        712, 33, 21, 29, 1, 90, 8, 90, 8,
     ],
 };
 
@@ -16841,80 +17042,80 @@ static POPULATE_WINUITHEME_XAML_ROWS_632: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_633: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarForegroundBrushSystemControlForegroundBaseHighBrushTitleBarDeactivatedForegroundBrushSystemControlDisabledBaseMediumLowBrushTitleBarSubtitleForegroundBrushSystemControlHighlightAltBaseHighBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSystemControlBackgroundBaseLowBrushTitleBarBackButtonBackgroundPointerOverSystemControlHighlightListLowBrushTitleBarBackButtonBackgroundPressedSystemControlHighlightListMediumBrushTitleBarBackButtonBackgroundDisabledTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabled",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 36, 1, 59, 8, 59, 8,
-        59, 34, 93, 39, 1, 60, 8, 60, 8,
-        132, 31, 163, 38, 1, 61, 8, 61, 8,
-        201, 42, 93, 39, 1, 62, 8, 62, 8,
-        243, 28, 271, 35, 1, 63, 8, 63, 8,
-        306, 39, 345, 34, 1, 64, 8, 64, 8,
-        379, 35, 414, 37, 1, 65, 8, 65, 8,
-        451, 36, 271, 35, 1, 66, 8, 66, 8,
-        487, 28, 23, 36, 1, 67, 8, 67, 8,
-        515, 39, 163, 38, 1, 68, 8, 68, 8,
-        554, 35, 163, 38, 1, 69, 8, 69, 8,
-        589, 36, 93, 39, 1, 70, 8, 70, 8,
-        625, 34, 271, 35, 1, 71, 8, 71, 8,
-        659, 45, 345, 34, 1, 72, 8, 72, 8,
-        704, 41, 414, 37, 1, 73, 8, 73, 8,
-        745, 42, 271, 35, 1, 74, 8, 74, 8,
-        787, 34, 23, 36, 1, 75, 8, 75, 8,
-        821, 45, 163, 38, 1, 76, 8, 76, 8,
-        866, 41, 163, 38, 1, 77, 8, 77, 8,
-        907, 42, 93, 39, 1, 78, 8, 78, 8,
+        0, 23, 951, 36, 1, 59, 8, 59, 8,
+        48, 34, 987, 39, 1, 60, 8, 60, 8,
+        108, 31, 1026, 38, 1, 61, 8, 61, 8,
+        166, 42, 987, 39, 1, 62, 8, 62, 8,
+        208, 28, 1064, 35, 1, 63, 8, 63, 8,
+        267, 39, 1099, 34, 1, 64, 8, 64, 8,
+        335, 35, 1133, 37, 1, 65, 8, 65, 8,
+        398, 36, 1064, 35, 1, 66, 8, 66, 8,
+        463, 28, 951, 36, 1, 67, 8, 67, 8,
+        491, 39, 1026, 38, 1, 68, 8, 68, 8,
+        530, 35, 1026, 38, 1, 69, 8, 69, 8,
+        565, 36, 987, 39, 1, 70, 8, 70, 8,
+        627, 34, 1064, 35, 1, 71, 8, 71, 8,
+        661, 45, 1099, 34, 1, 72, 8, 72, 8,
+        706, 41, 1133, 37, 1, 73, 8, 73, 8,
+        747, 42, 1064, 35, 1, 74, 8, 74, 8,
+        789, 34, 951, 36, 1, 75, 8, 75, 8,
+        823, 45, 1026, 38, 1, 76, 8, 76, 8,
+        868, 41, 1026, 38, 1, 77, 8, 77, 8,
+        909, 42, 987, 39, 1, 78, 8, 78, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_634: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceRowBackgroundBrushSystemColorWindowColorTabularSurfaceRowBackgroundPointerOverBrushSystemColorHighlightColorTabularSurfaceRowBackgroundPressedBrushTabularSurfaceRowBackgroundSelectedBrushTabularSurfaceRowBackgroundSelectedPointerOverBrushTabularSurfaceRowBackgroundSelectedPressedBrushTabularSurfaceRowBackgroundDisabledBrushTabularSurfaceSelectionIndicatorBrushSystemColorHighlightTextColorTabularSurfaceSelectionIndicatorDisabledBrushSystemColorGrayTextColorTabularSurfaceRowForegroundBrushSystemColorWindowTextColorTabularSurfaceRowForegroundSelectedBrushTabularSurfaceRowForegroundSelectedPointerOverBrushTabularSurfaceRowForegroundSelectedPressedBrushTabularSurfaceRowForegroundPointerOverBrushTabularSurfaceRowForegroundPressedBrushTabularSurfaceRowForegroundDisabledBrushTabularSurfaceHeaderBackgroundBrushTabularSurfaceHeaderForegroundBrushTabularSurfaceHeaderSeparatorBrushTabularSurfaceHeaderBackgroundPointerOverBrushTabularSurfaceHeaderBackgroundPressedBrushTabularSurfaceHeaderForegroundPointerOverBrushTabularSurfaceHeaderForegroundPressedBrushTabularSurfaceGroupHeaderBackgroundBrushTabularSurfaceGroupHeaderForegroundBrush",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 22, 1, 78, 8, 78, 65,
-        54, 43, 97, 25, 1, 79, 8, 79, 76,
-        122, 39, 97, 25, 1, 80, 8, 80, 72,
-        161, 40, 97, 25, 1, 81, 8, 81, 73,
-        201, 51, 97, 25, 1, 82, 8, 82, 84,
-        252, 47, 97, 25, 1, 83, 8, 83, 80,
-        299, 40, 32, 22, 1, 84, 8, 84, 73,
-        339, 37, 376, 29, 1, 85, 8, 85, 70,
-        405, 45, 450, 24, 1, 86, 8, 86, 78,
-        474, 32, 506, 26, 1, 87, 8, 87, 65,
-        532, 40, 376, 29, 1, 88, 8, 88, 73,
-        572, 51, 376, 29, 1, 89, 8, 89, 84,
-        623, 47, 376, 29, 1, 90, 8, 90, 80,
-        670, 43, 376, 29, 1, 91, 8, 91, 76,
-        713, 39, 376, 29, 1, 92, 8, 92, 72,
-        752, 40, 450, 24, 1, 93, 8, 93, 73,
-        792, 35, 32, 22, 1, 94, 8, 94, 68,
-        827, 35, 506, 26, 1, 95, 8, 95, 68,
-        862, 34, 506, 26, 1, 96, 8, 96, 67,
-        896, 46, 97, 25, 1, 97, 8, 97, 79,
-        942, 42, 97, 25, 1, 98, 8, 98, 75,
-        984, 46, 376, 29, 1, 99, 8, 99, 79,
-        1030, 42, 376, 29, 1, 100, 8, 100, 75,
-        1072, 40, 32, 22, 1, 101, 8, 101, 73,
-        1112, 40, 506, 26, 1, 102, 8, 102, 73,
+        0, 32, 1106, 22, 1, 78, 8, 78, 65,
+        32, 43, 1128, 25, 1, 79, 8, 79, 76,
+        75, 39, 1128, 25, 1, 80, 8, 80, 72,
+        114, 40, 1128, 25, 1, 81, 8, 81, 73,
+        154, 51, 1128, 25, 1, 82, 8, 82, 84,
+        205, 47, 1128, 25, 1, 83, 8, 83, 80,
+        252, 40, 1106, 22, 1, 84, 8, 84, 73,
+        292, 37, 1153, 29, 1, 85, 8, 85, 70,
+        346, 45, 1182, 24, 1, 86, 8, 86, 78,
+        391, 32, 1206, 26, 1, 87, 8, 87, 65,
+        423, 40, 1153, 29, 1, 88, 8, 88, 73,
+        463, 51, 1153, 29, 1, 89, 8, 89, 84,
+        514, 47, 1153, 29, 1, 90, 8, 90, 80,
+        561, 43, 1153, 29, 1, 91, 8, 91, 76,
+        604, 39, 1153, 29, 1, 92, 8, 92, 72,
+        643, 40, 1182, 24, 1, 93, 8, 93, 73,
+        683, 35, 1106, 22, 1, 94, 8, 94, 68,
+        718, 35, 1206, 26, 1, 95, 8, 95, 68,
+        753, 34, 1206, 26, 1, 96, 8, 96, 67,
+        787, 46, 1128, 25, 1, 97, 8, 97, 79,
+        833, 42, 1128, 25, 1, 98, 8, 98, 75,
+        875, 46, 1153, 29, 1, 99, 8, 99, 79,
+        921, 42, 1153, 29, 1, 100, 8, 100, 75,
+        963, 40, 1106, 22, 1, 101, 8, 101, 73,
+        1003, 40, 1206, 26, 1, 102, 8, 102, 73,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_635: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGroupHeaderBorderBrushSystemColorWindowTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 26, 1, 104, 8, 104, 69,
+        1043, 36, 1206, 26, 1, 104, 8, 104, 69,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_636: rt::PackedRows = rt::PackedRows {
-    strings: "TabularSurfaceGridLineBrushSystemColorWindowTextColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 26, 1, 106, 8, 106, 60,
+        1079, 27, 1206, 26, 1, 106, 8, 106, 60,
     ],
 };
 
@@ -16947,10 +17148,10 @@ static POPULATE_WINUITHEME_XAML_ROWS_640: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_641: rt::PackedRows = rt::PackedRows {
-    strings: "ResizeGripperSeparatorBrushSystemColorHighlightColor",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 25, 1, 22, 8, 22, 60,
+        0, 27, 72, 25, 1, 22, 8, 22, 60,
     ],
 };
 
@@ -17008,10 +17209,10 @@ static POPULATE_WINUITHEME_XAML_ROWS_647: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_648: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutSystemBackdropAcrylicBackgroundFillColorDefaultBackdrop",
+    strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 41, 1, 271, 4, 271, 4,
+        3609, 24, 3633, 41, 1, 271, 4, 271, 4,
     ],
 };
 

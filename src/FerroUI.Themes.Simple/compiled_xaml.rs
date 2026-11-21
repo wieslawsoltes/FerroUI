@@ -222,9 +222,12 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "HyperlinkVisitedColor", value: 4285013416_u32, line: 22, position: 44 },
 ];
 
+/// The keys and targets of the packed tables of the unit 1 of `SimpleTheme.xaml`, each once (#855).
+const POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS: &str = "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColorRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushHighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColorNotificationCardForegroundBrushThemeControlTransparentBrush";
+
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 20, 20, 20, 1, 24, 8, 24, 53,
@@ -248,23 +251,23 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 27, 0, 65280, 1, 41, 8,
-        27, 27, 65535, 255, 1, 42, 8,
-        54, 23, 0, 65280, 1, 46, 8,
-        77, 23, 58853, 65509, 1, 47, 8,
-        100, 24, 51914, 65482, 1, 48, 8,
+        692, 27, 0, 65280, 1, 41, 8,
+        719, 27, 65535, 255, 1, 42, 8,
+        746, 23, 0, 65280, 1, 46, 8,
+        769, 23, 58853, 65509, 1, 47, 8,
+        792, 24, 51914, 65482, 1, 48, 8,
     ],
 };
 
 /// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 23, 23, 20, 1, 49, 8, 49, 8,
+        816, 23, 0, 20, 1, 49, 8, 49, 8,
     ],
 };
 
@@ -290,7 +293,7 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 20, 20, 20, 1, 70, 8, 70, 53,
@@ -314,23 +317,23 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 27, 65535, 65535, 1, 87, 8,
-        27, 27, 65535, 255, 1, 88, 8,
-        54, 23, 65535, 65535, 1, 92, 8,
-        77, 23, 5903, 65309, 1, 93, 8,
-        100, 24, 51914, 65482, 1, 94, 8,
+        692, 27, 65535, 65535, 1, 87, 8,
+        719, 27, 65535, 255, 1, 88, 8,
+        746, 23, 65535, 65535, 1, 92, 8,
+        769, 23, 5903, 65309, 1, 93, 8,
+        792, 24, 51914, 65482, 1, 94, 8,
     ],
 };
 
 /// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 23, 23, 20, 1, 95, 8, 95, 8,
+        816, 23, 0, 20, 1, 95, 8, 95, 8,
     ],
 };
 
@@ -348,35 +351,35 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
-    strings: "HighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 24, 24, 24, 1, 107, 4, 107, 53,
-        48, 23, 71, 23, 1, 108, 4, 108, 52,
-        94, 17, 111, 17, 1, 109, 4, 109, 46,
-        128, 17, 145, 17, 1, 110, 4, 110, 46,
-        162, 17, 179, 17, 1, 111, 4, 111, 46,
-        94, 16, 111, 16, 1, 112, 4, 112, 45,
-        196, 10, 206, 10, 1, 113, 4, 113, 39,
-        216, 13, 229, 13, 1, 114, 4, 114, 42,
+        839, 24, 863, 24, 1, 107, 4, 107, 53,
+        887, 23, 910, 23, 1, 108, 4, 108, 52,
+        933, 17, 950, 17, 1, 109, 4, 109, 46,
+        967, 17, 984, 17, 1, 110, 4, 110, 46,
+        1001, 17, 1018, 17, 1, 111, 4, 111, 46,
+        933, 16, 950, 16, 1, 112, 4, 112, 45,
+        1035, 10, 1045, 10, 1, 113, 4, 113, 39,
+        1055, 13, 1068, 13, 1, 114, 4, 114, 42,
     ],
 };
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardForegroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 31, 65535, 65535, 1, 119, 4,
+        1081, 31, 65535, 65535, 1, 119, 4,
     ],
 };
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeControlTransparentBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 28, 65535, 255, 1, 138, 4,
+        1112, 28, 65535, 255, 1, 138, 4,
     ],
 };
 
@@ -2050,9 +2053,12 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: rt::PackedRows = rt::PackedRo
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 68 of `Controls/SimpleControls.xaml`, each once (#855).
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColorTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrush";
+
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelected",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
         0, 43, 65535, 255, 0, 17, 4,
@@ -2062,49 +2068,49 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRo
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 54, 54, 20, 0, 19, 4, 19, 83,
+        84, 54, 138, 20, 0, 19, 4, 19, 83,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 52, 65535, 255, 0, 20, 4,
+        158, 52, 65535, 255, 0, 20, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 50, 50, 29, 0, 21, 4, 21, 79,
+        210, 50, 260, 29, 0, 21, 4, 21, 79,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabled",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 48, 65535, 255, 0, 22, 4,
-        48, 41, 65535, 255, 0, 23, 4,
+        289, 48, 65535, 255, 0, 22, 4,
+        337, 41, 65535, 255, 0, 23, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 43, 43, 23, 0, 26, 4, 26, 72,
-        66, 41, 107, 16, 0, 27, 4, 27, 70,
-        123, 41, 164, 18, 0, 28, 4, 28, 70,
+        378, 43, 421, 23, 0, 26, 4, 26, 72,
+        444, 41, 485, 16, 0, 27, 4, 27, 70,
+        501, 41, 542, 18, 0, 28, 4, 28, 70,
     ],
 };
 
@@ -2130,19 +2136,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBackground",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 28, 65535, 255, 0, 48, 4,
+        560, 28, 65535, 255, 0, 48, 4,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBorderBrush",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_68_STRINGS,
     namespaces: &[],
     records: &[
-        0, 29, 65535, 255, 0, 51, 4,
+        588, 29, 65535, 255, 0, 51, 4,
     ],
 };
 
