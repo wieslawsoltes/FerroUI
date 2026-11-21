@@ -288,10 +288,10 @@ version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
+ "ferroui-ident-macros",
  "ferroui-system",
  "icu_locale_core",
  "libc",
- "paste",
  "rust_decimal",
  "rustc-hash",
  "smallvec",
@@ -354,6 +354,10 @@ dependencies = [
  "ferroui-controls",
  "harfbuzz-sys",
 ]
+
+[[package]]
+name = "ferroui-ident-macros"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-markup"
@@ -457,7 +461,6 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "libc",
- "paste",
 ]
 
 [[package]]
@@ -471,10 +474,10 @@ dependencies = [
 name = "ferroui-reactiveui"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-ident-macros",
  "ferroui-reactive",
  "ferroui-splat",
  "ferroui-system",
- "paste",
  "uuid",
 ]
 
@@ -986,12 +989,6 @@ dependencies = [
  "smallvec",
  "windows-link 0.2.1",
 ]
-
-[[package]]
-name = "paste"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "percent-encoding"
