@@ -85,7 +85,7 @@ pub struct MacOSTheme {
     /// The type keys of the control themes the units of the theme leave out, for the diagnostic of
     /// a lookup that misses one (#568, step 3). Debug builds only.
     #[cfg(debug_assertions)]
-    trimmed: RefCell<Vec<&'static str>>,
+    trimmed: RefCell<rt::TrimmedKeys>,
 }
 
 ferro_class!(MacOSTheme: Styles);
@@ -177,7 +177,7 @@ impl MacOSTheme {
             window_active: Cell::new(true), accent_color: Cell::new(None),
             platform_settings: RefCell::new(None), accessibility_subscription: RefCell::new(None),
             #[cfg(debug_assertions)]
-            trimmed: RefCell::new(Vec::new()),
+            trimmed: RefCell::new(rt::TrimmedKeys::default()),
         }
     }
 
@@ -212,7 +212,7 @@ impl MacOSTheme {
     /// turns it off). The theme
     /// applies those units, at the places of the full theme and in its order; a unit that `parts`
     /// leaves out adds nothing. Only the units named are linked into the application. In debug
-    /// builds a lookup of a control theme that `parts` left out logs once that it was trimmed.
+    /// builds a lookup of a control theme or a resource that `parts` left out logs once that it was trimmed.
     ///
     /// # Panics
     /// Panics if the documents of the theme fail to load, or if `parts` leaves out the ambient
@@ -224,7 +224,7 @@ impl MacOSTheme {
         }
         #[cfg(debug_assertions)]
         {
-            *this.trimmed.borrow_mut() = rt::trimmed_type_keys(crate::compiled_xaml::THEME_UNIT_TYPE_KEYS, parts);
+            *this.trimmed.borrow_mut() = crate::compiled_xaml::trimmed_theme_keys(parts);
         }
 
         let compact_styles = this.get_and_remove("CompactStyles");

@@ -495,7 +495,7 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
             }
             unit.entries = entries
                 .into_iter()
-                .map(|(key, references)| ThemeEntryModel { key, references: references.into_iter().collect() })
+                .map(|(key, references)| ThemeEntryModel { key, references: references.into_iter().collect(), slots: Vec::new() })
                 .collect();
             unit.body_references = body_references.into_iter().collect();
             unit

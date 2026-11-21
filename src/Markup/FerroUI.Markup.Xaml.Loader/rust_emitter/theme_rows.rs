@@ -249,7 +249,7 @@ enum Operand {
 
 /// The text of the Rust string literal `literal` as [`super::rust_string_literal`] writes it,
 /// or `None` for any other form.
-fn string_value(literal: &str) -> Option<String> {
+pub(super) fn string_value(literal: &str) -> Option<String> {
     let inner = literal.strip_prefix('"')?.strip_suffix('"')?;
     let mut text = String::with_capacity(inner.len());
     let mut characters = inner.chars();

@@ -1249,6 +1249,9 @@ pub struct AssemblyModel {
     pub theme_units: Vec<ThemeUnitsModel>,
     /// What the compiled documents of the crate name, for a crate without theme units (#568).
     pub references: MarkupReferencesModel,
+    /// The string literals of the code of the crate that can spell a resource key (#852, step 2,
+    /// `SourceReferences::key_strings`): what it may look up by text. Absent in a file: none.
+    pub key_strings: Vec<String>,
 }
 
 impl AssemblyModel {
@@ -1274,6 +1277,7 @@ impl AssemblyModel {
             dependencies: Vec::new(),
             theme_units: Vec::new(),
             references: MarkupReferencesModel::default(),
+            key_strings: Vec::new(),
         }
     }
 
@@ -1387,7 +1391,8 @@ impl AssemblyModel {
             .list("theme_units", &self.theme_units, theme_units_to_json)
             .list("referenced_types", &self.references.types, |name| Json::string(name))
             .list("referenced_keys", &self.references.keys, |name| Json::string(name))
-            .list("class_references", &self.references.classes, class_references_to_json);
+            .list("class_references", &self.references.classes, class_references_to_json)
+            .list("key_strings", &self.key_strings, |text| Json::string(text));
         Json::object(members).to_text()
     }
 
@@ -1468,6 +1473,7 @@ impl AssemblyModel {
                 keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
                 classes: fields.list("class_references", class_references_from_json)?,
             },
+            key_strings: fields.list("key_strings", |text| text_of(text, "a key string"))?,
         })
     }
 }
@@ -1502,6 +1508,10 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
             };
             members.push(("entry_references".to_string(), Json::Array(unit.entry_rows().iter().map(|names| row(names)).collect())));
             members.push(("body_references".to_string(), row(&unit.body_row())));
+            let slots = unit.slot_rows();
+            if !slots.is_empty() {
+                members.push(("entry_slots".to_string(), Json::Array(slots.iter().map(|names| row(names)).collect())));
+            }
         }
         Json::Object(members)
     };
@@ -1567,7 +1577,8 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
             };
             let rows = unit.list("entry_references", names)?;
             let body = unit.optional("body_references", names)?.unwrap_or_default();
-            read.read_entry_graph(rows, body)?;
+            let slots = unit.list("entry_slots", names)?;
+            read.read_entry_graph(rows, body, slots)?;
         }
         Ok(read)
     })?;

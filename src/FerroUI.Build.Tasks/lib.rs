@@ -232,7 +232,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, ClassReferencesModel, MarkupReferencesModel, ThemeUnitsModel};
+use crate::model::{AssemblyModel, ClassReferencesModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -245,10 +245,9 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, keys_listing, keys_live_by_entry, kept_units_across,
-    live_class_references, parts_constructor,
-    parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
-    BuildTarget, Roots, ThemeTrimming, TypeGraph,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, keys_by_entry, keys_listing, kept_units_across,
+    live_class_references, live_keys, parts_constructor, parts_static_name, parts_static_names, selected_slots,
+    source_roots, unit_static_path, verify_parts_constructor, why_kept_listing, BuildTarget, Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -854,8 +853,11 @@ impl Build {
                 compiled_against = models.clone();
             }
             let started = Instant::now();
-            match self.scan(models, theme_parts.is_some()) {
+            // The string literals of the crate are exported for the applications that select the
+            // entries of their themes by key (#852, step 2), whether or not it trims a theme.
+            match self.scan(models, true) {
                 Ok(mut scan) => {
+                    scan.model.key_strings = scan.references.key_strings();
                     report.scanned(&scan, started.elapsed());
                     for file in &scan.files {
                         rerun(&mut lines, &file.path);
@@ -1375,6 +1377,25 @@ impl Build {
                     roots
                 })
                 .collect();
+            // The keys live by key across the kept units of the themes used together (#852, step
+            // 2): the keys of the roots, what the code of every crate names as a string, what the
+            // rest of each kept unit names, and what a live entry names.
+            let kept_models: Vec<&ThemeUnitModel> = themes
+                .iter()
+                .zip(&kept_of_themes)
+                .flat_map(|(units, kept)| units.units.iter().filter(move |unit| kept.contains(&unit.index)))
+                .collect();
+            let live = live_keys(
+                &kept_models,
+                roots
+                    .keys
+                    .iter()
+                    .chain(&roots.names)
+                    .chain(base_models.iter().flat_map(|model| model.key_strings.iter()))
+                    .cloned(),
+            );
+            // With every unit asked for, every entry is kept: nothing is selected.
+            let selecting = !(roots.all || self.full_themes);
             let mut why = String::new();
             let mut keys_text = String::new();
             let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
@@ -1391,12 +1412,26 @@ impl Build {
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 // The keys of the kept units that are live by key (#852, step 2, a count).
-                keys_text.push_str(&keys_listing(&class, &keys_live_by_entry(units, &kept, &roots)));
-                let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
+                keys_text.push_str(&keys_listing(&class, &keys_by_entry(units, &kept, &live)));
+                let static_name = static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class));
+                let mut table_units = Vec::with_capacity(kept.len());
+                let mut selected_units = Vec::new();
+                for unit in units.units.iter().filter(|unit| kept.contains(&unit.index)) {
+                    let path = unit_static_path(&units.table_path, unit.index);
+                    match selecting.then(|| selected_slots(unit, &live)).flatten() {
+                        Some(slots) => {
+                            let local = format!("{static_name}_UNIT_{}", unit.index);
+                            selected_units.push(selected_unit_static(&local, &path, unit, &slots));
+                            table_units.push((local, unit.name.clone()));
+                        }
+                        None => table_units.push((path, unit.name.clone())),
+                    }
+                }
                 parts_tables.push(PartsTable {
-                    static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),
+                    static_name,
                     class,
-                    units: kept.iter().map(|&index| (unit_static_path(&units.table_path, index), name_of(index))).collect(),
+                    units: table_units,
+                    selected_units,
                     total: units.units.len(),
                 });
             }
@@ -1544,6 +1579,29 @@ mod runtime_host {
 }
 
 /// The parts table of a theme the application trims (#568, step 3), in `compiled_markup`.
+/// The static `local` of the unit `unit` (whose own static is at `path`) with the entries `slots`
+/// alone (#852, step 2): the runs of the unit and the statics of those entries, so that the build of
+/// an entry no table names is not linked.
+fn selected_unit_static(local: &str, path: &str, unit: &ThemeUnitModel, slots: &[u32]) -> String {
+    let module = path.rsplit_once("::").map_or("", |(module, _)| module);
+    let entries: Vec<String> = slots.iter().map(|slot| format!("&{module}::THEME_ENTRY_{slot}")).collect();
+    format!(
+        "    /// The unit `{}` with the entries of its live keys (#852): {} of them.\n\
+         \x20   static {local}: ::ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit =\n\
+         \x20       ::ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit {{\n\
+         \x20           name: {},\n\
+         \x20           index: {},\n\
+         \x20           runs: &{path}_RUNS,\n\
+         \x20           entries: &[{}],\n\
+         \x20       }};\n",
+        unit.name.replace(['\r', '\n', '`'], " "),
+        slots.len(),
+        rust_string_literal(&unit.name),
+        unit.index,
+        entries.join(", ")
+    )
+}
+
 struct PartsTable {
     /// The full name of the class of the theme.
     class: String,
@@ -1551,6 +1609,9 @@ struct PartsTable {
     static_name: String,
     /// The path of the static of each unit kept, with the name of the unit, in canonical order.
     units: Vec<(String, String)>,
+    /// The statics of the units kept with some of their entries (#852, step 2), which `units`
+    /// names by their local names.
+    selected_units: Vec<String>,
     /// The number of units of the theme.
     total: usize,
 }
@@ -1765,6 +1826,8 @@ fn crate_file_with_plan(
     text.push_str("    ];\n");
     for table in parts {
         text.push('\n');
+        // The units kept with some of their entries (#852, step 2), which the table names.
+        text.push_str(&table.selected_units.concat());
         text.push_str(&format!(
             "    /// The units of the theme `{}` the application keeps (#568): {} of {}, the closure of the\n",
             table.class,
@@ -1898,6 +1961,7 @@ mod tests {
                 ("::tests::compiled_xaml::THEME_UNIT_0".to_string(), "ambient".to_string()),
                 ("::tests::compiled_xaml::THEME_UNIT_3".to_string(), "Controls/Button.xaml".to_string()),
             ],
+            selected_units: Vec::new(),
             total: 9,
         }];
         let text = crate_file("App", &[], &[], &[], &parts);
@@ -2286,6 +2350,87 @@ mod tests {
         assert!(listing.starts_with("Tests.Theme: 2 of 2 units\n"), "{listing}");
         let reason = "defines the theme of Button: the type Button, referenced by the document of the live class Library.About";
         assert!(why.contains(reason), "{why}");
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// Not from upstream (#852, step 2): what stays when an application selects the entries of a
+    /// unit by key. A key only a string literal of a dependency names, the target of a dynamic
+    /// resource of the rest of a kept unit and what it names in turn, and a key defined in several
+    /// theme variants (all of its statics) stay; only a key nothing names leaves. An application
+    /// that keeps every unit selects nothing.
+    #[test]
+    fn selecting_entries_by_key_keeps_every_key_that_may_be_looked_up() {
+        use ferroui_build_scan::model::ThemeEntryModel;
+        use ferroui_build_scan::xaml_metadata::ThemeUnitModel;
+        let root = env::temp_dir().join(format!("ferroui-build-key-selection-{}", std::process::id()));
+        let entry = |key: &str, references: &[&str], slots: &[u32]| ThemeEntryModel {
+            key: key.to_string(),
+            references: references.iter().map(|key| key.to_string()).collect(),
+            slots: slots.to_vec(),
+        };
+        let ambient = ThemeUnitModel {
+            name: "ambient".to_string(),
+            documents: vec!["ambient".to_string()],
+            // `{DynamicResource DynamicTarget}` in a control theme by type of the ambient unit.
+            body_references: vec!["DynamicTarget".to_string()],
+            ..ThemeUnitModel::default()
+        };
+        let resources = ThemeUnitModel {
+            name: "Resources/Base.xaml".to_string(),
+            index: 1,
+            documents: vec!["Resources/Base.xaml".to_string()],
+            keys: ["Dead", "DynamicTarget", "OpaqueKey", "Reached", "Variant"].iter().map(|key| key.to_string()).collect(),
+            entries: vec![
+                entry("Dead", &[], &[5]),
+                entry("DynamicTarget", &["Reached"], &[1]),
+                entry("OpaqueKey", &[], &[0]),
+                entry("Reached", &[], &[2]),
+                entry("Variant", &[], &[3, 4]),
+            ],
+            ..ThemeUnitModel::default()
+        };
+        let mut theme = AssemblyModel::new("Theme", "theme");
+        theme.theme_units = vec![ThemeUnitsModel {
+            class: "Tests.Theme".to_string(),
+            table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![ambient, resources],
+        }];
+        // A library whose code looks a key up by its text.
+        let mut library = AssemblyModel::new("Library", "library");
+        library.key_strings = vec!["OpaqueKey".to_string()];
+        fs::create_dir_all(&root).expect("the directory of the test");
+        let theme_file = root.join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        let library_file = root.join("library.xamlmeta");
+        fs::write(&library_file, library.to_json()).expect("the .xamlmeta of the library");
+        let build = |name: &str, manifest: &str| {
+            let crate_dir = root.join(name);
+            fs::create_dir_all(&crate_dir).expect("the directory of the crate");
+            fs::write(crate_dir.join("Cargo.toml"), manifest).expect("a manifest");
+            // The application names the key defined in the two variants, and keeps the unit by it.
+            fs::write(crate_dir.join("lib.rs"), "pub fn key() -> &'static str {\n    \"Variant\"\n}\n").expect("the library");
+            let out = crate_dir.join("out");
+            let outcome = Build::new(crate_dir, out.clone(), "app", vec![theme_file.clone(), library_file.clone()])
+                .type_system(TypeSystem::Model)
+                .theme("Theme")
+                .execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let read = |file: &str| fs::read_to_string(out.join("xaml").join(file)).expect(file);
+            (read("mod.rs"), read("theme_keys.txt"))
+        };
+
+        let (text, keys) = build("selected", "[package]\nname = \"app\"\n");
+        let entries: Vec<String> = (0..5).map(|slot| format!("&::theme::compiled_xaml::THEME_ENTRY_{slot}")).collect();
+        assert!(text.contains(&format!("entries: &[{}],", entries.join(", "))), "{text}");
+        assert!(!text.contains("THEME_ENTRY_5"), "{text}");
+        assert!(text.contains("runs: &::theme::compiled_xaml::THEME_UNIT_1_RUNS,"), "{text}");
+        assert!(text.contains("&THEME_PARTS_TESTS_THEME_UNIT_1, // Resources/Base.xaml"), "{text}");
+        assert!(keys.contains("Resources/Base.xaml\t4 of 5 keys live by key\tDead\n"), "{keys}");
+
+        let every = "[package]\nname = \"app\"\n\n[package.metadata.ferroui]\ntheme-roots = \"all\"\n";
+        let (text, _) = build("every", every);
+        assert!(text.contains("&::theme::compiled_xaml::THEME_UNIT_1, // Resources/Base.xaml"), "{text}");
+        assert!(!text.contains("THEME_ENTRY_"), "{text}");
         let _ = fs::remove_dir_all(&root);
     }
 

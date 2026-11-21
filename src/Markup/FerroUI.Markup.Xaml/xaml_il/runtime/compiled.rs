@@ -71,7 +71,8 @@ pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
     active_theme_units, apply_theme_region, apply_theme_unit, find_theme_unit, register_theme_parts,
     register_theme_parts_if_absent, register_wider_theme_parts, registered_theme_parts, report_trimmed_theme,
-    set_active_theme_units, trimmed_type_keys, wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
+    set_active_theme_units, trimmed_keys, trimmed_type_keys, wider_theme_parts, ThemeEntry, ThemeParts, ThemeUnit,
+    TrimmedKeys, ThemeUnitRun,
 };
 
 /// Materialize an independently linkable constant from the build-time image.

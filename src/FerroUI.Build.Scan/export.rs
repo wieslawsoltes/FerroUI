@@ -296,7 +296,7 @@ impl Export {
             Err(error) => return Outcome { lines, errors: vec![error] },
         };
         let started = Instant::now();
-        let scan = scan_crate(&ScanOptions::new(&self.crate_name, root).with_dependencies(models));
+        let scan = scan_crate(&ScanOptions::new(&self.crate_name, root).with_dependencies(models).with_source_references(true));
         report.scanned(&scan, started.elapsed());
         for file in &scan.files {
             rerun(&mut lines, &file.path);
@@ -307,7 +307,9 @@ impl Export {
             lines.push(format!("cargo::warning={diagnostic}"));
         }
 
+        let key_strings = scan.references.key_strings();
         let mut model = scan.model;
+        model.key_strings = key_strings;
         if model.name.is_empty() {
             // A crate that states no assembly is the assembly named after the crate, as
             // the type systems name it.

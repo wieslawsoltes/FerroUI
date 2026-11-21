@@ -29,8 +29,8 @@ fn second_run(_context: &Rc<XamlIlContext>, dictionary: &Ref<ResourceDictionary>
     Ok(())
 }
 
-static AMBIENT: ThemeUnit = ThemeUnit { name: "ambient", index: 0, runs: &[ambient_run] };
-static BUTTON: ThemeUnit = ThemeUnit { name: "Controls/Button.xaml", index: 1, runs: &[first_run, second_run] };
+static AMBIENT: ThemeUnit = ThemeUnit { name: "ambient", index: 0, runs: &[ambient_run], entries: &[] };
+static BUTTON: ThemeUnit = ThemeUnit { name: "Controls/Button.xaml", index: 1, runs: &[first_run, second_run], entries: &[] };
 static UNITS: &[&ThemeUnit] = &[&AMBIENT, &BUTTON];
 
 fn context_of(dictionary: &Ref<ResourceDictionary>) -> Rc<XamlIlContext> {
@@ -114,12 +114,36 @@ fn trimmed_type_keys_are_those_of_the_units_left_out() {
 #[test]
 fn only_trimmed_type_keys_are_reported() {
     use ferroui_base::StaticType;
-    let trimmed: &[&'static str] = &["ResourceDictionary"];
-    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
+    let trimmed = TrimmedKeys { types: vec!["ResourceDictionary"], texts: Vec::new() };
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &trimmed));
     // Reported once, and still recognised.
-    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
-    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), trimmed));
-    assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &[]));
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &TrimmedKeys::default()));
+}
+
+/// #852, step 2: a text key is left out when no kept unit still defines it: the keys of a unit the
+/// table does not have and the selectable keys whose entries its static does not name, but not a
+/// key another kept unit defines, and such a key is reported as a trimmed resource.
+#[test]
+fn trimmed_text_keys_are_those_no_kept_unit_defines() {
+    fn build(_provider: &Rc<dyn ferroui_base::metadata::IServiceProvider>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError> {
+        Ok(None)
+    }
+    static LIVE: ThemeEntry = ThemeEntry { run: 0, key: "Live", build, line: 1, position: 1 };
+    static SELECTED: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[first_run], entries: &[&LIVE] };
+    static PARTS: &[&ThemeUnit] = &[&AMBIENT, &SELECTED];
+    static TYPE_KEYS: &[&[&str]] = &[&[], &[], &["Button"]];
+    static TEXT_KEYS: &[&[&str]] = &[&["Shared"], &["Dead", "Inline", "Live", "Shared"], &["OfALeftOutUnit", "Inline"]];
+    static ENTRY_KEYS: &[&[&str]] = &[&[], &["Dead", "Live", "Shared"], &[]];
+    let trimmed = trimmed_keys(TYPE_KEYS, TEXT_KEYS, ENTRY_KEYS, PARTS);
+    assert_eq!(trimmed.types, ["Button"]);
+    // `Shared` is defined by the ambient unit, and `Inline` by a run of the kept unit.
+    assert_eq!(trimmed.texts, ["Dead", "OfALeftOutUnit"]);
+    assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
+    assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Live"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Unknown"), &trimmed));
 }
 
 ferroui_base::ferro_thread_local! {
@@ -157,10 +181,10 @@ fn list_light(_: &Rc<XamlIlContext>, _: &Ref<ResourceDictionary>) -> Result<(), 
     logged("list light")
 }
 
-static REGION_BASE: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[base_light, base_dark] };
-static REGION_BUTTON: ThemeUnit = ThemeUnit { name: "Controls/Button.xaml", index: 2, runs: &[button_light] };
-static REGION_FAILING: ThemeUnit = ThemeUnit { name: "Controls/Failing.xaml", index: 3, runs: &[failing] };
-static REGION_LIST: ThemeUnit = ThemeUnit { name: "Controls/List.xaml", index: 4, runs: &[list_light] };
+static REGION_BASE: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[base_light, base_dark], entries: &[] };
+static REGION_BUTTON: ThemeUnit = ThemeUnit { name: "Controls/Button.xaml", index: 2, runs: &[button_light], entries: &[] };
+static REGION_FAILING: ThemeUnit = ThemeUnit { name: "Controls/Failing.xaml", index: 3, runs: &[failing], entries: &[] };
+static REGION_LIST: ThemeUnit = ThemeUnit { name: "Controls/List.xaml", index: 4, runs: &[list_light], entries: &[] };
 static REGION_UNITS: &[&ThemeUnit] = &[&AMBIENT, &REGION_BASE, &REGION_BUTTON, &REGION_LIST];
 
 /// #853: a region applies the runs of the units the table has, in the order of the region, and
@@ -222,4 +246,37 @@ fn the_wider_table_of_a_class_is_registered_and_applied() {
     assert!(std::ptr::eq(wider_theme_parts(class, ONLY_AMBIENT), UNITS));
     // A construction whose own table is as wide keeps it.
     assert!(std::ptr::eq(wider_theme_parts(class, UNITS), UNITS));
+}
+
+/// #852, step 2: a run adds its statements and then the entries of that run that the unit names;
+/// an entry the table of the application leaves out is not in the dictionary; and of two tables of
+/// one theme with the same units, the one with more entries is the wider.
+#[test]
+fn a_unit_adds_the_entries_it_names_after_its_run() {
+    fn build(_provider: &Rc<dyn ferroui_base::metadata::IServiceProvider>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError> {
+        Ok(Some(Rc::new("built".to_string()) as BoxedValue))
+    }
+    static IN_FIRST: ThemeEntry = ThemeEntry { run: 0, key: "InFirst", build, line: 1, position: 2 };
+    static IN_SECOND: ThemeEntry = ThemeEntry { run: 1, key: "InSecond", build, line: 3, position: 4 };
+    static WHOLE: ThemeUnit =
+        ThemeUnit { name: "Controls/Button.xaml", index: 1, runs: &[first_run, second_run], entries: &[&IN_FIRST, &IN_SECOND] };
+    static SELECTED: ThemeUnit =
+        ThemeUnit { name: "Controls/Button.xaml", index: 1, runs: &[first_run, second_run], entries: &[&IN_SECOND] };
+    static WHOLE_PARTS: &[&ThemeUnit] = &[&WHOLE];
+    static SELECTED_PARTS: &[&ThemeUnit] = &[&SELECTED];
+
+    let dictionary = ResourceDictionary::new();
+    let context = context_of(&dictionary);
+    apply_theme_unit(WHOLE_PARTS, 1, 0, &context, &dictionary).expect("the first run");
+    assert!(has(&dictionary, "First") && has(&dictionary, "InFirst") && !has(&dictionary, "InSecond"));
+    apply_theme_unit(WHOLE_PARTS, 1, 1, &context, &dictionary).expect("the second run");
+    assert!(has(&dictionary, "Second") && has(&dictionary, "InSecond"));
+
+    let dictionary = ResourceDictionary::new();
+    let context = context_of(&dictionary);
+    apply_theme_region(SELECTED_PARTS, &[(1, 0), (1, 1)], &context, &dictionary).expect("the region");
+    assert!(has(&dictionary, "First") && has(&dictionary, "Second") && has(&dictionary, "InSecond"));
+    assert!(!has(&dictionary, "InFirst"));
+
+    assert!(parts_width(WHOLE_PARTS) > parts_width(SELECTED_PARTS));
 }

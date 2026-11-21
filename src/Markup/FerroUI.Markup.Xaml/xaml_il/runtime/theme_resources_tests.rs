@@ -709,7 +709,7 @@ fn scheduled_units_capture_deferred_factories_and_apply_rows_in_declaration_orde
             &DOCUMENT, context, dict,
         )
     }
-    static UNIT: rt::ThemeUnit = rt::ThemeUnit { name: "Button", index: 1, runs: &[run] };
+    static UNIT: rt::ThemeUnit = rt::ThemeUnit { name: "Button", index: 1, runs: &[run], entries: &[] };
     let (dict, context) = populated();
     rt::apply_theme_unit(&[], 1, 0, &context, &dict).unwrap();
     assert!(!dict.contains_key(&"Lazy".into()) && !dict.contains_key(&"Later".into()));

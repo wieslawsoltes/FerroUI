@@ -340,6 +340,18 @@ impl SourceReferences {
     /// The longest string literal that is kept: a key is a short name.
     pub const MAX_STRING: usize = 256;
 
+    /// The string literals that can spell a resource key of a theme (an upper-case letter, then
+    /// letters, digits, `_` and `.`), sorted: what the code of a crate may look up by text, which
+    /// an application keeps when it selects the entries of its themes by key (#852, step 2).
+    pub fn key_strings(&self) -> Vec<String> {
+        let spells_a_key = |text: &&String| {
+            text.len() >= 3
+                && text.starts_with(|c: char| c.is_ascii_uppercase())
+                && text.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '.')
+        };
+        self.strings.iter().filter(spells_a_key).cloned().collect()
+    }
+
     pub(crate) fn add_name(&mut self, name: &str) {
         if name.starts_with(|c: char| c.is_ascii_uppercase()) && !self.names.contains(name) {
             self.names.insert(name.to_string());

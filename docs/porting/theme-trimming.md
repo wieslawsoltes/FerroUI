@@ -1930,3 +1930,33 @@ every key of it counts as live.
 An application build writes `$OUT_DIR/xaml/theme_keys.txt`: for each kept unit, its keys, the
 keys live by key and the dead keys. A key is live when it is a root, when the rest of a kept unit
 names it, or when a live entry names it. The listing changes nothing in the application.
+
+### 26.4 Selecting deferred resources by key
+
+With `ThemeUnitPlan::with_entries` (off until it is measured), a deferred resource that is the
+only statement of its run naming its key leaves the run. It becomes a static of its own,
+`THEME_ENTRY_<n>` (`rt::ThemeEntry`: the run, the key, the build, the position), which the
+`ThemeUnit` names and adds right after the run. Since no other statement of the run names the key,
+the dictionary gets the same entries. `entry_slots` in the `.xamlmeta` gives the statics of each key.
+
+An application that keeps a unit with a dead key writes its own static of the unit, with the
+runs of the unit (`THEME_UNIT_<n>_RUNS`) and the statics of the live keys. The table of its parts
+names that static, so the build of a dead key is not linked. A unit whose keys are all live is
+named by its own static. `ThemeParts`, `with_parts` and the active and registered tables keep their
+shape; of two tables of one theme the wider has more units, then more entries.
+
+The live keys are the closure of section 26.3 across the themes used together, with one more
+seed: the string literals of the code of every scanned crate that can spell a key (an upper-case
+letter, then letters, digits, `_` and `.`; `AssemblyModel::key_strings`). What stays:
+
+- a key a string literal of the application or of a dependency names, since code can look it up
+  by text;
+- a key a live entry or the rest of a kept unit names, by `{StaticResource}`, `{DynamicResource}`,
+  `BasedOn`, an alias or a token that spells it;
+- every definition of a live key, in every theme dictionary;
+- every entry, when the build keeps every unit (`theme-roots = "all"`, `full-themes`).
+
+A key that reaches the code only at run time (read from a file, or built from parts) is not seen,
+and needs `theme-roots`. In a debug build, a lookup that misses a key the full theme defines and no
+kept unit still defines logs once `the <theme> resource <key> was trimmed: add it to theme-roots`
+(`rt::trimmed_keys`, the debug statics `THEME_UNIT_TEXT_KEYS` and `THEME_UNIT_ENTRY_KEYS`).

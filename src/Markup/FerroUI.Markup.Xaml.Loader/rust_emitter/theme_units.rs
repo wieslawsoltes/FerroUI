@@ -38,6 +38,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
+use ferroui_build_scan::xaml_metadata::{ThemeEntryModel, ThemeUnitModel};
 use xamlx::ast::IXamlAstNode;
 
 use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
@@ -71,15 +72,28 @@ const APPLY_REGION: &str = "rt::apply_theme_region";
 pub struct ThemeUnitPlan {
     regions: bool,
     keys_in_runs: bool,
+    entries: bool,
 }
 
 impl ThemeUnitPlan {
     /// Both switches off: one call of `rt::apply_theme_unit` for each run, and the key
     /// assignments of merged theme dictionaries in the function of the document.
-    pub const OFF: Self = Self { regions: false, keys_in_runs: false };
+    pub const OFF: Self = Self { regions: false, keys_in_runs: false, entries: false };
 
-    /// Both switches on.
-    pub const ON: Self = Self { regions: true, keys_in_runs: true };
+    /// The two switches of #853 on.
+    pub const ON: Self = Self { regions: true, keys_in_runs: true, entries: false };
+
+    /// The deferred resources of a run written as entries an application selects by key (#852,
+    /// step 2): statics of their own (`THEME_ENTRY_<n>`), which the unit names, instead of
+    /// statements of the run.
+    pub const fn with_entries(self, on: bool) -> Self {
+        Self { entries: on, ..self }
+    }
+
+    /// Whether the deferred resources of the runs are entries selected by key.
+    pub const fn entries(self) -> bool {
+        self.entries
+    }
 
     /// Consecutive calls of runs that add to one dictionary written as one call of
     /// `rt::apply_theme_region`.
@@ -157,13 +171,80 @@ pub(crate) struct UnitEmission {
     names: Vec<String>,
     /// The functions of the runs of each unit, by its index, in the order they are applied.
     runs: RefCell<Vec<Vec<String>>>,
+    /// The deferred resources written as entries selected by key (#852, step 2): the index of an
+    /// entry is the number of its static, `THEME_ENTRY_<n>`.
+    entries: RefCell<Vec<UnitEntry>>,
+}
+
+/// A deferred resource of a run written as an entry selected by key (#852, step 2).
+struct UnitEntry {
+    unit: u32,
+    run: usize,
+    key: String,
+    /// The key as the Rust literal the statement had.
+    literal: String,
+    build: String,
+    position: (i32, i32),
+}
+
+/// `lines`, the statements of a run that adds to `dictionary`, without the deferred resources that
+/// can be selected by key, and those resources as `(key, literal, build, position)`. A resource is
+/// selectable when its statement is the only one of the run that names its key, so that adding it
+/// after the other statements of the run adds the same entries. The comment of its position
+/// goes with it.
+fn selectable_entries(lines: Vec<String>, dictionary: &str) -> (Vec<String>, Vec<(String, String, String, (i32, i32))>) {
+    let code: Vec<&str> = lines.iter().map(|line| line.trim_start()).filter(|text| !text.starts_with("//")).collect();
+    let single = |literal: &str| code.iter().filter(|text| text.contains(literal)).count() == 1;
+    let mut found = Vec::new();
+    let mut kept: Vec<String> = Vec::with_capacity(lines.len());
+    for line in &lines {
+        let selectable = super::theme_rows::deferred_addition(line.trim_start())
+            .filter(|addition| addition.dictionary == dictionary && single(addition.key))
+            .and_then(|addition| {
+                let key = super::theme_rows::string_value(addition.key)?;
+                Some((key, addition.key.to_string(), addition.build.to_string(), addition.position))
+            });
+        match selectable {
+            Some(entry) => {
+                while kept.last().is_some_and(|last| last.trim_start().starts_with("//")) {
+                    kept.pop();
+                }
+                found.push(entry);
+            }
+            None => kept.push(line.clone()),
+        }
+    }
+    (kept, found)
 }
 
 impl UnitEmission {
     /// `names` are the names of the units, by their indices.
     pub(crate) fn new(origins: Rc<MergedEntryOrigins>, unit_of_uri: HashMap<String, u32>, names: Vec<String>) -> Self {
         let runs = RefCell::new(vec![Vec::new(); names.len()]);
-        Self { origins, unit_of_uri, names, runs }
+        Self { origins, unit_of_uri, names, runs, entries: RefCell::new(Vec::new()) }
+    }
+
+    /// States the number of the static of each entry on the entries of the graph of its unit
+    /// (#852, step 2), which an application selects by. An entry of a key the graph of its unit
+    /// does not list is added to it with everything the unit names, so selecting it keeps what
+    /// it may need.
+    pub(crate) fn record_slots(&self, units: &mut [ThemeUnitModel]) {
+        for (slot, entry) in self.entries.borrow().iter().enumerate() {
+            let Some(unit) = units.get_mut(entry.unit as usize) else { continue };
+            let position = match unit.entries.binary_search_by(|known| known.key.as_str().cmp(&entry.key)) {
+                Ok(position) => position,
+                Err(position) => {
+                    let added = ThemeEntryModel {
+                        key: entry.key.clone(),
+                        references: unit.references.clone(),
+                        slots: Vec::new(),
+                    };
+                    unit.entries.insert(position, added);
+                    position
+                }
+            };
+            unit.entries[position].slots.push(slot as u32);
+        }
     }
 
     /// The unit of the entry `node`: the unit of the document a merge inlined it from.
@@ -191,16 +272,38 @@ impl UnitEmission {
     /// ([`ACTIVE`]), `registered_theme_units` and, in debug builds, `THEME_UNIT_TYPE_KEYS`.
     /// `class` is the full name of the class; `type_keys` are the type keys of each unit, by
     /// its index.
-    pub(crate) fn table(&self, class: &str, type_keys: &[Vec<String>]) -> String {
+    pub(crate) fn table(&self, class: &str, type_keys: &[Vec<String>], text_keys: &[Vec<String>]) -> String {
         let runs = self.runs.borrow();
+        let entries = self.entries.borrow();
         let mut text = String::new();
         for (index, name) in self.names.iter().enumerate() {
             let name_text = name.replace('`', "'").replace(['\r', '\n'], " ");
+            let of_unit: Vec<(usize, &UnitEntry)> =
+                entries.iter().enumerate().filter(|(_, entry)| entry.unit as usize == index).collect();
+            for (slot, entry) in &of_unit {
+                text.push_str(&format!(
+                    "/// A resource of the unit `{name_text}` an application selects by its key (#852).\n\
+                     pub static THEME_ENTRY_{slot}: rt::ThemeEntry = rt::ThemeEntry {{ run: {}, key: {}, build: {}, line: {}, position: {} }};\n\n",
+                    entry.run, entry.literal, entry.build, entry.position.0, entry.position.1
+                ));
+            }
+            let (runs_operand, entries_operand) = match of_unit.is_empty() {
+                true => (format!("&[{}]", runs[index].join(", ")), "&[]".to_string()),
+                false => {
+                    text.push_str(&format!(
+                        "/// The runs of the unit `{name_text}`, for an application that keeps some of its entries (#852).\n\
+                         pub static THEME_UNIT_{index}_RUNS: [rt::ThemeUnitRun; {}] = [{}];\n\n",
+                        runs[index].len(),
+                        runs[index].join(", ")
+                    ));
+                    let named: Vec<String> = of_unit.iter().map(|(slot, _)| format!("&THEME_ENTRY_{slot}")).collect();
+                    (format!("&THEME_UNIT_{index}_RUNS"), format!("&[{}]", named.join(", ")))
+                }
+            };
             text.push_str(&format!("/// The unit `{name_text}` of the theme (#568): its runs, in the order the builds apply them.\n"));
             text.push_str(&format!(
-                "pub static THEME_UNIT_{index}: rt::ThemeUnit = rt::ThemeUnit {{ name: {}, index: {index}, runs: &[{}] }};\n\n",
+                "pub static THEME_UNIT_{index}: rt::ThemeUnit = rt::ThemeUnit {{ name: {}, index: {index}, runs: {runs_operand}, entries: {entries_operand} }};\n\n",
                 super::rust_string_literal(name),
-                runs[index].join(", ")
             ));
         }
         text.push_str("/// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors\n");
@@ -237,6 +340,37 @@ impl UnitEmission {
         text.push_str("    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n");
         text.push_str("}\n");
         text.push('\n');
+        // What a lookup that misses reports in a debug build (#852, step 2).
+        let table_of = |of_unit: &dyn Fn(usize) -> Vec<String>| -> String {
+            let units: Vec<String> = (0..self.names.len())
+                .map(|index| {
+                    let names: Vec<String> = of_unit(index).iter().map(|key| super::rust_string_literal(key)).collect();
+                    format!("&[{}]", names.join(", "))
+                })
+                .collect();
+            units.join(", ")
+        };
+        let of_text = |index: usize| text_keys.get(index).cloned().unwrap_or_default();
+        let of_entries = |index: usize| -> Vec<String> {
+            let mut keys: Vec<String> =
+                entries.iter().filter(|entry| entry.unit as usize == index).map(|entry| entry.key.clone()).collect();
+            keys.sort();
+            keys.dedup();
+            keys
+        };
+        text.push_str("/// The text keys of each unit, by its index: the names of the diagnostic of a trimmed resource\n");
+        text.push_str("/// (#852). Debug builds only: release builds carry no names.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str(&format!("pub static THEME_UNIT_TEXT_KEYS: &[&[&str]] = &[{}];\n\n", table_of(&of_text)));
+        text.push_str("/// The keys of each unit an application selects by key (#852). Debug builds only.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str(&format!("pub static THEME_UNIT_ENTRY_KEYS: &[&[&str]] = &[{}];\n\n", table_of(&of_entries)));
+        text.push_str("/// What the table `parts` leaves out of the theme, for the diagnostic of a lookup that misses\n");
+        text.push_str("/// it (#852). Debug builds only.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str("pub fn trimmed_theme_keys(parts: rt::ThemeParts) -> rt::TrimmedKeys {\n");
+        text.push_str("    rt::trimmed_keys(THEME_UNIT_TYPE_KEYS, THEME_UNIT_TEXT_KEYS, THEME_UNIT_ENTRY_KEYS, parts)\n");
+        text.push_str("}\n\n");
         text.push_str("/// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control\n");
         text.push_str("/// theme (#568, step 3). Debug builds only: release builds carry no names.\n");
         text.push_str("#[cfg(debug_assertions)]\n");
@@ -474,13 +608,29 @@ impl Extractor<'_> {
         let Some(run) = self.run.take() else { return };
         let function = format!("{}_unit_{}", self.function_name, self.functions.len());
         let schedule = self.bytecode.as_ref().and_then(|config| bytecode::compile(&run.lines, &run.dictionary, config));
-        let uses_context = schedule.is_some() || run
-            .lines
-            .iter()
-            .map(|line| line.trim_start())
-            .filter(|text| !text.starts_with("//"))
-            .any(|text| identifiers(text).iter().any(|name| name == "context"));
-        let unit_name = self.units.names.get(run.unit as usize).map_or("", String::as_str).replace('`', "'").replace(['\r', '\n'], " ");
+        let index = self.units.push_run(run.unit, function.clone());
+        // The deferred resources an application selects by key (#852, step 2) leave the run.
+        let Run { unit, dictionary, lines } = run;
+        let lines = match schedule.is_none() && self.bytecode.is_none() && ThemeUnitPlan::current().entries() {
+            true => {
+                let (kept, found) = selectable_entries(lines, &dictionary);
+                let mut entries = self.units.entries.borrow_mut();
+                entries.extend(found.into_iter().map(|(key, literal, build, position)| UnitEntry {
+                    unit,
+                    run: index,
+                    key,
+                    literal,
+                    build,
+                    position,
+                }));
+                kept
+            }
+            false => lines,
+        };
+        let code = || lines.iter().map(|line| line.trim_start()).filter(|text| !text.starts_with("//"));
+        let uses_context = schedule.is_some() || code().any(|text| identifiers(text).iter().any(|name| name == "context"));
+        let uses_dictionary = schedule.is_some() || code().next().is_some();
+        let unit_name = self.units.names.get(unit as usize).map_or("", String::as_str).replace('`', "'").replace(['\r', '\n'], " ");
         let mut text = String::new();
         text.push_str(&format!(
             "/// Run {} of `{}` (`{}`): entries of the unit `{unit_name}` (#568).\n",
@@ -493,7 +643,7 @@ impl Extractor<'_> {
             "    {}: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,\n",
             if uses_context { "context" } else { "_context" }
         ));
-        text.push_str(&format!("    dictionary: &{},\n", self.dictionary_type));
+        text.push_str(&format!("    {}: &{},\n", if uses_dictionary { "dictionary" } else { "_dictionary" }, self.dictionary_type));
         text.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
         if let Some(schedule) = schedule {
             text.push_str(&schedule);
@@ -501,8 +651,10 @@ impl Extractor<'_> {
             if uses_context {
                 text.push_str("    let context = ::core::clone::Clone::clone(context);\n");
             }
-            text.push_str(&format!("    let {} = ::core::clone::Clone::clone(dictionary);\n", run.dictionary));
-            for line in &run.lines {
+            if uses_dictionary {
+                text.push_str(&format!("    let {dictionary} = ::core::clone::Clone::clone(dictionary);\n"));
+            }
+            for line in &lines {
                 text.push_str(line);
                 text.push('\n');
             }
@@ -510,9 +662,8 @@ impl Extractor<'_> {
         }
         text.push_str("}\n");
         self.functions.push(text);
-        let index = self.units.push_run(run.unit, function);
-        self.calls.push(Call { line: self.body.len(), unit: run.unit, run: index, dictionary: run.dictionary.clone() });
-        self.body.push(format!("    rt::apply_theme_unit({ACTIVE}(), {}, {index}, &context, &{})?;", run.unit, run.dictionary));
+        self.calls.push(Call { line: self.body.len(), unit, run: index, dictionary: dictionary.clone() });
+        self.body.push(format!("    rt::apply_theme_unit({ACTIVE}(), {unit}, {index}, &context, &{dictionary})?;"));
     }
 
     fn finish(mut self) -> (Vec<String>, Vec<String>) {

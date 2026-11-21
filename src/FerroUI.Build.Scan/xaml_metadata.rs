@@ -135,6 +135,9 @@ pub struct ThemeEntryModel {
     pub key: String,
     /// The keys of the group the entries name.
     pub references: Vec<String>,
+    /// The numbers of the statics (`THEME_ENTRY_<n>`) of the entries of the key an application
+    /// selects; empty when the entries of the key stay in the runs of the unit.
+    pub slots: Vec<u32>,
 }
 
 /// A name of the compact form of the entry graph of a unit in a `.xamlmeta` (#852, step 2): its
@@ -184,23 +187,52 @@ impl ThemeUnitModel {
             .collect()
     }
 
+    /// The entries with statics, each as its key and the numbers of its statics.
+    pub(crate) fn slot_rows(&self) -> Vec<Vec<IndexedName>> {
+        self.entries
+            .iter()
+            .filter(|entry| !entry.slots.is_empty())
+            .map(|entry| {
+                std::iter::once(IndexedName::of(&self.keys, &entry.key))
+                    .chain(entry.slots.iter().map(|slot| IndexedName::Index(*slot)))
+                    .collect()
+            })
+            .collect()
+    }
+
     /// What the rest of the unit names, in the compact form.
     pub(crate) fn body_row(&self) -> Vec<IndexedName> {
         self.body_references.iter().map(|name| IndexedName::of(&self.references, name)).collect()
     }
 
     /// Reads the entry graph back from its compact form: an entry for each key of the unit, with
-    /// what `rows` says it names.
-    pub(crate) fn read_entry_graph(&mut self, rows: Vec<Vec<IndexedName>>, body: Vec<IndexedName>) -> Result<(), String> {
-        let mut entries: std::collections::BTreeMap<String, Vec<String>> =
-            self.keys.iter().map(|key| (key.clone(), Vec::new())).collect();
+    /// what `rows` says it names and the statics `slot_rows` gives it.
+    pub(crate) fn read_entry_graph(
+        &mut self,
+        rows: Vec<Vec<IndexedName>>,
+        body: Vec<IndexedName>,
+        slot_rows: Vec<Vec<IndexedName>>,
+    ) -> Result<(), String> {
+        let mut entries: std::collections::BTreeMap<String, ThemeEntryModel> =
+            self.keys.iter().map(|key| (key.clone(), ThemeEntryModel { key: key.clone(), ..ThemeEntryModel::default() })).collect();
         for row in rows {
             let mut row = row.into_iter();
             let key = row.next().ok_or("an empty row of the entry graph of a unit")?.resolve(&self.keys)?;
             let references = row.map(|name| name.resolve(&self.references)).collect::<Result<Vec<_>, _>>()?;
-            entries.insert(key, references);
+            entries.entry(key.clone()).or_insert_with(|| ThemeEntryModel { key, ..ThemeEntryModel::default() }).references = references;
         }
-        self.entries = entries.into_iter().map(|(key, references)| ThemeEntryModel { key, references }).collect();
+        for row in slot_rows {
+            let mut row = row.into_iter();
+            let key = row.next().ok_or("an empty row of the statics of a unit")?.resolve(&self.keys)?;
+            let slots = row
+                .map(|slot| match slot {
+                    IndexedName::Index(slot) => Ok(slot),
+                    IndexedName::Name(_) => Err("a static of an entry is not a number".to_string()),
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            entries.entry(key.clone()).or_insert_with(|| ThemeEntryModel { key, ..ThemeEntryModel::default() }).slots = slots;
+        }
+        self.entries = entries.into_values().collect();
         self.body_references = body.into_iter().map(|name| name.resolve(&self.references)).collect::<Result<_, _>>()?;
         Ok(())
     }
@@ -458,7 +490,12 @@ fn write_theme_units(text: &mut String, units: &ThemeUnitsModel) {
                 text.push_str(&format!("          \"types\": {},\n", list(&unit.types)));
                 let rows: Vec<String> = unit.entry_rows().iter().map(|names| row(names)).collect();
                 text.push_str(&format!("          \"entry_references\": [{}],\n", rows.join(", ")));
-                text.push_str(&format!("          \"body_references\": {}\n", row(&unit.body_row())));
+                text.push_str(&format!("          \"body_references\": {}", row(&unit.body_row())));
+                let slots: Vec<String> = unit.slot_rows().iter().map(|names| row(names)).collect();
+                if !slots.is_empty() {
+                    text.push_str(&format!(",\n          \"entry_slots\": [{}]", slots.join(", ")));
+                }
+                text.push('\n');
             }
         }
         text.push_str("        }");
@@ -501,7 +538,11 @@ fn read_theme_units(value: &JsonValue) -> Result<ThemeUnitsModel, String> {
                 };
                 let rows = rows.array("entry_references")?.iter().map(names).collect::<Result<Vec<_>, String>>()?;
                 let body = names(field(unit, "body_references")?)?;
-                read.read_entry_graph(rows, body)?;
+                let slots = match unit.iter().find(|(key, _)| key == "entry_slots") {
+                    Some((_, slots)) => slots.array("entry_slots")?.iter().map(names).collect::<Result<Vec<_>, String>>()?,
+                    None => Vec::new(),
+                };
+                read.read_entry_graph(rows, body, slots)?;
             }
             Ok(read)
         })
@@ -881,7 +922,7 @@ mod tests {
                     keys: vec!["Accent".to_string(), "AccentBrush".to_string()],
                     entries: vec![
                         ThemeEntryModel { key: "Accent".to_string(), ..ThemeEntryModel::default() },
-                        ThemeEntryModel { key: "AccentBrush".to_string(), references: vec!["Accent".to_string()] },
+                        ThemeEntryModel { key: "AccentBrush".to_string(), references: vec!["Accent".to_string()], slots: vec![3, 7] },
                     ],
                     references: vec!["Accent".to_string(), "Other".to_string()],
                     body_references: vec!["Other".to_string()],
@@ -902,6 +943,7 @@ mod tests {
         // The names are indices in the lists of the unit.
         assert!(text.contains("\"entry_references\": [[1, 0]],"), "{text}");
         assert!(text.contains("\"body_references\": [1]"), "{text}");
+        assert!(text.contains("\"entry_slots\": [[1, 3, 7]]"), "{text}");
         let model = crate::model::AssemblyModel::from_metadata(metadata.clone());
         assert_eq!(crate::model::AssemblyModel::parse(&model.to_json()).map(|read| read.theme_units), Ok(metadata.theme_units));
     }
