@@ -356,19 +356,20 @@ impl BindingTarget {
     }
 }
 
-/// Target events and the lifetime of the target subscription do not depend on
-/// the model or its property's Rust type. Dispatch back to the concrete
-/// expression only when an operation needs the typed source or payload.
+/// The cold operations of a binding (start, stop, disposal, errors) do not depend on the model
+/// or its property's Rust type, and are shared. They call back to the concrete expression only
+/// for what needs the typed source or payload. Producing a value is not among them: that path
+/// runs for every update and stays typed in the expression, from the change notification to
+/// the sink.
 trait BindingHost: BindingExpressionBase {
-    fn controller(&self) -> &BindingController;
+    fn expression(&self) -> Option<Rc<dyn BindingExpressionBase>>;
+    fn subscribe_target(&self, target: &FerroObject) -> Subscription;
     fn refresh_source(&self, data_context: Option<BoxedValue>);
     fn disconnect_source(&self);
-    fn source_changed(&self, name: &str);
     fn write_target_change(&self, change: &crate::FerroPropertyChangedEventArgs<'_>);
 }
 
 struct BindingController {
-    this: Weak<dyn BindingHost>,
     target: BindingTarget,
     mode: BindingMode,
     default_priority: BindingPriority,
@@ -383,24 +384,9 @@ struct BindingController {
 }
 
 impl BindingController {
-    fn subscribe_source(&self, inpc: &dyn INotifyPropertyChanged) -> u64 {
-        let weak = self.this.clone();
-        inpc.property_changed().add(Rc::new(move |name| {
-            if let Some(host) = weak.upgrade() {
-                host.source_changed(name);
-            }
-        }))
-    }
-
     fn start_core(&self, host: &dyn BindingHost) {
         let (Some(target), Some(_)) = (self.target.owner(), self.target.property.get()) else { return };
-        let weak = self.this.clone();
-        let subscription = target.property_changed(move |e| {
-            if let Some(this) = weak.upgrade() {
-                this.controller().on_target_property_changed(&*this, e);
-            }
-        });
-        self.target_subscription.replace(Some(Subscription::new(subscription)));
+        self.target_subscription.replace(Some(host.subscribe_target(&target)));
         let data_context = target.downcast_ref::<StyledElement>().and_then(|e| e.data_context());
         host.refresh_source(data_context);
     }
@@ -417,31 +403,12 @@ impl BindingController {
         }
     }
 
-    fn publish_value(&self) {
-        crate::perf_count!(BindingValuesPublished);
-        #[cfg(all(debug_assertions, feature = "hot-reload"))]
-        if self.reload_paused.get() {
-            self.reload_pending.set(true);
-            return;
-        }
-        self.publish_value_now();
-    }
-
-    fn publish_value_now(&self) {
-        // Flag that the source value is being pushed to the target so that
-        // the resulting change notification isn't echoed straight back to the
-        // source in two-way mode.
-        let sink = self.target.sink.borrow().clone();
-        let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
-        let this: Rc<dyn BindingExpressionBase> = this;
-        self.target.publish(sink, this);
-    }
-
+    /// Runs for every change of a property of the target: inlined into the typed handler, where
+    /// the host is known and the call back to it is direct.
+    #[inline]
     fn on_target_property_changed(&self, host: &dyn BindingHost, e: &crate::FerroPropertyChangedEventArgs<'_>) {
         if e.property().id() == StyledElement::data_context_property().id() {
-            let data_context =
-                self.target.owner().and_then(|t| t.downcast_ref::<StyledElement>().and_then(|e| e.data_context()));
-            host.refresh_source(data_context);
+            self.data_context_changed(host);
         } else if self.target.property.get().is_some_and(|p| p.id() == e.property().id()) {
             // Don't write back to the source if this change is the binding
             // pushing the source value to the target.
@@ -451,6 +418,18 @@ impl BindingController {
                 host.write_target_change(e);
             }
         }
+    }
+
+    #[inline(never)]
+    fn data_context_changed(&self, host: &dyn BindingHost) {
+        let data_context =
+            self.target.owner().and_then(|t| t.downcast_ref::<StyledElement>().and_then(|e| e.data_context()));
+        host.refresh_source(data_context);
+    }
+
+    #[cold]
+    fn log_get_error(&self, name: &str, error: &BindingError) {
+        self.target.log(name, &format!("Error getting '{}': {}", name, error));
     }
 
     fn dispose(&self, host: &dyn BindingHost) {
@@ -463,34 +442,18 @@ impl BindingController {
         let frame = self.target.frame.borrow_mut().take();
         self.stop_core(host);
         self.is_running.set(false);
-        let this = self.this.upgrade().map(|this| this as Rc<dyn BindingExpressionBase>);
+        let this = host.expression();
         self.target.complete(sink, this, frame);
     }
 
-    fn start(&self, host: &dyn BindingHost, produce_value: bool) {
-        if self.is_running.get() {
-            return;
-        }
+    /// Starts a stopped expression. The check that it is running stays in the expression: every
+    /// read of the value makes it.
+    #[inline(never)]
+    fn start_stopped(&self, host: &dyn BindingHost, produce_value: bool) {
         self.is_running.set(true);
         self.produce_value.set(produce_value);
         self.start_core(host);
         self.produce_value.set(true);
-    }
-
-    fn source_value_changed(&self, had_value: bool, has_value: bool) {
-        if self.produce_value.get() && self.mode != BindingMode::OneWayToSource {
-            // An expression which has no value, and had no value before, must
-            // not notify: doing so would push the target property's default
-            // value, overriding values from styles or property inheritance.
-            // Otherwise always notify, even if the value is unchanged, as the
-            // target may hold an uncommitted value.
-            if had_value || has_value {
-                self.publish_value();
-            }
-            if self.mode == BindingMode::OneTime {
-                self.should_update_one_time_binding_target.set(false);
-            }
-        }
     }
 }
 
@@ -523,6 +486,7 @@ impl<TSource: 'static> SourceSlot<TSource> {
         name: &str,
         notifier: Option<fn(&TSource) -> &dyn INotifyPropertyChanged>,
         data_context: Option<&BoxedValue>,
+        subscribe: &dyn Fn(&dyn INotifyPropertyChanged) -> u64,
     ) -> Option<Rc<TSource>> {
         let source = data_context.and_then(owner_of::<TSource>);
         if let (Some(d), None) = (data_context, &source) {
@@ -539,8 +503,7 @@ impl<TSource: 'static> SourceSlot<TSource> {
 
         if let Some(source) = &source {
             if let Some(inpc) = notifier.map(|f| f(source)) {
-                let token = controller.subscribe_source(inpc);
-                self.token.set(Some(token));
+                self.token.set(Some(subscribe(inpc)));
             }
         }
 
@@ -553,20 +516,7 @@ impl<TSource: 'static> SourceSlot<TSource> {
 struct TypedValueSlot<TValue>(RefCell<Option<TValue>>);
 
 impl<TValue: PropertyValue> TypedValueSlot<TValue> {
-    fn update(&self, controller: &BindingController, name: &str, value: Option<Result<TValue, BindingError>>) {
-        let value = match value {
-            Some(Ok(value)) => Some(value),
-            Some(Err(error)) => {
-                controller.target.log(name, &format!("Error getting '{}': {}", name, error));
-                None
-            }
-            None => None,
-        };
-        let had_value = self.0.replace(value).is_some();
-        let has_value = self.0.borrow().is_some();
-        controller.source_value_changed(had_value, has_value);
-    }
-
+    #[inline]
     fn try_get_value(&self, target: &BindingTarget, out: &mut dyn Any) -> bool {
         // A value that has to be cast to the type of the target property is
         // read through `get_value_boxed`.
@@ -615,6 +565,7 @@ impl<TValue: PropertyValue> TypedValueSlot<TValue> {
 /// per update; otherwise the value is cast to the type of the target property
 /// (see [`ValueTypes::is_assignable`]).
 pub struct TypedBindingExpression<TSource: PartialEq + 'static, TValue: PropertyValue> {
+    this: Weak<Self>,
     property_info: Rc<TypedClrPropertyInfo<TSource, TValue>>,
     controller: BindingController,
     source: SourceSlot<TSource>,
@@ -629,9 +580,9 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     ) -> Rc<Self> {
         crate::perf_count!(BindingExpressionsCreated);
         Rc::new_cyclic(|this: &Weak<Self>| Self {
+            this: this.clone(),
             property_info,
             controller: BindingController {
-                this: this.clone(),
                 mode,
                 default_priority,
                 target: BindingTarget::new(default_priority),
@@ -655,8 +606,20 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     }
 
     fn update_source(&self, data_context: Option<BoxedValue>) {
+        let subscribe = |inpc: &dyn INotifyPropertyChanged| {
+            let weak = self.this.clone();
+            inpc.property_changed().add(Rc::new(move |name: &str| {
+                if let Some(this) = weak.upgrade() {
+                    this.on_source_changed(name);
+                }
+            }))
+        };
         let source = self.source.replace(
-            &self.controller, self.property_info.name(), self.property_info.inpc, data_context.as_ref(),
+            &self.controller,
+            self.property_info.name(),
+            self.property_info.inpc,
+            data_context.as_ref(),
+            &subscribe,
         );
         if self.controller.mode == BindingMode::OneWayToSource {
             if let Some(value) = TypedValueSlot::<TValue>::try_get_target_value(&self.controller.target) {
@@ -679,18 +642,87 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         }
     }
 
+    fn on_source_changed(&self, name: &str) {
+        // An empty name means "all properties changed".
+        if name.is_empty() || name == self.property_info.name() {
+            let source = self.source.get();
+            if source.is_some() {
+                self.write_source_value_to_target(source.as_ref());
+            }
+        }
+    }
+
     fn write_source_value_to_target(&self, source: Option<&Rc<TSource>>) {
-        if self.controller.mode == BindingMode::OneTime && !self.controller.should_update_one_time_binding_target.get() {
+        let controller = &self.controller;
+        if controller.mode == BindingMode::OneTime && !controller.should_update_one_time_binding_target.get() {
             return;
         }
-        let value = source.map(|owner| self.property_info.try_get_from(owner));
-        self.source_value.update(&self.controller, self.property_info.name(), value);
+        let new_value = match source {
+            None => None,
+            Some(source) => match self.property_info.try_get_from(source) {
+                Ok(value) => Some(value),
+                Err(error) => {
+                    // Getter failures must not escape into the source's
+                    // change notification: the error is logged and the value
+                    // cleared, as the untyped binding path does.
+                    controller.log_get_error(self.property_info.name(), &error);
+                    None
+                }
+            },
+        };
+        let had_value = self.source_value.0.replace(new_value).is_some();
+        let has_value = self.source_value.0.borrow().is_some();
+
+        if controller.produce_value.get() && controller.mode != BindingMode::OneWayToSource {
+            // An expression which has no value, and had no value before, must
+            // not notify: doing so would push the target property's default
+            // value, overriding values from styles or property inheritance.
+            // Otherwise always notify, even if the value is unchanged, as the
+            // target may hold an uncommitted value.
+            if had_value || has_value {
+                self.publish_value();
+            }
+            if controller.mode == BindingMode::OneTime {
+                controller.should_update_one_time_binding_target.set(false);
+            }
+        }
+    }
+
+    #[inline]
+    fn publish_value(&self) {
+        crate::perf_count!(BindingValuesPublished);
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.controller.reload_paused.get() {
+            self.controller.reload_pending.set(true);
+            return;
+        }
+        self.publish_value_now();
+    }
+
+    #[inline]
+    fn publish_value_now(&self) {
+        // Flag that the source value is being pushed to the target so that
+        // the resulting change notification isn't echoed straight back to the
+        // source in two-way mode.
+        let sink = self.controller.target.sink.borrow().clone();
+        let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
+        let this: Rc<dyn BindingExpressionBase> = this;
+        self.controller.target.publish(sink, this);
     }
 }
 
 impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingHost for TypedBindingExpression<TSource, TValue> {
-    fn controller(&self) -> &BindingController {
-        &self.controller
+    fn expression(&self) -> Option<Rc<dyn BindingExpressionBase>> {
+        self.this.upgrade().map(|this| this as Rc<dyn BindingExpressionBase>)
+    }
+
+    fn subscribe_target(&self, target: &FerroObject) -> Subscription {
+        let weak = self.this.clone();
+        Subscription::new(target.property_changed(move |e| {
+            if let Some(this) = weak.upgrade() {
+                this.controller.on_target_property_changed(&*this, e);
+            }
+        }))
     }
 
     fn refresh_source(&self, data_context: Option<BoxedValue>) {
@@ -699,15 +731,6 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingHost for TypedB
 
     fn disconnect_source(&self) {
         self.source.unsubscribe(self.property_info.inpc);
-    }
-
-    fn source_changed(&self, name: &str) {
-        if name.is_empty() || name == self.property_info.name() {
-            let source = self.source.get();
-            if source.is_some() {
-                self.write_source_value_to_target(source.as_ref());
-            }
-        }
     }
 
     fn write_target_change(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) {
@@ -809,7 +832,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
         }
         let _resume = Resume(&self.controller.reload_paused);
         while self.controller.reload_pending.replace(false) {
-            self.controller.publish_value_now();
+            self.publish_value_now();
         }
     }
 
@@ -824,8 +847,11 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
         self.controller.target.attach(ValueType::of::<TValue>(), sink, frame, target, target_property, priority);
     }
 
+    #[inline]
     fn start(&self, produce_value: bool) {
-        self.controller.start(self, produce_value);
+        if !self.controller.is_running.get() {
+            self.controller.start_stopped(self, produce_value);
+        }
     }
 
     fn as_any(&self) -> &dyn Any {
