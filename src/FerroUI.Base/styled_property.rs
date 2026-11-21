@@ -8,7 +8,8 @@ use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
     BoxedValue, ObjectType, DoNothingType, FerroObject, FerroProperty, FerroPropertyMetadata,
-    FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, StyledValue, TypeInfo, UnsetValueType,
+    EnumValue, FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, StyledValue, TypeInfo,
+    UnsetValueType,
 };
 use std::any::{Any, TypeId};
 use std::cell::{OnceCell, RefCell};
@@ -312,7 +313,11 @@ pub(crate) trait StyledCodec {
         o: &FerroObject,
         value: &dyn Any,
         priority: BindingPriority,
-    ) -> Option<Option<Rc<dyn IDisposable>>>;
+    ) -> Option<Rc<dyn IDisposable>>;
+    /// `value`, of the value type, as the [`EnumValue`] the store keeps it as; `None` for a value
+    /// type that is not kept as one (decided when the function is compiled) and for a value of
+    /// another type. One check of the type, where `copy_value` has two.
+    fn enum_storage(&'static self, value: &dyn Any) -> Option<EnumValue>;
     /// The current value from `value`, a value of the value type; whether it was one.
     fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool;
     /// The value of the property on `o` in a box of its own.
@@ -356,9 +361,19 @@ impl<T: StyledValue> StyledCodec for StyledProperty<T> {
         o: &FerroObject,
         value: &dyn Any,
         priority: BindingPriority,
-    ) -> Option<Option<Rc<dyn IDisposable>>> {
-        let value = value.downcast_ref::<T>()?;
-        Some(o.set_value_with_priority(self, value.clone(), priority))
+    ) -> Option<Rc<dyn IDisposable>> {
+        match value.downcast_ref::<T>() {
+            Some(value) => o.set_value_with_priority(self, value.clone(), priority),
+            None => set_other_styled_value(&self.base, self, o, value, priority),
+        }
+    }
+
+    fn enum_storage(&'static self, value: &dyn Any) -> Option<EnumValue> {
+        if TypeId::of::<T::Storage>() != TypeId::of::<EnumValue>() {
+            return None;
+        }
+        let stored = value.downcast_ref::<T>()?.clone().into_storage();
+        (&stored as &dyn Any).downcast_ref::<EnumValue>().cloned()
     }
 
     fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool {
@@ -526,7 +541,7 @@ impl PropertyRoutes for StyledRoutes {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        set_styled_value(self.property(), self.codec(), o, value, priority)
+        self.codec().set_value(o, value, priority)
     }
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
@@ -608,27 +623,9 @@ impl PropertyRoutes for StyledRoutes {
     }
 }
 
-/// The untyped write of a styled property: the route, and `FerroObject::set_value_untyped`
-/// directly (one call through a vtable, the codec's, as the typed route of a value type was).
-#[inline]
-pub(crate) fn set_styled_value(
-    property: &'static FerroProperty,
-    codec: &'static dyn StyledCodec,
-    o: &FerroObject,
-    value: &dyn Any,
-    priority: BindingPriority,
-) -> Option<Rc<dyn IDisposable>> {
-    // The type of the value, asked once: a value of the value type is the common case.
-    if value.type_id() == property.property_type() {
-        return match codec.set_value(o, value, priority) {
-            Some(result) => result,
-            None => property.invalid_value_type(),
-        };
-    }
-    set_other_styled_value(property, codec, o, value, priority)
-}
-
-/// [`set_styled_value`] of a marker or of a value of another type, which is converted.
+/// The untyped write of a value that is not of the value type: a marker, or a value to convert.
+/// Compiled once, and out of the way of the write of a value of the value type.
+#[cold]
 #[inline(never)]
 fn set_other_styled_value(
     property: &'static FerroProperty,
@@ -648,7 +645,7 @@ fn set_other_styled_value(
         return None;
     }
     let converted = converted_value(property, codec, value);
-    set_styled_value(property, codec, o, converted.as_any(), priority)
+    codec.set_value(o, converted.as_any(), priority)
 }
 
 /// [`StyledRoutes::converted`] of `property`.
