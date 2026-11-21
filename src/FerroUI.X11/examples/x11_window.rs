@@ -295,7 +295,7 @@ mod app {
     /// is known.
     mod ibus_double {
         use std::sync::{Arc, Mutex, OnceLock};
-        use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
+        use zbus::{ObjectPath, OwnedObjectPath, Structure, Variant};
 
         pub const NAME: &str = "org.freedesktop.portal.IBus";
         const CONTEXT_PATH: &str = "/org/freedesktop/IBus/InputContext_1";
@@ -339,12 +339,12 @@ mod app {
                 }
                 if state & RELEASE_MASK == 0 {
                     // An IBusText: (sa{sv}sv), the text is its third member.
-                    let attachments: std::collections::HashMap<String, Value<'static>> = Default::default();
-                    let text = Value::Structure(Structure::from((
+                    let attachments: std::collections::HashMap<String, Variant<'static>> = Default::default();
+                    let text = Variant::Structure(Structure::from((
                         "IBusText".to_string(),
                         attachments,
                         COMMITTED_TEXT.to_string(),
-                        Value::from(0u32),
+                        Variant::from(0u32),
                     )));
                     let _ = connection
                         .emit_signal(Option::<&str>::None, CONTEXT_PATH, CONTEXT_INTERFACE, "CommitText", &(text,))
@@ -394,7 +394,7 @@ mod app {
         }
 
         struct Double {
-            _connection: zbus::blocking::Connection,
+            _connection: zbus::Connection,
             log: Log,
         }
 
@@ -405,13 +405,12 @@ mod app {
             DOUBLE
                 .get_or_init(|| {
                     let log: Log = Arc::default();
-                    let connection = zbus::blocking::connection::Builder::session()
-                        .and_then(|builder| builder.serve_at("/org/freedesktop/IBus", Portal { log: log.clone() }))
-                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Context { log: log.clone() }))
-                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Service { log: log.clone() }))
-                        .and_then(|builder| builder.name(NAME))
-                        .and_then(|builder| builder.build())
-                        .map_err(|error| error.to_string())?;
+                    let builder = zbus::connection::Builder::session()
+                        .serve_at("/org/freedesktop/IBus", Portal { log: log.clone() })
+                        .serve_at(CONTEXT_PATH, Context { log: log.clone() })
+                        .serve_at(CONTEXT_PATH, Service { log: log.clone() })
+                        .name(NAME);
+                    let connection = zbus::block_on(builder.build()).map_err(|error| error.to_string())?;
                     Ok(Double { _connection: connection, log })
                 })
                 .as_ref()
@@ -436,7 +435,7 @@ mod app {
     mod desktop_double {
         use std::collections::HashMap;
         use std::sync::{Arc, Mutex, OnceLock};
-        use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
+        use zbus::{OwnedObjectPath, OwnedVariant, Variant};
 
         pub const REGISTRAR_NAME: &str = "com.canonical.AppMenu.Registrar";
         pub const WATCHER_NAME: &str = "org.kde.StatusNotifierWatcher";
@@ -490,7 +489,7 @@ mod app {
         }
 
         struct Double {
-            connection: zbus::blocking::Connection,
+            connection: zbus::Connection,
             state: Shared,
         }
 
@@ -502,15 +501,12 @@ mod app {
             DOUBLE
                 .get_or_init(|| {
                     let state: Shared = Arc::default();
-                    let connection = zbus::blocking::connection::Builder::session()
-                        .and_then(|builder| {
-                            builder.serve_at("/com/canonical/AppMenu/Registrar", Registrar { state: state.clone() })
-                        })
-                        .and_then(|builder| builder.serve_at("/StatusNotifierWatcher", Watcher { state: state.clone() }))
-                        .and_then(|builder| builder.name(REGISTRAR_NAME))
-                        .and_then(|builder| builder.name(WATCHER_NAME))
-                        .and_then(|builder| builder.build())
-                        .map_err(|error| error.to_string())?;
+                    let builder = zbus::connection::Builder::session()
+                        .serve_at("/com/canonical/AppMenu/Registrar", Registrar { state: state.clone() })
+                        .serve_at("/StatusNotifierWatcher", Watcher { state: state.clone() })
+                        .name(REGISTRAR_NAME)
+                        .name(WATCHER_NAME);
+                    let connection = zbus::block_on(builder.build()).map_err(|error| error.to_string())?;
                     Ok(Double { connection, state })
                 })
                 .as_ref()
@@ -540,7 +536,7 @@ mod app {
         /// its own: the application answers from its UI thread, which has
         /// to go on running meanwhile.
         pub fn ask<T: Send + 'static>(
-            call: impl FnOnce(&zbus::blocking::Connection) -> T + Send + 'static,
+            call: impl FnOnce(&zbus::Connection) -> T + Send + 'static,
         ) -> Answer<T> {
             let answer: Answer<T> = Arc::default();
             if let Some(double) = double() {
@@ -554,20 +550,20 @@ mod app {
         }
 
         /// A value as text: variants unwrapped, a dictionary sorted by key.
-        pub fn show(value: &Value<'_>) -> String {
+        pub fn show(value: &Variant<'_>) -> String {
             match value {
-                Value::Value(inner) => show(inner),
-                Value::Str(text) => text.to_string(),
-                Value::ObjectPath(path) => path.to_string(),
-                Value::Bool(flag) => flag.to_string(),
-                Value::U8(number) => number.to_string(),
-                Value::I32(number) => number.to_string(),
-                Value::U32(number) => number.to_string(),
-                Value::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
-                Value::Structure(fields) => {
+                Variant::Variant(inner) => show(inner),
+                Variant::Str(text) => text.to_string(),
+                Variant::ObjectPath(path) => path.to_string(),
+                Variant::Bool(flag) => flag.to_string(),
+                Variant::U8(number) => number.to_string(),
+                Variant::I32(number) => number.to_string(),
+                Variant::U32(number) => number.to_string(),
+                Variant::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
+                Variant::Structure(fields) => {
                     format!("({})", fields.fields().iter().map(show).collect::<Vec<_>>().join(","))
                 }
-                Value::Dict(entries) => {
+                Variant::Dict(entries) => {
                     let mut entries: Vec<String> =
                         entries.iter().map(|(key, value)| format!("{}={}", show(key), show(value))).collect();
                     entries.sort();
@@ -578,12 +574,11 @@ mod app {
         }
 
         /// `GetLayout` of the whole menu at `path` of `destination`, as text.
-        pub fn layout(connection: &zbus::blocking::Connection, destination: &str, path: &str) -> Result<String, String> {
+        pub fn layout(connection: &zbus::Connection, destination: &str, path: &str) -> Result<String, String> {
             let body = (0i32, -1i32, Vec::<String>::new());
-            let reply = connection
-                .call_method(Some(destination), path, Some(MENU_INTERFACE), "GetLayout", &body)
-                .map_err(|error| error.to_string())?;
-            let (_, (id, properties, children)): (u32, (i32, HashMap<String, OwnedValue>, Vec<OwnedValue>)) =
+            let call = connection.call_method(Some(destination), path, Some(MENU_INTERFACE), "GetLayout", &body);
+            let reply = zbus::block_on(call).map_err(|error| error.to_string())?;
+            let (_, (id, properties, children)): (u32, (i32, HashMap<String, OwnedVariant>, Vec<OwnedVariant>)) =
                 reply.body().deserialize().map_err(|error| error.to_string())?;
             let mut entries: Vec<String> = properties.iter().map(|(key, value)| format!("{key}={}", show(value))).collect();
             entries.sort();
@@ -592,28 +587,30 @@ mod app {
         }
 
         /// The event "clicked" for the item `id` of that menu.
-        pub fn click(connection: &zbus::blocking::Connection, destination: &str, path: &str, id: i32) -> Result<(), String> {
-            let body = (id, "clicked", Value::I32(0), 0u32);
-            connection
-                .call_method(Some(destination), path, Some(MENU_INTERFACE), "Event", &body)
+        pub fn click(connection: &zbus::Connection, destination: &str, path: &str, id: i32) -> Result<(), String> {
+            let body = (id, "clicked", Variant::I32(0), 0u32);
+            zbus::block_on(connection.call_method(Some(destination), path, Some(MENU_INTERFACE), "Event", &body))
                 .map(|_| ())
                 .map_err(|error| error.to_string())
         }
 
         /// A property of the item of `destination`, as text.
-        pub fn item_property(connection: &zbus::blocking::Connection, destination: &str, name: &str) -> Result<String, String> {
-            let reply = connection
-                .call_method(Some(destination), ITEM_PATH, Some("org.freedesktop.DBus.Properties"), "Get", &(ITEM_INTERFACE, name))
+        pub fn item_property(connection: &zbus::Connection, destination: &str, name: &str) -> Result<String, String> {
+            let body = (ITEM_INTERFACE, name);
+            let properties = Some("org.freedesktop.DBus.Properties");
+            let reply = zbus::block_on(connection.call_method(Some(destination), ITEM_PATH, properties, "Get", &body))
                 .map_err(|error| error.to_string())?;
-            let value: OwnedValue = reply.body().deserialize().map_err(|error| error.to_string())?;
+            let value: OwnedVariant = reply.body().deserialize().map_err(|error| error.to_string())?;
             Ok(show(&value))
         }
 
         /// Whether somebody owns `name` on the bus.
-        pub fn has_owner(connection: &zbus::blocking::Connection, name: &str) -> Result<bool, String> {
-            let dbus = zbus::blocking::fdo::DBusProxy::new(connection).map_err(|error| error.to_string())?;
+        pub fn has_owner(connection: &zbus::Connection, name: &str) -> Result<bool, String> {
             let name = zbus::names::BusName::try_from(name).map_err(|error| error.to_string())?;
-            dbus.name_has_owner(name).map_err(|error| error.to_string())
+            zbus::block_on(async {
+                let dbus = zbus::fdo::DBusProxy::new(connection).await.map_err(|error| error.to_string())?;
+                dbus.name_has_owner(name).await.map_err(|error| error.to_string())
+            })
         }
     }
 
@@ -630,7 +627,7 @@ mod app {
     mod a11y {
         use std::collections::HashMap;
         use std::sync::{Arc, Mutex, OnceLock};
-        use zbus::zvariant::{OwnedObjectPath, OwnedValue};
+        use zbus::{OwnedObjectPath, OwnedVariant};
 
         pub const ROOT_PATH: &str = "/org/a11y/atspi/accessible/root";
         pub const REGISTRY_NAME: &str = "org.a11y.atspi.Registry";
@@ -724,29 +721,31 @@ mod app {
             DOUBLE
                 .get_or_init(|| {
                     let state: Shared = Arc::default();
-                    let connection = zbus::blocking::connection::Builder::session()
-                        .and_then(|builder| builder.serve_at("/org/a11y/bus", Bus { state: state.clone() }))
-                        .and_then(|builder| builder.serve_at(ROOT_PATH, Socket { state: state.clone() }))
-                        .and_then(|builder| builder.serve_at(ROOT_PATH, RegistryRoot { state: state.clone() }))
-                        .and_then(|builder| builder.serve_at("/org/a11y/atspi/registry", Registry))
-                        .and_then(|builder| builder.name("org.a11y.Bus"))
-                        .and_then(|builder| builder.name(REGISTRY_NAME))
-                        .and_then(|builder| builder.build())
-                        .map_err(|error| error.to_string())?;
+                    let builder = zbus::connection::Builder::session()
+                        .serve_at("/org/a11y/bus", Bus { state: state.clone() })
+                        .serve_at(ROOT_PATH, Socket { state: state.clone() })
+                        .serve_at(ROOT_PATH, RegistryRoot { state: state.clone() })
+                        .serve_at("/org/a11y/atspi/registry", Registry)
+                        .name("org.a11y.Bus")
+                        .name(REGISTRY_NAME);
+                    let connection = zbus::block_on(builder.build()).map_err(|error| error.to_string())?;
 
                     // The events of objects, as a listener of the registry gets them.
                     let events = state.clone();
                     std::thread::spawn(move || {
                         let rule = "type='signal',interface='org.a11y.atspi.Event.Object'";
-                        let Ok(iterator) = zbus::blocking::MessageIterator::for_match_rule(rule, &connection, Some(256))
+                        let queue = std::num::NonZeroUsize::new(256);
+                        let Ok(mut stream) =
+                            zbus::block_on(zbus::MessageStream::for_match_rule(rule, &connection, queue))
                         else {
                             return;
                         };
-                        for message in iterator.flatten() {
+                        while let Some(message) = zbus::block_on(futures_util::StreamExt::next(&mut stream)) {
+                            let Ok(message) = message else { continue };
                             let header = message.header();
                             let Ok((detail, detail1, _, _, _)) = message
                                 .body()
-                                .deserialize::<(String, i32, i32, OwnedValue, HashMap<String, OwnedValue>)>()
+                                .deserialize::<(String, i32, i32, OwnedVariant, HashMap<String, OwnedVariant>)>()
                             else {
                                 continue;
                             };
@@ -780,7 +779,7 @@ mod app {
 
         /// A client of the accessibility bus.
         pub struct Client {
-            connection: zbus::blocking::Connection,
+            connection: zbus::Connection,
             /// The connection of the application on the accessibility bus.
             pub application: String,
         }
@@ -791,15 +790,15 @@ mod app {
             /// the children of the root of the registry.
             pub fn connect() -> Result<Client, String> {
                 let text = |error: zbus::Error| error.to_string();
-                let session = zbus::blocking::Connection::session().map_err(text)?;
-                let address: String = session
-                    .call_method(Some("org.a11y.Bus"), "/org/a11y/bus", Some("org.a11y.Bus"), "GetAddress", &())
-                    .map_err(text)?
-                    .body()
-                    .deserialize()
-                    .map_err(text)?;
-                let connection = zbus::blocking::connection::Builder::address(address.as_str())
-                    .and_then(|builder| builder.build())
+                let session = zbus::block_on(zbus::Connection::session()).map_err(text)?;
+                let bus = Some("org.a11y.Bus");
+                let address: String =
+                    zbus::block_on(session.call_method(bus, "/org/a11y/bus", bus, "GetAddress", &()))
+                        .map_err(text)?
+                        .body()
+                        .deserialize()
+                        .map_err(text)?;
+                let connection = zbus::block_on(zbus::connection::Builder::address(address.as_str()).build())
                     .map_err(|error| format!("the accessibility bus at {address}: {error}"))?;
                 let mut client = Client { connection, application: REGISTRY_NAME.to_string() };
                 let applications = client.children(ROOT_PATH)?;
@@ -815,18 +814,17 @@ mod app {
 
             pub fn call<B, T>(&self, path: &str, interface: &str, member: &str, body: &B) -> Result<T, String>
             where
-                B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
-                T: for<'a> zbus::export::serde::Deserialize<'a> + zbus::zvariant::Type,
+                B: zbus::export::serde::ser::Serialize + zbus::DynamicType,
+                T: for<'a> zbus::export::serde::Deserialize<'a> + zbus::Type,
             {
-                let reply = self
-                    .connection
-                    .call_method(Some(self.application.as_str()), path, Some(interface), member, body)
-                    .map_err(|error| format!("{member} of {path}: {error}"))?;
+                let destination = Some(self.application.as_str());
+                let call = self.connection.call_method(destination, path, Some(interface), member, body);
+                let reply = zbus::block_on(call).map_err(|error| format!("{member} of {path}: {error}"))?;
                 reply.body().deserialize::<T>().map_err(|error| format!("the reply of {member} of {path}: {error}"))
             }
 
             pub fn property(&self, path: &str, interface: &str, name: &str) -> Result<String, String> {
-                let value: OwnedValue = self.call(path, PROPERTIES, "Get", &(interface, name))?;
+                let value: OwnedVariant = self.call(path, PROPERTIES, "Get", &(interface, name))?;
                 Ok(super::desktop_double::show(&value))
             }
 

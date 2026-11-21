@@ -8,7 +8,7 @@ use crate::test_support::{emit_from_service, log, pump_until, scope, Log, TestCo
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use std::cell::{Cell, RefCell};
 use std::sync::{Arc, Mutex};
-use zbus::zvariant::Structure;
+use zbus::Structure;
 
 struct Answer {
     version: u32,

@@ -4,9 +4,9 @@
 //! `DBusXml/`, with the members the input method calls and the signals it
 //! listens to.
 
-use zbus::zvariant::OwnedObjectPath;
+use zbus::OwnedObjectPath;
 
-#[zbus::proxy(interface = "org.fcitx.Fcitx.InputMethod", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.fcitx.Fcitx.InputMethod", assume_defaults = false)]
 pub trait InputMethod {
     /// Gives the identifier of the context, whether it is enabled, and
     /// two trigger keys with their states.
@@ -14,7 +14,7 @@ pub trait InputMethod {
     fn create_icv3(&self, appname: &str, pid: i32) -> zbus::Result<(i32, bool, u32, u32, u32, u32)>;
 }
 
-#[zbus::proxy(interface = "org.fcitx.Fcitx.InputMethod1", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.fcitx.Fcitx.InputMethod1", assume_defaults = false)]
 pub trait InputMethod1 {
     /// Gives the path of the context and its identifier.
     fn create_input_context(&self, arg0: &[(&str, &str)]) -> zbus::Result<(OwnedObjectPath, Vec<u8>)>;
@@ -26,7 +26,7 @@ pub use context1::InputContext1Proxy;
 /// The proxy and the signals of the input context: a module of its own, because the two versions
 /// have signals of the same names.
 pub mod context {
-    #[zbus::proxy(interface = "org.fcitx.Fcitx.InputContext", gen_blocking = false, assume_defaults = false)]
+    #[zbus::proxy(interface = "org.fcitx.Fcitx.InputContext", assume_defaults = false)]
     pub trait InputContext {
         fn focus_in(&self) -> zbus::Result<()>;
 
@@ -57,7 +57,7 @@ pub mod context {
 /// The proxy and the signals of the input context: a module of its own, because the two versions
 /// have signals of the same names.
 pub mod context1 {
-    #[zbus::proxy(interface = "org.fcitx.Fcitx.InputContext1", gen_blocking = false, assume_defaults = false)]
+    #[zbus::proxy(interface = "org.fcitx.Fcitx.InputContext1", assume_defaults = false)]
     pub trait InputContext1 {
         fn focus_in(&self) -> zbus::Result<()>;
 
