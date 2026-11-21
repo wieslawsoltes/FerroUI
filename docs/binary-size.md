@@ -1455,6 +1455,47 @@ its own, so each goes through the service made before the class's initialisation
 The catalog and the WinUI gallery show tool tips and keep the class; they grow by the stated
 functions (release: the catalog +15.8 kB, the gallery -0.9 kB).
 
+### 4.30 The declarative applications (#612, #570)
+
+The same trace on the applications of the declarative layer, at section 4.29 (release, macOS):
+
+- **`hello-world-builders` against the XAML hello world.** 17,856,464 against 17,758,584 bytes
+  stripped (+97,880 bytes), 118 against 120 class initialisers (the XAML application has its
+  `App` and `MainWindow` classes). The difference is the declarative layer itself: `ferroui_view`
+  80 kB (the reactive runtime, mounting and the builders) and the generic code it instantiates
+  in `alloc`, `std` and `hashbrown`, about 40 kB. The builders link no class, no unit of the
+  theme and no part of the framework that the XAML version does not: there is nothing of the
+  framework to cut there.
+- **`samples/TodoMvc`.** 22,221,960 bytes stripped, 18,598,960 in `dist` (19.58 MB on main), 189
+  class initialisers. Most of what it links beyond hello world are its controls and their units
+  of the theme (the text box with the menu flyout of its context menu, the check box, the grid,
+  the scroll bars) and units of the WinUI theme (reveal and acrylic brushes, theme shadows, the
+  lights); those belong to theme trimming. One root is outside the theme:
+
+**The automation peer of an items control read `ListBox.Scroll`.** `ItemsControlAutomationPeer`
+looked for the element that scrolls the items with `get_direct_value(ListBox::scroll_property())`;
+the accessor initialises the list box class, so every application with an items control linked
+the list box and its virtualizing panel. In TodoMvc the items control is the presenter of the
+menu flyout of the text box's context menu. The peer now reads the element from the list box
+itself (`downcast_ref::<ListBox>().and_then(ListBox::scroll)`, the getter the property is
+registered with); for an items control of another class the property is not registered, and the
+read panicked (`Property 'ListBox.Scroll' not registered on 'ItemsControl'`, the new test run on
+the code before the change): the peer now finds no element to scroll.
+
+| `samples/TodoMvc`, macOS | 4.29 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 22,221,960 bytes | 22,133,560 bytes | -88,400 bytes (-0.4 %) |
+| release, `__TEXT,__text` | 17,549,496 bytes | 17,458,504 bytes | -90,992 bytes (-0.5 %) |
+| Class initialisers linked | 189 | 187 | -2 (the list box, the virtualizing stack panel) |
+| `dist`, file | 18,598,960 bytes | 18,499,472 bytes | -99,488 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 15,232,428 bytes | 15,154,576 bytes | -77,852 bytes (-0.5 %) |
+
+Hello world, the catalog and the WinUI gallery are unchanged (they have no items control, or
+use the list box).
+
+Test: `the_peer_of_an_items_control_scrolls_with_the_element_of_a_list_box_only`
+(`automation/peers/items_automation_peer_tests.rs`).
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
