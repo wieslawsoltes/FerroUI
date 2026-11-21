@@ -26,6 +26,7 @@ enum ValueSyntax {
 
 impl ValueShape {
     pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
+    pub(crate) const COLOR: Self = Self::typed(ValueKind::Color);
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
     pub(crate) const SOLID_BRUSH: Self = Self {

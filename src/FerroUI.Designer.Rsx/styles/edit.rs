@@ -1,5 +1,5 @@
 //! Plans in the original Rust buffer, validated by reprojecting the invocation.
-use super::{string_literal, syntax::validate_selector, Deletion, RsxStyle};
+use super::{string_literal, syntax::validate_selector, Deletion, RsxStyle, RsxStyleField};
 use crate::{blocks::keep_comments, source_edits::line_prefix, RsxProjection};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use serde::Deserialize;
@@ -29,6 +29,22 @@ pub enum RsxStyleEdit {
         getter: String,
         value: String,
     },
+    SetResource {
+        style: usize,
+        key: String,
+        setter: Option<usize>,
+        getter: Option<String>,
+    },
+    AddColorResource {
+        style: usize,
+        key: String,
+        value: String,
+    },
+    ColorResource {
+        style: usize,
+        resource: usize,
+        value: String,
+    },
     Remove {
         style: usize,
     },
@@ -42,6 +58,9 @@ impl RsxStyleEdit {
             | Self::Selector { style, .. }
             | Self::Setter { style, .. }
             | Self::AddSetter { style, .. }
+            | Self::SetResource { style, .. }
+            | Self::AddColorResource { style, .. }
+            | Self::ColorResource { style, .. }
             | Self::Remove { style } => *style,
         }
     }
@@ -122,29 +141,22 @@ impl RsxProjection<'_> {
                 value,
             } => {
                 let style = self.style_at(*style)?;
-                let field = self
-                    .catalog
-                    .style_field(getter.trim_start_matches("::"))
-                    .filter(|field| field.insertable)
-                    .ok_or("Choose a registered writable Rust style property")?;
-                if style
-                    .setters
-                    .iter()
-                    .filter_map(|setter| setter.field.as_ref())
-                    .any(|existing| existing.name == field.name && existing.owner == field.owner)
-                {
-                    return Err("Edit the existing setter for this registered property".into());
-                }
-                let getter = if field.getter.starts_with("crate::") {
-                    field.getter.clone()
-                } else {
-                    format!("::{}", field.getter)
-                };
+                let field = self.new_style_field(style, getter)?;
+                let getter = qualified_getter(field);
                 let value = field.rust(value)?;
                 vec![insert(
                     style.declaration.end,
                     format!(".set({getter}(), {value})"),
                 )]
+            }
+            RsxStyleEdit::SetResource { style, key, setter, getter } => {
+                self.plan_resource_setter(self.style_at(*style)?, key, *setter, getter.as_deref())?
+            }
+            RsxStyleEdit::AddColorResource { style, key, value } => {
+                self.add_style_color(self.style_at(*style)?, key, value)?
+            }
+            RsxStyleEdit::ColorResource { style, resource, value } => {
+                self.change_style_color(self.style_at(*style)?, *resource, value)?
             }
             RsxStyleEdit::Remove { style } => {
                 let style = self.style_at(*style)?;
@@ -179,6 +191,16 @@ impl RsxProjection<'_> {
             .ok_or_else(|| "Choose a style from the current Rust invocation".into())
     }
 
+    pub(super) fn new_style_field(&self, style: &RsxStyle, getter: &str) -> Result<&RsxStyleField, String> {
+        let field = self.catalog.style_field(getter.trim_start_matches("::"))
+            .filter(|field| field.insertable)
+            .ok_or("Choose a registered writable Rust style property")?;
+        if style.has_setter(field) {
+            return Err("Edit the existing setter for this registered property".into());
+        }
+        Ok(field)
+    }
+
     fn remove_style_part(&self, deletion: &Deletion) -> Result<Vec<TextPatch>, String> {
         let mut span = deletion.span;
         let replacement = keep_comments(&self.source[span.range()])?;
@@ -200,7 +222,11 @@ fn style_factory(selector: &str) -> String {
     format!("::ferroui_view::style({selector:?})")
 }
 
-fn insert(at: usize, replacement: String) -> TextPatch {
+pub(super) fn qualified_getter(field: &RsxStyleField) -> String {
+    if field.getter.starts_with("crate::") { field.getter.clone() } else { format!("::{}", field.getter) }
+}
+
+pub(super) fn insert(at: usize, replacement: String) -> TextPatch {
     TextPatch {
         span: SourceSpan::new(at, at),
         replacement,

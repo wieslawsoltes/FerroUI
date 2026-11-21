@@ -48,6 +48,20 @@ impl AuthoredRsxFrame {
                 self.require_style_source(&address, None)?;
                 Ok(json!({"uri":uri}))
             }
+            Action::Resources { target, property } => {
+                self.require_style_source(&target.address, None)?;
+                let node = usize::try_from(target.node).map_err(|error| error.to_string())?;
+                let report = ferroui_designer::rust_style_report(self.source(), &self.projection()?, Some(node))?;
+                let compatible = ["setters", "available"].iter().any(|section| {
+                    report[*section].as_array().is_some_and(|fields| fields.iter().any(|field| {
+                        field["property"] == property && field["field"]["resources"] == true
+                    }))
+                });
+                let resources = report["resource_choices"].as_array().into_iter().flatten()
+                    .filter(|_| compatible).map(|entry| json!({"key":entry["key"],"type_name":"Color"}))
+                    .collect::<Vec<_>>();
+                Ok(json!({"uri":uri,"resources":resources}))
+            }
             Action::Locate {
                 address,
                 range,
@@ -59,7 +73,7 @@ impl AuthoredRsxFrame {
                     .map_err(|error| error.to_string())?;
                 Ok(json!({"uri":uri,"range":range}))
             }
-            Action::Plan { .. } | Action::Resources { .. } => {
+            Action::Plan { .. } => {
                 Err("Choose a mapped Rust style action for this preview".into())
             }
         }

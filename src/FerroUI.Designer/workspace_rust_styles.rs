@@ -7,11 +7,13 @@ use ferroui_controls::{
     Button, Control, Flyout, PlacementMode, ScrollViewer, StackPanel, TextBlock,
 };
 use ferroui_designer_core::SourceSpan;
-use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit};
+use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit, RsxStyleResource};
 use std::rc::{Rc, Weak};
 
 #[path = "workspace_rust_style_fields.rs"]
 mod fields;
+#[path = "workspace_rust_style_resources.rs"]
+mod resources;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_rust_styles_tests.rs"]
 mod tests;
@@ -139,7 +141,8 @@ impl Pane {
                 }
             });
             body.children().add(choices.upcast::<Control>());
-            self.rule(&body, &tools, &scope, rule, projection.style_fields());
+            let choices = projection.style_resource_choices(rule.declaration.start);
+            self.rule(&body, &tools, &scope, rule, &projection.style_fields(), &choices);
         } else {
             body.children()
                 .add(text("No inline styles in this RSX view.").upcast::<Control>());
@@ -153,7 +156,8 @@ impl Pane {
         tools: &StackPanel,
         scope: &Scope,
         rule: &RsxStyle,
-        fields: Vec<&ferroui_designer_rsx::RsxStyleField>,
+        fields: &[&ferroui_designer_rsx::RsxStyleField],
+        choices: &[&RsxStyleResource],
     ) {
         let style = rule.declaration.start;
         let span = rule.selector_span;
@@ -184,7 +188,9 @@ impl Pane {
             let name = field.map_or("Computed property", |field| field.name.as_str());
             let source = setter.source;
             let member = setter.declaration.start;
-            let row = if let Some(value) = setter.value() {
+            let row = if let Some(key) = setter.resource_key() {
+                fields::read_only_row(body, name, key)
+            } else if let Some(value) = setter.value() {
                 let active = scope.clone();
                 let options = field.map_or(&[][..], |field| field.options());
                 let row = fields::value_row(body, name, &value, options, move |value| {
@@ -197,21 +203,19 @@ impl Pane {
                         None,
                     );
                 });
-                let active = scope.clone();
-                add_button(&row, RESET, &format!("Remove {name} setter"), move || {
-                    active.apply(
-                        RsxStyleEdit::Setter {
-                            style,
-                            setter: member,
-                            value: None,
-                        },
-                        None,
-                    );
-                });
                 row
             } else {
                 fields::source_row(body, name)
             };
+            if setter.value().is_some() {
+                let active = scope.clone();
+                add_button(&row, RESET, &format!("Remove {name} setter"), move || {
+                    active.apply(RsxStyleEdit::Setter { style, setter: member, value: None }, None);
+                });
+                if field.is_some_and(|field| field.accepts_color_resource()) && !choices.is_empty() {
+                    resources::change_setter(&row, scope, style, setter, choices);
+                }
+            }
             let active = scope.clone();
             add_button(
                 &row,
@@ -220,6 +224,7 @@ impl Pane {
                 move || active.reveal(source),
             );
         }
+        resources::section(body, scope, rule, fields, choices);
     }
 }
 

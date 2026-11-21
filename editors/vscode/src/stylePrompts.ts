@@ -1,5 +1,5 @@
 import { choose, editText } from './studioContext';
-import type { StyleCatalog, StyleCreation, StyleSetter } from './stylesProtocol';
+import type { RustColorResource, StyleCatalog, StyleCreation, StyleSetter } from './stylesProtocol';
 
 export async function chooseNewStyle(catalog: StyleCatalog, kind: 'style' | 'theme', suggestedType?: string): Promise<{ node: number; edit: StyleCreation } | undefined> {
     const scopes = kind === 'theme' ? catalog.palette_scopes : catalog.style_hosts;
@@ -19,7 +19,7 @@ export async function chooseNewStyle(catalog: StyleCatalog, kind: 'style' | 'the
     if (target !== undefined) return { node, edit: { action: 'create_theme', key: key.trim(), target_type: target.trim() } };
 }
 
-type NewSetter = { property: string; kind: 'literal'; value: string; getter?: string } | { property: string; kind: 'resource' };
+type NewSetter = { property: string; kind: 'literal'; value: string; getter?: string } | { property: string; kind: 'resource'; getter?: string };
 
 export async function chooseStyleIssue(issues: NonNullable<StyleCatalog['issues']>) {
     const selected = await choose('Reveal a Rust Style Expression', issues.map(issue => ({
@@ -37,10 +37,23 @@ export async function chooseNewSetter(available: readonly StyleSetter[]): Promis
     const mode = field.resources ? await choose(property, [{ label: 'Literal value', resource: false }, { label: 'Resource reference', resource: true }])
         : { resource: false };
     if (!mode) return;
-    if (mode.resource) return { property, kind: 'resource' };
+    if (mode.resource) return { property, kind: 'resource', getter: item.setter.getter };
     const value = field.options.length ? (await choose(property, field.options.map(label => ({ label }))))?.label
         : await editText(`${property} value`, field.kind === 'color' ? '#FF4C82D0' : undefined, undefined, 'New FerroUI Setter');
     if (value !== undefined) return { property, kind: 'literal', value, getter: item.setter.getter };
+}
+
+export async function chooseRustColorResource(property: string, choices: readonly RustColorResource[]) {
+    if (!choices.length) throw new Error('This style scope has no mapped color resource.');
+    return await choose(`Choose a Color Resource for ${property}`,
+        choices.map(resource => ({ label: resource.key, description: resource.color ?? 'Color', key: resource.key })));
+}
+
+export async function promptRustColorResource(): Promise<{ key: string; value: string } | undefined> {
+    const key = await editText('Resource key', undefined, key => key.trim() ? undefined : 'Enter a resource key.', 'New Rust Color Resource');
+    if (key === undefined) return;
+    const value = await editText('Color value', '#FF4C82D0', undefined, 'New Rust Color Resource');
+    if (value !== undefined) return { key: key.trim(), value };
 }
 
 export async function chooseStyleResource<T extends { key: string; type_name: string }>(property: string, resources: readonly T[]) {

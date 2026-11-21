@@ -3,6 +3,7 @@ import type { PaletteColumn, PaletteColor, PaletteSheet, ResolvedColor, StylesAc
 import { create } from './dom';
 import { actionButton } from './propertyEditor';
 import { submitValue } from './styleDefinitionEditor';
+import { colorPicker, swatch } from './colorSwatch';
 
 export function paletteEditor(sheet: PaletteSheet | undefined, layer: PaletteColumn | undefined,
     compare: boolean, filter: string, send: (action: StylesAction) => void): HTMLElement {
@@ -36,7 +37,7 @@ function colorRow(color: PaletteColor, send: (action: StylesAction) => void): HT
     value.title = value.value || color.kind;
     const set = (value: string) => send({ type: 'palette-color', node: color.node, color: value });
     if (color.editable) submitValue(value, value.value, set);
-    const sample = color.editable ? colorPicker(color, set) : swatch(color.color);
+    const sample = color.editable ? colorPicker(color.key, color.color, set) : swatch(color.color);
     const controls = create('div');
     controls.className = 'style-tools';
     if (color.uses) controls.append(actionButton('references', `Find ${color.key} references`,
@@ -44,25 +45,6 @@ function colorRow(color: PaletteColor, send: (action: StylesAction) => void): HT
     controls.append(actionButton('go-to-file', `Reveal ${color.key} in source`, () => send({ type: 'reveal', range: color.range })));
     row.append(sample, title, value, controls);
     return row;
-}
-
-function colorPicker(color: PaletteColor, set: (value: string) => void): HTMLInputElement {
-    const input = create('input');
-    input.type = 'color';
-    input.className = 'palette-picker';
-    input.value = color.color ? `#${color.color.slice(3)}` : '#000000';
-    input.title = `Choose ${color.key} color`;
-    input.setAttribute('aria-label', input.title);
-    input.addEventListener('change', () => set(`#${color.color?.slice(1, 3) ?? 'FF'}${input.value.slice(1)}`));
-    return input;
-}
-
-function swatch(argb: string | undefined): HTMLElement {
-    const result = create('span');
-    result.className = 'palette-swatch';
-    result.setAttribute('aria-hidden', 'true');
-    if (argb && /^#[0-9A-F]{8}$/i.test(argb)) result.style.backgroundColor = `#${argb.slice(3)}${argb.slice(1, 3)}`;
-    return result;
 }
 
 function comparison(sheet: PaletteSheet, filter: string, send: (action: StylesAction) => void): HTMLElement {

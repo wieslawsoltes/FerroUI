@@ -201,7 +201,7 @@ export class StylesView {
                     if (range) await context.revealRange(range);
                     return;
                 }
-                case 'add-nested-style': return;
+                case 'add-nested-style': case 'add-color-resource': case 'rust-resource-color': return;
                 case 'references': await showResourceReferences(context, action.node); return;
                 case 'preview-theme':
                     if (action.theme === 'high_contrast' && !panel.supportsHighContrastTheme) return;

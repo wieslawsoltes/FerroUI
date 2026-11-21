@@ -18,6 +18,7 @@ pub struct RsxPreviewMarkup<'a> {
     pub controls: Vec<usize>,
     pub animations: Vec<(usize, &'a RsxAnimation)>,
     pub state_groups: Vec<(usize, &'a RsxStateGroup)>,
+    style_setters: Vec<(usize, SourceSpan)>,
 }
 
 /// Source locations for an accepted projection. Keys are XML byte offsets
@@ -30,6 +31,7 @@ pub struct RsxSourceMap {
     controls: Vec<ControlSource>,
     animations: Vec<(usize, RsxAnimation)>,
     state_groups: Vec<(usize, RsxStateGroup)>,
+    style_setters: Vec<(usize, SourceSpan)>,
 }
 
 struct ControlSource {
@@ -58,6 +60,11 @@ impl RsxSourceMap {
     pub fn property(&self, offset: usize, name: &str) -> Option<SourceSpan> {
         let (index, _) = self.control(offset)?;
         self.controls[index].properties.get(name).copied()
+    }
+
+    pub fn style_setter(&self, offset: usize) -> Option<SourceSpan> {
+        let index = self.style_setters.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
+        Some(self.style_setters[index].1)
     }
 
     pub fn can_create_animation(&self, offset: usize) -> bool {
@@ -116,6 +123,7 @@ impl RsxProjection<'_> {
                 .map(|(offset, clip)| (offset, clip.clone()))
                 .collect(),
             state_groups: markup.state_groups.into_iter().map(|(offset, group)| (offset, group.clone())).collect(),
+            style_setters: markup.style_setters,
         };
         (markup.source, map)
     }
@@ -215,19 +223,28 @@ impl<'a> RsxPreviewMarkup<'a> {
             let _ = write!(self.source, " xmlns:{alias}=\"{namespace}\"");
         }
         self.source.push('>');
+        self.style_resources(style, &pad);
         for setter in &style.setters {
             let (Some(field), Some(value)) = (&setter.field, setter.value()) else { continue };
             let value = escape_xml(&value, Some('"'));
             let name = &field.name;
             let owner = field.owner_name();
-            let _ = write!(self.source, "\n{pad}{INDENT}<Setter xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"");
+            let _ = write!(self.source, "\n{pad}{INDENT}");
+            self.style_setters.push((self.source.len(), setter.source));
+            self.source.push_str("<Setter xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"");
             let prefix = if let Some(namespace) = &field.owner.namespace {
                 let namespace = escape_xml(namespace, Some('"'));
                 let _ = write!(self.source, " xmlns:rsxOwner=\"{namespace}\"");
                 "rsxOwner:"
             } else { "" };
             let owner = format!("{prefix}{owner}");
-            let _ = write!(self.source, " x:SetterTargetType=\"{owner}\" Property=\"{owner}.{name}\" Value=\"{value}\"/>");
+            let _ = write!(self.source, " x:SetterTargetType=\"{owner}\" Property=\"{owner}.{name}\"");
+            if let Some(key) = setter.resource_key() {
+                let key = resource_key_attribute(key);
+                let _ = write!(self.source, "><Setter.Value><DynamicResource ResourceKey=\"{key}\"/></Setter.Value></Setter>");
+            } else {
+                let _ = write!(self.source, " Value=\"{value}\"/>");
+            }
         }
         if !style.clips.is_empty() {
             let _ = write!(self.source, "\n{pad}{INDENT}<Style.Animations>");
@@ -243,4 +260,21 @@ impl<'a> RsxPreviewMarkup<'a> {
         }
         let _ = write!(self.source, "\n{pad}</Style>");
     }
+
+    fn style_resources(&mut self, style: &RsxStyle, pad: &str) {
+        let mut entries = style.resource_entries().filter_map(|entry| {
+            Some((resource_key_attribute(&entry.key), entry.color()?))
+        }).peekable();
+        if entries.peek().is_none() { return; }
+        let _ = write!(self.source, "\n{pad}{INDENT}<Style.Resources>");
+        for (key, color) in entries {
+            let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}<Color xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Key=\"{key}\">{color}</Color>");
+        }
+        let _ = write!(self.source, "\n{pad}{INDENT}</Style.Resources>");
+    }
+}
+
+fn resource_key_attribute(key: &str) -> String {
+    let escaped = escape_xml(key, Some('"'));
+    if key.starts_with('{') { format!("{{}}{escaped}") } else { escaped }
 }

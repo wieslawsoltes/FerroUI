@@ -189,7 +189,13 @@ export class HostedStylesView {
                 break;
             case 'add-setter': this.send({ action: 'addSetter', target }); break;
             case 'add-nested-style': this.send({ action: 'addNested', target }); break;
-            case 'setter-resource': this.send({ action: 'chooseResource', target, property: action.property }); break;
+            case 'setter-resource': this.send({ action: 'chooseResource', target, property: action.property, setter: action.node }); break;
+            case 'add-color-resource':
+                if (rust) this.send({ action: 'addColorResource', target });
+                break;
+            case 'rust-resource-color':
+                if (rust) rustEdit({ action: 'color_resource', style: target.node, resource: action.node, value: action.color });
+                break;
             case 'reveal': this.send({ action: 'locate', address: target.address, range: action.range }); break;
         }
     }

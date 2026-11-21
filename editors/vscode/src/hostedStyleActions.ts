@@ -3,7 +3,7 @@ import type { HostedStyles } from './hostedStyles';
 import type { HostedStyleCatalog, HostedStyleCommand, HostedStyleDefinition, HostedStyleResult, HostedStyleTarget } from './hostedStylesProtocol';
 import { choose, editText } from './studioContext';
 import type { RustStyleEdit } from './stylesProtocol';
-import { chooseNewSetter, chooseNewStyle, chooseStyleIssue, chooseStyleResource } from './stylePrompts';
+import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, chooseStyleIssue, chooseStyleResource, promptRustColorResource } from './stylePrompts';
 
 export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAnimationFrame,
     command: HostedStyleCommand, current: () => HostedAnimationFrame): Promise<HostedStyleResult | undefined> {
@@ -51,7 +51,12 @@ export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAn
         case 'addSetter': {
             const { definition } = await styles.read(frame, { action: 'read', target: command.target }, signal()) as HostedStyleDefinition;
             const setter = await chooseNewSetter(definition.available);
-            if (setter?.kind === 'resource') await assign(command.target, setter.property);
+            if (setter?.kind === 'resource') {
+                if (setter.getter) {
+                    const choice = await chooseRustColorResource(setter.property, definition.resource_choices ?? []);
+                    if (choice) await rustEdit(command.target, { action: 'set_resource', style: command.target.node, getter: setter.getter, key: choice.key });
+                } else await assign(command.target, setter.property);
+            }
             if (setter?.kind === 'literal') {
                 if (setter.getter) await rustEdit(command.target, { action: 'add_setter', style: command.target.node, getter: setter.getter, value: setter.value });
                 else await styles.edit(latest(), command.target, { action: 'setter', property: setter.property, value: setter.value }, true, signal());
@@ -63,6 +68,17 @@ export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAn
             if (selector !== undefined) await rustEdit(command.target, { action: 'create_nested', style: command.target.node, selector });
             return;
         }
-        case 'chooseResource': await assign(command.target, command.property);
+        case 'addColorResource': {
+            const input = await promptRustColorResource();
+            if (input) await rustEdit(command.target, { action: 'add_color_resource', style: command.target.node, ...input });
+            return;
+        }
+        case 'chooseResource': {
+            const { definition } = await styles.read(frame, { action: 'read', target: command.target }, signal()) as HostedStyleDefinition;
+            if (definition.resource_choices) {
+                const choice = await chooseRustColorResource(command.property, definition.resource_choices);
+                if (choice) await rustEdit(command.target, { action: 'set_resource', style: command.target.node, setter: command.setter, key: choice.key });
+            } else await assign(command.target, command.property);
+        }
     }
 }

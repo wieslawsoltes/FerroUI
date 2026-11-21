@@ -1,12 +1,17 @@
 //! Authored Rust styles used by both the native projection and source editors.
 mod edit;
 pub(crate) mod fields;
+mod resource_edits;
+mod resources;
 mod syntax;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod resources_tests;
 
 pub use edit::RsxStyleEdit;
 pub use fields::RsxStyleField;
+pub use resources::RsxStyleResource;
 pub(crate) use syntax::projected_styles;
 
 use crate::animation::RsxAnimation;
@@ -19,6 +24,7 @@ pub struct RsxStyle {
     pub selector: String,
     pub selector_span: SourceSpan,
     pub setters: Vec<RsxStyleSetter>,
+    pub resources: Vec<RsxStyleResource>,
     pub children: Vec<RsxStyle>,
     pub(crate) clips: Vec<RsxAnimation>,
     pub(crate) preview_selector: Option<syntax::PreviewSelector>,
@@ -31,6 +37,7 @@ pub struct RsxStyleSetter {
     pub declaration: SourceSpan,
     pub source: SourceSpan,
     pub field: Option<RsxStyleField>,
+    method: SourceSpan,
     value: Option<fields::SetterValue>,
 }
 
@@ -47,6 +54,11 @@ struct Deletion {
 }
 
 impl RsxStyle {
+    pub fn has_setter(&self, field: &RsxStyleField) -> bool {
+        self.setters.iter().filter_map(|setter| setter.field.as_ref())
+            .any(|existing| existing.name == field.name && existing.owner == field.owner)
+    }
+
     pub fn can_remove(&self) -> bool {
         self.removable
     }
@@ -55,7 +67,7 @@ impl RsxStyle {
         self.deletion.span != self.declaration
     }
 
-    pub(crate) fn visit(&self, visitor: &mut impl FnMut(&Self)) {
+    pub(crate) fn visit<'a>(&'a self, visitor: &mut impl FnMut(&'a Self)) {
         visitor(self);
         for child in &self.children {
             child.visit(visitor);
@@ -66,6 +78,13 @@ impl RsxStyle {
 impl RsxStyleSetter {
     pub fn value(&self) -> Option<String> {
         self.value.as_ref().map(fields::SetterValue::text)
+    }
+
+    pub fn resource_key(&self) -> Option<&str> {
+        match self.value.as_ref()? {
+            fields::SetterValue::Resource(key) => Some(key),
+            _ => None,
+        }
     }
 }
 

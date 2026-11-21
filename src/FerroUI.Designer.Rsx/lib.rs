@@ -36,7 +36,7 @@ pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
 pub use wrap_edits::{RsxWrap, RsxWrapResult};
 pub use states::{RsxStateGroup, RsxStateSource};
-pub use styles::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleIssue, RsxStyleSetter};
+pub use styles::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleIssue, RsxStyleResource, RsxStyleSetter};
 pub use xaml::{apply_rsx, xaml_to_rsx};
 
 /// Count source-authored invocations without requiring registered control types.

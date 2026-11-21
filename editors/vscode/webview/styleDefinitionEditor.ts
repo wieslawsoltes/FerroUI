@@ -1,4 +1,5 @@
-import type { AuthoredSetter, StyleDefinition, StylesAction } from '../src/stylesProtocol';
+import type { AuthoredSetter, RustColorResource, StyleDefinition, StylesAction } from '../src/stylesProtocol';
+import { colorPicker, swatch } from './colorSwatch';
 import { create } from './dom';
 import { actionButton } from './propertyEditor';
 
@@ -34,6 +35,7 @@ export function styleDefinition<Base extends string | number>(sheet: StyleDefini
         for (const setter of sheet.setters) list.append(setterRow(setter, send));
         root.append(list);
     }
+    if (sheet.color_resources) root.append(colorResources(sheet.color_resources, send));
     return root;
 }
 
@@ -87,7 +89,10 @@ function setterRow<Base extends string | number>(setter: AuthoredSetter, send: (
     const buttons = create('div');
     buttons.className = 'style-tools';
     if (setter.field.resources) buttons.append(actionButton('link', `Assign resource to ${setter.property}`,
-        () => send({ type: 'setter-resource', property: setter.property })));
+        () => send({ type: 'setter-resource', property: setter.property, node: setter.node })));
+    const declaration = setter.resource?.declaration;
+    if (declaration) buttons.append(actionButton('symbol-color', `Reveal declared resource ${setter.resource!.key}`,
+        () => send({ type: 'reveal', range: declaration })));
     buttons.append(actionButton('go-to-file', `Reveal ${setter.property} setter`, () => send({ type: 'reveal', range: setter.range })));
     if (setter.can_remove !== false) buttons.append(actionButton('discard', `Remove ${setter.property} setter`,
         () => send({ type: 'setter', node: setter.node, property: setter.property, value: null })));
@@ -109,10 +114,41 @@ function setterInput(setter: AuthoredSetter, value: string): HTMLInputElement {
     field.readOnly = !setter.editable;
     field.spellcheck = false;
     field.value = value;
-    field.title = value || (setter.object ? 'XAML object value' : setter.field.type_name ?? '');
+    field.title = setter.resource ? `Dynamic resource · ${setter.resource.key}`
+        : value || (setter.object ? 'XAML object value' : setter.field.type_name ?? '');
     if (setter.object) field.placeholder = 'XAML object';
     if (setter.field.kind === 'number') field.inputMode = 'decimal';
     return field;
+}
+
+function colorResources<Base extends string | number>(resources: readonly RustColorResource[], send: (action: StylesAction<Base>) => void): HTMLElement {
+    const section = create('section');
+    section.setAttribute('aria-label', 'Rust color resources');
+    const header = create('div');
+    header.className = 'style-subheader';
+    const caption = create('span');
+    caption.textContent = 'Color resources';
+    header.append(caption, actionButton('add', 'Add Rust color resource', () => send({ type: 'add-color-resource' })));
+    section.append(header);
+    for (const resource of resources) {
+        const row = create('div');
+        row.className = 'palette-row';
+        const title = create('label');
+        title.textContent = title.title = resource.key;
+        const input = create('input');
+        input.id = `rust-color-${resource.node}`;
+        input.setAttribute('aria-label', `${resource.key} color resource value`);
+        input.value = resource.color ?? 'Rust expression';
+        input.readOnly = !resource.color;
+        input.spellcheck = false;
+        title.htmlFor = input.id;
+        const change = (color: string) => send({ type: 'rust-resource-color', node: resource.node, color });
+        if (resource.color) submitValue(input, input.value, change);
+        row.append(resource.color ? colorPicker(resource.key, resource.color, change) : swatch(undefined), title, input,
+            actionButton('go-to-file', `Reveal ${resource.key} resource`, () => send({ type: 'reveal', range: resource.range })));
+        section.append(row);
+    }
+    return section;
 }
 
 export function submitValue(field: HTMLInputElement | HTMLSelectElement, original: string, apply: (value: string) => void): void {

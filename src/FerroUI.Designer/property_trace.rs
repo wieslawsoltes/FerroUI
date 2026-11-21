@@ -61,6 +61,9 @@ impl TraceLocation {
         };
         let node = document.ast().node(self.node)?;
         if let Some(property) = &self.property {
+            if property == "Value" && node.local_name() == "Setter" {
+                return map.style_setter(node.span.start);
+            }
             return map.property(node.span.start, property);
         }
         map.control(node.span.start).map(|(_, span)| span)
@@ -72,7 +75,7 @@ impl TraceLocation {
         source: &'a str,
         map: Option<&RsxSourceMap>,
     ) -> Option<&'a str> {
-        self.exact_value
+        (self.exact_value || map.is_some() && self.property.as_deref() == Some("Value"))
             .then(|| source.get(self.span(document, map)?.range()))
             .flatten()
     }
@@ -210,17 +213,28 @@ fn setter_location(document: &Document, owner: &Node, property: &str) -> Option<
         .filter_map(|id| document.ast().node(id))
         .filter(|child| {
             child.local_name() == "Setter"
-                && child.attribute("Property").is_some_and(|name| {
-                    let name = name.rsplit(':').next().unwrap_or(name);
-                    name == property
-                        || (!property.contains('.') && name.rsplit('.').next() == Some(property))
-                })
+                && child.attribute("Property").is_some_and(|name| setter_matches(document, owner, child, name, property))
         });
     let setter = candidates.next()?;
     if candidates.next().is_some() {
         return None;
     }
     property_location(document, setter.id, "Value").or_else(|| Some(TraceLocation::element(setter)))
+}
+
+fn setter_matches(document: &Document, style: &Node, setter: &Node, name: &str, property: &str) -> bool {
+    use crate::property_literals::{registered_type, setter_target_type};
+    let local_name = name.rsplit(':').next().unwrap_or(name);
+    if local_name == property || !property.contains('.') && local_name.rsplit('.').next() == Some(property) {
+        return true;
+    }
+    let Some((owner, member)) = property.rsplit_once('.') else { return false };
+    if let Some((qualifier, declared)) = name.rsplit_once('.') {
+        return declared == member && registered_type(document, setter.id, qualifier)
+            .and_then(|class| class.find_property(member)).is_some_and(|property| property.owner_type().name() == owner);
+    }
+    local_name == member && setter_target_type(document, style.id)
+        .and_then(|class| class.find_property(member)).is_some_and(|property| property.owner_type().name() == owner)
 }
 
 fn resource_location(

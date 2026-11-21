@@ -15,7 +15,7 @@ pub(super) fn tools() -> Vec<Value> {
     let offset = json!({"type":"integer","minimum":0});
     vec![
         s::tool(RSX_STYLES,
-            "Read mapped Rust styles in the selected RSX invocation. Omit node for the style catalog and owner ordinals. Pass a style node for its source ranges and typed setters.",
+            "Read mapped Rust styles in the selected RSX invocation. Omit node for the style catalog and owner ordinals. Pass a style node for its typed setters, color resources, compatible resource choices, and source ranges.",
             s::object(json!({"node":offset}), &[]), false),
         s::actions(RSX_STYLE_EDIT,
             "Update one inline Rust style in the accepted invocation. Use the current style and setter offsets. Computed values have source navigation. Every edit has one Undo.",
@@ -25,6 +25,9 @@ pub(super) fn tools() -> Vec<Value> {
                 s::action("selector", json!({"style":offset,"selector":s::string()}), &["style","selector"], true),
                 s::action("setter", json!({"style":offset,"setter":offset,"value":s::nullable(s::string())}), &["style","setter","value"], true),
                 s::action("add_setter", json!({"style":offset,"getter":s::string(),"value":s::string()}), &["style","getter","value"], true),
+                s::action("set_resource", json!({"style":offset,"key":s::string(),"setter":offset,"getter":s::string()}), &["style","key"], true),
+                s::action("add_color_resource", json!({"style":offset,"key":s::string(),"value":s::string()}), &["style","key","value"], true),
+                s::action("color_resource", json!({"style":offset,"resource":offset,"value":s::string()}), &["style","resource","value"], true),
                 s::action("remove", json!({"style":offset}), &["style"], true),
             ], true),
     ]

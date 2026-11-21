@@ -7,8 +7,9 @@ const address = { type: 'string', maxLength: 4096 };
 const target = record({ address, node: integer(0) });
 const position = record({ line: integer(0), character: integer(0) });
 const member = { type: 'string', maxLength: 512 };
-const rustEdit = record({ action: choice('create', 'create_nested', 'selector', 'setter', 'add_setter', 'remove'),
-    owner: integer(0), style: integer(0), setter: integer(0), selector: address, getter: member, value: {} }, ['action']);
+const rustEdit = record({ action: choice('create', 'create_nested', 'selector', 'setter', 'add_setter', 'remove',
+    'set_resource', 'add_color_resource', 'color_resource'), owner: integer(0), style: integer(0), setter: integer(0),
+    resource: integer(0), key: member, selector: address, getter: member, value: {} }, ['action']);
 const edit = record({ action: choice('create', 'create_theme', 'selector', 'base', 'setter', 'resource', 'remove', 'rust'),
     selector: address, target_type: member, key: {}, property: member, value: {}, dynamic: truth, edit: rustEdit }, ['action']);
 const editArgs = { ...frame, arguments: record({ target, edit }) };

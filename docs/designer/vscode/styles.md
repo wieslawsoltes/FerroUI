@@ -79,3 +79,13 @@ The editor maps explicit `ferroui_view::style` builders, typed property getters,
 ![VS Code shows the selected Rust FontSize literal, the Styles & Themes dock, and the updated native canvas](../images/vscode-rust-style-edit.jpg)
 
 [See the same Rust style workflow in App Preview](../images/vscode-app-preview-rust-style.jpg)
+
+### Edit Rust style color resources
+
+1. Choose a rule in **Styles & Themes**. Under **Color resources**, choose **Add Rust color resource**, enter a key, and supply a hex color. The edit adds a `StyleBuilder::resource` call to the selected rule.
+2. Use the link icon on a mapped color or brush setter to choose a resource. To add a setter that uses a resource, select **Add setter**, then choose **Resource reference** for a compatible property. The source uses `StyleBuilder::set_resource` with the selected key.
+3. Change the color with the swatch or hex field. The preview updates each styled control that resolves that key. Use the source icon to reveal the original color constructor. **Trace value** in Properties reveals the exact winning setter operand, including the referenced key.
+
+The color editor maps literal `Color::new`, `Color::from_rgb`, and `Color::from_argb` declarations in inline Rust styles. Resource choices come from the style host and its authored ancestors. A closer resource on the matched control can change the effective value at runtime. Use the source arrow for computed values. The same color edit, compatible resource choices, and source navigation are available in App Preview. Each accepted edit takes one Undo step. [View resource API](../../declarative-ui.md#102-styles) · [MCP arguments](reference.md#edit-rust-styles-with-mcp)
+
+![Styles and Themes shows a linked foreground, its edited green swatch, and the original Rust color constructor beside the native Design canvas](../images/vscode-rust-style-resource.jpg)

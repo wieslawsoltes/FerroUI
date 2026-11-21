@@ -62,14 +62,18 @@ pub(super) fn value_row(
 }
 
 pub(super) fn source_row(body: &StackPanel, label: &str) -> Ref<StackPanel> {
+    read_only_row(body, label, "Rust expression")
+}
+
+pub(super) fn read_only_row(body: &StackPanel, label: &str, value: &str) -> Ref<StackPanel> {
     let (row, tools) = row(body, label);
-    let value = text("Rust expression");
+    let value = text(value);
     Grid::set_column(&value, 1);
     row.children().add(value.upcast::<Control>());
     tools
 }
 
-fn row(body: &StackPanel, label: &str) -> (Ref<Grid>, Ref<StackPanel>) {
+pub(super) fn row(body: &StackPanel, label: &str) -> (Ref<Grid>, Ref<StackPanel>) {
     let row = Grid::new();
     row.set_column_definitions(
         ColumnDefinitions::parse("112,*,Auto").expect("Style editor columns"),
@@ -132,20 +136,12 @@ pub(super) fn add_setter_button(
     tools: &StackPanel,
     scope: &Scope,
     rule: &RsxStyle,
-    fields: Vec<&RsxStyleField>,
+    fields: &[&RsxStyleField],
 ) {
     let style = rule.declaration.start;
     let mut choices = fields
-        .into_iter()
-        .filter(|field| {
-            !rule
-                .setters
-                .iter()
-                .filter_map(|setter| setter.field.as_ref())
-                .any(|original| {
-                    original.name == field.name && original.owner_name() == field.owner_name()
-                })
-        })
+        .iter()
+        .filter(|field| !rule.has_setter(field))
         .map(|field| {
             (
                 format!("{} · {}", field.name, field.owner_name()),
@@ -207,7 +203,7 @@ pub(super) fn issues_button(tools: &StackPanel, scope: &Scope, issues: &[RsxStyl
     );
 }
 
-fn input(label: &str, value: &str) -> Ref<TextBox> {
+pub(super) fn input(label: &str, value: &str) -> Ref<TextBox> {
     let input = TextBox::new();
     input.classes().add("designer-field");
     input.set_min_width(0.0);
@@ -216,7 +212,7 @@ fn input(label: &str, value: &str) -> Ref<TextBox> {
     input
 }
 
-fn prompt(title: &str) -> Ref<StackPanel> {
+pub(super) fn prompt(title: &str) -> Ref<StackPanel> {
     let pane = StackPanel::new();
     pane.set_width(340.0);
     pane.set_spacing(5.0);
@@ -224,7 +220,7 @@ fn prompt(title: &str) -> Ref<StackPanel> {
     pane
 }
 
-fn flyout_button(tools: &StackPanel, glyph: &str, label: &str, pane: Ref<StackPanel>) {
+pub(super) fn flyout_button(tools: &StackPanel, glyph: &str, label: &str, pane: Ref<StackPanel>) {
     let button: Ref<Button> = icon_button(glyph, label, || {});
     let flyout = Flyout::new();
     flyout.set_placement(PlacementMode::Bottom);

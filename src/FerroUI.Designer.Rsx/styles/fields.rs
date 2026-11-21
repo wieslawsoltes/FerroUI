@@ -32,9 +32,14 @@ enum Codec {
 pub(super) enum SetterValue {
     Native(ValueSource),
     Literal { text: String, span: SourceSpan },
+    Resource(String),
 }
 
 impl RsxStyleField {
+    pub fn accepts_color_resource(&self) -> bool {
+        matches!(&self.codec, Codec::Native(shape) if shape.kind() == ValueKind::Color)
+    }
+
     pub fn owner_name(&self) -> &str {
         &self.owner.name
     }
@@ -101,6 +106,7 @@ impl SetterValue {
         match self {
             Self::Native(value) => value.value.to_xaml(),
             Self::Literal { text, .. } => text.clone(),
+            Self::Resource(key) => key.clone(),
         }
     }
 
@@ -112,6 +118,7 @@ impl SetterValue {
     ) -> Result<Vec<TextPatch>, String> {
         let mut patches = Vec::new();
         match self {
+            Self::Resource(_) => return Err("Choose a resource for this setter".into()),
             Self::Native(authored) => authored.plan(value, &mut patches)?,
             Self::Literal { span, .. } => {
                 let mut replacement = field.rust(value)?;

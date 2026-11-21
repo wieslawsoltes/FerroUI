@@ -1,5 +1,6 @@
 //! Parse inline StyleBuilder calls and retain the source of omitted Rust expressions.
-use super::{Deletion, RsxStyle, RsxStyleField, RsxStyleIssue, RsxStyleSetter};
+use super::{Deletion, RsxStyle, RsxStyleField, RsxStyleIssue, RsxStyleResource, RsxStyleSetter};
+use super::{fields::SetterValue, resources::literal_key};
 use crate::animation::{program_comment::AnimationAttachment, syntax as rust, RsxAnimationIssue};
 use crate::{tree::MAX_DEPTH, RsxCatalog};
 use ferroui_designer_core::SourceSpan;
@@ -95,16 +96,19 @@ impl ProjectedStyles {
         let lone_style =
             (depth == 0 && methods.len() == 1).then_some((declaration, deletion.comma));
         let mut setters = Vec::new();
+        let mut resources = Vec::new();
         let mut children = Vec::new();
         let mut clips = Vec::new();
         for call in methods {
             let method = rust::method_suffix(call);
-            if call.method == "set" && call.args.len() == 2 {
+            if (call.method == "set" || call.method == "set_resource") && call.args.len() == 2 {
                 let expression = &call.args[1];
                 let field = RsxStyleField::from_expression(&call.args[0], catalog);
-                let value = field
-                    .as_ref()
-                    .and_then(|field| field.read(source, expression));
+                let value = if call.method == "set_resource" {
+                    field.as_ref().and_then(|_| literal_key(expression)).map(SetterValue::Resource)
+                } else {
+                    field.as_ref().and_then(|field| field.read(source, expression))
+                };
                 if value.is_none() {
                     self.issue(
                         rust::span(expression),
@@ -115,8 +119,15 @@ impl ProjectedStyles {
                     declaration: method,
                     source: rust::span(expression),
                     field,
+                    method: rust::span(&call.method),
                     value,
                 });
+            } else if call.method == "resource" {
+                let resource = RsxStyleResource::read(call);
+                if resource.as_ref().is_none_or(|resource| resource.color.is_none()) {
+                    self.issue(method, "Reveal this computed or unmapped Rust resource");
+                }
+                resources.extend(resource);
             } else if let Some(nested) = rust::argument(call, "nested") {
                 let deletion = Deletion {
                     span: method,
@@ -154,6 +165,7 @@ impl ProjectedStyles {
             selector: value,
             selector_span,
             setters,
+            resources,
             children,
             clips,
             preview_selector,

@@ -16,6 +16,9 @@ export type RustStyleEdit = { action: 'create'; owner: number; selector: string 
     | { action: 'create_nested' | 'selector'; style: number; selector: string }
     | { action: 'setter'; style: number; setter: number; value: string | null }
     | { action: 'add_setter'; style: number; getter: string; value: string }
+    | { action: 'set_resource'; style: number; key: string } & ({ setter: number } | { getter: string })
+    | { action: 'add_color_resource'; style: number; key: string; value: string }
+    | { action: 'color_resource'; style: number; resource: number; value: string }
     | { action: 'remove'; style: number };
 
 export interface StyleScope { node: number; label: string }
@@ -47,7 +50,9 @@ export interface AuthoredSetter extends StyleSetter {
     expression: boolean;
     editable: boolean;
     can_remove?: boolean;
+    resource?: { key: string; declaration?: Range | null } | null;
 }
+export interface RustColorResource { node: number; key: string; color?: string | null; range: Range }
 export interface StyleDefinition<Base extends string | number = number> {
     node: number;
     kind: StyleSummary['kind'];
@@ -61,6 +66,8 @@ export interface StyleDefinition<Base extends string | number = number> {
     available: StyleSetter[];
     can_remove: boolean;
     nested_allowed?: boolean;
+    color_resources?: RustColorResource[];
+    resource_choices?: RustColorResource[];
 }
 export interface PaletteColor {
     node: number;
@@ -112,7 +119,9 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'selector'; value: string }
     | { type: 'base'; base: Base | null }
     | { type: 'setter'; property: string; value: string | null; node: number }
-    | { type: 'setter-resource'; property: string }
+    | { type: 'setter-resource'; property: string; node: number }
+    | { type: 'add-color-resource' }
+    | { type: 'rust-resource-color'; node: number; color: string }
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }
     | { type: 'add-nested-style' | 'style-issues' }
     | { type: 'palette-add'; layer: PaletteLayer }

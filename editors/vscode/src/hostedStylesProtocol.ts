@@ -30,8 +30,9 @@ export type HostedStyleCommand = HostedStyleRead
     | { action: 'create'; address: string }
     | { action: 'issues'; address: string }
     | { action: 'addSetter'; target: HostedStyleTarget }
+    | { action: 'addColorResource'; target: HostedStyleTarget }
     | { action: 'addNested'; target: HostedStyleTarget }
-    | { action: 'chooseResource'; target: HostedStyleTarget; property: string };
+    | { action: 'chooseResource'; target: HostedStyleTarget; property: string; setter: number };
 export type HostedStyleResult = HostedStyleFiles | HostedStyleCatalog | HostedStyleDefinition;
 export type FromHostedStyles = { type: 'styles'; request: number; frame: HostedAnimationFrame; command: HostedStyleCommand };
 export type ToHostedStyles = { type: 'stylesReply'; request: number; frame: HostedAnimationFrame; result?: HostedStyleResult; error?: string }

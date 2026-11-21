@@ -1,7 +1,7 @@
 //! Shared report and source transaction for Rust style editors.
 use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField};
+use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField, RsxStyleResource};
 use serde_json::{json, Value};
 
 impl DesignerSession {
@@ -38,39 +38,42 @@ pub fn rust_style_report(
             .iter()
             .find(|(_, style)| style.declaration.start == node)
             .ok_or("Choose a style from the current Rust invocation")?;
+        let choices = projection.style_resource_choices(node);
+        let has_choices = !choices.is_empty();
         let setters = style.setters.iter().map(|setter| {
             let value = setter.value();
             let fallback = source.get(setter.source.range()).unwrap_or_default();
+            let resource = setter.resource_key().map(|key| {
+                let declaration = choices.iter().find(|entry| entry.key == key)
+                    .and_then(|entry| index.range(entry.source).ok());
+                json!({"key":key,"declaration":declaration})
+            });
             json!({"node":setter.declaration.start,
                 "property":setter.field.as_ref().map_or("Computed property", |field| field.name.as_str()),
                 "value":value.as_deref().unwrap_or(fallback),
                 "range":index.range(setter.source).ok(),
-                "field":setter.field.as_ref().map(field).unwrap_or_else(|| json!({"kind":"text","options":[],"resources":false})),
-                "expression":value.is_none(),"editable":value.is_some(),"can_remove":value.is_some(),"object":false})
+                "field":setter.field.as_ref().map(|field| field_report(field, has_choices && value.is_some())).unwrap_or_else(|| json!({"kind":"text","options":[],"resources":false})),
+                "resource":resource, "expression":value.is_none(),
+                "editable":value.is_some() && resource.is_none(),"can_remove":value.is_some(),"object":false})
         }).collect::<Vec<_>>();
         let mut available = projection
             .style_fields()
             .into_iter()
-            .filter(|field| {
-                !style
-                    .setters
-                    .iter()
-                    .filter_map(|setter| setter.field.as_ref())
-                    .any(|original| {
-                        original.name == field.name && original.owner_name() == field.owner_name()
-                    })
-            })
+            .filter(|field| !style.has_setter(field))
             .collect::<Vec<_>>();
         available.sort_by(|a, b| {
             (&a.name, a.owner_name(), &a.getter).cmp(&(&b.name, b.owner_name(), &b.getter))
         });
         available.dedup_by(|a, b| a.name == b.name && a.owner_name() == b.owner_name());
         let available = available.into_iter().map(|property|
-            json!({"property":property.name,"getter":property.getter,"field":field(property)})).collect::<Vec<_>>();
+            json!({"property":property.name,"getter":property.getter,"field":field_report(property, has_choices)})).collect::<Vec<_>>();
+        let resources = style.resources.iter().map(|resource| resource_report(&index, resource)).collect::<Vec<_>>();
+        let choices = choices.into_iter().map(|resource| resource_report(&index, resource)).collect::<Vec<_>>();
         return Ok(json!({"node":node,"kind":"Style","name":style.selector,
             "range":index.range(style.selector_span).ok(),
             "identity":{"kind":"selector","value":style.selector,"editable":true},
-            "nested_allowed":true,"can_remove":style.can_remove(),"setters":setters,"available":available}));
+            "nested_allowed":true,"can_remove":style.can_remove(),"setters":setters,"available":available,
+            "color_resources":resources,"resource_choices":choices}));
     }
     let definitions = styles.into_iter().map(|(owner, style)| {
         let span = projection.nodes[owner].name;
@@ -95,11 +98,17 @@ pub fn rust_style_report(
     )
 }
 
-fn field(field: &RsxStyleField) -> Value {
+fn field_report(field: &RsxStyleField, has_choices: bool) -> Value {
     let options = if field.kind() == "boolean" {
         vec!["true".into(), "false".into()]
     } else {
         field.options().to_vec()
     };
-    json!({"kind":field.kind(),"type_name":field.type_name,"options":options,"resources":false,"owner":field.owner_name()})
+    json!({"kind":field.kind(),"type_name":field.type_name,"options":options,
+        "resources":has_choices && field.accepts_color_resource(),"owner":field.owner_name()})
+}
+
+fn resource_report(index: &LineIndex, resource: &RsxStyleResource) -> Value {
+    json!({"node":resource.declaration.start,"key":resource.key,"color":resource.color(),
+        "range":index.range(resource.source).ok()})
 }

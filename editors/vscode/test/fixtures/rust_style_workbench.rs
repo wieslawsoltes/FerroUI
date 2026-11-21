@@ -6,6 +6,7 @@ fn customer_review() -> Element {
             StackPanel { spacing: 14.0,
                 styles: [
                     ferroui_view::style(r"#Review")
+                        .resource("ReviewInk", ferroui_base::media::Color::from_rgb(34, /* palette */ 78, 124))
                         .set(ferroui_controls::TextBlock::font_size_property(), /* 🧭 headline */ 24.0f64)
                         .set(ferroui_controls::TextBlock::foreground_property(), "#1C3554")
                         .nested(ferroui_view::style("^.muted")

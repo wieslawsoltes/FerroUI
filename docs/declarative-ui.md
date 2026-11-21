@@ -533,6 +533,7 @@ stack_panel().styles([
 
 - `style(selector)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. `style_of(selector)` takes a selector built with the selectors API.
 - `.set(property, value)` takes what converts to the value of the property, as the setters of elements do.
+- `.resource(key, value)` adds a native resource to the rule's dictionary. `.set_resource(property, key)` follows the value seen by each matched control, including local overrides and theme variants. A `Color` resource can supply a brush property. For example, `.resource("Accent", Color::from_rgb(0, 99, 177)).set_resource(TemplatedControl::background_property(), "Accent")` uses the same key in the authored rule and the live property binding. [Author color resources in VS Code](designer/vscode/styles.md#edit-rust-style-color-resources)
 - `.nested(style("^..."))` adds a nested style; its selector starts with `^`, the selector of the style it is in (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
 - `.styles([..])` of an element (`styles: [..]` in `rsx!`) adds the styles to the `Styles` of the control when it is made.
 

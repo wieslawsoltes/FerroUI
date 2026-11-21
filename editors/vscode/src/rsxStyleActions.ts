@@ -1,11 +1,12 @@
 import { editText, type StudioContext } from './studioContext';
-import { chooseNewSetter, chooseNewStyle } from './stylePrompts';
+import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, promptRustColorResource } from './stylePrompts';
 import type { RustStyleEdit, StylesAction, StylesContent } from './stylesProtocol';
 
 export const RSX_STYLES = 'designer_rsx_styles';
 export const RSX_STYLE_EDIT = 'designer_rsx_style_edit';
 
-const editActions = new Set(['new', 'selector', 'setter', 'add-setter', 'add-nested-style', 'remove-style']);
+const editActions = new Set(['new', 'selector', 'setter', 'setter-resource', 'add-setter', 'add-nested-style', 'remove-style',
+    'add-color-resource', 'rust-resource-color']);
 
 export function isRustStyleAction(action: StylesAction): boolean { return editActions.has(action.type); }
 
@@ -27,13 +28,30 @@ export async function editRustStyle(context: StudioContext, content: StylesConte
         case 'setter':
             await edit({ action: 'setter', style, setter: action.node, value: action.value });
             break;
+        case 'setter-resource': {
+            const choice = await chooseRustColorResource(action.property, definition.resource_choices ?? []);
+            if (choice) await edit({ action: 'set_resource', style, setter: action.node, key: choice.key });
+            break;
+        }
         case 'add-setter': {
             const value = await chooseNewSetter(definition.available);
             if (value?.kind === 'literal' && value.getter) {
                 await edit({ action: 'add_setter', style, getter: value.getter, value: value.value });
             }
+            if (value?.kind === 'resource' && value.getter) {
+                const choice = await chooseRustColorResource(value.property, definition.resource_choices ?? []);
+                if (choice) await edit({ action: 'set_resource', style, getter: value.getter, key: choice.key });
+            }
             break;
         }
+        case 'add-color-resource': {
+            const result = await promptRustColorResource();
+            if (result) await edit({ action: 'add_color_resource', style, ...result });
+            break;
+        }
+        case 'rust-resource-color':
+            await edit({ action: 'color_resource', style, resource: action.node, value: action.color });
+            break;
         case 'add-nested-style': {
             const selector = await editText('Selector', '^:pointerover', undefined, 'New Nested Rust Style');
             if (selector === undefined) break;
