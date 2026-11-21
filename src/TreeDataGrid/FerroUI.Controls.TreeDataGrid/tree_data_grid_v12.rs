@@ -207,6 +207,20 @@ impl TreeDataGrid {
         &self.column_definitions
     }
 
+    /// Updates the existing collection so XAML, View and list subscribers observe
+    /// the same columns. The generated source rebuilds from the completed list.
+    pub fn set_column_definitions(&self, value: crate::TreeDataGridColumns) {
+        let previous = self.column_definitions.snapshot();
+        if self.column_definitions.replace_all(value.snapshot().iter().cloned()) {
+            let previous = crate::TreeDataGridColumns::from_columns(previous.iter().cloned());
+            self.raise_direct_property_changed(
+                Self::column_definitions_property(),
+                &previous,
+                &self.column_definitions,
+            );
+        }
+    }
+
     /// `SelectionChanged`: the rows or cells selected changed. Disposing the returned handle
     /// unsubscribes.
     pub fn selection_changed(&self, handler: impl Fn(&TreeDataGridSelectionChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {

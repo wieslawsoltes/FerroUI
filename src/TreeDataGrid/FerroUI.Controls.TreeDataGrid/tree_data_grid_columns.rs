@@ -15,6 +15,11 @@ impl TreeDataGridColumns {
         Self(FerroList::new())
     }
 
+    /// Starts a detached collection from native declarative columns.
+    pub fn from_columns(columns: impl IntoIterator<Item = Rc<dyn TreeDataGridColumn>>) -> Self {
+        Self(FerroList::from_items(columns))
+    }
+
     /// The list.
     pub fn list(&self) -> &FerroList<Rc<dyn TreeDataGridColumn>> {
         &self.0

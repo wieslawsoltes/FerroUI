@@ -7,6 +7,8 @@ mod macro_tests;
 mod reactive_tests;
 mod rerender_tests;
 mod template_tests;
+#[cfg(feature = "treedatagrid")]
+mod tree_data_grid_tests;
 mod api_tests;
 mod tools_tests;
 mod performance_tests;

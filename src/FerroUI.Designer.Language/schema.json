@@ -28637,18 +28637,19 @@
         "values": [],
         "attached": false
       },
+      "ColumnDefinitions": {
+        "name": "ColumnDefinitions",
+        "type_name": "TreeDataGridColumns",
+        "documentation": "TreeDataGrid.ColumnDefinitions: TreeDataGridColumns",
+        "values": [],
+        "attached": false
+      },
       "SelectionMode": {
         "name": "SelectionMode",
         "type_name": "TreeDataGridSelectionMode",
         "documentation": "TreeDataGrid.SelectionMode: TreeDataGridSelectionMode",
         "values": [],
         "attached": false
-      },
-      "ColumnDefinitions": {
-        "name": "ColumnDefinitions",
-        "type_name": "crate::TreeDataGridColumns",
-        "documentation": "TreeDataGrid.ColumnDefinitions: crate::TreeDataGridColumns",
-        "values": []
       },
       "RowDragStarted": {
         "name": "RowDragStarted",

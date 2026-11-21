@@ -66,6 +66,8 @@ mod rust_paths;
 mod style;
 mod table_columns;
 mod template;
+#[cfg(feature = "treedatagrid")]
+mod tree_data_grid_columns;
 mod visual_states;
 pub mod xaml;
 
@@ -113,6 +115,12 @@ pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
 pub use template::template;
 pub use table_columns::{TableViewColumnBuilder, table_column, table_columns};
+#[cfg(feature = "treedatagrid")]
+pub use tree_data_grid_columns::{
+    TreeDataGridColumnBuilder, tree_data_grid_check_box_column, tree_data_grid_columns,
+    tree_data_grid_expander_column, tree_data_grid_row_header_column, tree_data_grid_template_column,
+    tree_data_grid_text_column,
+};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
@@ -146,6 +154,11 @@ pub mod prelude {
     pub use crate::generated::repeater::*;
     #[cfg(feature = "treedatagrid")]
     pub use crate::generated::treedatagrid::*;
+    #[cfg(feature = "treedatagrid")]
+    pub use crate::{
+        tree_data_grid_check_box_column, tree_data_grid_columns, tree_data_grid_expander_column,
+        tree_data_grid_row_header_column, tree_data_grid_template_column, tree_data_grid_text_column,
+    };
     pub use crate::{
         animation, batch, component, dynamic, effect, for_each, memo, ms, on_cleanup, provide_context, rerender, rsx, show,
         show_else, style, transition, transitions, use_animation, use_resource, use_resource_as, use_theme_variant,
