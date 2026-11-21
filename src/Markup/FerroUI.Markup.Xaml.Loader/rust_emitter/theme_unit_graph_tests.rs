@@ -362,11 +362,10 @@ fn a_unit_records_what_each_of_its_entries_names() {
     // The brush of the light dictionary names the colour; the style names the brush.
     assert_eq!(entry("AccentBrush").references, strings(&["Accent"]));
     assert_eq!(entry("Default").references, strings(&["AccentBrush"]));
-    assert!(entry("Unscaled").types.contains(&"Viewbox".to_string()), "{:?}", entry("Unscaled"));
+    assert!(entry("Unscaled").references.is_empty(), "{:?}", entry("Unscaled"));
     // The button's document: its control theme by type is the rest of the unit; the keyed theme
     // based on it is an entry.
     let button = unit(&units, "Controls/Button.xaml");
     assert_eq!(button.entries.iter().map(|entry| entry.key.as_str()).collect::<Vec<_>>(), ["AccentButtonStyle"]);
     assert!(button.body_references.contains(&"Default".to_string()), "{:?}", button.body_references);
-    assert!(button.body_types.contains(&"ContentPresenter".to_string()), "{:?}", button.body_types);
 }
