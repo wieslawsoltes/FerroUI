@@ -65,7 +65,7 @@ fn compiled_source_information_is_the_run_time_loaders() {
     let actual = source_infos(&compiled);
     let name = SOURCE_INFO_DOCUMENTS[1].0.trim_start_matches('/');
     let physical_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(name);
-    let loader_address = format!("ferres://{}/{name}", ASSEMBLY.name);
+    let loader_address = format!("ferres://{}/{name}", ASSEMBLY.name.to_ascii_lowercase());
     // The compiled object locations retain both the workspace file used for
     // Apply to Source and the packaged address used for resource resolution.
     for (compiled, loaded) in actual.iter().zip(&expected).take(2) {

@@ -19,6 +19,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
+    DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
     DesignIncludedSource, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
@@ -167,6 +168,18 @@ fn entities() -> Vec<Message> {
         Arc::new(ferroui_remote_protocol::designer::DesignPaletteContextMessage {
             revision: 41, contrast: Some(vec!["HighContrast".into(), "Dark".into()]),
             assemblies: vec!["FerroUI.Themes.WinUI".into()],
+        }),
+        Arc::new(DesignTemplateCatalogMessage {
+            revision: 41,
+            templates: vec![DesignTemplateUse {
+                owner: DesignTemplateSource {
+                    address: "ferres://test/Preview.xaml".into(), fingerprint: -32, line: 8, column: 5,
+                },
+                type_name: "Button".into(),
+                definition: Some(DesignTemplateSource {
+                    address: "ferres://test/Resources/Controls.xaml".into(), fingerprint: 14, line: 16, column: 11,
+                }),
+            }],
         }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),

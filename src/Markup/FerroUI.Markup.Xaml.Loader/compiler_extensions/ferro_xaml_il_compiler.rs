@@ -380,7 +380,10 @@ impl FerroXamlIlCompiler {
         let snapshot = self.create_source_info().then(|| Rc::new(XamlSourceStamp {
             revision: ferroui_reload_protocol::fingerprint(source.as_bytes()),
             file_path,
-            loader_uri: base_uri.filter(|uri| uri.starts_with("ferres://")).map(std::sync::Arc::from),
+            loader_uri: base_uri
+                .and_then(|uri| ferroui_base::utilities::UriRef::parse_absolute(uri).ok())
+                .filter(|uri| uri.scheme() == ferroui_base::platform::ASSET_SCHEME)
+                .map(|uri| std::sync::Arc::from(uri.as_str())),
         }));
         self.add_source_info_transformer.set_source_snapshot(snapshot);
         let result = self.transform(document);

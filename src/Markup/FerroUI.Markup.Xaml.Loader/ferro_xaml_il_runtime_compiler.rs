@@ -539,14 +539,17 @@ mod cache_tests {
         let revision = ferroui_reload_protocol::fingerprint(source.as_bytes());
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
         configuration.set_create_source_info(true);
-        for address in ["ferres://Sample/Themes/Primary.xaml", "ferres://Sample/Other/Primary.xaml"] {
+        for (address, canonical) in [
+            ("ferres://Sample/Themes/Primary.xaml", "ferres://sample/Themes/Primary.xaml"),
+            ("ferres://SAMPLE/Other/Primary.xaml", "ferres://sample/Other/Primary.xaml"),
+        ] {
             let uri = url::Url::parse(address).unwrap();
             let object = FerroXamlIlRuntimeCompiler::load(
                 RuntimeXamlLoaderDocument::with_base_uri(Some(uri.clone()), source),
                 &configuration,
             ).unwrap();
             let info = XamlSourceInfo::get_xaml_source_info(&object).unwrap();
-            assert_eq!(info.loader_uri(), Some(uri.as_str()));
+            assert_eq!(info.loader_uri(), Some(canonical));
             assert_eq!(info.source_revision(), Some(revision));
         }
     }
