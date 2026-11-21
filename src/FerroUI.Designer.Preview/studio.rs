@@ -146,11 +146,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     let needs_selection = match query.name.as_str() {
         "designer_style_catalog" => query.arguments.get("target").is_none(),
-        "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette" | RSX_STYLES => false,
+        "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette"
+        | "designer_item_templates" | RSX_STYLES => false,
         _ => true,
     };
-    // Reading one explicit definition must never retire a plan made for another
-    // selection while the Styles & Themes dock refreshes its rows.
+    // A direct style or template lookup can run while another view holds a
+    // selection-based plan. Leave its selection in place.
     if let (true, Some(selection)) = (needs_selection, &query.selection) {
         select(stage, selection)?;
     }

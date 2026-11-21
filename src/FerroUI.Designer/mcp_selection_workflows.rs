@@ -166,9 +166,18 @@ fn property_plan(
     ))
 }
 
-pub(super) fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value) -> Value {
+pub(super) fn accepted_report(session: &DesignerSession, operation: &str, report: Value) -> Value {
+    model_report(session, operation, report, true)
+}
+
+/// An explicit authored target uses the same scope guards as a selection
+/// plan. Other views may change selection while its source action is open.
+pub(super) fn accepted_target_report(session: &DesignerSession, operation: &str, report: Value) -> Value {
+    model_report(session, operation, report, false)
+}
+
+fn model_report(session: &DesignerSession, operation: &str, mut report: Value, track_selection: bool) -> Value {
     report["revision"] = json!(session.document().revision());
-    report["selection"] = json!(session.selection());
     report["scope_epoch"] = json!(session.definition_scope_epoch());
     report["layer_epoch"] = json!(session.layer_view_epoch());
     // The token is an optimistic-concurrency check, not a permission or credential.
@@ -177,10 +186,16 @@ pub(super) fn accepted_report(session: &DesignerSession, operation: &str, mut re
     let mut hash = std::collections::hash_map::DefaultHasher::new();
     operation.hash(&mut hash);
     session.document_uri().hash(&mut hash);
-    session.generation().hash(&mut hash);
+    if track_selection {
+        session.generation().hash(&mut hash);
+        report["selection"] = json!(session.selection());
+    }
     Arc::as_ptr(&session.document().ast_snapshot()).hash(&mut hash);
     report.to_string().hash(&mut hash);
     report["model"] = json!(format!("{:016x}", hash.finish()));
+    if !track_selection {
+        report["selection"] = json!(session.selection());
+    }
     report
 }
 

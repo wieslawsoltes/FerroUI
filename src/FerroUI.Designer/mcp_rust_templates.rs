@@ -1,4 +1,4 @@
-use super::{QUERY, accepted_report, decode, node_id, require_model, state};
+use super::{QUERY, accepted_target_report, decode, node_id, require_model, state};
 use crate::{DesignerSession, mcp::ensure_revision};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::LineIndex;
@@ -48,7 +48,7 @@ pub fn rust_template_report(
             })
         })
         .collect::<Vec<_>>();
-    Ok(accepted_report(
+    Ok(accepted_target_report(
         session,
         QUERY,
         json!({

@@ -1,4 +1,4 @@
-use super::selection_workflows::{accepted_report, require_model};
+use super::selection_workflows::{accepted_target_report, require_model};
 use super::{decode, node_id, schema as s, state};
 use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
@@ -119,7 +119,7 @@ fn report(session: &DesignerSession, node: u64, control: bool) -> Result<Value, 
             }))
         })
         .collect::<Result<Vec<_>, String>>()?;
-    Ok(accepted_report(
+    Ok(accepted_target_report(
         session,
         QUERY,
         json!({"node":node,"slots":slots,"resources":resources,"includedResources":included_resources}),

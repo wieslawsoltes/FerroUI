@@ -53,6 +53,7 @@ export async function verifyCompiledControlTemplate(designer: DesignerWorkbench,
     assert.equal(vscode.Uri.parse(slot.includedDefinition.uri).fsPath, await realpath(theme.fsPath));
     assert.equal(slot.canCopyInline, true, slot.copyReason);
 
+    await panel.studioQuery('designer_ast', { depth: 0 }, [before.nodes[0].id], AbortSignal.timeout(15_000));
     await panel.studioEdit(token, 'designer_item_template', {
         node, property: 'Template', action: 'copy_inline', expected_model: report.model,
     }, [node], AbortSignal.timeout(15_000));
