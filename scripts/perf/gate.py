@@ -577,6 +577,27 @@ def parse_tdg(output: str) -> tuple[list[tuple[Metric, float]], set[str], dict[s
 # --- running --------------------------------------------------------------------------------------
 
 
+# The cargo profile of the desktop suites and the folder of its output (`--profile`).
+PROFILE_FOLDER = "release"
+
+
+def use_profile(profile: str) -> None:
+    """Builds and runs the desktop suites with `profile` instead of `release`."""
+    global PROFILE_FOLDER
+    PROFILE_FOLDER = profile
+    if profile == "release":
+        return
+    def replaced(args: list[str]) -> list[str]:
+        out: list[str] = []
+        for arg in args:
+            out.extend(["--profile", profile] if arg == "--release" else [arg])
+        return out
+    FRAMES_TEST[:] = replaced(FRAMES_TEST)
+    for suite in SUITES.values():
+        suite["build"] = replaced(suite["build"])
+        suite["run"] = replaced(suite["run"])
+
+
 def cargo_command() -> list[str]:
     return shlex.split(os.environ.get("FERROUI_CARGO", "cargo"))
 
@@ -1074,7 +1095,7 @@ def window_metrics(side: Side, scene: str, report: PerfReport, seconds: float, l
 def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
     """Opens `scene` in the desktop program of the frame benchmarks for `seconds` and returns its
     metrics (`window_metrics`)."""
-    binary = side.target / "release" / (FRAMES_BINARY + (".exe" if os.name == "nt" else ""))
+    binary = side.target / PROFILE_FOLDER / (FRAMES_BINARY + (".exe" if os.name == "nt" else ""))
     env = {**os.environ, "FRAMES_SCENE": scene, "PERF_REPORT": "1"}
     # A program before the fonts were part of it reads them from this folder.
     env.setdefault("PERF_FONTS", str(side.root / "src/FerroUI.Themes.Material/Assets"))
@@ -1566,6 +1587,13 @@ def main() -> int:
         "can move. Instructions decide; the full gate runs on the top of the stack",
     )
     parser.add_argument(
+        "--profile",
+        choices=("release", "dist"),
+        default="release",
+        help="the cargo profile of the desktop suites (default release). The gate before a release uses dist, "
+        "the build that ships; its first run in a target folder builds native Skia there",
+    )
+    parser.add_argument(
         "--batch",
         action="store_true",
         help="the gate of a batch of stacks merged together: frames and framework, 3 timed rounds of the "
@@ -1609,6 +1637,9 @@ def main() -> int:
             options.max_rounds = options.rounds + BATCH_CONFIRM_ROUNDS - 1
         if options.frames is None:
             options.frames = 120
+    if options.profile != "release" and options.window_device:
+        parser.error("--profile applies to the desktop suites; a device build uses release")
+    use_profile(options.profile)
     if options.rounds < 1:
         parser.error("--rounds must be at least 1")
     if options.max_rounds < options.rounds:
@@ -1704,7 +1735,7 @@ def gate(options: argparse.Namespace) -> int:
     if "counters" in suites:
         what.insert(0, "the counter checks")
     print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {' and '.join(what)}")
-    print(f"scratch: {scratch}; cargo: {' '.join(cargo_command())}")
+    print(f"profile: {options.profile}; scratch: {scratch}; cargo: {' '.join(cargo_command())}")
     device = None
     if options.window_device and options.dry_run:
         device = Device(options.window_device, options.device_id, "arm64-v8a")
@@ -1941,6 +1972,8 @@ def gate(options: argparse.Namespace) -> int:
     if options.markdown:
         machine = f"{platform.system()} {platform.machine()}, Python {platform.python_version()}"
         notes = []
+        if options.profile != "release":
+            notes.append(f"Built with the `{options.profile}` profile.")
         if options.batch:
             notes.append(
                 "Batch gate: the frame scenes in timed rounds, the micro-benchmarks in one round decided by their "
