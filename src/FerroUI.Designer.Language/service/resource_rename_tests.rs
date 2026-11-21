@@ -324,3 +324,67 @@ fn scoped_theme_family_rename_reaches_nested_contrast_colors() {
     let key = updated.find("Review Accent 🧭").unwrap();
     assert_eq!(service.definitions(&view, key).unwrap().len(), 3);
 }
+
+#[test]
+fn lsp_refreshes_open_consumers_after_a_nested_theme_dictionary_changes_or_closes() {
+    use serde_json::{json, Value};
+
+    let project = Project::new();
+    let view = format!(
+        "<Grid {NS}><Grid.Resources><ResourceInclude Source='Palette.xaml'/></Grid.Resources><Border Background='{{DynamicResource Accent}}'/></Grid>"
+    );
+    let palette = format!(
+        "<ResourceDictionary {NS} xmlns:t='using:FerroUI.Themes.WinUI'><ResourceDictionary.ThemeDictionaries><ResourceInclude x:Key='{{x:Static t:WinUITheme.HighContrast}}' Source='Colors.xaml'/></ResourceDictionary.ThemeDictionaries></ResourceDictionary>"
+    );
+    let colors = format!(
+        "<ResourceDictionary {NS}><SolidColorBrush x:Key='Accent' Color='Yellow'/></ResourceDictionary>"
+    );
+    let unrelated = format!("<Grid {NS}/>");
+    let view_uri = project.write("View.xaml", &view);
+    let other_uri = project.write("Unrelated.xaml", &unrelated);
+    let colors_uri = project.write("Colors.xaml", &colors);
+    project.write("Palette.xaml", &palette);
+
+    let mut server = crate::lsp::LspServer::default();
+    project.index(&mut server.service);
+    server.handle(json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}));
+    for (uri, source) in [
+        (&view_uri, &view),
+        (&other_uri, &unrelated),
+        (&colors_uri, &colors),
+    ] {
+        server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didOpen",
+            "params":{"textDocument":{"uri":uri,"version":1,"text":source}}}));
+    }
+
+    let assert_consumer = |published: Vec<Value>, missing: bool| {
+        assert!(published
+            .iter()
+            .all(|message| message["params"]["uri"] != other_uri));
+        let view = published
+            .iter()
+            .find(|message| {
+                message["method"] == "textDocument/publishDiagnostics"
+                    && message["params"]["uri"] == view_uri
+            })
+            .expect("the open consumer must receive fresh diagnostics");
+        assert_eq!(view["params"]["version"], 1);
+        let entries = view["params"]["diagnostics"].as_array().unwrap();
+        assert_eq!(
+            entries
+                .iter()
+                .any(|entry| entry["code"] == "unresolved-reference"),
+            missing
+        );
+    };
+    let draft = colors.replace("Accent", "TemporaryAccent");
+    for (version, source, unresolved) in [(2, &draft, true), (3, &colors, false), (4, &draft, true)]
+    {
+        let published = server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didChange",
+            "params":{"textDocument":{"uri":colors_uri,"version":version},"contentChanges":[{"text":source}]}}));
+        assert_consumer(published, unresolved);
+    }
+    let published = server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didClose",
+        "params":{"textDocument":{"uri":colors_uri}}}));
+    assert_consumer(published, false);
+}

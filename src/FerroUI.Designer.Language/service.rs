@@ -19,6 +19,7 @@ mod registered_types;
 mod setter_properties;
 mod style_selectors;
 mod refactoring;
+mod resource_dependencies;
 mod resource_occurrences;
 mod resource_move;
 mod source_review;

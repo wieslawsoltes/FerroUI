@@ -135,7 +135,7 @@ impl LspServer {
                     .open(uri, text(document, "text")?, integer(document, "version")?)?;
                 let identity = self.service.document_uri(uri)?.into_owned();
                 self.open_uris.insert(identity, uri.into());
-                self.publish(uri, notifications)?;
+                self.publish_change(uri, notifications)?;
                 Ok(Value::Null)
             }
             "textDocument/didChange" => {
@@ -144,7 +144,7 @@ impl LspServer {
                 let changes: Vec<TextChange> = decode(&params["contentChanges"])?;
                 self.service
                     .change(uri, integer(document, "version")?, &changes)?;
-                self.publish(uri, notifications)?;
+                self.publish_change(uri, notifications)?;
                 Ok(Value::Null)
             }
             "textDocument/didClose" => {
@@ -157,6 +157,7 @@ impl LspServer {
                     "jsonrpc": "2.0", "method": "textDocument/publishDiagnostics",
                     "params": { "uri": uri, "diagnostics": [] }
                 }));
+                self.publish_dependents(&identity, notifications)?;
                 Ok(Value::Null)
             }
             "textDocument/didSave" => {
@@ -644,6 +645,22 @@ impl LspServer {
     }
     fn publish(&self, uri: &str, out: &mut Vec<Value>) -> Result<()> {
         out.push(json!({"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":uri,"version":self.service.version(uri),"diagnostics":self.service.diagnostics(uri)?.into_iter().map(|d|json!({"range":d.range,"severity":d.severity,"code":d.code,"source":"FerroUI","message":d.message})).collect::<Vec<_>>()}}));
+        Ok(())
+    }
+
+    fn publish_change(&self, uri: &str, out: &mut Vec<Value>) -> Result<()> {
+        self.publish(uri, out)?;
+        self.publish_dependents(&self.service.document_uri(uri)?, out)
+    }
+
+    fn publish_dependents(&self, changed: &str, out: &mut Vec<Value>) -> Result<()> {
+        // A workspace edit can arrive as several didChange notifications. The
+        // last dictionary update may repair a previously reported consumer.
+        for (identity, uri) in &self.open_uris {
+            if identity != changed && self.service.uses_resource_document(identity, changed) {
+                self.publish(uri, out)?;
+            }
+        }
         Ok(())
     }
 }
