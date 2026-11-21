@@ -170,6 +170,12 @@ export async function run(): Promise<void> {
         const partial = await preview.render(sourceOf(rust, 'rust', rust.positionAt(rust.getText().lastIndexOf('"Increment"'))), viewport);
         assert.ok(partial.image && !partial.counterpart.editable);
         assert.ok(partial.notices.some(notice => notice.includes('omitted Rust items')));
+        const collection = await preview.render({
+            ...rustInput, source: 'rsx! { StackPanel { children([rsx! { Button { content("Open") } }]) } }',
+            caret: { line: 0, character: 0 },
+        }, viewport);
+        assert.ok(collection.image && collection.counterpart.editable);
+        assert.match(collection.counterpart.reason ?? '', /mapped properties.*Outline/);
         await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);
         await verifyMultiSelection(preview, xamlInput.uri, rustInput.uri);
         await verifyStudioPresentations(preview, xamlInput.uri);

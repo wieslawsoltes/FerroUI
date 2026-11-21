@@ -1,5 +1,5 @@
 import type { Bounds, NodeOperation, PropertiesState, PropertyAuthoring, PropertyField, Range } from '../src/protocol';
-import { create, element } from './dom';
+import { create, element, iconButton } from './dom';
 import { propertyEditor } from './propertyEditor';
 
 const common = [
@@ -187,17 +187,13 @@ export class Inspector {
     private structure(node: number, canInsert: boolean, canRemove: boolean): HTMLElement {
         const row = create('div');
         row.className = 'structure';
+        row.setAttribute('role', 'group');
+        row.setAttribute('aria-label', 'Control actions');
         if (canInsert) {
-            const button = create('button', 'Open Toolbox');
-            button.className = 'secondary';
-            button.addEventListener('click', this.openToolbox);
-            row.append(button);
+            row.append(iconButton('extensions', 'Open Toolbox', this.openToolbox));
         }
         if (canRemove) {
-            const remove = create('button', 'Remove control');
-            remove.className = 'secondary';
-            remove.addEventListener('click', () => this.edit({ type: 'removeNode', node }));
-            row.append(remove);
+            row.append(iconButton('trash', 'Remove control', () => this.edit({ type: 'removeNode', node })));
         }
         return row;
     }

@@ -127,12 +127,25 @@ impl<'a> DesignDocument<'a> {
             let states = rsx.has_projected_states();
             let columns = rsx.has_projected_columns();
             let complete = rsx.omitted_count == 0;
+            let reason = if columns {
+                Some("Edit authored Rust column collections in Columns")
+            } else if states {
+                Some("Edit mapped Rust state declarations in States")
+            } else if animated {
+                Some("Edit mapped animation keys in Timeline")
+            } else if styled {
+                Some("Edit mapped Rust styles in Styles & Themes")
+            } else if !complete {
+                Some("Edit mapped literals in Properties or change the Rust source")
+            } else if !rsx.can_replace_structure() {
+                Some("Edit mapped properties here. Use the canvas or Outline to arrange controls.")
+            } else {
+                None
+            };
             return Counterpart {
                 source: Some(self.xaml.source().to_owned()),
                 editable: complete && !styled && !states && !columns,
-                reason: if columns { Some("Edit authored Rust column collections in Columns".into()) } else if states { Some("Edit mapped Rust state declarations in States".into()) } else if animated { Some("Edit mapped animation keys in Timeline".into()) } else if styled { Some("Edit mapped Rust styles in Styles & Themes".into()) } else { (!complete).then(|| {
-                    "Edit mapped literals in the inspector or change the Rust source".into()
-                }) },
+                reason: reason.map(str::to_owned),
             };
         }
         match self.rsx_catalog().xaml_to_rsx(&self.xaml) {

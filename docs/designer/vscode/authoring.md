@@ -141,7 +141,7 @@ Select a mapped member in **Outline** or on the canvas. Drag to reorder it, move
 
 **Properties** edits supported values inside the original member. In an editable **XAML** counterpart, change, add, or clear a mapped property without changing the original child list. Use the canvas or Outline to place and move controls. [Studio workflow](../native-controls.md#arrange-an-inline-rust-child-collection) · [MCP placement](reference.md#drive-an-editor-workflow)
 
-Choose **Remove control** in **Properties** to delete a mapped member. The edit keeps computed siblings and adjacent Rust. If every member is removed, the designer clears the collection assignment and retains its surrounding comments. Undo restores the original source. [MCP removal](reference.md#drive-an-editor-workflow)
+Choose the trash icon **Remove control** in **Properties** to delete a mapped member. The edit keeps computed siblings and adjacent Rust. If every member is removed, the designer clears the collection assignment and retains its surrounding comments. Undo restores the original source. [MCP removal](reference.md#drive-an-editor-workflow)
 
 ## Wrap selected controls
 
