@@ -508,8 +508,10 @@ impl MarkupDelegate {
     /// and the result is `None`; [`try_invoke`](Self::try_invoke) returns it.
     pub fn invoke(&self, arguments: &[MarkupValue]) -> MarkupValue {
         if self.nominal_type.is_some() {
-            self.try_invoke(arguments)
-                .unwrap_or_else(|error| panic!("{error}"))
+            self.try_invoke(arguments).unwrap_or_else(|error| {
+                crate::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+                None
+            })
         } else {
             (self.call)(arguments)
         }

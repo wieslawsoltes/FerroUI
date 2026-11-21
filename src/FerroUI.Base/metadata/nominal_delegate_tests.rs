@@ -159,7 +159,9 @@ fn multicast_uses_nominal_compatibility_last_subsequence_and_error_order() {
         Err(MarkupInvokeError::Failed("typed-failed".into()))
     );
     assert_eq!(&*trace.borrow(), &["a"]);
-    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| all.invoke(&[]))).is_err());
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let failure = crate::threading::Dispatcher::current_dispatcher().capture_unhandled_exceptions(|| all.invoke(&[]));
+    assert!(failure.is_err(), "the failure of a typed delegate reaches the dispatcher");
     assert_eq!(&*trace.borrow(), &["a", "a"]);
 }
 #[test]
