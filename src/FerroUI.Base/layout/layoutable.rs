@@ -1165,3 +1165,7 @@ impl HotSizes {
     const USE_LAYOUT_ROUNDING: u16 = 1 << 9;
     const CONTAINER_SIZING: u16 = 1 << 10;
 }
+
+#[cfg(test)]
+#[path = "unchanged_layout_value_tests.rs"]
+mod unchanged_layout_value_tests;
