@@ -290,6 +290,12 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 
 ![The compact stage reports the edges clipped by its own viewport](../images/vscode-layout-stage-checks.jpg)
 
+### Compare a high contrast stage
+
+Use the **Environment** icon on one card and choose **High contrast** under **Theme**. Keep another card in Light or Dark to compare how the same view looks and measures under the native contrast palette. The option appears when the preview host supplies a High Contrast variant. **Checks** uses the selected card’s measured layout and colors.
+
+The choice stays on that card and is saved in the stage set. Authored background and foreground values keep their native precedence. [Designer Studio stages](../xcode-previews.md) · [MCP stage actions](reference.md#choose-a-stage-theme-with-mcp)
+
 ### Use the keyboard in a stage
 
 1. Switch a ready stage to **Interact**. Choose **Keyboard input for** the stage with the **abc** icon, or click a control directly on the artboard.

@@ -7,6 +7,7 @@ import { DesignerDependencies, dirtyXamlSources, xamlPath } from './designerDepe
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import { stageThemeLabels } from './stagesProtocol';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { sameStageSource, stageUsesSource, retargetStageManifest, type StageFileMove } from './stageSourceMoves';
@@ -560,7 +561,8 @@ class StageSession {
                 const environment = configuration.environment;
                 const size = await dimensions(environment.width, environment.height);
                 if (!size) return;
-                const theme = await choose('Theme', [{ label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' }, { label: 'Inherit', value: 'inherit' }] as const);
+                const themes = model.availableThemes ?? ['light', 'dark', 'inherit'] as const;
+                const theme = await choose('Theme', themes.map(value => ({ label: stageThemeLabels[value], value })));
                 if (!theme) return;
                 const direction = await choose('Direction', [{ label: 'Inherit', value: 'inherit' }, { label: 'Left to right', value: 'left_to_right' }, { label: 'Right to left', value: 'right_to_left' }] as const);
                 if (!direction) return;

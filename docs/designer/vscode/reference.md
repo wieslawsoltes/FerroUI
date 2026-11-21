@@ -44,6 +44,12 @@ For example, ask an agent to open the current design, inspect its animation prog
 
 Read the new buffer revision, frame token, stage epoch, or connection generation after the corresponding change. Text locations are UTF-16. A stale source edit is rejected. Re-read the current state before retrying the edit. The advertised tool schemas specify which identity each tool needs.
 
+### Choose a stage theme with MCP
+
+Open a board with `designer_stages_open` and read its `availableThemes`. In `designer_stage_change`, use the board’s `expected_epoch` and the stage ID. Send `action: "update"` with the stage’s complete `configuration` and set `environment.theme` to an advertised value such as `"high_contrast"`.
+
+In Studio, read `available_themes` from `designer_preview_stages`, then update the same environment through `designer_preview_stage`. The preview uses the host’s native contrast variant and the choices persist in the stage set. [Compare high contrast in VS Code](motion.md#compare-a-high-contrast-stage)
+
 ### Send keyboard input to a stage
 
 1. Read the board with `designer_stages`. Use `designer_stage_change` to set the card's mode to `live`. Read the accepted stage ID and epoch from the returned board.

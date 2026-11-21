@@ -37,6 +37,7 @@ import { verifyStylesMcp } from './stylesMcp';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
 import { verifyStageKeyboard } from './stageKeyboardMcp';
+import { verifyStageContrast } from './stageContrastMcp';
 import { verifyDesignTokens } from './designTokenMcp';
 import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
@@ -271,6 +272,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyPreviewChecks({ invoke, content });
         await verifyStageStates({ invoke, content });
         await verifyStageKeyboard({ invoke, content });
+        await verifyStageContrast({ invoke, content });
         await verifyDesignTokens({ invoke, content });
         await verifyBrushMcp({ invoke, content });
         await verifyFocusOverlay({ invoke, content });

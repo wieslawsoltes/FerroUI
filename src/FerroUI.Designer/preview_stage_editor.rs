@@ -50,6 +50,7 @@ pub struct PreviewStageEditor {
     width: Ref<TextBox>,
     height: Ref<TextBox>,
     theme: Ref<ComboBox>,
+    themes: Vec<PreviewTheme>,
     flow: Ref<ComboBox>,
     mode: Ref<ComboBox>,
     design_data: Ref<CheckBox>,
@@ -205,14 +206,11 @@ impl PreviewStageEditor {
         let rotate = action("Swap width and height", "StageRotate");
         row(&body, "Orientation", &rotate);
         let theme = picker("StageTheme", "Stage theme");
-        for value in ["Light", "Dark", "Application theme"] {
-            item(&theme, value);
+        let themes = PreviewTheme::options(initial.environment.theme);
+        for value in &themes {
+            item(&theme, value.label());
         }
-        theme.set_selected_index(match initial.environment.theme {
-            PreviewTheme::Light => 0,
-            PreviewTheme::Dark => 1,
-            PreviewTheme::Inherit => 2,
-        });
+        theme.set_selected_index(themes.iter().position(|value| *value == initial.environment.theme).unwrap_or_default() as i32);
         row(&body, "Theme", &theme);
         let flow = picker("StageDirection", "Stage reading direction");
         for value in ["Inherited", "Left to right", "Right to left"] {
@@ -313,6 +311,7 @@ impl PreviewStageEditor {
             width,
             height,
             theme,
+            themes,
             flow,
             mode,
             design_data,
@@ -686,11 +685,7 @@ impl PreviewStageEditor {
             environment: PreviewEnvironment {
                 width: number(&self.width, "width")?,
                 height: number(&self.height, "height")?,
-                theme: match self.theme.selected_index() {
-                    0 => PreviewTheme::Light,
-                    1 => PreviewTheme::Dark,
-                    _ => PreviewTheme::Inherit,
-                },
+                theme: self.themes.get(self.theme.selected_index() as usize).copied().unwrap_or(PreviewTheme::Inherit),
                 flow_direction: match self.flow.selected_index() {
                     1 => PreviewFlowDirection::LeftToRight,
                     2 => PreviewFlowDirection::RightToLeft,

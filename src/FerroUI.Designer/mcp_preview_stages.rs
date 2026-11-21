@@ -3,7 +3,7 @@ use super::schema as s;
 use super::{decode, integer, text, Permissions};
 use crate::{
     DesignerWorkspace, PreviewEnvironment, PreviewStageSpec, PreviewStageSet,
-    PreviewStageMode,
+    PreviewStageMode, PreviewTheme,
 };
 use base64::Engine;
 use ferroui_inspect::TreeKind;
@@ -31,7 +31,7 @@ fn bounded_string(maximum: usize) -> Value {
 fn environment_schema() -> Value {
     let dimension = json!({"type":"number","minimum":1,"maximum":16384});
     s::object(
-        json!({"width":dimension,"height":dimension,"theme":{"enum":["light","dark","inherit"]},
+        json!({"width":dimension,"height":dimension,"theme":{"enum":["light","dark","inherit","high_contrast"]},
         "flow_direction":{"enum":["inherit","left_to_right","right_to_left"]}}),
         &["width", "height", "theme", "flow_direction"],
     )
@@ -83,7 +83,7 @@ fn matrix_schema() -> Value {
     s::object(
         json!({
             "sizes":s::array(s::object(json!({"name":bounded_string(64),"width":dimension,"height":dimension}), &["name","width","height"]),16),
-            "themes":s::array(json!({"enum":["light","dark","inherit"]}),3),
+            "themes":s::array(json!({"enum":["light","dark","inherit","high_contrast"]}),4),
             "directions":s::array(json!({"enum":["inherit","left_to_right","right_to_left"]}),3),
             "design_time_data":s::array(json!({"type":"boolean"}),2),
             "state_groups":s::array(s::object(json!({"owner":anchor_schema(),"group":bounded_string(256),"states":s::array(bounded_string(256),16)}), &["owner","group","states"]),32)
@@ -231,6 +231,7 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
         })
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
+        "available_themes":PreviewTheme::available(),
         "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {

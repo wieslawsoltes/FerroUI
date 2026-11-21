@@ -1,4 +1,5 @@
 import type { PrototypeScene, StageFocus, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
+import { stageThemeLabels } from '../src/stagesProtocol';
 import { create, icon, iconButton, labelButton } from './dom';
 import { StageKeyboard } from './stageKeyboard';
 import type { StageField, StageMenu } from './stageMenu';
@@ -72,10 +73,10 @@ export class StageCard {
         this.element.dataset.state = status.state;
         const dimensions = `${Math.round(layout.width)} × ${Math.round(layout.height)}`;
         setting(this.size, 'layout', dimensions, `Sizing for ${name} · ${dimensions}`);
-        const theme = { light: 'Light', dark: 'Dark', inherit: 'Inherited theme' }[environment.theme];
+        const theme = stageThemeLabels[environment.theme];
         const direction = { inherit: 'Inherited direction', left_to_right: 'Left to right', right_to_left: 'Right to left' }[environment.flow_direction];
         labelButton(this.environment, `Environment for ${name} · ${theme} · ${direction}`,
-            environment.theme === 'dark' ? 'color-mode' : 'paintcan');
+            environment.theme === 'dark' || environment.theme === 'high_contrast' ? 'color-mode' : 'paintcan');
         const fixture = configuration.design_time_data ? configuration.design_fixture : 'Application values';
         this.fixture.hidden = configuration.design_time_data && !configuration.design_fixture;
         setting(this.fixture, 'database', fixture ?? 'Design defaults', `Design data for ${name} · ${fixture ?? 'View default'}`);

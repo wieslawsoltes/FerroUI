@@ -3,10 +3,10 @@
 use crate::runtime::RuntimePreview;
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewHostOptions,
-    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, PreviewTheme, RuntimeNode,
+    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, RuntimeNode,
 };
-use ferroui_base::media::{FlowDirection, SolidColorBrush};
-use ferroui_base::styling::ThemeVariant;
+use ferroui_base::media::FlowDirection;
+use crate::preview_theme::preview_backing;
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
@@ -1470,7 +1470,7 @@ impl PreviewStageBoard {
             })
             .collect::<Result<Vec<_>, String>>()?;
         let scope = ThemeVariantScope::new();
-        apply_environment(&scope, config.environment);
+        apply_environment(&scope, config.environment)?;
         apply_scope_layout(&scope, config.layout, config.environment);
         scope.set_opacity(0.0);
         scope.set_is_hit_test_visible(false);
@@ -1480,7 +1480,6 @@ impl PreviewStageBoard {
         let backing = Border::new();
         backing.set_child(Some(host.clone().upcast()));
         scope.set_child(Some(backing.clone().upcast()));
-        apply_stage_backing(&scope, &backing, stage.prototype_overlay.get());
         let weak_scope = scope.downgrade();
         let weak_backing = backing.downgrade();
         let prototype_overlay = stage.prototype_overlay.clone();
@@ -1501,6 +1500,7 @@ impl PreviewStageBoard {
             .control
             .children()
             .add(scope.clone().upcast::<Control>());
+        apply_stage_backing(&scope, &backing, stage.prototype_overlay.get());
         // Application factories and registered constructors are extension points.
         // Match the main development reload driver's panic containment so a bad
         // candidate cannot strand its hidden host or tear down the entire board.
@@ -1772,31 +1772,18 @@ fn dependency_stamps(
 }
 
 fn apply_stage_backing(scope: &ThemeVariantScope, backing: &Border, overlay: bool) {
-    backing.set_background((!overlay).then(|| {
-        SolidColorBrush::parse(
-            if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
-                "#FF202020"
-            } else {
-                "#FFFFFFFF"
-            },
-        )
-        .unwrap()
-        .into()
-    }));
+    backing.set_background((!overlay).then(|| preview_backing(scope)));
 }
 
-fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) {
+fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) -> Result<(), String> {
     scope.set_clip_to_bounds(true);
-    scope.set_requested_theme_variant(match environment.theme {
-        PreviewTheme::Light => Some(ThemeVariant::light()),
-        PreviewTheme::Dark => Some(ThemeVariant::dark()),
-        PreviewTheme::Inherit => None,
-    });
+    scope.set_requested_theme_variant(environment.theme.resolve()?);
     match environment.flow_direction {
         PreviewFlowDirection::Inherit => scope.clear_value(Visual::flow_direction_property()),
         PreviewFlowDirection::LeftToRight => scope.set_flow_direction(FlowDirection::LeftToRight),
         PreviewFlowDirection::RightToLeft => scope.set_flow_direction(FlowDirection::RightToLeft),
     }
+    Ok(())
 }
 
 fn apply_scope_layout(

@@ -54,6 +54,7 @@ mod item_template_samples;
 mod item_template_scope;
 mod property_trace;
 mod preview_environment;
+mod preview_theme;
 mod preview_host;
 mod preview_prototype;
 mod preview_prototype_editor;
@@ -140,8 +141,9 @@ pub use grid_track_editor::GridTrackEditor;
 pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot, LayerViewState};
 pub use preview_environment::{
     PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection,
-    PreviewSizePreset, PreviewTheme,
+    PreviewSizePreset,
 };
+pub use preview_theme::PreviewTheme;
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };

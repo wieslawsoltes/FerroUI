@@ -181,6 +181,7 @@ impl PreviewStageMatrix {
                 PreviewTheme::Light => "Light",
                 PreviewTheme::Dark => "Dark",
                 PreviewTheme::Inherit => "App theme",
+                PreviewTheme::HighContrast => "High contrast",
             }
             .into()
         });

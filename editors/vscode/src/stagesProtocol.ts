@@ -1,11 +1,14 @@
 import type { PreviewFinding, PreviewSourceBuffer, Range, Snapshot, Source } from './protocol';
 
+export const stageThemeLabels = { light: 'Light', dark: 'Dark', inherit: 'Application theme', high_contrast: 'High contrast' } as const;
+export type StageTheme = keyof typeof stageThemeLabels;
+
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
     name: string;
     source_uri: string;
     target: { kind: string };
-    environment: { width: number; height: number; theme: 'light' | 'dark' | 'inherit'; flow_direction: 'inherit' | 'left_to_right' | 'right_to_left' };
+    environment: { width: number; height: number; theme: StageTheme; flow_direction: 'inherit' | 'left_to_right' | 'right_to_left' };
     layout: 'fixed' | 'size_that_fits' | 'fixed_width' | 'fixed_height';
     design_time_data: boolean;
     design_fixture?: string;
@@ -47,7 +50,7 @@ export interface PrototypeScene {
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean }
+export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; availableThemes?: StageTheme[] }
 export interface StageTarget { id: number; epoch: number }
 export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
 export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }

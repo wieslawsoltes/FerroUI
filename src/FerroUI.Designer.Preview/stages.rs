@@ -86,6 +86,8 @@ pub(crate) struct Model {
     stages: Vec<PreviewStageDetails>,
     prototype: Option<crate::stages_prototype::Scene>,
     dependencies: BTreeSet<String>,
+    #[serde(rename = "availableThemes")]
+    available_themes: Vec<PreviewTheme>,
 }
 
 #[derive(Deserialize)]
@@ -386,6 +388,7 @@ impl Stages {
             stages,
             prototype: self.playback.scene(),
             dependencies: stages_sources::watch_paths(&self.sources),
+            available_themes: PreviewTheme::available(),
         }
     }
 }

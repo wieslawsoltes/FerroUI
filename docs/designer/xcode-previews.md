@@ -79,6 +79,11 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
     closes the top overlay first. These are FerroUI design-review semantics, not an
     emulation of iOS sheets, macOS windows or Apple's sheet-internal Back behavior.
 
+Choose **High contrast** in the stage’s **Theme** picker or the editing canvas’s **Preview
+environment** when the active theme supplies a native contrast variant. Use it alongside
+a Light or Dark stage and read the same native preview checks. Saving the stage set keeps
+the selected contrast variant on the card. [VS Code and MCP](vscode/motion.md#compare-a-high-contrast-stage)
+
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
 component preview alongside the complete document without extracting or rewriting the

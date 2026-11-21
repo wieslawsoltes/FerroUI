@@ -1,6 +1,7 @@
 use super::*;
-use crate::DesignerSession;
+use crate::{DesignerSession, PreviewTheme};
 use ferroui_base::layout::Orientation;
+use ferroui_base::styling::ThemeVariant;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, Grid, StackPanel, TextBlock, TextBox, Window};
 use ferroui_designer_core::Edit;
