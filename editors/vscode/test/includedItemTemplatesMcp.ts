@@ -36,10 +36,15 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
         const { revision, nodes } = await frame(session);
         const node = nodes.find(node => node.name === name)?.id;
         assert.ok(node);
+        // The docks refresh against the workbench selection. Select the target
+        // there before reading the model so those reads use the same native scope.
+        const selected = content<{ revision: number }>(await invoke('designer_select', {
+            session, expected_revision: revision, selection: [node],
+        }));
         const model = content<Report>(await invoke('designer_studio_query', { session, tool: 'designer_item_templates',
-            arguments: { node }, selection: [node] }));
+            arguments: { node } }));
         assert.equal(model.slots[0]?.property, 'ItemTemplate');
-        return { revision, node, model };
+        return { revision: selected.revision, node, model };
     };
     const apply = (report: Awaited<ReturnType<typeof read>>, action: object, present = false) =>
         invoke(present ? 'designer_studio_present' : 'designer_studio_edit', {
@@ -58,6 +63,7 @@ export async function verifyIncludedItemTemplatesMcp({ invoke, content }: McpFix
 
     const queue = await read('ReviewQueue');
     assert.ok(queue.model.includedResources.some(resource => resource.key === 'CustomerRow' && resource.uri === dictionaryUri.toString()));
+    content(await invoke('designer_studio_query', { session, tool: 'designer_definition_scope', arguments: {} }));
     content(await apply(queue, { action: 'assign_included_resource', key: 'CustomerRow' }));
     assert.match(consumer.getText(), /Name="ReviewQueue"[^>]*ItemTemplate="\{StaticResource 'CustomerRow'\}"/);
     await undo(session, consumer, originalConsumer);
