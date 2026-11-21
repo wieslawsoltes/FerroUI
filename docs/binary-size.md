@@ -1294,6 +1294,65 @@ Tests: `a_class_with_no_mapper_of_its_own_takes_the_one_of_its_family`,
 `a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread`
 (`visual_state/state_mapper_tests.rs`), with the mapper tests of every family.
 
+### 4.26 An interface cast is registered by the construction of its implementation (#612, #566)
+
+Section 4.16 left some registrations at start-up: the casts of the types that members of markup
+types hold, because compiled markup casts such a value before it sets it
+(`rt::cast::<Option<Rc<dyn IValueConverter>>, _>`) and setting a member registers nothing. A
+cast of a concrete type to an interface names the interface table of the type, and through it
+everything its methods call. The dominator tree of the whole-program module of hello world
+(each symbol under the one every path from `main` to it passes through) put two of these
+families at the top of what hello world links and never runs:
+
+- **The page transitions of `ferroui-base`** (`CrossFade`, `PageSlide`, `Rotate3DTransition`,
+  `CompositePageTransition`, cast to `IPageTransition`): their `start` runs key-frame
+  animations, which bring the animation classes, an animator and an animation instance per
+  value type, and the 3D rotation transform. `ircut.py --edges` predicted 893 kB for the four
+  casts.
+- **The converters of `ferroui-controls`** (nine, cast to `IValueConverter` or
+  `IMultiValueConverter`): `BorderGapMaskConverter`, the gap in the border of a group box in the
+  Simple and Fluent themes, builds a grid in its conversion, which kept the grid's layout in an
+  application in the WinUI theme. Predicted 259 kB, 232 kB of it this one cast.
+
+Each of these types now registers its value conversions from its constructor, once per process
+(a `std::sync::Once` around `ValueTypes::register_used::<Self>()`), and its casts moved from the
+start-up list into its `ValueTypeRegistration`. Every value of the type is made there: the
+transitions have private fields, and the converters that were unit structs are
+`#[non_exhaustive]`, made with `new()`, `default()` or `instance()` outside their crate (a
+breaking change of 0.6). Compiled markup makes them through their markup constructors, which
+call these; with the tables of types every type registers at start-up as before. A converter
+or a transition that exists has its casts on every thread. The easings' casts to `Easing`
+stay at start-up: 1.2 kB together.
+
+| `samples/HelloWorld`, release, macOS | 4.25 | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 19,949,824 bytes | 18,563,848 bytes | -1,385,976 bytes (-6.9 %) |
+| `__TEXT,__text` | 15,784,532 bytes | 14,551,128 bytes | -1,233,404 bytes (-7.8 %) |
+| Class initialisers linked | 164 | 150 | -14 |
+| `dist` file (stripped) | 16,980,368 bytes | 15,917,456 bytes | -1,062,912 bytes (-6.3 %) |
+| `dist` `__TEXT,__text` | 13,975,444 bytes | 13,007,668 bytes | -967,776 bytes (-6.9 %) |
+
+With section 4.25, hello world is 9.6 % smaller than on main in release (20,529,288 bytes)
+and 8.8 % in `dist` (17,446,112 bytes). The smoke run prints the same output.
+
+The catalog and the WinUI gallery make transitions and converters, so they keep the code;
+what changes is where the registrations are (one `Once` per constructor instead of one list):
+
+| Stripped file / `__TEXT,__text`, macOS | 4.25 | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,659,088 / 60,829,068 | 80,591,664 / 60,758,972 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,421,796 | 66,542,272 / 51,431,696 |
+| `winui-gallery`, release | 57,368,968 / 40,118,076 | 57,351,336 / 40,089,864 |
+| `winui-gallery`, `dist` | 47,339,712 / 33,484,580 | 47,356,320 / 33,490,164 |
+
+Start-up of hello world (`FERROUI_SMOKE_EXIT_MS=1`, 11 launches of each build, alternating,
+release): main 159 ms, section 4.25 165 ms, this section 161 ms at the median, 147 ms at the
+minimum for all three; within the noise of a machine that was building at the same time.
+
+Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-base`) and
+`a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
+create both through their markup constructors.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
