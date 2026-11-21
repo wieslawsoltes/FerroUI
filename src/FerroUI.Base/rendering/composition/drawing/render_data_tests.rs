@@ -340,7 +340,7 @@ fn round_trip_preserves_text_options_and_glyph_runs() {
 // --- recording --------------------------------------------------------------
 
 #[test]
-fn recording_elides_empty_scopes_and_identity_transforms_but_preserves_opacity() {
+fn recording_elides_empty_scopes_and_no_op_pushes() {
     let mut recorder = RenderDataDrawingContext::new(None);
     {
         let mut context = DrawingContext::new(&mut recorder);
@@ -361,11 +361,11 @@ fn recording_elides_empty_scopes_and_identity_transforms_but_preserves_opacity()
         .expect("something was drawn");
     assert_eq!(
         content.with_stream(recorded_opcodes),
-        Some(vec![RenderDataOpcode::PushOpacity, RenderDataOpcode::PushClip, RenderDataOpcode::DrawRectangle, RenderDataOpcode::Pop, RenderDataOpcode::Pop])
+        Some(vec![RenderDataOpcode::PushClip, RenderDataOpcode::DrawRectangle, RenderDataOpcode::Pop])
     );
     assert_eq!(
         content.with_stream(replay).unwrap(),
-        ["PushOpacity 1", "PushRoundedClip 0, 0, 10, 10", "DrawRectangle Red none 0, 0, 4, 4 shadows=0", "PopClip", "PopOpacity"]
+        ["PushRoundedClip 0, 0, 10, 10", "DrawRectangle Red none 0, 0, 4, 4 shadows=0", "PopClip"]
     );
 }
 

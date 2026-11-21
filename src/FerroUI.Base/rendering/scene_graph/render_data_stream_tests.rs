@@ -82,13 +82,13 @@ fn replay_applies_and_restores_transform() {
 }
 
 #[test]
-fn replay_preserves_unit_opacity_for_backend_layer_policy() {
+fn replay_skips_opacity_one_push() {
     let mut stream = RenderDataStream::new();
     stream.push_opacity(1.0);
     stream.pop();
     let calls = recorded_calls(&stream);
 
-    assert_eq!(calls, ["PushOpacity", "PopOpacity"]);
+    assert!(calls.is_empty());
 }
 
 #[test]

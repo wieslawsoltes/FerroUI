@@ -420,8 +420,10 @@ impl IDrawingContextCore for RenderDataDrawingContext {
     }
 
     fn push_opacity_core(&mut self, opacity: f64) {
-        // Unit opacity can request isolation under full opacity handling.
-        // The renderer's inherited options are not known while recording.
+        if opacity == 1.0 {
+            self.pushed_no_op_scope();
+            return;
+        }
         let before = self.stream().opcode_length();
         self.stream().push_opacity(opacity);
         self.pushed_scope(before);

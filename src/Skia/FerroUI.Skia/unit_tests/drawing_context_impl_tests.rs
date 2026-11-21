@@ -67,17 +67,17 @@ fn solid_color_composition_preserves_destination_alpha_clip_and_transform() {
 
 #[test]
 fn recorded_source_in_layer_preserves_unrelated_background() {
-    use ferroui_base::media::{Color, DrawingContext, ISceneBrushContent, RenderOptions, SolidColorBrush, imaging::BitmapBlendingMode, immutable::ImmutableImageBrush};
+    use ferroui_base::media::{Color, DrawingContext, ISceneBrushContent, SolidColorBrush, imaging::BitmapBlendingMode, immutable::ImmutableImageBrush};
     use ferroui_base::rendering::composition::drawing::RenderDataDrawingContext;
     let mut recorder = RenderDataDrawingContext::new(None);
     {
         let mut context = DrawingContext::new(&mut recorder);
-        let options = context.push_render_options(RenderOptions {requires_full_opacity_handling:Some(true), ..Default::default()});
-        let layer = context.push_opacity(1.0);
+        let bounds = Rect::new(0.,0.,6.,4.);
+        let layer = context.try_push_compositing_layer(BitmapBlendingMode::SourceOver,1.0,bounds).unwrap();
         let brush: Rc<dyn IBrush> = SolidColorBrush::from_uint32(0x80ff0000).into();
         context.draw_rectangle(Some(&brush),None,Rect::new(1.,1.,3.,2.),0.,0.,&BoxShadows::default());
         context.draw_color(Color::from_uint32(0xff0000ff),BitmapBlendingMode::SourceIn,Rect::new(1.,1.,3.,2.));
-        context.pop(layer);context.pop(options);
+        context.pop(layer);
     }
     let content=recorder.get_immediate_scene_brush_content(Rc::new(ImmutableImageBrush::from_bitmap(None)),None,true).unwrap();
     let (mut target,mut surface)=create_target();

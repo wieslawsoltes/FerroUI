@@ -31,11 +31,9 @@ impl ICustomDrawOperation for ColorDrawOperation {
 #[cfg(test)]
 mod tests {
     use crate::Rect;
-    use crate::media::{
-        Color, DrawingContext, PlatformDrawingContext, RenderOptions, imaging::BitmapBlendingMode,
-    };
+    use crate::media::{Color, DrawingContext, PlatformDrawingContext, imaging::BitmapBlendingMode};
     use crate::media::{ISceneBrushContent, ITileBrush, immutable::ImmutableImageBrush};
-    use crate::rendering::composition::drawing::{RenderDataDrawingContext, RenderDataStream};
+    use crate::rendering::composition::drawing::RenderDataDrawingContext;
     use crate::rendering::composition::server::CompositorDrawingContextProxy;
     use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl};
 
@@ -47,76 +45,39 @@ mod tests {
         let proxy = CompositorDrawingContextProxy::new(Box::new(mock));
         let mut context =
             DrawingContext::owned(Box::new(PlatformDrawingContext::new(Box::new(proxy))));
-        let options = context.push_render_options(RenderOptions {
-            requires_full_opacity_handling: Some(true),
-            ..Default::default()
-        });
-        let opacity = context.push_opacity(1.0);
-        let clip = context.push_clip(Rect::new(0., 0., 3., 2.));
-        assert!(log.entries().is_empty());
-        context.draw_color(
-            Color::from_uint32(0x80402010),
-            BitmapBlendingMode::SourceIn,
-            Rect::new(0., 0., 3., 2.),
-        );
+        let bounds = Rect::new(0., 0., 3., 2.);
+        let layer = context
+            .try_push_compositing_layer(BitmapBlendingMode::SourceOver, 1.0, bounds)
+            .unwrap();
+        let clip = context.push_clip(bounds);
+        context.draw_color(Color::from_uint32(0x80402010), BitmapBlendingMode::SourceIn, bounds);
         let entries = log.entries();
-        assert_eq!(entries.len(), 4, "{entries:?}");
-        assert!(entries[0].starts_with("PushRenderOptions"));
-        assert!(entries[1].starts_with("PushOpacity"));
-        assert!(entries[2].starts_with("PushClip"));
-        assert_eq!(entries[3], "DrawColor #80402010 SourceIn");
+        assert_eq!(entries.len(), 3, "{entries:?}");
+        assert!(entries[0].starts_with("PushCompositingLayer"));
+        assert!(entries[1].starts_with("PushClip"));
+        assert_eq!(entries[2], "DrawColor #80402010 SourceIn");
         context.pop(clip);
-        context.pop(opacity);
-        context.pop(options);
+        context.pop(layer);
     }
 
     #[test]
-    fn full_opacity_recording_preserves_unit_layer() {
+    fn recorded_color_stays_inside_its_compositing_layer() {
+        let bounds = Rect::new(0., 0., 3., 2.);
         let mut recorder = RenderDataDrawingContext::new(None);
         {
             let mut context = DrawingContext::new(&mut recorder);
-            let options = context.push_render_options(RenderOptions {
-                requires_full_opacity_handling: Some(true),
-                ..Default::default()
-            });
-            let layer = context.push_opacity(1.0);
-            context.draw_color(
-                Color::from_uint32(0xffff0000),
-                BitmapBlendingMode::SourceIn,
-                Rect::new(0., 0., 3., 2.),
-            );
+            let layer = context
+                .try_push_compositing_layer(BitmapBlendingMode::SourceOver, 1.0, bounds)
+                .unwrap();
+            context.draw_color(Color::from_uint32(0xffff0000), BitmapBlendingMode::SourceIn, bounds);
             context.pop(layer);
-            context.pop(options);
         }
         let brush: std::rc::Rc<dyn ITileBrush> =
             std::rc::Rc::new(ImmutableImageBrush::from_bitmap(None));
-        let content = recorder
-            .get_immediate_scene_brush_content(brush, None, true)
-            .unwrap();
+        let content = recorder.get_immediate_scene_brush_content(brush, None, true).unwrap();
         let log = DrawingLog::new();
         content.render(&mut MockDrawingContextImpl::new(log.clone()), None);
-        assert_eq!(log.count("PushOpacity"), 1, "{:?}", log.entries());
-        assert_eq!(log.count("PopOpacity"), 1, "{:?}", log.entries());
-    }
-
-    #[test]
-    fn full_opacity_replay_preserves_unit_layer() {
-        let mut stream = RenderDataStream::new();
-        stream.push_render_options(RenderOptions {
-            requires_full_opacity_handling: Some(true),
-            ..Default::default()
-        });
-        stream.push_opacity(1.0);
-        stream.draw_custom(Some(std::sync::Arc::new(super::ColorDrawOperation {
-            color: Color::from_uint32(0xffff0000),
-            blend: BitmapBlendingMode::SourceIn,
-            bounds: Rect::new(0., 0., 3., 2.),
-        })));
-        stream.pop();
-        stream.pop();
-        let log = DrawingLog::new();
-        stream.replay(&mut MockDrawingContextImpl::new(log.clone()));
-        assert_eq!(log.count("PushOpacity"), 1, "{:?}", log.entries());
-        assert_eq!(log.count("PopOpacity"), 1, "{:?}", log.entries());
+        assert_eq!(log.count("PushCompositingLayer"), 1, "{:?}", log.entries());
+        assert_eq!(log.count("PopCompositingLayer"), 1, "{:?}", log.entries());
     }
 }
