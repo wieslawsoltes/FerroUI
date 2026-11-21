@@ -40,7 +40,8 @@ pub struct FerroObject {
     this: OnceCell<Weak<dyn Any>>,
     vtable: Cell<Option<&'static FerroObjectVTable>>,
     values: ValueStore,
-    instance_data: RefCell<Option<Box<InstanceDataMap>>>,
+    /// Eight bytes per object: most objects never hold instance data.
+    instance_data: OptionCell<Box<InstanceDataMap>>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.67): read by upgrading and
     // written whole, so a cell without a borrow flag.
     inheritance_parent: OptionCell<WeakRef<FerroObject>>,
@@ -269,7 +270,7 @@ impl FerroObject {
             this: OnceCell::new(),
             vtable: Cell::new(None),
             values: ValueStore::new(),
-            instance_data: RefCell::new(None),
+            instance_data: OptionCell::new(),
             inheritance_parent: OptionCell::new(),
             inheritance_children: RefCell::new(std::collections::VecDeque::new()),
             property_changed: HandlerList::new(),
@@ -283,10 +284,7 @@ impl FerroObject {
     pub fn instance_data<T: Any>(&self) -> Option<Rc<T>> {
         self.verify_access();
         self.instance_data
-            .borrow()
-            .as_ref()?
-            .get(&TypeId::of::<T>())?
-            .clone()
+            .with(|map| map?.get(&TypeId::of::<T>()).cloned())?
             .downcast::<T>()
             .ok()
     }
@@ -300,23 +298,21 @@ impl FerroObject {
     /// not strongly retain the owner through a cycle. Use WeakRef for back-links.
     pub fn set_instance_data<T: Any>(&self, value: Option<Rc<T>>) -> Option<Rc<T>> {
         self.verify_access();
-        let previous = {
-            let mut storage = self.instance_data.borrow_mut();
-            match value {
-                Some(value) => storage
-                    .get_or_insert_with(|| Box::new(HashMap::new()))
-                    .insert(TypeId::of::<T>(), value),
-                None => {
-                    let previous = storage
-                        .as_mut()
-                        .and_then(|map| map.remove(&TypeId::of::<T>()));
-                    if storage.as_ref().is_some_and(|map| map.is_empty()) {
-                        *storage = None;
-                    }
-                    previous
+        // Taken and put back with no user code in between: the old value drops after this.
+        let mut storage = self.instance_data.take();
+        let previous = match value {
+            Some(value) => storage
+                .get_or_insert_with(|| Box::new(HashMap::new()))
+                .insert(TypeId::of::<T>(), value),
+            None => {
+                let previous = storage.as_mut().and_then(|map| map.remove(&TypeId::of::<T>()));
+                if storage.as_ref().is_some_and(|map| map.is_empty()) {
+                    storage = None;
                 }
+                previous
             }
         };
+        self.instance_data.set(storage);
         previous.and_then(|value| value.downcast::<T>().ok())
     }
 

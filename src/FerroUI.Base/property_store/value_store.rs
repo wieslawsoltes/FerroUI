@@ -75,13 +75,19 @@ crate::ferro_thread_local! {
     static REEVALUATION_LISTS: RefCell<Vec<Vec<EffectiveValueRef>>> = const { RefCell::new(Vec::new()) };
 }
 
+crate::ferro_thread_local! {
+    /// The local binding expressions being started on this thread, innermost last. One stack for
+    /// the thread, not a list in each store: a store holds no state for what lasts only a call.
+    static INITIALIZING_LOCAL_EXPRESSIONS: RefCell<Vec<Weak<dyn BindingExpressionBase>>> =
+        const { RefCell::new(Vec::new()) };
+}
+
 /// The local value bindings of a store (`ValueStore::local_bindings`).
 #[derive(Default)]
 struct LocalBindings {
     bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
     /// The local value bindings that are binding expressions.
     expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
-    initializing: RefCell<Vec<Weak<dyn BindingExpressionBase>>>,
 }
 
 /// Stores the styled property values of a [`FerroObject`] and resolves the
@@ -345,8 +351,8 @@ impl ValueStore {
             self.set_local_value_binding(property, disposable);
             let local = self.local_bindings();
             local.expressions.borrow_mut().push((property.id(), source.clone()));
-            local.initializing.borrow_mut().push(Rc::downgrade(&source));
-            let _initializing = LocalBindingInitializationGuard(&local.initializing);
+            INITIALIZING_LOCAL_EXPRESSIONS.with(|stack| stack.borrow_mut().push(Rc::downgrade(&source)));
+            let _initializing = LocalBindingInitializationGuard;
             source.attach(SinkRef::Store(owner.to_weak()), None, owner, property, BindingPriority::LocalValue);
             source.start(true);
         } else {
@@ -439,8 +445,10 @@ impl ValueStore {
         let Some(local) = self.local_bindings.get() else { return false };
         let current = local.expressions.borrow().iter()
             .find(|(id, _)| *id == property.id()).map(|(_, expression)| Rc::downgrade(expression));
-        current.is_some_and(|current| local.initializing.borrow().iter()
-            .any(|expression| Weak::ptr_eq(expression, &current)))
+        current.is_some_and(|current| {
+            INITIALIZING_LOCAL_EXPRESSIONS
+                .with(|stack| stack.borrow().iter().any(|expression| Weak::ptr_eq(expression, &current)))
+        })
     }
 
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
@@ -1660,11 +1668,11 @@ impl Drop for ValueStore {
     }
 }
 
-struct LocalBindingInitializationGuard<'a>(&'a RefCell<Vec<Weak<dyn BindingExpressionBase>>>);
+struct LocalBindingInitializationGuard;
 
-impl Drop for LocalBindingInitializationGuard<'_> {
+impl Drop for LocalBindingInitializationGuard {
     fn drop(&mut self) {
-        let popped = self.0.borrow_mut().pop();
+        let popped = INITIALIZING_LOCAL_EXPRESSIONS.with(|stack| stack.borrow_mut().pop());
         debug_assert!(popped.is_some());
     }
 }
