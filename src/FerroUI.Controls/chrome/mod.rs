@@ -1,5 +1,6 @@
 //! Drawn (client-side) window decorations.
 
+pub mod drawn_decorations_targets;
 mod drawn_window_decoration_parts;
 mod i_window_drawn_decorations_template;
 mod resize_grip_layer;
