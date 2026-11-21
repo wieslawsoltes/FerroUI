@@ -84,9 +84,14 @@ fn view() { rsx! {
     const dynamic = { ...rust, source: 'fn view() { rsx! { StackPanel { {extra()} Button { "Save" } } } }' };
     const dynamicFrame = await preview.render(dynamic, viewport, 14);
     assert.ok(dynamicFrame.image);
-    assert.equal(dynamicFrame.nodes[0].canInsert, false);
-    await assert.rejects(preview.placement(14, { origin: { type: 'asset', control: 'Button' },
-        target: { type: 'outline', node: dynamicFrame.nodes[0].id, position: 'inside' } }), /fully mapped children/);
+    assert.ok(dynamicFrame.nodes[0].canInsert);
+    const mixedPlacement = { origin: { type: 'asset', control: 'TextBlock' },
+        target: { type: 'outline', node: dynamicFrame.nodes[0].id, position: 'inside' } } as const;
+    assert.ok((await preview.placement(14, mixedPlacement)).description);
+    const insertedText = await preview.edit(dynamic, { type: 'place', frame: 14, placement: mixedPlacement });
+    const mixedSource = apply(dynamic.source, insertedText.edits);
+    assert.match(mixedSource, /\{extra\(\)\} Button \{ "Save" \}/);
+    assert.match(mixedSource, /TextBlock\s*\{[^}]*\btext:\s*"Text"/);
     const imageTarget = await preview.render(rust, viewport, 15);
     const rustImage = { origin: placement.origin, target: { type: 'outline', node: imageTarget.nodes[0].id, position: 'inside' } } as const;
     assert.ok((await preview.placement(15, rustImage)).description);
