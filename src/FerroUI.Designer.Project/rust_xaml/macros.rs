@@ -1,6 +1,7 @@
 mod imports;
 
-use self::imports::{visit_bindings, StandardImports};
+use self::imports::StandardImports;
+use crate::visit_rust_imports;
 use super::{string_literal, RustPathAnchor};
 use std::collections::{BTreeMap, BTreeSet};
 use syn::{
@@ -168,7 +169,7 @@ impl<'source> Visit<'source> for MacroSyntax {
                 file_input_imports(&path.tree, &mut self.file_input_names);
             }
         }
-        visit_bindings(&item.tree, &mut Vec::new(), &mut |name, path| {
+        visit_rust_imports(&item.tree, |name, path| {
             self.changes_directory |= path.last().is_some_and(|part| *part == "set_current_dir");
             self.note_local_name(name);
         });
