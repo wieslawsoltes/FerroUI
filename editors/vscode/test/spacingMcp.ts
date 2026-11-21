@@ -42,12 +42,19 @@ export async function verifySpacing({ invoke, content }: McpFixture): Promise<vo
             session, expected_revision: revision, tool: 'designer_spacing_edit', selection: model.selection, arguments: args,
         });
         const draft = (model: Model, args: SpacingChange) => query('designer_spacing_draft', model.selection, args);
-        const undo = async () => {
+        const undo = async (checkConcurrentRequests = false) => {
             const version = document.version;
             const label = `Design · ${path}`;
             const design = vscode.window.tabGroups.all.find(group => group.activeTab?.label === label);
             assert.ok(design, `Show ${label} beside the source`);
-            content(await invoke('designer_history', { session, expected_version: version, action: 'undo' }));
+            const request = { session, expected_version: version, action: 'undo' };
+            if (checkConcurrentRequests) {
+                const results = await Promise.all([invoke('designer_history', request), invoke('designer_history', request)]);
+                assert.equal(results.filter(result => !result.isError).length, 1);
+                assert.match(results.find(result => result.isError)?.content[0]?.text ?? '', /source buffer changed/);
+            } else {
+                content(await invoke('designer_history', request));
+            }
             await until(() => document.version > version);
             assert.equal(document.getText(), source);
             assert.equal(vscode.window.tabGroups.all.find(group => group.viewColumn === design.viewColumn)?.activeTab?.label,
@@ -82,7 +89,8 @@ export async function verifySpacing({ invoke, content }: McpFixture): Promise<vo
     content(await view.edit(initial, drag));
     assert.equal(view.document.version, originalVersion + 1);
     assert.equal(view.document.getText(), xaml.replace('Spacing="12"', 'Spacing="20"'));
-    await view.undo();
+    await vscode.commands.executeCommand('workbench.action.findInFiles', { query: 'Spacing="20"' });
+    await view.undo(true);
 
     const current = await view.read('Card');
     assert.notEqual(current.model, initial.model);
