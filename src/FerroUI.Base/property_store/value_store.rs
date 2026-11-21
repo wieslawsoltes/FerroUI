@@ -35,7 +35,7 @@ impl<T> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_> {
     fn create_and_add(&self) -> EffectiveValueRef {
         // The property makes the value (with its metadata as it is now), as
         // a value made for a write does.
-        let effective = self.property.routes().create_effective_value(self.owner);
+        let effective = self.property.styled_codec().create_effective_value(self.owner);
         self.store.add_effective_value(self.owner, self.property, effective.clone());
         // No other owning locals or callable temporaries remain after this
         // result is formed. On insertion unwind, effective still drops before
@@ -617,7 +617,9 @@ impl ValueStore {
         self.set_local_stored_value(owner, property.as_property(), value.into_storage());
     }
 
-    #[inline]
+    // Inlined into the typed set (pinned: not inlined, it was a call more for every local write
+    // through the codec, property_subsystem::UntypedRoutes.set_untyped, #997).
+    #[inline(always)]
     fn set_local_stored_value<S: StyledValue>(
         &self,
         owner: &FerroObject,
@@ -1140,7 +1142,7 @@ impl ValueStore {
     // The construction route preserves the property's Rust type. Only a miss
     // needs this dispatch; lookup and insertion are the same for every type.
     fn create_and_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
-        let value = property.routes().create_effective_value(owner);
+        let value = property.styled_codec().create_effective_value(owner);
         self.add_effective_value(owner, property, value.clone());
         value
     }

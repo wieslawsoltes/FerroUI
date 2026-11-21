@@ -3,8 +3,8 @@ use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
 use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::utilities::OptionCell;
-use crate::{BoxedValue, FerroObject, FerroProperty, StyledPropertyMetadata, StyledValue};
-use std::any::Any;
+use crate::{BoxedValue, EnumValue, FerroObject, FerroProperty, StyledPropertyMetadata, StyledValue};
+use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -14,6 +14,8 @@ pub(crate) trait EffectiveValueDyn: Any {
     // priorities and subscriptions for every payload type.
     fn state(&self) -> &EffectiveValueState;
     fn boxed_value(&self) -> BoxedValue;
+    /// The base value in a box of its own, if there is one.
+    fn boxed_base_value(&self) -> Option<BoxedValue>;
     fn end_reevaluation(&self, owner: &FerroObject);
     /// Reads the entry as this property's Rust type, then applies it.
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
@@ -542,7 +544,7 @@ pub(crate) fn with_values<T: StyledValue>(
 pub(crate) fn box_stored<T: StyledValue>(property: &'static FerroProperty, value: &T) -> BoxedValue {
     if T::SHARED_STORAGE {
         let mut boxed = None;
-        with_values(property, None, value, |_, value| boxed = property.routes().route_box_value(value));
+        with_values(property, None, value, |_, value| boxed = property.styled_codec().box_value(value));
         boxed.expect("the property boxes a value of its own type")
     } else {
         Rc::new(value.clone())
@@ -643,10 +645,8 @@ impl<T: StyledValue> EffectiveValue<T> {
                 // marker. A value of a type that is not its own storage type
                 // is converted by the property.
                 if T::SHARED_STORAGE {
-                    if self.state.property.routes().route_copy_value(boxed.as_any(), &mut out) {
-                        if let Some(v) = out {
-                            return v;
-                        }
+                    if let Some(v) = self.stored_from_value(boxed.as_any()) {
+                        return v;
                     }
                 } else if let Some(v) = boxed.downcast_ref::<T>() {
                     return v.clone();
@@ -654,6 +654,21 @@ impl<T: StyledValue> EffectiveValue<T> {
             }
         }
         self.metadata.default_value().clone()
+    }
+
+    /// `value`, of the value type of the property, as this shared storage type.
+    #[inline]
+    fn stored_from_value(&self, value: &dyn Any) -> Option<T> {
+        let codec = self.state.property.styled_codec();
+        // Decided when the function is compiled: an enumeration is converted with one check of
+        // its type.
+        if TypeId::of::<T>() == TypeId::of::<EnumValue>() {
+            let stored = codec.enum_storage(value)?;
+            return (&stored as &dyn Any).downcast_ref::<T>().cloned();
+        }
+        let mut out = None;
+        codec.copy_value(value, &mut out);
+        out
     }
 
     fn set_and_raise_core(
@@ -784,6 +799,10 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
 
     fn boxed_value(&self) -> BoxedValue {
         box_stored(self.state.property, &self.value())
+    }
+
+    fn boxed_base_value(&self) -> Option<BoxedValue> {
+        self.try_get_base_value().map(|value| box_stored(self.state.property, &value))
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {

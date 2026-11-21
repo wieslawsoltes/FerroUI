@@ -1279,9 +1279,12 @@ impl Visual {
 
     /// Sets the bounds of the control. Called by the layout system.
     pub fn set_bounds(&self, value: Rect) {
-        if self.bounds.get() != value {
-            bump_geometry_version();
+        // A layout pass sets this for every child, mostly to what it is: unchanged bounds do not
+        // read the property, whose accessor may be a call (it depends on the inlining).
+        if self.bounds.get() == value {
+            return;
         }
+        bump_geometry_version();
         self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
     }
 
@@ -1372,6 +1375,9 @@ impl Visual {
     }
 
     /// The opacity of the control.
+    // Inlined into its callers, as it was (pinned: the inlining shifted with the typed routes in
+    // the codec, #997; property_subsystem::ControlRead).
+    #[inline]
     pub fn opacity(&self) -> f64 {
         self.get_value(Self::opacity_property())
     }

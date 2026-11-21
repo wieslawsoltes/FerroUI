@@ -874,19 +874,31 @@ impl FerroObject {
     // --- untyped access ---------------------------------------------------
 
     /// Gets a property value as an untyped value.
+    #[inline]
     pub fn get_value_untyped(&self, property: &'static FerroProperty) -> BoxedValue {
-        property.routes().route_get_value(self)
+        // A styled property is read by its codec directly: one call, as the typed route of its
+        // value type was (#997).
+        match property.styled_codec_if_any() {
+            Some(codec) => codec.get_value_boxed(self),
+            None => property.routes().route_get_value(self),
+        }
     }
 
     /// Sets a property from an untyped value, which must hold exactly the
     /// property's value type or the unset marker.
+    #[inline]
     pub fn set_value_untyped(
         &self,
         property: &'static FerroProperty,
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        property.routes().route_set_value(self, value, priority)
+        // A styled property is written by its codec directly: one call, as the typed route of its
+        // value type was (#997).
+        match property.styled_codec_if_any() {
+            Some(codec) => codec.set_value(self, value, priority),
+            None => property.routes().route_set_value(self, value, priority),
+        }
     }
 
     /// Sets a property whose value type is `T` with local value priority, from the value
@@ -1037,7 +1049,7 @@ impl FerroObject {
         self.raise_property_changed(property, Some(old_value), new_value, BindingPriority::LocalValue, true);
     }
 
-    fn validate_priority(priority: BindingPriority) {
+    pub(crate) fn validate_priority(priority: BindingPriority) {
         if priority < BindingPriority::Animation || priority >= BindingPriority::Inherited {
             panic!("Invalid priority {priority:?}");
         }

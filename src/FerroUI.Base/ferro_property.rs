@@ -667,10 +667,17 @@ pub struct FerroProperty {
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
     routes: OnceCell<&'static dyn PropertyRoutes>,
+    /// The operations of a styled property that depend on its value type
+    /// ([`StyledCodec`](crate::styled_property::StyledCodec)): what its routes and the store ask
+    /// of the typed property. Empty for a direct property.
+    styled_codec: OnceCell<&'static dyn crate::styled_property::StyledCodec>,
     /// The members of the value type when it is an enumeration the store keeps as an
     /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
     /// hands out for a stored member. Empty otherwise.
     members: &'static [(i64, &'static dyn Any)],
+    /// Whether the property validates its values (a styled property with a validation callback):
+    /// [`is_valid_value`](Self::is_valid_value) asks its routes only then.
+    validates: bool,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -719,13 +726,21 @@ impl FerroProperty {
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
             members: &[],
+            validates: false,
         }
     }
 
     /// The property with the members of its value type ([`StyledValue::MEMBERS`]).
     pub(crate) fn with_members(mut self, members: &'static [(i64, &'static dyn Any)]) -> Self {
         self.members = members;
+        self
+    }
+
+    /// The property with a validation callback or without.
+    pub(crate) fn with_validation(mut self, validates: bool) -> Self {
+        self.validates = validates;
         self
     }
 
@@ -756,8 +771,28 @@ impl FerroProperty {
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
             members: source.members,
+            validates: source.validates,
         }
+    }
+
+    pub(crate) fn set_styled_codec(&self, codec: &'static dyn crate::styled_property::StyledCodec) {
+        if self.styled_codec.set(codec).is_err() {
+            panic!("the codec of the property is already set");
+        }
+    }
+
+    /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
+    #[inline]
+    /// The codec of a styled property, `None` for a direct property.
+    #[inline]
+    pub(crate) fn styled_codec_if_any(&self) -> Option<&'static dyn crate::styled_property::StyledCodec> {
+        self.styled_codec.get().copied()
+    }
+
+    pub(crate) fn styled_codec(&self) -> &'static dyn crate::styled_property::StyledCodec {
+        *self.styled_codec.get().expect("a styled property has a codec")
     }
 
     pub(crate) fn set_routes(&self, routes: &'static dyn PropertyRoutes) {
@@ -968,6 +1003,11 @@ impl FerroProperty {
     /// Checks whether `value` is valid for the property: of the property's
     /// value type and accepted by its validation callback.
     pub fn is_valid_value(&self, value: &dyn Any) -> bool {
+        // Without a validation callback a value is valid when it is of the value type, which is
+        // what the routes would answer.
+        if !self.validates {
+            return value.type_id() == self.property_type;
+        }
         self.routes().route_is_valid_value(value)
     }
 
@@ -976,7 +1016,9 @@ impl FerroProperty {
     /// `None` for direct properties and when `T` is not the property's value
     /// type.
     pub fn as_styled<T: crate::PropertyValue>(&'static self) -> Option<&'static StyledProperty<T>> {
-        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
+        // From the codec directly: one call, as from the typed routes before the routes were shared.
+        // A typed write of the declarative layer asks this for every value it sets.
+        self.styled_codec.get().and_then(|codec| codec.typed().downcast_ref::<StyledProperty<T>>())
     }
 
     /// The property as a direct property with value type `T`: the typed view needed to set it
