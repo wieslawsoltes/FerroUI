@@ -1415,7 +1415,7 @@ anyway, as no element can have groups. The mappers name nothing of the manager. 
 | `dist`, `__TEXT,__text` | 12,933,984 bytes | 12,535,144 bytes | -398,840 bytes (-3.1 %) |
 
 The classes that left: the visual state manager, the storyboard and timeline, the double,
-color, point and object animations and their key frames (discrete, easing and spline), the
+color, point and object animations and their key frames (plain, easing and spline), the
 easing functions, the adaptive and state triggers, the content page and the page.
 
 Test: `the_manager_is_named_by_the_mappers_once_an_element_has_groups`
