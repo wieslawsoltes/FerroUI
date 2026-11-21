@@ -42034,238 +42034,238 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_26, build_controls_fluentcontrols_xaml_unit_28, build_controls_fluentcontrols_xaml_unit_30, build_controls_fluentcontrols_xaml_unit_32] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_26, build_controls_fluentcontrols_xaml_unit_28, build_controls_fluentcontrols_xaml_unit_30, build_controls_fluentcontrols_xaml_unit_32], entries: &[] };
 
 /// The unit `Accents/BaseResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/BaseResources.xaml", index: 1, runs: &[populate_fluenttheme_xaml_unit_0, populate_fluenttheme_xaml_unit_2, populate_fluenttheme_xaml_unit_4] };
+pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/BaseResources.xaml", index: 1, runs: &[populate_fluenttheme_xaml_unit_0, populate_fluenttheme_xaml_unit_2, populate_fluenttheme_xaml_unit_4], entries: &[] };
 
 /// The unit `Accents/FluentControlResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/FluentControlResources.xaml", index: 2, runs: &[populate_fluenttheme_xaml_unit_1, populate_fluenttheme_xaml_unit_3] };
+pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/FluentControlResources.xaml", index: 2, runs: &[populate_fluenttheme_xaml_unit_1, populate_fluenttheme_xaml_unit_3], entries: &[] };
 
 /// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 3, runs: &[populate_fluenttheme_xaml_unit_5] };
+pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 3, runs: &[populate_fluenttheme_xaml_unit_5], entries: &[] };
 
 /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 4, runs: &[build_controls_fluentcontrols_xaml_unit_0] };
+pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 4, runs: &[build_controls_fluentcontrols_xaml_unit_0], entries: &[] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 5, runs: &[build_controls_fluentcontrols_xaml_unit_33] };
+pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 5, runs: &[build_controls_fluentcontrols_xaml_unit_33], entries: &[] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 6, runs: &[build_controls_fluentcontrols_xaml_unit_1] };
+pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 6, runs: &[build_controls_fluentcontrols_xaml_unit_1], entries: &[] };
 
 /// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 7, runs: &[build_controls_fluentcontrols_xaml_unit_2] };
+pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 7, runs: &[build_controls_fluentcontrols_xaml_unit_2], entries: &[] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 8, runs: &[build_controls_fluentcontrols_xaml_unit_34] };
+pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 8, runs: &[build_controls_fluentcontrols_xaml_unit_34], entries: &[] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 9, runs: &[build_controls_fluentcontrols_xaml_unit_35] };
+pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 9, runs: &[build_controls_fluentcontrols_xaml_unit_35], entries: &[] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 10, runs: &[build_controls_fluentcontrols_xaml_unit_36] };
+pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 10, runs: &[build_controls_fluentcontrols_xaml_unit_36], entries: &[] };
 
 /// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 11, runs: &[build_controls_fluentcontrols_xaml_unit_37] };
+pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 11, runs: &[build_controls_fluentcontrols_xaml_unit_37], entries: &[] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 12, runs: &[build_controls_fluentcontrols_xaml_unit_38] };
+pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 12, runs: &[build_controls_fluentcontrols_xaml_unit_38], entries: &[] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 13, runs: &[build_controls_fluentcontrols_xaml_unit_39] };
+pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 13, runs: &[build_controls_fluentcontrols_xaml_unit_39], entries: &[] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 14, runs: &[build_controls_fluentcontrols_xaml_unit_3] };
+pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 14, runs: &[build_controls_fluentcontrols_xaml_unit_3], entries: &[] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 15, runs: &[build_controls_fluentcontrols_xaml_unit_40] };
+pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 15, runs: &[build_controls_fluentcontrols_xaml_unit_40], entries: &[] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 16, runs: &[build_controls_fluentcontrols_xaml_unit_4] };
+pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 16, runs: &[build_controls_fluentcontrols_xaml_unit_4], entries: &[] };
 
 /// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 17, runs: &[build_controls_fluentcontrols_xaml_unit_5] };
+pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 17, runs: &[build_controls_fluentcontrols_xaml_unit_5], entries: &[] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 18, runs: &[build_controls_fluentcontrols_xaml_unit_41] };
+pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 18, runs: &[build_controls_fluentcontrols_xaml_unit_41], entries: &[] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 19, runs: &[build_controls_fluentcontrols_xaml_unit_6] };
+pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 19, runs: &[build_controls_fluentcontrols_xaml_unit_6], entries: &[] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 20, runs: &[build_controls_fluentcontrols_xaml_unit_42] };
+pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 20, runs: &[build_controls_fluentcontrols_xaml_unit_42], entries: &[] };
 
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 21, runs: &[build_controls_fluentcontrols_xaml_unit_7] };
+pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 21, runs: &[build_controls_fluentcontrols_xaml_unit_7], entries: &[] };
 
 /// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 22, runs: &[build_controls_fluentcontrols_xaml_unit_43] };
+pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 22, runs: &[build_controls_fluentcontrols_xaml_unit_43], entries: &[] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 23, runs: &[build_controls_fluentcontrols_xaml_unit_44] };
+pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 23, runs: &[build_controls_fluentcontrols_xaml_unit_44], entries: &[] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_fluentcontrols_xaml_unit_45] };
+pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_fluentcontrols_xaml_unit_45], entries: &[] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 25, runs: &[build_controls_fluentcontrols_xaml_unit_8] };
+pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 25, runs: &[build_controls_fluentcontrols_xaml_unit_8], entries: &[] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_fluentcontrols_xaml_unit_46] };
+pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_fluentcontrols_xaml_unit_46], entries: &[] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 27, runs: &[build_controls_fluentcontrols_xaml_unit_9] };
+pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 27, runs: &[build_controls_fluentcontrols_xaml_unit_9], entries: &[] };
 
 /// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 28, runs: &[build_controls_fluentcontrols_xaml_unit_10] };
+pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 28, runs: &[build_controls_fluentcontrols_xaml_unit_10], entries: &[] };
 
 /// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 29, runs: &[build_controls_fluentcontrols_xaml_unit_11] };
+pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 29, runs: &[build_controls_fluentcontrols_xaml_unit_11], entries: &[] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 30, runs: &[build_controls_fluentcontrols_xaml_unit_47] };
+pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 30, runs: &[build_controls_fluentcontrols_xaml_unit_47], entries: &[] };
 
 /// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 31, runs: &[build_controls_fluentcontrols_xaml_unit_12] };
+pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 31, runs: &[build_controls_fluentcontrols_xaml_unit_12], entries: &[] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 32, runs: &[build_controls_fluentcontrols_xaml_unit_48] };
+pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 32, runs: &[build_controls_fluentcontrols_xaml_unit_48], entries: &[] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 33, runs: &[build_controls_fluentcontrols_xaml_unit_49] };
+pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 33, runs: &[build_controls_fluentcontrols_xaml_unit_49], entries: &[] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 34, runs: &[build_controls_fluentcontrols_xaml_unit_50] };
+pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 34, runs: &[build_controls_fluentcontrols_xaml_unit_50], entries: &[] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 35, runs: &[build_controls_fluentcontrols_xaml_unit_13] };
+pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 35, runs: &[build_controls_fluentcontrols_xaml_unit_13], entries: &[] };
 
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 36, runs: &[build_controls_fluentcontrols_xaml_unit_14] };
+pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 36, runs: &[build_controls_fluentcontrols_xaml_unit_14], entries: &[] };
 
 /// The unit `Controls/OverlayPopupHost.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 37, runs: &[build_controls_fluentcontrols_xaml_unit_15] };
+pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 37, runs: &[build_controls_fluentcontrols_xaml_unit_15], entries: &[] };
 
 /// The unit `Controls/PopupRoot.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 38, runs: &[build_controls_fluentcontrols_xaml_unit_16] };
+pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 38, runs: &[build_controls_fluentcontrols_xaml_unit_16], entries: &[] };
 
 /// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 39, runs: &[build_controls_fluentcontrols_xaml_unit_17] };
+pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 39, runs: &[build_controls_fluentcontrols_xaml_unit_17], entries: &[] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 40, runs: &[build_controls_fluentcontrols_xaml_unit_51, build_controls_fluentcontrols_xaml_unit_52, build_controls_fluentcontrols_xaml_unit_53, build_controls_fluentcontrols_xaml_unit_54] };
+pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 40, runs: &[build_controls_fluentcontrols_xaml_unit_51, build_controls_fluentcontrols_xaml_unit_52, build_controls_fluentcontrols_xaml_unit_53, build_controls_fluentcontrols_xaml_unit_54], entries: &[] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 41, runs: &[build_controls_fluentcontrols_xaml_unit_18] };
+pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 41, runs: &[build_controls_fluentcontrols_xaml_unit_18], entries: &[] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 42, runs: &[build_controls_fluentcontrols_xaml_unit_55] };
+pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 42, runs: &[build_controls_fluentcontrols_xaml_unit_55], entries: &[] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 43, runs: &[build_controls_fluentcontrols_xaml_unit_19] };
+pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 43, runs: &[build_controls_fluentcontrols_xaml_unit_19], entries: &[] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 44, runs: &[build_controls_fluentcontrols_xaml_unit_20] };
+pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 44, runs: &[build_controls_fluentcontrols_xaml_unit_20], entries: &[] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 45, runs: &[build_controls_fluentcontrols_xaml_unit_56] };
+pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 45, runs: &[build_controls_fluentcontrols_xaml_unit_56], entries: &[] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 46, runs: &[build_controls_fluentcontrols_xaml_unit_57] };
+pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 46, runs: &[build_controls_fluentcontrols_xaml_unit_57], entries: &[] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 47, runs: &[build_controls_fluentcontrols_xaml_unit_58] };
+pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 47, runs: &[build_controls_fluentcontrols_xaml_unit_58], entries: &[] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 48, runs: &[build_controls_fluentcontrols_xaml_unit_59] };
+pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 48, runs: &[build_controls_fluentcontrols_xaml_unit_59], entries: &[] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 49, runs: &[build_controls_fluentcontrols_xaml_unit_60] };
+pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 49, runs: &[build_controls_fluentcontrols_xaml_unit_60], entries: &[] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 50, runs: &[build_controls_fluentcontrols_xaml_unit_61] };
+pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 50, runs: &[build_controls_fluentcontrols_xaml_unit_61], entries: &[] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 51, runs: &[build_controls_fluentcontrols_xaml_unit_62] };
+pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 51, runs: &[build_controls_fluentcontrols_xaml_unit_62], entries: &[] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 52, runs: &[build_controls_fluentcontrols_xaml_unit_63] };
+pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 52, runs: &[build_controls_fluentcontrols_xaml_unit_63], entries: &[] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 53, runs: &[build_controls_fluentcontrols_xaml_unit_21] };
+pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 53, runs: &[build_controls_fluentcontrols_xaml_unit_21], entries: &[] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 54, runs: &[build_controls_fluentcontrols_xaml_unit_64] };
+pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 54, runs: &[build_controls_fluentcontrols_xaml_unit_64], entries: &[] };
 
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 55, runs: &[build_controls_fluentcontrols_xaml_unit_65] };
+pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 55, runs: &[build_controls_fluentcontrols_xaml_unit_65], entries: &[] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 56, runs: &[build_controls_fluentcontrols_xaml_unit_22] };
+pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 56, runs: &[build_controls_fluentcontrols_xaml_unit_22], entries: &[] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 57, runs: &[build_controls_fluentcontrols_xaml_unit_66] };
+pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 57, runs: &[build_controls_fluentcontrols_xaml_unit_66], entries: &[] };
 
 /// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 58, runs: &[build_controls_fluentcontrols_xaml_unit_67] };
+pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 58, runs: &[build_controls_fluentcontrols_xaml_unit_67], entries: &[] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 59, runs: &[build_controls_fluentcontrols_xaml_unit_23] };
+pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 59, runs: &[build_controls_fluentcontrols_xaml_unit_23], entries: &[] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24] };
+pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24], entries: &[] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_68] };
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_68], entries: &[] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_25] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_25], entries: &[] };
 
 /// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_69], entries: &[] };
 
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_70], entries: &[] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_27] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_27], entries: &[] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_71], entries: &[] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_72], entries: &[] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_73], entries: &[] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_74], entries: &[] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_75], entries: &[] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_76], entries: &[] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_77], entries: &[] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_78], entries: &[] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_79], entries: &[] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 75, runs: &[build_controls_fluentcontrols_xaml_unit_29] };
+pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 75, runs: &[build_controls_fluentcontrols_xaml_unit_29], entries: &[] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 76, runs: &[build_controls_fluentcontrols_xaml_unit_31] };
+pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 76, runs: &[build_controls_fluentcontrols_xaml_unit_31], entries: &[] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 77, runs: &[build_controls_fluentcontrols_xaml_unit_80] };
+pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 77, runs: &[build_controls_fluentcontrols_xaml_unit_80], entries: &[] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
@@ -42298,6 +42298,13 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 #[cfg(not(ferroui_full_themes))]
 pub fn registered_theme_units() -> rt::ThemeParts {
     rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)
+}
+
+/// What the table `parts` leaves out of the theme, for the diagnostic of a lookup that misses
+/// it (#852). Debug builds only.
+#[cfg(debug_assertions)]
+pub fn trimmed_theme_keys(parts: rt::ThemeParts) -> rt::TrimmedKeys {
+    rt::trimmed_keys(THEME_UNIT_TYPE_KEYS, &[], &[], parts)
 }
 
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control

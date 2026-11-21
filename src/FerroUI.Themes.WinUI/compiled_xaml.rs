@@ -92002,532 +92002,532 @@ fn build_densitystyles_compact_xaml_deferred_0(
 }
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0, build_controls_winuicontrols_xaml_unit_3] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0, build_controls_winuicontrols_xaml_unit_3], entries: &[] };
 
 /// The unit `Resources/Generic.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Generic.xaml", index: 1, runs: &[populate_winuitheme_xaml_unit_11, populate_winuitheme_xaml_unit_80, populate_winuitheme_xaml_unit_149, populate_winuitheme_xaml_unit_218] };
+pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Generic.xaml", index: 1, runs: &[populate_winuitheme_xaml_unit_11, populate_winuitheme_xaml_unit_80, populate_winuitheme_xaml_unit_149, populate_winuitheme_xaml_unit_218], entries: &[] };
 
 /// The unit `Resources/Common_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources.xaml", index: 2, runs: &[populate_winuitheme_xaml_unit_1, populate_winuitheme_xaml_unit_12, populate_winuitheme_xaml_unit_81, populate_winuitheme_xaml_unit_150] };
+pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources.xaml", index: 2, runs: &[populate_winuitheme_xaml_unit_1, populate_winuitheme_xaml_unit_12, populate_winuitheme_xaml_unit_81, populate_winuitheme_xaml_unit_150], entries: &[] };
 
 /// The unit `Resources/Common_themeresources_any.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources_any.xaml", index: 3, runs: &[populate_winuitheme_xaml_unit_13, populate_winuitheme_xaml_unit_82, populate_winuitheme_xaml_unit_151, populate_winuitheme_xaml_unit_219] };
+pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources_any.xaml", index: 3, runs: &[populate_winuitheme_xaml_unit_13, populate_winuitheme_xaml_unit_82, populate_winuitheme_xaml_unit_151, populate_winuitheme_xaml_unit_219], entries: &[] };
 
 /// The unit `Resources/Deprecated_themeresources_any.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources_any.xaml", index: 4, runs: &[populate_winuitheme_xaml_unit_14, populate_winuitheme_xaml_unit_83, populate_winuitheme_xaml_unit_152] };
+pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources_any.xaml", index: 4, runs: &[populate_winuitheme_xaml_unit_14, populate_winuitheme_xaml_unit_83, populate_winuitheme_xaml_unit_152], entries: &[] };
 
 /// The unit `Resources/RichEditBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RichEditBox_themeresources.xaml", index: 5, runs: &[populate_winuitheme_xaml_unit_0] };
+pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RichEditBox_themeresources.xaml", index: 5, runs: &[populate_winuitheme_xaml_unit_0], entries: &[] };
 
 /// The unit `Resources/PasswordBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PasswordBox_themeresources.xaml", index: 6, runs: &[populate_winuitheme_xaml_unit_220] };
+pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PasswordBox_themeresources.xaml", index: 6, runs: &[populate_winuitheme_xaml_unit_220], entries: &[] };
 
 /// The unit `Resources/TextBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBox_themeresources.xaml", index: 7, runs: &[populate_winuitheme_xaml_unit_15, populate_winuitheme_xaml_unit_84, populate_winuitheme_xaml_unit_153, populate_winuitheme_xaml_unit_221] };
+pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBox_themeresources.xaml", index: 7, runs: &[populate_winuitheme_xaml_unit_15, populate_winuitheme_xaml_unit_84, populate_winuitheme_xaml_unit_153, populate_winuitheme_xaml_unit_221], entries: &[] };
 
 /// The unit `Resources/MenuFlyout_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuFlyout_themeresources.xaml", index: 8, runs: &[populate_winuitheme_xaml_unit_16, populate_winuitheme_xaml_unit_85, populate_winuitheme_xaml_unit_154, populate_winuitheme_xaml_unit_222] };
+pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuFlyout_themeresources.xaml", index: 8, runs: &[populate_winuitheme_xaml_unit_16, populate_winuitheme_xaml_unit_85, populate_winuitheme_xaml_unit_154, populate_winuitheme_xaml_unit_222], entries: &[] };
 
 /// The unit `Resources/AcrylicBrush_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AcrylicBrush_themeresources.xaml", index: 9, runs: &[populate_winuitheme_xaml_unit_17, populate_winuitheme_xaml_unit_86, populate_winuitheme_xaml_unit_155] };
+pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AcrylicBrush_themeresources.xaml", index: 9, runs: &[populate_winuitheme_xaml_unit_17, populate_winuitheme_xaml_unit_86, populate_winuitheme_xaml_unit_155], entries: &[] };
 
 /// The unit `Resources/RevealBrush_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RevealBrush_themeresources.xaml", index: 10, runs: &[populate_winuitheme_xaml_unit_18, populate_winuitheme_xaml_unit_87, populate_winuitheme_xaml_unit_156, populate_winuitheme_xaml_unit_223] };
+pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RevealBrush_themeresources.xaml", index: 10, runs: &[populate_winuitheme_xaml_unit_18, populate_winuitheme_xaml_unit_87, populate_winuitheme_xaml_unit_156, populate_winuitheme_xaml_unit_223], entries: &[] };
 
 /// The unit `Resources/Deprecated_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources.xaml", index: 11, runs: &[populate_winuitheme_xaml_unit_19, populate_winuitheme_xaml_unit_88, populate_winuitheme_xaml_unit_157, populate_winuitheme_xaml_unit_224] };
+pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources.xaml", index: 11, runs: &[populate_winuitheme_xaml_unit_19, populate_winuitheme_xaml_unit_88, populate_winuitheme_xaml_unit_157, populate_winuitheme_xaml_unit_224], entries: &[] };
 
 /// The unit `Resources/Hyperlink_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Hyperlink_themeresources.xaml", index: 12, runs: &[populate_winuitheme_xaml_unit_2, populate_winuitheme_xaml_unit_20, populate_winuitheme_xaml_unit_89, populate_winuitheme_xaml_unit_158] };
+pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Hyperlink_themeresources.xaml", index: 12, runs: &[populate_winuitheme_xaml_unit_2, populate_winuitheme_xaml_unit_20, populate_winuitheme_xaml_unit_89, populate_winuitheme_xaml_unit_158], entries: &[] };
 
 /// The unit `Resources/HyperlinkButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/HyperlinkButton_themeresources.xaml", index: 13, runs: &[populate_winuitheme_xaml_unit_21, populate_winuitheme_xaml_unit_90, populate_winuitheme_xaml_unit_159] };
+pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/HyperlinkButton_themeresources.xaml", index: 13, runs: &[populate_winuitheme_xaml_unit_21, populate_winuitheme_xaml_unit_90, populate_winuitheme_xaml_unit_159], entries: &[] };
 
 /// The unit `Resources/RadioButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButton_themeresources.xaml", index: 14, runs: &[populate_winuitheme_xaml_unit_22, populate_winuitheme_xaml_unit_91, populate_winuitheme_xaml_unit_160, populate_winuitheme_xaml_unit_225] };
+pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButton_themeresources.xaml", index: 14, runs: &[populate_winuitheme_xaml_unit_22, populate_winuitheme_xaml_unit_91, populate_winuitheme_xaml_unit_160, populate_winuitheme_xaml_unit_225], entries: &[] };
 
 /// The unit `Resources/AppBarButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarButton_themeresources.xaml", index: 15, runs: &[populate_winuitheme_xaml_unit_23, populate_winuitheme_xaml_unit_92, populate_winuitheme_xaml_unit_161, populate_winuitheme_xaml_unit_226] };
+pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarButton_themeresources.xaml", index: 15, runs: &[populate_winuitheme_xaml_unit_23, populate_winuitheme_xaml_unit_92, populate_winuitheme_xaml_unit_161, populate_winuitheme_xaml_unit_226], entries: &[] };
 
 /// The unit `Resources/AppBarSeparator_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarSeparator_themeresources.xaml", index: 16, runs: &[populate_winuitheme_xaml_unit_24, populate_winuitheme_xaml_unit_93, populate_winuitheme_xaml_unit_162, populate_winuitheme_xaml_unit_227] };
+pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarSeparator_themeresources.xaml", index: 16, runs: &[populate_winuitheme_xaml_unit_24, populate_winuitheme_xaml_unit_93, populate_winuitheme_xaml_unit_162, populate_winuitheme_xaml_unit_227], entries: &[] };
 
 /// The unit `Resources/AppBarToggleButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarToggleButton_themeresources.xaml", index: 17, runs: &[populate_winuitheme_xaml_unit_25, populate_winuitheme_xaml_unit_94, populate_winuitheme_xaml_unit_163, populate_winuitheme_xaml_unit_228] };
+pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarToggleButton_themeresources.xaml", index: 17, runs: &[populate_winuitheme_xaml_unit_25, populate_winuitheme_xaml_unit_94, populate_winuitheme_xaml_unit_163, populate_winuitheme_xaml_unit_228], entries: &[] };
 
 /// The unit `Resources/ListBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListBox_themeresources.xaml", index: 18, runs: &[populate_winuitheme_xaml_unit_3, populate_winuitheme_xaml_unit_26, populate_winuitheme_xaml_unit_95, populate_winuitheme_xaml_unit_164] };
+pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListBox_themeresources.xaml", index: 18, runs: &[populate_winuitheme_xaml_unit_3, populate_winuitheme_xaml_unit_26, populate_winuitheme_xaml_unit_95, populate_winuitheme_xaml_unit_164], entries: &[] };
 
 /// The unit `Resources/ToggleSwitch_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleSwitch_themeresources.xaml", index: 19, runs: &[populate_winuitheme_xaml_unit_27, populate_winuitheme_xaml_unit_96, populate_winuitheme_xaml_unit_165, populate_winuitheme_xaml_unit_229] };
+pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleSwitch_themeresources.xaml", index: 19, runs: &[populate_winuitheme_xaml_unit_27, populate_winuitheme_xaml_unit_96, populate_winuitheme_xaml_unit_165, populate_winuitheme_xaml_unit_229], entries: &[] };
 
 /// The unit `Resources/CommandBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CommandBar_themeresources.xaml", index: 20, runs: &[populate_winuitheme_xaml_unit_28, populate_winuitheme_xaml_unit_97, populate_winuitheme_xaml_unit_166, populate_winuitheme_xaml_unit_230] };
+pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CommandBar_themeresources.xaml", index: 20, runs: &[populate_winuitheme_xaml_unit_28, populate_winuitheme_xaml_unit_97, populate_winuitheme_xaml_unit_166, populate_winuitheme_xaml_unit_230], entries: &[] };
 
 /// The unit `Resources/GridViewItem_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/GridViewItem_themeresources.xaml", index: 21, runs: &[populate_winuitheme_xaml_unit_29, populate_winuitheme_xaml_unit_98, populate_winuitheme_xaml_unit_167] };
+pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/GridViewItem_themeresources.xaml", index: 21, runs: &[populate_winuitheme_xaml_unit_29, populate_winuitheme_xaml_unit_98, populate_winuitheme_xaml_unit_167], entries: &[] };
 
 /// The unit `Resources/ListViewItem_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListViewItem_themeresources.xaml", index: 22, runs: &[populate_winuitheme_xaml_unit_30, populate_winuitheme_xaml_unit_99, populate_winuitheme_xaml_unit_168] };
+pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListViewItem_themeresources.xaml", index: 22, runs: &[populate_winuitheme_xaml_unit_30, populate_winuitheme_xaml_unit_99, populate_winuitheme_xaml_unit_168], entries: &[] };
 
 /// The unit `Resources/TextBlock_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources.xaml", index: 23, runs: &[populate_winuitheme_xaml_unit_231] };
+pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources.xaml", index: 23, runs: &[populate_winuitheme_xaml_unit_231], entries: &[] };
 
 /// The unit `Resources/TextBlock_themeresources_v2.5.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources_v2.5.xaml", index: 24, runs: &[populate_winuitheme_xaml_unit_232] };
+pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources_v2.5.xaml", index: 24, runs: &[populate_winuitheme_xaml_unit_232], entries: &[] };
 
 /// The unit `Resources/FlyoutPresenter_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlyoutPresenter_themeresources.xaml", index: 25, runs: &[populate_winuitheme_xaml_unit_4, populate_winuitheme_xaml_unit_31, populate_winuitheme_xaml_unit_100, populate_winuitheme_xaml_unit_169] };
+pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlyoutPresenter_themeresources.xaml", index: 25, runs: &[populate_winuitheme_xaml_unit_4, populate_winuitheme_xaml_unit_31, populate_winuitheme_xaml_unit_100, populate_winuitheme_xaml_unit_169], entries: &[] };
 
 /// The unit `Resources/Button_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Button_themeresources.xaml", index: 26, runs: &[populate_winuitheme_xaml_unit_5, populate_winuitheme_xaml_unit_32, populate_winuitheme_xaml_unit_101, populate_winuitheme_xaml_unit_170] };
+pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Button_themeresources.xaml", index: 26, runs: &[populate_winuitheme_xaml_unit_5, populate_winuitheme_xaml_unit_32, populate_winuitheme_xaml_unit_101, populate_winuitheme_xaml_unit_170], entries: &[] };
 
 /// The unit `Resources/ToggleButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleButton_themeresources.xaml", index: 27, runs: &[populate_winuitheme_xaml_unit_33, populate_winuitheme_xaml_unit_102, populate_winuitheme_xaml_unit_171] };
+pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleButton_themeresources.xaml", index: 27, runs: &[populate_winuitheme_xaml_unit_33, populate_winuitheme_xaml_unit_102, populate_winuitheme_xaml_unit_171], entries: &[] };
 
 /// The unit `Resources/CornerRadius_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CornerRadius_themeresources.xaml", index: 28, runs: &[populate_winuitheme_xaml_unit_34, populate_winuitheme_xaml_unit_103, populate_winuitheme_xaml_unit_172, populate_winuitheme_xaml_unit_233] };
+pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CornerRadius_themeresources.xaml", index: 28, runs: &[populate_winuitheme_xaml_unit_34, populate_winuitheme_xaml_unit_103, populate_winuitheme_xaml_unit_172, populate_winuitheme_xaml_unit_233], entries: &[] };
 
 /// The unit `Resources/MediaTransportControls_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MediaTransportControls_themeresources.xaml", index: 29, runs: &[populate_winuitheme_xaml_unit_35, populate_winuitheme_xaml_unit_104, populate_winuitheme_xaml_unit_173] };
+pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MediaTransportControls_themeresources.xaml", index: 29, runs: &[populate_winuitheme_xaml_unit_35, populate_winuitheme_xaml_unit_104, populate_winuitheme_xaml_unit_173], entries: &[] };
 
 /// The unit `Resources/RepeatButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RepeatButton_themeresources.xaml", index: 30, runs: &[populate_winuitheme_xaml_unit_36, populate_winuitheme_xaml_unit_105, populate_winuitheme_xaml_unit_174] };
+pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RepeatButton_themeresources.xaml", index: 30, runs: &[populate_winuitheme_xaml_unit_36, populate_winuitheme_xaml_unit_105, populate_winuitheme_xaml_unit_174], entries: &[] };
 
 /// The unit `Resources/CalendarDatePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarDatePicker_themeresources.xaml", index: 31, runs: &[populate_winuitheme_xaml_unit_6, populate_winuitheme_xaml_unit_37, populate_winuitheme_xaml_unit_106, populate_winuitheme_xaml_unit_175] };
+pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarDatePicker_themeresources.xaml", index: 31, runs: &[populate_winuitheme_xaml_unit_6, populate_winuitheme_xaml_unit_37, populate_winuitheme_xaml_unit_106, populate_winuitheme_xaml_unit_175], entries: &[] };
 
 /// The unit `Resources/CalendarView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarView_themeresources.xaml", index: 32, runs: &[populate_winuitheme_xaml_unit_7, populate_winuitheme_xaml_unit_38, populate_winuitheme_xaml_unit_107, populate_winuitheme_xaml_unit_176] };
+pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarView_themeresources.xaml", index: 32, runs: &[populate_winuitheme_xaml_unit_7, populate_winuitheme_xaml_unit_38, populate_winuitheme_xaml_unit_107, populate_winuitheme_xaml_unit_176], entries: &[] };
 
 /// The unit `Resources/CheckBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CheckBox_themeresources.xaml", index: 33, runs: &[populate_winuitheme_xaml_unit_39, populate_winuitheme_xaml_unit_108, populate_winuitheme_xaml_unit_177, populate_winuitheme_xaml_unit_234] };
+pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CheckBox_themeresources.xaml", index: 33, runs: &[populate_winuitheme_xaml_unit_39, populate_winuitheme_xaml_unit_108, populate_winuitheme_xaml_unit_177, populate_winuitheme_xaml_unit_234], entries: &[] };
 
 /// The unit `Resources/ContentDialog_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ContentDialog_themeresources.xaml", index: 34, runs: &[populate_winuitheme_xaml_unit_40, populate_winuitheme_xaml_unit_109, populate_winuitheme_xaml_unit_178] };
+pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ContentDialog_themeresources.xaml", index: 34, runs: &[populate_winuitheme_xaml_unit_40, populate_winuitheme_xaml_unit_109, populate_winuitheme_xaml_unit_178], entries: &[] };
 
 /// The unit `Resources/DatePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DatePicker_themeresources.xaml", index: 35, runs: &[populate_winuitheme_xaml_unit_41, populate_winuitheme_xaml_unit_110, populate_winuitheme_xaml_unit_179, populate_winuitheme_xaml_unit_235] };
+pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DatePicker_themeresources.xaml", index: 35, runs: &[populate_winuitheme_xaml_unit_41, populate_winuitheme_xaml_unit_110, populate_winuitheme_xaml_unit_179, populate_winuitheme_xaml_unit_235], entries: &[] };
 
 /// The unit `Resources/DateTimePickerFlyout_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DateTimePickerFlyout_themeresources.xaml", index: 36, runs: &[populate_winuitheme_xaml_unit_42, populate_winuitheme_xaml_unit_111, populate_winuitheme_xaml_unit_180, populate_winuitheme_xaml_unit_236] };
+pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DateTimePickerFlyout_themeresources.xaml", index: 36, runs: &[populate_winuitheme_xaml_unit_42, populate_winuitheme_xaml_unit_111, populate_winuitheme_xaml_unit_180, populate_winuitheme_xaml_unit_236], entries: &[] };
 
 /// The unit `Resources/FlipView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipView_themeresources.xaml", index: 37, runs: &[populate_winuitheme_xaml_unit_43, populate_winuitheme_xaml_unit_112, populate_winuitheme_xaml_unit_181, populate_winuitheme_xaml_unit_237] };
+pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipView_themeresources.xaml", index: 37, runs: &[populate_winuitheme_xaml_unit_43, populate_winuitheme_xaml_unit_112, populate_winuitheme_xaml_unit_181, populate_winuitheme_xaml_unit_237], entries: &[] };
 
 /// The unit `Resources/FlipViewItem_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipViewItem_themeresources.xaml", index: 38, runs: &[populate_winuitheme_xaml_unit_44, populate_winuitheme_xaml_unit_113, populate_winuitheme_xaml_unit_182] };
+pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipViewItem_themeresources.xaml", index: 38, runs: &[populate_winuitheme_xaml_unit_44, populate_winuitheme_xaml_unit_113, populate_winuitheme_xaml_unit_182], entries: &[] };
 
 /// The unit `Resources/Pivot_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Pivot_themeresources.xaml", index: 39, runs: &[populate_winuitheme_xaml_unit_8, populate_winuitheme_xaml_unit_45, populate_winuitheme_xaml_unit_114, populate_winuitheme_xaml_unit_183] };
+pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Pivot_themeresources.xaml", index: 39, runs: &[populate_winuitheme_xaml_unit_8, populate_winuitheme_xaml_unit_45, populate_winuitheme_xaml_unit_114, populate_winuitheme_xaml_unit_183], entries: &[] };
 
 /// The unit `Resources/ScrollBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollBar_themeresources.xaml", index: 40, runs: &[populate_winuitheme_xaml_unit_46, populate_winuitheme_xaml_unit_115, populate_winuitheme_xaml_unit_184, populate_winuitheme_xaml_unit_238] };
+pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollBar_themeresources.xaml", index: 40, runs: &[populate_winuitheme_xaml_unit_46, populate_winuitheme_xaml_unit_115, populate_winuitheme_xaml_unit_184, populate_winuitheme_xaml_unit_238], entries: &[] };
 
 /// The unit `Resources/ScrollViewer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollViewer_themeresources.xaml", index: 41, runs: &[populate_winuitheme_xaml_unit_47, populate_winuitheme_xaml_unit_116, populate_winuitheme_xaml_unit_185, populate_winuitheme_xaml_unit_239] };
+pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollViewer_themeresources.xaml", index: 41, runs: &[populate_winuitheme_xaml_unit_47, populate_winuitheme_xaml_unit_116, populate_winuitheme_xaml_unit_185, populate_winuitheme_xaml_unit_239], entries: &[] };
 
 /// The unit `Resources/Slider_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Slider_themeresources.xaml", index: 42, runs: &[populate_winuitheme_xaml_unit_48, populate_winuitheme_xaml_unit_117, populate_winuitheme_xaml_unit_186, populate_winuitheme_xaml_unit_240] };
+pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Slider_themeresources.xaml", index: 42, runs: &[populate_winuitheme_xaml_unit_48, populate_winuitheme_xaml_unit_117, populate_winuitheme_xaml_unit_186, populate_winuitheme_xaml_unit_240], entries: &[] };
 
 /// The unit `Resources/TimePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TimePicker_themeresources.xaml", index: 43, runs: &[populate_winuitheme_xaml_unit_49, populate_winuitheme_xaml_unit_118, populate_winuitheme_xaml_unit_187, populate_winuitheme_xaml_unit_241] };
+pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TimePicker_themeresources.xaml", index: 43, runs: &[populate_winuitheme_xaml_unit_49, populate_winuitheme_xaml_unit_118, populate_winuitheme_xaml_unit_187, populate_winuitheme_xaml_unit_241], entries: &[] };
 
 /// The unit `Resources/ToolTip_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToolTip_themeresources.xaml", index: 44, runs: &[populate_winuitheme_xaml_unit_50, populate_winuitheme_xaml_unit_119, populate_winuitheme_xaml_unit_188, populate_winuitheme_xaml_unit_242] };
+pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToolTip_themeresources.xaml", index: 44, runs: &[populate_winuitheme_xaml_unit_50, populate_winuitheme_xaml_unit_119, populate_winuitheme_xaml_unit_188, populate_winuitheme_xaml_unit_242], entries: &[] };
 
 /// The unit `Resources/RatingControl_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RatingControl_themeresources.xaml", index: 45, runs: &[populate_winuitheme_xaml_unit_51, populate_winuitheme_xaml_unit_120, populate_winuitheme_xaml_unit_189, populate_winuitheme_xaml_unit_243] };
+pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RatingControl_themeresources.xaml", index: 45, runs: &[populate_winuitheme_xaml_unit_51, populate_winuitheme_xaml_unit_120, populate_winuitheme_xaml_unit_189, populate_winuitheme_xaml_unit_243], entries: &[] };
 
 /// The unit `Resources/InfoBadge_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBadge_themeresources.xaml", index: 46, runs: &[populate_winuitheme_xaml_unit_52, populate_winuitheme_xaml_unit_121, populate_winuitheme_xaml_unit_190] };
+pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBadge_themeresources.xaml", index: 46, runs: &[populate_winuitheme_xaml_unit_52, populate_winuitheme_xaml_unit_121, populate_winuitheme_xaml_unit_190], entries: &[] };
 
 /// The unit `Resources/NavigationView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationView_themeresources.xaml", index: 47, runs: &[populate_winuitheme_xaml_unit_53, populate_winuitheme_xaml_unit_122, populate_winuitheme_xaml_unit_191, populate_winuitheme_xaml_unit_244] };
+pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationView_themeresources.xaml", index: 47, runs: &[populate_winuitheme_xaml_unit_53, populate_winuitheme_xaml_unit_122, populate_winuitheme_xaml_unit_191, populate_winuitheme_xaml_unit_244], entries: &[] };
 
 /// The unit `Resources/NavigationBackButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationBackButton_themeresources.xaml", index: 48, runs: &[populate_winuitheme_xaml_unit_54, populate_winuitheme_xaml_unit_123, populate_winuitheme_xaml_unit_192, populate_winuitheme_xaml_unit_245] };
+pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationBackButton_themeresources.xaml", index: 48, runs: &[populate_winuitheme_xaml_unit_54, populate_winuitheme_xaml_unit_123, populate_winuitheme_xaml_unit_192, populate_winuitheme_xaml_unit_245], entries: &[] };
 
 /// The unit `Resources/PersonPicture_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PersonPicture_themeresources.xaml", index: 49, runs: &[populate_winuitheme_xaml_unit_55, populate_winuitheme_xaml_unit_124, populate_winuitheme_xaml_unit_193] };
+pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PersonPicture_themeresources.xaml", index: 49, runs: &[populate_winuitheme_xaml_unit_55, populate_winuitheme_xaml_unit_124, populate_winuitheme_xaml_unit_193], entries: &[] };
 
 /// The unit `Resources/RefreshContainer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshContainer_themeresources.xaml", index: 50, runs: &[populate_winuitheme_xaml_unit_56, populate_winuitheme_xaml_unit_125, populate_winuitheme_xaml_unit_194] };
+pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshContainer_themeresources.xaml", index: 50, runs: &[populate_winuitheme_xaml_unit_56, populate_winuitheme_xaml_unit_125, populate_winuitheme_xaml_unit_194], entries: &[] };
 
 /// The unit `Resources/RefreshVisualizer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshVisualizer_themeresources.xaml", index: 51, runs: &[populate_winuitheme_xaml_unit_57, populate_winuitheme_xaml_unit_126, populate_winuitheme_xaml_unit_195] };
+pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshVisualizer_themeresources.xaml", index: 51, runs: &[populate_winuitheme_xaml_unit_57, populate_winuitheme_xaml_unit_126, populate_winuitheme_xaml_unit_195], entries: &[] };
 
 /// The unit `Resources/MenuBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuBar_themeresources.xaml", index: 52, runs: &[populate_winuitheme_xaml_unit_58, populate_winuitheme_xaml_unit_127, populate_winuitheme_xaml_unit_196, populate_winuitheme_xaml_unit_246] };
+pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuBar_themeresources.xaml", index: 52, runs: &[populate_winuitheme_xaml_unit_58, populate_winuitheme_xaml_unit_127, populate_winuitheme_xaml_unit_196, populate_winuitheme_xaml_unit_246], entries: &[] };
 
 /// The unit `Resources/TreeView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TreeView_themeresources.xaml", index: 53, runs: &[populate_winuitheme_xaml_unit_59, populate_winuitheme_xaml_unit_128, populate_winuitheme_xaml_unit_197] };
+pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TreeView_themeresources.xaml", index: 53, runs: &[populate_winuitheme_xaml_unit_59, populate_winuitheme_xaml_unit_128, populate_winuitheme_xaml_unit_197], entries: &[] };
 
 /// The unit `Resources/SwipeControl_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SwipeControl_themeresources.xaml", index: 54, runs: &[populate_winuitheme_xaml_unit_60, populate_winuitheme_xaml_unit_129, populate_winuitheme_xaml_unit_198] };
+pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SwipeControl_themeresources.xaml", index: 54, runs: &[populate_winuitheme_xaml_unit_60, populate_winuitheme_xaml_unit_129, populate_winuitheme_xaml_unit_198], entries: &[] };
 
 /// The unit `Resources/SplitButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitButton_themeresources.xaml", index: 55, runs: &[populate_winuitheme_xaml_unit_61, populate_winuitheme_xaml_unit_130, populate_winuitheme_xaml_unit_199, populate_winuitheme_xaml_unit_247] };
+pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitButton_themeresources.xaml", index: 55, runs: &[populate_winuitheme_xaml_unit_61, populate_winuitheme_xaml_unit_130, populate_winuitheme_xaml_unit_199, populate_winuitheme_xaml_unit_247], entries: &[] };
 
 /// The unit `Resources/DropDownButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DropDownButton_themeresources.xaml", index: 56, runs: &[populate_winuitheme_xaml_unit_62, populate_winuitheme_xaml_unit_131, populate_winuitheme_xaml_unit_200] };
+pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DropDownButton_themeresources.xaml", index: 56, runs: &[populate_winuitheme_xaml_unit_62, populate_winuitheme_xaml_unit_131, populate_winuitheme_xaml_unit_200], entries: &[] };
 
 /// The unit `Resources/RadioButtons_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButtons_themeresources.xaml", index: 57, runs: &[populate_winuitheme_xaml_unit_63, populate_winuitheme_xaml_unit_132, populate_winuitheme_xaml_unit_201, populate_winuitheme_xaml_unit_248] };
+pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButtons_themeresources.xaml", index: 57, runs: &[populate_winuitheme_xaml_unit_63, populate_winuitheme_xaml_unit_132, populate_winuitheme_xaml_unit_201, populate_winuitheme_xaml_unit_248], entries: &[] };
 
 /// The unit `Resources/TabView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabView_themeresources.xaml", index: 58, runs: &[populate_winuitheme_xaml_unit_64, populate_winuitheme_xaml_unit_133, populate_winuitheme_xaml_unit_202, populate_winuitheme_xaml_unit_249] };
+pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabView_themeresources.xaml", index: 58, runs: &[populate_winuitheme_xaml_unit_64, populate_winuitheme_xaml_unit_133, populate_winuitheme_xaml_unit_202, populate_winuitheme_xaml_unit_249], entries: &[] };
 
 /// The unit `Resources/AutoSuggestBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AutoSuggestBox_themeresources.xaml", index: 59, runs: &[populate_winuitheme_xaml_unit_65, populate_winuitheme_xaml_unit_134, populate_winuitheme_xaml_unit_203, populate_winuitheme_xaml_unit_250] };
+pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AutoSuggestBox_themeresources.xaml", index: 59, runs: &[populate_winuitheme_xaml_unit_65, populate_winuitheme_xaml_unit_134, populate_winuitheme_xaml_unit_203, populate_winuitheme_xaml_unit_250], entries: &[] };
 
 /// The unit `Resources/ComboBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ComboBox_themeresources.xaml", index: 60, runs: &[populate_winuitheme_xaml_unit_66, populate_winuitheme_xaml_unit_135, populate_winuitheme_xaml_unit_204, populate_winuitheme_xaml_unit_251] };
+pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ComboBox_themeresources.xaml", index: 60, runs: &[populate_winuitheme_xaml_unit_66, populate_winuitheme_xaml_unit_135, populate_winuitheme_xaml_unit_204, populate_winuitheme_xaml_unit_251], entries: &[] };
 
 /// The unit `Resources/SplitView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitView_themeresources.xaml", index: 61, runs: &[populate_winuitheme_xaml_unit_67, populate_winuitheme_xaml_unit_136, populate_winuitheme_xaml_unit_205] };
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitView_themeresources.xaml", index: 61, runs: &[populate_winuitheme_xaml_unit_67, populate_winuitheme_xaml_unit_136, populate_winuitheme_xaml_unit_205], entries: &[] };
 
 /// The unit `Resources/ProgressBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressBar_themeresources.xaml", index: 62, runs: &[populate_winuitheme_xaml_unit_68, populate_winuitheme_xaml_unit_137, populate_winuitheme_xaml_unit_206, populate_winuitheme_xaml_unit_252] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressBar_themeresources.xaml", index: 62, runs: &[populate_winuitheme_xaml_unit_68, populate_winuitheme_xaml_unit_137, populate_winuitheme_xaml_unit_206, populate_winuitheme_xaml_unit_252], entries: &[] };
 
 /// The unit `Resources/ProgressRing_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressRing_themeresources.xaml", index: 63, runs: &[populate_winuitheme_xaml_unit_9, populate_winuitheme_xaml_unit_69, populate_winuitheme_xaml_unit_138, populate_winuitheme_xaml_unit_207] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressRing_themeresources.xaml", index: 63, runs: &[populate_winuitheme_xaml_unit_9, populate_winuitheme_xaml_unit_69, populate_winuitheme_xaml_unit_138, populate_winuitheme_xaml_unit_207], entries: &[] };
 
 /// The unit `Resources/NumberBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NumberBox_themeresources.xaml", index: 64, runs: &[populate_winuitheme_xaml_unit_70, populate_winuitheme_xaml_unit_139, populate_winuitheme_xaml_unit_208, populate_winuitheme_xaml_unit_253] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NumberBox_themeresources.xaml", index: 64, runs: &[populate_winuitheme_xaml_unit_70, populate_winuitheme_xaml_unit_139, populate_winuitheme_xaml_unit_208, populate_winuitheme_xaml_unit_253], entries: &[] };
 
 /// The unit `Resources/Expander_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Expander_themeresources.xaml", index: 65, runs: &[populate_winuitheme_xaml_unit_71, populate_winuitheme_xaml_unit_140, populate_winuitheme_xaml_unit_209, populate_winuitheme_xaml_unit_254] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Expander_themeresources.xaml", index: 65, runs: &[populate_winuitheme_xaml_unit_71, populate_winuitheme_xaml_unit_140, populate_winuitheme_xaml_unit_209, populate_winuitheme_xaml_unit_254], entries: &[] };
 
 /// The unit `Resources/PagerControl_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PagerControl_themeresources.xaml", index: 66, runs: &[populate_winuitheme_xaml_unit_10, populate_winuitheme_xaml_unit_72, populate_winuitheme_xaml_unit_141, populate_winuitheme_xaml_unit_210] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PagerControl_themeresources.xaml", index: 66, runs: &[populate_winuitheme_xaml_unit_10, populate_winuitheme_xaml_unit_72, populate_winuitheme_xaml_unit_141, populate_winuitheme_xaml_unit_210], entries: &[] };
 
 /// The unit `Resources/InfoBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBar_themeresources.xaml", index: 67, runs: &[populate_winuitheme_xaml_unit_73, populate_winuitheme_xaml_unit_142, populate_winuitheme_xaml_unit_211, populate_winuitheme_xaml_unit_255] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBar_themeresources.xaml", index: 67, runs: &[populate_winuitheme_xaml_unit_73, populate_winuitheme_xaml_unit_142, populate_winuitheme_xaml_unit_211, populate_winuitheme_xaml_unit_255], entries: &[] };
 
 /// The unit `Resources/PipsPager_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PipsPager_themeresources.xaml", index: 68, runs: &[populate_winuitheme_xaml_unit_74, populate_winuitheme_xaml_unit_143, populate_winuitheme_xaml_unit_212, populate_winuitheme_xaml_unit_256] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PipsPager_themeresources.xaml", index: 68, runs: &[populate_winuitheme_xaml_unit_74, populate_winuitheme_xaml_unit_143, populate_winuitheme_xaml_unit_212, populate_winuitheme_xaml_unit_256], entries: &[] };
 
 /// The unit `Resources/SelectorBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SelectorBar_themeresources.xaml", index: 69, runs: &[populate_winuitheme_xaml_unit_75, populate_winuitheme_xaml_unit_144, populate_winuitheme_xaml_unit_213, populate_winuitheme_xaml_unit_257] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SelectorBar_themeresources.xaml", index: 69, runs: &[populate_winuitheme_xaml_unit_75, populate_winuitheme_xaml_unit_144, populate_winuitheme_xaml_unit_213, populate_winuitheme_xaml_unit_257], entries: &[] };
 
 /// The unit `Resources/TitleBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TitleBar_themeresources.xaml", index: 70, runs: &[populate_winuitheme_xaml_unit_76, populate_winuitheme_xaml_unit_145, populate_winuitheme_xaml_unit_214, populate_winuitheme_xaml_unit_258] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TitleBar_themeresources.xaml", index: 70, runs: &[populate_winuitheme_xaml_unit_76, populate_winuitheme_xaml_unit_145, populate_winuitheme_xaml_unit_214, populate_winuitheme_xaml_unit_258], entries: &[] };
 
 /// The unit `Resources/TabularSurfaces_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabularSurfaces_themeresources.xaml", index: 71, runs: &[populate_winuitheme_xaml_unit_77, populate_winuitheme_xaml_unit_146, populate_winuitheme_xaml_unit_215] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabularSurfaces_themeresources.xaml", index: 71, runs: &[populate_winuitheme_xaml_unit_77, populate_winuitheme_xaml_unit_146, populate_winuitheme_xaml_unit_215], entries: &[] };
 
 /// The unit `Resources/TableView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TableView_themeresources.xaml", index: 72, runs: &[populate_winuitheme_xaml_unit_78, populate_winuitheme_xaml_unit_147, populate_winuitheme_xaml_unit_216] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TableView_themeresources.xaml", index: 72, runs: &[populate_winuitheme_xaml_unit_78, populate_winuitheme_xaml_unit_147, populate_winuitheme_xaml_unit_216], entries: &[] };
 
 /// The unit `Resources/ResizeGripper_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ResizeGripper_themeresources.xaml", index: 73, runs: &[populate_winuitheme_xaml_unit_79, populate_winuitheme_xaml_unit_148, populate_winuitheme_xaml_unit_217, populate_winuitheme_xaml_unit_259] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ResizeGripper_themeresources.xaml", index: 73, runs: &[populate_winuitheme_xaml_unit_79, populate_winuitheme_xaml_unit_148, populate_winuitheme_xaml_unit_217, populate_winuitheme_xaml_unit_259], entries: &[] };
 
 /// The unit `Resources/ThemeShadows.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ThemeShadows.xaml", index: 74, runs: &[populate_winuitheme_xaml_unit_260] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ThemeShadows.xaml", index: 74, runs: &[populate_winuitheme_xaml_unit_260], entries: &[] };
 
 /// The unit `Resources/Glyphs.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Glyphs.xaml", index: 75, runs: &[populate_winuitheme_xaml_unit_261] };
+pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Glyphs.xaml", index: 75, runs: &[populate_winuitheme_xaml_unit_261], entries: &[] };
 
 /// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 76, runs: &[populate_winuitheme_xaml_unit_262] };
+pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 76, runs: &[populate_winuitheme_xaml_unit_262], entries: &[] };
 
 /// The unit `Controls/OverlayPopupHost.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_1] };
+pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_1], entries: &[] };
 
 /// The unit `Controls/PopupRoot.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_2] };
+pub static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_2], entries: &[] };
 
 /// The unit `Controls/TextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_33] };
+pub static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_33], entries: &[] };
 
 /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_34] };
+pub static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_34], entries: &[] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_35] };
+pub static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_35], entries: &[] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_36] };
+pub static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_36], entries: &[] };
 
 /// The unit `Controls/RevealStyles.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_37] };
+pub static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_37], entries: &[] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_38] };
+pub static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_38], entries: &[] };
 
 /// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_39] };
+pub static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_39], entries: &[] };
 
 /// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_40] };
+pub static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_40], entries: &[] };
 
 /// The unit `Controls/Thumb.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_4] };
+pub static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_4], entries: &[] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_41] };
+pub static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_41], entries: &[] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_42] };
+pub static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_42], entries: &[] };
 
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_43] };
+pub static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_43], entries: &[] };
 
 /// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_44] };
+pub static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_44], entries: &[] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_45] };
+pub static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_45], entries: &[] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_5] };
+pub static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_5], entries: &[] };
 
 /// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_46] };
+pub static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_46], entries: &[] };
 
 /// The unit `Controls/FontIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_6] };
+pub static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_6], entries: &[] };
 
 /// The unit `Controls/SymbolIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_7] };
+pub static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_7], entries: &[] };
 
 /// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_8] };
+pub static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_8], entries: &[] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_9] };
+pub static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_9], entries: &[] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_10] };
+pub static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_10], entries: &[] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_11] };
+pub static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_11], entries: &[] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_12] };
+pub static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_12], entries: &[] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_13] };
+pub static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_13], entries: &[] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_14] };
+pub static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_14], entries: &[] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_47] };
+pub static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_47], entries: &[] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_15] };
+pub static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_15], entries: &[] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_48] };
+pub static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_48], entries: &[] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_16] };
+pub static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_16], entries: &[] };
 
 /// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_17] };
+pub static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_17], entries: &[] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_49] };
+pub static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_49], entries: &[] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_50] };
+pub static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_50], entries: &[] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_51] };
+pub static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_51], entries: &[] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_52] };
+pub static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_52], entries: &[] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_53] };
+pub static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_53], entries: &[] };
 
 /// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_54] };
+pub static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_54], entries: &[] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_55] };
+pub static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_55], entries: &[] };
 
 /// The unit `Controls/InfoBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_18] };
+pub static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_18], entries: &[] };
 
 /// The unit `Controls/InfoBadge.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_56] };
+pub static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_56], entries: &[] };
 
 /// The unit `Controls/Pivot.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Pivot.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_57] };
+pub static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Pivot.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_57], entries: &[] };
 
 /// The unit `Controls/SwipeControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SwipeControl.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_58] };
+pub static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SwipeControl.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_58], entries: &[] };
 
 /// The unit `Controls/TitleBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_59] };
+pub static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_59], entries: &[] };
 
 /// The unit `Controls/ProgressRing.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_19] };
+pub static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_19], entries: &[] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_20] };
+pub static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_20], entries: &[] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_60] };
+pub static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_60], entries: &[] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_21] };
+pub static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_21], entries: &[] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_61] };
+pub static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_61], entries: &[] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_22] };
+pub static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_22], entries: &[] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_62] };
+pub static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_62], entries: &[] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_63] };
+pub static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_63], entries: &[] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_64] };
+pub static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_64], entries: &[] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_65] };
+pub static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_65], entries: &[] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_23] };
+pub static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_23], entries: &[] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_66] };
+pub static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_66], entries: &[] };
 
 /// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_24] };
+pub static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_24], entries: &[] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_67] };
+pub static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_67], entries: &[] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_68] };
+pub static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_68], entries: &[] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_69] };
+pub static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_69], entries: &[] };
 
 /// The unit `Controls/Frame.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_25] };
+pub static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_25], entries: &[] };
 
 /// The unit `Controls/NavigationView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_70] };
+pub static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_70], entries: &[] };
 
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_71] };
+pub static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_71], entries: &[] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_26] };
+pub static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_26], entries: &[] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_72] };
+pub static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_72], entries: &[] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_73] };
+pub static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_73], entries: &[] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_74] };
+pub static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_74], entries: &[] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_75] };
+pub static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_75], entries: &[] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_76] };
+pub static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_76], entries: &[] };
 
 /// The unit `Controls/MediaTransportControls.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MediaTransportControls.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_77] };
+pub static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MediaTransportControls.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_77], entries: &[] };
 
 /// The unit `Controls/CameraCaptureUI.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CameraCaptureUI.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_27] };
+pub static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CameraCaptureUI.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_27], entries: &[] };
 
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_78] };
+pub static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_78], entries: &[] };
 
 /// The unit `Controls/NumberBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_79] };
+pub static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_79], entries: &[] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_28] };
+pub static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_28], entries: &[] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_80] };
+pub static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_80], entries: &[] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_81] };
+pub static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_81], entries: &[] };
 
 /// The unit `Controls/RatingControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_29] };
+pub static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_29], entries: &[] };
 
 /// The unit `Controls/PersonPicture.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_82] };
+pub static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_82], entries: &[] };
 
 /// The unit `Controls/PagerControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_83] };
+pub static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_83], entries: &[] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_84] };
+pub static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_84], entries: &[] };
 
 /// The unit `Controls/RefreshVisualizer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_30] };
+pub static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_30], entries: &[] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_85] };
+pub static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_85], entries: &[] };
 
 /// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_31] };
+pub static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_31], entries: &[] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_86] };
+pub static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_86], entries: &[] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_32] };
+pub static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_32], entries: &[] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_87] };
+pub static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_87], entries: &[] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_88] };
+pub static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_88], entries: &[] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_164: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 164, runs: &[build_controls_winuicontrols_xaml_unit_89] };
+pub static THEME_UNIT_164: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 164, runs: &[build_controls_winuicontrols_xaml_unit_89], entries: &[] };
 
 /// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_165: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 165, runs: &[build_controls_winuicontrols_xaml_unit_90] };
+pub static THEME_UNIT_165: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 165, runs: &[build_controls_winuicontrols_xaml_unit_90], entries: &[] };
 
 /// The unit `Controls/ListView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_166: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListView.xaml", index: 166, runs: &[build_controls_winuicontrols_xaml_unit_91] };
+pub static THEME_UNIT_166: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListView.xaml", index: 166, runs: &[build_controls_winuicontrols_xaml_unit_91], entries: &[] };
 
 /// The unit `Controls/GridView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_167: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridView.xaml", index: 167, runs: &[build_controls_winuicontrols_xaml_unit_92] };
+pub static THEME_UNIT_167: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridView.xaml", index: 167, runs: &[build_controls_winuicontrols_xaml_unit_92], entries: &[] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_168: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 168, runs: &[build_controls_winuicontrols_xaml_unit_93] };
+pub static THEME_UNIT_168: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 168, runs: &[build_controls_winuicontrols_xaml_unit_93], entries: &[] };
 
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_169: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 169, runs: &[build_controls_winuicontrols_xaml_unit_94] };
+pub static THEME_UNIT_169: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 169, runs: &[build_controls_winuicontrols_xaml_unit_94], entries: &[] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_170: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 170, runs: &[build_controls_winuicontrols_xaml_unit_95] };
+pub static THEME_UNIT_170: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 170, runs: &[build_controls_winuicontrols_xaml_unit_95], entries: &[] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_171: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 171, runs: &[build_controls_winuicontrols_xaml_unit_96] };
+pub static THEME_UNIT_171: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 171, runs: &[build_controls_winuicontrols_xaml_unit_96], entries: &[] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_172: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 172, runs: &[build_controls_winuicontrols_xaml_unit_97] };
+pub static THEME_UNIT_172: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 172, runs: &[build_controls_winuicontrols_xaml_unit_97], entries: &[] };
 
 /// The unit `Controls/AutoSuggestBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_173: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 173, runs: &[build_controls_winuicontrols_xaml_unit_98] };
+pub static THEME_UNIT_173: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 173, runs: &[build_controls_winuicontrols_xaml_unit_98], entries: &[] };
 
 /// The unit `Controls/RadioButtons.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_174: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 174, runs: &[build_controls_winuicontrols_xaml_unit_99] };
+pub static THEME_UNIT_174: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 174, runs: &[build_controls_winuicontrols_xaml_unit_99], entries: &[] };
 
 /// The unit `Controls/RichEditBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_175: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 175, runs: &[build_controls_winuicontrols_xaml_unit_100] };
+pub static THEME_UNIT_175: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 175, runs: &[build_controls_winuicontrols_xaml_unit_100], entries: &[] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
@@ -92560,6 +92560,13 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 #[cfg(not(ferroui_full_themes))]
 pub fn registered_theme_units() -> rt::ThemeParts {
     rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)
+}
+
+/// What the table `parts` leaves out of the theme, for the diagnostic of a lookup that misses
+/// it (#852). Debug builds only.
+#[cfg(debug_assertions)]
+pub fn trimmed_theme_keys(parts: rt::ThemeParts) -> rt::TrimmedKeys {
+    rt::trimmed_keys(THEME_UNIT_TYPE_KEYS, &[], &[], parts)
 }
 
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
