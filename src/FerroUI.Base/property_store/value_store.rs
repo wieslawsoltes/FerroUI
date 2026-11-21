@@ -572,9 +572,17 @@ impl ValueStore {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_local_write(property);
         if let Some(effective) = self.get_effective_value(property) {
-            if effective.priority() == BindingPriority::LocalValue || effective.is_overriden_current_value() || effective.clears_coercion_on_clear() {
+            let overridden = effective.is_overriden_current_value();
+            if effective.priority() == BindingPriority::LocalValue || overridden {
                 effective.set_is_overriden_current_value(false);
                 self.reevaluate_effective_value(owner, property, Some(effective), None, true);
+            } else if effective.clears_coercion_on_clear() {
+                // A local value hidden by an animation is not what this clear removes.
+                if effective.base_priority() == BindingPriority::LocalValue {
+                    self.reset_coercion(owner, property);
+                } else {
+                    self.reevaluate_effective_value(owner, property, Some(effective), None, true);
+                }
             }
         }
     }
@@ -604,10 +612,17 @@ impl ValueStore {
                 expressions.iter().position(|(id, _)| *id == property.id())
                     .map(|index| expressions.remove(index).1)
             };
+            // The expression is already detached, so its completion does not clear this state.
+            let had_validation = expression.as_ref().is_some_and(|e| e.is_data_validation_enabled());
             if let Some(binding) = binding {
                 binding.dispose();
             }
             drop(expression);
+            self.clear_local_value(owner, property);
+            if had_validation {
+                owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);
+            }
+            return;
         }
         self.clear_local_value(owner, property);
     }
@@ -1346,6 +1361,12 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                // The pending pass does not know this was a clear: record it on the value now.
+                if ignore_local_value {
+                    if let Some(current) = &current {
+                        current.begin_reevaluation(true, changed_value_entry.is_some());
+                    }
+                }
                 self.reevaluation_pending.set(true);
                 return;
             }

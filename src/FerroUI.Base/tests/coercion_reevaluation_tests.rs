@@ -341,3 +341,53 @@ fn clearing_local_input_reveals_a_style_without_a_coercion_poll() {
     assert_eq!(calls.get(), 2);
     style.dispose();
 }
+
+#[test]
+fn ended_animation_restores_a_local_value_under_a_coerced_default() {
+    let property: &'static StyledProperty<i32> = StyledProperty::create(
+        "AtLeastTen",
+        ScopeOwner::TYPE,
+        ScopeOwner::TYPE,
+        StyledPropertyMetadata::new(Some(0)).with_coerce(|_, value: i32| value.max(10)),
+        false,
+        None,
+        None,
+        false,
+    );
+    let owner = ScopeOwner::new();
+    owner.set_value(property, 50);
+    let animation = owner
+        .set_value_with_priority(property, 70, BindingPriority::Animation)
+        .unwrap();
+    assert_eq!(owner.get_value(property), 70);
+    animation.dispose();
+    assert_eq!(owner.get_value(property), 50);
+    assert_eq!(owner.get_local_value(property), Some(50));
+}
+
+#[test]
+fn clear_inside_a_styling_update_removes_the_local_value() {
+    let (property, _) = property(false);
+    let owner = ScopeOwner::new();
+    owner.set_value(property, true);
+    owner.values().begin_styling();
+    owner.clear_value(property);
+    owner.values().end_styling(&owner);
+    assert_eq!(owner.get_local_value(property), None);
+    assert!(owner.get_value(property));
+}
+
+#[test]
+fn clear_keeps_a_local_value_hidden_by_an_animation() {
+    let (property, _) = property(false);
+    let owner = ScopeOwner::new();
+    owner.set_value(property, false);
+    let animation = owner
+        .set_value_with_priority(property, true, BindingPriority::Animation)
+        .unwrap();
+    owner.clear_value(property);
+    assert_eq!(owner.get_local_value(property), Some(false));
+    animation.dispose();
+    assert_eq!(owner.get_local_value(property), Some(false));
+    assert!(!owner.get_value(property));
+}

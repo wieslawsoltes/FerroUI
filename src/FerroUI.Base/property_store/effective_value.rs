@@ -149,7 +149,9 @@ impl EffectiveValueState {
 
     fn begin_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
         self.reuse_unmodified_coercion.set(self.explicit_coercion && !force_coerce);
-        self.reset_coercion_on_reevaluation.set(self.explicit_coercion && clear_local_value);
+        // A clear deferred by a styling pass stays requested until the pass reevaluates.
+        self.reset_coercion_on_reevaluation
+            .set(self.explicit_coercion && (clear_local_value || self.reset_coercion_on_reevaluation.get()));
         if self.explicit_coercion && clear_local_value {
             self.is_coerced_default_value.set(false);
         }
@@ -894,7 +896,12 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {
-        if self.state.priority.get() == BindingPriority::Unset && !self.state.explicit_coercion {
+        // A local value hidden by an animation that just ended is still the input of this
+        // property: it is restored by `remove_animation_and_raise`, not replaced by the default.
+        if self.state.priority.get() == BindingPriority::Unset
+            && self.state.base_priority.get() == BindingPriority::Unset
+            && !self.state.explicit_coercion
+        {
             // Keep the priority short circuit before even reading metadata.
             if let Some(coercion) = self.metadata.coercion() {
                 coercion.end_reevaluation(self, owner, DefaultCoercionOperations {
