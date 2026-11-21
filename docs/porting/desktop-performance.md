@@ -513,8 +513,9 @@ code.
 
 ## 8. The cross-framework gauntlet (2026-11-08)
 
-`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
-benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the
+comparison's benchmark ([performance-comparison.md](performance-comparison.md)): the same screens,
+per-frame work and
 `PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
 beside the other frameworks. `PERF_REPORT=1` prints how often the app's animation-frame
 callback runs (`PERF fps`), for A/B runs of FerroUI builds; a build with the feature `counters`
@@ -655,7 +656,7 @@ What it measures:
   a gate of its own.
 - **The frame benchmarks** (`tests/FerroUI.FrameBenchmarks`, suite `frames`): FerroUI's own
   regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
-  follows the Cranpose benchmark and is synced with it). Each scene does one kind of per-frame work
+  follows the comparison's benchmark and is synced with it). Each scene does one kind of per-frame work
   of a heavy screen, so that a change of that work shows in its own numbers, and each names the
   sections of chapter 9 it guards: `text` (text that changes every frame), `paragraph` (a long
   paragraph one word of which changes every frame), `list` (a scrolling list of shadowed cards),
@@ -1996,7 +1997,7 @@ found again:
 | 16,384 | 53 % |
 
 Upstream makes a layout for every text block and every change. egui keeps its laid-out texts
-(galleys) by their content for the frames that use them, and Cranpose keeps its measured texts
+(galleys) by their content for the frames that use them, and the comparison keeps its measured texts
 the same way. FerroUI keeps the layout itself, the object the formatter makes, so nothing about
 shaping, line breaking or drawing is done another way: a layout that is found is the layout
 that would have been made.
@@ -3781,12 +3782,12 @@ not decide which pass commits. One batch at most is still in flight beside the o
 prepared (the commit itself waits for the acceptance in `MediaContext::commit_compositor`),
 and what observes the effects of a batch still waits for `processed` or `rendered`.
 
-What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and Cranpose in
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and the comparison in
 the same run, first and second launch; the machine was not quiet, so the figures compare
 the columns and are not calibrated; the column after also has the balanced bands of the
 Skia layer):
 
-| Scene | FerroUI before | FerroUI after | Cranpose |
+| Scene | FerroUI before | FerroUI after | The comparison |
 |---|---|---|---|
 | gauntlet, tier 16, frames per second | 21.8 to 22.8 / 27.5 to 29.1 | 37.1 / 47.1 | 55.5 / 58.1 |
 | gauntlet, tier 16, processor time for a frame | 61 to 69 ms | 51.3 to 51.5 ms | 20.4 to 20.5 ms |
@@ -3847,9 +3848,9 @@ entries and every origin carried down is compared with the walk up it replaces
 `move_composition_offsets_below`), under every test of the crate.
 
 What it measures (M3 Pro, 60 Hz, the harness of the benchmark, the two binaries run in
-turn, first and second launch; Cranpose from the run of section 9.46):
+turn, first and second launch; the comparison from the run of section 9.46):
 
-| Gauntlet, tier 16 | Before | After | Cranpose |
+| Gauntlet, tier 16 | Before | After | The comparison |
 |---|---|---|---|
 | frames per second | 39.2 to 40.0 / 48.1 to 48.7 | 42.6 to 42.8 / 53.8 to 54.3 | 55.5 / 58.1 |
 | processor time for a frame | 49.2 to 51.5 / 47.7 to 50.6 ms | 46.9 to 48.4 / 47.0 to 47.3 ms | 20.4 to 20.5 ms |
@@ -4452,7 +4453,7 @@ The harness of the benchmark, ten seconds from the launch, first launch and seco
 a second; the processor time of all threads for a frame; the 99th percentile of the frame
 time), with the other framework of the benchmark from its run on the same machine:
 
-| Scene | Before | After | Cranpose |
+| Scene | Before | After | The comparison |
 | --- | ---: | ---: | ---: |
 | Gauntlet tier 16, frames a second | 44.3, 55.4 | 43.3, 54.8 | 55.3, 58.2 |
 | Gauntlet tier 16, processor ms a frame | 47.2, 46.0 | 47.2, 46.7 | |
