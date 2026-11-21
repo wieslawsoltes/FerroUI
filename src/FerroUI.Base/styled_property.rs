@@ -466,14 +466,7 @@ impl StyledRoutes {
     /// before the value is validated, coerced or published, as the typed routes released it.
     /// Panics as they did for a value that does not convert.
     fn converted(&self, value: &dyn Any) -> BoxedValue {
-        let property = self.property();
-        let converted = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type());
-        let copy = converted.as_ref().and_then(|converted| self.codec().box_value(converted.as_any()));
-        drop(converted);
-        match copy {
-            Some(copy) => copy,
-            None => property.invalid_value_type(),
-        }
+        converted_value(self.property(), self.codec(), value)
     }
 }
 
@@ -511,27 +504,7 @@ impl PropertyRoutes for StyledRoutes {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        let property = self.property();
-        // The type of the value, asked once: a value of the value type is the common case, then
-        // the two markers, then a value to convert.
-        let type_id = value.type_id();
-        if type_id != property.property_type() {
-            if type_id == TypeId::of::<UnsetValueType>() {
-                if priority == BindingPriority::LocalValue {
-                    o.values().clear_value(o, property);
-                }
-                return None;
-            }
-            if type_id == TypeId::of::<DoNothingType>() {
-                return None;
-            }
-            let converted = self.converted(value);
-            return self.route_set_value(o, converted.as_any(), priority);
-        }
-        match self.codec().set_value(o, value, priority) {
-            Some(result) => result,
-            None => property.invalid_value_type(),
-        }
+        set_styled_value(self.property(), self.codec(), o, value, priority)
     }
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
@@ -610,6 +583,60 @@ impl PropertyRoutes for StyledRoutes {
 
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
         self.codec().set_local_boxed(o, value);
+    }
+}
+
+/// The untyped write of a styled property: the route, and `FerroObject::set_value_untyped`
+/// directly (one call through a vtable, the codec's, as the typed route of a value type was).
+#[inline]
+pub(crate) fn set_styled_value(
+    property: &'static FerroProperty,
+    codec: &'static dyn StyledCodec,
+    o: &FerroObject,
+    value: &dyn Any,
+    priority: BindingPriority,
+) -> Option<Rc<dyn IDisposable>> {
+    // The type of the value, asked once: a value of the value type is the common case.
+    if value.type_id() == property.property_type() {
+        return match codec.set_value(o, value, priority) {
+            Some(result) => result,
+            None => property.invalid_value_type(),
+        };
+    }
+    set_other_styled_value(property, codec, o, value, priority)
+}
+
+/// [`set_styled_value`] of a marker or of a value of another type, which is converted.
+#[inline(never)]
+fn set_other_styled_value(
+    property: &'static FerroProperty,
+    codec: &'static dyn StyledCodec,
+    o: &FerroObject,
+    value: &dyn Any,
+    priority: BindingPriority,
+) -> Option<Rc<dyn IDisposable>> {
+    let type_id = value.type_id();
+    if type_id == TypeId::of::<UnsetValueType>() {
+        if priority == BindingPriority::LocalValue {
+            o.values().clear_value(o, property);
+        }
+        return None;
+    }
+    if type_id == TypeId::of::<DoNothingType>() {
+        return None;
+    }
+    let converted = converted_value(property, codec, value);
+    set_styled_value(property, codec, o, converted.as_any(), priority)
+}
+
+/// [`StyledRoutes::converted`] of `property`.
+fn converted_value(property: &'static FerroProperty, codec: &'static dyn StyledCodec, value: &dyn Any) -> BoxedValue {
+    let converted = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type());
+    let copy = converted.as_ref().and_then(|converted| codec.box_value(converted.as_any()));
+    drop(converted);
+    match copy {
+        Some(copy) => copy,
+        None => property.invalid_value_type(),
     }
 }
 

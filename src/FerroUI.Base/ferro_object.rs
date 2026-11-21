@@ -891,7 +891,10 @@ impl FerroObject {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        property.routes().route_set_value(self, value, priority)
+        match property.styled_codec_if_any() {
+            Some(codec) => crate::styled_property::set_styled_value(property, codec, self, value, priority),
+            None => property.routes().route_set_value(self, value, priority),
+        }
     }
 
     /// Sets a property whose value type is `T` with local value priority, from the value
