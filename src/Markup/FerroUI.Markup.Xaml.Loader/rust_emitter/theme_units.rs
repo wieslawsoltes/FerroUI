@@ -273,7 +273,7 @@ impl UnitEmission {
     /// ([`ACTIVE`]), `registered_theme_units` and, in debug builds, `THEME_UNIT_TYPE_KEYS`.
     /// `class` is the full name of the class; `type_keys` are the type keys of each unit, by
     /// its index.
-    pub(crate) fn table(&self, class: &str, type_keys: &[Vec<String>]) -> String {
+    pub(crate) fn table(&self, class: &str, type_keys: &[Vec<String>], text_keys: &[Vec<String>]) -> String {
         let runs = self.runs.borrow();
         let entries = self.entries.borrow();
         let mut text = String::new();
@@ -341,6 +341,37 @@ impl UnitEmission {
         text.push_str("    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n");
         text.push_str("}\n");
         text.push('\n');
+        // What a lookup that misses reports in a debug build (#852, step 2).
+        let table_of = |of_unit: &dyn Fn(usize) -> Vec<String>| -> String {
+            let units: Vec<String> = (0..self.names.len())
+                .map(|index| {
+                    let names: Vec<String> = of_unit(index).iter().map(|key| super::rust_string_literal(key)).collect();
+                    format!("&[{}]", names.join(", "))
+                })
+                .collect();
+            units.join(", ")
+        };
+        let of_text = |index: usize| text_keys.get(index).cloned().unwrap_or_default();
+        let of_entries = |index: usize| -> Vec<String> {
+            let mut keys: Vec<String> =
+                entries.iter().filter(|entry| entry.unit as usize == index).map(|entry| entry.key.clone()).collect();
+            keys.sort();
+            keys.dedup();
+            keys
+        };
+        text.push_str("/// The text keys of each unit, by its index: the names of the diagnostic of a trimmed resource\n");
+        text.push_str("/// (#852). Debug builds only: release builds carry no names.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str(&format!("pub static THEME_UNIT_TEXT_KEYS: &[&[&str]] = &[{}];\n\n", table_of(&of_text)));
+        text.push_str("/// The keys of each unit an application selects by key (#852). Debug builds only.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str(&format!("pub static THEME_UNIT_ENTRY_KEYS: &[&[&str]] = &[{}];\n\n", table_of(&of_entries)));
+        text.push_str("/// What the table `parts` leaves out of the theme, for the diagnostic of a lookup that misses\n");
+        text.push_str("/// it (#852). Debug builds only.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        text.push_str("pub fn trimmed_theme_keys(parts: rt::ThemeParts) -> rt::TrimmedKeys {\n");
+        text.push_str("    rt::trimmed_keys(THEME_UNIT_TYPE_KEYS, THEME_UNIT_TEXT_KEYS, THEME_UNIT_ENTRY_KEYS, parts)\n");
+        text.push_str("}\n\n");
         text.push_str("/// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control\n");
         text.push_str("/// theme (#568, step 3). Debug builds only: release builds carry no names.\n");
         text.push_str("#[cfg(debug_assertions)]\n");

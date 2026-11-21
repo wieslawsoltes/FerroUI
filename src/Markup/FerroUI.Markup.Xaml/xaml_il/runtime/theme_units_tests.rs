@@ -114,12 +114,36 @@ fn trimmed_type_keys_are_those_of_the_units_left_out() {
 #[test]
 fn only_trimmed_type_keys_are_reported() {
     use ferroui_base::StaticType;
-    let trimmed: &[&'static str] = &["ResourceDictionary"];
-    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
+    let trimmed = TrimmedKeys { types: vec!["ResourceDictionary"], texts: Vec::new() };
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &trimmed));
     // Reported once, and still recognised.
-    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
-    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), trimmed));
-    assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &[]));
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &TrimmedKeys::default()));
+}
+
+/// #852, step 2: a text key is left out when no kept unit still defines it: the keys of a unit the
+/// table does not have and the selectable keys whose entries its static does not name, but not a
+/// key another kept unit defines, and such a key is reported as a trimmed resource.
+#[test]
+fn trimmed_text_keys_are_those_no_kept_unit_defines() {
+    fn build(_provider: &Rc<dyn ferroui_base::metadata::IServiceProvider>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError> {
+        Ok(None)
+    }
+    static LIVE: ThemeEntry = ThemeEntry { run: 0, key: "Live", build, line: 1, position: 1 };
+    static SELECTED: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[first_run], entries: &[&LIVE] };
+    static PARTS: &[&ThemeUnit] = &[&AMBIENT, &SELECTED];
+    static TYPE_KEYS: &[&[&str]] = &[&[], &[], &["Button"]];
+    static TEXT_KEYS: &[&[&str]] = &[&["Shared"], &["Dead", "Inline", "Live", "Shared"], &["OfALeftOutUnit", "Inline"]];
+    static ENTRY_KEYS: &[&[&str]] = &[&[], &["Dead", "Live", "Shared"], &[]];
+    let trimmed = trimmed_keys(TYPE_KEYS, TEXT_KEYS, ENTRY_KEYS, PARTS);
+    assert_eq!(trimmed.types, ["Button"]);
+    // `Shared` is defined by the ambient unit, and `Inline` by a run of the kept unit.
+    assert_eq!(trimmed.texts, ["Dead", "OfALeftOutUnit"]);
+    assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
+    assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Live"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Unknown"), &trimmed));
 }
 
 ferroui_base::ferro_thread_local! {

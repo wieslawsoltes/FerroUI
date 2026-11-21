@@ -2353,6 +2353,88 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
     }
 
+    /// Not from upstream (#852, step 2): what stays when an application selects the entries of a
+    /// unit by key. A key only a string literal of a dependency names, the target of a dynamic
+    /// resource of the rest of a kept unit and what it names in turn, and a key defined in several
+    /// theme variants (all of its statics) stay; only a key nothing names leaves. An application
+    /// that keeps every unit selects nothing.
+    #[test]
+    fn selecting_entries_by_key_keeps_every_key_that_may_be_looked_up() {
+        use ferroui_build_scan::model::ThemeEntryModel;
+        use ferroui_build_scan::xaml_metadata::ThemeUnitModel;
+        let root = env::temp_dir().join(format!("ferroui-build-key-selection-{}", std::process::id()));
+        let entry = |key: &str, references: &[&str], slots: &[u32]| ThemeEntryModel {
+            key: key.to_string(),
+            references: references.iter().map(|key| key.to_string()).collect(),
+            types: Vec::new(),
+            slots: slots.to_vec(),
+        };
+        let ambient = ThemeUnitModel {
+            name: "ambient".to_string(),
+            documents: vec!["ambient".to_string()],
+            // `{DynamicResource DynamicTarget}` in a control theme by type of the ambient unit.
+            body_references: vec!["DynamicTarget".to_string()],
+            ..ThemeUnitModel::default()
+        };
+        let resources = ThemeUnitModel {
+            name: "Resources/Base.xaml".to_string(),
+            index: 1,
+            documents: vec!["Resources/Base.xaml".to_string()],
+            keys: ["Dead", "DynamicTarget", "OpaqueKey", "Reached", "Variant"].iter().map(|key| key.to_string()).collect(),
+            entries: vec![
+                entry("Dead", &[], &[5]),
+                entry("DynamicTarget", &["Reached"], &[1]),
+                entry("OpaqueKey", &[], &[0]),
+                entry("Reached", &[], &[2]),
+                entry("Variant", &[], &[3, 4]),
+            ],
+            ..ThemeUnitModel::default()
+        };
+        let mut theme = AssemblyModel::new("Theme", "theme");
+        theme.theme_units = vec![ThemeUnitsModel {
+            class: "Tests.Theme".to_string(),
+            table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![ambient, resources],
+        }];
+        // A library whose code looks a key up by its text.
+        let mut library = AssemblyModel::new("Library", "library");
+        library.key_strings = vec!["OpaqueKey".to_string()];
+        fs::create_dir_all(&root).expect("the directory of the test");
+        let theme_file = root.join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        let library_file = root.join("library.xamlmeta");
+        fs::write(&library_file, library.to_json()).expect("the .xamlmeta of the library");
+        let build = |name: &str, manifest: &str| {
+            let crate_dir = root.join(name);
+            fs::create_dir_all(&crate_dir).expect("the directory of the crate");
+            fs::write(crate_dir.join("Cargo.toml"), manifest).expect("a manifest");
+            // The application names the key defined in the two variants, and keeps the unit by it.
+            fs::write(crate_dir.join("lib.rs"), "pub fn key() -> &'static str {\n    \"Variant\"\n}\n").expect("the library");
+            let out = crate_dir.join("out");
+            let outcome = Build::new(crate_dir, out.clone(), "app", vec![theme_file.clone(), library_file.clone()])
+                .type_system(TypeSystem::Model)
+                .theme("Theme")
+                .execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let read = |file: &str| fs::read_to_string(out.join("xaml").join(file)).expect(file);
+            (read("mod.rs"), read("theme_keys.txt"))
+        };
+
+        let (text, keys) = build("selected", "[package]\nname = \"app\"\n");
+        let entries: Vec<String> = (0..5).map(|slot| format!("&::theme::compiled_xaml::THEME_ENTRY_{slot}")).collect();
+        assert!(text.contains(&format!("entries: &[{}],", entries.join(", "))), "{text}");
+        assert!(!text.contains("THEME_ENTRY_5"), "{text}");
+        assert!(text.contains("runs: &::theme::compiled_xaml::THEME_UNIT_1_RUNS,"), "{text}");
+        assert!(text.contains("&THEME_PARTS_TESTS_THEME_UNIT_1, // Resources/Base.xaml"), "{text}");
+        assert!(keys.contains("Resources/Base.xaml\t4 of 5 keys live by key\tDead\n"), "{keys}");
+
+        let every = "[package]\nname = \"app\"\n\n[package.metadata.ferroui]\ntheme-roots = \"all\"\n";
+        let (text, _) = build("every", every);
+        assert!(text.contains("&::theme::compiled_xaml::THEME_UNIT_1, // Resources/Base.xaml"), "{text}");
+        assert!(!text.contains("THEME_ENTRY_"), "{text}");
+        let _ = fs::remove_dir_all(&root);
+    }
+
     /// Not from upstream: the two texts of the base crate the scanner states itself, because
     /// the crate it is in cannot link the base crate, are the ones of the base crate.
     #[test]

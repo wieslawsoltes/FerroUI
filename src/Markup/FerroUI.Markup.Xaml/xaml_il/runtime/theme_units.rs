@@ -247,35 +247,85 @@ pub fn trimmed_type_keys(type_keys: &'static [&'static [&'static str]], parts: &
     trimmed
 }
 
+/// What a table of units leaves out of a theme, for the diagnostic of a lookup that misses it:
+/// the type keys of the control themes and the text keys of the resources (#852, step 2).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct TrimmedKeys {
+    /// The type keys, sorted.
+    pub types: Vec<&'static str>,
+    /// The text keys no unit of the table defines any more, sorted.
+    pub texts: Vec<&'static str>,
+}
+
+/// What `parts` leaves out of a theme. `type_keys` and `text_keys` hold the keys of every unit, by
+/// its index, and `entry_keys` the keys of each unit an application selects (the statics the
+/// generated file has in debug builds). A text key is left out when no kept unit still defines it:
+/// a unit of `parts` defines its keys, but for a selectable key whose entry its static does not name.
+pub fn trimmed_keys(
+    type_keys: &'static [&'static [&'static str]],
+    text_keys: &'static [&'static [&'static str]],
+    entry_keys: &'static [&'static [&'static str]],
+    parts: &[&ThemeUnit],
+) -> TrimmedKeys {
+    let mut kept: Vec<&'static str> = Vec::new();
+    let mut gone: Vec<&'static str> = Vec::new();
+    for (index, keys) in text_keys.iter().enumerate() {
+        let Ok(found) = parts.binary_search_by_key(&(index as u32), |unit| unit.index) else {
+            gone.extend(keys.iter().copied());
+            continue;
+        };
+        let selectable = entry_keys.get(index).copied().unwrap_or_default();
+        for key in keys.iter().copied() {
+            match selectable.contains(&key) && !parts[found].entries.iter().any(|entry| entry.key == key) {
+                true => gone.push(key),
+                false => kept.push(key),
+            }
+        }
+    }
+    kept.sort_unstable();
+    gone.sort_unstable();
+    gone.dedup();
+    gone.retain(|key| kept.binary_search(key).is_err());
+    TrimmedKeys { types: trimmed_type_keys(type_keys, parts), texts: gone }
+}
+
 ferroui_base::ferro_thread_local! {
-    /// The trimmed control themes reported so far.
-    static REPORTED: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) };
+    /// The trimmed control themes and resources reported so far, each with whether it is a type.
+    static REPORTED: RefCell<Vec<(bool, &'static str)>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Whether `found` (a type key, or a text key) is reported for the first time.
+fn first_report(is_type: bool, found: &'static str) -> bool {
+    REPORTED.with(|reported| {
+        let mut reported = reported.borrow_mut();
+        let first = !reported.contains(&(is_type, found));
+        if first {
+            reported.push((is_type, found));
+        }
+        first
+    })
 }
 
 /// The diagnostic of a lookup that missed: when `key` is the type key of a control whose theme
-/// is in `trimmed` (the type keys the application left out), logs once, as a warning of the
-/// framework logger, `the <theme> control theme of <Type> was trimmed: add it to theme-roots`.
-/// Returns whether it is such a key. The themes call it in debug builds only; release builds
-/// carry no names.
-pub fn report_trimmed_theme(theme: &str, key: &ResourceKey, trimmed: &[&'static str]) -> bool {
-    let ResourceKey::Type(type_) = key else {
+/// is in `trimmed`, or a text key of a resource in it (#852, step 2), logs once, as a warning of
+/// the framework logger, `the <theme> control theme of <Type> was trimmed: add it to theme-roots`
+/// or `the <theme> resource <key> was trimmed: add it to theme-roots`. Returns whether it is such
+/// a key. The themes call it in debug builds only; release builds carry no names.
+pub fn report_trimmed_theme(theme: &str, key: &ResourceKey, trimmed: &TrimmedKeys) -> bool {
+    let (is_type, name, list) = match key {
+        ResourceKey::Type(type_) => (true, type_.name(), &trimmed.types),
+        ResourceKey::String(text) => (false, &**text, &trimmed.texts),
+        ResourceKey::Object(_) => return false,
+    };
+    let Some(found) = list.iter().copied().find(|known| *known == name) else {
         return false;
     };
-    let name = type_.name();
-    let Some(found) = trimmed.iter().copied().find(|trimmed| *trimmed == name) else {
-        return false;
-    };
-    let first = REPORTED.with(|reported| {
-        let mut reported = reported.borrow_mut();
-        let first = !reported.contains(&found);
-        if first {
-            reported.push(found);
-        }
-        first
-    });
-    if first {
+    if first_report(is_type, found) {
         if let Some(log) = Logger::try_get(LogEventLevel::Warning, LogArea::CONTROL) {
-            log.log_with_values(None, "the {Theme} control theme of {Type} was trimmed: add it to theme-roots", &[&theme, &name]);
+            match is_type {
+                true => log.log_with_values(None, "the {Theme} control theme of {Type} was trimmed: add it to theme-roots", &[&theme, &found]),
+                false => log.log_with_values(None, "the {Theme} resource {Key} was trimmed: add it to theme-roots", &[&theme, &found]),
+            }
         }
     }
     true

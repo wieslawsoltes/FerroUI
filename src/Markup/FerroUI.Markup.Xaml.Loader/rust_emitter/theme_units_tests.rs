@@ -258,7 +258,8 @@ fn the_table_lists_every_unit_with_its_runs() {
     units.push_run(2, "populate_t_xaml_unit_0".to_string());
     units.push_run(2, "populate_t_xaml_unit_3".to_string());
     let type_keys = vec![Vec::new(), vec!["Button".to_string()], Vec::new()];
-    let table = units.table("Tests.Theme", &type_keys);
+    let text_keys = vec![Vec::new(), vec!["AccentButtonStyle".to_string()], Vec::new()];
+    let table = units.table("Tests.Theme", &type_keys, &text_keys);
     assert!(
         table.starts_with(
             "/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.\n\
@@ -281,6 +282,9 @@ fn the_table_lists_every_unit_with_its_runs() {
         table.contains("#[cfg(not(ferroui_full_themes))]\npub fn registered_theme_units() -> rt::ThemeParts {\n    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n}\n"),
         "{table}"
     );
+    assert!(table.contains("#[cfg(debug_assertions)]\npub static THEME_UNIT_TEXT_KEYS: &[&[&str]] = &[&[], &[\"AccentButtonStyle\"], &[]];\n"), "{table}");
+    assert!(table.contains("#[cfg(debug_assertions)]\npub static THEME_UNIT_ENTRY_KEYS: &[&[&str]] = &[&[], &[], &[]];\n"), "{table}");
+    assert!(table.contains("pub fn trimmed_theme_keys(parts: rt::ThemeParts) -> rt::TrimmedKeys {\n"), "{table}");
     assert!(table.ends_with("#[cfg(debug_assertions)]\npub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&[], &[\"Button\"], &[]];\n"), "{table}");
 }
 
@@ -459,7 +463,9 @@ fn the_deferred_resources_of_a_run_are_entries_selected_by_key() {
     assert_eq!(functions.len(), 1);
     assert!(!functions[0].contains("\"One\"") && !functions[0].contains("t.xaml(3,8)"), "{}", functions[0]);
     assert!(functions[0].contains("\"Two\", ::ferroui_base") && functions[0].contains("t.xaml(4,8)"), "{}", functions[0]);
-    let table = units.table("Tests.Theme", &[Vec::new(), Vec::new(), Vec::new()]);
+    let none = [Vec::new(), Vec::new(), Vec::new()];
+    let table = units.table("Tests.Theme", &none, &none);
+    assert!(table.contains("THEME_UNIT_ENTRY_KEYS: &[&[&str]] = &[&[], &[], &[\"One\"]];"), "{table}");
     assert!(
         table.contains(
             "pub static THEME_ENTRY_0: rt::ThemeEntry = rt::ThemeEntry { run: 0, key: \"One\", build: build_t_xaml_deferred_0, line: 3, position: 8 };"
