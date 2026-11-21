@@ -1,9 +1,13 @@
 //! The grammar of binding expression paths (`Foo.Bar[0]`, `#name.Text`,
 //! `$parent[Border].Tag`, `!Foo`, `((ns:Type)Foo).Bar`, `Foo^`, ...).
 
-use crate::ExpressionParseError;
 use crate::character_reader::CharacterReader;
 use crate::span_helpers::{try_parse_int, NumberStyles};
+use crate::ExpressionParseError;
+
+mod spans;
+use spans::Nodes;
+pub use spans::{OperandSpan, SpannedNode};
 
 /// The kind of source a parsed binding expression starts from.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -46,7 +50,10 @@ pub enum Node {
         level: i32,
     },
     /// A type cast (`(Type)` or `((ns:Type)Member)`).
-    TypeCast { namespace: String, type_name: String },
+    TypeCast {
+        namespace: String,
+        type_name: String,
+    },
 }
 
 impl Node {
@@ -71,9 +78,18 @@ impl BindingExpressionGrammar {
     pub fn parse_reader(
         r: &mut CharacterReader<'_>,
     ) -> Result<(Vec<Node>, SourceMode), ExpressionParseError> {
-        let mut result = Vec::new();
+        let mut result = Nodes::default();
         let mode = parse(r, &mut result)?;
-        Ok((result, mode))
+        Ok((result.nodes, mode))
+    }
+
+    /// Parses the same path with the source range of each authored operand.
+    pub fn parse_with_spans(
+        text: &str,
+    ) -> Result<(Vec<SpannedNode>, SourceMode), ExpressionParseError> {
+        let mut result = Nodes::spanned(text);
+        let mode = parse(&mut CharacterReader::new(text), &mut result)?;
+        Ok((result.into_spanned(), mode))
     }
 }
 
@@ -99,7 +115,7 @@ struct TypeName<'a> {
     type_name: &'a str,
 }
 
-fn parse(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<SourceMode> {
+fn parse(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> ParseResult<SourceMode> {
     let mut state = State::Start;
     let mut mode = SourceMode::Data;
 
@@ -142,7 +158,7 @@ fn parse(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<Sour
     Ok(mode)
 }
 
-fn parse_start(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> State {
+fn parse_start(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> State {
     if parse_not(r) {
         nodes.push(Node::Not);
         return State::Start;
@@ -169,10 +185,13 @@ fn parse_start(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> State {
         let identifier = r.parse_identifier();
 
         if !identifier.is_empty() {
-            nodes.push(Node::PropertyName {
-                accepts_null: false,
-                property_name: identifier.to_string(),
-            });
+            nodes.push_named(
+                Node::PropertyName {
+                    accepts_null: false,
+                    property_name: identifier.to_string(),
+                },
+                identifier,
+            );
             return State::AfterMember;
         }
     }
@@ -180,7 +199,7 @@ fn parse_start(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> State {
     State::End
 }
 
-fn parse_after_member(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> State {
+fn parse_after_member(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> State {
     if let Some(accepts_null) = parse_member_accessor(r) {
         return if accepts_null {
             State::BeforeMemberNullable
@@ -201,7 +220,7 @@ fn parse_after_member(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> Sta
 
 fn parse_before_member(
     r: &mut CharacterReader<'_>,
-    nodes: &mut Vec<Node>,
+    nodes: &mut Nodes<'_>,
     accepts_null: bool,
 ) -> State {
     if parse_open_brace(r) {
@@ -218,10 +237,13 @@ fn parse_before_member(
         let identifier = r.parse_identifier();
 
         if !identifier.is_empty() {
-            nodes.push(Node::PropertyName {
-                accepts_null,
-                property_name: identifier.to_string(),
-            });
+            nodes.push_named(
+                Node::PropertyName {
+                    accepts_null,
+                    property_name: identifier.to_string(),
+                },
+                identifier,
+            );
             return State::AfterMember;
         }
 
@@ -231,7 +253,7 @@ fn parse_before_member(
 
 fn parse_attached_property(
     r: &mut CharacterReader<'_>,
-    nodes: &mut Vec<Node>,
+    nodes: &mut Nodes<'_>,
     accepts_null: bool,
 ) -> ParseResult<State> {
     let TypeName {
@@ -240,10 +262,13 @@ fn parse_attached_property(
     } = parse_type_name(r);
 
     if !r.end() && r.take_if(')') {
-        nodes.push(Node::TypeCast {
-            namespace: ns.to_string(),
-            type_name: owner.to_string(),
-        });
+        nodes.push_named(
+            Node::TypeCast {
+                namespace: ns.to_string(),
+                type_name: owner.to_string(),
+            },
+            owner,
+        );
         return Ok(State::AfterMember);
     }
 
@@ -267,16 +292,20 @@ fn parse_attached_property(
         return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
     }
 
-    nodes.push(Node::AttachedPropertyName {
-        accepts_null,
-        namespace: ns.to_string(),
-        type_name: owner.to_string(),
-        property_name: name.to_string(),
-    });
+    nodes.push_operand(
+        Node::AttachedPropertyName {
+            accepts_null,
+            namespace: ns.to_string(),
+            type_name: owner.to_string(),
+            property_name: name.to_string(),
+        },
+        Some(name),
+        Some(owner),
+    );
     Ok(State::AfterMember)
 }
 
-fn parse_indexer(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<State> {
+fn parse_indexer(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> ParseResult<State> {
     let args = r.parse_arguments('[', ']')?;
 
     if args.is_empty() {
@@ -290,7 +319,7 @@ fn parse_indexer(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseRes
     Ok(State::AfterMember)
 }
 
-fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<State> {
+fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> ParseResult<State> {
     let parse_member_before_add_cast = parse_open_brace(r);
 
     let TypeName {
@@ -315,10 +344,13 @@ fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseR
         }
     }
 
-    nodes.push(Node::TypeCast {
-        namespace: ns.to_string(),
-        type_name: type_name.to_string(),
-    });
+    nodes.push_named(
+        Node::TypeCast {
+            namespace: ns.to_string(),
+            type_name: type_name.to_string(),
+        },
+        type_name,
+    );
 
     if r.end() || !r.take_if(')') {
         return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
@@ -327,7 +359,7 @@ fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseR
     Ok(result)
 }
 
-fn parse_element_name(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<State> {
+fn parse_element_name(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> ParseResult<State> {
     let name = r.parse_identifier();
 
     if name.is_empty() {
@@ -337,47 +369,39 @@ fn parse_element_name(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> Par
         ));
     }
 
-    nodes.push(Node::Name {
-        name: name.to_string(),
-    });
+    nodes.push_named(
+        Node::Name {
+            name: name.to_string(),
+        },
+        name,
+    );
     Ok(State::AfterMember)
 }
 
-fn parse_relative_source(
-    r: &mut CharacterReader<'_>,
-    nodes: &mut Vec<Node>,
-) -> ParseResult<State> {
+fn parse_relative_source(r: &mut CharacterReader<'_>, nodes: &mut Nodes<'_>) -> ParseResult<State> {
     let mode = r.parse_identifier();
 
     if mode == "self" {
         nodes.push(Node::SelfNode);
     } else if mode == "parent" {
-        let mut ancestor_namespace: Option<String> = None;
-        let mut ancestor_type: Option<String> = None;
+        let mut ancestor_type = None;
         let mut ancestor_level = 0;
         if peek_open_bracket(r) {
-            let args = r.parse_arguments_with_delimiter('[', ']', ';')?;
+            let args = r.parse_argument_slices('[', ']', ';')?;
             if args.len() > 2 || args.is_empty() {
                 return Err(ExpressionParseError::new(
                     r.position(),
                     "Too many arguments in RelativeSource syntax sugar",
                 ));
             } else if args.len() == 1 {
-                if let Some(level) = try_parse_int(&args[0], NumberStyles::INTEGER) {
-                    ancestor_type = None;
+                if let Some(level) = try_parse_int(args[0], NumberStyles::INTEGER) {
                     ancestor_level = level;
                 } else {
-                    let mut reader = CharacterReader::new(&args[0]);
-                    let name = parse_type_name(&mut reader);
-                    ancestor_namespace = Some(name.namespace.to_string());
-                    ancestor_type = Some(name.type_name.to_string());
+                    ancestor_type = Some(parse_type_name(&mut CharacterReader::new(args[0])));
                 }
             } else {
-                let mut reader = CharacterReader::new(&args[0]);
-                let name = parse_type_name(&mut reader);
-                ancestor_namespace = Some(name.namespace.to_string());
-                ancestor_type = Some(name.type_name.to_string());
-                ancestor_level = match try_parse_int(&args[1], NumberStyles::INTEGER) {
+                ancestor_type = Some(parse_type_name(&mut CharacterReader::new(args[0])));
+                ancestor_level = match try_parse_int(args[1], NumberStyles::INTEGER) {
                     Some(level) => level,
                     None => {
                         return Err(ExpressionParseError::new(
@@ -391,11 +415,19 @@ fn parse_relative_source(
                 };
             }
         }
-        nodes.push(Node::Ancestor {
-            namespace: ancestor_namespace,
-            type_name: ancestor_type,
-            level: ancestor_level,
-        });
+        nodes.push_operand(
+            Node::Ancestor {
+                namespace: ancestor_type
+                    .as_ref()
+                    .map(|type_| type_.namespace.to_owned()),
+                type_name: ancestor_type
+                    .as_ref()
+                    .map(|type_| type_.type_name.to_owned()),
+                level: ancestor_level,
+            },
+            ancestor_type.map(|type_| type_.type_name),
+            None,
+        );
     } else {
         return Err(ExpressionParseError::new(
             r.position(),

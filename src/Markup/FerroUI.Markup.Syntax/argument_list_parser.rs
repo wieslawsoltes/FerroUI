@@ -3,7 +3,7 @@
 use crate::character_reader::{is_white_space, CharacterReader};
 use crate::ExpressionParseError;
 
-impl CharacterReader<'_> {
+impl<'a> CharacterReader<'a> {
     /// Parses a list of arguments enclosed in `open`/`close` and separated by
     /// `,`. The reader must be positioned on `open`.
     pub fn parse_arguments(
@@ -22,6 +22,25 @@ impl CharacterReader<'_> {
         close: char,
         delimiter: char,
     ) -> Result<Vec<String>, ExpressionParseError> {
+        self.parse_arguments_with(open, close, delimiter, str::to_owned)
+    }
+
+    pub(crate) fn parse_argument_slices(
+        &mut self,
+        open: char,
+        close: char,
+        delimiter: char,
+    ) -> Result<Vec<&'a str>, ExpressionParseError> {
+        self.parse_arguments_with(open, close, delimiter, |argument| argument)
+    }
+
+    fn parse_arguments_with<T>(
+        &mut self,
+        open: char,
+        close: char,
+        delimiter: char,
+        map: impl Fn(&'a str) -> T,
+    ) -> Result<Vec<T>, ExpressionParseError> {
         let r = self;
 
         if r.peek() == Some(open) {
@@ -30,8 +49,7 @@ impl CharacterReader<'_> {
             r.take();
 
             while !r.end() {
-                let argument =
-                    r.take_while(|c| c != delimiter && c != close && !is_white_space(c));
+                let argument = r.take_while(|c| c != delimiter && c != close && !is_white_space(c));
                 if argument.is_empty() {
                     return Err(ExpressionParseError::new(
                         r.position(),
@@ -39,7 +57,7 @@ impl CharacterReader<'_> {
                     ));
                 }
 
-                result.push(argument.to_string());
+                result.push(map(argument));
 
                 r.skip_whitespace();
 
@@ -126,8 +144,14 @@ mod tests {
     fn fails_on_empty_argument() {
         assert_eq!(error("[]"), (1, "Expected indexer argument.".to_string()));
         assert_eq!(error("[,3]"), (1, "Expected indexer argument.".to_string()));
-        assert_eq!(error("[3,,4]"), (3, "Expected indexer argument.".to_string()));
-        assert_eq!(error("[3,4,]"), (5, "Expected indexer argument.".to_string()));
+        assert_eq!(
+            error("[3,,4]"),
+            (3, "Expected indexer argument.".to_string())
+        );
+        assert_eq!(
+            error("[3,4,]"),
+            (5, "Expected indexer argument.".to_string())
+        );
         assert_eq!(error("[ 3]"), (1, "Expected indexer argument.".to_string()));
     }
 

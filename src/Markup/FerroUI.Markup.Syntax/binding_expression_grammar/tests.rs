@@ -5,6 +5,37 @@ fn parse(s: &str) -> Vec<Node> {
     BindingExpressionGrammar::parse_reader(&mut r).unwrap().0
 }
 
+#[test]
+fn spanned_path_uses_real_operand_ranges_and_preserves_runtime_nodes() {
+    let path = "!$parent[data:Żółw;2]?.(data:Shell.Caption).((data:Label)Context).Text";
+    let (nodes, mode) = BindingExpressionGrammar::parse_with_spans(path).unwrap();
+    assert_eq!(mode, SourceMode::Control);
+    assert_eq!(
+        nodes
+            .iter()
+            .map(|node| node.node.clone())
+            .collect::<Vec<_>>(),
+        parse(path)
+    );
+    let operands = nodes
+        .into_iter()
+        .filter_map(|node| node.operand)
+        .map(|span| (&path[span.name], span.owner.map(|owner| &path[owner])))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        operands,
+        [
+            ("Żółw", None),
+            ("Caption", Some("Shell")),
+            ("Context", None),
+            ("Label", None),
+            ("Text", None)
+        ]
+    );
+    let (draft, _) = BindingExpressionGrammar::parse_with_spans("(.Caption)").unwrap();
+    assert_eq!(draft[0].operand.as_ref().unwrap().owner, None);
+}
+
 fn parse_err(s: &str) -> ExpressionParseError {
     BindingExpressionGrammar::parse(s).unwrap_err()
 }
@@ -496,10 +527,7 @@ fn should_parse_namespaced_attached_property() {
 #[test]
 fn should_parse_type_cast_of_source() {
     assert_eq!(parse("(ns:Foo)"), [type_cast("ns", "Foo")]);
-    assert_eq!(
-        parse("(Foo).Bar"),
-        [type_cast("", "Foo"), property("Bar")]
-    );
+    assert_eq!(parse("(Foo).Bar"), [type_cast("", "Foo"), property("Bar")]);
 }
 
 #[test]
