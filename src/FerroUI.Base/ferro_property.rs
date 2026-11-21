@@ -676,7 +676,7 @@ pub struct FerroProperty {
     /// hands out for a stored member. Empty otherwise.
     members: &'static [(i64, &'static dyn Any)],
     /// Whether the property validates its values (a styled property with a validation callback):
-    /// an untyped write asks the codec only then.
+    /// [`is_valid_value`](Self::is_valid_value) asks its routes only then.
     validates: bool,
 }
 
@@ -738,7 +738,7 @@ impl FerroProperty {
         self
     }
 
-    /// The property with a validation callback ([`validates`](Self::validates)).
+    /// The property with a validation callback or without.
     pub(crate) fn with_validation(mut self, validates: bool) -> Self {
         self.validates = validates;
         self

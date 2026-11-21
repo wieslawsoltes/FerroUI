@@ -351,7 +351,7 @@ pub(crate) trait StyledCodec {
 }
 
 impl<T: StyledValue> StyledCodec for StyledProperty<T> {
-    fn set_typed(
+    fn set_value(
         &'static self,
         o: &FerroObject,
         value: &dyn Any,
