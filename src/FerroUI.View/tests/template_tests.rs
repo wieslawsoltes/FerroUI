@@ -88,6 +88,31 @@ fn a_registered_component_is_shown_by_name() {
 }
 
 #[test]
+fn rust_template_starters_use_the_authored_item_type() {
+    let _app = app();
+    let list = crate::rsx! {
+        ListBox {
+            item_template: ::ferroui_view::template::<String, _>(|_item|
+                ::ferroui_view::rsx! { TextBlock { text: "Item" } }
+            )
+        }
+    }.mount().cast::<ListBox>().unwrap();
+    let table = crate::rsx! {
+        TableView {
+            columns: ::ferroui_view::table_columns([
+                ::ferroui_view::table_column().header("Account")
+                    .cell_template(::ferroui_view::template::<String, _>(|_item|
+                        ::ferroui_view::rsx! { TextBlock { text: "Cell" } }
+                    ))
+            ])
+        }
+    }.mount().cast::<TableView>().unwrap();
+    let row = Rc::new(String::from("Northwind")) as BoxedValue;
+    assert!(list.item_template().unwrap().match_(Some(&row)));
+    assert!(table.columns().get(0).cell_template().unwrap().match_(Some(&row)));
+}
+
+#[test]
 fn a_virtualized_list_of_ten_thousand_items_recycles_its_component_items() {
     let _app = app();
     let mounts = Rc::new(Cell::new(0));

@@ -6,6 +6,7 @@ mod blocks;
 mod catalog;
 mod columns;
 mod image_source;
+mod item_templates;
 mod language;
 mod layout_edits;
 mod literal;
@@ -24,6 +25,7 @@ mod wrap_edits;
 mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
+pub use item_templates::{RsxItemTemplate, is_item_template_owner};
 pub use language::{RsxLanguageDocument, analyze_rsx};
 pub use layout_edits::RsxChildEdit;
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};

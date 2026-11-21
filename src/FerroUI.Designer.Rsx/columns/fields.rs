@@ -1,6 +1,7 @@
 use crate::{
     animation::syntax::{method_suffix, path, span},
     blocks::keep_comments,
+    item_templates::TemplateSource,
     literal::{self, Literal},
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -92,6 +93,7 @@ pub(super) struct SourceField {
     pub(super) value: Option<String>,
     argument: SourceSpan,
     method: SourceSpan,
+    pub(super) template: Option<TemplateSource>,
 }
 
 impl SourceField {
@@ -106,11 +108,13 @@ impl SourceField {
         let value = property.encoding.read(expr);
         let argument = span(expr);
         let method = method_suffix(method);
+        let template = (property.name == "CellTemplate").then(|| TemplateSource::read(expr, Some(method)));
         Some(Self {
             property,
             value,
             argument,
             method,
+            template,
         })
     }
 

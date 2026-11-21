@@ -2,6 +2,7 @@ use crate::animation::{AnimationStyle, RsxAnimationIssue, projected_styles};
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
 use crate::columns::ColumnSource;
+use crate::item_templates::TemplateFields;
 use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
 use crate::source_array::ArraySlot;
@@ -35,6 +36,7 @@ pub struct RsxNode {
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
     pub(crate) columns: Option<ColumnSource>,
+    pub(crate) templates: TemplateFields,
 }
 
 impl RsxNode {
@@ -301,6 +303,7 @@ impl State {
             },
             columns: matches!(&class, crate::registered::Class::Builtin(name) if name == "TableView")
                 .then_some(ColumnSource::Missing),
+            templates: TemplateFields::for_class(&class),
         });
         let mut seen = BTreeSet::new();
         let mut state_fields = Vec::new();
@@ -311,6 +314,12 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    let templates = &mut self.nodes[index].templates;
+                    templates.note_setter(&setter, false);
+                    templates.record_call(
+                        source, &setter, name.span().byte_range().start, node.braces.close().byte_range().start,
+                        arguments.first().filter(|_| arguments.len() == 1),
+                    );
                     if setter == "columns" && self.nodes[index].columns.is_some() && arguments.len() == 1 {
                         self.read_columns(index, &arguments[0]);
                         continue;
@@ -366,6 +375,12 @@ impl State {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
+            let templates = &mut self.nodes[index].templates;
+            templates.note_setter(&setter, owner.is_some());
+            if templates.record(&setter, value, owner.is_none().then_some(field)) {
+                self.omit(format!("{class}.{setter} template"));
+                continue;
+            }
             if owner.is_none() && setter == "styles" && class.xaml_property(None, &setter).is_none() {
                 let slot = &mut self.nodes[index].style_slot;
                 *slot = if matches!(slot, ArraySlot::Missing) {

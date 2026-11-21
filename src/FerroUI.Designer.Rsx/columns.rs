@@ -8,6 +8,7 @@ use self::{array::ColumnArray, fields::SourceField};
 use crate::{
     RsxProjection,
     animation::syntax::{chain, path, span, view_argument},
+    item_templates::TemplateSource,
     source_edits::insert_field,
     tree::escape_xml,
 };
@@ -178,7 +179,7 @@ impl RsxProjection<'_> {
         model: &mut TableColumns,
     ) -> Option<SourceSpan> {
         let source = self
-            .column_owner(document, model.table)
+            .control_index(document, model.table)
             .and_then(|index| self.nodes[index].columns.as_ref());
         match source {
             Some(ColumnSource::Missing) if model.columns.is_empty() => {}
@@ -213,7 +214,7 @@ impl RsxProjection<'_> {
             return Err(reason.clone());
         }
         let index = self
-            .column_owner(document, model.table)
+            .control_index(document, model.table)
             .ok_or("Select an authored RSX table")?;
         let owner = &self.nodes[index];
         let patches = match owner.columns.as_ref() {
@@ -324,12 +325,37 @@ impl RsxProjection<'_> {
         }
     }
 
-    fn column_owner(&self, document: &Document, table: NodeId) -> Option<usize> {
-        let owner = document.ast().node(table)?;
+    pub(crate) fn control_index(&self, document: &Document, node: NodeId) -> Option<usize> {
+        let owner = document.ast().node(node)?;
         self.preview_markup()
             .controls
             .binary_search(&owner.span.start)
             .ok()
+    }
+
+    pub(crate) fn template_column(&self, document: &Document, node: NodeId) -> Option<(usize, usize)> {
+        if document.ast().node(node)?.local_name() != "TableViewColumn" {
+            return None;
+        }
+        let table = ferroui_designer_tools::nearest_table(document, node)?;
+        let index = self.control_index(document, table)?;
+        let ColumnSource::Inline(columns) = self.nodes[index].columns.as_ref()? else {
+            return None;
+        };
+        let model = ferroui_designer_tools::table_columns(document, table).ok()?;
+        if model.reason.is_some() || columns.rows.len() != model.columns.len() {
+            return None;
+        }
+        let column = model.columns.iter().position(|column| column.node == node)?;
+        Some((index, column))
+    }
+
+    pub(crate) fn column_template(&self, table: usize, column: usize) -> Option<(usize, Option<TemplateSource>)> {
+        let ColumnSource::Inline(columns) = self.nodes.get(table)?.columns.as_ref()? else {
+            return None;
+        };
+        let row = columns.rows.get(column)?;
+        Some((row.source.end, row.fields.get("CellTemplate").and_then(|field| field.template)))
     }
 }
 
