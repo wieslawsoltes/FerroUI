@@ -222,9 +222,12 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "HyperlinkVisitedColor", value: 4285013416_u32, line: 22, position: 44 },
 ];
 
+/// The keys and targets of the packed tables of the unit 1 of `SimpleTheme.xaml`, each once (#855).
+const POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS: &str = "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColorRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushHighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColorNotificationCardForegroundBrushThemeControlTransparentBrush";
+
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 20, 20, 20, 1, 24, 8, 24, 53,
@@ -248,23 +251,23 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 27, 0, 65280, 1, 41, 8,
-        27, 27, 65535, 255, 1, 42, 8,
-        54, 23, 0, 65280, 1, 46, 8,
-        77, 23, 58853, 65509, 1, 47, 8,
-        100, 24, 51914, 65482, 1, 48, 8,
+        692, 27, 0, 65280, 1, 41, 8,
+        719, 27, 65535, 255, 1, 42, 8,
+        746, 23, 0, 65280, 1, 46, 8,
+        769, 23, 58853, 65509, 1, 47, 8,
+        792, 24, 51914, 65482, 1, 48, 8,
     ],
 };
 
 /// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 23, 23, 20, 1, 49, 8, 49, 8,
+        816, 23, 0, 20, 1, 49, 8, 49, 8,
     ],
 };
 
@@ -290,7 +293,7 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 20, 20, 20, 1, 70, 8, 70, 53,
@@ -314,23 +317,23 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 27, 65535, 65535, 1, 87, 8,
-        27, 27, 65535, 255, 1, 88, 8,
-        54, 23, 65535, 65535, 1, 92, 8,
-        77, 23, 5903, 65309, 1, 93, 8,
-        100, 24, 51914, 65482, 1, 94, 8,
+        692, 27, 65535, 65535, 1, 87, 8,
+        719, 27, 65535, 255, 1, 88, 8,
+        746, 23, 65535, 65535, 1, 92, 8,
+        769, 23, 5903, 65309, 1, 93, 8,
+        792, 24, 51914, 65482, 1, 94, 8,
     ],
 };
 
 /// The resource aliases of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushThemeBackgroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 23, 23, 20, 1, 95, 8, 95, 8,
+        816, 23, 0, 20, 1, 95, 8, 95, 8,
     ],
 };
 
@@ -348,35 +351,35 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
-    strings: "HighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColor",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 24, 24, 24, 1, 107, 4, 107, 53,
-        48, 23, 71, 23, 1, 108, 4, 108, 52,
-        94, 17, 111, 17, 1, 109, 4, 109, 46,
-        128, 17, 145, 17, 1, 110, 4, 110, 46,
-        162, 17, 179, 17, 1, 111, 4, 111, 46,
-        94, 16, 111, 16, 1, 112, 4, 112, 45,
-        196, 10, 206, 10, 1, 113, 4, 113, 39,
-        216, 13, 229, 13, 1, 114, 4, 114, 42,
+        839, 24, 863, 24, 1, 107, 4, 107, 53,
+        887, 23, 910, 23, 1, 108, 4, 108, 52,
+        933, 17, 950, 17, 1, 109, 4, 109, 46,
+        967, 17, 984, 17, 1, 110, 4, 110, 46,
+        1001, 17, 1018, 17, 1, 111, 4, 111, 46,
+        933, 16, 950, 16, 1, 112, 4, 112, 45,
+        1035, 10, 1045, 10, 1, 113, 4, 113, 39,
+        1055, 13, 1068, 13, 1, 114, 4, 114, 42,
     ],
 };
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardForegroundBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 31, 65535, 65535, 1, 119, 4,
+        1081, 31, 65535, 65535, 1, 119, 4,
     ],
 };
 
 /// The brushes with a literal colour of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
-    strings: "ThemeControlTransparentBrush",
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 28, 65535, 255, 1, 138, 4,
+        1112, 28, 65535, 255, 1, 138, 4,
     ],
 };
 
@@ -621,73 +624,74 @@ pub fn build_controls_simplecontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 16, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 1, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 17, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 19, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 20, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 21, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 22, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 24, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 23, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 25, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 26, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 27, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 28, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 31, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 29, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 32, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 33, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 34, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 35, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 2, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 36, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 3, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 37, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 2, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 41, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_0);
+    rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     rt::apply_theme_unit(active_theme_units(), 52, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 4, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_0);
+    rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 3, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 5, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 7, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 5, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 18, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 19, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(active_theme_units(), 23, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 24, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
-    rt::apply_theme_unit(active_theme_units(), 29, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 30, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
+    rt::apply_theme_unit(active_theme_units(), 31, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
     let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
     let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
-    rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
-    rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
     let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
-    rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
     let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
-    rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
     // Controls/SimpleControls.xaml(8,4) MenuFlyout
@@ -735,16 +739,16 @@ pub fn build_controls_simplecontrols_xaml(
     rt::pop_parent_end_init(&context, &menu_item_0, 9, 6)?;
     context.pop_parent();
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 8, 4)?, rt::string_object("SelectableTextBlockContextFlyout"), rt::to_object(::core::clone::Clone::clone(&menu_flyout_0))), 8, 4)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 6, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 4, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 68, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 6, 6)?), 6, 6)?;
     context.pop_parent();
@@ -1116,7 +1120,7 @@ fn build_controls_simplecontrols_xaml_unit_27(
     ::core::result::Result::Ok(())
 }
 
-/// Run 28 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+/// Run 28 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/PopupRoot.xaml` (#568).
 fn build_controls_simplecontrols_xaml_unit_28(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
@@ -1126,14 +1130,24 @@ fn build_controls_simplecontrols_xaml_unit_28(
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_28 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_63, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_28) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 29 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/OverlayPopupHost.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_29(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_65, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     ::core::result::Result::Ok(())
 }
 
-/// Run 29 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_29(
+/// Run 30 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_30(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1145,8 +1159,8 @@ fn build_controls_simplecontrols_xaml_unit_29(
     ::core::result::Result::Ok(())
 }
 
-/// Run 30 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_simplecontrols_xaml_unit_30(
+/// Run 31 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_31(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1158,8 +1172,8 @@ fn build_controls_simplecontrols_xaml_unit_30(
     ::core::result::Result::Ok(())
 }
 
-/// Run 31 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_31(
+/// Run 32 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_32(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1171,8 +1185,8 @@ fn build_controls_simplecontrols_xaml_unit_31(
     ::core::result::Result::Ok(())
 }
 
-/// Run 32 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_32(
+/// Run 33 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_33(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1184,8 +1198,8 @@ fn build_controls_simplecontrols_xaml_unit_32(
     ::core::result::Result::Ok(())
 }
 
-/// Run 33 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_33(
+/// Run 34 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_34(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1197,8 +1211,8 @@ fn build_controls_simplecontrols_xaml_unit_33(
     ::core::result::Result::Ok(())
 }
 
-/// Run 34 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_34(
+/// Run 35 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_35(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1210,8 +1224,8 @@ fn build_controls_simplecontrols_xaml_unit_34(
     ::core::result::Result::Ok(())
 }
 
-/// Run 35 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_35(
+/// Run 36 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_36(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1223,8 +1237,8 @@ fn build_controls_simplecontrols_xaml_unit_35(
     ::core::result::Result::Ok(())
 }
 
-/// Run 36 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_36(
+/// Run 37 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_37(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1236,8 +1250,8 @@ fn build_controls_simplecontrols_xaml_unit_36(
     ::core::result::Result::Ok(())
 }
 
-/// Run 37 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_37(
+/// Run 38 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_38(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1249,8 +1263,8 @@ fn build_controls_simplecontrols_xaml_unit_37(
     ::core::result::Result::Ok(())
 }
 
-/// Run 38 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_38(
+/// Run 39 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_39(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1262,8 +1276,8 @@ fn build_controls_simplecontrols_xaml_unit_38(
     ::core::result::Result::Ok(())
 }
 
-/// Run 39 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_39(
+/// Run 40 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_40(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1275,8 +1289,8 @@ fn build_controls_simplecontrols_xaml_unit_39(
     ::core::result::Result::Ok(())
 }
 
-/// Run 40 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_40(
+/// Run 41 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_41(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1288,8 +1302,8 @@ fn build_controls_simplecontrols_xaml_unit_40(
     ::core::result::Result::Ok(())
 }
 
-/// Run 41 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_41(
+/// Run 42 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_42(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1301,8 +1315,8 @@ fn build_controls_simplecontrols_xaml_unit_41(
     ::core::result::Result::Ok(())
 }
 
-/// Run 42 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_42(
+/// Run 43 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_43(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1314,8 +1328,8 @@ fn build_controls_simplecontrols_xaml_unit_42(
     ::core::result::Result::Ok(())
 }
 
-/// Run 43 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_simplecontrols_xaml_unit_43(
+/// Run 44 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_44(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1330,8 +1344,8 @@ fn build_controls_simplecontrols_xaml_unit_43(
     ::core::result::Result::Ok(())
 }
 
-/// Run 44 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_44(
+/// Run 45 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_45(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1343,8 +1357,8 @@ fn build_controls_simplecontrols_xaml_unit_44(
     ::core::result::Result::Ok(())
 }
 
-/// Run 45 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_45(
+/// Run 46 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_46(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1356,8 +1370,8 @@ fn build_controls_simplecontrols_xaml_unit_45(
     ::core::result::Result::Ok(())
 }
 
-/// Run 46 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_46(
+/// Run 47 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_47(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1369,8 +1383,8 @@ fn build_controls_simplecontrols_xaml_unit_46(
     ::core::result::Result::Ok(())
 }
 
-/// Run 47 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_47(
+/// Run 48 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_48(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1392,8 +1406,8 @@ fn build_controls_simplecontrols_xaml_unit_47(
     ::core::result::Result::Ok(())
 }
 
-/// Run 48 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_48(
+/// Run 49 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_49(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1415,8 +1429,8 @@ fn build_controls_simplecontrols_xaml_unit_48(
     ::core::result::Result::Ok(())
 }
 
-/// Run 49 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_49(
+/// Run 50 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_50(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1430,8 +1444,8 @@ fn build_controls_simplecontrols_xaml_unit_49(
     ::core::result::Result::Ok(())
 }
 
-/// Run 50 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_simplecontrols_xaml_unit_50(
+/// Run 51 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_51(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1452,8 +1466,8 @@ fn build_controls_simplecontrols_xaml_unit_50(
     ::core::result::Result::Ok(())
 }
 
-/// Run 51 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_51(
+/// Run 52 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_52(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1477,8 +1491,8 @@ fn build_controls_simplecontrols_xaml_unit_51(
     ::core::result::Result::Ok(())
 }
 
-/// Run 52 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_52(
+/// Run 53 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_53(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1492,8 +1506,8 @@ fn build_controls_simplecontrols_xaml_unit_52(
     ::core::result::Result::Ok(())
 }
 
-/// Run 53 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_53(
+/// Run 54 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_54(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1509,8 +1523,8 @@ fn build_controls_simplecontrols_xaml_unit_53(
     ::core::result::Result::Ok(())
 }
 
-/// Run 54 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_54(
+/// Run 55 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_55(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1524,8 +1538,8 @@ fn build_controls_simplecontrols_xaml_unit_54(
     ::core::result::Result::Ok(())
 }
 
-/// Run 55 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_55(
+/// Run 56 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_56(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1541,8 +1555,8 @@ fn build_controls_simplecontrols_xaml_unit_55(
     ::core::result::Result::Ok(())
 }
 
-/// Run 56 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_56(
+/// Run 57 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_57(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1556,8 +1570,8 @@ fn build_controls_simplecontrols_xaml_unit_56(
     ::core::result::Result::Ok(())
 }
 
-/// Run 57 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_57(
+/// Run 58 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_58(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1571,8 +1585,8 @@ fn build_controls_simplecontrols_xaml_unit_57(
     ::core::result::Result::Ok(())
 }
 
-/// Run 58 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_58(
+/// Run 59 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_59(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1586,8 +1600,8 @@ fn build_controls_simplecontrols_xaml_unit_58(
     ::core::result::Result::Ok(())
 }
 
-/// Run 59 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_59(
+/// Run 60 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_60(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1601,8 +1615,8 @@ fn build_controls_simplecontrols_xaml_unit_59(
     ::core::result::Result::Ok(())
 }
 
-/// Run 60 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_60(
+/// Run 61 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_61(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1621,8 +1635,8 @@ fn build_controls_simplecontrols_xaml_unit_60(
     ::core::result::Result::Ok(())
 }
 
-/// Run 61 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_61(
+/// Run 62 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_62(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1645,8 +1659,8 @@ fn build_controls_simplecontrols_xaml_unit_61(
     ::core::result::Result::Ok(())
 }
 
-/// Run 62 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_62(
+/// Run 63 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_63(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1671,8 +1685,8 @@ fn build_controls_simplecontrols_xaml_unit_62(
     ::core::result::Result::Ok(())
 }
 
-/// Run 63 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_63(
+/// Run 64 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_64(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1694,8 +1708,8 @@ fn build_controls_simplecontrols_xaml_unit_63(
     ::core::result::Result::Ok(())
 }
 
-/// Run 64 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_64(
+/// Run 65 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_65(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1716,8 +1730,8 @@ fn build_controls_simplecontrols_xaml_unit_64(
     ::core::result::Result::Ok(())
 }
 
-/// Run 65 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_65(
+/// Run 66 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_66(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1749,8 +1763,8 @@ fn build_controls_simplecontrols_xaml_unit_65(
     ::core::result::Result::Ok(())
 }
 
-/// Run 66 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_simplecontrols_xaml_unit_66(
+/// Run 67 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_67(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1762,8 +1776,8 @@ fn build_controls_simplecontrols_xaml_unit_66(
     ::core::result::Result::Ok(())
 }
 
-/// Run 67 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_67(
+/// Run 68 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_68(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1785,8 +1799,8 @@ fn build_controls_simplecontrols_xaml_unit_67(
     ::core::result::Result::Ok(())
 }
 
-/// Run 68 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_68(
+/// Run 69 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_69(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1807,8 +1821,8 @@ fn build_controls_simplecontrols_xaml_unit_68(
     ::core::result::Result::Ok(())
 }
 
-/// Run 69 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_69(
+/// Run 70 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_70(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1824,8 +1838,8 @@ fn build_controls_simplecontrols_xaml_unit_69(
     ::core::result::Result::Ok(())
 }
 
-/// Run 70 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_70(
+/// Run 71 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_71(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1845,8 +1859,8 @@ fn build_controls_simplecontrols_xaml_unit_70(
     ::core::result::Result::Ok(())
 }
 
-/// Run 71 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_71(
+/// Run 72 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_72(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1896,8 +1910,8 @@ fn build_controls_simplecontrols_xaml_unit_71(
     ::core::result::Result::Ok(())
 }
 
-/// Run 72 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_72(
+/// Run 73 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_73(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1911,8 +1925,8 @@ fn build_controls_simplecontrols_xaml_unit_72(
     ::core::result::Result::Ok(())
 }
 
-/// Run 73 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_73(
+/// Run 74 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_74(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1926,8 +1940,8 @@ fn build_controls_simplecontrols_xaml_unit_73(
     ::core::result::Result::Ok(())
 }
 
-/// Run 74 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_74(
+/// Run 75 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_75(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -1945,8 +1959,8 @@ fn build_controls_simplecontrols_xaml_unit_74(
     ::core::result::Result::Ok(())
 }
 
-/// Run 75 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
-fn build_controls_simplecontrols_xaml_unit_75(
+/// Run 76 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_76(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -2050,9 +2064,12 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: rt::PackedRows = rt::PackedRo
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 70 of `Controls/SimpleControls.xaml`, each once (#855).
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColorTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrush";
+
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelected",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
         0, 43, 65535, 255, 0, 17, 4,
@@ -2062,49 +2079,49 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRo
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 54, 54, 20, 0, 19, 4, 19, 83,
+        84, 54, 138, 20, 0, 19, 4, 19, 83,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 52, 65535, 255, 0, 20, 4,
+        158, 52, 65535, 255, 0, 20, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 50, 50, 29, 0, 21, 4, 21, 79,
+        210, 50, 260, 29, 0, 21, 4, 21, 79,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabled",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 48, 65535, 255, 0, 22, 4,
-        48, 41, 65535, 255, 0, 23, 4,
+        289, 48, 65535, 255, 0, 22, 4,
+        337, 41, 65535, 255, 0, 23, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColor",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 43, 43, 23, 0, 26, 4, 26, 72,
-        66, 41, 107, 16, 0, 27, 4, 27, 70,
-        123, 41, 164, 18, 0, 28, 4, 28, 70,
+        378, 43, 421, 23, 0, 26, 4, 26, 72,
+        444, 41, 485, 16, 0, 27, 4, 27, 70,
+        501, 41, 542, 18, 0, 28, 4, 28, 70,
     ],
 };
 
@@ -2130,19 +2147,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBackground",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 28, 65535, 255, 0, 48, 4,
+        560, 28, 65535, 255, 0, 48, 4,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBorderBrush",
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_70_STRINGS,
     namespaces: &[],
     records: &[
-        0, 29, 65535, 255, 0, 51, 4,
+        588, 29, 65535, 255, 0, 51, 4,
     ],
 };
 
@@ -31380,7 +31397,7 @@ fn build_controls_simplecontrols_xaml_deferred_287(
 }
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_simplecontrols_xaml_unit_0, build_controls_simplecontrols_xaml_unit_12, build_controls_simplecontrols_xaml_unit_28, build_controls_simplecontrols_xaml_unit_30, build_controls_simplecontrols_xaml_unit_43, build_controls_simplecontrols_xaml_unit_50, build_controls_simplecontrols_xaml_unit_66] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_simplecontrols_xaml_unit_0, build_controls_simplecontrols_xaml_unit_12, build_controls_simplecontrols_xaml_unit_31, build_controls_simplecontrols_xaml_unit_44, build_controls_simplecontrols_xaml_unit_67] };
 
 /// The unit `Accents/Base.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/Base.xaml", index: 1, runs: &[populate_simpletheme_xaml_unit_0, populate_simpletheme_xaml_unit_1, populate_simpletheme_xaml_unit_2] };
@@ -31395,16 +31412,16 @@ pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.
 pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 4, runs: &[build_controls_simplecontrols_xaml_unit_2] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 5, runs: &[build_controls_simplecontrols_xaml_unit_47] };
+pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 5, runs: &[build_controls_simplecontrols_xaml_unit_48] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 6, runs: &[build_controls_simplecontrols_xaml_unit_3] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 7, runs: &[build_controls_simplecontrols_xaml_unit_48] };
+pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 7, runs: &[build_controls_simplecontrols_xaml_unit_49] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 8, runs: &[build_controls_simplecontrols_xaml_unit_49] };
+pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 8, runs: &[build_controls_simplecontrols_xaml_unit_50] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 9, runs: &[build_controls_simplecontrols_xaml_unit_4] };
@@ -31433,171 +31450,180 @@ pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboB
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 17, runs: &[build_controls_simplecontrols_xaml_unit_13] };
 
+/// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 18, runs: &[build_controls_simplecontrols_xaml_unit_51] };
+
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 18, runs: &[build_controls_simplecontrols_xaml_unit_51] };
+pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 19, runs: &[build_controls_simplecontrols_xaml_unit_52] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 19, runs: &[build_controls_simplecontrols_xaml_unit_14] };
+pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 20, runs: &[build_controls_simplecontrols_xaml_unit_14] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 20, runs: &[build_controls_simplecontrols_xaml_unit_15] };
+pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 21, runs: &[build_controls_simplecontrols_xaml_unit_15] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 21, runs: &[build_controls_simplecontrols_xaml_unit_16] };
+pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 22, runs: &[build_controls_simplecontrols_xaml_unit_16] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 22, runs: &[build_controls_simplecontrols_xaml_unit_17] };
+pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 23, runs: &[build_controls_simplecontrols_xaml_unit_17] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 23, runs: &[build_controls_simplecontrols_xaml_unit_52] };
+pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_simplecontrols_xaml_unit_53] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 24, runs: &[build_controls_simplecontrols_xaml_unit_18] };
+pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 25, runs: &[build_controls_simplecontrols_xaml_unit_18] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 25, runs: &[build_controls_simplecontrols_xaml_unit_19] };
+pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_simplecontrols_xaml_unit_19] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 26, runs: &[build_controls_simplecontrols_xaml_unit_20] };
+pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 27, runs: &[build_controls_simplecontrols_xaml_unit_20] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 27, runs: &[build_controls_simplecontrols_xaml_unit_21] };
+pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 28, runs: &[build_controls_simplecontrols_xaml_unit_21] };
 
 /// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 28, runs: &[build_controls_simplecontrols_xaml_unit_22] };
+pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 29, runs: &[build_controls_simplecontrols_xaml_unit_22] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 29, runs: &[build_controls_simplecontrols_xaml_unit_53] };
+pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 30, runs: &[build_controls_simplecontrols_xaml_unit_54] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 30, runs: &[build_controls_simplecontrols_xaml_unit_54] };
+pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 31, runs: &[build_controls_simplecontrols_xaml_unit_55] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 31, runs: &[build_controls_simplecontrols_xaml_unit_23] };
+pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 32, runs: &[build_controls_simplecontrols_xaml_unit_23] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 32, runs: &[build_controls_simplecontrols_xaml_unit_24] };
+pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 33, runs: &[build_controls_simplecontrols_xaml_unit_24] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 33, runs: &[build_controls_simplecontrols_xaml_unit_25] };
+pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 34, runs: &[build_controls_simplecontrols_xaml_unit_25] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 34, runs: &[build_controls_simplecontrols_xaml_unit_26] };
+pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 35, runs: &[build_controls_simplecontrols_xaml_unit_26] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 35, runs: &[build_controls_simplecontrols_xaml_unit_27] };
+pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 36, runs: &[build_controls_simplecontrols_xaml_unit_27] };
+
+/// The unit `Controls/PopupRoot.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 37, runs: &[build_controls_simplecontrols_xaml_unit_28] };
+
+/// The unit `Controls/OverlayPopupHost.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 38, runs: &[build_controls_simplecontrols_xaml_unit_29] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 36, runs: &[build_controls_simplecontrols_xaml_unit_29] };
+pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 39, runs: &[build_controls_simplecontrols_xaml_unit_30] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 37, runs: &[build_controls_simplecontrols_xaml_unit_31] };
+pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 40, runs: &[build_controls_simplecontrols_xaml_unit_32] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 38, runs: &[build_controls_simplecontrols_xaml_unit_32] };
+pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 41, runs: &[build_controls_simplecontrols_xaml_unit_33] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 39, runs: &[build_controls_simplecontrols_xaml_unit_55] };
+pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 42, runs: &[build_controls_simplecontrols_xaml_unit_56] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 40, runs: &[build_controls_simplecontrols_xaml_unit_56] };
+pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 43, runs: &[build_controls_simplecontrols_xaml_unit_57] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 41, runs: &[build_controls_simplecontrols_xaml_unit_33] };
+pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 44, runs: &[build_controls_simplecontrols_xaml_unit_34] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 42, runs: &[build_controls_simplecontrols_xaml_unit_57] };
+pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 45, runs: &[build_controls_simplecontrols_xaml_unit_58] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 43, runs: &[build_controls_simplecontrols_xaml_unit_58] };
+pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 46, runs: &[build_controls_simplecontrols_xaml_unit_59] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 44, runs: &[build_controls_simplecontrols_xaml_unit_34] };
+pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 47, runs: &[build_controls_simplecontrols_xaml_unit_35] };
 
 /// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 45, runs: &[build_controls_simplecontrols_xaml_unit_35] };
+pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 48, runs: &[build_controls_simplecontrols_xaml_unit_36] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 46, runs: &[build_controls_simplecontrols_xaml_unit_36] };
+pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 49, runs: &[build_controls_simplecontrols_xaml_unit_37] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 47, runs: &[build_controls_simplecontrols_xaml_unit_37] };
+pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 50, runs: &[build_controls_simplecontrols_xaml_unit_38] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 48, runs: &[build_controls_simplecontrols_xaml_unit_38] };
+pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 51, runs: &[build_controls_simplecontrols_xaml_unit_39] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 49, runs: &[build_controls_simplecontrols_xaml_unit_39] };
+pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 52, runs: &[build_controls_simplecontrols_xaml_unit_40] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 50, runs: &[build_controls_simplecontrols_xaml_unit_59] };
+pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 53, runs: &[build_controls_simplecontrols_xaml_unit_60] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 51, runs: &[build_controls_simplecontrols_xaml_unit_40] };
+pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 54, runs: &[build_controls_simplecontrols_xaml_unit_41] };
 
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 52, runs: &[build_controls_simplecontrols_xaml_unit_41] };
+pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 55, runs: &[build_controls_simplecontrols_xaml_unit_42] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 53, runs: &[build_controls_simplecontrols_xaml_unit_60] };
+pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 56, runs: &[build_controls_simplecontrols_xaml_unit_61] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 54, runs: &[build_controls_simplecontrols_xaml_unit_61] };
+pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 57, runs: &[build_controls_simplecontrols_xaml_unit_62] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 55, runs: &[build_controls_simplecontrols_xaml_unit_62] };
+pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 58, runs: &[build_controls_simplecontrols_xaml_unit_63] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 56, runs: &[build_controls_simplecontrols_xaml_unit_63] };
+pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 59, runs: &[build_controls_simplecontrols_xaml_unit_64] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 57, runs: &[build_controls_simplecontrols_xaml_unit_64] };
+pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 60, runs: &[build_controls_simplecontrols_xaml_unit_65] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 58, runs: &[build_controls_simplecontrols_xaml_unit_65] };
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 61, runs: &[build_controls_simplecontrols_xaml_unit_66] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 59, runs: &[build_controls_simplecontrols_xaml_unit_42] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 62, runs: &[build_controls_simplecontrols_xaml_unit_43] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 60, runs: &[build_controls_simplecontrols_xaml_unit_44] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 63, runs: &[build_controls_simplecontrols_xaml_unit_45] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 61, runs: &[build_controls_simplecontrols_xaml_unit_67] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 64, runs: &[build_controls_simplecontrols_xaml_unit_68] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 62, runs: &[build_controls_simplecontrols_xaml_unit_68] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 65, runs: &[build_controls_simplecontrols_xaml_unit_69] };
 
 /// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 63, runs: &[build_controls_simplecontrols_xaml_unit_45] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 66, runs: &[build_controls_simplecontrols_xaml_unit_46] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 64, runs: &[build_controls_simplecontrols_xaml_unit_46] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 67, runs: &[build_controls_simplecontrols_xaml_unit_47] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 65, runs: &[build_controls_simplecontrols_xaml_unit_69] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 68, runs: &[build_controls_simplecontrols_xaml_unit_70] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 66, runs: &[build_controls_simplecontrols_xaml_unit_70] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 69, runs: &[build_controls_simplecontrols_xaml_unit_71] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 67, runs: &[build_controls_simplecontrols_xaml_unit_71] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 70, runs: &[build_controls_simplecontrols_xaml_unit_72] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 68, runs: &[build_controls_simplecontrols_xaml_unit_72] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 71, runs: &[build_controls_simplecontrols_xaml_unit_73] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 69, runs: &[build_controls_simplecontrols_xaml_unit_73] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 72, runs: &[build_controls_simplecontrols_xaml_unit_74] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 70, runs: &[build_controls_simplecontrols_xaml_unit_74] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 73, runs: &[build_controls_simplecontrols_xaml_unit_75] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 71, runs: &[build_controls_simplecontrols_xaml_unit_75] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 74, runs: &[build_controls_simplecontrols_xaml_unit_76] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
-pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71];
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74];
 
 /// The ambient unit alone: what a load by URI applies when the application registered no
 /// parts and constructed no full theme (#568, step 3).
@@ -31631,7 +31657,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "SelectableTextBlock", "ThemeVariantScope", "Window", "WindowDrawnDecorations"], &[], &[], &["Button"], &["RadioButton"], &["Expander"], &["RepeatButton"], &["ToggleSwitch"], &["ButtonSpinner"], &["ToggleButton"], &["DropDownButton"], &["PathIcon"], &["CheckBox"], &["ToolTip"], &["Label"], &["ComboBoxItem"], &["ComboBox"], &["Carousel"], &["TextBox"], &["AutoCompleteBox"], &["DataValidationErrors"], &["FlyoutPresenter"], &["MenuFlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["ListBoxItem"], &["ListBox"], &["ScrollBar"], &["ScrollViewer"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["PipsPager"], &["WindowNotificationManager"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["ProgressBar"], &["Separator"], &["Menu"], &["MenuItem"], &["ContextMenu"], &["CalendarButton"], &["CalendarDayButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["Slider"], &["NotificationCard"], &["NumericUpDown"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["SplitView"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SplitButton"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["ContentPage"], &["CarouselPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "SelectableTextBlock", "ThemeVariantScope", "Window"], &[], &[], &["Button"], &["RadioButton"], &["Expander"], &["RepeatButton"], &["ToggleSwitch"], &["ButtonSpinner"], &["ToggleButton"], &["DropDownButton"], &["PathIcon"], &["CheckBox"], &["ToolTip"], &["Label"], &["ComboBoxItem"], &["ComboBox"], &["Carousel"], &["WindowDrawnDecorations"], &["TextBox"], &["AutoCompleteBox"], &["DataValidationErrors"], &["FlyoutPresenter"], &["MenuFlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["ListBoxItem"], &["ListBox"], &["ScrollBar"], &["ScrollViewer"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["PipsPager"], &["PopupRoot"], &["OverlayPopupHost"], &["WindowNotificationManager"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["ProgressBar"], &["Separator"], &["Menu"], &["MenuItem"], &["ContextMenu"], &["CalendarButton"], &["CalendarDayButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["Slider"], &["NotificationCard"], &["NumericUpDown"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["SplitView"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SplitButton"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["ContentPage"], &["CarouselPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
