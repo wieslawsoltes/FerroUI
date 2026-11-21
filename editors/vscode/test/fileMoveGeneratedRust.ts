@@ -13,6 +13,7 @@ export async function verifyGeneratedRustMove({ invoke, content }: McpFixture): 
     const generated = uri('target/schema/xaml/views.rs');
     const manifest = uri('Cargo.toml');
     const library = uri('lib.rs');
+    const helper = uri('helper.rs');
     const from = 'Views/Card.xaml';
     const to = 'Views/Archive/Customer.xaml';
     const oldName = 'build_views_card_xaml';
@@ -36,7 +37,8 @@ export async function verifyGeneratedRustMove({ invoke, content }: McpFixture): 
     await Promise.all([
         write('Cargo.toml', '[package]\nname="generated-xaml-move"\nversion="0.1.0"\nedition="2024"\n[lib]\npath="lib.rs"\n'),
         write('build.rs', build),
-        write('lib.rs', source), write(from, '<Border xmlns="https://github.com/ferroui" />'),
+        write('lib.rs', '\uFEFF' + source), write('helper.rs', 'pub fn other() {}\n'),
+        write(from, '<Border xmlns="https://github.com/ferroui" />'),
         write('target/schema/xaml/views.rs', generatedSource),
         write('target/schema/generated_xaml_move.xamlmeta', JSON.stringify({ name: 'generated_xaml_move', crate_name: 'generated_xaml_move', documents: [], dependencies: [] })),
         write('target/schema/xaml-symbols.json', JSON.stringify({
@@ -48,10 +50,12 @@ export async function verifyGeneratedRustMove({ invoke, content }: McpFixture): 
     const document = await vscode.workspace.openTextDocument(library);
     const script = await vscode.workspace.openTextDocument(uri('build.rs'));
     const provider = vscode.languages.registerRenameProvider({ language: 'rust', scheme: 'file', pattern: new vscode.RelativePattern(directory, 'xaml/views.rs') }, {
-        provideRenameEdits(file, at, name) {
+        async provideRenameEdits(file, at, name) {
             assert.equal(file.uri.fsPath, generated.fsPath);
             assert.equal(file.getText(new vscode.Range(at, at.translate(0, oldName.length))), oldName);
             assert.equal(name, newName);
+            const opened = await vscode.workspace.openTextDocument(helper);
+            assert.equal(opened.isDirty, false);
             const edit = new vscode.WorkspaceEdit();
             edit.replace(generated, new vscode.Range(at, at.translate(0, oldName.length)), name);
             const start = document.getText().indexOf(oldName);
@@ -64,7 +68,7 @@ export async function verifyGeneratedRustMove({ invoke, content }: McpFixture): 
         const args = { path: relative(from), destination: relative(to) };
         const plan = content<FileMovePlan>(await invoke('ferroui_workspace_plan_xaml_move', args));
         assert.equal(plan.generatedRust?.[0].oldName, oldName);
-        assert.equal(plan.documents.find(item => item.edit.uri.endsWith('/lib.rs'))?.after, expected);
+        assert.equal(plan.documents.find(item => item.edit.uri.endsWith('/lib.rs'))?.after, '\uFEFF' + expected);
         assert.equal(plan.documents.find(item => item.edit.uri.endsWith('/build.rs'))?.after, build.replace(from, to));
         assert.ok(plan.documents.every(item => !item.edit.uri.endsWith('/xaml/views.rs')));
         await vscode.window.showTextDocument(document);

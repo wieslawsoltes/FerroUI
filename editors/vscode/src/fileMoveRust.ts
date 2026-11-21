@@ -1,4 +1,4 @@
-import { realpath } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { FileMoveRustResolution, GeneratedRustRename } from './fileMoveProtocol';
@@ -38,9 +38,18 @@ export async function resolveFileMoveRust(renames: readonly GeneratedRustRename[
                 throw new Error('The Rust rename reaches outside the authored workspace. Open the consumer packages before reviewing this move.');
             }
             const key = authored.toString();
-            const live = vscode.workspace.textDocuments.find(document => document.uri.toString() === key);
-            documents.push({ uri: key, version: live?.version ?? -1, edits: edits.map(item => ({
-                range: { start: { line: item.range.start.line, character: item.range.start.character }, end: { line: item.range.end.line, character: item.range.end.character } },
+            const live = vscode.workspace.textDocuments.find(document => !document.isClosed && document.uri.toString() === key);
+            const version = live?.isDirty ? live.version : -1;
+            const saved = version < 0 ? await readFile(authored.fsPath, 'utf8') : undefined;
+            const bom = saved?.startsWith('\uFEFF') ? 1 : 0;
+            if (saved !== undefined && live && (live.isDirty || live.getText() !== saved.slice(bom))) {
+                throw new Error('The Rust reference buffer changed. Review the move again.');
+            }
+            const position = (point: vscode.Position) => ({
+                line: point.line, character: point.character + (point.line === 0 ? bom : 0),
+            });
+            documents.push({ uri: key, version, edits: edits.map(item => ({
+                range: { start: position(item.range.start), end: position(item.range.end) },
                 newText: item.newText,
             })) });
         }

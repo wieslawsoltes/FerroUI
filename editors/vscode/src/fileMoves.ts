@@ -59,8 +59,11 @@ export class FileMoves implements vscode.Disposable {
 
     private async drafts() {
         return fileMoveDrafts(document => {
+            // Opening a clean buffer during semantic rename does not change the
+            // saved source snapshot that the server is reviewing.
+            if (!document.isDirty) return false;
             const extension = path.extname(document.uri.path).toLowerCase();
-            return (extension === '.rs' && !isCompiledXamlRust(document)) || (document.isDirty && (extension === '.json' || extension === '.ferrostages'));
+            return (extension === '.rs' && !isCompiledXamlRust(document)) || extension === '.json' || extension === '.ferrostages';
         });
     }
 
