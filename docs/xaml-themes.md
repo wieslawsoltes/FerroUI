@@ -286,7 +286,11 @@ needs. The build computes the table from the roots:
    base classes;
 2. the keys and key-like tokens of those documents;
 3. the types and keys the compiled documents of its dependencies name (a control library's
-   templates);
+   templates); for the document of an ordinary class of a dependency (a dialog, a window), only
+   when the class is live in the application: the application names it (`AboutFerroDialog::new()`,
+   the builder `about_ferro_dialog()`), or a live class or document constructs it (#1002). A crate
+   whose own code constructs such a class states it (`XamlGroup::constructed_by_its_crate`), and
+   its documents then root the themes whenever the crate is linked;
 4. the class names and string literals in the application's Rust sources that match a type key
    or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
    methods the sources call, read as class names (`text_block()` is `TextBlock`,
