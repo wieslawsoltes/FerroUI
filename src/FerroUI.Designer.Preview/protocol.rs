@@ -147,6 +147,8 @@ pub(crate) struct EditResult {
     pub(crate) retained_selection: Vec<Range>,
     #[serde(rename = "moduleEdit", skip_serializing_if = "Option::is_none")]
     pub(crate) module_edit: Option<RustModuleEdit>,
+    #[serde(rename = "layerChange", skip_serializing_if = "Option::is_none")]
+    pub(crate) layer_change: Option<crate::layer_edits::LayerChange>,
 }
 
 #[derive(Serialize)]
@@ -186,6 +188,8 @@ pub(crate) struct Snapshot {
     pub(crate) definition_scope: Option<u64>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub(crate) definition_selection: Vec<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) layer_view: Option<ferroui_designer::LayerViewState>,
 }
 
 #[derive(Serialize)]
@@ -197,6 +201,7 @@ pub(crate) struct OutlineNode {
     pub(crate) name: Option<String>,
     pub(crate) range: Range,
     pub(crate) name_range: Range,
+    pub(crate) layer_start: usize,
     pub(crate) bounds: Option<Bounds>,
     pub(crate) properties: Vec<Property>,
     pub(crate) addable_properties: Vec<String>,

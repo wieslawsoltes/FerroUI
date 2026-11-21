@@ -1,6 +1,6 @@
 use crate::document::DesignDocument;
 use crate::protocol::{DragOrigin, DropPosition, DropTarget, EditResult, Placement};
-use ferroui_designer_core::{Document, Edit, NodeId, TextPatch};
+use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_designer_language::LineIndex;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -95,9 +95,7 @@ pub(crate) fn edit(
         _ => None,
     };
     let plan = projection.plan_child_edit(&design.xaml, draft, edits, after)?;
-    let source = TextPatch::apply_all(design.source, plan.patches.clone())
-        .map_err(|error| error.to_string())?;
-    let index = LineIndex::new(&source);
+    let index = LineIndex::new(&plan.authored_source);
     let range = |id| {
         let span = plan
             .controls
@@ -116,7 +114,7 @@ pub(crate) fn edit(
         .chain(std::iter::once(selected))
         .map(range)
         .collect::<Result<Vec<_>, _>>()?;
-    let mut result = crate::edits::editor_edits(design, plan.patches)?;
+    let mut result = crate::layer_edits::rust(design, plan)?;
     result.selection = retained.last().cloned();
     result.retained_selection = retained;
     Ok(result)

@@ -1,4 +1,4 @@
-import type { LayerViewState, LayerViewsState } from './layerViews';
+import type { LayerChange, LayerViewState, LayerViewsState } from './layerViews';
 import type { CanvasGuidesState, CanvasSnapInput, GuideEdit, SnapLine } from './canvasGuidesProtocol';
 import type { SpacingRequest, SpacingResponse } from './spacingProtocol';
 import type { GuideViewsState } from './guideViews';
@@ -16,6 +16,7 @@ export interface EditResult {
     timelineProgramKey?: string;
     timelineKeys?: KeyframeLocation[];
     retainedSelection?: Range[];
+    layerChange?: LayerChange;
 }
 export interface PreviewFinding {
     node: number;
@@ -155,6 +156,7 @@ export interface OutlineNode {
     name: string | null;
     range: Range;
     nameRange: Range;
+    layerStart?: number;
     bounds: Bounds | null;
     properties: Property[];
     addableProperties: string[];
@@ -179,6 +181,7 @@ export interface Snapshot {
     timelinePose?: TimelinePreviewPose;
     definitionScope?: number;
     definitionSelection?: number[];
+    layerView?: LayerViewState;
     rustTemplate?: import('./itemTemplateLabels').TemplateProperty;
 }
 export type NodeOperation =

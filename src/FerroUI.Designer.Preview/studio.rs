@@ -333,10 +333,18 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         return Ok(edit);
     }
     if wrapping {
-        let (patches, wrapper) = stage.sources.run(|| stage.studio.wrap_source_plan(&arguments, design.rsx.take()))?;
-        let edited = TextPatch::apply_all(design.source, patches.clone()).map_err(|error| error.to_string())?;
-        let range = ferroui_designer_language::LineIndex::new(&edited).range(wrapper).map_err(|error| error.to_string())?;
-        let mut result = editor_edits(&design, patches)?;
+        use ferroui_designer::WrapSourceChange;
+        let block = design.rsx.as_ref().map(|rsx| design.range(rsx.invocation)).transpose()?;
+        let plan = stage.sources.run(|| stage.studio.prepare_wrap_edit(&arguments, design.rsx.take()))?;
+        let edited = match &plan.change {
+            WrapSourceChange::Xaml(_) => plan.basis.source(),
+            WrapSourceChange::Rust(edit) => &edit.authored_source,
+        };
+        let range = ferroui_designer_language::LineIndex::new(edited).range(plan.wrapper).map_err(|error| error.to_string())?;
+        let mut result = match plan.change {
+            WrapSourceChange::Xaml(patches) => crate::layer_edits::xaml(&design, &plan.basis, patches)?,
+            WrapSourceChange::Rust(edit) => crate::layer_edits::rust_in_block(&design, edit, block.ok_or("Open the current RSX view")?)?,
+        };
         result.retained_selection = vec![range];
         return Ok(result);
     }
@@ -394,7 +402,11 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         session.selection().iter().filter_map(|&node| crate::edit_selection::authored_range(
             &design, session.document(), &patches, node)).collect()
     } else { Vec::new() };
-    let mut edit = editor_edits(&design, patches)?;
+    let mut edit = if design.rsx.is_none() {
+        crate::layer_edits::xaml(&design, session.document(), patches)?
+    } else {
+        editor_edits(&design, patches)?
+    };
     if recorded { edit.timeline_pose = session.timeline_preview_pose(); }
     if query.name == "designer_program" {
         edit.timeline_keys = operation.get("keyframes")

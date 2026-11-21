@@ -15,6 +15,7 @@ mod hosted_frame;
 mod hosted_relay;
 mod hosted_states;
 mod inspection;
+mod layer_edits;
 mod interaction;
 mod inventory;
 mod placement;

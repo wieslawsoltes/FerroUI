@@ -102,6 +102,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
                 name: node.xaml_name().map(str::to_owned),
                 range: design.range(span)?,
                 name_range: design.range(name_span)?,
+                layer_start: node.span.start,
                 bounds: bounds.get(&node.id).copied(),
                 properties,
                 addable_properties: addable_properties(&design, node),
@@ -125,6 +126,9 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         let selection = if scope.is_some() { session.selection().to_vec() } else { Vec::new() };
         (scope, selection)
     });
+    let layer_view = renderer.stage.as_ref()
+        .filter(|_| layers.is_some() && image.is_some())
+        .map(|stage| stage.session.borrow().persist_layer_view());
     let snapshot = Snapshot {
         nodes,
         blocks,
@@ -140,6 +144,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         timeline_pose,
         definition_scope,
         definition_selection,
+        layer_view,
     };
     renderer.accepted_rust_module_document = rust.as_ref().map(|_| input.document.uri.clone());
     if snapshot.image.is_none() {

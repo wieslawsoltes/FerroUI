@@ -1,7 +1,7 @@
 //! Restores local layer presentation across separately constructed native previews.
 use super::LayerFlags;
 use crate::{DesignerSession, PreviewSourceAnchor};
-use ferroui_designer_core::{Document, NodeKind};
+use ferroui_designer_core::NodeKind;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, hash_map::DefaultHasher},
@@ -39,6 +39,13 @@ impl LayerViewState {
     pub fn is_empty(&self) -> bool {
         self.locked.is_empty() && self.hidden.is_empty() && self.isolation.is_empty()
     }
+
+    /// Identifies the projected markup in which the layer offsets were captured.
+    pub fn stamp_source(source: &str) -> String {
+        let mut hasher = DefaultHasher::new();
+        source.hash(&mut hasher);
+        format!("{:016x}", hasher.finish())
+    }
 }
 
 impl DesignerSession {
@@ -72,7 +79,7 @@ impl DesignerSession {
         };
         let flags = &self.layers.flags;
         LayerViewState {
-            source_stamp: stamp(document),
+            source_stamp: LayerViewState::stamp_source(document.source()),
             locked: flags
                 .locked
                 .iter()
@@ -105,7 +112,7 @@ impl DesignerSession {
         if !document.is_valid() {
             return;
         }
-        let exact = state.source_stamp == stamp(document);
+        let exact = state.source_stamp == LayerViewState::stamp_source(document.source());
         let mut by_offset = BTreeMap::new();
         if exact {
             by_offset.extend(
@@ -147,10 +154,4 @@ impl DesignerSession {
         };
         self.layer_view_changed();
     }
-}
-
-fn stamp(document: &Document) -> String {
-    let mut hasher = DefaultHasher::new();
-    document.source().hash(&mut hasher);
-    format!("{:016x}", hasher.finish())
 }

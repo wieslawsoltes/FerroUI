@@ -113,6 +113,14 @@ Switch Outline to **Visual**, **Logical**, or **Combined** to inspect constructe
 
 Use the size button to change logical width, height, preset, or theme. With the canvas focused, press `0` to fit, `1` for actual size, `+` or `−` to zoom, and hold Space while dragging to pan. The zoom menu includes **Fit selection**. Use **Interact** and its input bar for clicks, scroll, text, and key gestures.
 
+### Keep layer state during edits
+
+Open **Studio → Layers** to hide, lock, or isolate an authored control. Hide keeps its layout space. Lock protects it from canvas and Outline manipulation while you can still inspect and edit its source deliberately. The canvas, Source Outline, and Properties use the same ordered selection.
+
+When you move, wrap, or remove controls through the designer, surviving controls keep their layer flags. This includes XAML and mapped RSX siblings with identical markup. Move a visible sibling beside a hidden row in Source Outline to see the flag follow the original control. Use VS Code **Undo** and **Redo** to reverse or repeat the source gesture. A checked reorder of identical markup still has one Undo step.
+
+Undo restores a removed control's hidden or locked state while its layer history is available in the open view. **Reset layers** clears those flags and isolation for the current view. Layer actions use local view state and leave source values intact. [Studio Layers](../native-controls.md#hierarchy-and-artboard) · [MCP actions](reference.md#drive-an-editor-workflow)
+
 ### Move and insert controls in a partial RSX preview
 
 Choose an RSX invocation in **Design** and switch Outline to **Source**. Move one mapped control or a selection in the canvas or Outline, or insert a compatible Toolbox item. The move preserves source order and keeps the moved controls selected. Their Rust blocks retain handler expressions, comments, and computed values. A placement can update the mapped layout literals needed by the new parent.

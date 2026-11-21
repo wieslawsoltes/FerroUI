@@ -40,6 +40,7 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
     )?;
     let mut candidate = design.xaml.snapshot_without_history();
     let mut selected = None;
+    let mut retained = Vec::new();
     let patches = match &request.operation {
         Operation::ApplyCounterpart { source } => {
             if source.len() > MAX_SOURCE_BYTES {
@@ -109,10 +110,10 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
                 .apply("Remove control", vec![edit.clone()])
                 .map_err(|e| e.to_string())?;
             if let Some(projection) = &design.rsx {
-                projection.plan_child_edit(&design.xaml, &candidate, &[edit], None)?.patches
-            } else {
-                change.patches
+                let plan = projection.plan_child_edit(&design.xaml, &candidate, &[edit], None)?;
+                return crate::layer_edits::rust(&design, plan);
             }
+            change.patches
         }
         Operation::Place { frame, placement } => {
             let stage = renderer.ok_or("Render the design before placing controls")?.stage(*frame)?;
@@ -131,6 +132,10 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             if design.rsx.is_some() {
                 return crate::rsx_placement::edit(&design, &candidate, selected, placement, &edits);
             }
+            if let (Some(anchor), crate::protocol::DragOrigin::Nodes { nodes, .. }) = (selected, &placement.origin) {
+                retained.extend(nodes.iter().copied().filter(|node| *node != anchor));
+                retained.push(anchor);
+            }
             change.patches
         }
         Operation::Resize { frame, node, handle, dx, dy } => {
@@ -145,7 +150,12 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             if let Some(projection) = design.rsx.as_ref().filter(|projection| {
                 projection.has_projected_columns() || projection.has_explicit_child_lists()
             }) {
-                projection.plan_child_edit(&design.xaml, &candidate, &edits, None)?.patches
+                let plan = projection.plan_child_edit(&design.xaml, &candidate, &edits, None)?;
+                let selection = selected.and_then(|node| plan.controls.get(&node))
+                    .and_then(|span| LineIndex::new(&plan.authored_source).range(*span).ok());
+                let mut result = crate::layer_edits::rust(&design, plan)?;
+                result.selection = selection;
+                return Ok(result);
             } else {
                 translated_patches(&design, candidate.source(), change.patches)?
             }
@@ -163,15 +173,21 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             }
             let change = candidate.apply(label, edits.clone()).map_err(|error| error.to_string())?;
             if let Some(projection) = child_list {
-                projection.plan_child_edit(&design.xaml, &candidate, edits, None)?.patches
-            } else {
-                translated_patches(&design, candidate.source(), change.patches)?
+                let plan = projection.plan_child_edit(&design.xaml, &candidate, edits, None)?;
+                return crate::layer_edits::rust(&design, plan);
             }
+            translated_patches(&design, candidate.source(), change.patches)?
         }
     };
     let selection = selected.and_then(|node| crate::edit_selection::authored_range(&design, &candidate, &patches, node));
-    let mut result = editor_edits(&design, patches)?;
+    let retained = retained.into_iter().filter_map(|node| crate::edit_selection::authored_range(&design, &candidate, &patches, node)).collect();
+    let mut result = if design.rsx.is_none() && !matches!(request.operation, Operation::ApplyCounterpart { .. }) {
+        crate::layer_edits::xaml(&design, &candidate, patches)?
+    } else {
+        editor_edits(&design, patches)?
+    };
     result.selection = selection;
+    result.retained_selection = retained;
     Ok(result)
 }
 

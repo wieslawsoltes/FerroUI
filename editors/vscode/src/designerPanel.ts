@@ -10,6 +10,7 @@ import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSna
 import { GuideViews, type GuideAnchor } from './guideViews';
 import { previewSourceUri } from './includedSource';
 import { LayerViews } from './layerViews';
+import type { LayerTransfer } from './layerHistory';
 import { NativePreview } from './nativePreview';
 import { RustTemplateScopes } from './rustTemplateScopes';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, withViewportTheme, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
@@ -87,7 +88,7 @@ export class DesignerPanel implements vscode.Disposable {
     private timelineTargets?: TimelineTargetOverrides;
     private animationCatalogEpoch = 0;
     private animationRecording = false;
-    private retainedSelection?: { version: number; ranges: Range[] };
+    private retainedSelection?: { version: number } & ({ ranges: Range[] } | { starts: number[] });
     private timelineProgramSelection?: { version: number; key: string };
     private inspected = false;
     private readers = 0;
@@ -150,7 +151,8 @@ export class DesignerPanel implements vscode.Disposable {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
                 this.templateScopes.sourceChanged(event.contentChanges);
-                this.layers.sourceChanged(event.contentChanges);
+                const transfer = this.layers.sourceChanged(event);
+                if (transfer) this.retainLayerSelection(event.document.version, transfer);
                 this.guides.sourceChanged(event.contentChanges);
                 this.schedule();
             }),
@@ -683,6 +685,7 @@ export class DesignerPanel implements vscode.Disposable {
         const presentation = await this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
             presentation => {
                 if (name === 'designer_design_data_edit') this.rememberDesignData(args);
+                if (name === 'designer_layer' && action.action === 'reset') this.layers.reset(view?.activeBlock ?? null);
                 if (name === 'designer_program') {
                     this.timelinePose = presentation.timelinePosition?.pose ?? undefined;
                     if (presentation.timelinePosition?.elapsed !== undefined || !this.timelinePose) this.setAnimationRecording(false);
@@ -896,7 +899,7 @@ export class DesignerPanel implements vscode.Disposable {
                     return undefined;
                 })) : undefined;
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
-            const snapshot = await client.render(input, viewport, token, {
+            const { layerView, ...snapshot } = await client.render(input, viewport, token, {
                 workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
                 rustProject,
                 localSources: dirtyPreviewSources([this.document.uri], this.document, Boolean(rustProject)),
@@ -907,6 +910,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
             this.viewport = viewport;
             snapshot.rustTemplate = this.templateScopes.accept(this.document, snapshot);
+            if (layerView) this.layers.remember(layerView, snapshot.activeBlock);
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
@@ -943,10 +947,11 @@ export class DesignerPanel implements vscode.Disposable {
                     wrapAvailable: Boolean(client.capabilities.selectionWrapping && snapshot.image) } };
             this.runtime = undefined;
             const retained = this.retainedSelection?.version === version && snapshot.image
-                ? this.retainedSelection.ranges.flatMap(range => {
-                    const node = snapshot.nodes.find(node => asRange(node.nameRange).isEqual(asRange(range)));
-                    return node ? [node.id] : [];
-                }) : [];
+                ? ('ranges' in this.retainedSelection
+                    ? this.retainedSelection.ranges.map(range => snapshot.nodes.find(node => asRange(node.nameRange).isEqual(asRange(range)))?.id)
+                    : this.retainedSelection.starts.map(start => snapshot.nodes.find(node => node.layerStart === start)?.id))
+                    .filter((id): id is number => id !== undefined)
+                : [];
             this.retainedSelection = undefined;
             if (retained.length) {
                 this.selection = retained;
@@ -1118,7 +1123,7 @@ export class DesignerPanel implements vscode.Disposable {
         try {
             const client = await this.getClient();
             const result = await plan(client);
-            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection, moduleEdit } = result;
+            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection, moduleEdit, layerChange } = result;
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
@@ -1139,13 +1144,17 @@ export class DesignerPanel implements vscode.Disposable {
             if (retainedSelection?.length && edits.length) {
                 this.retainedSelection = { version: frame.version + 1, ranges: retainedSelection };
             }
+            let clearLayerPlan: (() => void) | undefined;
             try {
+                if (layerChange && edits.length) clearLayerPlan = this.layers.history.prepare(layerChange, edits);
                 await applyTextEdits(this.document, frame.version, edits);
             } catch (error) {
                 if (this.timelinePose === timelinePose) this.timelinePose = previous;
                 this.timelineProgramSelection = previousProgram;
                 this.retainedSelection = undefined;
                 throw error;
+            } finally {
+                clearLayerPlan?.();
             }
             if (selection && edits.length && this.document.version === frame.version + 1) {
                 const range = asRange(selection);
@@ -1157,6 +1166,18 @@ export class DesignerPanel implements vscode.Disposable {
             this.editing = false;
             this.changed.fire();
         }
+    }
+
+    private retainLayerSelection(version: number, { block, positions }: LayerTransfer): void {
+        const frame = this.frame;
+        const active = frame?.snapshot.activeBlock;
+        if (frame?.version !== version - 1 || this.retainedSelection?.version === version
+            || (active ? !block || !asRange(active).start.isEqual(asRange(block).start) : block !== null)) return;
+        const starts = this.selection.flatMap(id => {
+            const start = frame.snapshot.nodes.find(node => node.id === id)?.layerStart;
+            return start === undefined ? [] : positions.get(start) ?? [];
+        });
+        if (starts.length) this.retainedSelection = { version, starts };
     }
 
     private async reveal(range: vscode.Range, openSource = false): Promise<void> {

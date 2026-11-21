@@ -23,6 +23,7 @@ import { verifyTimelineResource } from './studioTimelineResourceMcp';
 import { verifyStateTransition } from './studioStateTransitionMcp';
 import { verifyDesignData } from './designDataMcp';
 import { verifyLayerViews } from './layerViewsMcp';
+import { verifyLayerIdentity } from './layerIdentityMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
 import { verifyGridMcp } from './studioGridMcp';
 import { verifyColumnsMcp } from './studioColumnsMcp';
@@ -302,6 +303,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyStateTransition({ invoke, content }, session, document);
         await verifyDesignData({ invoke, content }, session, document);
         await verifyLayerViews({ invoke, content }, session, document);
+        await verifyLayerIdentity({ invoke, content });
         await verifyCanvasGuides({ invoke, content });
         await verifyCanvasSnapping({ invoke, content });
         await verifySpacing({ invoke, content });
