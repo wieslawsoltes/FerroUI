@@ -51,7 +51,7 @@ export interface AuthoredSetter extends StyleSetter {
     expression: boolean;
     editable: boolean;
     can_remove?: boolean;
-    resource?: { key: string; declaration?: Range | null } | null;
+    resource?: { key: string; declaration?: Range | null; sourceAddress?: string | null } | null;
 }
 export interface RustColorChoice { key: string; color?: string | null }
 export interface RustColorResource extends RustColorChoice {

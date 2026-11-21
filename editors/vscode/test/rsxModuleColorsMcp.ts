@@ -51,9 +51,12 @@ export async function verifyRsxModuleColorsMcp({ invoke, content }: McpFixture):
     assert.equal(await color(), '#FF2D4A70');
     const { definitions } = await query<StyleCatalog>('designer_rsx_styles');
     const style = definitions[0].node;
-    const { color_resources: [resource] = [] } = await query<StyleDefinition>('designer_rsx_styles', { node: style });
+    const { color_resources: [resource] = [], setters } = await query<StyleDefinition>('designer_rsx_styles', { node: style });
     assert.ok(resource?.sourceAddress);
     assert.equal(resource.shared_constant, 'ACCENT');
+    const linked = setters.find(setter => setter.property === 'Foreground')?.resource;
+    assert.equal(linked?.sourceAddress, resource.sourceAddress);
+    assert.deepEqual(linked?.declaration, resource.range);
     assert.equal(owner.getText(asRange(resource.range)), 'Paint::from_rgb(45u8, 74, 112)');
     content(await invoke('designer_rsx_style_source', { session, expected_revision: await ready(), address: resource.sourceAddress, range: resource.range }));
     const selection = vscode.window.visibleTextEditors.find(editor => editor.document === owner)?.selection;

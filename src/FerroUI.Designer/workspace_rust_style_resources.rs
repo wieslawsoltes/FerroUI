@@ -169,9 +169,7 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         } else {
             fields::source_row(body, &resource.key)
         };
-        let declaration = resource.shared.as_ref().and_then(|constant| {
-            constant.uri.clone().map(|uri| palette_comparison::Declaration::RustModule { uri, span: constant.value })
-        }).unwrap_or_else(|| palette_comparison::Declaration::Local(resource.color_source()));
+        let declaration = declaration(resource);
         let active = scope.clone();
         add_button(
             &row,
@@ -184,6 +182,12 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         body.children()
             .add(text("No colors in this layer.").upcast::<Control>());
     }
+}
+
+pub(super) fn declaration(resource: &RsxStyleResource) -> palette_comparison::Declaration {
+    resource.shared.as_ref().and_then(|constant| {
+        constant.uri.clone().map(|uri| palette_comparison::Declaration::RustModule { uri, span: constant.value })
+    }).unwrap_or_else(|| palette_comparison::Declaration::Local(resource.color_source()))
 }
 
 fn edit_shared(

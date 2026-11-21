@@ -91,9 +91,10 @@ function setterRow<Base extends string | number>(setter: AuthoredSetter, send: (
     buttons.className = 'style-tools';
     if (setter.field.resources) buttons.append(actionButton('link', `Assign resource to ${setter.property}`,
         () => send({ type: 'setter-resource', property: setter.property, node: setter.node })));
-    const declaration = setter.resource?.declaration;
-    if (declaration) buttons.append(actionButton('symbol-color', `Reveal declared resource ${setter.resource!.key}`,
-        () => send({ type: 'reveal', range: declaration })));
+    const resource = setter.resource;
+    const declaration = resource?.declaration;
+    if (resource && declaration) buttons.append(actionButton('symbol-color', `Reveal declared resource ${resource.key}`,
+        () => send({ type: 'reveal', range: declaration, sourceAddress: resource.sourceAddress ?? undefined })));
     buttons.append(actionButton('go-to-file', `Reveal ${setter.property} setter`, () => send({ type: 'reveal', range: setter.range })));
     if (setter.can_remove !== false) buttons.append(actionButton('discard', `Remove ${setter.property} setter`,
         () => send({ type: 'setter', node: setter.node, property: setter.property, value: null })));

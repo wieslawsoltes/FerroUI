@@ -62,6 +62,9 @@ export async function verifyHostedModuleColors(preview: NativePreview): Promise<
         assert.equal(entry.color, '#FF2D4A70');
         assert.equal(entry.sourceAddress, brand);
         assert.equal(entry.shared_constant, 'INK');
+        const linked = definition.setters.find(setter => setter.property === 'Foreground')?.resource;
+        assert.equal(linked?.sourceAddress, brand);
+        assert.deepEqual(linked?.declaration, entry.range);
         const location = await preview.hostedStyles<HostedSourceLocation>(accepted, {
             action: 'locate', address: brand, range: entry.range, source: brandDraft,
         });

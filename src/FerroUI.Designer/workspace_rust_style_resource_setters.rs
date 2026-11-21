@@ -1,5 +1,5 @@
 //! Choose the mapped color resource for an existing or new Rust style setter.
-use super::{SOURCE, Scope, add_button, fields, picker};
+use super::{SOURCE, Scope, add_button, fields, picker, resources};
 use crate::icons;
 use ferroui_controls::{Control, StackPanel};
 use ferroui_designer_rsx::{
@@ -34,13 +34,13 @@ pub(super) fn change_setter(
         .find(|entry| Some(entry.key) == current)
         .and_then(RsxStyleResourceFamily::common_declaration)
     {
-        let span = source.color_source();
+        let declaration = resources::declaration(source);
         let active = scope.clone();
         add_button(
             row,
             SOURCE,
             &format!("Reveal declared resource {}", source.key),
-            move || active.reveal(span),
+            move || active.reveal_declaration(declaration.clone()),
         );
     }
 }

@@ -55,8 +55,9 @@ pub fn rust_style_report(
             let resource = setter.resource_key().map(|key| {
                 let declaration = choices.iter().find(|entry| entry.key == key)
                     .and_then(|family| family.common_declaration())
-                    .and_then(|entry| index.range(entry.color_source()).ok());
-                json!({"key":key,"declaration":declaration})
+                    .and_then(|entry| palette::source_range(&index, modules, entry));
+                json!({"key":key,"declaration":declaration.as_ref().map(|(range, _)| range),
+                    "sourceAddress":declaration.and_then(|(_, address)| address)})
             });
             json!({"node":setter.declaration.start,
                 "property":setter.field.as_ref().map_or("Computed property", |field| field.name.as_str()),

@@ -8,7 +8,7 @@ use ferroui_designer_rsx::{RsxStyleResource, RsxStyleResourceFamily};
 use ferroui_designer_tools::component_palette::PaletteLayer;
 use serde_json::{Value, json};
 
-fn source_range<'a>(index: &LineIndex, modules: Option<&RustModuleSources>, resource: &'a RsxStyleResource) -> Option<(Range, Option<&'a str>)> {
+pub(super) fn source_range<'a>(index: &LineIndex, modules: Option<&RustModuleSources>, resource: &'a RsxStyleResource) -> Option<(Range, Option<&'a str>)> {
     if let Some(shared) = &resource.shared && let Some(uri) = shared.uri.as_deref() {
         let owner = modules?.source(uri)?;
         let range = LineIndex::new(&owner.source).range(shared.value).ok()?;
