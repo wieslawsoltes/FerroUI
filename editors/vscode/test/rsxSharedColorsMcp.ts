@@ -27,7 +27,7 @@ export async function verifyRsxSharedColorsMcp({ invoke, content }: McpFixture):
         const { nodes } = content<{ nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
         const node = nodes.find(node => node.name === 'SharedStatus');
         assert.ok(node, 'The shared edit keeps the second RSX invocation active');
-        return (await read<{ effective: string }>('designer_property_trace', { node: node.id, property: 'Foreground' })).effective;
+        return (await read<{ effective: string }>('designer_property_trace', { node: node.id, property: 'TextElement.Foreground' })).effective;
     };
     const originalColor = 'Rgb::from_rgb(37u8, /* brand 🧭 */ 74, 112)';
     const initial = await model();

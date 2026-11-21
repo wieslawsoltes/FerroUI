@@ -36,7 +36,7 @@ fn shared_rust_color_commits_keep_the_selected_view_and_one_undo() {
             .unwrap();
         read(
             "designer_property_trace",
-            json!({"node":node,"property":"Foreground"}),
+            json!({"node":node,"property":"TextElement.Foreground"}),
         )["effective"]
             .clone()
     };
