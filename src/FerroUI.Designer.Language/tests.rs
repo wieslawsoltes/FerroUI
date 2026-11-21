@@ -10,6 +10,29 @@ fn service(source: &str) -> LanguageService {
     service.open("untitled:/View.xaml", source, 1).unwrap();
     service
 }
+
+#[test]
+fn native_behavior_collections_have_clean_diagnostics_and_typed_completion() {
+    const URI: &str = "untitled:/View.xaml";
+    let source = include_str!("../../editors/vscode/test/fixtures/BehaviorsWorkbench.xaml");
+    let diagnostics = service(source).diagnostics(URI).unwrap();
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
+
+    let source = format!(r#"<Button {NS}>
+        <Interaction.Behaviors>
+            <DataTriggerBehavior Binding="{{Binding Ready}}" Value="True" ComparisonCondition="Equal">
+                <AddClassAction ClassName="Ready"/>
+            </DataTriggerBehavior>
+        </Interaction.Behaviors>
+    </Button>"#);
+    let at = source.find("ComparisonCondition=\"").unwrap() + "ComparisonCondition=\"".len();
+    let behavior = service(&source);
+    let diagnostics = behavior.diagnostics(URI).unwrap();
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
+    let values = behavior.completions(URI, at).unwrap();
+    assert!(values.iter().any(|item| item.label == "GreaterThanOrEqual"), "{values:?}");
+}
+
 #[test]
 fn utf16_positions_reject_split_surrogates_and_preserve_crlf() {
     let text = "α🦀\r\n漢x\n";

@@ -15,13 +15,19 @@ framework=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(framework)
 model=framework.Model()
 crates=list(framework.CRATES)
-# Templates, resource includes and markup extensions are declared by the XAML runtime,
-# not by the native view-builder crates. Read their real metadata through the same scanner.
-crates.append(("src/Markup/FerroUI.Markup.Xaml", "ferroui_markup_xaml"))
+# The XAML runtime and attached behaviors declare markup types independently of
+# the native view builders. Read their metadata through the same scanner.
+crates.extend([
+    ("src/Markup/FerroUI.Markup.Xaml", "ferroui_markup_xaml"),
+    ("src/Behaviors/FerroUI.Xaml.Interactivity", "ferroui_xaml_interactivity"),
+    ("src/Behaviors/FerroUI.Xaml.Interactions", "ferroui_xaml_interactions"),
+    ("src/Behaviors/FerroUI.Xaml.Interactions.Custom", "ferroui_xaml_interactions_custom"),
+])
 for _,_,group,_ in framework.GROUPS:
     crates.extend(group)
 for directory,crate in crates:
-    framework.read_paths(model,directory,crate)
+    if (ROOT/directory/"rust_paths.rs").is_file():
+        framework.read_paths(model,directory,crate)
 for directory,crate in crates:
     framework.read_classes(model,directory,crate)
 
