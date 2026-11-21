@@ -93,7 +93,10 @@ pub use ferro_property::{
     PropertyValue, StyledPropertyOptions, UnsetValueType,
 };
 #[doc(hidden)]
-pub use ferro_property::{__NoPropertyValueType, __NoValueMarkup, __RegisterPropertyValueType, __RegisterValueMarkup, __ValueMarkupProbe};
+pub use ferro_property::{
+    __first_property_read, __NoPropertyValueType, __NoValueMarkup, __RegisterPropertyValueType, __RegisterValueMarkup,
+    __ValueMarkupProbe,
+};
 pub use ferro_property_changed_event_args::{FerroPropertyChangedEventArgs, OwnedFerroPropertyChangedEventArgs};
 pub use property_change_handler::PropertyChangeHandler;
 pub use ferro_property_metadata::{
