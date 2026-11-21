@@ -34,7 +34,7 @@ pub use rust_xaml::{
 };
 pub use preview_sources::{
     hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
-    PreviewInclude, PreviewIncludes, PreviewSourceBuffer,
+    PreviewInclude, PreviewIncludes, PreviewSourceBuffer, xaml_source_revision,
 };
 pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 

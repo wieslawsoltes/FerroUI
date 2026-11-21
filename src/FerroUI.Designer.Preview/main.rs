@@ -138,6 +138,7 @@ fn respond(
                 DESIGN_STATE_AUTHORING_QUERY,
                 DESIGN_PALETTE_QUERY, DESIGN_PALETTE_VERSION,
                 DESIGN_SOURCE_SNAPSHOT_QUERY, DESIGN_SOURCE_SNAPSHOT_VERSION,
+                DESIGN_TEMPLATES_QUERY, DESIGN_TEMPLATES_VERSION,
             };
             let port = relay.port();
             *hosted = Some(relay);
@@ -154,7 +155,7 @@ fn respond(
             ]
             .map(|key| format!("{key}={DESIGN_ANIMATION_VERSION}"))
             .join("&");
-            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}&{DESIGN_PALETTE_QUERY}={DESIGN_PALETTE_VERSION}");
+            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}&{DESIGN_PALETTE_QUERY}={DESIGN_PALETTE_VERSION}&{DESIGN_TEMPLATES_QUERY}={DESIGN_TEMPLATES_VERSION}");
             json!({"port": port, "animationQuery": query})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
@@ -166,6 +167,8 @@ fn respond(
             .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.palette(request)),
         "hostedStyles" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.styles(request)),
+        "hostedTemplates" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.templates(request)),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
         "hostedAnimate" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

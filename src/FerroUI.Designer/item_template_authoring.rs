@@ -4,6 +4,7 @@ use crate::{
 };
 use ferroui_controls::ItemsControl;
 use ferroui_designer_core::{Document, Node, NodeKind, design_fixtures::DESIGN_NAMESPACE};
+use ferroui_designer_language::Schema;
 use ferroui_designer_tools::{
     ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource, ItemTemplateSlot, template_resources,
 };
@@ -81,7 +82,7 @@ impl DesignerSession {
             .ast()
             .node(owner)
             .ok_or("The template owner was removed.")?;
-        let declaration = authored_member(document, node, property)?;
+        let declaration = authored_member(property_schema(), document, node, property)?;
         let context = self.component_resource_context(owner);
         let mut slot =
             ItemTemplateSlot::read(document, owner, property, declaration, context.as_ref())
@@ -171,17 +172,8 @@ impl DesignerSession {
 
 impl DesignerSession {
     pub(crate) fn control_template_matches(&self, owner: NodeId, document: &Document, template: &Node) -> bool {
-        if !ItemTemplateMember::Template.accepts(template) { return false; }
-        let target = ferroui_designer_tools::component_property_attribute(document, template.id, "TargetType");
-        if matches!(target, Ok(None)) {
-            return ferroui_designer_tools::component_property_elements(document, template.id, "TargetType")
-                .is_ok_and(|elements| elements.is_empty());
-        }
-        let Ok((namespace, name)) = crate::definition_projection::target_type(document, template, None) else { return false };
-        let schema = property_schema();
         let Some(owner) = self.document().ast().node(owner) else { return false };
-        let Some(actual) = schema.type_info(&owner.name, owner.namespace_uri.as_deref()) else { return false };
-        schema.type_info(&name, Some(&namespace)).is_some_and(|expected| schema.type_assignable_to(actual, expected))
+        control_template_matches(property_schema(), owner, document, template)
     }
 
     pub(crate) fn template_preview_options(&self, owner: NodeId, property: ItemTemplateMember,
@@ -202,12 +194,24 @@ impl DesignerSession {
     }
 }
 
-fn authored_member(
+pub(crate) fn control_template_matches(schema: &Schema, owner: &Node, document: &Document, template: &Node) -> bool {
+    if !ItemTemplateMember::Template.accepts(template) { return false; }
+    let target = ferroui_designer_tools::component_property_attribute(document, template.id, "TargetType");
+    if matches!(target, Ok(None)) {
+        return ferroui_designer_tools::component_property_elements(document, template.id, "TargetType")
+            .is_ok_and(|elements| elements.is_empty());
+    }
+    let Ok((namespace, name)) = crate::definition_projection::target_type(document, template, None) else { return false };
+    let Some(actual) = schema.type_info(&owner.name, owner.namespace_uri.as_deref()) else { return false };
+    schema.type_info(&name, Some(&namespace)).is_some_and(|expected| schema.type_assignable_to(actual, expected))
+}
+
+pub(crate) fn authored_member(
+    schema: &Schema,
     document: &Document,
     owner: &Node,
     property: ItemTemplateMember,
 ) -> Result<ItemTemplateDeclaration, String> {
-    let schema = property_schema();
     let name = property.name();
     let matches = |spelling: &str| {
         !spelling.starts_with("Design.") && spelling.rsplit([':', '.']).next() == Some(name)

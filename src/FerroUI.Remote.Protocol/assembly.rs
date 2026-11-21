@@ -11,6 +11,7 @@ use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnim
 use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::design_palette_context::DesignPaletteContextMessage;
+use crate::design_template_catalog::DesignTemplateCatalogMessage;
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
     KeyEventMessage, PointerMovedEventMessage, PointerPressedEventMessage, PointerReleasedEventMessage,
@@ -70,6 +71,7 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateDesignSourcesMessage>(),
         ExportedType::of::<UpdateDesignResultMessage>(),
         ExportedType::of::<DesignPaletteContextMessage>(),
+        ExportedType::of::<DesignTemplateCatalogMessage>(),
         ExportedType::of::<DesignFrameMessage>(),
         ExportedType::of::<DesignFrameReceivedMessage>(),
         ExportedType::of::<DesignAnimationCatalogMessage>(),
@@ -134,6 +136,7 @@ mod tests {
         ("UpdateDesignSourcesMessage", "408BAE3B-C488-4DAC-9255-E3AD3C99D2C5"),
         ("UpdateDesignResultMessage", "CB085DBB-7231-4C16-8797-D8D97BCF9341"),
         ("DesignPaletteContextMessage", "D2C95A63-AF9C-4AA2-958B-8F49D3D61AD6"),
+        ("DesignTemplateCatalogMessage", "5817D3A7-7AC8-47C0-A5A0-76DF2207C5F6"),
         ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
         ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),
         ("DesignAnimationCatalogMessage", "C094EFD2-D7FC-467D-AC22-8FA047C4B54B"),
@@ -256,6 +259,26 @@ mod tests {
         let message: Message = Arc::new(packet.clone());
         let Value::Object(decoded) = round_trip(&message) else { panic!("Expected a design frame") };
         assert_eq!(decoded.downcast_ref::<DesignFrameMessage>(), Some(&packet));
+    }
+
+    #[test]
+    fn template_catalog_keeps_both_source_stamps_and_full_fingerprints() {
+        use crate::design_template_catalog::{DesignTemplateSource, DesignTemplateUse};
+        let packet = DesignTemplateCatalogMessage {
+            revision: 34,
+            templates: vec![DesignTemplateUse {
+                owner: DesignTemplateSource {
+                    address: "ferres://App/View.xaml".into(), fingerprint: -18, line: 5, column: 9,
+                },
+                type_name: "Button".into(),
+                definition: Some(DesignTemplateSource {
+                    address: "file:///Project/Theme.xaml".into(), fingerprint: 42, line: 17, column: 13,
+                }),
+            }],
+        };
+        let message: Message = Arc::new(packet.clone());
+        let Value::Object(decoded) = round_trip(&message) else { panic!("Expected a template catalog") };
+        assert_eq!(decoded.downcast_ref::<DesignTemplateCatalogMessage>(), Some(&packet));
     }
 
     #[test]

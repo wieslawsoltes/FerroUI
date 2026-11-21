@@ -5,6 +5,7 @@ pub(crate) mod detachable_transport_connection;
 pub(crate) mod file_watcher_transport;
 mod hosted_animation;
 mod hosted_sources;
+mod hosted_templates;
 mod hosted_palette;
 mod hosted_keyframes;
 pub mod html_transport;

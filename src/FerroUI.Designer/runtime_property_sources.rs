@@ -2,7 +2,7 @@ use super::RuntimePreview;
 use ferroui_base::{FerroObject, Visual};
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_designer_core::{Document, NodeId};
-use ferroui_designer_language::{LineIndex, Position};
+use ferroui_designer_language::XamlLocations;
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 
 impl RuntimePreview {
@@ -73,32 +73,5 @@ pub(crate) fn node_at_source_info(
     info: &XamlSourceInfo,
     type_name: &str,
 ) -> Option<NodeId> {
-    let source = document.valid_source();
-    let index = LineIndex::new(source);
-    let line = u32::try_from(info.line_number().checked_sub(1)?).ok()?;
-    let column = usize::try_from(info.line_position().checked_sub(1)?).ok()?;
-    let start = index.offset(Position { line, character: 0 }).ok()?;
-    let row = source[start..].split('\n').next()?;
-    let content = if line == 0 {
-        row.trim_start_matches('\u{feff}')
-    } else {
-        row
-    };
-    let position = content
-        .char_indices()
-        .nth(column)
-        .map(|(offset, _)| start + row.len() - content.len() + offset);
-    let mut candidates = document.ast().elements().filter(|node| {
-        (start..start + row.len()).contains(&node.span.start) && node.local_name() == type_name
-    });
-    let first = candidates.next()?;
-    let Some(second) = candidates.next() else {
-        return Some(first.id);
-    };
-    let position = position?;
-    [first, second]
-        .into_iter()
-        .chain(candidates)
-        .find(|node| node.span.start <= position && position <= node.name_span.end)
-        .map(|node| node.id)
+    Some(XamlLocations::new(document).element(info.line_number(), info.line_position(), type_name)?.id)
 }

@@ -46,8 +46,14 @@ pub struct PreviewInclude {
 
 impl PreviewInclude {
     pub fn source_revision(&self) -> u64 {
-        fingerprint(self.document.valid_source().as_bytes())
+        xaml_source_revision(&self.document)
     }
+}
+
+/// Match the compiler's fingerprint for the last valid XAML source.
+pub fn xaml_source_revision(document: &Document) -> u64 {
+    let source = document.valid_source();
+    fingerprint(source.strip_prefix('\u{feff}').unwrap_or(source).as_bytes())
 }
 
 impl PreviewIncludes {

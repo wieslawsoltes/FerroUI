@@ -14,6 +14,7 @@ mod handler_project;
 #[cfg(test)]
 mod handler_tests;
 mod line_index;
+mod xaml_locations;
 pub mod lsp;
 #[cfg(test)]
 mod project_library_tests;
@@ -34,6 +35,7 @@ mod service;
 pub use formatting::{AttributeLayout, FormattingOptions, SelfClosingSpace};
 pub use editing::QuickFix;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
+pub use xaml_locations::XamlLocations;
 pub use references::{
     identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,
     NameOccurrence,

@@ -9,6 +9,7 @@ use crate::{
 };
 use ferroui_remote_protocol::designer::{
     DesignPaletteContextMessage,
+    DesignTemplateCatalogMessage,
     DesignKeyframeSelectionResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
@@ -41,6 +42,7 @@ pub(crate) mod palette;
 mod sources;
 pub(crate) mod styles;
 mod rust_styles;
+pub(crate) mod templates;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
@@ -54,6 +56,7 @@ struct Events {
     outcome: Option<Result<(), String>>,
     latest: Option<DesignFrameMessage>,
     palette: Option<DesignPaletteContextMessage>,
+    templates: Option<DesignTemplateCatalogMessage>,
     animation_supported: bool,
     animation_catalog: Option<DesignAnimationCatalogMessage>,
     animation_request: Option<i64>,
@@ -78,6 +81,7 @@ pub(crate) struct Relay {
     animation_sources: SourceMaps,
     authored_rsx: Option<AuthoredRsxFrame>,
     authored: Option<authored::AuthoredPreview>,
+    templates: Option<templates::Templates>,
     size: (f64, f64),
 }
 
@@ -130,6 +134,8 @@ pub(crate) struct Frame {
     palette_available: bool,
     #[serde(rename = "stylesAvailable")]
     styles_available: bool,
+    #[serde(rename = "templatesAvailable")]
+    templates_available: bool,
     #[serde(rename = "rustScope", skip_serializing_if = "Option::is_none")]
     rust_scope: Option<crate::rsx_animation::AuthoredRustScope>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -170,6 +176,7 @@ impl Relay {
             animation_sources: SourceMaps::default(),
             authored_rsx: None,
             authored: None,
+            templates: None,
             size: (0.0, 0.0),
         })
     }
@@ -246,6 +253,10 @@ impl Relay {
             } else if let Some(context) = message.downcast_ref::<DesignPaletteContextMessage>() {
                 if state.requested == Some(context.revision) {
                     state.palette = Some(context.clone());
+                }
+            } else if let Some(catalog) = message.downcast_ref::<DesignTemplateCatalogMessage>() {
+                if state.requested == Some(catalog.revision) {
+                    state.templates = Some(catalog.clone());
                 }
             } else if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
                 if state.requested == Some(outcome.revision) {
@@ -358,6 +369,7 @@ impl Relay {
             };
         }
         self.authored = None;
+        self.templates = None;
         self.animation_sources.retain(design.restore_animation.as_ref());
         let project = projects.source(&design.document)?;
         let rust = design.workspace.as_ref().and_then(|workspace| workspace.rust_sources(&design, project));
@@ -420,6 +432,7 @@ impl Relay {
         } else {
             None
         };
+        let templates = state.templates.take();
         let authored_rsx = AuthoredRsxFrame::capture(&document, &design.document.uri);
         let states = state.animation_catalog.as_mut().map(|catalog| {
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
@@ -457,10 +470,13 @@ impl Relay {
             source.states.annotate(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
+        self.templates = authored.as_ref().zip(templates)
+            .map(|(source, catalog)| templates::Templates::capture(source, catalog));
         self.authored_rsx = authored_rsx;
         self.authored = authored;
         frame.palette_available = self.authored.is_some();
         frame.styles_available = self.authored.is_some() || self.authored_rsx.is_some();
+        frame.templates_available = self.templates.is_some();
         frame.rust_scope = self.authored_rsx.as_ref().map(|source| source.scope.clone());
         frame.animation_presentation = presentation;
         Ok(frame)
@@ -495,6 +511,7 @@ impl Relay {
             fixtures,
             palette_available: self.authored.is_some(),
             styles_available: self.authored.is_some() || self.authored_rsx.is_some(),
+            templates_available: self.templates.is_some(),
             rust_scope: self.authored_rsx.as_ref().map(|source| source.scope.clone()),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,

@@ -54,6 +54,8 @@ mod item_template_project;
 mod item_template_samples;
 mod item_template_scope;
 mod item_template_source;
+mod scoped_control_templates;
+pub use scoped_control_templates::ScopedControlTemplates;
 mod property_trace;
 mod preview_environment;
 mod preview_theme;

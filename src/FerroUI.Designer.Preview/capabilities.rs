@@ -7,6 +7,7 @@ pub(crate) fn initialize() -> Value {
         "hostedSourceSnapshots",
         "hostedPalette",
         "hostedStyles",
+        "hostedTemplates",
         "hostedAnimationRestoration",
         "hostedPreviewRanges",
         "hostedClipAuthoring",

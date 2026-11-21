@@ -2,6 +2,7 @@ use crate::design_window_loader::{DesignLoad, DesignWindowLoader};
 use crate::remote::hosted_animation;
 use crate::remote::hosted_palette;
 use crate::remote::hosted_sources;
+use crate::remote::hosted_templates;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
@@ -322,6 +323,7 @@ impl RemoteDesignerEntryPoint {
         };
         hosted_animation::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         hosted_palette::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        hosted_templates::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         Self::attach_transport(transport.clone());
         transport.on_exception(exception_handler(|_, e| {
             die(Some(&e.to_string()));
@@ -437,6 +439,7 @@ impl RemoteDesignerEntryPoint {
                 dispatcher.capture_unhandled_exceptions(|| {
                     with_xaml_errors(|| {
                         let snapshot = snapshot.map(hosted_sources::prepare).transpose()?;
+                        let create_source_info = snapshot.is_some() && hosted_templates::enabled();
                         let load = |base_uri| DesignWindowLoader::load(DesignLoad {
                             xaml: xaml.xaml.as_deref().unwrap_or(""),
                             assembly_path: xaml.assembly_path.as_deref(),
@@ -444,6 +447,7 @@ impl RemoteDesignerEntryPoint {
                             render_scaling: LAST_RENDER_SCALING.get(),
                             fixture: versioned.and_then(|update| update.fixture.as_deref()),
                             animation_document: animations.as_ref().map(|source| source.identity.as_str()),
+                            create_source_info,
                             freeze_animation_clock: animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
                             base_uri,
                         });
@@ -468,6 +472,7 @@ impl RemoteDesignerEntryPoint {
                 Ok(Ok(Ok(design))) => {
                     let catalog = hosted_animation::accept(revision, animations, &design);
                     let palette = snapshot.and_then(|snapshot| hosted_palette::capture(snapshot.update.revision));
+                    let templates = snapshot.and_then(|snapshot| hosted_templates::capture(snapshot.update.revision, &design));
                     let window = design.window;
                     if let Some(previous) = current_window {
                         // Boundary (#567): closing the previous preview runs the closing and
@@ -485,6 +490,9 @@ impl RemoteDesignerEntryPoint {
                     }
                     if let Some(palette) = palette {
                         transport.send(Arc::new(palette));
+                    }
+                    if let Some(templates) = templates {
+                        transport.send(Arc::new(templates));
                     }
                     UpdateXamlResultMessage {
                         handle: handle.map(|handle| handle.handle().to_string()),

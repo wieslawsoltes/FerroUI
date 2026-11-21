@@ -41,6 +41,7 @@ pub(crate) struct DesignLoad<'a> {
     pub(crate) render_scaling: f64,
     pub(crate) fixture: Option<&'a str>,
     pub(crate) animation_document: Option<&'a str>,
+    pub(crate) create_source_info: bool,
     pub(crate) freeze_animation_clock: bool,
     pub(crate) base_uri: Option<url::Url>,
 }
@@ -82,6 +83,7 @@ impl DesignWindowLoader {
             render_scaling,
             fixture: None,
             animation_document: None,
+            create_source_info: false,
             freeze_animation_clock: false,
             base_uri: None,
         }).map(|loaded| loaded.window)
@@ -186,9 +188,11 @@ fn load_preview_control(input: &DesignLoad<'_>) -> Result<Ref<Control>, XamlLoad
     configuration.use_compiled_bindings_by_default =
         local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
     let mut document = RuntimeXamlLoaderDocument::with_base_uri(base_uri, input.xaml);
+    if input.create_source_info || input.animation_document.is_some() {
+        configuration.set_create_source_info(true);
+    }
     if let Some(name) = input.animation_document {
         document.document = Some(name.to_owned());
-        configuration.set_create_source_info(true);
     }
     let loaded = loader.load(document, configuration)?;
 
