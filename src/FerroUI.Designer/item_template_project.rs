@@ -4,7 +4,7 @@ use crate::item_template_samples::{assigned_fixture, ItemTemplatePreview};
 use crate::{DefinitionPreviewOptions, DesignerSession};
 use ferroui_designer_core::{
     design_fixtures::{DesignFixture, DesignFixtures},
-    Document, NodeId, SourceSpan,
+    Document, Node, NodeId, SourceSpan,
 };
 use ferroui_designer_project::PreviewInclude;
 use ferroui_designer_tools::{
@@ -19,7 +19,8 @@ use std::collections::BTreeSet;
 pub(crate) struct IncludedItemTemplate {
     #[serde(flatten)]
     pub location: IncludedSource,
-    pub key: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub property: Option<ItemTemplateMember>,
 }
@@ -41,9 +42,18 @@ pub(crate) struct IncludedTemplateChoice {
 }
 
 impl IncludedItemTemplate {
+    fn locate(source: &PreviewInclude, node: &Node, property: ItemTemplateMember) -> Result<Self, String> {
+        Ok(Self {
+            location: IncludedSourceIndex::new(source).locate(node)?,
+            key: keyed_template(node, property),
+            property: (property == ItemTemplateMember::Template).then_some(property),
+        })
+    }
+
     pub fn node_in(&self, document: &Document, uri: &str) -> Result<(NodeId, SourceSpan), String> {
         let node = self.location.node_in(document, uri)?;
-        if keyed_template(node, self.property.unwrap_or(ItemTemplateMember::ItemTemplate)).as_ref() != Some(&self.key) {
+        let property = self.property.unwrap_or(ItemTemplateMember::ItemTemplate);
+        if !property.accepts(node) || keyed_template(node, property) != self.key {
             return Err("The template declaration changed.".into());
         }
         Ok((node.id, node.name_span))
@@ -51,23 +61,6 @@ impl IncludedItemTemplate {
 }
 
 impl DesignerSession {
-    fn included_template(
-        &self,
-        owner: NodeId,
-        key: &str,
-        property: ItemTemplateMember,
-        theme: Option<&ComponentResourceContext>,
-    ) -> Result<Option<IncludedItemTemplate>, String> {
-        let Some((source, node)) = self.included_template_node(owner, key, property, theme)? else {
-            return Ok(None);
-        };
-        Ok(Some(IncludedItemTemplate {
-            location: IncludedSourceIndex::new(source).locate(node)?,
-            key: key.to_owned(),
-            property: (property == ItemTemplateMember::Template).then_some(property),
-        }))
-    }
-
     pub(crate) fn included_template_node(
         &self,
         owner: NodeId,
@@ -101,19 +94,25 @@ impl DesignerSession {
             .map(|node| (source, node)))
     }
 
-    pub(crate) fn assigned_included_template(
+    fn included_slot_definition(
         &self,
         slot: &ItemTemplateSlot,
-    ) -> Result<Option<IncludedItemTemplate>, String> {
-        let ItemTemplateValue::Resource { key, .. } = &slot.value else {
-            return Ok(None);
-        };
-        self.included_template(
-            slot.owner,
-            key,
-            slot.property,
-            self.component_resource_context(slot.owner).as_ref(),
-        )
+    ) -> Result<Option<(&PreviewInclude, &Node)>, String> {
+        if let ItemTemplateValue::Resource { key, .. } = &slot.value {
+            return self.included_template_node(
+                slot.owner, key, slot.property, self.component_resource_context(slot.owner).as_ref(),
+            );
+        }
+        Ok(self.effective_control_template(slot).and_then(|template| {
+            let include = template.include?;
+            include.document.ast().node(template.location.node).map(|node| (include, node))
+        }))
+    }
+
+    pub(crate) fn included_template_definition(&self, slot: &ItemTemplateSlot) -> Result<Option<IncludedItemTemplate>, String> {
+        self.included_slot_definition(slot)?
+            .map(|(include, node)| IncludedItemTemplate::locate(include, node, slot.property))
+            .transpose()
     }
 
     pub(crate) fn included_template_resources(
@@ -152,9 +151,10 @@ impl DesignerSession {
         &self,
         slot: &ItemTemplateSlot,
     ) -> Result<Option<IncludedTemplatePreview>, String> {
-        let Some(source) = self.assigned_included_template(slot)? else {
+        let Some((include, node)) = self.included_slot_definition(slot)? else {
             return Ok(None);
         };
+        let source = IncludedItemTemplate::locate(include, node, slot.property)?;
         let sample = if self.design_time_enabled() {
             assigned_fixture(
                 self.document(),
@@ -165,11 +165,7 @@ impl DesignerSession {
         } else {
             None
         };
-        let target_type = if slot.property == ItemTemplateMember::Template {
-            let (included, node) = self.included_template_node(slot.owner, &source.key, slot.property,
-                self.component_resource_context(slot.owner).as_ref())?.ok_or("The control template source changed")?;
-            self.template_preview_options(slot.owner, slot.property, &included.document, node.id)?.target_type
-        } else { None };
+        let target_type = self.template_preview_options(slot.owner, slot.property, &include.document, node.id)?.target_type;
         Ok(Some(IncludedTemplatePreview {
             source,
             sample,

@@ -1920,6 +1920,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-mcp",
+ "ferroui-reload-protocol",
  "ferroui-themes-winui",
  "ferroui-treedatagrid-core",
  "ferroui-vello",

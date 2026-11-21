@@ -17,6 +17,7 @@ use std::{rc::Rc, sync::Arc};
 
 #[path = "runtime_property_sources.rs"]
 mod property_sources;
+pub(crate) use property_sources::node_at_source_info;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);

@@ -18,6 +18,7 @@ interface TemplateSlot {
     canReset: boolean;
     canCreate?: boolean;
     rustBody?: Range | null;
+    localDefinition?: number | null;
     includedDefinition?: IncludedTemplateSource | null;
 }
 
@@ -25,7 +26,7 @@ interface TemplateModel {
     model: string;
     slots: TemplateSlot[];
     resources: { node: number; key: string; target_type: string | null }[];
-    includedResources?: Pick<IncludedTemplateSource, 'uri' | 'key'>[];
+    includedResources?: { uri: string; key: string }[];
 }
 
 interface TemplateAction extends QuickPickItem {
@@ -49,7 +50,8 @@ export async function editItemTemplates(context: StudioContext, node: number, me
     const args = { node, property: slot.property, expected_model: model.model };
     const edit = (action: 'create_inline' | 'copy_inline' | 'reset') => context.edit(tool, { ...args, action });
     const available: TemplateAction[] = [];
-    const definition = slot.value.kind === 'inline' || slot.value.kind === 'resource' ? slot.value.definition : null;
+    const definition = slot.localDefinition
+        ?? (slot.value.kind === 'inline' || slot.value.kind === 'resource' ? slot.value.definition : null);
     const included = slot.includedDefinition;
     if (definition !== null || included || slot.rustBody) {
         available.push({
@@ -107,10 +109,10 @@ export async function editItemTemplates(context: StudioContext, node: number, me
     await action?.run();
 }
 
-function description({ value, rustBody }: TemplateSlot): string {
+function description({ value, rustBody, localDefinition, includedDefinition }: TemplateSlot): string {
     if (rustBody) return 'Inline RSX';
     switch (value.kind) {
-        case 'unset': return 'Default';
+        case 'unset': return localDefinition != null || includedDefinition ? 'Inherited' : 'Default';
         case 'inline': return 'Inline';
         case 'resource': return value.key;
         case 'expression': return 'Authored expression';

@@ -2,7 +2,7 @@
 use crate::{
     component_session::property_schema, style_composition::supports_palette, DesignerSession,
 };
-use ferroui_designer_core::{Edit, NodeKind};
+use ferroui_designer_core::{Document, Edit, NodeKind};
 use ferroui_designer_language::relocate_xaml_fragment;
 use ferroui_designer_tools::{
     IncludedResourceDocument, ItemTemplateChange, ItemTemplateMember, ItemTemplateSlot, ItemTemplateValue,
@@ -14,7 +14,8 @@ impl DesignerSession {
         &self,
         slot: &ItemTemplateSlot,
     ) -> Option<Result<Vec<Edit>, String>> {
-        (slot.reason.is_none() && matches!(slot.value, ItemTemplateValue::Resource { .. }))
+        (slot.reason.is_none() && (matches!(slot.value, ItemTemplateValue::Resource { .. })
+            || self.effective_control_template(slot).is_some()))
             .then(|| self.plan_inline_template_copy(slot))
     }
 
@@ -23,7 +24,8 @@ impl DesignerSession {
         slot: &ItemTemplateSlot,
     ) -> Result<Vec<Edit>, String> {
         let document = self.document();
-        if slot.property == ItemTemplateMember::Template {
+        let effective = self.effective_control_template(slot);
+        if slot.property == ItemTemplateMember::Template && effective.is_none() {
             let source = if let Some(definition) = slot.value.definition() {
                 document.ast().node(definition).map(|node| (document, node))
             } else if let ItemTemplateValue::Resource { key, .. } = &slot.value {
@@ -65,10 +67,16 @@ impl DesignerSession {
             }
             current = node.parent;
         }
-        slot.plan_resource_copy(document, &sources, &owners, &|address, fragment| {
+        let relocate = |address: &str, fragment: &Document| {
             relocate_xaml_fragment(fragment, property_schema(), address, self.document_uri())
                 .map_err(|error| ToolError(error.to_string()))
-        })
+        };
+        match effective {
+            Some(template) => slot.plan_effective_template_copy(
+                document, &sources, template.location, &owners, &relocate,
+            ),
+            None => slot.plan_resource_copy(document, &sources, &owners, &relocate),
+        }
         .map_err(|error| error.to_string())
     }
 }

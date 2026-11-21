@@ -470,12 +470,14 @@ The isolated canvas renders the supported static controls and literals of a dire
 ## Edit a control template
 
 1. Select a control that exposes a writable `Template` property. Choose **Edit control template** beside its name in **Properties**, or run **FerroUI: Edit Control Template**.
-2. Use **Edit Template on Canvas** to open its authored inline or shared XAML `ControlTemplate`. The canvas previews the template for the selected control. An included template opens in the dictionary that owns it. Use the back arrow to return to the consumer.
-3. Choose **Assign Template Resource…** to use a visible control template with a compatible `TargetType`. **Make Inline Copy** gives this instance a private template and carries across the dependencies its scope needs. **Create Inline Template** uses the selected control's `TargetType` and scaffolds its registered required parts. **Reset Template** returns to the control's default template.
+2. Use **Edit Template on Canvas** to open the authored XAML `ControlTemplate` used by the selected control. The picker shows **Inherited** when a style or theme supplies the template and the native preview can locate its source. An included template opens in the file that owns it. Use the back arrow to return to the consumer.
+3. Choose **Assign Template Resource…** to use a visible control template with a compatible `TargetType`. **Make Inline Copy** gives this instance a private copy of the assigned or inherited template and carries across the dependencies its scope needs. **Create Inline Template** uses the selected control's `TargetType` and scaffolds its registered required parts. **Reset Template** removes the local template and lets the style or theme supply it again.
 
 Use Undo in the owning XAML buffer to revert an edit. If the control assigns a template with an authored expression, **Reveal Template Assignment** opens the expression in source. [Designer Studio workflow](../native-controls.md#edit-control-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 In the workbench example, **SharedAction** opens a template in its included dictionary. Select **LocalAction** and choose **Make Inline Copy** to duplicate a template from the same document. The copy receives its own brush key because the button already shadows the template’s original brush key. **SecondLocalAction** keeps using the shared template. Use Undo once to remove the private template and its brush together. **PlainAction** can start an inline template. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
+
+In the same workbench, **InheritedAction** gets its template from a local style. **ThemedAction** gets its template from a control theme in the included dictionary. Use **Reveal Template Source** to see the supplying setter, or take a private copy before changing just the selected control. Compiled or programmatic templates may need a source mapping before the designer can open them. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
 
 The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
 

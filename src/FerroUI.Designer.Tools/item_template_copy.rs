@@ -9,6 +9,29 @@ use ferroui_designer_core::TextPatch;
 mod tests;
 
 impl ItemTemplateSlot {
+    /// Copy the proven source of an effective control template into this
+    /// empty slot using the same dependency review as a resource assignment.
+    pub fn plan_effective_template_copy(
+        &self,
+        document: &Document,
+        sources: &ResourceCopySources<'_>,
+        definition: ComponentResourceLocation<'_>,
+        resource_owners: &[NodeId],
+        relocate: &impl Fn(&str, &Document) -> Result<String>,
+    ) -> Result<Vec<Edit>> {
+        self.ensure_editable()?;
+        require(
+            self.property == ItemTemplateMember::Template
+                && matches!(self.value, ItemTemplateValue::Unset),
+            "Choose a control with an inherited template and no local assignment.",
+        )?;
+        let origin = sources.origin(document, definition)?;
+        let node = element(origin.document, definition.node)?;
+        require(self.property.accepts(node), "The source is no longer a control template.")?;
+        let prefix = literal_key(node).unwrap_or_else(|| "ControlTemplate".into());
+        self.plan_definition_copy(document, sources, definition, &prefix, resource_owners, relocate)
+    }
+
     /// Copy the assigned template and retain the meaning of its resource uses
     /// in the new scope. The source may be local or in an accepted include.
     pub fn plan_resource_copy(
@@ -43,11 +66,6 @@ impl ItemTemplateSlot {
         let ItemTemplateValue::Resource { key, .. } = &self.value else {
             return Err(ToolError("Select an assigned template resource.".into()));
         };
-        let dependency_owner = resource_owners.iter().copied().find(|owner| {
-            authoring::resource_container(document, *owner).is_ok()
-                && component_property_attribute(document, *owner, "Resources")
-                    .is_ok_and(|attribute| attribute.is_none())
-        });
         let scope = sources.scope(document);
         let root = references::resolve(scope, self.owner, key, None)?
             .unique()
@@ -63,8 +81,24 @@ impl ItemTemplateSlot {
             keyed_template(element(original, root.node)?, self.property).as_ref() == Some(key),
             "The assigned source is no longer a template.",
         )?;
+        self.plan_definition_copy(document, sources, root, key, resource_owners, relocate)
+    }
 
-        let mut planner = ResourceCopyPlanner::new(document, sources, key, relocate);
+    fn plan_definition_copy(
+        &self,
+        document: &Document,
+        sources: &ResourceCopySources<'_>,
+        root: ComponentResourceLocation<'_>,
+        prefix: &str,
+        resource_owners: &[NodeId],
+        relocate: &impl Fn(&str, &Document) -> Result<String>,
+    ) -> Result<Vec<Edit>> {
+        let dependency_owner = resource_owners.iter().copied().find(|owner| {
+            authoring::resource_container(document, *owner).is_ok()
+                && component_property_attribute(document, *owner, "Resources")
+                    .is_ok_and(|attribute| attribute.is_none())
+        });
+        let mut planner = ResourceCopyPlanner::new(document, sources, prefix, relocate);
         let mut fragment = planner.fragment(root)?;
         strip_template_key(&mut fragment)?;
         let mut trial = document.clone();

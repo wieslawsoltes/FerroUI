@@ -149,10 +149,7 @@ impl DesignerSession {
         owner: NodeId,
         property: ItemTemplateMember,
     ) -> Result<(), String> {
-        let template = self
-            .item_template_slot(owner, property)?
-            .value
-            .definition()
+        let template = self.local_template_definition(&self.item_template_slot(owner, property)?)
             .ok_or("Open a local authored template to preview its contents.")?;
         let options = self.template_preview_options(owner, property, self.document(), template)?;
         self.enter_definition(

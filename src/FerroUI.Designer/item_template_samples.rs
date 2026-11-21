@@ -16,7 +16,7 @@ pub(crate) enum ItemTemplatePreview {
         property: ItemTemplateMember,
     },
     Included {
-        key: String,
+        key: Option<String>,
         property: ItemTemplateMember,
         sample: Option<DesignFixture>,
         consumer: String,

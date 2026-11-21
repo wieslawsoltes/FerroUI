@@ -223,3 +223,31 @@ fn a_local_control_template_copies_the_dependency_shadowed_by_its_consumer() {
     document.undo().unwrap();
     assert_eq!(document.source(), source);
 }
+
+#[test]
+fn a_template_from_a_style_setter_copies_its_original_resource_scope() {
+    let graph = Graph(BTreeMap::new());
+    let sources = ResourceCopySources {
+        address: "ControlTemplateWorkbench.xaml",
+        graph: &graph,
+        includes: &[],
+    };
+    let mut document = Document::new(CONTROL_VIEW).unwrap();
+    let owner = document.ast().find_name("InheritedAction").unwrap();
+    let definition = document.ast().elements().find(|node| {
+        ItemTemplateMember::Template.accepts(node) && literal_key(node).is_none()
+    }).unwrap().id;
+    let slot = ItemTemplateSlot::read(
+        &document, owner, ItemTemplateMember::Template, ItemTemplateDeclaration::Unset, None,
+    ).unwrap();
+    let location = ComponentResourceLocation { uri: None, address: sources.address, node: definition };
+    let edits = slot.plan_effective_template_copy(&document, &sources, location, &[owner], &|_, _| {
+        panic!("the template and its dependencies keep their original document address")
+    }).unwrap();
+    document.apply("Make inline copy", edits).unwrap();
+    assert!(document.source().contains("x:Key=\"ControlTemplate_LocalInk\" Color=\"#FF20657B\""));
+    assert!(document.source().contains("StaticResource 'ControlTemplate_LocalInk'"));
+    assert!(document.source().contains("<Style Selector=\"Button.inherited\">"));
+    document.undo().unwrap();
+    assert_eq!(document.source(), CONTROL_VIEW);
+}

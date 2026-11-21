@@ -6,4 +6,13 @@
       <ContentPresenter Content="{TemplateBinding Content}" Foreground="White" />
     </Border>
   </ControlTemplate>
+  <ControlTheme x:Key="SharedButtonTheme" TargetType="Button">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Button">
+        <Border Background="{StaticResource ButtonAccent}" Padding="12,4">
+          <ContentPresenter Content="{TemplateBinding Content}" Foreground="White" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
 </ResourceDictionary>

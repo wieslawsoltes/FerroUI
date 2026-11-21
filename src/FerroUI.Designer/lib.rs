@@ -53,6 +53,7 @@ mod item_template_copy;
 mod item_template_project;
 mod item_template_samples;
 mod item_template_scope;
+mod item_template_source;
 mod property_trace;
 mod preview_environment;
 mod preview_theme;

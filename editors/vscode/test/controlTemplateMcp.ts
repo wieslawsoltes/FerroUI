@@ -5,7 +5,13 @@ import type { McpFixture } from './mcp';
 
 interface Model {
     model: string;
-    slots: { property: string; canCopyInline: boolean; includedDefinition?: { property?: string; key: string } }[];
+    slots: {
+        property: string;
+        value: { kind: string };
+        canCopyInline: boolean;
+        localDefinition?: number;
+        includedDefinition?: { uri: string; property?: string; key?: string };
+    }[];
     resources: { key: string }[];
     includedResources: { key: string }[];
 }
@@ -24,7 +30,7 @@ export async function verifyControlTemplate({ invoke, content }: McpFixture): Pr
         const model = content<Model>(await invoke('designer_studio_query', { session, tool: 'designer_item_templates',
             arguments: { node, property: 'Template' }, selection: [node] }));
         assert.equal(model.slots[0]?.property, 'Template');
-        return { revision, node, nodes, model };
+        return { revision, node, model };
     };
     const apply = (report: Awaited<ReturnType<typeof read>>, action: object, present = false) =>
         invoke(present ? 'designer_studio_present' : 'designer_studio_edit', { session, expected_revision: report.revision,
@@ -78,10 +84,42 @@ export async function verifyControlTemplate({ invoke, content }: McpFixture): Pr
     assert.match(source.getText(), /Name="SecondLocalAction"[^>]+Template="\{StaticResource LocalButton\}"/);
     assert.equal(await nativeImage(), before);
     await undo();
+
+    const inherited = await read('InheritedAction');
+    assert.equal(inherited.model.slots[0].value.kind, 'unset');
+    assert.ok(inherited.model.slots[0].localDefinition);
+    assert.equal(inherited.model.slots[0].canCopyInline, true);
+    content(await apply(inherited, { action: 'preview' }, true));
+    const scoped = content<{ revision: number }>(await invoke('designer_wait', { session }));
+    content(await invoke('designer_studio_present', { session, expected_revision: scoped.revision,
+        tool: 'designer_definition', arguments: { action: 'exit' } }));
+    const inheritedBefore = await nativeImage();
+    content(await apply(await read('InheritedAction'), { action: 'copy_inline' }));
+    assert.match(source.getText(), /x:Key="ControlTemplate_LocalInk" Color="#FF20657B"/);
+    assert.match(source.getText(), /StaticResource 'ControlTemplate_LocalInk'/);
+    assert.equal(await nativeImage(), inheritedBefore);
+    await undo();
+
+    const themed = await read('ThemedAction');
+    assert.equal(themed.model.slots[0].value.kind, 'unset');
+    assert.ok(themed.model.slots[0].includedDefinition?.uri.endsWith('/Templates/ControlTemplates.xaml'));
+    assert.equal(themed.model.slots[0].includedDefinition?.key, undefined);
+    assert.equal(themed.model.slots[0].canCopyInline, true);
+    const themeCanvas = content<{ opened_session: number }>(await apply(themed, { action: 'preview' }, true));
+    assert.notEqual(themeCanvas.opened_session, session);
+    const themeDefinition = content<{ revision: number }>(await invoke('designer_wait', { session: themeCanvas.opened_session }));
+    content(await invoke('designer_studio_present', { session: themeCanvas.opened_session, expected_revision: themeDefinition.revision,
+        tool: 'designer_definition', arguments: { action: 'exit' } }));
+    const themedBefore = await nativeImage();
+    content(await apply(await read('ThemedAction'), { action: 'copy_inline' }));
+    assert.match(source.getText(), /Name="ThemedAction"[^>]*Theme="\{StaticResource SharedButtonTheme\}"[^>]*>\s*<Button\.Template>/);
+    assert.equal(await nativeImage(), themedBefore);
+    await undo();
+
     const unset = await read('PlainAction');
     content(await apply(unset, { action: 'create_inline' }));
     assert.match(source.getText(), /<ControlTemplate TargetType="Button"><Border \/><\/ControlTemplate>/);
     assert.ok((await apply(unset, { action: 'reset' })).isError);
     await undo();
-    console.log('Control template authoring copied included and local templates, retained the local native frame, and restored source with Undo');
+    console.log('Control template authoring opened and copied assigned and inherited templates, preserved native frames, and restored source with Undo');
 }

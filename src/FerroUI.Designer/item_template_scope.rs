@@ -51,20 +51,15 @@ impl DesignerSession {
                 let Some(current) = remap(*owner) else {
                     return Ok(false);
                 };
-                if !self.item_template_slot(current, *property).is_ok_and(|slot| slot.value.definition() == Some(definition)) {
+                if !self.item_template_slot(current, *property).is_ok_and(|slot| self.local_template_definition(&slot) == Some(definition)) {
                     return Ok(false);
                 }
                 *owner = current;
             }
             ItemTemplatePreview::Included { key, property, .. } => {
-                if self
-                    .document()
-                    .ast()
-                    .node(definition)
-                    .and_then(|node| ferroui_designer_tools::keyed_template(node, *property))
-                    .as_ref()
-                    != Some(key)
-                {
+                if !self.document().ast().node(definition).is_some_and(|node| {
+                    property.accepts(node) && ferroui_designer_tools::keyed_template(node, *property) == *key
+                }) {
                     return Ok(false);
                 }
             }

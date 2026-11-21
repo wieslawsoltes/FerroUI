@@ -17,6 +17,17 @@
       </ControlTemplate>
     </ResourceDictionary>
   </StackPanel.Resources>
+  <StackPanel.Styles>
+    <Style Selector="Button.inherited">
+      <Setter Property="Template">
+        <ControlTemplate TargetType="Button">
+          <Border Background="{StaticResource LocalInk}" Padding="12,4">
+            <ContentPresenter Content="{TemplateBinding Content}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+  </StackPanel.Styles>
   <TextBlock Text="Actions" FontSize="24" Foreground="#FF1F3043" />
   <Button Name="SharedAction" Height="52" Template="{StaticResource SharedButton}" Content="Continue" />
   <Button Name="LocalAction" Height="48" Template="{StaticResource LocalButton}" Content="Review">
@@ -25,5 +36,11 @@
     </Button.Resources>
   </Button>
   <Button Name="SecondLocalAction" Height="48" Template="{StaticResource LocalButton}" Content="Approve" />
+  <Button Name="InheritedAction" Classes="inherited" Height="48" Content="Share">
+    <Button.Resources>
+      <SolidColorBrush x:Key="LocalInk" Color="#FFF39776" />
+    </Button.Resources>
+  </Button>
+  <Button Name="ThemedAction" Theme="{StaticResource SharedButtonTheme}" Height="48" Content="Archive" />
   <Button Name="PlainAction" Height="48" Content="Plain action" />
 </StackPanel>

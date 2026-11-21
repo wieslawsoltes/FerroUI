@@ -215,7 +215,7 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
             slots.push(session.item_template_slot(*owner, ItemTemplateMember::Template)?);
         }
         slots.into_iter().map(|slot| {
-            let included = session.assigned_included_template(&slot)?;
+            let included = session.included_template_definition(&slot)?;
             let resources = if slot.reason.is_none() { template_choices(&session, *owner, slot.property)? } else { Vec::new() };
             Ok((slot, included, resources))
         }).collect::<Result<Vec<_>, String>>()
@@ -229,18 +229,15 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
         }
     };
     for (slot, included, resources) in slots {
-        let span = slot
-            .value
-            .definition()
+        let definition = session.local_template_definition(&slot)
             .and_then(|node| session.document().ast().node(node))
-            .map(|node| node.name_span)
-            .or(slot.span);
+            .map(|node| node.name_span);
         let copy = session.inline_template_copy_offer(&slot);
         add_slot(
             &body,
             actions.clone(),
             &slot,
-            span,
+            definition,
             included,
             copy,
             &resources,
@@ -273,13 +270,15 @@ fn add_slot(
     body: &StackPanel,
     actions: TemplateActions,
     slot: &ItemTemplateSlot,
-    source: Option<SourceSpan>,
+    definition: Option<SourceSpan>,
     included: Option<IncludedItemTemplate>,
     copy: Option<Result<Vec<Edit>, String>>,
     resources: &[TemplateChoice],
 ) {
     let label = if slot.property == ItemTemplateMember::Template { "Control Template" } else { slot.property.name() };
+    let has_definition = definition.is_some() || included.is_some();
     let value = match &slot.value {
+        ItemTemplateValue::Unset if has_definition => "Inherited",
         ItemTemplateValue::Unset => "Default",
         ItemTemplateValue::Inline { .. } => "Inline",
         ItemTemplateValue::Resource { key, .. } => key,
@@ -287,7 +286,7 @@ fn add_slot(
     };
     let tools = slot_toolbar(body, label, value);
     let property = slot.property;
-    if slot.value.definition().is_some() || included.is_some() {
+    if has_definition {
         let action = actions.clone();
         add_button(&tools, icons::FIT, "Edit template on canvas", move || {
             action.preview(property)
@@ -301,7 +300,7 @@ fn add_slot(
             "Reveal included template source",
             move || action.reveal_included(&included),
         );
-    } else if let Some(span) = source {
+    } else if let Some(span) = definition.or(slot.span) {
         let action = actions.clone();
         add_button(&tools, SOURCE, "Reveal template source", move || {
             action.reveal(span)

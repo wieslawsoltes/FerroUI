@@ -1,7 +1,7 @@
 import type { IncludedSource } from './includedSource';
 
 export interface IncludedTemplateSource extends IncludedSource {
-    key: string;
+    key?: string;
     property?: 'Template';
 }
 
