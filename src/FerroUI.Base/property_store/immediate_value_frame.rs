@@ -173,31 +173,3 @@ impl IDisposable for BoxedImmediateValueEntry {
         }
     }
 }
-
-/// A value of a property that is borrowed for one write (an untyped local or current value,
-/// through the routes of the property): the store reads it as an entry, as it reads the entries of
-/// a frame (#997).
-pub(crate) struct BorrowedValueEntry<'a> {
-    pub(crate) property: &'static FerroProperty,
-    pub(crate) value: &'a dyn Any,
-}
-
-impl IValueEntry for BorrowedValueEntry<'_> {
-    fn property(&self) -> &'static FerroProperty {
-        self.property
-    }
-
-    fn has_value(&self) -> bool {
-        true
-    }
-
-    fn try_get_value(&self, out: &mut dyn Any) -> bool {
-        self.property.routes().route_copy_value(self.value, out)
-    }
-
-    fn get_value_boxed(&self) -> Option<BoxedValue> {
-        self.property.routes().route_box_value(self.value)
-    }
-
-    fn unsubscribe(&self) {}
-}

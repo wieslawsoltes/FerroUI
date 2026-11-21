@@ -675,6 +675,9 @@ pub struct FerroProperty {
     /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
     /// hands out for a stored member. Empty otherwise.
     members: &'static [(i64, &'static dyn Any)],
+    /// Whether the property validates its values (a styled property with a validation callback):
+    /// an untyped write asks the codec only then.
+    validates: bool,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -725,6 +728,7 @@ impl FerroProperty {
             routes: OnceCell::new(),
             styled_codec: OnceCell::new(),
             members: &[],
+            validates: false,
         }
     }
 
@@ -732,6 +736,27 @@ impl FerroProperty {
     pub(crate) fn with_members(mut self, members: &'static [(i64, &'static dyn Any)]) -> Self {
         self.members = members;
         self
+    }
+
+    /// The property with a validation callback ([`validates`](Self::validates)).
+    pub(crate) fn with_validation(mut self, validates: bool) -> Self {
+        self.validates = validates;
+        self
+    }
+
+    /// Whether the property has a validation callback: a value of its value type is valid
+    /// otherwise.
+    #[inline]
+    pub(crate) fn validates(&self) -> bool {
+        self.validates
+    }
+
+    /// Whether a value of the value type of the property may be a marker in a box (the unset value
+    /// or the do-nothing value as an untyped value): the value type is `BoxedValue` or
+    /// `Option<BoxedValue>`.
+    #[inline]
+    pub(crate) fn may_hold_marker(&self) -> bool {
+        self.property_type == TypeId::of::<BoxedValue>() || self.property_type == TypeId::of::<Option<BoxedValue>>()
     }
 
     /// The members of the value type, when it is an enumeration kept as an
@@ -763,6 +788,7 @@ impl FerroProperty {
             routes: OnceCell::new(),
             styled_codec: OnceCell::new(),
             members: source.members,
+            validates: source.validates,
         }
     }
 
@@ -986,6 +1012,11 @@ impl FerroProperty {
     /// Checks whether `value` is valid for the property: of the property's
     /// value type and accepted by its validation callback.
     pub fn is_valid_value(&self, value: &dyn Any) -> bool {
+        // Without a validation callback a value is valid when it is of the value type, which is
+        // what the routes would answer.
+        if !self.validates {
+            return value.type_id() == self.property_type;
+        }
         self.routes().route_is_valid_value(value)
     }
 

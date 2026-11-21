@@ -16,9 +16,11 @@ pub(crate) trait EffectiveValueDyn: Any {
     fn boxed_value(&self) -> BoxedValue;
     /// The base value in a box of its own, if there is one.
     fn boxed_base_value(&self) -> Option<BoxedValue>;
-    /// Reads the entry as this property's Rust type and makes it the current value
-    /// (`SetCurrentValue`).
-    fn set_current_value_and_raise_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry);
+    /// Makes `value`, a value of the value type of the property, the value of `priority`: the
+    /// untyped write of a value (an entry of its own is not made for it).
+    fn apply_value_any(&self, owner: &FerroObject, value: &dyn Any, priority: BindingPriority);
+    /// Makes `value`, a value of the value type of the property, the current value.
+    fn set_current_value_any(&self, owner: &FerroObject, value: &dyn Any);
     fn end_reevaluation(&self, owner: &FerroObject);
     /// Reads the entry as this property's Rust type, then applies it.
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
@@ -547,7 +549,7 @@ pub(crate) fn with_values<T: StyledValue>(
 pub(crate) fn box_stored<T: StyledValue>(property: &'static FerroProperty, value: &T) -> BoxedValue {
     if T::SHARED_STORAGE {
         let mut boxed = None;
-        with_values(property, None, value, |_, value| boxed = property.routes().route_box_value(value));
+        with_values(property, None, value, |_, value| boxed = property.styled_codec().box_value(value));
         boxed.expect("the property boxes a value of its own type")
     } else {
         Rc::new(value.clone())
@@ -648,13 +650,33 @@ impl<T: StyledValue> EffectiveValue<T> {
                 // marker. A value of a type that is not its own storage type
                 // is converted by the property.
                 if T::SHARED_STORAGE {
-                    if self.state.property.routes().route_copy_value(boxed.as_any(), &mut out) {
+                    if self.state.property.styled_codec().copy_value(boxed.as_any(), &mut out) {
                         if let Some(v) = out {
                             return v;
                         }
                     }
                 } else if let Some(v) = boxed.downcast_ref::<T>() {
                     return v.clone();
+                }
+            }
+        }
+        self.metadata.default_value().clone()
+    }
+
+    /// `value`, a value of the value type of the property, as the store keeps it: the value
+    /// itself where the value type is its own storage type, else converted by the codec of the
+    /// property. The default value for a value of another type, as an entry of it would give.
+    #[inline]
+    fn stored_any(&self, value: &dyn Any) -> T {
+        if !T::SHARED_STORAGE {
+            if let Some(value) = value.downcast_ref::<T>() {
+                return value.clone();
+            }
+        } else {
+            let mut out: Option<T> = None;
+            if self.state.property.styled_codec().copy_value(value, &mut out) {
+                if let Some(value) = out {
+                    return value;
                 }
             }
         }
@@ -795,8 +817,13 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
         self.try_get_base_value().map(|value| box_stored(self.state.property, &value))
     }
 
-    fn set_current_value_and_raise_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry) {
-        let value = self.get_entry_value(entry);
+    fn apply_value_any(&self, owner: &FerroObject, value: &dyn Any, priority: BindingPriority) {
+        let value = self.stored_any(value);
+        self.set_and_raise_core(owner, value, priority, false, false);
+    }
+
+    fn set_current_value_any(&self, owner: &FerroObject, value: &dyn Any) {
+        let value = self.stored_any(value);
         self.set_current_value_and_raise(owner, value);
     }
 
