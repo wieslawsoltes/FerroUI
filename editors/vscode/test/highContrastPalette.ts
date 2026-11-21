@@ -90,6 +90,8 @@ export async function verifyHighContrastPalette({ invoke, content }: McpFixture)
     content(await invoke('designer_history', { session: opened.opened_session, expected_version: contrast.version, action: 'undo' }));
     assert.equal(contrast.getText(), originals[2]);
 
+    const separatePalette = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace, 'StylePalette.xaml'));
+    const separateSource = separatePalette.getText();
     const position = view.positionAt(originals[0].indexOf('PanelSurface'));
     const request = { path, position: { line: position.line, character: position.character }, new_name: 'WorkspaceSurface' };
     const review = content<{ review: string; themeFamily: { members: { layers: string[] }[] } }>(
@@ -97,6 +99,7 @@ export async function verifyHighContrastPalette({ invoke, content }: McpFixture)
     assert.deepEqual(review.themeFamily.members.flatMap(member => member.layers).sort(), ['Dark', 'Default', 'HighContrast']);
     content(await invoke('ferroui_workspace_rename_resource', { ...request, review: review.review }));
     await until(() => documents.every((document, index) => document.getText() === originals[index].replaceAll('PanelSurface', 'WorkspaceSurface')));
+    assert.equal(separatePalette.getText(), separateSource, 'the rename stays out of a separate palette with its own fallback');
     for (const theme of themes) assert.equal(await image(theme), initial.get(theme), `rename must preserve ${theme} pixels`);
     content(await invoke('designer_history', { session, expected_version: view.version, action: 'undo' }));
     await until(() => documents.every((document, index) => document.getText() === originals[index]));
@@ -109,5 +112,5 @@ export async function verifyHighContrastPalette({ invoke, content }: McpFixture)
     const names = new Set([path, 'Accessible Palette.xaml', 'High Contrast.xaml', 'views.rs']);
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => names.has(tab.label.replace(/^Design · /, '')));
     await vscode.window.tabGroups.close(tabs);
-    console.log('VS Code palette and native preview agreed across all three themes, including nested source edits and grouped rename Undo');
+    console.log('VS Code palette and native preview agreed across all three themes, preserving a separate palette with the same keys and supporting grouped rename Undo');
 }

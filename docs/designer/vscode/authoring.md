@@ -281,6 +281,8 @@ Run **Rename Resource and References** from a member of a palette or from a reso
 
 The review covers an authored key shared across **Shared**, **Default**, **Light**, **Dark**, and native **High contrast** layers in one owning dictionary. For High contrast, use the theme package's static member, such as `{x:Static winui:WinUITheme.HighContrast}` with `xmlns:winui="using:FerroUI.Themes.WinUI"`. The review follows literal includes inside that layer. It preserves local shadows and checks whether the new key would overlap a declaration or change where a consumer resolves the key. If a reference can fall back to another owner, use its definition links to inspect the competing providers. [Compare theme colors](styles.md) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
 
+When a view should keep its own palette in every appearance, give that palette a **Default** value for each key it uses. The default covers variants without their own value and keeps the view’s references local during a rename in another palette.
+
 ## Move a resource to another dictionary
 
 1. Open the owning project in a trusted workspace. In **Resources**, select the arrow beside a keyed resource. In an XAML editor, place the caret on the declaration or a reference that resolves to one declaration and run **FerroUI: Move Resource…**.
