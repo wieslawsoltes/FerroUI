@@ -185,6 +185,9 @@ impl FerroXamlLoader {
             let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(absolute_uri), &source);
             document.service_provider = sp.cloned();
             let mut configuration = RuntimeXamlLoaderConfiguration::default();
+            if crate::source_overlay::capture_snapshot().is_some() {
+                configuration.set_create_source_info(true);
+            }
             configuration.local_assembly = asset_locator.get_assembly(&asset_uri, None)
                 .and_then(|assembly| MarkupAssembly::find(assembly.name()).or_else(|| {
                     // URI authorities are case-insensitive; metadata assembly names retain case.

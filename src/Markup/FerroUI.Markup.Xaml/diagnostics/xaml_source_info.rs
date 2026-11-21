@@ -5,14 +5,17 @@ use crate::{FromXamlObject, XamlLoadError};
 use ferroui_base::controls::{IResourceDictionary, ResourceDictionary, ResourceKey};
 use ferroui_base::utilities::UriExtensions;
 use ferroui_base::{
-    ferro_markup_type, ferro_properties, ferro_static_type, AnyValue, AttachedProperty, BoxedValue, FerroObject,
+    ferro_markup_type, ferro_properties, ferro_static_type, AttachedProperty, BoxedValue, FerroObject,
     FerroProperty, WeakRef,
 };
+use ferroui_controls::templates::IControlTemplate;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::{Rc, Weak};
 use url::Url;
+
+mod value_identity;
 
 /// Represents source location information for an element within a XAML
 /// file.
@@ -60,16 +63,8 @@ impl DictionaryKey {
 type KeyedSourceInfo = (DictionaryKey, HashMap<ResourceKey, XamlSourceInfo>);
 
 ferroui_base::ferro_thread_local! {
-    /// The source info of objects that are not part of the class model,
-    /// keyed by identity and held weakly.
-    static SOURCE_INFO: RefCell<HashMap<usize, (Weak<dyn AnyValue>, Option<XamlSourceInfo>)>> =
-        RefCell::new(HashMap::new());
     /// The source info of the entries of resource dictionaries.
     static KEYED_SOURCE_INFO: RefCell<HashMap<usize, KeyedSourceInfo>> = RefCell::new(HashMap::new());
-}
-
-fn identity(obj: &BoxedValue) -> usize {
-    Rc::as_ptr(obj) as *const () as usize
 }
 
 impl XamlSourceInfo {
@@ -123,11 +118,7 @@ impl XamlSourceInfo {
         if let Some(object) = as_object(obj) {
             object.set_value(Self::xaml_source_info_property(), info);
         } else {
-            SOURCE_INFO.with(|table| {
-                let mut table = table.borrow_mut();
-                table.retain(|_, (object, _)| object.strong_count() > 0);
-                table.insert(identity(obj), (Rc::downgrade(obj), info));
-            });
+            value_identity::set(obj, info);
         }
     }
 
@@ -161,21 +152,19 @@ impl XamlSourceInfo {
         if let Some(object) = as_object(obj) {
             Self::for_object(&object)
         } else {
-            SOURCE_INFO.with(|table| {
-                let table = table.borrow();
-                let (object, info) = table.get(&identity(obj))?;
-                // The address of a dead object may have been reused.
-                if object.strong_count() == 0 {
-                    return None;
-                }
-                info.clone()
-            })
+            value_identity::get(obj)
         }
     }
 
     /// Return compiler source information for a framework object.
     pub fn for_object(object: &FerroObject) -> Option<Self> {
         object.get_value(Self::xaml_source_info_property())
+    }
+
+    /// Return compiler source information for the actual XAML template used
+    /// by a control, independent of the boxed handle that created it.
+    pub fn for_control_template(template: &Rc<dyn IControlTemplate>) -> Option<Self> {
+        value_identity::for_template(template)
     }
 
     /// Retrieves the XAML source information associated with the specified
@@ -335,6 +324,24 @@ mod tests {
         XamlSourceInfo::set_xaml_source_info(&a, Some(info.clone()));
         assert_eq!(XamlSourceInfo::get_xaml_source_info(&a), Some(info));
         assert_eq!(XamlSourceInfo::get_xaml_source_info(&b), None);
+    }
+
+    #[test]
+    fn a_control_template_stamp_outlives_the_builders_boxed_handle() {
+        let template = crate::templates::ControlTemplate::new();
+        let handle = template.as_control_template();
+        let weak = Rc::downgrade(&template);
+        let boxed: BoxedValue = Rc::new(template);
+        let info = XamlSourceInfo::new(12, 7, Some("/templates.xaml")).with_source_revision(77);
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(info.clone()));
+        drop(boxed);
+
+        assert_eq!(XamlSourceInfo::for_control_template(&handle), Some(info.clone()));
+        let typed: BoxedValue = Rc::new(Some(handle.clone()));
+        assert_eq!(XamlSourceInfo::get_xaml_source_info(&typed), Some(info));
+        drop(typed);
+        drop(handle);
+        assert!(weak.upgrade().is_none());
     }
 
     #[test]
