@@ -1,6 +1,6 @@
 //! Checked source actions for color declarations and resource setters.
 use super::{
-    RsxStyle,
+    ResourceColorMode, RsxStyle, RsxStylePlan,
     edit::{insert, qualified_getter},
     resource_theme,
     resources::valid_key,
@@ -59,16 +59,47 @@ impl RsxProjection<'_> {
         style: &RsxStyle,
         resource: usize,
         value: &str,
-    ) -> Result<Vec<TextPatch>, String> {
-        let authored = style
+        mode: ResourceColorMode,
+    ) -> Result<RsxStylePlan, String> {
+        let resource = style
             .resources
             .iter()
             .find(|entry| entry.declaration.start == resource && entry.layer.is_some())
-            .and_then(|entry| entry.color.as_ref())
             .ok_or("Choose an authored color resource in this rule")?;
+        let authored = resource
+            .color
+            .as_ref()
+            .ok_or("Choose a mapped Rust color resource")?;
         let mut patches = Vec::new();
-        authored.plan(value, &mut patches)?;
-        Ok(patches)
+        let shared_color = match (mode, &resource.shared) {
+            (ResourceColorMode::Literal, None) => {
+                authored.plan(value, &mut patches)?;
+                None
+            }
+            (ResourceColorMode::Declaration, Some(shared)) => {
+                authored.plan(value, &mut patches)?;
+                Some(shared.value)
+            }
+            (ResourceColorMode::Local, Some(_)) => {
+                let color = AnimationValue::parse(value, ValueKind::Color)
+                    .map_err(|error| error.to_string())?;
+                let comments = keep_comments(&self.source[resource.source.range()])?;
+                patches.push(TextPatch {
+                    span: resource.source,
+                    replacement: format!("{comments}{}", rust_literal(&color)?),
+                });
+                None
+            }
+            _ => {
+                return Err(
+                    "Choose whether to edit the shared Rust constant or use a local color".into(),
+                );
+            }
+        };
+        Ok(RsxStylePlan {
+            patches,
+            shared_color,
+        })
     }
 
     pub(super) fn plan_resource_setter(

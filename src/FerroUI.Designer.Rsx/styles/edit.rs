@@ -5,6 +5,20 @@ use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_designer_tools::component_palette::PaletteLayer;
 use serde::Deserialize;
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ResourceColorMode {
+    #[default]
+    Literal,
+    Declaration,
+    Local,
+}
+
+pub struct RsxStylePlan {
+    pub patches: Vec<TextPatch>,
+    pub shared_color: Option<SourceSpan>,
+}
+
 #[derive(Deserialize)]
 #[serde(tag = "action", rename_all = "snake_case", deny_unknown_fields)]
 pub enum RsxStyleEdit {
@@ -46,6 +60,8 @@ pub enum RsxStyleEdit {
         style: usize,
         resource: usize,
         value: String,
+        #[serde(default)]
+        mode: ResourceColorMode,
     },
     Remove {
         style: usize,
@@ -70,7 +86,12 @@ impl RsxStyleEdit {
 
 impl RsxProjection<'_> {
     pub fn plan_style(&self, edit: &RsxStyleEdit) -> Result<Vec<TextPatch>, String> {
+        self.plan_style_source(edit).map(|plan| plan.patches)
+    }
+
+    pub fn plan_style_source(&self, edit: &RsxStyleEdit) -> Result<RsxStylePlan, String> {
         let mut count = self.style_definitions().len();
+        let mut shared_color = None;
         let mut patches = match edit {
             RsxStyleEdit::Create { owner, selector } => {
                 let owner = self
@@ -101,7 +122,7 @@ impl RsxProjection<'_> {
                 let selector = selector.trim();
                 validate_selector(selector, style.deletion.span != style.declaration)?;
                 if selector == style.selector {
-                    return Ok(Vec::new());
+                    return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None });
                 }
                 let token = style.selector_span;
                 vec![TextPatch {
@@ -127,7 +148,7 @@ impl RsxProjection<'_> {
                     .ok_or("Open the Rust source to change this setter expression")?;
                 if let Some(value) = value {
                     if *value == authored.text() {
-                        return Ok(Vec::new());
+                        return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None });
                     }
                     authored.plan(field, self.source, value)?
                 } else {
@@ -157,8 +178,10 @@ impl RsxProjection<'_> {
             RsxStyleEdit::AddColorResource { style, key, value, layer } => {
                 self.add_style_color(self.style_at(*style)?, key, value, layer.unwrap_or(PaletteLayer::Shared))?
             }
-            RsxStyleEdit::ColorResource { style, resource, value } => {
-                self.change_style_color(self.style_at(*style)?, *resource, value)?
+            RsxStyleEdit::ColorResource { style, resource, value, mode } => {
+                let plan = self.change_style_color(self.style_at(*style)?, *resource, value, *mode)?;
+                shared_color = plan.shared_color;
+                plan.patches
             }
             RsxStyleEdit::Remove { style } => {
                 let style = self.style_at(*style)?;
@@ -174,8 +197,9 @@ impl RsxProjection<'_> {
         patches.retain(|patch| self.source.get(patch.span.range()) != Some(&patch.replacement));
         let source = TextPatch::apply_all(self.source, patches.clone())
             .map_err(|error| error.to_string())?;
-        let draft = self.catalog.project(&source, self.invocation.start)?;
-        if draft.invocation.start != self.invocation.start
+        let start = self.invocation_start_after(&patches)?;
+        let draft = self.catalog.project(&source, start)?;
+        if draft.invocation.start != start
             || draft.tree != self.tree
             || draft.style_definitions().len() != count
             || draft.style_issues.len() > self.style_issues.len()
@@ -183,7 +207,7 @@ impl RsxProjection<'_> {
         {
             return Err("The style change does not round-trip in the active Rust view".into());
         }
-        Ok(patches)
+        Ok(RsxStylePlan { patches, shared_color })
     }
 
     fn style_at(&self, node: usize) -> Result<&RsxStyle, String> {

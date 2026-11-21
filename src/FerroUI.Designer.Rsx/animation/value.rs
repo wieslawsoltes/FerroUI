@@ -26,7 +26,6 @@ enum ValueSyntax {
 
 impl ValueShape {
     pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
-    pub(crate) const COLOR: Self = Self::typed(ValueKind::Color);
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
     pub(crate) const SOLID_BRUSH: Self = Self {
@@ -124,6 +123,11 @@ impl ValueShape {
 }
 
 impl ValueSource {
+    pub(crate) fn read_color(expression: &Expr, resolve: impl Fn(&Expr) -> Option<String>) -> Option<Self> {
+        let (value, source) = ColorSource::read_with(expression, false, resolve)?;
+        Some(Self { value, source: ValueSyntax::Color(source) })
+    }
+
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
         let kind = self.value.kind();
         let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;

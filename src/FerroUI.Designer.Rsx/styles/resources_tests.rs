@@ -1,4 +1,4 @@
-use super::RsxStyleEdit;
+use super::{ResourceColorMode, RsxStyleEdit};
 use crate::{RsxProjection, project_rust};
 use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_tools::component_palette::PaletteLayer;
@@ -71,6 +71,7 @@ fn assigns_a_scoped_color_and_maps_the_original_setter() {
             style: style.declaration.start,
             resource: style.resources[0].declaration.start,
             value: "#FF0A2037".into(),
+            mode: ResourceColorMode::Literal,
         })
         .unwrap();
     assert_eq!(
@@ -170,6 +171,7 @@ fn projects_literal_theme_families_and_preserves_theme_source_edits() {
             style,
             resource: family.dark.unwrap().declaration.start,
             value: "#FF7FB4E4".into(),
+            mode: ResourceColorMode::Literal,
         })
         .unwrap();
     assert_eq!(
@@ -200,6 +202,7 @@ fn computed_variant_prevents_guessing_a_color_and_shared_overrides_variants() {
                 style: rule.declaration.start,
                 resource: computed.declaration.start,
                 value: "#FF123456".into(),
+                mode: ResourceColorMode::Literal,
             })
             .is_err()
     );

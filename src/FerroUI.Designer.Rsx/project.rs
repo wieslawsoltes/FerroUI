@@ -4,6 +4,7 @@ use crate::catalog::Children;
 use crate::columns::{ColumnSource, collection_member, table_kind};
 use crate::item_templates::TemplateFields;
 use crate::literal;
+use crate::local_rust::LocalRust;
 use crate::markup::{RsxPreviewMarkup, serialize};
 use crate::source_array::ArraySlot;
 use crate::registered::{Class, RsxCatalog};
@@ -85,6 +86,20 @@ pub struct RsxProjection<'a> {
 }
 
 impl RsxProjection<'_> {
+    /// Carry the active invocation's start across checked edits to this file.
+    pub fn invocation_start_after(&self, patches: &[TextPatch]) -> Result<usize, String> {
+        let before = self.invocation.start;
+        let mut after = before;
+        for patch in patches.iter().filter(|patch| patch.span.start < before) {
+            if patch.span.end > before {
+                return Err("The edit crosses the selected RSX invocation".into());
+            }
+            after = after.checked_sub(patch.span.len()).and_then(|anchor| anchor.checked_add(patch.replacement.len()))
+                .ok_or("The selected RSX invocation moved outside the buffer")?;
+        }
+        Ok(after)
+    }
+
     pub fn xaml(&self) -> String {
         self.preview_markup().source
     }
@@ -261,6 +276,7 @@ struct State {
     states: BTreeMap<usize, ProjectedStates>,
     animation_issues: Vec<RsxAnimationIssue>,
     style_issues: Vec<RsxStyleIssue>,
+    local_rust: Option<LocalRust>,
 }
 
 impl State {
@@ -278,7 +294,8 @@ impl State {
         } else {
             ArraySlot::Unavailable
         };
-        let projected = projected_styles(source, value, catalog);
+        let bindings = self.local_rust.get_or_insert_with(|| LocalRust::parse(source, value.span().byte_range().start));
+        let projected = projected_styles(source, value, catalog, bindings);
         let partial = !projected.issues.is_empty() || !projected.animation_issues.is_empty();
         self.style_issues.extend(projected.issues);
         self.animation_issues.extend(projected.animation_issues);

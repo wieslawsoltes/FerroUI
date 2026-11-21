@@ -62,14 +62,14 @@ impl RsxStyleField {
         }
     }
 
-    pub(super) fn from_expression(expression: &Expr, catalog: &RsxCatalog) -> Option<Self> {
+    pub(super) fn from_expression(expression: &Expr, catalog: &RsxCatalog, bindings: &crate::local_rust::LocalRust) -> Option<Self> {
         let Expr::Call(call) = expression else {
             return None;
         };
         if !call.args.is_empty() {
             return None;
         }
-        let path = syntax::path(&call.func)?;
+        let path = bindings.path(&call.func)?;
         catalog.style_field(&path).cloned()
     }
 

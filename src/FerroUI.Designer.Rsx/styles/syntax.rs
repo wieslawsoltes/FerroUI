@@ -1,8 +1,9 @@
 //! Parse inline StyleBuilder calls and retain the source of omitted Rust expressions.
 use super::{Deletion, RsxStyle, RsxStyleField, RsxStyleIssue, RsxStyleResource, RsxStyleSetter};
-use super::{fields::SetterValue, resources::literal_key};
+use super::{fields::SetterValue, resources::resource_key};
 use crate::animation::{program_comment::AnimationAttachment, syntax as rust, RsxAnimationIssue};
 use crate::{tree::MAX_DEPTH, RsxCatalog};
+use crate::local_rust::LocalRust;
 use ferroui_designer_core::SourceSpan;
 use ferroui_markup::markup::parsers::selector_grammar::{
     SelectorGrammar, SelectorOperand, SelectorSyntax,
@@ -28,6 +29,7 @@ pub(crate) fn projected_styles(
     source: &str,
     value: &Expr,
     catalog: &RsxCatalog,
+    bindings: &LocalRust,
 ) -> ProjectedStyles {
     let mut result = ProjectedStyles::default();
     let Expr::Array(array) = value else {
@@ -43,7 +45,7 @@ pub(crate) fn projected_styles(
             span: rust::span(expression),
             comma: pair.punct().map(|token| rust::span(*token)),
         };
-        if let Some(style) = result.style(source, expression, catalog, deletion, 0) {
+        if let Some(style) = result.style(source, expression, catalog, bindings, deletion, 0) {
             result.styles.push(style);
         } else {
             result.issue(
@@ -65,6 +67,7 @@ impl ProjectedStyles {
         source: &str,
         expression: &Expr,
         catalog: &RsxCatalog,
+        bindings: &LocalRust,
         deletion: Deletion,
         depth: usize,
     ) -> Option<RsxStyle> {
@@ -72,7 +75,11 @@ impl ProjectedStyles {
             return None;
         }
         let (factory, methods) = rust::chain(expression)?;
-        let Expr::Lit(selector) = rust::view_argument(factory, "style")? else {
+        let path = bindings.path(&factory.func)?;
+        if !matches!(path.as_str(), "ferroui_view::style" | "ferroui_view::prelude::style") || factory.args.len() != 1 {
+            return None;
+        }
+        let Expr::Lit(selector) = &factory.args[0] else {
             return None;
         };
         let Lit::Str(selector) = &selector.lit else {
@@ -103,9 +110,9 @@ impl ProjectedStyles {
             let method = rust::method_suffix(call);
             if (call.method == "set" || call.method == "set_resource") && call.args.len() == 2 {
                 let expression = &call.args[1];
-                let field = RsxStyleField::from_expression(&call.args[0], catalog);
+                let field = RsxStyleField::from_expression(&call.args[0], catalog, bindings);
                 let value = if call.method == "set_resource" {
-                    field.as_ref().and_then(|_| literal_key(expression)).map(SetterValue::Resource)
+                    field.as_ref().and_then(|_| resource_key(expression, bindings)).map(SetterValue::Resource)
                 } else {
                     field.as_ref().and_then(|field| field.read(source, expression))
                 };
@@ -123,7 +130,7 @@ impl ProjectedStyles {
                     value,
                 });
             } else if call.method == "resource" || call.method == "theme_resource" {
-                let resource = RsxStyleResource::read(call);
+                let resource = RsxStyleResource::read(call, bindings);
                 if resource.as_ref().is_none_or(|resource| resource.color.is_none() || resource.layer.is_none()) {
                     self.issue(method, "Reveal this computed or unmapped Rust resource");
                 }
@@ -133,7 +140,7 @@ impl ProjectedStyles {
                     span: method,
                     comma: None,
                 };
-                if let Some(child) = self.style(source, nested, catalog, deletion, depth + 1) {
+                if let Some(child) = self.style(source, nested, catalog, bindings, deletion, depth + 1) {
                     children.push(child);
                 } else {
                     self.issue(rust::span(nested), "Reveal the computed nested Rust style");

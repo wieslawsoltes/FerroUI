@@ -27,6 +27,10 @@ pub(super) struct ByteSource {
 
 impl ColorSource {
     pub(super) fn read(expr: &Expr, brush: bool) -> Option<(AnimationValue, Self)> {
+        Self::read_with(expr, brush, path)
+    }
+
+    pub(super) fn read_with(expr: &Expr, brush: bool, resolve: impl Fn(&Expr) -> Option<String>) -> Option<(AnimationValue, Self)> {
         if let (
             true,
             Expr::Lit(syn::ExprLit {
@@ -39,7 +43,7 @@ impl ColorSource {
             return Some((value, Self::BrushText(span(text))));
         }
         let Expr::Call(call) = expr else { return None };
-        let count = match path(&call.func)?.strip_prefix("ferroui_base::media::Color::")? {
+        let count = match resolve(&call.func)?.strip_prefix("ferroui_base::media::Color::")? {
             "new" | "from_argb" => 4,
             "from_rgb" => 3,
             _ => return None,

@@ -10,6 +10,7 @@ mod item_templates;
 mod language;
 mod layout_edits;
 mod literal;
+mod local_rust;
 mod markup;
 mod names;
 mod placement;
@@ -36,7 +37,7 @@ pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
 pub use wrap_edits::{RsxWrap, RsxWrapResult};
 pub use states::{RsxStateGroup, RsxStateSource};
-pub use styles::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleIssue, RsxStyleResource, RsxStyleResourceFamily, RsxStyleSetter};
+pub use styles::{ResourceColorMode, RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleIssue, RsxStylePlan, RsxStyleResource, RsxStyleResourceFamily, RsxStyleSetter, SharedRustColor};
 pub use xaml::{apply_rsx, xaml_to_rsx};
 
 /// Count source-authored invocations without requiring registered control types.

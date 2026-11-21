@@ -1,7 +1,8 @@
 //! String-key resources and the literal values supported by the isolated preview.
 use super::{RsxStyle, resource_theme};
 use crate::RsxProjection;
-use crate::animation::{ValueShape, ValueSource, syntax as rust};
+use crate::animation::{ValueSource, syntax as rust};
+use crate::local_rust::LocalRust;
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_tools::component_palette::PaletteLayer;
 use std::collections::BTreeSet;
@@ -13,7 +14,14 @@ pub struct RsxStyleResource {
     pub source: SourceSpan,
     pub key: String,
     pub layer: Option<PaletteLayer>,
+    pub shared: Option<SharedRustColor>,
     pub(super) color: Option<ValueSource>,
+}
+
+#[derive(Debug)]
+pub struct SharedRustColor {
+    pub name: String,
+    pub value: SourceSpan,
 }
 
 impl RsxStyleResource {
@@ -21,30 +29,47 @@ impl RsxStyleResource {
         self.color.as_ref().map(|color| color.value.to_xaml())
     }
 
-    pub(super) fn read(call: &syn::ExprMethodCall) -> Option<Self> {
+    pub fn color_source(&self) -> SourceSpan {
+        self.shared
+            .as_ref()
+            .map_or(self.source, |constant| constant.value)
+    }
+
+    pub(super) fn read(call: &syn::ExprMethodCall, bindings: &LocalRust) -> Option<Self> {
         let (layer, key, value) = if call.method == "resource" && call.args.len() == 2 {
             (Some(PaletteLayer::Shared), &call.args[0], &call.args[1])
         } else if call.method == "theme_resource" && call.args.len() == 3 {
             (
-                resource_theme::read(&call.args[0]),
+                resource_theme::read(&call.args[0], bindings),
                 &call.args[1],
                 &call.args[2],
             )
         } else {
             return None;
         };
+        let initializer = bindings.value(value);
+        let color = initializer.as_ref().and_then(|value| {
+            ValueSource::read_color(value.expression, |path| bindings.path(path))
+        });
+        let shared = initializer.filter(|_| color.is_some()).and_then(|value| {
+            Some(SharedRustColor {
+                name: value.constant?.into(),
+                value: rust::span(value.expression),
+            })
+        });
         Some(Self {
             declaration: rust::method_suffix(call),
             source: rust::span(value),
-            key: literal_key(key)?,
+            key: resource_key(key, bindings)?,
             layer,
-            color: ValueShape::COLOR.read(value),
+            shared,
+            color,
         })
     }
 }
 
-pub(super) fn literal_key(expression: &Expr) -> Option<String> {
-    let Expr::Lit(lit) = expression else {
+pub(super) fn resource_key(expression: &Expr, bindings: &LocalRust) -> Option<String> {
+    let Expr::Lit(lit) = bindings.value(expression)?.expression else {
         return None;
     };
     let Lit::Str(lit) = &lit.lit else { return None };

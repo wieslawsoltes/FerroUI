@@ -9,10 +9,12 @@ mod syntax;
 mod tests;
 #[cfg(test)]
 mod resources_tests;
+#[cfg(test)]
+mod constant_tests;
 
-pub use edit::RsxStyleEdit;
+pub use edit::{ResourceColorMode, RsxStyleEdit, RsxStylePlan};
 pub use fields::RsxStyleField;
-pub use resources::{RsxStyleResource, RsxStyleResourceFamily};
+pub use resources::{RsxStyleResource, RsxStyleResourceFamily, SharedRustColor};
 pub(crate) use syntax::projected_styles;
 
 use crate::animation::RsxAnimation;
