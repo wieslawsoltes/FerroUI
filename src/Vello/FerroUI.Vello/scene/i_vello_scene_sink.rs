@@ -378,12 +378,14 @@ pub trait IVelloSceneSink {
 
     /// Fills `path` under `transform` with a texture of the WebGL2 context of the sink, whose
     /// pixels `(0, 0)` to `size` are placed by `texture_transform` (from the pixels of the texture
-    /// to the space of the path), source-over and without anti-aliasing.
+    /// to the space of the path), with the opacity `alpha`, composed with `blend_mode` and
+    /// without anti-aliasing.
     ///
     /// # Panics
     /// Panics in a sink that does not belong to a WebGL2 context
     /// ([`web_gl_gpu`](Self::web_gl_gpu) is `None`).
     #[cfg(feature = "hybrid-webgl")]
+    #[allow(clippy::too_many_arguments)]
     fn fill_with_web_gl_texture(
         &mut self,
         path: &BezPath,
@@ -391,8 +393,10 @@ pub trait IVelloSceneSink {
         texture: &std::rc::Rc<crate::web_gl::VelloWebGlTexture>,
         size: (u32, u32),
         texture_transform: Affine,
+        alpha: f32,
+        blend_mode: BlendMode,
     ) {
-        let _ = (path, transform, texture, size, texture_transform);
+        let _ = (path, transform, texture, size, texture_transform, alpha, blend_mode);
         panic!(
             "The {:?} rendering mode of the Vello backend paints with no texture of a WebGL context",
             self.rendering_mode()
