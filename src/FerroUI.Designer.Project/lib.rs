@@ -17,7 +17,7 @@ pub use markup::{BuildMetadata, CompiledXamlOutput, MarkupAnimationProperty, Mar
 pub mod rsx_mapping;
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
 pub use toolbox::{ToolboxSnippet, toolbox_snippets};
-pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri};
+pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri, same_loader_address};
 mod file_move;
 mod process;
 pub use process::{spawn_project_process, stop_project_process};

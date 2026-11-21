@@ -141,26 +141,28 @@ fn hosted_preview_uses_runtime_addresses_and_watches_workspace_inputs() {
     let embedded = file_uri(fixture.0.join("Authoring/Embedded.xaml")).unwrap();
     let document = ferroui_designer_core::Document::new(source).unwrap();
     let buffers = [PreviewSourceBuffer { uri: colors.clone(), source: Some("<ResourceDictionary><!-- draft --></ResourceDictionary>".into()) }];
-    let base = "ferres://test/Packaged/View.xaml";
+    let base = "ferres://Test/Packaged/View.xaml";
     let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &buffers, None);
     assert_eq!(graph.dependencies, [outer, colors.clone(), embedded].into_iter().collect());
     assert_eq!(graph.accepted.len(), 2);
-    assert_eq!(graph.accepted["ferres://test/Packaged/Color%20set.xaml"], buffers[0].source.as_deref().unwrap());
+    assert_eq!(graph.accepted["ferres://Test/Packaged/Color%20set.xaml"], buffers[0].source.as_deref().unwrap());
     assert!(graph.uses_drafts);
     assert!(graph.unavailable.is_empty());
-    let address = "ferres://test/Packaged/Color%20set.xaml";
+    let address = "ferres://Test/Packaged/Color%20set.xaml";
+    let runtime = "ferres://test/Packaged/Color%20set.xaml";
     let accepted = ferroui_reload_protocol::fingerprint(graph.accepted[address].as_bytes());
     let saved = ferroui_reload_protocol::fingerprint(b"<ResourceDictionary/>");
-    let (logical, input) = graph.includes.authored_revision(address, accepted).unwrap();
+    let (logical, input) = graph.includes.authored_revision(runtime, accepted).unwrap();
     assert_eq!(logical, address);
     assert_eq!(input.uri, colors);
     assert!(graph.includes.authored_revision(address, saved).is_none());
+    assert!(graph.includes.authored_revision("ferres://test/Packaged/color%20set.xaml", accepted).is_none());
     assert!(graph.includes.authored_revision(&colors, accepted).is_none());
 
     let invalid = [PreviewSourceBuffer { uri: colors, source: None }];
     let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &invalid, None);
-    assert!(!graph.accepted.contains_key("ferres://test/Packaged/Color%20set.xaml"));
-    assert!(graph.unavailable["ferres://test/Packaged/Color%20set.xaml"].contains("draft"));
+    assert!(!graph.accepted.contains_key(address));
+    assert!(graph.unavailable[address].contains("draft"));
 }
 
 #[test]

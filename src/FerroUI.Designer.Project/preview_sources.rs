@@ -1,5 +1,5 @@
 //! Build an immutable, workspace-scoped view of literal XAML includes.
-use crate::{file_path, file_uri, resolve_uri, CompiledResources};
+use crate::{file_path, file_uri, resolve_uri, same_loader_address, CompiledResources};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind};
 use ferroui_reload_protocol::fingerprint;
 use serde::Deserialize;
@@ -70,8 +70,8 @@ impl PreviewIncludes {
     }
 
     /// Match a native source stamp to the accepted include that supplied it.
-    /// Packaged addresses retain their exact loader scope. File URLs may have
-    /// different escaping, so an equivalent file path can match uniquely.
+    /// Packaged paths retain their loader scope and accept the native
+    /// authority spelling. File URLs may have equivalent escaping.
     pub fn authored_revision(
         &self,
         address: &str,
@@ -81,9 +81,11 @@ impl PreviewIncludes {
         if let Some((address, source)) = self.documents.get_key_value(address) {
             return matches(source).then_some((address.as_str(), source));
         }
-        let path = file_path(address).ok()?;
+        let path = file_path(address).ok();
         let mut equivalent = self.authored_sources().filter(|(uri, source)| {
-            file_path(uri).ok().as_ref() == Some(&path) && matches(source)
+            (same_loader_address(address, uri)
+                || path.as_ref().is_some_and(|path| file_path(uri).ok().as_ref() == Some(path)))
+                && matches(source)
         });
         let included = equivalent.next()?;
         equivalent.next().is_none().then_some(included)

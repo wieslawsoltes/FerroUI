@@ -6,7 +6,7 @@ use super::{
 use ferroui_designer::ScopedControlTemplates;
 use ferroui_designer_core::NodeId;
 use ferroui_designer_language::{Range, XamlLocations};
-use ferroui_designer_project::{resolve_uri, xaml_source_revision};
+use ferroui_designer_project::{resolve_uri, same_loader_address, xaml_source_revision};
 use ferroui_designer_tools::ItemTemplateMember;
 use ferroui_remote_protocol::designer::{DesignTemplateCatalogMessage, DesignTemplateSource};
 use serde::{Deserialize, Serialize};
@@ -182,20 +182,21 @@ fn accepted_source<'a>(
     fingerprint: u64,
 ) -> Option<AcceptedSource<'a>> {
     let base = authored.sources.base_uri.as_str();
-    let (address, uri, document) =
-        if address == base || resolve_uri(base, "").ok().as_deref() == Some(address) {
-            let (uri, document) = authored.source_at(base).ok()?;
-            if xaml_source_revision(document) != fingerprint {
-                return None;
-            }
-            (base, uri, document)
-        } else {
-            let (address, include) = authored
-                .sources
-                .includes
-                .authored_revision(address, fingerprint)?;
-            (address, include.uri.as_str(), &include.document)
-        };
+    let (address, uri, document) = if same_loader_address(address, base)
+        || resolve_uri(base, "").is_ok_and(|base| same_loader_address(address, &base))
+    {
+        let (uri, document) = authored.source_at(base).ok()?;
+        if xaml_source_revision(document) != fingerprint {
+            return None;
+        }
+        (base, uri, document)
+    } else {
+        let (address, include) = authored
+            .sources
+            .includes
+            .authored_revision(address, fingerprint)?;
+        (address, include.uri.as_str(), &include.document)
+    };
     Some(AcceptedSource {
         address,
         uri,

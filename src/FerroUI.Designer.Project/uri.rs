@@ -187,6 +187,24 @@ fn split_uri(uri: &str) -> Result<(&str, &str)> {
     };
     Ok((&uri[..start], &uri[start..]))
 }
+
+/// Compare XAML loader addresses while preserving the authored path spelling.
+/// The native loader canonicalizes the scheme and assembly authority.
+pub fn same_loader_address(left: &str, right: &str) -> bool {
+    if left == right {
+        return true;
+    }
+    let (Ok((left_authority, left_path)), Ok((right_authority, right_path))) =
+        (split_uri(left), split_uri(right))
+    else {
+        return false;
+    };
+    let packaged = "ferres://";
+    left_authority.get(..packaged.len()).is_some_and(|scheme| scheme.eq_ignore_ascii_case(packaged))
+        && left_authority.eq_ignore_ascii_case(right_authority)
+        && left_path == right_path
+}
+
 fn normalize_uri(uri: &str) -> Result<String> {
     let (prefix, path) = split_uri(uri)?;
     let suffix_start = path.find(['?', '#']).unwrap_or(path.len());
