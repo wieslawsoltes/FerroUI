@@ -1,10 +1,10 @@
 //! Model-backed animation, state, behavior and typed-property automation.
 use super::schema as s;
-use super::{decode, node_id, number, state, text, Permissions};
+use super::{decode, node_id, number, state, text};
 use crate::DesignerSession;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_animation::{
-    AnimationValue, BehaviorModel, CurveChannel, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
+    AnimationValue, CurveChannel, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
     TimelineTimingEdit, VisualStateGroup,
 };
 use ferroui_designer_tools::PropertyKind;
@@ -24,8 +24,6 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_states"
             | "designer_state"
             | "designer_state_actions"
-            | "designer_behaviors"
-            | "designer_behavior"
             | "designer_properties"
             | "designer_property"
             | "designer_record_property"
@@ -108,14 +106,6 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("clear_preview",json!({}), &[],true),
         ],true),
         s::tool("designer_state_actions","Generate native behavior actions that route to a state, optionally from a particular state. Returns data; it does not execute the actions.",s::object(json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string()}), &["owner","group","to"]),false),
-        s::tool("designer_behaviors","Read typed and opaque behaviors attached to one source element.",s::object(json!({"owner":s::id()}), &["owner"]),false),
-        s::actions("designer_behavior","Create/update/remove a native behavior or replace its preserved XAML. Preview executes the actual attached trigger actions and additionally requires allow_input; custom actions may invoke application commands. clear_preview restores authored preview state.",vec![
-            s::action("upsert",json!({"model":s::behavior()}), &["model"],true),
-            s::action("remove",json!({"behavior":s::id()}), &["behavior"],true),
-            s::action("source",json!({"behavior":s::id(),"source":s::string()}), &["behavior","source"],true),
-            s::action("preview",json!({"behavior":s::id()}), &["behavior"],true),
-            s::action("clear_preview",json!({}), &[],true),
-        ],true),
         s::tool("designer_properties","Read host-registered property descriptors and per-property JSON value schemas, including custom enum/numeric constraints and authored values.",s::object(json!({"node":s::id()}), &["node"]),false),
         s::actions("designer_property","Set or reset a property through Studio. Values accept JSON scalars, native XAML text, or tagged animation values.",vec![
             s::action("set",json!({"nodes":ids(),"property":s::string(),"value":property_value()}), &["nodes","property","value"],true),
@@ -131,7 +121,6 @@ pub(super) fn call(
     session: &mut DesignerSession,
     name: &str,
     args: &Value,
-    permissions: Permissions,
 ) -> Result<Value, String> {
     match name {
         "designer_programs" => {
@@ -374,41 +363,6 @@ pub(super) fn call(
             return Ok(
                 json!({"revision":session.document().revision(),"actions":session.state_group_transition_actions(node_id(args,"owner")?,&text(args,"group")?,args["from"].as_str(),&text(args,"to")?)?}),
             )
-        }
-        "designer_behaviors" => {
-            let owner = node_id(args, "owner")?;
-            if !session
-                .document()
-                .ast()
-                .node(owner)
-                .is_some_and(|node| node.is_element())
-            {
-                return Err("Unknown behavior owner".into());
-            }
-            return Ok(
-                json!({"revision":session.document().revision(),"behaviors":session.behaviors(owner)}),
-            );
-        }
-        "designer_behavior" => {
-            let mut created = None;
-            match text(args, "action")?.as_str() {
-                "upsert" => {
-                    let model: BehaviorModel = decode(args, "model")?;
-                    created = Some(session.upsert_behavior(model)?);
-                }
-                "remove" => session.remove_behavior(node_id(args, "behavior")?)?,
-                "source" => session
-                    .set_behavior_source(node_id(args, "behavior")?, &text(args, "source")?)?,
-                "preview" => {
-                    if !permissions.allow_input {
-                        return Err("Executing behavior actions requires allow_input".into());
-                    }
-                    session.preview_behavior(node_id(args, "behavior")?)?;
-                }
-                "clear_preview" => session.clear_interaction_preview(),
-                _ => return Err("Unknown behavior action".into()),
-            }
-            return Ok(json!({"document":state(session),"behavior":created}));
         }
         "designer_properties" => {
             let node = node_id(args, "node")?;

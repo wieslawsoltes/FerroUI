@@ -2,18 +2,22 @@
 use crate::DesignerSession;
 use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::{BoxedValue, StyledElement};
-use ferroui_designer_animation::{BehaviorAction, BehaviorModel, Sample, VisualStateGroup};
+use ferroui_base::StyledElement;
+use ferroui_designer_animation::{BehaviorAction, Sample, VisualStateGroup};
 use ferroui_designer_core::NodeId;
 use std::cell::Cell;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::rc::Rc;
+
+#[path = "behavior_session.rs"]
+mod behaviors;
 
 #[derive(Default)]
 pub(crate) struct InteractionSession {
     original_classes: BTreeMap<(NodeId, String), Vec<String>>,
     active_states: BTreeMap<(NodeId, String), String>,
     behavior_modified: bool,
+    active_behavior: Option<NodeId>,
     clock: Option<Rc<StatePreviewClock>>,
     clock_time: f64,
     transition: Option<TransitionPreview>,
@@ -370,119 +374,6 @@ impl DesignerSession {
         group
             .actions(owner_name, to, from)
             .map_err(|error| error.to_string())
-    }
-    pub fn behaviors(&self, owner: NodeId) -> Vec<BehaviorModel> {
-        BehaviorModel::read(&self.document, owner).unwrap_or_default()
-    }
-    pub fn upsert_behavior(&mut self, model: BehaviorModel) -> Result<NodeId, String> {
-        let before = self
-            .behaviors(model.owner)
-            .iter()
-            .filter_map(|model| model.id)
-            .collect::<BTreeSet<_>>();
-        let edits = model
-            .plan(&self.document)
-            .map_err(|error| error.to_string())?;
-        self.apply("Edit behavior", edits)
-            .map_err(|error| error.to_string())?;
-        if let Some(id) = model.id {
-            return Ok(id);
-        }
-        self.behaviors(model.owner)
-            .into_iter()
-            .filter_map(|model| model.id)
-            .find(|id| !before.contains(id))
-            .ok_or_else(|| "Created behavior was not found".into())
-    }
-    pub fn remove_behavior(&mut self, id: NodeId) -> Result<(), String> {
-        let edits = BehaviorModel::remove(&self.document, id).map_err(|error| error.to_string())?;
-        self.apply("Remove behavior", edits)
-            .map_err(|error| error.to_string())?;
-        Ok(())
-    }
-    pub fn set_behavior_source(&mut self, id: NodeId, source: &str) -> Result<(), String> {
-        let owner = self.behavior_owner(id)?;
-        let mut model = BehaviorModel::from_source(source, owner, Some(id))
-            .map_err(|error| error.to_string())?;
-        model.id = Some(id);
-        self.upsert_behavior(model)?;
-        Ok(())
-    }
-    /// Execute the real attached trigger's actions, preserving bindings, name scopes and
-    /// custom IAction implementations. The host must be attached to a rooted logical tree
-    /// so native action styles, bindings and lifecycle hooks have run. Stop/reload restores
-    /// the authored preview afterwards.
-    pub fn preview_behavior(&mut self, id: NodeId) -> Result<(), String> {
-        let owner = self.behavior_owner(id)?;
-        let models = self.behaviors(owner);
-        let index = models
-            .iter()
-            .position(|model| model.id == Some(id))
-            .ok_or("Unknown behavior")?;
-        let visual = self
-            .preview
-            .visual(owner)
-            .ok_or("Behavior owner has no live preview")?;
-        if visual
-            .cast::<StyledElement>()
-            .is_some_and(|element| !element.is_attached_to_logical_tree())
-        {
-            return Err("Attach the preview host to a Window or rooted logical tree before executing behaviors; native action styles and bindings require attachment".into());
-        }
-        let behaviors = ferroui_xaml_interactivity::Interaction::get_behaviors(&visual);
-        let snapshot = behaviors.snapshot();
-        let behavior = snapshot
-            .get(index)
-            .ok_or("The authored behavior is not attached in the current preview")?;
-        let trigger=<dyn ferroui_xaml_interactivity::ITrigger>::of(behavior).ok_or("This behavior is not an action trigger; use Interact to exercise its native event/lifecycle behavior")?;
-        let sender: BoxedValue = Rc::new(visual.clone());
-        ferroui_xaml_interactivity::Interaction::execute_actions(
-            Some(&sender),
-            trigger.actions().as_ref(),
-            None,
-        );
-        self.interactions.behavior_modified = true;
-        for group in self.state_groups() {
-            let Some(owner) = self
-                .preview
-                .visual(group.owner)
-                .and_then(|visual| visual.cast::<StyledElement>())
-            else {
-                continue;
-            };
-            let key = (group.owner, group.name.clone());
-            if let Some(state) = group
-                .states
-                .iter()
-                .find(|state| owner.classes().contains(&group.class_name(&state.name)))
-            {
-                self.interactions
-                    .active_states
-                    .insert(key, state.name.clone());
-            } else {
-                self.interactions.active_states.remove(&key);
-            }
-        }
-        self.import_animations();
-        self.generation += 1;
-        Ok(())
-    }
-    fn behavior_owner(&self, id: NodeId) -> Result<NodeId, String> {
-        let mut current = self.document.ast().node(id).and_then(|node| node.parent);
-        while let Some(id) = current {
-            let node = self
-                .document
-                .ast()
-                .node(id)
-                .ok_or("Unknown behavior ancestor")?;
-            if node.local_name() == "Interaction.Behaviors" {
-                return node
-                    .parent
-                    .ok_or_else(|| "Behavior collection has no owner".into());
-            }
-            current = node.parent;
-        }
-        Err("Source node is not a behavior".into())
     }
     pub fn clear_interaction_preview(&mut self) {
         let reset =

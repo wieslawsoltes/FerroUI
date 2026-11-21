@@ -10,6 +10,8 @@ use ferroui_designer_animation::{AnimationValue, BehaviorAction, BehaviorTrigger
 
 #[path = "workspace_rsx_tests.rs"]
 mod rsx_tests;
+#[path = "workspace_behavior_tests.rs"]
+mod behavior_tests;
 
 fn click(button: &Button) {
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));

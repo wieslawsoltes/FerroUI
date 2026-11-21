@@ -173,8 +173,8 @@ fn variant(name: &str, fields: Value, required: &[&str]) -> Value {
     properties.insert(name.into(), object(fields, required));
     object(Value::Object(properties), &[name])
 }
-pub(super) fn behavior() -> Value {
-    let action = json!({"oneOf":[
+pub(super) fn behavior_action() -> Value {
+    json!({"oneOf":[
         variant("ChangeProperty",json!({"target":nullable(string()),"property":string(),"value":string()}), &["property","value"]),
         variant("InvokeCommand",json!({"command":string(),"parameter":nullable(string())}), &["command"]),
         variant("CallMethod",json!({"target":nullable(string()),"method":string()}), &["method"]),
@@ -182,14 +182,18 @@ pub(super) fn behavior() -> Value {
         variant("RemoveClass",json!({"target":nullable(string()),"class":string()}), &["class"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string()),"children":string()}), &["type_name","properties","children"]),
         variant("Markup",json!({"source":string()}), &["source"])
-    ]});
-    let trigger = json!({"oneOf":[
+    ]})
+}
+pub(super) fn behavior_trigger() -> Value {
+    json!({"oneOf":[
         variant("Event",json!({"event":string(),"source":nullable(string())}), &["event"]),
         variant("Data",json!({"binding":string(),"comparison":string(),"value":string(),"revert_on_false":{"type":"boolean"}}), &["binding","comparison","value","revert_on_false"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string())}), &["type_name","properties"])
-    ]});
+    ]})
+}
+pub(super) fn behavior() -> Value {
     object(
-        json!({"id":nullable(id()),"owner":id(),"trigger":trigger,"actions":array(action,4096)}),
+        json!({"id":nullable(id()),"owner":id(),"trigger":behavior_trigger(),"actions":array(behavior_action(),4096)}),
         &["owner", "trigger", "actions"],
     )
 }

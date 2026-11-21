@@ -11,6 +11,8 @@ use std::rc::{Rc, Weak};
 
 #[path = "mcp_authoring.rs"]
 mod authoring;
+#[path = "mcp_behaviors.rs"]
+mod behaviors;
 #[path = "mcp_binding.rs"]
 mod binding;
 #[path = "mcp_brush.rs"]
@@ -308,6 +310,7 @@ impl UiToolProvider for DesignerMcp {
             ),
         ];
         tools.extend(authoring::tools());
+        tools.extend(behaviors::tools());
         tools.extend(timeline_markers::tools());
         tools.extend(binding::tools());
         tools.push(brush::tool());
@@ -339,6 +342,7 @@ impl UiToolProvider for DesignerMcp {
             .find(|tool| tool["name"] == name)
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
+            || behaviors::handles(name)
             || timeline_markers::handles(name)
             || binding::handles(name)
             || name == brush::NAME
@@ -595,7 +599,10 @@ impl UiToolProvider for DesignerMcp {
             ensure_revision(&session, args)?;
         }
         if authoring::handles(name) {
-            return authoring::call(&mut session, name, args, permissions);
+            return authoring::call(&mut session, name, args);
+        }
+        if behaviors::handles(name) {
+            return behaviors::call(&mut session, name, args, permissions);
         }
         if timeline_markers::handles(name) {
             return timeline_markers::call(&mut session, name, args);
