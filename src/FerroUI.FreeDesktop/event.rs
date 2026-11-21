@@ -10,13 +10,13 @@ pub struct Event<A = ()> {
     handlers: HandlerList<dyn Fn(A)>,
 }
 
-impl<A> Default for Event<A> {
+impl<A: 'static> Default for Event<A> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<A> Event<A> {
+impl<A: 'static> Event<A> {
     pub fn new() -> Self {
         Self { handlers: HandlerList::new() }
     }
@@ -36,7 +36,7 @@ impl<A> Event<A> {
     }
 }
 
-impl<A: Clone> Event<A> {
+impl<A: Clone + 'static> Event<A> {
     /// Calls the handlers that are subscribed at the time of the call.
     pub fn invoke(&self, arg: A) {
         let snapshot = self.handlers.snapshot();

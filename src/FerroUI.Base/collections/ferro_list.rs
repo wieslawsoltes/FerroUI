@@ -124,13 +124,13 @@ impl<T> std::fmt::Debug for FerroList<T> {
     }
 }
 
-impl<T: Clone> Default for FerroList<T> {
+impl<T: Clone + 'static> Default for FerroList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: Clone> FerroList<T> {
+impl<T: Clone + 'static> FerroList<T> {
     /// Creates an empty list.
     pub fn new() -> Self {
         Self(Rc::new(FerroListData {
@@ -152,7 +152,10 @@ impl<T: Clone> FerroList<T> {
 
     /// Subscribes to changes. Returns a token for
     /// [`remove_collection_changed`](Self::remove_collection_changed).
-    pub fn add_collection_changed(&self, handler: Rc<CollectionChangedHandler<T>>) -> u64 {
+    pub fn add_collection_changed(&self, handler: Rc<CollectionChangedHandler<T>>) -> u64
+    where
+        T: 'static,
+    {
         self.0.collection_changed.add(handler)
     }
 
@@ -551,7 +554,7 @@ impl<T: Clone> FerroList<T> {
 
 /// Runs the typed and the untyped handlers of a collection changed event in
 /// subscription order (their tokens come from one counter).
-pub(super) fn raise_collection_changed<T>(
+pub(super) fn raise_collection_changed<T: 'static>(
     typed: &HandlerList<CollectionChangedHandler<T>>,
     untyped: &Event<CollectionChange>,
     e: &NotifyCollectionChangedEventArgs<'_, T>,
@@ -570,11 +573,11 @@ pub(super) fn raise_collection_changed<T>(
     };
     let (mut i, mut j) = (0, 0);
     while i < typed.len() || j < untyped.len() {
-        if j == untyped.len() || (i < typed.len() && typed[i].0 < untyped[j].0) {
-            (typed[i].1)(e);
+        if j == untyped.len() || (i < typed.len() && typed.at(i).0 < untyped.at(j).0) {
+            (typed.at(i).1)(e);
             i += 1;
         } else {
-            (untyped[j].1)(&change);
+            (untyped.at(j).1)(&change);
             j += 1;
         }
     }
@@ -592,7 +595,7 @@ impl<T> INotifyPropertyChanged for FerroList<T> {
     }
 }
 
-impl<T: Clone + PartialEq> FerroList<T> {
+impl<T: Clone + PartialEq + 'static> FerroList<T> {
     /// Tests whether the collection contains an item.
     pub fn contains(&self, item: &T) -> bool {
         self.0.items.borrow().contains(item)

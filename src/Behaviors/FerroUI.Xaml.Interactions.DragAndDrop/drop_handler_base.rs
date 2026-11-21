@@ -19,7 +19,7 @@ use ferroui_base::BoxedValue;
 /// where [`IDropHandler`] is in scope too: the two traits have the same method names.
 pub trait DropHandlerBase {
     /// Moves an item within a collection.
-    fn move_item<T: Clone>(&self, items: &FerroList<T>, source_index: usize, target_index: usize)
+    fn move_item<T: Clone + 'static>(&self, items: &FerroList<T>, source_index: usize, target_index: usize)
     where
         Self: Sized,
     {
@@ -38,7 +38,7 @@ pub trait DropHandlerBase {
     }
 
     /// Moves an item from one collection to another.
-    fn move_item_between<T: Clone>(
+    fn move_item_between<T: Clone + 'static>(
         &self,
         source_items: &FerroList<T>,
         target_items: &FerroList<T>,
@@ -53,7 +53,7 @@ pub trait DropHandlerBase {
     }
 
     /// Swaps two items inside a collection.
-    fn swap_item<T: Clone + PartialEq>(&self, items: &FerroList<T>, source_index: usize, target_index: usize)
+    fn swap_item<T: Clone + PartialEq + 'static>(&self, items: &FerroList<T>, source_index: usize, target_index: usize)
     where
         Self: Sized,
     {
@@ -64,7 +64,7 @@ pub trait DropHandlerBase {
     }
 
     /// Swaps an item of one collection with an item of another.
-    fn swap_item_between<T: Clone + PartialEq>(
+    fn swap_item_between<T: Clone + PartialEq + 'static>(
         &self,
         source_items: &FerroList<T>,
         target_items: &FerroList<T>,
@@ -80,7 +80,7 @@ pub trait DropHandlerBase {
     }
 
     /// Inserts an item into a collection at the specified index.
-    fn insert_item<T: Clone>(&self, items: &FerroList<T>, item: T, index: usize)
+    fn insert_item<T: Clone + 'static>(&self, items: &FerroList<T>, item: T, index: usize)
     where
         Self: Sized,
     {

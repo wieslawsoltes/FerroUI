@@ -24,11 +24,6 @@ impl<A> DispatcherImplEvent<A> {
         Self { handlers: HandlerList::new() }
     }
 
-    /// Subscribes `handler` and returns the token that removes it.
-    pub fn add(&self, handler: Rc<dyn Fn(A)>) -> u64 {
-        self.handlers.add(handler)
-    }
-
     /// Removes the handler registered under `token`.
     pub fn remove(&self, token: u64) -> bool {
         self.handlers.remove(token)
@@ -39,7 +34,14 @@ impl<A> DispatcherImplEvent<A> {
     }
 }
 
-impl<A: Clone> DispatcherImplEvent<A> {
+impl<A: 'static> DispatcherImplEvent<A> {
+    /// Subscribes `handler` and returns the token that removes it.
+    pub fn add(&self, handler: Rc<dyn Fn(A)>) -> u64 {
+        self.handlers.add(handler)
+    }
+}
+
+impl<A: Clone + 'static> DispatcherImplEvent<A> {
     /// Invokes every subscribed handler with `arg`.
     pub fn invoke(&self, arg: A) {
         let snapshot = self.handlers.snapshot();

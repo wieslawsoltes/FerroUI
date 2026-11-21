@@ -27,7 +27,7 @@ pub trait IFerroReadOnlyList<T>: INotifyCollectionChanged + INotifyPropertyChang
     fn remove_collection_changed(&self, token: u64) -> bool;
 }
 
-impl<T: Clone> IFerroReadOnlyList<T> for FerroList<T> {
+impl<T: Clone + 'static> IFerroReadOnlyList<T> for FerroList<T> {
     fn count(&self) -> usize {
         FerroList::count(self)
     }

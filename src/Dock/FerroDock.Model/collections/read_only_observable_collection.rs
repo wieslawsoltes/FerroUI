@@ -94,11 +94,11 @@ impl<T: Clone + PartialEq + 'static> ReadOnlyObservableCollection<T> {
         };
         let (mut a, mut b) = (0, 0);
         while a < typed.len() || b < untyped.len() {
-            if b == untyped.len() || (a < typed.len() && typed[a].0 < untyped[b].0) {
-                (typed[a].1)(args);
+            if b == untyped.len() || (a < typed.len() && typed.at(a).0 < untyped.at(b).0) {
+                (typed.at(a).1)(args);
                 a += 1;
             } else {
-                (untyped[b].1)(&change);
+                (untyped.at(b).1)(&change);
                 b += 1;
             }
         }

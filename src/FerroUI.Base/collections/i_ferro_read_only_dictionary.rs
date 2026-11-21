@@ -39,7 +39,7 @@ pub trait IFerroReadOnlyDictionary<K, V>: INotifyCollectionChanged + INotifyProp
     fn remove_collection_changed(&self, token: u64) -> bool;
 }
 
-impl<K: Eq + Hash + Clone + Display, V: Clone> IFerroReadOnlyDictionary<K, V> for FerroDictionary<K, V> {
+impl<K: Eq + Hash + Clone + Display + 'static, V: Clone + 'static> IFerroReadOnlyDictionary<K, V> for FerroDictionary<K, V> {
     fn count(&self) -> usize {
         FerroDictionary::count(self)
     }

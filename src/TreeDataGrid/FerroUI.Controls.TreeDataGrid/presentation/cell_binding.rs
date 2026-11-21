@@ -128,7 +128,8 @@ impl<V: Clone + 'static> CoreCellBinding<V> {
         self.publish_count.set(self.publish_count.get().wrapping_add(1));
         // Every observer but the last gets a copy; the last takes the value.
         let observers = self.observers.snapshot();
-        if let Some(((_, last), others)) = observers.split_last() {
+        let mut others = observers.iter();
+        if let Some((_, last)) = others.next_back() {
             for (_, observer) in others {
                 observer(value.clone());
             }

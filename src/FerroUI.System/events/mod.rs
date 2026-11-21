@@ -5,4 +5,4 @@ mod event;
 mod handler_list;
 
 pub use event::Event;
-pub use handler_list::{HandlerList, HandlerSnapshot};
+pub use handler_list::{HandlerIter, HandlerList, HandlerSnapshot};

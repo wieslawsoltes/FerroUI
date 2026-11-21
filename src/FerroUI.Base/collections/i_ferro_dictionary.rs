@@ -21,7 +21,7 @@ pub trait IFerroDictionary<K, V>: IFerroReadOnlyDictionary<K, V> {
     fn is_read_only(&self) -> bool;
 }
 
-impl<K: Eq + Hash + Clone + Display, V: Clone> IFerroDictionary<K, V> for FerroDictionary<K, V> {
+impl<K: Eq + Hash + Clone + Display + 'static, V: Clone + 'static> IFerroDictionary<K, V> for FerroDictionary<K, V> {
     fn set(&self, key: K, value: V) {
         FerroDictionary::set(self, key, value)
     }

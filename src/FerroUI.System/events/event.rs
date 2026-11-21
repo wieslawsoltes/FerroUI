@@ -27,11 +27,6 @@ impl<A: ?Sized> Event<A> {
         self.handlers.snapshot()
     }
 
-    /// Adds a handler; returns the token that removes it.
-    pub fn add(&self, handler: Rc<dyn Fn(&A)>) -> u64 {
-        self.handlers.add(handler)
-    }
-
     /// Removes a handler. Returns false if the token is unknown.
     pub fn remove(&self, token: u64) -> bool {
         self.handlers.remove(token)
@@ -45,6 +40,14 @@ impl<A: ?Sized> Event<A> {
     /// The number of subscribed handlers.
     pub fn handler_count(&self) -> usize {
         self.handlers.len()
+    }
+
+}
+
+impl<A: ?Sized + 'static> Event<A> {
+    /// Adds a handler; returns the token that removes it.
+    pub fn add(&self, handler: Rc<dyn Fn(&A)>) -> u64 {
+        self.handlers.add(handler)
     }
 
     /// Invokes the handlers.

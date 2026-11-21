@@ -1631,7 +1631,7 @@ impl NavigationPage {
         self.subscribe::<dyn Fn(&ModalPoppedEventArgs)>(|x| &x.modal_popped, Rc::new(handler))
     }
 
-    fn raise<A>(handlers: &HandlerList<dyn Fn(&A)>, args: &A) {
+    fn raise<A: 'static>(handlers: &HandlerList<dyn Fn(&A)>, args: &A) {
         for (_, handler) in handlers.snapshot().iter() {
             handler(args);
         }

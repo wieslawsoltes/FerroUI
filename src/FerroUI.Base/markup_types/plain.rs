@@ -95,13 +95,13 @@ pub(super) fn new_resource_key(
 }
 
 /// `FerroList<T>.Capacity`.
-fn list_capacity<T: Clone>(list: &FerroList<T>) -> i32 {
+fn list_capacity<T: Clone + 'static>(list: &FerroList<T>) -> i32 {
     i32::try_from(list.capacity()).unwrap_or(i32::MAX)
 }
 
 /// The setter of `FerroList<T>.Capacity`: a capacity below the number of
 /// items is an error, as in the managed original.
-fn set_list_capacity<T: Clone>(list: &FerroList<T>, capacity: i32) -> Result<(), &'static str> {
+fn set_list_capacity<T: Clone + 'static>(list: &FerroList<T>, capacity: i32) -> Result<(), &'static str> {
     match usize::try_from(capacity) {
         Ok(capacity) if capacity >= list.count() => Ok(list.set_capacity(capacity)),
         _ => Err("capacity was less than the current size."),

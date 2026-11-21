@@ -12,11 +12,12 @@ impl IDisposable for EmptyDisposable {
     fn dispose(&self) {}
 }
 
-struct AnonymousDisposable<F: FnOnce()> {
-    action: Cell<Option<F>>,
+/// One compiled form for every action: only the box of the action is made per call site.
+struct AnonymousDisposable {
+    action: Cell<Option<Box<dyn FnOnce()>>>,
 }
 
-impl<F: FnOnce()> IDisposable for AnonymousDisposable<F> {
+impl IDisposable for AnonymousDisposable {
     fn dispose(&self) {
         if let Some(action) = self.action.take() {
             action();
@@ -34,7 +35,13 @@ impl Disposable {
     }
 
     /// A disposable that runs `action` the first time it is disposed.
+    #[inline]
     pub fn create(action: impl FnOnce() + 'static) -> Rc<dyn IDisposable> {
+        Self::create_boxed(Box::new(action))
+    }
+
+    #[inline(never)]
+    fn create_boxed(action: Box<dyn FnOnce()>) -> Rc<dyn IDisposable> {
         Rc::new(AnonymousDisposable { action: Cell::new(Some(action)) })
     }
 
@@ -44,7 +51,7 @@ impl Disposable {
         state: TState,
         dispose: impl FnOnce(TState) + 'static,
     ) -> Rc<dyn IDisposable> {
-        Rc::new(AnonymousDisposable { action: Cell::new(Some(move || dispose(state))) })
+        Self::create(move || dispose(state))
     }
 }
 

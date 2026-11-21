@@ -464,7 +464,7 @@ fn native_host_peer_and_model_metadata_preserve_original_members_and_event_dispo
         match ferroui_base::metadata::MarkupEvent::subscription_of(&result) {
             Some(subscription) => subscription.dispose(),
             None => {
-                let token = provider.changed.snapshot().iter().next().unwrap().0;
+                let token = *provider.changed.snapshot().iter().next().unwrap().0;
                 provider.changed.remove(token);
             }
         }

@@ -137,13 +137,13 @@ impl<K, V> std::fmt::Debug for FerroDictionary<K, V> {
     }
 }
 
-impl<K: Eq + Hash + Clone + Display, V: Clone> Default for FerroDictionary<K, V> {
+impl<K: Eq + Hash + Clone + Display + 'static, V: Clone + 'static> Default for FerroDictionary<K, V> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
+impl<K: Eq + Hash + Clone + Display + 'static, V: Clone + 'static> FerroDictionary<K, V> {
     /// Creates an empty dictionary.
     pub fn new() -> Self {
         Self::with_capacity(0)
@@ -174,7 +174,11 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
 
     /// Subscribes to changes of the collection. Returns a token for
     /// [`remove_collection_changed`](Self::remove_collection_changed).
-    pub fn add_collection_changed(&self, handler: Rc<CollectionChangedHandler<(K, V)>>) -> u64 {
+    pub fn add_collection_changed(&self, handler: Rc<CollectionChangedHandler<(K, V)>>) -> u64
+    where
+        K: 'static,
+        V: 'static,
+    {
         self.0.collection_changed.add(handler)
     }
 
@@ -346,7 +350,7 @@ impl<K, V> INotifyCollectionChanged for FerroDictionary<K, V> {
     }
 }
 
-impl<K: Eq + Hash + Clone + Display, V: Clone> INotifyPropertyChanged for FerroDictionary<K, V> {
+impl<K: Eq + Hash + Clone + Display + 'static, V: Clone + 'static> INotifyPropertyChanged for FerroDictionary<K, V> {
     fn property_changed(&self) -> &Event<str> {
         &self.0.property_changed
     }
