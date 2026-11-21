@@ -61,9 +61,14 @@ mod tests {
                 }
                 let Ok(source) = std::fs::read_to_string(&path) else { continue };
                 let relative = path.strip_prefix(sources()).unwrap_or(&path).to_string_lossy().replace('\\', "/");
+                // A call of the name itself, not of a longer name that ends with it (`TrayPopupRoot`).
                 let constructs = ["PopupRoot::new(", "PopupRoot::new_with_resolver(", "OverlayPopupHost::new(", "create_popup_host("]
                     .iter()
-                    .any(|call| source.contains(call));
+                    .any(|call| {
+                        source.match_indices(call).any(|(at, _)| {
+                            !source[..at].chars().next_back().is_some_and(|before| before.is_alphanumeric() || before == '_')
+                        })
+                    });
                 assert!(
                     !constructs || allowed.contains(&relative.as_str()),
                     "{relative} creates a popup host: add the class that does to CREATES"
