@@ -2,7 +2,7 @@ use super::{AutomationControlType, AutomationLandmarkType, AutomationPeer, Autom
 use crate::automation::{
     AccessibilityView, AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperties, IsOffscreenBehavior,
 };
-use crate::{Control, DataValidationErrors, ToolTip};
+use crate::{Control, DataValidationErrors};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
@@ -140,7 +140,7 @@ impl AutomationPeerImpl for ControlAutomationPeer {
         }
 
         if is_null_or_white_space(&result) {
-            result = ToolTip::get_tip(&owner).and_then(|tip| {
+            result = crate::tool_tip::tip_if_any(&owner).and_then(|tip| {
                 let tip: &dyn AnyValue = &*tip;
                 tip.downcast_ref::<String>().cloned()
             });
