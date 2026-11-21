@@ -7,6 +7,7 @@ use ferroui_designer_rsx::{RsxAnimation, RsxAnimationIssue, RsxCatalog, RsxState
 use ferroui_remote_protocol::designer::{DesignAnimationProgram, DesignAnimationSourcePatch};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
+use std::rc::Rc;
 
 mod states;
 pub(crate) use states::{state_edit, state_patches};
@@ -26,7 +27,7 @@ struct StateOwnerMapping {
 pub(crate) struct AuthoredRsxFrame {
     pub(crate) uri: String,
     source: Box<str>,
-    modules: Option<RustModuleSources>,
+    modules: Option<Rc<RustModuleSources>>,
     invocation: SourceSpan,
     pub(crate) scope: AuthoredRustScope,
     clips: BTreeMap<NodeId, RsxAnimation>,
@@ -57,12 +58,16 @@ impl AuthoredRsxFrame {
         Ok(())
     }
 
-    pub(crate) fn module_sources(&self) -> Option<&RustModuleSources> {
-        self.modules.as_ref()
+    pub(crate) fn module_sources(&self) -> Option<Rc<RustModuleSources>> {
+        self.modules.clone()
     }
 
     pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
-        self.catalog.project_with_modules(&self.source, self.invocation.start, self.modules.as_ref())
+        self.catalog.project_with_modules(
+            &self.source,
+            self.invocation.start,
+            self.modules.as_deref(),
+        )
     }
 
     pub(crate) fn capture(design: &DesignDocument<'_>, uri: &str) -> Option<Self> {
@@ -70,7 +75,7 @@ impl AuthoredRsxFrame {
         Some(Self {
             uri: uri.into(),
             source: design.source.into(),
-            modules: rsx.module_sources().cloned(),
+            modules: rsx.module_sources().cloned().map(Rc::new),
             invocation: rsx.invocation,
             scope: AuthoredRustScope {
                 active: design.index.range(rsx.invocation).ok()?,

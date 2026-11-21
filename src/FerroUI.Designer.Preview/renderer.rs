@@ -11,6 +11,7 @@ use ferroui_designer::{
     PreviewTheme,
 };
 use ferroui_designer_core::NodeId;
+use ferroui_designer_project::RustModuleSources;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use ferroui_inspect::TreeKind;
@@ -52,7 +53,10 @@ pub(crate) struct Stage {
 }
 
 impl Stage {
-    pub(crate) fn rust_modules(&self, source: &crate::protocol::Source) -> Option<&ferroui_designer_project::RustModuleSources> {
+    pub(crate) fn rust_modules(
+        &self,
+        source: &crate::protocol::Source,
+    ) -> Option<Rc<RustModuleSources>> {
         let rust = self.authored_rsx.as_ref()?;
         if rust.uri != source.uri || rust.source() != source.source || self.project != source.project {
             return None;

@@ -217,8 +217,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
     let query = request.query;
     let stage = renderer.stage(query.frame)?;
+    // Source validation and patch translation can outlive the retired frame.
+    let modules = stage.rust_modules(&request.document);
     let mut design = DesignDocument::parse_with_rust_modules(
-        &request.document, projects.source(&request.document)?, stage.rust_modules(&request.document),
+        &request.document,
+        projects.source(&request.document)?,
+        modules.as_deref(),
     )?;
     let action = query.arguments["action"].as_str();
     let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, action);

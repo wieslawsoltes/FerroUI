@@ -33,7 +33,11 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
         (Some(frame), Some(renderer)) => renderer.stage(frame)?.rust_modules(&request.document),
         _ => None,
     };
-    let design = DesignDocument::parse_with_rust_modules(&request.document, projects.source(&request.document)?, modules)?;
+    let design = DesignDocument::parse_with_rust_modules(
+        &request.document,
+        projects.source(&request.document)?,
+        modules.as_deref(),
+    )?;
     let mut candidate = design.xaml.snapshot_without_history();
     let mut selected = None;
     let patches = match &request.operation {

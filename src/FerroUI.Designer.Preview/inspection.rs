@@ -44,7 +44,11 @@ pub(crate) fn inspect(
     match input.target {
         InspectionTarget::Source { node } => {
             let modules = stage.and_then(|stage| stage.rust_modules(&input.source));
-            let design = DesignDocument::parse_with_rust_modules(&input.source, projects.source(&input.source)?, modules)?;
+            let design = DesignDocument::parse_with_rust_modules(
+                &input.source,
+                projects.source(&input.source)?,
+                modules.as_deref(),
+            )?;
             let element = design
                 .xaml
                 .ast()
@@ -69,7 +73,12 @@ pub(crate) fn inspect(
                 return Err("Inspect between two and 128 distinct source elements".into());
             }
             let stage = stage.ok_or("Wait for the current preview")?;
-            let design = DesignDocument::parse_with_rust_modules(&input.source, projects.source(&input.source)?, stage.rust_modules(&input.source))?;
+            let modules = stage.rust_modules(&input.source);
+            let design = DesignDocument::parse_with_rust_modules(
+                &input.source,
+                projects.source(&input.source)?,
+                modules.as_deref(),
+            )?;
             let session = stage.session.borrow();
             let mut fields = nodes.iter().rev().map(|id| {
                 let node = design.xaml.ast().node(*id).ok_or("Unknown selected element")?;
