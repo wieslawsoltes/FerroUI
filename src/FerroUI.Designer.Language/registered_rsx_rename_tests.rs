@@ -89,9 +89,13 @@ fn rebuild(fixture: &CatalogFixture) -> AssemblyModel {
 }
 
 #[test]
-fn property_review_uses_unsaved_mapping_source_and_preserves_shared_constants() {
+fn property_review_follows_imported_constants_in_an_unsaved_mapping_file() {
     let (fixture, mut service, uri, rust_uri) = fixture(false);
     let original = ASSEMBLY
+        .replace("    const KEY:", "    mod literals {\n        pub(super) const KEY:")
+        .replace("    const FEATURED:", "        pub(super) const FEATURED:")
+        .replace("    static DESIGN", "    }\n    use self::literals::KEY as MAPPING_KEY;\n    static DESIGN")
+        .replace("(self::KEY, FEATURED)", "(MAPPING_KEY, self::literals::FEATURED)")
         .replace('\n', "\r\n")
         .replace("// Preserve", "// Unsaved 🧭. Preserve");
     let draft = FileMoveDraft {
@@ -109,12 +113,12 @@ fn property_review_uses_unsaved_mapping_source_and_preserves_shared_constants() 
         .unwrap();
     assert_eq!(mapping.edit.version, 32);
     assert_eq!(mapping.before, original);
-    let updated = r#"(self::KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"title\"}}")"#;
+    let updated = r#"(MAPPING_KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"title\"}}")"#;
     assert_eq!(
         mapping.after,
         original
             .replace("\"Tone\" : \"tone\"", "\"Accent\" : \"tone\"")
-            .replace("(self::KEY, FEATURED)", updated)
+            .replace("(MAPPING_KEY, self::literals::FEATURED)", updated)
     );
     assert!(plan
         .documents
@@ -125,13 +129,23 @@ fn property_review_uses_unsaved_mapping_source_and_preserves_shared_constants() 
         .iter()
         .any(|entry| entry.after.contains("String>(\"Accent\",")));
 
+    let ambiguous = original.replace(
+        "    use self::literals::KEY as MAPPING_KEY;",
+        "    use self::literals::KEY as MAPPING_KEY;\r\n    #[cfg(test)]\r\n    use self::literals::FEATURED as MAPPING_KEY;",
+    );
+    let draft = FileMoveDraft { uri: rust_uri.clone(), version: 33, source: ambiguous };
+    let error = service
+        .plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft])
+        .unwrap_err();
+    assert!(error.0.contains("keys in the selected assembly"));
+
     let collision = original.replace(
         r#""Tone" : "tone""#,
         r#""Tone" : "tone", "Accent" : "already_mapped""#,
     );
     let draft = FileMoveDraft {
         uri: rust_uri,
-        version: 33,
+        version: 34,
         source: collision,
     };
     let error = service

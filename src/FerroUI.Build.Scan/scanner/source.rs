@@ -1764,7 +1764,7 @@ struct RegistrationFinder {
 }
 
 /// The names the `use` tree `tree` below `prefix` imports, each with its path.
-fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut LocalImports) {
+pub(super) fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut LocalImports) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());

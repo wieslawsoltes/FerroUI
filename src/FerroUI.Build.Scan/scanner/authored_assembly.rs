@@ -5,9 +5,13 @@ use crate::authored_symbols::{AuthoredAssembly, AuthoredMetadata, AuthoredText};
 use std::ops::Range;
 use syn::{spanned::Spanned, Expr, Item, Lit, LitStr};
 
+#[path = "metadata_constants.rs"]
+mod constants;
+use constants::MetadataConstants;
+
 impl AuthoredAssembly {
     /// Exact tuple operands in the assembly's metadata array. A text constant
-    /// in the same module can be edited at its use without changing its definition.
+    /// in this file can be edited at its use without changing its definition.
     pub fn metadata_in(&self, source: &str) -> Option<Vec<AuthoredMetadata>> {
         let body = rust_body(source);
         let offset = source.len() - body.len();
@@ -27,33 +31,23 @@ impl AuthoredAssembly {
             return None;
         };
         let pairs = pair_expressions(field_of(value, "metadata")?)?;
+        let constants = MetadataConstants::new(&file, &self.modules)?;
         Some(
             pairs
                 .into_iter()
                 .map(|(key, value)| AuthoredMetadata {
-                    key: authored_text(items, key, offset),
-                    value: authored_text(items, value, offset),
+                    key: authored_text(&constants, key, offset),
+                    value: authored_text(&constants, value, offset),
                 })
                 .collect(),
         )
     }
 }
 
-fn authored_text(items: &[Item], expr: &Expr, offset: usize) -> Option<AuthoredText> {
+fn authored_text(constants: &MetadataConstants<'_>, expr: &Expr, offset: usize) -> Option<AuthoredText> {
     let operand = ungroup(expr);
     let literal = match operand {
-        Expr::Path(path) if path.qself.is_none() && path.path.leading_colon.is_none() => {
-            let name = local_constant(&path.path)?;
-            let mut matches = items.iter().filter_map(|item| match item {
-                Item::Const(item) if item.ident == *name => Some(item),
-                _ => None,
-            });
-            let item = matches.next()?;
-            if matches.next().is_some() {
-                return None;
-            }
-            string_literal(ungroup(&item.expr))?
-        }
+        Expr::Path(path) => constants.literal(path)?,
         other => string_literal(other)?,
     };
     let shifted = |range: Range<usize>| (range.start + offset)..(range.end + offset);
@@ -62,15 +56,6 @@ fn authored_text(items: &[Item], expr: &Expr, offset: usize) -> Option<AuthoredT
         range: shifted(operand.span().byte_range()),
         literal: shifted(literal.span().byte_range()),
     })
-}
-
-fn local_constant(path: &syn::Path) -> Option<&syn::Ident> {
-    let last = path.segments.last()?;
-    if !last.arguments.is_empty() {
-        return None;
-    }
-    (path.segments.len() == 1 || (path.segments.len() == 2 && path.segments[0].ident == "self"))
-        .then_some(&last.ident)
 }
 
 fn ungroup(expr: &Expr) -> &Expr {

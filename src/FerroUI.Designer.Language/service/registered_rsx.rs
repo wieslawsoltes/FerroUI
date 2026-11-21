@@ -70,7 +70,7 @@ impl LanguageService {
                 })?;
                 require(
                     entries.iter().all(|entry| entry.key.is_some()),
-                    format!("The keys in the selected assembly need literals or local text constants before review: {uri}"),
+                    format!("The keys in the selected assembly need literals or text constants from this source file before review: {uri}"),
                 )?;
                 let mut patches = Vec::new();
                 for edit in edits {
@@ -217,7 +217,7 @@ impl MappingRename<'_> {
         if edit.property || inspect_builder {
             let value = entry.value.as_ref().ok_or_else(|| {
                 LanguageError(format!(
-                    "Use a literal or a local text constant for the RSX mapping {}",
+                    "Use a literal or a text constant from the assembly source file for the RSX mapping {}",
                     edit.key
                 ))
             })?;
