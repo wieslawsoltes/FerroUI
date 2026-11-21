@@ -48,12 +48,14 @@ export async function verifyIncludedStylesMcp({ invoke, content }: McpFixture): 
         assert.equal(document.getText(), expected);
         await frame(session);
     };
-    const trace = async (name: string) => {
+    const trace = async (name: string, included = true) => {
         await frame(session);
         const { nodes } = content<{ nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
         const node = nodes.find(node => node.name === name)?.id;
         assert.ok(node);
-        return read<PropertyTrace<DesignTraceSource>>(session, 'designer_property_trace', { node, property: 'Background' });
+        return read<PropertyTrace<DesignTraceSource>>(session, 'designer_property_trace', {
+            node, property: 'Background', ...(included && { include_sources: true }),
+        });
     };
     const effective = async (name: string) => (await trace(name)).effective;
     const theme = async (dark: boolean) => {
@@ -84,6 +86,8 @@ export async function verifyIncludedStylesMcp({ invoke, content }: McpFixture): 
     assert.equal(winner.included.uri, style.uri);
     assert.equal(stylesheet.getText(asRange(winner.included.range)), '#FF3D567D');
     assert.equal(winner.sourceRevision, revision(Buffer.from(dirtyStyle)));
+    const localOnly = await trace('SharedStyleCard', false);
+    assert.equal(localOnly.contributors.find(entry => entry.state === 'effective')?.source, null);
     const activeResource = await trace('SharedAccentCard');
     assert.equal(activeResource.effective, '#FF3468AC');
     const resource = activeResource.resource?.included;

@@ -120,7 +120,9 @@ export class DesignerWorkbench implements vscode.Disposable {
                     : panel.selectedIds.length === 1 && panel.selectedIds[0] === target.node);
                 const context = new StudioContext(panel, frame.token, current);
                 const args = target.type === 'runtime' ? { runtime_node: target.id, property } : { node: target.node, property };
-                const trace = await context.read<PropertyTrace<DesignTraceSource>>('designer_property_trace', args);
+                const trace = await context.read<PropertyTrace<DesignTraceSource>>('designer_property_trace', {
+                    ...args, ...(panel.supportsIncludedPropertyTrace && { include_sources: true }),
+                });
                 await showPropertyTrace(trace, source => source.included
                     ? context.revealIncludedRange(source.included, source.sourceRevision)
                     : context.revealRange(source.range), source => source.included

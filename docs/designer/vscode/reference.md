@@ -169,7 +169,7 @@ Use `designer_hosted_palette_source` with the accepted frame, the comparison cel
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.
 
-When a contributor or resource comes from an included XAML file, its location is under `included`. Use `included.uri` and `included.range` together to open the supplying declaration. `sourceRevision` is the hexadecimal revision of the accepted XAML text, excluding an initial byte-order mark. Read a fresh trace after the owner changes.
+Pass `include_sources: true` to include cross-file locations. When a contributor or resource comes from an included XAML file, its location is under `included`. Use `included.uri` and `included.range` together to open the supplying declaration. `sourceRevision` is the hexadecimal revision of the accepted XAML text, excluding an initial byte-order mark. Read a fresh trace after the owner changes.
 
 On the running app’s MCP connection, call `get_property_trace` with `node_id` and `property`. Contributor locations use the runtime’s one-based source coordinates and revision fingerprint when available. Read the trace again after interacting with the preview or the app. [Authoring guide](authoring.md#trace-an-effective-property-value)
 

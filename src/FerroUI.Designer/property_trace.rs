@@ -105,9 +105,10 @@ impl PropertyTrace {
         document: &Document,
         source: &str,
         map: Option<&RsxSourceMap>,
+        include_sources: bool,
     ) -> Value {
         let index = LineIndex::new(source);
-        let locate = |location: &TraceSource| location.json(document, source, map, &index);
+        let locate = |location: &TraceSource| location.json(document, source, map, &index, include_sources);
         let mut result = self
             .native
             .json(|index, _| self.sources[index].as_ref().and_then(locate));

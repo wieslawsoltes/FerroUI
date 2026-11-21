@@ -39,6 +39,7 @@ interface Frame {
     itemTemplateAuthoring: boolean;
     controlTemplateAuthoring: boolean;
     propertyTrace: boolean;
+    includedPropertyTrace: boolean;
     styleComposition: boolean;
     rustStyleComposition: boolean;
     timelineRecording: boolean;
@@ -252,6 +253,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsBehaviorAuthoring(): boolean { return this.language === 'xaml' && Boolean(this.frame?.behaviorAuthoring); }
     get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
+    get supportsIncludedPropertyTrace(): boolean { return Boolean(this.frame?.includedPropertyTrace); }
     get supportsStyleComposition(): boolean { return Boolean(this.frame?.styleComposition); }
     get supportsRustStyles(): boolean { return Boolean(this.frame?.rustStyleComposition); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
@@ -919,6 +921,7 @@ export class DesignerPanel implements vscode.Disposable {
                 itemTemplateAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxItemTemplateAuthoring : client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
+                includedPropertyTrace: Boolean(client.capabilities.includedPropertyTrace),
                 styleComposition: Boolean(client.capabilities.styleComposition),
                 rustStyleComposition: Boolean(client.capabilities.rustStyleComposition),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),

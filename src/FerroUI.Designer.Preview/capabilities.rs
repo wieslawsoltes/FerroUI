@@ -30,6 +30,7 @@ pub(crate) fn initialize() -> Value {
         "rsxItemTemplateAuthoring",
         "controlTemplateAuthoring",
         "propertyTrace",
+        "includedPropertyTrace",
         "styleComposition",
         "rustStyleComposition",
         "rustModuleSources",

@@ -58,6 +58,7 @@ impl TraceSource {
         source: &str,
         map: Option<&RsxSourceMap>,
         index: &LineIndex,
+        include_sources: bool,
     ) -> Option<Value> {
         match self {
             Self::Local(location) => location.json(document, source, map, index),
@@ -65,11 +66,12 @@ impl TraceSource {
                 source,
                 revision,
                 text,
-            } => Some(json!({
+            } if include_sources => Some(json!({
                 "included": source,
                 "sourceRevision": format!("{revision:016x}"),
                 "text": text,
             })),
+            Self::Included { .. } => None,
         }
     }
 }

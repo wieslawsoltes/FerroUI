@@ -25,5 +25,6 @@ pub fn property_trace_report(
         || (session.authored_source(), session.rust_map()),
         |(source, map)| (source, Some(map)),
     );
-    Ok(trace.json(session.document(), source, map))
+    let include_sources = arguments["include_sources"].as_bool().unwrap_or_default();
+    Ok(trace.json(session.document(), source, map, include_sources))
 }

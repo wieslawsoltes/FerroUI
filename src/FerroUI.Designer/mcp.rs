@@ -273,8 +273,8 @@ impl UiToolProvider for DesignerMcp {
             ),
             definition(
                 "designer_property_trace",
-                "Trace a property on one source or runtime node against the accepted native preview. Read the effective value, contributor precedence, and any authored locations.",
-                json!({"node":schema::id(),"runtime_node":schema::id(),"property":{"type":"string","minLength":1,"maxLength":256}}),
+                "Trace a property on one source or runtime node against the accepted native preview. Read the effective value, contributor precedence, and any authored locations. Pass include_sources to include checked locations in other XAML files.",
+                json!({"node":schema::id(),"runtime_node":schema::id(),"property":{"type":"string","minLength":1,"maxLength":256},"include_sources":{"type":"boolean"}}),
                 &["property"],
                 false,
             ),
