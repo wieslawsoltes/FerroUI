@@ -151,6 +151,9 @@ impl DesignerSession {
         &mut self,
         plan: ferroui_designer_rsx::RsxStylePlan,
     ) -> Result<ChangeSet, DesignerError> {
+        if plan.source_uri.is_some() {
+            return Err(DesignerError::InvalidEdit("Apply this color edit to its authored Rust module".into()));
+        }
         let label = if plan.shared_color.is_some() {
             "Edit shared Rust color"
         } else {

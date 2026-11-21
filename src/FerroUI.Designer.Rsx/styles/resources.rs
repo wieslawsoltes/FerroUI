@@ -22,6 +22,7 @@ pub struct RsxStyleResource {
 pub struct SharedRustColor {
     pub name: String,
     pub value: SourceSpan,
+    pub uri: Option<String>,
 }
 
 impl RsxStyleResource {
@@ -32,6 +33,7 @@ impl RsxStyleResource {
     pub fn color_source(&self) -> SourceSpan {
         self.shared
             .as_ref()
+            .filter(|constant| constant.uri.is_none())
             .map_or(self.source, |constant| constant.value)
     }
 
@@ -49,12 +51,13 @@ impl RsxStyleResource {
         };
         let initializer = bindings.value(value);
         let color = initializer.as_ref().and_then(|value| {
-            ValueSource::read_color(value.expression, |path| bindings.path(path))
+            ValueSource::read_color(value.expression, |path| bindings.value_path(value, path))
         });
         let shared = initializer.filter(|_| color.is_some()).and_then(|value| {
             Some(SharedRustColor {
                 name: value.constant?.into(),
                 value: rust::span(value.expression),
+                uri: bindings.value_uri(&value).map(str::to_owned),
             })
         });
         Some(Self {

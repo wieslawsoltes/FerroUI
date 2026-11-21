@@ -11,6 +11,8 @@ mod tests;
 mod resources_tests;
 #[cfg(test)]
 mod constant_tests;
+#[cfg(test)]
+mod module_tests;
 
 pub use edit::{ResourceColorMode, RsxStyleEdit, RsxStylePlan};
 pub use fields::RsxStyleField;

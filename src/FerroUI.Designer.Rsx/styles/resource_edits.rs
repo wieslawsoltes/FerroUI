@@ -99,7 +99,30 @@ impl RsxProjection<'_> {
         Ok(RsxStylePlan {
             patches,
             shared_color,
+            source_uri: if mode == ResourceColorMode::Declaration {
+                resource.shared.as_ref().and_then(|constant| constant.uri.clone())
+            } else {
+                None
+            },
         })
+    }
+
+    pub(super) fn check_style_color(&self, edit: &super::RsxStyleEdit, draft: &Self) -> Result<(), String> {
+        let super::RsxStyleEdit::ColorResource { style, resource, value, .. } = edit else {
+            return Ok(());
+        };
+        let styles = self.style_definitions();
+        let rule = styles.iter().position(|(_, rule)| rule.declaration.start == *style)
+            .ok_or("The Rust style changed")?;
+        let entry = styles[rule].1.resources.iter().position(|entry| entry.declaration.start == *resource)
+            .ok_or("The Rust color declaration changed")?;
+        let expected = AnimationValue::parse(value, ValueKind::Color).map_err(|error| error.to_string())?;
+        if draft.style_definitions().get(rule).and_then(|(_, rule)| rule.resources.get(entry))
+            .and_then(|entry| entry.color.as_ref()).is_some_and(|color| color.value == expected) {
+            Ok(())
+        } else {
+            Err("The edited color does not resolve in the authored Rust style".into())
+        }
     }
 
     pub(super) fn plan_resource_setter(

@@ -17,6 +17,9 @@ pub enum ResourceColorMode {
 pub struct RsxStylePlan {
     pub patches: Vec<TextPatch>,
     pub shared_color: Option<SourceSpan>,
+    /// None targets the selected RSX buffer. A shared declaration can instead
+    /// target its own accepted Rust module.
+    pub source_uri: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -86,12 +89,17 @@ impl RsxStyleEdit {
 
 impl RsxProjection<'_> {
     pub fn plan_style(&self, edit: &RsxStyleEdit) -> Result<Vec<TextPatch>, String> {
-        self.plan_style_source(edit).map(|plan| plan.patches)
+        let plan = self.plan_style_source(edit)?;
+        if plan.source_uri.is_some() {
+            return Err("Apply this color edit to its authored Rust module".into());
+        }
+        Ok(plan.patches)
     }
 
     pub fn plan_style_source(&self, edit: &RsxStyleEdit) -> Result<RsxStylePlan, String> {
         let mut count = self.style_definitions().len();
         let mut shared_color = None;
+        let mut source_uri = None;
         let mut patches = match edit {
             RsxStyleEdit::Create { owner, selector } => {
                 let owner = self
@@ -122,7 +130,7 @@ impl RsxProjection<'_> {
                 let selector = selector.trim();
                 validate_selector(selector, style.deletion.span != style.declaration)?;
                 if selector == style.selector {
-                    return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None });
+                    return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None, source_uri: None });
                 }
                 let token = style.selector_span;
                 vec![TextPatch {
@@ -148,7 +156,7 @@ impl RsxProjection<'_> {
                     .ok_or("Open the Rust source to change this setter expression")?;
                 if let Some(value) = value {
                     if *value == authored.text() {
-                        return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None });
+                        return Ok(RsxStylePlan { patches: Vec::new(), shared_color: None, source_uri: None });
                     }
                     authored.plan(field, self.source, value)?
                 } else {
@@ -181,6 +189,7 @@ impl RsxProjection<'_> {
             RsxStyleEdit::ColorResource { style, resource, value, mode } => {
                 let plan = self.change_style_color(self.style_at(*style)?, *resource, value, *mode)?;
                 shared_color = plan.shared_color;
+                source_uri = plan.source_uri;
                 plan.patches
             }
             RsxStyleEdit::Remove { style } => {
@@ -194,11 +203,31 @@ impl RsxProjection<'_> {
                 self.remove_style_part(&style.deletion)?
             }
         };
-        patches.retain(|patch| self.source.get(patch.span.range()) != Some(&patch.replacement));
-        let source = TextPatch::apply_all(self.source, patches.clone())
+        let original = match source_uri.as_deref() {
+            Some(uri) => self.modules
+                .and_then(|modules| modules.source(uri))
+                .ok_or("The authored Rust module is unavailable")?
+                .source.as_ref(),
+            None => self.source,
+        };
+        if shared_color.is_some_and(|initializer| patches.iter().any(|patch| {
+            patch.span.start < initializer.start || patch.span.end > initializer.end
+        })) {
+            return Err("The color change extends beyond its authored initializer".into());
+        }
+        patches.retain(|patch| original.get(patch.span.range()) != Some(&patch.replacement));
+        let edited = TextPatch::apply_all(original, patches.clone())
             .map_err(|error| error.to_string())?;
-        let start = self.invocation_start_after(&patches)?;
-        let draft = self.catalog.project(&source, start)?;
+        let (source, start) = if source_uri.is_some() {
+            (self.source, self.invocation.start)
+        } else {
+            (edited.as_str(), self.invocation_start_after(&patches)?)
+        };
+        let modules = self.modules.map(|modules| {
+            modules.with_file_text(source_uri.as_deref().unwrap_or(&modules.active().uri), &edited)
+                .ok_or("The style edit changes the accepted Cargo module layout")
+        }).transpose()?;
+        let draft = self.catalog.project_with_modules(source, start, modules.as_ref())?;
         if draft.invocation.start != start
             || draft.tree != self.tree
             || draft.style_definitions().len() != count
@@ -207,7 +236,8 @@ impl RsxProjection<'_> {
         {
             return Err("The style change does not round-trip in the active Rust view".into());
         }
-        Ok(RsxStylePlan { patches, shared_color })
+        self.check_style_color(edit, &draft)?;
+        Ok(RsxStylePlan { patches, shared_color, source_uri })
     }
 
     fn style_at(&self, node: usize) -> Result<&RsxStyle, String> {

@@ -1,8 +1,9 @@
-//! Resolve explicit names and constant initializers in the authored Rust file.
+//! Resolve explicit names and constant initializers in authored Rust sources.
 mod collect;
 
 use crate::animation::syntax as rust;
 use ferroui_designer_core::SourceSpan;
+use ferroui_designer_project::RustModuleSources;
 use std::collections::BTreeMap;
 use syn::{Expr, ext::IdentExt};
 
@@ -10,6 +11,9 @@ const MAX_INDIRECTION: usize = 32;
 
 pub(crate) struct LocalRust {
     scopes: Vec<Scope>,
+    files: Vec<String>,
+    active: usize,
+    target_known: bool,
 }
 
 struct Scope {
@@ -17,6 +21,8 @@ struct Scope {
     parent: Option<usize>,
     module: usize,
     super_module: Option<usize>,
+    file: usize,
+    indexed: bool,
     members: BTreeMap<String, Binding>,
 }
 
@@ -29,21 +35,39 @@ enum Binding {
 
 enum Resolved<'a> {
     External(String),
-    Constant { name: &'a str, value: &'a Expr },
+    Constant {
+        name: &'a str,
+        value: &'a Expr,
+        scope: usize,
+    },
 }
 
 pub(crate) struct Value<'a> {
     pub(crate) expression: &'a Expr,
     pub(crate) constant: Option<&'a str>,
+    scope: usize,
 }
 
 impl LocalRust {
-    pub(crate) fn parse(source: &str, offset: usize) -> Self {
-        collect::parse(source, offset)
+    pub(crate) fn parse(source: &str, offset: usize, modules: Option<&RustModuleSources>) -> Self {
+        collect::parse(source, offset, modules)
     }
 
     pub(crate) fn path(&self, expression: &Expr) -> Option<String> {
-        match self.resolve(expression)? {
+        self.path_in(self.active_scope(expression)?, expression)
+    }
+
+    pub(crate) fn value_path(&self, value: &Value<'_>, expression: &Expr) -> Option<String> {
+        self.path_in(value.scope, expression)
+    }
+
+    pub(crate) fn value_uri(&self, value: &Value<'_>) -> Option<&str> {
+        let file = self.scopes[value.scope].file;
+        (file != self.active).then(|| self.files[file].as_str())
+    }
+
+    fn path_in(&self, scope: usize, expression: &Expr) -> Option<String> {
+        match self.resolve(scope, expression)? {
             Resolved::External(path) => Some(path),
             Resolved::Constant { .. } => None,
         }
@@ -51,21 +75,29 @@ impl LocalRust {
 
     pub(crate) fn value<'a>(&'a self, mut expression: &'a Expr) -> Option<Value<'a>> {
         let mut constant = None;
+        let mut scope = self.active_scope(expression)?;
         for _ in 0..MAX_INDIRECTION {
             match expression {
                 Expr::Paren(group) => expression = &group.expr,
                 Expr::Group(group) => expression = &group.expr,
                 Expr::Path(_) => {
-                    let Resolved::Constant { name, value } = self.resolve(expression)? else {
+                    let Resolved::Constant {
+                        name,
+                        value,
+                        scope: owner,
+                    } = self.resolve(scope, expression)?
+                    else {
                         return None;
                     };
                     expression = value;
                     constant = Some(name);
+                    scope = owner;
                 }
                 _ => {
                     return Some(Value {
                         expression,
                         constant,
+                        scope,
                     });
                 }
             }
@@ -73,7 +105,14 @@ impl LocalRust {
         None
     }
 
-    fn resolve(&self, expression: &Expr) -> Option<Resolved<'_>> {
+    fn active_scope(&self, expression: &Expr) -> Option<usize> {
+        let offset = rust::span(expression).start;
+        self.scopes
+            .iter()
+            .rposition(|scope| scope.file == self.active && scope.span.contains(offset))
+    }
+
+    fn resolve(&self, scope: usize, expression: &Expr) -> Option<Resolved<'_>> {
         let Expr::Path(site) = expression else {
             return None;
         };
@@ -93,11 +132,6 @@ impl LocalRust {
             .map(|part| part.ident.unraw().to_string())
             .collect();
         let parts: Vec<_> = names.iter().map(String::as_str).collect();
-        let offset = rust::span(expression).start;
-        let scope = self
-            .scopes
-            .iter()
-            .rposition(|scope| scope.span.contains(offset))?;
         self.follow(scope, site.path.leading_colon.is_some(), &parts, 0)
     }
 
@@ -127,8 +161,14 @@ impl LocalRust {
                 }
                 self.member(module, rest, depth + 1)
             }
-            // The authored file can be a module file inside another crate root.
-            "crate" => Some(Resolved::External(parts.join("::"))),
+            "crate" => {
+                // Registered getters may be qualified by `crate` even when the
+                // syntax index does not recognize their registration macro.
+                self.target_known
+                    .then(|| self.member(0, rest, depth + 1))
+                    .flatten()
+                    .or_else(|| Some(Resolved::External(parts.join("::"))))
+            }
             _ => {
                 let mut current = Some(scope);
                 while let Some(index) = current {
@@ -164,7 +204,9 @@ impl LocalRust {
             return None;
         }
         match binding {
-            Binding::Constant(value) if tail.is_empty() => Some(Resolved::Constant { name, value }),
+            Binding::Constant(value) if tail.is_empty() => {
+                Some(Resolved::Constant { name, value, scope })
+            }
             Binding::Module(module) => self.member(*module, tail, depth + 1),
             Binding::Import { absolute, path } => {
                 let parts: Vec<_> = path

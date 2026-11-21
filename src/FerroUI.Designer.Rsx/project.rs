@@ -14,6 +14,7 @@ use crate::styles::{RsxStyle, RsxStyleIssue, projected_styles};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
 use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
+use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_tools::TableKind;
 use ferroui_view_syntax::{Attribute, Node};
 use proc_macro2::TokenStream;
@@ -70,6 +71,7 @@ impl RsxNode {
 pub struct RsxProjection<'a> {
     pub(crate) source: &'a str,
     pub(crate) catalog: &'a RsxCatalog,
+    pub(crate) modules: Option<&'a RustModuleSources>,
     pub(crate) tree: Element,
     pub nodes: Vec<RsxNode>,
     pub blocks: Vec<SourceSpan>,
@@ -208,6 +210,18 @@ impl RsxCatalog {
         source: &'a str,
         caret: usize,
     ) -> Result<RsxProjection<'a>, String> {
+        self.project_with_modules(source, caret, None)
+    }
+
+    /// Use an accepted Cargo target snapshot to resolve authored declarations
+    /// in the other modules of that crate.
+    pub fn project_with_modules<'a>(
+        &'a self,
+        source: &'a str,
+        caret: usize,
+        modules: Option<&'a RustModuleSources>,
+    ) -> Result<RsxProjection<'a>, String> {
+        let modules = modules.filter(|modules| modules.active().source.as_ref() == source);
         let blocks = blocks(source)?;
         let block = blocks
             .iter()
@@ -216,11 +230,12 @@ impl RsxCatalog {
             .or_else(|| blocks.first())
             .ok_or("Open a Rust file containing a ferroui_view::rsx! invocation")?;
         let stream = block.group.stream();
-        let (tree, state) = parse_body(source, stream.clone(), self)?;
+        let (tree, state) = parse_body(source, stream.clone(), self, modules)?;
         let inner_trivia = contains_trivia(source, stream, state.nodes[0].span);
         Ok(RsxProjection {
             source,
             catalog: self,
+            modules,
             tree,
             nodes: state.nodes,
             blocks: blocks.iter().map(|block| block.span).collect(),
@@ -251,7 +266,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
     {
         return Err("Expected an rsx! expression".into());
     }
-    let (tree, state) = parse_body(source, draft.mac.tokens, catalog)?;
+    let (tree, state) = parse_body(source, draft.mac.tokens, catalog, None)?;
     if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected)) {
         return Err("Edit native styles, animation, states, and columns in their authored scope".into());
     }
@@ -268,7 +283,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
 }
 
 #[derive(Default)]
-struct State {
+struct State<'a> {
     nodes: Vec<RsxNode>,
     omissions: Vec<String>,
     omitted_count: usize,
@@ -277,9 +292,10 @@ struct State {
     animation_issues: Vec<RsxAnimationIssue>,
     style_issues: Vec<RsxStyleIssue>,
     local_rust: Option<LocalRust>,
+    modules: Option<&'a RustModuleSources>,
 }
 
-impl State {
+impl State<'_> {
     fn omit(&mut self, description: String) {
         self.omitted_count += 1;
         if self.omissions.len() < 8 && !self.omissions.contains(&description) {
@@ -294,7 +310,10 @@ impl State {
         } else {
             ArraySlot::Unavailable
         };
-        let bindings = self.local_rust.get_or_insert_with(|| LocalRust::parse(source, value.span().byte_range().start));
+        let modules = self.modules;
+        let bindings = self.local_rust.get_or_insert_with(|| {
+            LocalRust::parse(source, value.span().byte_range().start, modules)
+        });
         let projected = projected_styles(source, value, catalog, bindings);
         let partial = !projected.issues.is_empty() || !projected.animation_issues.is_empty();
         self.style_issues.extend(projected.issues);
@@ -573,12 +592,17 @@ pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {
             && !element.properties.contains_key("Content"))
 }
 
-fn parse_body(source: &str, tokens: TokenStream, catalog: &RsxCatalog) -> Result<(Element, State), String> {
+fn parse_body<'a>(
+    source: &str,
+    tokens: TokenStream,
+    catalog: &RsxCatalog,
+    modules: Option<&'a RustModuleSources>,
+) -> Result<(Element, State<'a>), String> {
     let nodes = ferroui_view_syntax::parse(tokens).map_err(|e| format!("Invalid RSX: {e}"))?;
     let [root] = nodes.as_slice() else {
         return Err("RSX preview needs one root control; wrap fragments in a panel".into());
     };
-    let mut state = State::default();
+    let mut state = State { modules, ..State::default() };
     let tree = state.element(source, root, 0, catalog)?;
     Ok((tree, state))
 }
