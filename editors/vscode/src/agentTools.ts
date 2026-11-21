@@ -513,8 +513,10 @@ export class AgentTools {
                 const presentation = await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source,
                     opened_session: presentation.navigationSession };
-                if (presentation?.returnToConsumer) return { ...describe(panel), returned_to: presentation.returnToConsumer };
-                if (presentation?.openRustTemplate) return { ...describe(panel), opened_template: presentation.openRustTemplate };
+                if (presentation?.returnToConsumer) return { ...describe(panel), returned_to: presentation.returnToConsumer,
+                    ...(presentation.navigationSession !== undefined && { returned_session: presentation.navigationSession }) };
+                if (presentation?.openRustTemplate) return { ...describe(panel), opened_template: presentation.openRustTemplate,
+                    ...(presentation.navigationSession !== undefined && { opened_session: presentation.navigationSession }) };
                 break;
             }
             case 'designer_timeline_control':

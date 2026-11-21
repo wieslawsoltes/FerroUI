@@ -41,7 +41,11 @@ pub(super) struct SourceField {
 }
 
 impl SourceField {
-    pub(super) fn read(kind: ColumnKind, method: &ExprMethodCall) -> Option<Self> {
+    pub(super) fn read(
+        kind: ColumnKind,
+        method: &ExprMethodCall,
+        scope: Option<crate::local_rust::RustSourceScope<'_>>,
+    ) -> Option<Self> {
         let property = properties::of(kind).find(|property| method.method == property.setter)?;
         if method.args.len() != 1 {
             return None;
@@ -53,7 +57,7 @@ impl SourceField {
         let argument = span(expr);
         let method = method_suffix(method);
         let template = matches!(property.name, "CellTemplate" | "CellEditingTemplate")
-            .then(|| TemplateSource::read(expr, Some(method)));
+            .then(|| TemplateSource::read(expr, Some(method), scope));
         Some(Self {
             property,
             value,

@@ -1,6 +1,6 @@
 use crate::{DesignerSession, NodeId};
-use ferroui_designer_core::{SourceSpan, TextPatch};
-use ferroui_designer_rsx::{RsxItemTemplate, RsxProjection};
+use ferroui_designer_core::SourceSpan;
+use ferroui_designer_rsx::{RsxItemTemplate, RsxProjection, RsxSourceEdit, RsxTemplateBody};
 use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember, nearest_table};
 
 impl DesignerSession {
@@ -44,12 +44,12 @@ impl DesignerSession {
         projection: &RsxProjection<'_>,
         owner: NodeId,
         property: ItemTemplateMember,
-    ) -> Result<SourceSpan, String> {
+    ) -> Result<RsxTemplateBody, String> {
         self.rust_template_slots(projection, owner)
             .into_iter()
             .find(|slot| slot.property == property)
             .and_then(|slot| slot.body)
-            .ok_or_else(|| "Open a mapped inline Rust template in the current preview".into())
+            .ok_or_else(|| "Open a mapped Rust template in the current preview".into())
     }
 
     pub(crate) fn rust_template_plan(
@@ -59,12 +59,13 @@ impl DesignerSession {
         property: ItemTemplateMember,
         change: &ItemTemplateChange,
         row_type: Option<&str>,
-    ) -> Result<Vec<TextPatch>, String> {
+    ) -> Result<RsxSourceEdit, String> {
+        self.ensure_writable().map_err(|error| error.to_string())?;
         if !self.can_manipulate() {
             return Err("Wait for the current editable Rust preview".into());
         }
         self.ensure_layer_manipulable(owner)?;
-        projection.edit_item_template(self.document(), owner, property, change, row_type)
+        projection.plan_item_template(self.document(), owner, property, change, row_type)
     }
 
     pub(crate) fn edit_rust_template(
@@ -75,10 +76,18 @@ impl DesignerSession {
         row_type: Option<&str>,
     ) -> Result<(), String> {
         let rust = self.rust.as_ref().ok_or("Open a Rust view")?;
-        let patches =
+        let edit =
             self.rust_template_plan(&rust.projection()?, owner, property, &change, row_type)?;
+        self.apply_rust_template_plan(change.label(), edit)
+    }
+
+    pub(crate) fn apply_rust_template_plan(
+        &mut self,
+        label: &str,
+        edit: RsxSourceEdit,
+    ) -> Result<(), String> {
         if !self
-            .commit_rust_patches(change.label(), patches)
+            .commit_rust_declaration(label, edit)
             .map_err(|error| error.to_string())?
             .is_empty()
         {
@@ -93,23 +102,54 @@ impl DesignerSession {
         property: ItemTemplateMember,
     ) -> Result<(), String> {
         let rust = self.rust.as_ref().ok_or("Open a Rust view")?;
-        let projection = rust.projection()?;
-        let body = self.rust_template_body(&projection, owner, property)?;
+        let body = self.rust_template_body(&rust.projection()?, owner, property)?;
+        if body.location.uri.is_some() {
+            return Err("Open this template in its companion Rust module".into());
+        }
+        self.enter_rust_template(owner, body.location.span, property)
+    }
+
+    pub(crate) fn enter_rust_template(
+        &mut self,
+        owner: NodeId,
+        body: SourceSpan,
+        property: ItemTemplateMember,
+    ) -> Result<(), String> {
+        let invocation = self.rust_map().ok_or("Open a mapped Rust view")?.invocation;
         let owner = self
             .authored_span(owner)
             .or_else(|| {
                 nearest_table(self.document(), owner).and_then(|table| self.authored_span(table))
             })
-            .map_or(projection.invocation.start, |span| span.start);
+            .map_or(invocation.start, |span| span.start);
         self.rust
             .as_mut()
             .expect("Rust view is open")
             .enter_template(&mut self.document, body, owner, property)
             .map_err(|error| error.to_string())?;
+        self.finish_rust_template_preview();
+        Ok(())
+    }
+
+    pub(crate) fn enter_companion_rust_template(
+        &mut self,
+        body: SourceSpan,
+        consumer: String,
+        property: ItemTemplateMember,
+    ) -> Result<(), String> {
+        self.rust
+            .as_mut()
+            .ok_or("Open the Rust template module")?
+            .enter_companion_template(&mut self.document, body, consumer, property)
+            .map_err(|error| error.to_string())?;
+        self.finish_rust_template_preview();
+        Ok(())
+    }
+
+    fn finish_rust_template_preview(&mut self) {
         self.reset_rust_view_state();
         self.changed(true);
         self.select([self.document.ast().root()]);
-        Ok(())
     }
 
     pub(crate) fn rust_template_property(&self) -> Option<ItemTemplateMember> {
@@ -131,7 +171,7 @@ impl DesignerSession {
             .elements()
             .find(|node| {
                 self.authored_span(node.id)
-                    .is_some_and(|span| span.start == owner)
+                    .is_some_and(|span| Some(span.start) == owner)
             })
             .map_or(self.document.ast().root(), |node| node.id);
         self.select([node]);

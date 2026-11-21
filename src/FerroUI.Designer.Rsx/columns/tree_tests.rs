@@ -143,7 +143,7 @@ fn tree_grid_template_slots_insert_before_build_and_keep_the_original_body() {
     let node = columns.columns[3].node;
     let slots = view.item_templates(&document, node);
     assert_eq!(slots.len(), 2);
-    assert!(TREE[slots[0].body.unwrap().range()].contains("Active account"));
+    assert!(TREE[slots[0].body.as_ref().unwrap().location.span.range()].contains("Active account"));
     assert!(slots[1].can_create);
     let patches = view
         .edit_item_template(

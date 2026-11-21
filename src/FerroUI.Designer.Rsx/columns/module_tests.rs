@@ -3,12 +3,21 @@ use ferroui_designer_core::{Document, TextPatch};
 use ferroui_designer_project::{
     PreviewSourceBuffer, RustModuleSources, canonical_file_uri, file_uri,
 };
-use ferroui_designer_tools::{ColumnChange, table_columns};
+use ferroui_designer_tools::{ColumnChange, ItemTemplateChange, ItemTemplateMember, table_columns};
 use std::{fs, path::PathBuf};
 
 struct Fixture(PathBuf);
 
 impl Fixture {
+    fn create(name: &str) -> Self {
+        let root = std::env::temp_dir().join(format!(
+            "ferroui-column-module-{name}-{}",
+            std::process::id()
+        ));
+        fs::create_dir(&root).unwrap();
+        Self(root)
+    }
+
     fn write(&self, name: &str, source: &str) -> String {
         let path = self.0.join(name);
         fs::write(&path, source).unwrap();
@@ -24,9 +33,7 @@ impl Drop for Fixture {
 
 #[test]
 fn named_columns_edit_the_captured_companion_buffer() {
-    let fixture =
-        Fixture(std::env::temp_dir().join(format!("ferroui-column-module-{}", std::process::id())));
-    fs::create_dir(&fixture.0).unwrap();
+    let fixture = Fixture::create("columns");
     fixture.write("main.rs", "mod columns; mod review;\n");
     let disk = r#"use ferroui_view::{table_columns as list, table_column};
 pub(crate) fn shared() -> Columns { stored() }
@@ -90,4 +97,91 @@ fn review() { rsx! { TableView { columns: accounts() } }; }
         .unwrap();
     assert_eq!(updated.invocation, projection.invocation);
     assert!(updated.xaml().contains("Header=\"Customer\""));
+}
+
+#[test]
+fn a_cell_assignment_and_its_body_can_belong_to_different_companion_modules() {
+    let fixture = Fixture::create("templates");
+    fixture.write("main.rs", "mod columns; mod review; mod templates;\n");
+    let column_source = r#"use ferroui_view::{table_columns, table_column};
+use crate::templates::account_cell as cell;
+pub fn columns() -> Columns {
+    table_columns([table_column().header("Account").cell_template(cell())])
+}
+"#;
+    let column_uri = fixture.write("columns.rs", column_source);
+    let body_source = r#"pub fn account_cell() -> Template {
+    ferroui_view::template::<String, _>(|value| rsx! { StackPanel {
+        TextBlock { text: "Account 🧭" }
+        TextBlock { text: value }
+    } })
+}
+"#
+    .replace('\n', "\r\n");
+    let body_uri = fixture.write("templates.rs", &body_source);
+    let source = r#"fn review() { rsx! { TableView { columns: crate::columns::columns() } }; }"#;
+    let consumer = fixture.write("review.rs", source);
+    let modules = RustModuleSources::capture(
+        &fixture.0,
+        &fixture.0.join("main.rs"),
+        &consumer,
+        source,
+        &[],
+    )
+    .unwrap();
+    let catalog = RsxCatalog::built_in();
+    let caret = source.find("TableView").unwrap();
+    let view = catalog
+        .project_with_modules(source, caret, Some(&modules))
+        .unwrap();
+    let document = Document::new(view.xaml()).unwrap();
+    let column = table_columns(&document, document.ast().root())
+        .unwrap()
+        .columns[0]
+        .node;
+    let slots = view.item_templates(&document, column);
+    let slot = &slots[0];
+    let assignment = slot.expression.as_ref().unwrap();
+    assert_eq!(assignment.uri.as_ref(), Some(&column_uri));
+    assert_eq!(&column_source[assignment.span.range()], "cell()");
+    let body = slot.body.as_ref().unwrap();
+    assert_eq!(body.factory.as_deref(), Some("account_cell"));
+    assert_eq!(body.location.uri.as_ref(), Some(&body_uri));
+    assert!(body_source[body.location.span.range()].contains("Account 🧭"));
+    assert!(slot.can_reset);
+    let plan = view
+        .plan_item_template(
+            &document,
+            column,
+            ItemTemplateMember::CellTemplate,
+            &ItemTemplateChange::Reset,
+            None,
+        )
+        .unwrap();
+    assert_eq!(plan.source.uri, Some(column_uri.clone()));
+    let reset = TextPatch::apply_all(column_source, plan.patches).unwrap();
+    assert_eq!(reset, column_source.replace(".cell_template(cell())", ""));
+    let modules = modules.with_file_text(&column_uri, &reset).unwrap();
+    let view = catalog
+        .project_with_modules(source, caret, Some(&modules))
+        .unwrap();
+    let plan = view
+        .plan_item_template(
+            &document,
+            column,
+            ItemTemplateMember::CellTemplate,
+            &ItemTemplateChange::CreateInline,
+            Some("String"),
+        )
+        .unwrap();
+    assert_eq!(plan.source.uri, Some(column_uri));
+    assert!(
+        TextPatch::apply_all(&reset, plan.patches)
+            .unwrap()
+            .contains("ferroui_view::template::<String, _>")
+    );
+    assert_eq!(
+        fs::read_to_string(fixture.0.join("templates.rs")).unwrap(),
+        body_source
+    );
 }

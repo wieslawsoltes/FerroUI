@@ -130,12 +130,16 @@ impl TemplateActions {
     fn apply(&self, edit: impl FnOnce(&mut crate::DesignerSession) -> Result<(), String>) {
         self.run(|workspace| {
             edit(&mut workspace.session.borrow_mut())?;
-            workspace.refresh(true);
-            if let Some(flyout) = self.flyout.upgrade() {
-                render(workspace, &flyout);
-            }
+            self.refresh(workspace);
             Ok(())
         });
+    }
+
+    fn refresh(&self, workspace: &Rc<DesignerWorkspace>) {
+        workspace.refresh(true);
+        if let Some(flyout) = self.flyout.upgrade() {
+            render(workspace, &flyout);
+        }
     }
 
     fn preview(&self, property: ItemTemplateMember) {

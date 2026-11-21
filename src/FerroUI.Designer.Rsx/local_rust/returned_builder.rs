@@ -3,30 +3,37 @@ use super::{LocalRust, MAX_INDIRECTION, Resolved};
 use syn::{Expr, ItemFn, Pat, Stmt};
 
 pub(crate) struct ReturnedBuilder<'a> {
-    resolver: &'a LocalRust,
-    scope: usize,
+    pub(crate) scope: RustSourceScope<'a>,
     pub(crate) name: &'a str,
     pub(crate) expression: &'a Expr,
 }
 
-impl ReturnedBuilder<'_> {
-    pub(crate) fn uri(&self) -> Option<&str> {
+#[derive(Clone, Copy)]
+pub(crate) struct RustSourceScope<'a> {
+    resolver: &'a LocalRust,
+    scope: usize,
+}
+
+impl LocalRust {
+    pub(crate) fn source_scope(&self, expression: &Expr) -> Option<RustSourceScope<'_>> {
+        Some(RustSourceScope {
+            resolver: self,
+            scope: self.active_scope(expression)?,
+        })
+    }
+}
+
+impl<'a> RustSourceScope<'a> {
+    pub(crate) fn uri(self) -> Option<&'a str> {
         let file = self.resolver.scopes[self.scope].file;
         (file != self.resolver.active).then(|| self.resolver.files[file].as_str())
     }
 
-    pub(crate) fn path(&self, expression: &Expr) -> Option<String> {
+    pub(crate) fn path(self, expression: &Expr) -> Option<String> {
         self.resolver.path_in(self.scope, expression)
     }
-}
 
-impl LocalRust {
-    pub(crate) fn can_resolve_builder(expression: &Expr) -> bool {
-        matches!(ungroup(expression), Expr::Call(call) if call.args.is_empty() && call.attrs.is_empty())
-    }
-
-    pub(crate) fn returned_builder<'a>(&'a self, assignment: &Expr) -> Option<ReturnedBuilder<'a>> {
-        let mut scope = self.active_scope(assignment)?;
+    pub(crate) fn returned_builder(mut self, assignment: &Expr) -> Option<ReturnedBuilder<'a>> {
         let mut expression = ungroup(assignment);
         let mut resolved = None;
         for _ in 0..MAX_INDIRECTION {
@@ -40,15 +47,14 @@ impl LocalRust {
                 name,
                 expression: body,
                 scope: owner,
-            }) = self.resolve(scope, &call.func)
+            }) = self.resolver.resolve(self.scope, &call.func)
             else {
                 return resolved;
             };
-            scope = owner;
+            self.scope = owner;
             expression = body;
             resolved = Some(ReturnedBuilder {
-                resolver: self,
-                scope,
+                scope: self,
                 name,
                 expression: body,
             });

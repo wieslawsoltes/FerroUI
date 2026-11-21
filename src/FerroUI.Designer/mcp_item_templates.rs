@@ -8,10 +8,11 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 #[path = "mcp_rust_templates.rs"]
 mod rust;
-pub use rust::{rust_template_navigation, rust_template_report, rust_template_source_plan};
+pub use rust::{rust_template_declaration_plan, rust_template_navigation, rust_template_report, rust_template_source_plan};
+pub(super) use rust::call_workspace as call_rust_workspace;
 
 const QUERY: &str = "designer_item_templates";
-const ACTION: &str = "designer_item_template";
+pub(super) const ACTION: &str = "designer_item_template";
 
 pub(super) fn handles(name: &str) -> bool {
     matches!(name, QUERY | ACTION)

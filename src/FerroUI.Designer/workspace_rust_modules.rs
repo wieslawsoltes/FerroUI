@@ -5,10 +5,27 @@ use ferroui_designer_language::{LineIndex, Range};
 use ferroui_designer_project::{
     PreviewSourceBuffer, RustModuleProject, RustModuleSources, file_path,
 };
-use ferroui_designer_rsx::RsxStyleEdit;
+use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit};
 use std::{rc::Rc, sync::Arc};
 
 impl DesignerWorkspace {
+    pub(super) fn with_current_rust_sources<T>(
+        &self,
+        read: impl FnOnce(&crate::DesignerSession, &RsxProjection<'_>) -> Result<T, String>,
+    ) -> Result<(T, Option<Arc<RustModuleSources>>), String> {
+        if self.pending_source.get() {
+            return Err("Apply the current source draft before using the inspector".into());
+        }
+        let session = self.session.borrow();
+        let rust = session.rust.as_ref().ok_or("Open a mapped Rust view")?;
+        let projection = rust.projection()?;
+        let modules = rust.module_sources().cloned();
+        if let Some(modules) = &modules {
+            self.require_rust_module_snapshot(session.document_uri(), modules)?;
+        }
+        Ok((read(&session, &projection)?, modules))
+    }
+
     pub(super) fn capture_rust_modules(
         &self,
         uri: &str,

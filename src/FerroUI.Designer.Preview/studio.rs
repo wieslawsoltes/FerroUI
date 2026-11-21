@@ -294,9 +294,9 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
                     &session, design.source, projection, &arguments))?;
                 (plan.patches, plan.source.uri)
             } else {
-                let patches = stage.sources.run(|| ferroui_designer::mcp::rust_template_source_plan(
+                let plan = stage.sources.run(|| ferroui_designer::mcp::rust_template_declaration_plan(
                     &session, design.source, projection, &arguments))?;
-                (patches, None)
+                (plan.patches, plan.source.uri)
             };
             if let Some(uri) = uri {
                 let source = stage.authored_rsx.as_ref().and_then(|rust| rust.module_source(&uri))

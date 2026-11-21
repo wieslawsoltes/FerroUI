@@ -19,7 +19,7 @@ import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelinePro
 import type { SpacingCatalog, SpacingDraft, SpacingRequest, SpacingResponse } from './spacingProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
-import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState, ResizeGesture } from './protocol';
+import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DefinitionNavigation, DesignDataPresentation, DesignerViewState, ResizeGesture, RustTemplateNavigation, StudioPresentation } from './protocol';
 import { isInside } from './workspacePaths';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit',
@@ -115,7 +115,7 @@ export class DesignerPanel implements vscode.Disposable {
         caret: vscode.Position,
         onClose: () => void,
         private readonly onDrag: (message: DragMessage | Extract<FromDesigner, { type: 'previewDrop' }>) => void,
-        private readonly onDefinitionNavigation: (token: number, target: NonNullable<CanvasPresentation['openDefinition']> | string,
+        private readonly onDefinitionNavigation: (token: number, target: DefinitionNavigation,
             signal: AbortSignal) => Promise<number | undefined>,
         restored?: DesignerCanvasState,
     ) {
@@ -383,13 +383,13 @@ export class DesignerPanel implements vscode.Disposable {
         return (await this.getClient()).resources(source, frame.token, target);
     }
 
-    async revealSource(frame: FrameTarget, range: Range): Promise<void> {
-        if (this.canUse(frame)) await this.reveal(this.document.validateRange(asRange(range)), true);
+    async revealSource(frame: FrameTarget, range: Range, preserveView = false): Promise<void> {
+        if (this.canUse(frame)) await this.reveal(this.document.validateRange(asRange(range)), true, preserveView);
     }
 
     async revealRustModule(frame: FrameTarget, uri: string, range: Range, signal?: AbortSignal, validate?: () => void): Promise<void> {
         if (!this.canUse(frame)) throw new Error('Read the current Rust preview before opening a module.');
-        const { document } = await this.checkRustModule(await this.getClient(), frame.token, uri);
+        const { document } = await this.checkRustModule(frame.token, uri);
         signal?.throwIfAborted();
         validate?.();
         const source = vscode.window.visibleTextEditors.find(editor => editor.document === this.document);
@@ -397,8 +397,10 @@ export class DesignerPanel implements vscode.Disposable {
             viewColumn: source?.viewColumn ?? vscode.ViewColumn.One, preview: false, preserveFocus: true });
     }
 
-    private async checkRustModule(client: NativePreview, token: number, uri: string) {
+    async checkRustModule(token: number, uri: string) {
         if (this.language !== 'rust') throw new Error('Open a mapped Rust preview to use a companion module.');
+        if (this.currentToken !== token) throw new Error('Read the current source before opening a Rust module.');
+        const client = await this.getClient();
         const document = await vscode.workspace.openTextDocument(await previewSourceUri(this.document.uri, uri, 'rust'));
         const version = document.version;
         await client.verifyRustModule(token, uri, document.getText());
@@ -672,14 +674,18 @@ export class DesignerPanel implements vscode.Disposable {
         return {};
     }
 
-    async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
+    async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<StudioPresentation | undefined> {
         const action = args as { action?: string; node?: number };
         const view = this.snapshot;
         if (name === 'designer_definition' && action.action === 'exit' && view?.rustTemplate) {
             if (!this.canUse({ session: this.session, token })) throw new Error('Read the current Rust template preview before returning.');
             signal.throwIfAborted();
             const scope = this.templateScopes.leave(this.document, view);
-            await this.switchTemplateView(scope.consumer, scope.owner, signal);
+            await this.switchTemplateView(scope.previous, scope.owner, signal);
+            if (scope.consumer && this.currentToken !== undefined) {
+                const navigationSession = await this.onDefinitionNavigation(this.currentToken, scope.consumer, signal);
+                if (navigationSession !== undefined) return { returnToConsumer: scope.consumer, navigationSession };
+            }
             return;
         }
         const presentation = await this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
@@ -702,14 +708,19 @@ export class DesignerPanel implements vscode.Disposable {
         if (this.language === 'rust' && name === 'designer_item_template' && !presentation?.openRustTemplate) {
             throw new Error('Read the current Rust template slot before opening it.');
         }
-        if (presentation?.openRustTemplate) {
+        const template = presentation?.openRustTemplate;
+        if (template) {
             const frame = this.snapshot;
             if (!frame || !this.canUse({ session: this.session, token: token + 1 })) {
                 throw new Error('The Rust view changed before opening the template.');
             }
             signal.throwIfAborted();
+            if (template.uri) {
+                const navigationSession = await this.onDefinitionNavigation(token + 1, { ...template, uri: template.uri }, signal);
+                return { ...presentation, navigationSession };
+            }
             const owner = frame.nodes.some(node => node.id === action.node) ? action.node : this.selected;
-            const body = this.templateScopes.enter(this.document, frame, presentation.openRustTemplate, owner);
+            const body = this.templateScopes.enter(this.document, frame, template, owner);
             await this.switchTemplateView(body, undefined, signal);
             return presentation;
         }
@@ -723,7 +734,21 @@ export class DesignerPanel implements vscode.Disposable {
         return presentation;
     }
 
-    private async switchTemplateView(offset: number, owner: number | undefined, signal: AbortSignal): Promise<void> {
+    async openCompanionRustTemplate(template: RustTemplateNavigation, consumer: string, version: number, signal: AbortSignal,
+        ensureConsumer: () => void): Promise<void> {
+        let snapshot = await this.waitForSnapshot(signal);
+        if (this.language !== 'rust' || this.document.version !== version || this.currentToken === undefined) {
+            throw new Error('The template source changed. Reopen Item Templates.');
+        }
+        if (!snapshot.image || !snapshot.activeBlock) {
+            snapshot = await this.switchTemplateView(this.document.offsetAt(exactRange(this.document, template.range).start), undefined, signal);
+        }
+        ensureConsumer();
+        const body = this.templateScopes.enter(this.document, snapshot, template, undefined, consumer);
+        await this.switchTemplateView(body, undefined, signal);
+    }
+
+    private async switchTemplateView(offset: number, owner: number | undefined, signal: AbortSignal): Promise<Snapshot> {
         const document = this.document;
         const version = document.version;
         const start = document.positionAt(offset);
@@ -743,6 +768,7 @@ export class DesignerPanel implements vscode.Disposable {
             const node = snapshot.nodes.find(node => document.offsetAt(asPosition(node.nameRange.start)) === owner);
             if (node) this.setSelection(node.id);
         }
+        return snapshot;
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
@@ -1145,7 +1171,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
             if (moduleEdit) {
-                const { document, version } = await this.checkRustModule(client, frame.token, moduleEdit.uri);
+                const { document, version } = await this.checkRustModule(frame.token, moduleEdit.uri);
                 signal?.throwIfAborted();
                 validate?.();
                 await applyTextEdits(document, version, moduleEdit.edits);
@@ -1197,7 +1223,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (starts.length) this.retainedSelection = { version, starts };
     }
 
-    private async reveal(range: vscode.Range, openSource = false): Promise<void> {
+    private async reveal(range: vscode.Range, openSource = false, preserveView = false): Promise<void> {
         const version = this.document.version;
         let editor = vscode.window.visibleTextEditors.find(editor => editor.document === this.document);
         if (!editor && openSource) {
@@ -1220,7 +1246,7 @@ export class DesignerPanel implements vscode.Disposable {
             editor.selection = selection;
         }
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-        this.updateCaret(range.start, true);
+        if (!preserveView) this.updateCaret(range.start, true);
     }
 
     private syncCanvas(): void {

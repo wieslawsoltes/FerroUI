@@ -74,6 +74,11 @@ impl DesignerSession {
         self.preview.definition_scope.as_ref()
     }
 
+    pub(crate) fn definition_consumer(&self) -> Option<&str> {
+        self.rust.as_ref().and_then(|rust| rust.template_consumer())
+            .or_else(|| self.included_template_consumer())
+    }
+
     /// Changes after accepted scope, design-data and preview-environment transitions,
     /// including returning to the same definition. Source revisions alone cannot retire
     /// an editor or spatial gesture when native preview conditions change.

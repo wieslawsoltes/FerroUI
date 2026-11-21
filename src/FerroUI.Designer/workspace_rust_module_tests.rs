@@ -329,3 +329,89 @@ pub fn shared() -> Columns {
     assert_eq!(read()["columns"][0]["label"], "Account");
     window.close();
 }
+
+#[test]
+fn studio_opens_a_shared_cell_body_and_undoes_the_assignment_from_its_module() {
+    const VIEW: &str = r#"fn view() { rsx! { TableView { name: "Accounts", columns: crate::columns::account_columns() } }; }"#;
+    const COLUMNS: &str = r#"use crate::templates::account_cell;
+pub fn account_columns() -> Columns {
+    ferroui_view::table_columns([ferroui_view::table_column().header("Account").cell_template(account_cell())])
+}
+"#;
+    const TEMPLATE: &str = r#"fn earlier() { rsx! { TextBlock { name: "Earlier" } }; }
+pub fn account_cell() -> Template {
+    ferroui_view::template::<String, _>(|data| rsx! { StackPanel {
+        TextBlock { name: "Caption", text: "Customer 🧭" }
+        TextBlock { text: data }
+    } })
+}
+"#;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let root = std::env::temp_dir().join(format!("ferroui-studio-rust-templates-{}", std::process::id()));
+    fs::create_dir_all(&root).unwrap();
+    let files = Files(root.canonicalize().unwrap());
+    let manifest = files.0.join("Cargo.toml");
+    let main = files.0.join("main.rs");
+    let view = files.0.join("review.rs");
+    let columns = files.0.join("columns.rs");
+    let template = files.0.join("templates.rs");
+    fs::write(&manifest, "[package]\nname='review'\nversion='0.0.0'\n").unwrap();
+    fs::write(&main, "mod columns; mod review; mod templates; fn main() {}\n").unwrap();
+    fs::write(&view, VIEW).unwrap();
+    fs::write(&columns, COLUMNS).unwrap();
+    fs::write(&template, TEMPLATE).unwrap();
+    let view_uri = file_uri(&view).unwrap();
+    let columns_uri = file_uri(&columns).unwrap();
+    let template_uri = file_uri(&template).unwrap();
+    let workspace = DesignerWorkspace::with_uri(VIEW, view_uri.clone()).unwrap();
+    workspace.set_solution(Solution {
+        format_version: 1, root: files.0.clone(),
+        projects: vec![ProjectDescriptor {
+            id: "review".into(), name: "review".into(), root: files.0.clone(), manifest_path: manifest,
+            documents: Vec::new(),
+            targets: vec![CargoTarget { name: "review".into(), kind: vec!["bin".into()], source: main }],
+        }],
+    }).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let writes = Permissions { allow_property_writes: true, ..Default::default() };
+    let read = || {
+        let node = {
+            let session = session.borrow();
+            let document = session.document();
+            let table = document.ast().find_name("Accounts").unwrap();
+            ferroui_designer_tools::table_columns(document, table).unwrap().columns[0].node
+        };
+        provider.call("designer_item_templates", &json!({"node":node}), Permissions::default()).unwrap()
+    };
+    let apply = |report: serde_json::Value, action| provider.call("designer_item_template", &json!({
+        "node":report["node"], "property":"CellTemplate", "action":action,
+        "expected_model":report["model"], "expected_revision":report["revision"],
+    }), writes).unwrap();
+    let model = read();
+    assert_eq!(model["slots"][0]["rustBodyUri"], template_uri);
+    assert_eq!(model["slots"][0]["sourceUri"], columns_uri);
+    apply(model, "preview");
+    assert_eq!(session.borrow().document_uri(), template_uri);
+    let caption = session.borrow().document().ast().find_name("Caption").unwrap();
+    session.borrow_mut().set_property(&[caption], "Text", "Account 🧭").unwrap();
+    assert_eq!(session.borrow().authored_source(), TEMPLATE.replace("Customer 🧭", "Account 🧭"));
+    session.borrow_mut().undo().unwrap();
+    workspace.return_to_document().unwrap();
+    assert_eq!(session.borrow().document_uri(), view_uri);
+    assert_eq!(session.borrow().authored_source(), VIEW);
+    apply(read(), "reset");
+    assert_eq!(read()["slots"][0]["canCreate"], true);
+    workspace.activate_document(&columns_uri).unwrap();
+    assert_eq!(session.borrow().authored_source(), COLUMNS.replace(".cell_template(account_cell())", ""));
+    let revision = session.borrow().document().revision();
+    provider.call("designer_undo", &json!({"expected_revision": revision}), writes).unwrap();
+    assert_eq!(session.borrow().authored_source(), COLUMNS);
+    workspace.activate_document(&view_uri).unwrap();
+    assert_eq!(read()["slots"][0]["rustFactory"], "account_cell");
+    window.close();
+}

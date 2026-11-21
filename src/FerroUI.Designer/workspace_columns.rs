@@ -30,16 +30,9 @@ impl DesignerWorkspace {
         if !self.session.borrow().uses_rust_source() {
             return self.session.borrow_mut().edit_authored_columns(table, change);
         }
-        let (plan, modules) = {
-            let session = self.session.borrow();
-            let rust = session.rust.as_ref().ok_or("Open a mapped Rust view")?;
-            let projection = rust.projection()?;
-            let modules = rust.module_sources().cloned();
-            if let Some(modules) = &modules {
-                self.require_rust_module_snapshot(session.document_uri(), modules)?;
-            }
-            (session.rust_column_plan(table, &projection, &change)?, modules)
-        };
+        let (plan, modules) = self.with_current_rust_sources(|session, projection| {
+            session.rust_column_plan(table, projection, &change)
+        })?;
         if plan.patches.is_empty() {
             return Ok(());
         }
@@ -154,7 +147,7 @@ impl ColumnFlyout {
             table: model.table,
             selected: preferred.min(model.columns.len().saturating_sub(1)),
             writable: model.reason.is_none(),
-            rust_templates: session.uses_rust_source() && factory.is_none(),
+            rust_templates: session.uses_rust_source(),
             source_uri: columns.source.as_ref().and_then(|source| source.location.uri.clone()),
             message: message.downgrade(),
         };

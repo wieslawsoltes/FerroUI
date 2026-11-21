@@ -292,7 +292,7 @@ impl DesignerWorkspace {
     }
 
     pub fn return_to_document(self: &Rc<Self>) -> Result<(), String> {
-        let consumer = self.session.borrow().included_template_consumer().map(str::to_owned);
+        let consumer = self.session.borrow().definition_consumer().map(str::to_owned);
         self.session.borrow_mut().exit_definition_scope()?;
         self.components.borrow_mut().editor_open = false;
         self.root

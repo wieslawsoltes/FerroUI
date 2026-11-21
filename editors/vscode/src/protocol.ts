@@ -314,7 +314,16 @@ export interface CanvasPresentation {
     navigationSession?: number;
     returnToConsumer?: string;
 }
-export interface RustTemplateNavigation { property: import('./itemTemplateLabels').TemplateProperty; range: Range }
+export interface RustTemplateNavigation {
+    property: import('./itemTemplateLabels').TemplateProperty;
+    range: Range;
+    uri?: string;
+}
+
+export type DefinitionNavigation = NonNullable<CanvasPresentation['openDefinition']>
+    | (RustTemplateNavigation & { uri: string })
+    | string;
+export type StudioPresentation = Omit<CanvasPresentation, 'image' | 'nodes' | 'notices' | 'selection' | 'layerView'>;
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
     focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean; highContrastTheme?: boolean };
 export interface CanvasFocusOrder {

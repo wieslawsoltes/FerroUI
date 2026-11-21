@@ -58,8 +58,10 @@ export class StudioContext {
     }
 
     async revealRustRange(range: Range, uri?: string): Promise<void> {
-        if (!uri) return this.revealRange(range);
         this.ensure();
+        if (!uri) {
+            return this.panel.revealSource({ session: this.panel.session, token: this.token }, range, this.panel.language === 'rust');
+        }
         await this.panel.revealRustModule({ session: this.panel.session, token: this.token }, uri, range,
             AbortSignal.timeout(15_000), () => this.ensure());
     }

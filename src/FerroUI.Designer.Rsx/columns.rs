@@ -12,9 +12,9 @@ mod tree_tests;
 use self::{array::ColumnArray, row::Column};
 use crate::{
     RsxProjection, RsxSourceEdit, RsxSourceLocation,
-    animation::syntax::{path, span},
+    animation::syntax::span,
     item_templates::TemplateSource,
-    local_rust::ReturnedBuilder,
+    local_rust::{RustSourceScope, path_in_source},
     registered::Class,
     source_edits::insert_field,
 };
@@ -72,17 +72,15 @@ impl ColumnSource {
         &mut self,
         kind: TableKind,
         expression: &Expr,
-        returned: Option<ReturnedBuilder<'_>>,
+        scope: Option<RustSourceScope<'_>>,
     ) -> bool {
         if matches!(self, Self::Computed(_)) {
             return false;
         }
         let parsed = if matches!(self, Self::Missing) {
-            MappedColumns::read(kind, expression, None, &path).or_else(|| {
-                let returned = returned?;
-                MappedColumns::read(kind, returned.expression, Some(&returned), &|expression| {
-                    returned.path(expression)
-                })
+            MappedColumns::read(kind, expression, None, scope).or_else(|| {
+                let returned = scope?.returned_builder(expression)?;
+                MappedColumns::read(kind, returned.expression, Some(returned.name), Some(returned.scope))
             })
         } else {
             None
@@ -154,13 +152,13 @@ impl MappedColumns {
     fn read(
         kind: TableKind,
         expression: &Expr,
-        returned: Option<&ReturnedBuilder<'_>>,
-        resolve: &dyn Fn(&Expr) -> Option<String>,
+        factory: Option<&str>,
+        scope: Option<RustSourceScope<'_>>,
     ) -> Option<Self> {
         let Expr::Call(call) = expression else {
             return None;
         };
-        let qualified = resolve(&call.func)?;
+        let qualified = path_in_source(&call.func, scope)?;
         let name = qualified.strip_prefix("ferroui_view::")?;
         let name = name.strip_prefix("prelude::").unwrap_or(name);
         if name != builder(kind) || call.args.len() != 1 || !call.attrs.is_empty() {
@@ -175,7 +173,7 @@ impl MappedColumns {
         let rows = array
             .elems
             .iter()
-            .map(|column| Column::read(column, kind, resolve))
+            .map(|column| Column::read(column, kind, scope))
             .collect::<Option<Vec<_>>>()?;
         if rows
             .iter()
@@ -188,10 +186,10 @@ impl MappedColumns {
         Some(Self {
             declaration: RsxColumnDeclaration {
                 location: RsxSourceLocation {
-                    uri: returned.and_then(ReturnedBuilder::uri).map(str::to_owned),
+                    uri: scope.and_then(RustSourceScope::uri).map(str::to_owned),
                     span: span(expression),
                 },
-                factory: returned.map(|definition| definition.name.to_owned()),
+                factory: factory.map(str::to_owned),
             },
             kind,
             array: ColumnArray::read(array),
@@ -444,9 +442,6 @@ impl RsxProjection<'_> {
         let ColumnSource::Mapped(columns) = self.nodes[index].columns.as_ref()? else {
             return None;
         };
-        if columns.declaration.factory.is_some() {
-            return None;
-        }
         let model = ferroui_designer_tools::table_columns(document, table).ok()?;
         if model.reason.is_some() || columns.rows.len() != model.columns.len() {
             return None;
@@ -460,7 +455,7 @@ impl RsxProjection<'_> {
         table: usize,
         column: ColumnPosition,
         property: ItemTemplateMember,
-    ) -> Option<(usize, Option<TemplateSource>, bool)> {
+    ) -> Option<(usize, Option<&TemplateSource>, bool, &RsxSourceLocation)> {
         let ColumnSource::Mapped(columns) = self.nodes.get(table)?.columns.as_ref()? else {
             return None;
         };
@@ -474,8 +469,9 @@ impl RsxProjection<'_> {
             row.append_at,
             row.fields
                 .get(property.name())
-                .and_then(|field| field.template),
+                .and_then(|field| field.template.as_ref()),
             !row.fields.contains_key(key) && !row.fields.contains_key("CellTemplateResourceKey"),
+            &columns.declaration.location,
         ))
     }
 }

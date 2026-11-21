@@ -1,17 +1,30 @@
+use crate::local_rust::{RustSourceScope, path_in_source};
 use ferroui_designer_core::SourceSpan;
-use syn::{Expr, ExprPath, Macro, Path, Stmt};
+use syn::{Expr, Macro, Path, PathArguments, Stmt};
 
-pub(super) fn template_body(expression: &Expr) -> Option<SourceSpan> {
+pub(super) fn template_body(
+    expression: &Expr,
+    scope: Option<RustSourceScope<'_>>,
+) -> Option<SourceSpan> {
     let Expr::Call(factory) = expression else {
         return None;
     };
-    let Expr::Path(ExprPath {
-        qself: None, path, ..
-    }) = factory.func.as_ref()
-    else {
+    if factory.args.len() != 1 || !factory.attrs.is_empty() {
+        return None;
+    }
+    let Expr::Path(path) = factory.func.as_ref() else {
         return None;
     };
-    if factory.args.len() != 1 || !view_path(path, "template", true) {
+    let mut callee = path.clone();
+    let last = callee.path.segments.last_mut()?;
+    if matches!(last.arguments, PathArguments::AngleBracketed(_)) {
+        last.arguments = PathArguments::None;
+    }
+    let name = path_in_source(&Expr::Path(callee), scope)?;
+    if !matches!(
+        name.as_str(),
+        "ferroui_view::template" | "ferroui_view::prelude::template"
+    ) {
         return None;
     }
     let Expr::Closure(closure) = &factory.args[0] else {
@@ -22,7 +35,7 @@ pub(super) fn template_body(expression: &Expr) -> Option<SourceSpan> {
     }
     let body = tail_macro(&closure.body)?;
     let ident = &body.path.segments.last()?.ident;
-    let is_rsx = body.path.is_ident("rsx") || view_path(&body.path, "rsx", false);
+    let is_rsx = body.path.is_ident("rsx") || view_rsx(&body.path);
     is_rsx.then(|| {
         SourceSpan::new(
             ident.span().byte_range().start,
@@ -44,7 +57,7 @@ fn tail_macro(expression: &Expr) -> Option<&Macro> {
     }
 }
 
-fn view_path(path: &Path, name: &str, generics: bool) -> bool {
+fn view_rsx(path: &Path) -> bool {
     let mut segments = path.segments.iter();
     let Some(root) = segments.next() else {
         return false;
@@ -63,7 +76,7 @@ fn view_path(path: &Path, name: &str, generics: bool) -> bool {
     } else {
         next
     };
-    member.ident == name && (generics || member.arguments.is_empty()) && segments.next().is_none()
+    member.ident == "rsx" && member.arguments.is_empty() && segments.next().is_none()
 }
 
 pub(super) fn type_path(row_type: Option<&str>) -> Result<&str, String> {

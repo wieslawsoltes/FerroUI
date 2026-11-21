@@ -276,7 +276,7 @@ pub(super) fn call(
             }
             let action = text(args, "action")?;
             let consumer = if action == "exit" {
-                session.included_template_consumer().map(str::to_owned)
+                session.definition_consumer().map(str::to_owned)
             } else {
                 None
             };

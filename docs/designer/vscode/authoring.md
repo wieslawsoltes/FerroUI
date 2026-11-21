@@ -512,7 +512,7 @@ fn accounts() -> Element {
 
 Select the table and open **Columns**. Its title shows `account_columns()`. Use **Reveal Column Collection** to open the array in its owning Rust file. Edit or reorder columns in the same way as an inline collection. The change applies to every view that calls the function. If the definition comes from a companion module, use Undo in that module’s editor.
 
-Use a function with no parameters that returns a static `table_columns` or `tree_data_grid_columns` array directly. A single immutable local returned unchanged and explicit imports or aliases in the selected Cargo target are supported. For computed collections or cell-template expressions inside a shared collection, use **Reveal in Source** to edit Rust. [Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+Use a function with no parameters that returns a static `table_columns` or `tree_data_grid_columns` array directly. A single immutable local returned unchanged and explicit imports or aliases in the selected Cargo target are supported. Open **Cell template** on a shared column to edit its template. Use **Reveal in Source** for computed collections and other Rust expressions. [Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ## Edit item and cell templates
 
@@ -548,11 +548,40 @@ The contextual editor covers authored XAML item, selection box, menu item, cell,
 3. Use the back arrow in Design to return to the owning view. To edit a table cell, select **Accounts**, open **Columns**, expand **Status**, and choose **Cell template**.
 4. To add a template to the **Account** column or another empty slot, choose **Create Inline Rust Template** and enter the Rust type of one item, such as `Customer` or `crate::model::Customer`. The editor adds a typed `ferroui_view::template` with a starter text control. **Reset Template** removes a mapped local assignment. Each creation, reset, or canvas edit has its own Undo step.
 
-The isolated canvas renders the supported static controls and literals of a direct `ferroui_view::template` closure. Use the running app to see computed content with its real data. A template supplied by a variable, a function call, or another builder remains editable in the Rust source through **Reveal Template Assignment**. The template picker supports inline item templates on ItemsControl, ListBox, TreeView and ComboBox, the ComboBox selection box template, NavigationView menu items, and display and editing templates on their applicable table columns. [Rust data templates](../../declarative-ui.md#92-data-templates-whose-items-are-components) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+The isolated canvas renders the supported static controls and literals of a `ferroui_view::template` closure. Use the running app to see computed content with its real data. Use **Reveal Template Assignment** for an assignment computed at runtime. The template picker supports item templates on ItemsControl, ListBox, TreeView and ComboBox, the ComboBox selection box template, NavigationView menu items, and display and editing templates on their applicable table columns. [Rust data templates](../../declarative-ui.md#92-data-templates-whose-items-are-components) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![The item template canvas and its original Rust with CustomerTitle selected](../images/vscode-rsx-item-template.jpg)
 
 ![The Columns cell template actions beside the authored Account column](../images/vscode-rsx-cell-template-actions.jpg)
+
+### Edit a shared Rust template
+
+Assign the result of a named function that returns a typed template. The function can live in the view’s Rust file or in a companion module of its selected Cargo target.
+
+```rust
+use ferroui_controls::templates::IDataTemplate;
+use ferroui_view::prelude::*;
+use std::rc::Rc;
+
+fn account_card() -> Rc<dyn IDataTemplate> {
+    ferroui_view::template::<String, _>(|account| rsx! {
+        StackPanel {
+            TextBlock { text: "Account" }
+            TextBlock { text: account }
+        }
+    })
+}
+
+fn accounts() -> Element {
+    rsx! { ListBox { name: "Accounts", item_template: account_card() } }
+}
+```
+
+1. Open **Edit Item Templates** on the control or **Cell template** on the column. The picker shows the supplying function’s name. **Reveal Shared Template Body** and **Reveal Template Assignment** point to their respective files.
+2. Choose **Edit Template on Canvas**. Change a mapped property in the original body, even when that file has several RSX views. Use Undo in the body’s editor. **Return to document** opens the consuming view again.
+3. **Reset Template** clears the assignment at its source. When a shared column builder owns the assignment, reset and inline creation both edit the column builder’s file. Every table that uses that builder sees the change. Use Undo in the column builder’s editor.
+
+The designer follows explicit imports and aliases and a function with no arguments that returns the template directly or through one immutable local. The typed closure must return a supported RSX invocation. For other expressions, use **Reveal Template Assignment**. [Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
 

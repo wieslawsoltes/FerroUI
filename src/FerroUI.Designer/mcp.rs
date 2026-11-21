@@ -37,7 +37,7 @@ mod rsx_style;
 pub use rsx_style::{rust_style_source_plan, RSX_STYLES, RSX_STYLE_EDIT};
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
-pub use item_templates::{rust_template_navigation, rust_template_report, rust_template_source_plan};
+pub use item_templates::{rust_template_declaration_plan, rust_template_navigation, rust_template_report, rust_template_source_plan};
 #[path = "mcp_property_trace.rs"]
 mod property_trace;
 pub use property_trace::property_trace_report;
@@ -610,6 +610,14 @@ impl UiToolProvider for DesignerMcp {
                 return columns::call_workspace(&workspace, args);
             }
         }
+        if name == item_templates::ACTION {
+            if let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade) {
+                let rust = owner.try_borrow().map_err(|_| "Designer is already processing a transaction")?.uses_rust_source();
+                if rust {
+                    return item_templates::call_rust_workspace(&workspace, args);
+                }
+            }
+        }
         let style_workspace = self.workspace.as_ref()
             .filter(|_| name == RSX_STYLE_EDIT).and_then(Weak::upgrade);
         if let Some(workspace) = style_workspace {
@@ -652,14 +660,6 @@ impl UiToolProvider for DesignerMcp {
         }
         if item_templates::handles(name) {
             let result = item_templates::call(&mut session, name, args)?;
-            if let (true, Some(workspace)) = (
-                session.uses_rust_source() && args["action"] == "preview",
-                self.workspace.as_ref().and_then(Weak::upgrade),
-            ) {
-                drop(session);
-                workspace.focus_definition_canvas();
-                return Ok(result);
-            }
             if let (Some(workspace), Some(target)) = (
                 self.workspace.as_ref().and_then(Weak::upgrade),
                 result.get("openDefinition"),

@@ -1,6 +1,7 @@
 use super::fields::{self, SourceField, reflection_binding};
 use crate::{
     animation::syntax::{chain, method_suffix, span},
+    local_rust::{RustSourceScope, path_in_source},
     tree::escape_xml,
 };
 use ferroui_designer_core::{NodeId, SourceSpan};
@@ -59,22 +60,22 @@ impl Column {
     pub(super) fn read(
         expression: &Expr,
         table: TableKind,
-        resolve: &dyn Fn(&Expr) -> Option<String>,
+        scope: Option<RustSourceScope<'_>>,
     ) -> Option<Self> {
-        Self::parse(expression, table, false, resolve)
+        Self::parse(expression, table, false, scope)
     }
 
     fn parse(
         expression: &Expr,
         table: TableKind,
         nested: bool,
-        resolve: &dyn Fn(&Expr) -> Option<String>,
+        scope: Option<RustSourceScope<'_>>,
     ) -> Option<Self> {
         let (factory, mut methods) = chain(expression)?;
         if !factory.attrs.is_empty() || methods.iter().any(|method| !method.attrs.is_empty()) {
             return None;
         }
-        let qualified = resolve(&factory.func)?;
+        let qualified = path_in_source(&factory.func, scope)?;
         let parent = qualified.strip_prefix("ferroui_view::")?;
         let name = parent.strip_prefix("prelude::").unwrap_or(parent);
         let kind = match (table, name) {
@@ -91,12 +92,7 @@ impl Column {
             _ => return None,
         };
         let inner = if kind == ColumnKind::Expander && factory.args.len() == 1 {
-            Some(Box::new(Self::parse(
-                &factory.args[0],
-                table,
-                true,
-                resolve,
-            )?))
+            Some(Box::new(Self::parse(&factory.args[0], table, true, scope)?))
         } else if kind != ColumnKind::Expander && factory.args.is_empty() {
             None
         } else {
@@ -113,7 +109,7 @@ impl Column {
         };
         let mut fields = BTreeMap::new();
         for method in methods {
-            let field = SourceField::read(kind, method)?;
+            let field = SourceField::read(kind, method, scope)?;
             if fields.insert(field.name(), field).is_some() {
                 return None;
             }

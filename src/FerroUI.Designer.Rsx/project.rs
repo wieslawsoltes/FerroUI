@@ -470,9 +470,7 @@ impl State<'_> {
                         self.project_styles(source, index, styles, catalog);
                         continue;
                     }
-                    let templates = &mut self.nodes[index].templates;
-                    templates.note_setter(&setter, false);
-                    templates.record_call(&setter, field, argument);
+                    self.project_template(index, &setter, false, argument, field);
                     if let Some(table) = table {
                         if self.project_columns(index, table, &setter, false, argument, name) {
                             continue;
@@ -529,9 +527,7 @@ impl State<'_> {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
-            let templates = &mut self.nodes[index].templates;
-            templates.note_setter(&setter, owner.is_some());
-            if templates.record(&setter, value, owner.is_none().then_some(field)) {
+            if self.project_template(index, &setter, owner.is_some(), Some(value), owner.is_none().then_some(field)) {
                 self.omit(format!("{class}.{setter} template"));
                 continue;
             }
@@ -630,6 +626,28 @@ impl State<'_> {
         Ok(result)
     }
 
+    fn project_template(
+        &mut self,
+        index: usize,
+        setter: &str,
+        qualified: bool,
+        argument: Option<&syn::Expr>,
+        field: Option<SourceSpan>,
+    ) -> bool {
+        let templates = &mut self.nodes[index].templates;
+        templates.note_setter(setter, qualified);
+        let Some(property) = templates.member(setter) else {
+            return false;
+        };
+        let source = self.source;
+        let modules = self.modules;
+        let scope = argument.and_then(|value| self.local_rust.get_or_insert_with(|| {
+            LocalRust::parse(source, value.span().byte_range().start, modules)
+        }).source_scope(value));
+        templates.record(property, argument, field, scope);
+        true
+    }
+
     fn project_columns(
         &mut self, index: usize, table: TableKind, setter: &str, qualified: bool,
         value: Option<&syn::Expr>, name: SourceSpan,
@@ -643,13 +661,10 @@ impl State<'_> {
             let projected = if let (false, Some(value)) = (qualified, value) {
                 let source = self.source;
                 let modules = self.modules;
-                let returned = if LocalRust::can_resolve_builder(value) {
-                    self.local_rust.get_or_insert_with(|| LocalRust::parse(source, value.span().byte_range().start, modules))
-                        .returned_builder(value)
-                } else {
-                    None
-                };
-                columns.read(table, value, returned)
+                let scope = self.local_rust.get_or_insert_with(|| {
+                    LocalRust::parse(source, value.span().byte_range().start, modules)
+                }).source_scope(value);
+                columns.read(table, value, scope)
             } else {
                 *columns = ColumnSource::Computed(source);
                 false

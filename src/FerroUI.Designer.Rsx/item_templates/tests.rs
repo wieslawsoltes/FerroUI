@@ -36,7 +36,7 @@ fn exact_returned_body_edits_without_rewriting_rust() {
     assert_eq!(slots.len(), 1);
     let slot = &slots[0];
     assert!(slot.can_reset);
-    let body = slot.body.unwrap();
+    let body = slot.body.as_ref().unwrap().location.span;
     assert!(source[body.range()].starts_with("rsx! { StackPanel"));
     assert!(!view.can_replace_structure());
     let child = project_rust(&source, body.start).unwrap();
@@ -132,7 +132,7 @@ fn cell_create_preview_and_reset_preserve_column_and_source_order() {
         .columns[0]
         .node;
     let slots = view.item_templates(&document, column);
-    assert!(next[slots[0].body.unwrap().range()].contains("\"Cell\""));
+    assert!(next[slots[0].body.as_ref().unwrap().location.span.range()].contains("\"Cell\""));
     let reset = view
         .edit_item_template(
             &document,
@@ -143,6 +143,45 @@ fn cell_create_preview_and_reset_preserve_column_and_source_order() {
         )
         .unwrap();
     assert_eq!(TextPatch::apply_all(&next, reset).unwrap(), source);
+}
+
+#[test]
+fn named_item_template_targets_its_definition_and_resets_only_the_selected_assignment() {
+    let source = r#"use ferroui_view::template as make_template;
+fn shared() -> Template {
+    make_template::<Customer, _>(|customer| rsx! { StackPanel {
+        TextBlock { text: "Directory 🧭" }
+        TextBlock { text: customer.name }
+    } })
+}
+fn directory() -> Element {
+    rsx! { ListBox { item_template: shared(), name: "Directory" } }
+}
+fn recent() -> Element {
+    rsx! { ListBox { item_template: shared(), name: "Recent" } }
+}
+"#.replace('\n', "\r\n");
+    let (view, document, node) = owner(&source, "ListBox {");
+    let slots = view.item_templates(&document, node);
+    let body = slots[0].body.as_ref().unwrap();
+    assert_eq!(body.factory.as_deref(), Some("shared"));
+    assert!(body.location.uri.is_none());
+    assert!(body.location.span.end < view.invocation.start);
+    assert!(source[body.location.span.range()].contains("customer.name"));
+
+    let edit = view.edit_item_template(&document, node, ItemTemplate, &ItemTemplateChange::Reset, None).unwrap();
+    let after = TextPatch::apply_all(&source, edit).unwrap();
+    assert_eq!(after, source.replacen("item_template: shared(),", "", 1));
+
+    for opaque in [
+        source.replace("fn shared()", "#[cfg(feature = \"app\")]\nfn shared()"),
+        source.replace("make_template::<Customer", "record_usage(); make_template::<Customer"),
+        source.replace("use ferroui_view::template", "use other_crate::template"),
+    ] {
+        let (view, document, node) = owner(&opaque, "ListBox {");
+        let slots = view.item_templates(&document, node);
+        assert!(slots[0].body.is_none() && !slots[0].can_reset);
+    }
 }
 
 #[test]

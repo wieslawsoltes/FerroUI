@@ -41,7 +41,7 @@ import { STYLES_VIEW, StylesView } from './stylesView';
 import type { StylesPage } from './stylesProtocol';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
-import { errorMessage, type CanvasPresentation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type ToolboxState, type ToToolbox } from './protocol';
+import { errorMessage, type DefinitionNavigation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type RustTemplateNavigation, type ToolboxState, type ToToolbox } from './protocol';
 import { asPosition, asRange, languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
@@ -356,10 +356,10 @@ export class DesignerWorkbench implements vscode.Disposable {
     }
 
     private async navigateDefinition(consumer: DesignerPanel, token: number,
-        target: NonNullable<CanvasPresentation['openDefinition']> | string, signal: AbortSignal): Promise<number | undefined> {
+        target: DefinitionNavigation, signal: AbortSignal): Promise<number | undefined> {
         const ensureConsumer = () => {
             signal.throwIfAborted();
-            if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen the included definition.');
+            if (consumer.currentToken !== token) throw new Error('The consuming preview changed. Reopen the definition.');
         };
         if (typeof target === 'string') {
             ensureConsumer();
@@ -367,6 +367,9 @@ export class DesignerWorkbench implements vscode.Disposable {
             if (!previous || previous.isDisposed) return;
             await this.revealDesign(previous, 'canvas');
             return previous.session;
+        }
+        if ('range' in target) {
+            return this.navigateRustTemplate(consumer, token, target, signal, ensureConsumer);
         }
         const uri = await includedSourceUri(consumer.document.uri, target.source);
         ensureConsumer();
@@ -393,6 +396,29 @@ export class DesignerWorkbench implements vscode.Disposable {
                 await this.revealDesign(designer, 'styles');
             }
             designer.panel.reveal(undefined, true);
+            return designer.session;
+        } catch (error) {
+            if (this.active === designer && !consumer.isDisposed && !signal.aborted) await this.revealDesign(consumer, 'canvas');
+            throw error;
+        }
+    }
+
+    private async navigateRustTemplate(consumer: DesignerPanel, token: number, target: RustTemplateNavigation & { uri: string },
+        signal: AbortSignal, ensureConsumer: () => void): Promise<number> {
+        const { document, version } = await consumer.checkRustModule(token, target.uri);
+        ensureConsumer();
+        const designer = this.panels.get(document.uri.toString())
+            ?? await this.openDocument(document.uri, asPosition(target.range.start), this.definitionColumns(consumer));
+        try {
+            ensureConsumer();
+            if (designer.document !== document || document.isClosed) throw new Error('The Rust template source was reopened.');
+            await designer.openCompanionRustTemplate(target, consumer.document.uri.toString(), version, signal, ensureConsumer);
+            ensureConsumer();
+            const current = designer.currentToken;
+            if (current === undefined) throw new Error('The Rust template changed while opening it.');
+            await designer.revealSource({ session: designer.session, token: current }, target.range);
+            designer.panel.reveal(undefined, true);
+            this.setActive(designer);
             return designer.session;
         } catch (error) {
             if (this.active === designer && !consumer.isDisposed && !signal.aborted) await this.revealDesign(consumer, 'canvas');

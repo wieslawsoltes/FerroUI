@@ -101,7 +101,7 @@ export class ColumnEditor {
     }
 
     rustTemplate(field: ColumnField): 'CellTemplate' | 'CellEditingTemplate' | undefined {
-        if (!this.table.factory && this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates
+        if (this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates
             && (field.name === 'CellTemplate' || field.name === 'CellEditingTemplate')) {
             return field.name;
         }

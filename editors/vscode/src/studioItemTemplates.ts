@@ -18,6 +18,9 @@ interface TemplateSlot {
     canReset: boolean;
     canCreate?: boolean;
     rustBody?: Range | null;
+    sourceUri?: string | null;
+    rustBodyUri?: string | null;
+    rustFactory?: string | null;
     localDefinition?: number | null;
     includedDefinition?: IncludedTemplateSource | null;
 }
@@ -58,9 +61,14 @@ export async function editItemTemplates(context: StudioContext, node: number, me
             label: '$(preview) Edit Template on Canvas',
             run: async () => {
                 await context.present(tool, { ...args, action: 'preview' });
-                if (!included && !context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
+                if (!included && !slot.rustBodyUri && !context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
             },
         });
+    }
+    if (slot.rustFactory && slot.rustBody) {
+        const range = slot.rustBody;
+        available.push({ label: '$(go-to-file) Reveal Shared Template Body',
+            run: () => context.revealRustRange(range, slot.rustBodyUri ?? undefined) });
     }
     if (definition !== null || included) {
         available.push({ label: '$(go-to-file) Reveal Template Source', detail: slot.copyReason ?? undefined,
@@ -68,7 +76,7 @@ export async function editItemTemplates(context: StudioContext, node: number, me
     } else if (slot.range) {
         const range = slot.range;
         available.push({ label: '$(go-to-file) Reveal Template Assignment', detail: slot.copyReason ?? slot.reason ?? undefined,
-            run: () => context.revealRange(range) });
+            run: () => context.revealRustRange(range, slot.sourceUri ?? undefined) });
     }
     if (!slot.reason) {
         if (slot.value.kind === 'unset' && context.writable) {
@@ -109,8 +117,8 @@ export async function editItemTemplates(context: StudioContext, node: number, me
     await action?.run();
 }
 
-function description({ value, rustBody, localDefinition, includedDefinition }: TemplateSlot): string {
-    if (rustBody) return 'Inline RSX';
+function description({ value, rustBody, rustFactory, localDefinition, includedDefinition }: TemplateSlot): string {
+    if (rustBody) return rustFactory ? `${rustFactory}()` : 'Inline RSX';
     switch (value.kind) {
         case 'unset': return localDefinition != null || includedDefinition ? 'Inherited' : 'Default';
         case 'inline': return 'Inline';

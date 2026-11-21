@@ -4,6 +4,14 @@ use std::sync::Arc;
 use syn::spanned::Spanned;
 
 impl RustModuleSources {
+    /// Use the same captured sources to project a companion module.
+    pub fn for_module(&self, uri: &str) -> Option<Self> {
+        let source = self.source(uri)?;
+        let mut snapshot = self.clone();
+        snapshot.active.clone_from(&source.uri);
+        Some(snapshot)
+    }
+
     /// Make a draft of the accepted snapshot for an edit which preserves its
     /// authored module declarations. The original frame remains immutable.
     pub fn with_file_text(&self, uri: &str, source: &str) -> Option<Self> {

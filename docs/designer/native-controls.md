@@ -226,6 +226,8 @@ For a template supplied by a workspace dictionary include, the canvas and source
 
 For Rust, select an items control and open **Edit item templates**. For a TableView column, choose it in **Edit columns** and use **Edit cell template**. The canvas icon opens the mapped `rsx!` returned by its typed closure. Use Properties and the canvas on that original body, then use the back arrow to return to the owning view. For an empty slot, enter the Rust item type and press Enter or choose the plus icon. Reset removes a mapped assignment. For a computed template, use the source icon. [Rust example](vscode/authoring.md#edit-a-rust-item-or-cell-template) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
 
+For a shared Rust template, the inspector shows the supplying function. The canvas icon opens the original invocation in the template’s file. The source icons reveal either the body or the call site. Use the back arrow to return to the consuming tab. Undo a body edit in the template’s tab. Resetting a call in a companion column module links the table and the column module, so Undo works from either tab. [Shared Rust example](vscode/authoring.md#edit-a-shared-rust-template)
+
 ## Edit control templates
 
 Select an XAML control with a writable `Template` property. Choose **Edit templates** in the property inspector and use the **Control Template** section. Open the template on the canvas, reveal its source, or choose a visible resource that matches the control's type. Studio shows **Inherited** for a template supplied by a style or theme with a verified source. An included definition opens in its original file and uses its authored resource scope.

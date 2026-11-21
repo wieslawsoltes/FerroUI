@@ -49,7 +49,17 @@ enum Resolved<'a> {
     },
 }
 
-pub(crate) use returned_builder::ReturnedBuilder;
+pub(crate) use returned_builder::RustSourceScope;
+
+pub(crate) fn path_in_source(
+    expression: &Expr,
+    scope: Option<RustSourceScope<'_>>,
+) -> Option<String> {
+    match scope {
+        Some(scope) => scope.path(expression),
+        None => rust::path(expression),
+    }
+}
 
 pub(crate) struct Value<'a> {
     pub(crate) expression: &'a Expr,

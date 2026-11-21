@@ -30,7 +30,7 @@ mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use columns::RsxColumnDeclaration;
-pub use item_templates::{RsxItemTemplate, is_item_template_owner};
+pub use item_templates::{RsxItemTemplate, RsxTemplateBody, is_item_template_owner};
 pub use language::{RsxLanguageDocument, analyze_rsx};
 pub use layout_edits::{is_child_list_edit, RsxChildEdit};
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};
