@@ -272,8 +272,9 @@ The theme crate compiles its documents once, as today. The emitter partitions th
 - **Units.** Each control document (`Controls/Button.xaml`: its ControlThemes, text-keyed or
   type-keyed, and its local resources) is a unit. The theme resources are grouped into units by the
   key graph. The ambient content is one unit that is always kept: the global `Style` elements of
-  `WinUIControls.xaml`, the hosts the framework creates (`Window`, `PopupRoot`, `OverlayPopupHost`,
-  `AdornerLayer`, `EmbeddableControlRoot`, `ThemeVariantScope`), `CompactStyles`, and
+  `WinUIControls.xaml`, the hosts the framework creates (`Window`, `AdornerLayer`,
+  `EmbeddableControlRoot`, `ThemeVariantScope`; the hosts of popups since section 25),
+  `CompactStyles`, and
   `SystemAccentColors`. Each unit is one function, or one set of static row tables per variant
   dictionary, that adds its entries to the dictionaries it is given.
 - **Graph in the `.xamlmeta`.** For each unit: the keys and type keys it defines, the keys it
@@ -566,10 +567,11 @@ are step 3 (section 10).
   (the document of the class, `Controls/WinUIControls.xaml` with its global `Style` elements,
   `DensityStyles/Compact.xaml`, which `CompactStyles` includes), the structure of the builds (the
   dictionaries, `SystemAccentColors`, the theme variants, `CompactStyles`), the documents that define
-  the theme of a host the framework creates (`Window`, `PopupRoot`, `OverlayPopupHost`,
-  `AdornerLayer`, `EmbeddableControlRoot`, `ThemeVariantScope`), and the documents with an entry no
-  root can name (an entry without a key, with a key that is neither text nor `{x:Type}`, or one that
-  registers a name in the scope of the document; in WinUI only `Controls/WindowDrawnDecorations.xaml`).
+  the theme of a host the framework creates (`Window`, `AdornerLayer`, `EmbeddableControlRoot`,
+  `ThemeVariantScope`; `PopupRoot` and `OverlayPopupHost` until section 25), and the documents with
+  an entry no root can name (an entry without a key, with a key that is neither text nor
+  `{x:Type}`, or one that registers a name in the scope of the document; in WinUI only
+  `Controls/WindowDrawnDecorations.xaml`, until section 24).
 - **Canonical order** is the order of the documents of the group: the class document, then its
   includes in the order they are met. The ambient unit is first.
 - **Resources are grouped by document.** The unit graph links the units through their keys, and step
@@ -1855,3 +1857,37 @@ previewer build with every unit of the themes (`full-themes`), and are unchanged
   `wasm32`. There the class is live only where it is named.
 - `ferroui-controls` (`chrome::drawn_decorations_targets::tests`): the table is in step with the
   backends.
+
+## 25. The hosts of popups are units of their own (#994)
+
+The ambient unit of every theme held the theme of `PopupRoot` and of `OverlayPopupHost`
+(`FRAMEWORK_HOSTS`): hosts the framework creates, which no application names. An application
+that never opens a popup kept their control themes, and through them the members of `PopupRoot`
+(a top level) that the themes set: about 243 kB of hello world, by the estimate of its IR.
+
+A popup host is created only when a `Popup` opens: `Popup` calls
+`OverlayPopupHost::create_popup_host`, which makes a `PopupRoot` (a platform popup) or an
+`OverlayPopupHost` (on the overlay layer). A popup is constructed by what shows one: a tool tip,
+a flyout, a context menu, or a template with a `Popup` element.
+
+The change:
+
+- `FRAMEWORK_HOSTS` no longer names the two hosts. Their documents are units keyed by their type.
+- The scan reads a construction only as `X::new` and its kin in the code of a class, not as a
+  factory function of another class. So `ferroui-controls` states the edges from `Popup` to both
+  hosts in `primitives/popup_hosts.rs`, which its build script reads and applies with the new
+  `Export::creates`. The edges are added to `TypeModel::creates`.
+- The test of the file checks three things: `Popup` calls the factory, the factory constructs
+  both hosts, and no other source of the repository creates a host outside tests. (The view models
+  of DevTools have a `PopupRoot` of their own.)
+
+An application keeps the themes of the hosts where a popup is live: a `Popup` it constructs or
+whose class it names, or one a live class creates (`ToolTip`, `ContextMenu`, `PopupFlyoutBase`
+create one).
+
+### 25.1 Tests
+
+- `export.rs` (`export_adds_the_stated_creates_edges`): the stated classes are added once,
+  sorted, and an unknown class is an error.
+- `ferroui-controls` (`primitives::popup_hosts::tests`): the table is in step with the code that
+  creates the hosts.

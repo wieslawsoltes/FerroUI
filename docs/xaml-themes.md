@@ -279,7 +279,8 @@ tests fail by design. Design, coverage and measurements:
 `Controls/Button.xaml` and `Resources/Button_themeresources.xaml`. One more unit, the ambient
 unit (index 0), holds what is always needed:
 - the class document;
-- the host documents (`Window`, `PopupRoot`, overlay and adorner hosts);
+- the host documents (`Window`, the adorner and embedding hosts, the theme variant scope); the
+  hosts of popups are units of their own, kept where a popup is live (#994);
 - documents with entries no key can name.
 
 The `.xamlmeta` records each unit's unit graph: the keys and type keys it defines, the keys it
