@@ -16,11 +16,6 @@ pub(crate) trait EffectiveValueDyn: Any {
     fn boxed_value(&self) -> BoxedValue;
     /// The base value in a box of its own, if there is one.
     fn boxed_base_value(&self) -> Option<BoxedValue>;
-    /// Makes `value`, a value of the value type of the property, the value of `priority`: the
-    /// untyped write of a value (an entry of its own is not made for it).
-    fn apply_value_any(&self, owner: &FerroObject, value: &dyn Any, priority: BindingPriority);
-    /// Makes `value`, a value of the value type of the property, the current value.
-    fn set_current_value_any(&self, owner: &FerroObject, value: &dyn Any);
     fn end_reevaluation(&self, owner: &FerroObject);
     /// Reads the entry as this property's Rust type, then applies it.
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
@@ -663,26 +658,6 @@ impl<T: StyledValue> EffectiveValue<T> {
         self.metadata.default_value().clone()
     }
 
-    /// `value`, a value of the value type of the property, as the store keeps it: the value
-    /// itself where the value type is its own storage type, else converted by the codec of the
-    /// property. The default value for a value of another type, as an entry of it would give.
-    #[inline]
-    fn stored_any(&self, value: &dyn Any) -> T {
-        if !T::SHARED_STORAGE {
-            if let Some(value) = value.downcast_ref::<T>() {
-                return value.clone();
-            }
-        } else {
-            let mut out: Option<T> = None;
-            if self.state.property.styled_codec().copy_value(value, &mut out) {
-                if let Some(value) = out {
-                    return value;
-                }
-            }
-        }
-        self.metadata.default_value().clone()
-    }
-
     fn set_and_raise_core(
         &self,
         owner: &FerroObject,
@@ -815,16 +790,6 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
 
     fn boxed_base_value(&self) -> Option<BoxedValue> {
         self.try_get_base_value().map(|value| box_stored(self.state.property, &value))
-    }
-
-    fn apply_value_any(&self, owner: &FerroObject, value: &dyn Any, priority: BindingPriority) {
-        let value = self.stored_any(value);
-        self.set_and_raise_core(owner, value, priority, false, false);
-    }
-
-    fn set_current_value_any(&self, owner: &FerroObject, value: &dyn Any) {
-        let value = self.stored_any(value);
-        self.set_current_value_and_raise(owner, value);
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {

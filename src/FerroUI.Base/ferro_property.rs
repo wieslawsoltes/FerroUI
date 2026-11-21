@@ -678,10 +678,6 @@ pub struct FerroProperty {
     /// Whether the property validates its values (a styled property with a validation callback):
     /// an untyped write asks the codec only then.
     validates: bool,
-    /// Whether the value type is kept as a storage type other value types share
-    /// ([`StyledValue::SHARED_STORAGE`]): an untyped write and read take the typed path of the
-    /// codec then.
-    shared_storage: bool,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -733,7 +729,6 @@ impl FerroProperty {
             styled_codec: OnceCell::new(),
             members: &[],
             validates: false,
-            shared_storage: false,
         }
     }
 
@@ -747,34 +742,6 @@ impl FerroProperty {
     pub(crate) fn with_validation(mut self, validates: bool) -> Self {
         self.validates = validates;
         self
-    }
-
-    /// The property with the kind of the storage type of its value type
-    /// ([`shared_storage`](Self::shared_storage)).
-    pub(crate) fn with_shared_storage(mut self, shared_storage: bool) -> Self {
-        self.shared_storage = shared_storage;
-        self
-    }
-
-    /// Whether the value type is kept as a storage type other value types share.
-    #[inline]
-    pub(crate) fn shared_storage(&self) -> bool {
-        self.shared_storage
-    }
-
-    /// Whether the property has a validation callback: a value of its value type is valid
-    /// otherwise.
-    #[inline]
-    pub(crate) fn validates(&self) -> bool {
-        self.validates
-    }
-
-    /// Whether a value of the value type of the property may be a marker in a box (the unset value
-    /// or the do-nothing value as an untyped value): the value type is `BoxedValue` or
-    /// `Option<BoxedValue>`.
-    #[inline]
-    pub(crate) fn may_hold_marker(&self) -> bool {
-        self.property_type == TypeId::of::<BoxedValue>() || self.property_type == TypeId::of::<Option<BoxedValue>>()
     }
 
     /// The members of the value type, when it is an enumeration kept as an
@@ -807,7 +774,6 @@ impl FerroProperty {
             styled_codec: OnceCell::new(),
             members: source.members,
             validates: source.validates,
-            shared_storage: source.shared_storage,
         }
     }
 
