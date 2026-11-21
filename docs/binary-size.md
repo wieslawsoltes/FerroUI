@@ -1365,6 +1365,32 @@ Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-
 `a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
 create both through their markup constructors.
 
+### 4.27 A setter's markup extension describes `Setter.Value` alone (#612)
+
+A markup extension in the value of a setter (`<Setter Property=".." Value="{StaticResource
+..}" />`) asks for its target property; compiled markup gives it the description of
+`Setter.Value` (`rt::setter_value_property()`), which the runtime library built from the markup
+declaration of the setter. Naming the declaration keeps all of it: every member of the setter
+and what the members reach, the target property path of the setters of visual states and its
+typed bindings among them. `ircut.py` on the whole-program module after section 4.26: 93.6 kB
+reachable only through `setter_value_property`.
+
+`Setter.Value` is now also a `MarkupProperty` of its own in `ferroui-base`, built with the
+accessor forms of the declaration macros from the same functions and attributes as the member
+of the declaration (`Setter::__value_markup_property`), and the runtime library describes the
+target property from it, with the owner name the declaration gives for the messages of its
+accessors. The description is one per thread, as it was.
+
+| `samples/HelloWorld`, macOS | 4.26 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,563,848 bytes | 18,461,208 bytes | -102,640 bytes (-0.6 %) |
+| release, `__TEXT,__text` | 14,551,128 bytes | 14,473,576 bytes | -77,552 bytes (-0.5 %) |
+| `dist`, file | 15,917,456 bytes | 15,834,272 bytes | -83,184 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 13,007,668 bytes | 12,933,984 bytes | -73,684 bytes (-0.6 %) |
+
+Test: `the_setter_value_target_property_is_the_declared_member`
+(`ferroui-markup-xaml`, `xaml_il/runtime/compiled.rs`).
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
