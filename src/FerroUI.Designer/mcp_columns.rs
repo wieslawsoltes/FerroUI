@@ -20,7 +20,7 @@ pub(super) fn tools() -> Vec<Value> {
     vec![
         s::tool(
             QUERY,
-            "Read authored XAML table columns or a mapped RSX TableView collection, typed fields, source ranges and the current edit model. Pass the table or an authored descendant.",
+            "Read authored XAML or mapped RSX columns for TableView and TreeDataGrid, with typed fields, source ranges and the current edit model. Pass the table or an authored descendant.",
             s::object(json!({"node":s::id()}), &["node"]),
             false,
         ),

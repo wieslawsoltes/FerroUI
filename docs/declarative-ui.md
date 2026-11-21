@@ -185,6 +185,36 @@ fn customer_table() -> Element {
 
 Set `items_source` to your row collection. `binding_path` creates a reflection binding for a row property. Use `binding` to pass an existing `AssignedBinding`, or supply a `cell_template` to render the whole row object. The same collection works with the chained `table_view().columns(...)` builder. Fully qualified helpers and an inline array let Designer Studio and the VS Code Columns view edit the original Rust declaration. [Designer workflow](designer/vscode/authoring.md#edit-an-rsx-tableview)
 
+### 4.4 Build TreeDataGrid columns
+
+Enable the `treedatagrid` feature of `ferroui-view` to use `TreeDataGrid`. Give the grid an `items_source` and a `column_definitions` collection. Each column builder's `.build()` creates a native column that can share the collection with different column kinds.
+
+```rust
+use ferroui_controls::ItemsSource;
+use ferroui_view::prelude::*;
+
+fn account_tree(items: ItemsSource) -> Element {
+    rsx! {
+        TreeDataGrid {
+            items_source: items,
+            column_definitions: ::ferroui_view::tree_data_grid_columns([
+                ::ferroui_view::tree_data_grid_row_header_column().build(),
+                ::ferroui_view::tree_data_grid_expander_column(
+                    ::ferroui_view::tree_data_grid_text_column()
+                        .header("Account").binding_path("Name").build()
+                ).children_path("Children").build(),
+                ::ferroui_view::tree_data_grid_check_box_column()
+                    .header("Active").binding_path("Active").build(),
+            ])
+        }
+    }
+}
+```
+
+The native grid builds a hierarchy when it encounters an expander column. Give each row a binding-readable name and children collection, or supply a compiled binding to the builder. Put header and width settings on the expander's inner column. Text, checkbox, template, and row-header columns can also stand on their own. Template columns start with the framework's default text template. Use `.cell_template(ferroui_view::template(...))` or `.cell_editing_template(...)` for a typed row.
+
+If the column definitions change when the view runs again, the grid replaces the collection in one update. For unchanged columns, reuse the collection through a hook or memo. [TreeDataGrid authoring in VS Code](designer/vscode/authoring.md#edit-an-rsx-treedatagrid)
+
 ## 5. The macros
 
 ### 5.1 `rsx!`

@@ -6,7 +6,7 @@ use ferroui_designer_tools::ColumnField;
 
 pub(super) fn add_fields(panel: &StackPanel, column: &AuthoredColumn, scope: &ColumnScope) {
     for field in &column.fields {
-        if scope.rust && field.name == "CellTemplate" {
+        if scope.rust && matches!(field.name, "CellTemplate" | "CellEditingTemplate") {
             continue;
         }
         let editable = scope.writable && field.editable;
@@ -44,6 +44,7 @@ pub(super) fn add_fields(panel: &StackPanel, column: &AuthoredColumn, scope: &Co
         let title = text(&format!("Inner column · {}", child.label));
         title.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
         panel.children().add(title.upcast::<Control>());
+        add_template_action(panel, child, scope);
         add_fields(panel, child, scope);
     }
 }

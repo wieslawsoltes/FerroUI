@@ -176,13 +176,15 @@ behavior. Designer source hierarchy moves continue to use their own guarded move
 
 ## Edit table columns
 
-Select an XAML `TableView` or `TreeDataGrid`, or a `TableView` in an RSX view, in the canvas or Layers. Use the **Edit columns** icon beside the property search. Choose a column from the list. The arrow icons change its position, and the adjacent icons duplicate, remove, or reveal it in source. To add a column, choose an available type and select the plus icon.
+Select a `TableView` or `TreeDataGrid` in an XAML or RSX view using the canvas or Layers. Use the **Edit columns** icon beside the property search. Choose a column from the list. The arrow icons change its position, and the adjacent icons duplicate, remove, or reveal it in source. To add a column, choose an available type and select the plus icon.
 
 Edit a column’s width, header, binding, or supported type-specific settings. Press Enter in a text field or use the check icon to confirm a value. Reset restores the framework default by removing the authored field. A template, object value, or protected expression links to its authored source. You can also edit the supported inner fields of an XAML hierarchy column.
 
 Each action updates the native design and writes one source transaction. Undo restores the previous collection or value. Use the authored source for collections supplied by runtime code. [VS Code Columns view](vscode/authoring.md#edit-table-columns) · [MCP arguments](vscode/reference.md#edit-table-columns-with-mcp)
 
 For an RSX table, Columns edits an inline `ferroui_view::table_columns` array and starts one when you add the first column. Enter a simple path such as `Customer.Name` in **Binding**. Reveal a computed property in its original Rust expression. If the whole collection is computed, use **Reveal column collection in source** in the flyout. [RSX example](vscode/authoring.md#edit-an-rsx-tableview)
+
+For an RSX TreeDataGrid, the same flyout edits a `ferroui_view::tree_data_grid_columns` array. Edit the header, width, and binding under **Inner column** when working with a hierarchy. Its parent column sets the children and expansion paths. Choose **Edit cell templates** on a template column to open the display or editing body. [RSX TreeDataGrid example](vscode/authoring.md#edit-an-rsx-treedatagrid)
 
 ## Edit item and cell templates
 

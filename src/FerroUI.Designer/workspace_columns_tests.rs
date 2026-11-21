@@ -136,3 +136,55 @@ fn studio_rsx_columns_share_preview_source_and_history_with_mcp() {
     flyout.hide();
     window.close();
 }
+
+#[cfg(feature = "mcp")]
+#[test]
+fn rust_tree_grid_columns_edit_the_native_inner_column_and_keep_the_source() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_controls::GridLength;
+    use ferroui_controls_treedatagrid::{TreeDataGrid, TreeDataGridHierarchicalExpanderColumn};
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+
+    const RUST: &str = include_str!("../../editors/vscode/test/fixtures/tree_grid_workbench.rs");
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let file = ferroui_designer_project::file_uri(std::env::temp_dir().join("tree_grid_workbench.rs")).unwrap();
+    let workspace = DesignerWorkspace::with_uri(RUST, file).unwrap();
+    let window = Window::new();
+    window.set_width(1240.0);
+    window.set_height(840.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+
+    let session = workspace.session();
+    let table = session.borrow().document().ast().find_name("Accounts").unwrap();
+    session.borrow_mut().select([table]);
+    workspace.refresh(true);
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_columns", &json!({"node":table}), Permissions::default()).unwrap();
+    let model = read();
+    assert_eq!(model["reason"], serde_json::Value::Null, "{model}");
+    assert_eq!(model["columns"][1]["label"], "Account 🧭");
+    let check = |width| {
+        let grid = session.borrow().preview.visual(table).unwrap().cast::<TreeDataGrid>().unwrap();
+        assert!(grid.source().is_some());
+        assert_eq!(grid.column_definitions().count(), 5);
+        let expander = grid.column_definitions().get(1);
+        let inner = expander.as_any().downcast_ref::<TreeDataGridHierarchicalExpanderColumn>()
+            .unwrap().inner_column().unwrap();
+        assert_eq!(inner.base().width(), GridLength::from_pixels(width));
+    };
+    check(160.0);
+    let editable = json!({"table":table,"expected_model":model["model"],"expected_revision":model["revision"],
+        "column":model["columns"][1]["children"][0]["node"],"action":"set","field":"Width","value":"186"});
+    let write = Permissions { allow_property_writes: true, ..Default::default() };
+    provider.call("designer_columns_edit", &editable, write).unwrap();
+    check(186.0);
+    assert_eq!(session.borrow().authored_source(), RUST.replace("from_pixels(160.0)", "from_pixels(186.0)"));
+    assert!(provider.call("designer_columns_edit", &editable, write).is_err());
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), RUST);
+    check(160.0);
+    window.close();
+}

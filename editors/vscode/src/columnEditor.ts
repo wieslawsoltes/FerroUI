@@ -74,8 +74,9 @@ export class ColumnEditor {
 
     async field(column: AuthoredColumn, field: ColumnField): Promise<void> {
         this.context.ensure();
-        if (this.rustTemplate(field)) {
-            await editItemTemplates(this.context, column.node, 'CellTemplate');
+        const template = this.rustTemplate(field);
+        if (template) {
+            await editItemTemplates(this.context, column.node, template);
             return;
         }
         if (!field.editable || this.table.reason) {
@@ -93,8 +94,11 @@ export class ColumnEditor {
         }
     }
 
-    rustTemplate(field: ColumnField): boolean {
-        return field.name === 'CellTemplate' && this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates;
+    rustTemplate(field: ColumnField): 'CellTemplate' | 'CellEditingTemplate' | undefined {
+        if (this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates
+            && (field.name === 'CellTemplate' || field.name === 'CellEditingTemplate')) {
+            return field.name;
+        }
     }
 }
 

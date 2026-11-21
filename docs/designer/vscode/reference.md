@@ -88,6 +88,8 @@ Indices start at zero. The move index is the column’s place in the resulting l
 
 For a mapped RSX `TableView`, use the same tools and pass `kind: "table"` to insert. Pass a plain row path such as `Customer.Name` as the `Binding` value. Column and field ranges address the original Rust buffer. Use `sourceRange` to open the collection and each field’s `range` to reveal protected Rust values. [RSX column authoring](authoring.md#edit-an-rsx-tableview)
 
+For an RSX `TreeDataGrid`, the model offers `text`, `checkBox`, `template`, `rowHeader`, and `expander` where the selected collection supports them. Use the child node ID from `children` to edit an expander's inner column. Send a plain row path for `Binding`, `ChildrenBinding`, `HasChildrenBinding`, `IsExpandedBinding`, or `TextSearchBinding`. Move and remove actions use the top-level column ID. For an application-supplied `source` or `model`, the query explains why edits are unavailable and returns its Rust range. [TreeDataGrid workbench](authoring.md#edit-an-rsx-treedatagrid)
+
 ### Edit item templates with MCP
 
 1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, slot names and ranges, the assigned `includedDefinition` when resolved, and `includedResources` available for assignment.
@@ -98,7 +100,7 @@ On Studio’s server, call `designer_item_templates` and `designer_item_template
 
 For a control template, pass `property: "Template"` in the query and in each action. The query returns the control's authored assignment and the compatible resources. Use the same `preview`, assignment, copy, creation, reset, and stale-model checks. [Control template workflow](authoring.md#edit-a-control-template)
 
-For RSX, the query returns a `rustBody` range when the template opens on the native canvas. The `range` points to its Rust assignment. Use the column's node ID from `designer_columns` for `property: "CellTemplate"`. For `create_inline`, pass `rust_type` with the type of one item. The report's `canCreate` and `canReset` fields identify available edits. For `preview`, VS Code reports `opened_template` with the original range and sets `rust_template` for the active view. Studio selects the same invocation. Use `designer_definition` with `action: "exit"` to return to the owning Rust view in either host. [Rust workflow](authoring.md#edit-a-rust-item-or-cell-template)
+For RSX, the query returns a `rustBody` range when the template opens on the native canvas. The `range` points to its Rust assignment. Use the column's node ID from `designer_columns` for `property: "CellTemplate"` or a TreeDataGrid template column's `"CellEditingTemplate"`. For `create_inline`, pass `rust_type` with the type of one item. The report's `canCreate` and `canReset` fields identify available edits. For `preview`, VS Code reports `opened_template` with the original range and sets `rust_template` for the active view. Studio selects the same invocation. Use `designer_definition` with `action: "exit"` to return to the owning Rust view in either host. [Rust workflow](authoring.md#edit-a-rust-item-or-cell-template)
 
 ### Edit styles and palettes with MCP
 

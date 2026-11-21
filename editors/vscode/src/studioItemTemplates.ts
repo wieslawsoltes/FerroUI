@@ -34,7 +34,7 @@ interface TemplateAction extends QuickPickItem {
 
 const tool = 'designer_item_template';
 
-export async function editItemTemplates(context: StudioContext, node: number, member?: 'Template' | 'CellTemplate'): Promise<void> {
+export async function editItemTemplates(context: StudioContext, node: number, member?: TemplateProperty): Promise<void> {
     if (member === 'Template' ? !context.panel.supportsControlTemplate : !context.panel.supportsItemTemplates) {
         throw new Error('Update the FerroUI preview helper to edit this template.');
     }

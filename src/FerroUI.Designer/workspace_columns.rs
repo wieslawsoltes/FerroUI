@@ -9,7 +9,7 @@ use ferroui_controls::{
     ScrollViewer, StackPanel, TextBlock,
 };
 use ferroui_designer_core::{NodeId, SourceSpan};
-use ferroui_designer_tools::{AuthoredColumn, ColumnChange, TableColumns, nearest_table};
+use ferroui_designer_tools::{AuthoredColumn, ColumnChange, ColumnKind, TableColumns, nearest_table};
 use std::rc::{Rc, Weak};
 
 #[path = "workspace_column_fields.rs"]
@@ -266,11 +266,7 @@ fn column_details(host: &ContentControl, model: &TableColumns, scope: ColumnScop
     add_button(&actions, SOURCE, "Reveal column in source", move || {
         source.reveal(span)
     });
-    if scope.rust {
-        let template = scope.clone();
-        let node = column.node;
-        add_button(&actions, icons::FIT, "Edit cell template", move || template.open_template(node));
-    }
+    add_template_action(&actions, column, &scope);
     if scope.writable {
         add_reorder_buttons(&actions, column, model.columns.len(), &scope);
     }
@@ -283,6 +279,15 @@ fn column_details(host: &ContentControl, model: &TableColumns, scope: ColumnScop
     scroll.set_content(Some(Control::boxed(editor)));
     content.children().add(scroll.upcast::<Control>());
     host.set_content(Some(Control::boxed(content)));
+}
+
+fn add_template_action(panel: &StackPanel, column: &AuthoredColumn, scope: &ColumnScope) {
+    if scope.rust && matches!(column.kind, ColumnKind::Table | ColumnKind::Template) {
+        let scope = scope.clone();
+        let node = column.node;
+        let label = if column.kind == ColumnKind::Table { "Edit cell template" } else { "Edit cell templates" };
+        add_button(panel, icons::FIT, label, move || scope.open_template(node));
+    }
 }
 
 fn add_reorder_buttons(

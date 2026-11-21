@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ColumnEditor, columnKinds, type AuthoredColumn, type ColumnField, type TableColumns } from './columnEditor';
 import type { DesignerPanel } from './designerPanel';
+import { templateLabels } from './itemTemplateLabels';
 import { errorMessage } from './protocol';
 import { StudioContext } from './studioContext';
 
@@ -115,18 +116,19 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
         const { id, editor, column, field, index, topLevel } = row;
         const writable = !editor.table.reason;
         const template = field && editor.rustTemplate(field);
-        const item = new vscode.TreeItem(template ? 'Cell template' : field?.name ?? column.label, field
+        const label = template ? templateLabels[template] : field?.name ?? column.label;
+        const item = new vscode.TreeItem(label, field
             ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed);
         item.id = id;
         if (field) {
             item.description = field.value ?? (field.range ? 'Object' : undefined);
-            const accessible = [template ? 'Cell template' : field.name, item.description].filter(Boolean).join(' ');
+            const accessible = [label, item.description].filter(Boolean).join(' ');
             item.accessibilityInformation = { label: accessible };
             item.tooltip = accessible;
             const editable = field.editable && writable;
             item.iconPath = new vscode.ThemeIcon(field.kind === 'binding' ? 'link' : field.kind === 'object' ? 'symbol-structure' : 'symbol-property');
             item.contextValue = ['field', field.range && 'source', writable && field.canClear && 'reset'].filter(Boolean).join(' ');
-            if (editable || field.range || template) item.command = { command: command('edit'), title: template ? 'Edit Cell Template' : field.name, arguments: [row] };
+            if (editable || field.range || template) item.command = { command: command('edit'), title: label, arguments: [row] };
         } else {
             const kind = columnKinds[column.kind];
             item.iconPath = new vscode.ThemeIcon(kind.icon);

@@ -391,6 +391,19 @@ Edit the header, width, visibility, resizing, alignment, and simple row binding.
 
 Open **Cell template** under the column to create or edit an inline RSX template. For a computed assignment such as `.cell_template(status_cell())`, choose **Reveal Template Assignment**. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns()`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
+### Edit an RSX TreeDataGrid
+
+1. Open Design for [tree_grid_workbench.rs](../../../editors/vscode/test/fixtures/tree_grid_workbench.rs). Select **Accounts** in **Outline** and choose **Edit Columns** in Properties.
+2. Expand **Account** to see the hierarchy settings and its inner text column. Edit the inner **Width** or **Binding** to change the header geometry or value. Use **ChildrenBinding** on the hierarchy column to set the path to a row's children. For a checkbox, use a Boolean row property such as `Active`.
+3. Choose **Add Column** to add a text, checkbox, template, row-header, or hierarchy column. A grid can have one hierarchy column. Drag top-level columns into order or use **Move Column Earlier** and **Move Column Later** from the row's context menu. Each accepted edit has one Undo step.
+4. Expand a template column and choose **Cell template** or **Cell editing template**. Open the mapped body on the canvas, or create a typed inline template in an empty slot. The editing starter uses a text box. The back arrow returns to the owning grid view.
+
+The isolated canvas shows the native headers. Launch the application to see the authored columns with the app's rows. An inline `ferroui_view::tree_data_grid_columns` array supplies editable column definitions. When `source` or `model` supplies the grid, **Reveal Column Collection** opens the Rust assignment. For computed fields in an editable collection, reveal the field's expression. [Rust builders](../../declarative-ui.md#44-build-treedatagrid-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+
+![Columns shows the RSX hierarchy, row header, text, checkbox, and template columns beside the grid preview](../images/vscode-rsx-tree-grid-columns.jpg)
+
+![The designer isolates a TreeDataGrid cell editing template and selects its TextBox in Rust](../images/vscode-rsx-tree-grid-editing-template.jpg)
+
 ## Edit item and cell templates
 
 1. Open [ItemTemplatesWorkbench.xaml](../../../editors/vscode/test/fixtures/ItemTemplatesWorkbench.xaml) and choose **FerroUI: Open Designer**. Select **Directory** from **Outline** to work on its shared template, or select **ReviewQueue** to start with the default item presentation.
@@ -425,7 +438,7 @@ The contextual editor covers authored XAML item, selection box, menu item, cell,
 3. Use the back arrow in Design to return to the owning view. To edit a table cell, select **Accounts**, open **Columns**, expand **Status**, and choose **Cell template**.
 4. To add a template to the **Account** column or another empty slot, choose **Create Inline Rust Template** and enter the Rust type of one item, such as `Customer` or `crate::model::Customer`. The editor adds a typed `ferroui_view::template` with a starter text control. **Reset Template** removes a mapped local assignment. Each creation, reset, or canvas edit has its own Undo step.
 
-The isolated canvas renders the supported static controls and literals of a direct `ferroui_view::template` closure. Use the running app to see computed content with its real data. A template supplied by a variable, a function call, or another builder remains editable in the Rust source through **Reveal Template Assignment**. The template picker supports inline item templates on ItemsControl, ListBox, TreeView and ComboBox, the ComboBox selection box template, NavigationView menu items, and cell templates on mapped TableView columns. [Rust data templates](../../declarative-ui.md#92-data-templates-whose-items-are-components) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+The isolated canvas renders the supported static controls and literals of a direct `ferroui_view::template` closure. Use the running app to see computed content with its real data. A template supplied by a variable, a function call, or another builder remains editable in the Rust source through **Reveal Template Assignment**. The template picker supports inline item templates on ItemsControl, ListBox, TreeView and ComboBox, the ComboBox selection box template, NavigationView menu items, and display and editing templates on their applicable table columns. [Rust data templates](../../declarative-ui.md#92-data-templates-whose-items-are-components) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![The item template canvas and its original Rust with CustomerTitle selected](../images/vscode-rsx-item-template.jpg)
 
