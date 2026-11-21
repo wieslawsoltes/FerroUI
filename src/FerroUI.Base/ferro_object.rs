@@ -1037,7 +1037,7 @@ impl FerroObject {
         self.raise_property_changed(property, Some(old_value), new_value, BindingPriority::LocalValue, true);
     }
 
-    pub(crate) fn validate_priority(priority: BindingPriority) {
+    fn validate_priority(priority: BindingPriority) {
         if priority < BindingPriority::Animation || priority >= BindingPriority::Inherited {
             panic!("Invalid priority {priority:?}");
         }
@@ -1051,7 +1051,7 @@ impl fmt::Debug for FerroObject {
 }
 
 /// A marker held by a value of an untyped ("any value") property type.
-pub(crate) enum ValueMarker {
+enum ValueMarker {
     Unset,
     DoNothing,
 }
@@ -1061,12 +1061,7 @@ pub(crate) enum ValueMarker {
 /// value type this folds to a constant `None`.
 #[inline]
 fn value_marker<T: 'static>(value: &T) -> Option<ValueMarker> {
-    value_marker_any(value)
-}
-
-/// [`value_marker`] of an untyped value.
-#[inline]
-pub(crate) fn value_marker_any(any: &dyn Any) -> Option<ValueMarker> {
+    let any: &dyn Any = value;
     let boxed = match any.downcast_ref::<BoxedValue>() {
         Some(boxed) => boxed,
         None => any.downcast_ref::<Option<BoxedValue>>()?.as_ref()?,
