@@ -9,9 +9,12 @@ use ferroui_designer_tools::component_palette::PaletteLayer;
 use serde_json::{Value, json};
 
 pub(super) fn source_range<'a>(index: &LineIndex, modules: Option<&RustModuleSources>, resource: &'a RsxStyleResource) -> Option<(Range, Option<&'a str>)> {
-    if let Some(shared) = &resource.shared && let Some(uri) = shared.uri.as_deref() {
+    let foreign = resource.shared.as_ref().and_then(|shared| {
+        shared.uri.as_deref().map(|uri| (uri, shared.value))
+    });
+    if let Some((uri, span)) = foreign {
         let owner = modules?.source(uri)?;
-        let range = LineIndex::new(&owner.source).range(shared.value).ok()?;
+        let range = LineIndex::new(&owner.source).range(span).ok()?;
         return Some((range, Some(uri)));
     }
     Some((index.range(resource.color_source()).ok()?, None))

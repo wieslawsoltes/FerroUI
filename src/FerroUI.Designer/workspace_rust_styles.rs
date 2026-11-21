@@ -293,7 +293,7 @@ impl Scope {
             Declaration::Local(span) => self.reveal(span),
             Declaration::RustModule { uri, span } => {
                 let result = self.current().and_then(|workspace| workspace.reveal_rust_style_module_span(&uri, span));
-                if result.is_ok() && let Some(flyout) = self.pane.flyout.upgrade() {
+                if let Some(flyout) = self.pane.flyout.upgrade().filter(|_| result.is_ok()) {
                     flyout.hide();
                 }
                 self.report(result);

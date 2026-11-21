@@ -113,9 +113,8 @@ impl DesignerSession {
     }
 
     pub(crate) fn invalidate_rust_modules(&mut self) -> Result<(), String> {
-        if let Some(rust) = self.rust.as_mut()
-            && rust.invalidate_modules(&mut self.document).map_err(|error| error.to_string())?
-        {
+        let Some(rust) = self.rust.as_mut() else { return Ok(()) };
+        if rust.invalidate_modules(&mut self.document).map_err(|error| error.to_string())? {
             self.changed(true);
         }
         Ok(())

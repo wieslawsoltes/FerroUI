@@ -604,7 +604,9 @@ impl UiToolProvider for DesignerMcp {
             }
             return workspace_tools::call(&workspace, name, args, permissions.allow_input);
         }
-        if name == RSX_STYLE_EDIT && let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade) {
+        let style_workspace = self.workspace.as_ref()
+            .filter(|_| name == RSX_STYLE_EDIT).and_then(Weak::upgrade);
+        if let Some(workspace) = style_workspace {
             {
                 let session = owner.try_borrow().map_err(|_| "Designer is already processing a transaction")?;
                 ensure_revision(&session, args)?;
