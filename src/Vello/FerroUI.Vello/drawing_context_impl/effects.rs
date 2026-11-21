@@ -113,6 +113,28 @@ pub(super) struct DeviceLayer {
 #[cfg(not(feature = "hybrid"))]
 pub(super) enum DeviceLayer {}
 
+/// A layer whose content is recorded into a scene of the WebGL2 context of the canvas, rendered
+/// there and copied into a texture of the pool of the context, and passed through a program of
+/// `web_gl/layer_programs.rs` into another, which the scene the layer was pushed in paints with
+/// (step 3 of the GPU route, gpu-rendering.md, #623).
+#[cfg(feature = "hybrid-webgl")]
+pub(super) struct WebGlLayer {
+    gpu: std::rc::Rc<crate::web_gl::VelloWebGlGpu>,
+    /// The area of the layer in the pixels of the canvas.
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+    /// The bounds of the layer in the coordinates of the context when it was pushed, with the
+    /// transform from them to the pixels of the canvas.
+    bounds: Rect,
+    transform: Affine,
+}
+
+/// No layer is drawn on a WebGL2 context in a build without the hybrid renderer over WebGL2.
+#[cfg(not(feature = "hybrid-webgl"))]
+pub(super) enum WebGlLayer {}
+
 /// The result of a layer drawn on the device: a texture of the pool.
 #[cfg(feature = "hybrid")]
 type LayerTexture = std::sync::Arc<crate::gpu::VelloDeviceTexture>;
@@ -771,6 +793,8 @@ pub(super) struct ColorMatrixFrame {
     outer: OuterScene,
     operation: LayerOperation,
     device: Option<DeviceLayer>,
+    /// On the WebGL2 context of the canvas when set.
+    web_gl: Option<WebGlLayer>,
 }
 
 /// What a layer does to its content.
@@ -841,7 +865,18 @@ impl DrawingContextImpl {
         if !matches!(operation, LayerOperation::Multiply { .. }) {
             if let Some(layer) = self.device_layer(Some(bounds)) {
                 let outer = self.enter_device_scene(&layer);
-                self.color_matrix_stack.push(ColorMatrixFrame { outer, operation, device: Some(layer) });
+                self.color_matrix_stack.push(ColorMatrixFrame { outer, operation, device: Some(layer), web_gl: None });
+                self.save(SavedKind::ColorMatrix);
+                // Nothing outside the bounds is kept.
+                self.push_clip(bounds);
+                return;
+            }
+        }
+        #[cfg(feature = "hybrid-webgl")]
+        if matches!(operation, LayerOperation::Matrix { .. }) {
+            if let Some(layer) = self.web_gl_layer(bounds) {
+                let outer = self.enter_web_gl_scene();
+                self.color_matrix_stack.push(ColorMatrixFrame { outer, operation, device: None, web_gl: Some(layer) });
                 self.save(SavedKind::ColorMatrix);
                 // Nothing outside the bounds is kept.
                 self.push_clip(bounds);
@@ -849,7 +884,7 @@ impl DrawingContextImpl {
             }
         }
         let outer = self.begin_cpu_scene(bounds);
-        self.color_matrix_stack.push(ColorMatrixFrame { outer, operation, device: None });
+        self.color_matrix_stack.push(ColorMatrixFrame { outer, operation, device: None, web_gl: None });
         self.save(SavedKind::ColorMatrix);
         // Nothing outside the bounds is kept.
         self.push_clip(bounds);
@@ -861,6 +896,16 @@ impl DrawingContextImpl {
         let frame = self.color_matrix_stack.pop().unwrap_or_else(|| panic!("The colour matrix stack is empty"));
         let position = self.sink_origin - frame.outer.origin;
         let mut scene = self.leave_scene(frame.outer);
+
+        if let Some(layer) = frame.web_gl {
+            #[cfg(feature = "hybrid-webgl")]
+            {
+                self.end_web_gl_layer(scene, layer, &frame.operation);
+                return;
+            }
+            #[cfg(not(feature = "hybrid-webgl"))]
+            match layer {}
+        }
 
         if let Some(layer) = frame.device {
             #[cfg(feature = "hybrid")]
@@ -901,6 +946,78 @@ impl DrawingContextImpl {
     pub(super) fn end_pixel_source(&mut self) {
         #[cfg(feature = "hybrid")]
         self.end_device_pixel_source();
+    }
+}
+
+/// The route of the WebGL2 context (gpu-rendering.md, "Vello", step 3, #623).
+#[cfg(feature = "hybrid-webgl")]
+impl DrawingContextImpl {
+    /// A colour matrix layer over `bounds` on the WebGL2 context of the canvas: when the scene of
+    /// the context belongs to the canvas (not a scene of the CPU renderer inside it), its pixels
+    /// are those of the canvas, and the program compiled.
+    fn web_gl_layer(&mut self, bounds: Rect) -> Option<WebGlLayer> {
+        let gpu = self.scene().web_gl_gpu()?;
+        if self.sink_origin != Vec2::ZERO || !gpu.prepare_color_matrix() {
+            return None;
+        }
+        let (width, height) = (f64::from(self.sink().width()), f64::from(self.sink().height()));
+        let whole = kurbo::Rect::new(0.0, 0.0, width, height);
+        let transform = self.device_transform();
+        let area = (transform * rect_path(bounds)).bounding_box().expand().intersect(whole);
+        if !(area.width() >= 1.0 && area.height() >= 1.0) {
+            return None;
+        }
+        Some(WebGlLayer {
+            gpu,
+            x: area.x0 as u32,
+            y: area.y0 as u32,
+            width: area.width() as u32,
+            height: area.height() as u32,
+            bounds,
+            transform,
+        })
+    }
+
+    /// Replaces the scene of the context by a scene of the canvas for the content of a layer, of
+    /// the size of the canvas and in its pixels, and returns the scene that was replaced.
+    fn enter_web_gl_scene(&mut self) -> OuterScene {
+        let (width, height) = (self.sink().width(), self.sink().height());
+        let Some(gpu) = self.scene().web_gl_gpu() else {
+            panic!("The scene of the context does not belong to a WebGL2 context");
+        };
+        let scene: Box<dyn IVelloSceneSink> = Box::new(crate::scene::VelloWebGlSceneSink::new(gpu, width, height));
+        let sink = match self.sink.replace(scene) {
+            Some(sink) => sink,
+            None => panic!("The drawing context has been disposed"),
+        };
+        let outer = OuterScene { sink, origin: self.sink_origin, open_clips: self.open_clips, area: (width, height) };
+        self.open_clips = 0;
+        outer
+    }
+
+    /// Ends a layer drawn on the WebGL2 context: its content rendered and copied into a texture
+    /// of the pool, the pass of its operation, and the result painted over its bounds in the
+    /// scene the layer was pushed in (the order of the commands of the context).
+    fn end_web_gl_layer(&mut self, mut scene: Box<dyn IVelloSceneSink>, layer: WebGlLayer, operation: &LayerOperation) {
+        let LayerOperation::Matrix { matrix, alpha_mode } = operation else {
+            return;
+        };
+        let size = (layer.width, layer.height);
+        let result = scene
+            .render_to_web_gl_texture((layer.x, layer.y, layer.width, layer.height))
+            .and_then(|content| layer.gpu.color_matrix_texture(&content, size, matrix, *alpha_mode));
+        drop(scene);
+        match result {
+            Ok(Some(texture)) => {
+                let texture_transform =
+                    layer.transform.inverse() * Affine::translate((f64::from(layer.x), f64::from(layer.y)));
+                let path = rect_path(layer.bounds);
+                self.sink().fill_with_web_gl_texture(&path, layer.transform, &texture, size, texture_transform);
+            }
+            // The program was there when the layer was pushed.
+            Ok(None) => {}
+            Err(error) => crate::web_gl::log_render_failure(&error),
+        }
     }
 }
 
@@ -1117,6 +1234,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
             outer,
             operation: LayerOperation::Multiply { factors: factors.clone(), bounds, scene_to_local },
             device: None,
+            web_gl: None,
         });
         self.save(SavedKind::ColorMatrix);
         self.push_clip(bounds);
@@ -1158,6 +1276,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
             outer,
             operation: LayerOperation::LightingMultiply { lighting: lighting.clone(), scene_to_local },
             device: Some(layer),
+            web_gl: None,
         });
         self.save(SavedKind::ColorMatrix);
         self.push_clip(bounds);

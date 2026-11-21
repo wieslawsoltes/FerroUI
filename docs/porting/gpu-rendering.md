@@ -204,14 +204,29 @@ The route, in pull requests stacked on the Skia ones:
    with the hybrid renderer (its filter layers in a scene of the device the GPU scene paints
    with), so the two-pass Gaussian of the plan is not needed there; it remains for a build of the
    GPU renderer alone, which draws them on the processor.
-3. **WebGL2** (next). The same programs in GLSL ES 3.0 on the WebGL2 context the renderer uses,
-   with framebuffer textures in place of wgpu textures (`hybrid-webgl` has no device textures yet:
-   the sink has to learn to paint with a framebuffer texture first). Until then WebGL2 draws the
-   layers of step 2 with the CPU path, as before E3, and the shader effects of #455 by their CPU
-   references. The GLSL ES 3.0 of a shader effect's pass is ready: `ferroui-build` translates the
-   WGSL module of its description with naga at build time (`ferroui_build::shader_effects`,
-   decision 2 of custom-effects.md), so the browser module will carry no translator; the renderer
-   does not consume it yet.
+3. **WebGL2** (#623, in progress). The same programs in GLSL ES 3.0 on the WebGL2 context the
+   renderer uses (`web_gl/`), with textures of the context in place of wgpu textures.
+   - *Done: a scene paints with a texture of the context* (`web_gl/frame_textures.rs`). A texture
+     of the context with a framebuffer, pooled by size (rounded up to 32 pixels; the pool's again
+     once nothing but the pool holds it, so steady frames allocate none; sizes no frame uses are
+     let go after a frame, four of each kept), is painted through the texture bindings of the
+     renderer (`ImageSource::ExternalTexture`). The renderer of `vello_gpu` over WebGL2 draws into
+     the drawing buffer of its canvas only, so the content of a layer is a scene of the size of
+     the canvas, rendered into the drawing buffer before the frame and copied into a texture of
+     the pool (`copyTexSubImage2D`, its first row the bottom one of the area); the scene of the
+     frame is rendered after its layers and clears the drawing buffer. Nothing is read back.
+   - *Done: the colour matrix layers* (`web_gl/layer_programs.rs`, the program of
+     `COLOR_MATRIX_WGSL` in both alpha modes). Compiled once per context when a layer first needs
+     it, its values uniforms for each pass; the pass reads the copied content, turns it upright
+     and writes the result into another texture of the pool, which the scene the layer was pushed
+     in paints over the bounds of the layer. A program that does not compile is logged once and
+     its layers are drawn on the processor; so is a layer inside a scene of the CPU renderer.
+   - *Next*, in the same way: the light multiply, the pixel operations of two sources, the
+     convolution and the luminance mask (the other programs of `gpu/effect_passes.rs`); the shader
+     effects of #455, whose GLSL ES 3.0 `ferroui-build` already translates from their WGSL with
+     naga at build time (`ferroui_build::shader_effects`, decision 2 of custom-effects.md), so the
+     browser module carries no translator; the 3D executor on WebGL2 (#608 D8 shares the GL
+     executor). Until each lands, WebGL2 draws it with the CPU path.
 4. **The CPU renderer** keeps the CPU path: it is the reference.
 5. **Validation:** each pass against the exact result or the CPU reference in each GPU mode
    (`gpu/effect_pass_tests.rs`), `tests/FerroUI.RenderBackends.Comparison` scenes against Skia (the
