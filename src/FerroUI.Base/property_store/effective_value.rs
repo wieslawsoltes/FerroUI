@@ -8,6 +8,8 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+mod erased_write;
+
 /// The untyped interface of an [`EffectiveValue`].
 pub(crate) trait EffectiveValueDyn: Any {
     // A single projection gives the common store its property identity,
@@ -685,84 +687,29 @@ impl<T: StyledValue> EffectiveValue<T> {
             return (uncommon.set)(self, owner, value, priority, is_overridden_current_value, is_coerced_default_value);
         }
 
-        self.state.is_overriden_current_value.set(is_overridden_current_value);
-        self.state.is_coerced_default_value.set(is_coerced_default_value);
-
-        let sets_base = priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue;
-        let mut value_changed = false;
-        let mut base_value_changed = false;
-        // The value that is replaced is the old value of the change. It is kept to the end, as the copy of it
-        // was that this function began with: what dropping it does happens after the notification.
-        let mut old_value = None;
-
-        if priority <= self.state.priority.get() {
-            value_changed = !value_equals(&*self.value.borrow(), &value);
-            // Before the write: dropping the previous value may read the property.
-            owner.values().advance_value_generation();
-            let previous = self.value.replace(value);
-            if sets_base {
-                // The value and the base value at once, which is every set without an animation over the
-                // value: the value is kept once, and a base value that was the value changed if the value did.
-                if self.state.base_is_value.get() {
-                    base_value_changed = value_changed;
-                } else {
-                    let value = self.value.borrow();
-                    base_value_changed =
-                        !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &value)));
-                    drop(value);
-                    self.set_base_to_value();
-                }
-                self.state.priority.set(priority);
-                self.state.base_priority.set(priority);
-                old_value = Some(previous);
-            } else {
-                // The value alone. A base value that was the value stays what it was: the value that is
-                // replaced becomes it.
-                if self.state.base_is_value.get() {
-                    old_value = value_changed.then(|| previous.clone());
-                    self.base_value.set(Some(Rc::new(previous)));
-                    self.state.base_is_value.set(false);
-                } else {
-                    old_value = Some(previous);
-                }
-                self.state.priority.set(priority);
-            }
-        } else if sets_base {
-            base_value_changed = !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &value)));
-            self.set_base_value(value);
-            self.state.base_priority.set(priority);
-        }
-
-        if value_changed {
-            self.notify_value_changed(owner, old_value.expect("the old value of a changed value is kept"));
-        } else if base_value_changed {
-            self.notify_base_value_changed(owner);
-        }
+        // The values of the write stay in this frame: what is left in the slots is dropped here,
+        // the previous value before the new one, after the notification.
+        let mut new = Some(value);
+        let mut old = None;
+        erased_write::write_value(
+            &self.state,
+            erased_write::ErasedWrite::new(self, &mut new, &mut old),
+            owner,
+            priority,
+            is_overridden_current_value,
+            is_coerced_default_value,
+        );
     }
 
     fn notify_value_changed(&self, owner: &FerroObject, old_value: T) {
-        let notifying = self.state.property.notifying();
-        if let Some(notifying) = notifying {
-            notifying(owner, true);
-        }
-        let property = self.state.property;
-        let new_value = self.value();
-        let priority = self.state.priority.get();
-        with_values(property, Some(&old_value), &new_value, |old, new| {
-            owner.raise_property_changed_values(property, old, new, priority, true);
-        });
-        if property.inherits() {
-            // A change handler may have changed the value again: inheritance
-            // children are told the value as it is now, not the value that
-            // was announced to the handlers of this object.
-            let new_value = self.value();
-            with_values(property, Some(&old_value), &new_value, |old, new| {
-                owner.values().on_inherited_effective_value_changed(owner, property, old.expect("the old value"), new);
-            });
-        }
-        if let Some(notifying) = notifying {
-            notifying(owner, false);
-        }
+        // The copy of the new value lives until the end of the notification, before the old value
+        // is dropped.
+        let mut new_value = None;
+        erased_write::raise_value_changed(
+            &self.state,
+            erased_write::ErasedNotify::new(self, &old_value, &mut new_value),
+            owner,
+        );
     }
 
     fn notify_base_value_changed(&self, owner: &FerroObject) {
