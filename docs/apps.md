@@ -287,7 +287,8 @@ GitHub Pages is enabled once, with GitHub Actions as its source:
 gh api -X POST repos/FerroUI/MyApp/pages -f build_type=workflow
 ```
 
-The site is then published at `https://ferroui.github.io/MyApp/` by every push to main.
+The site is then published at `https://ferroui.com/MyApp/` (the custom domain of the
+organization Pages site) by every push to main.
 
 ## 7. Updating FerroUI
 

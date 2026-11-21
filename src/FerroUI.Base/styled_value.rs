@@ -5,7 +5,7 @@
 //! value frames) is compiled once for each type it keeps values as, its storage type, and not
 //! once for each value type of a property: the members of every enumeration are kept as one
 //! [`EnumValue`](crate::EnumValue), and an optional member as an `Option` of it
-//! (docs/binary-size.md, section 4.25).
+//! (docs/binary-size.md, section 4.27).
 
 use crate::{styled_value, ElementRef, ObjectType, Ref, StyledValue, WeakRef};
 

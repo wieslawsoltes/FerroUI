@@ -8,14 +8,24 @@ use std::rc::Rc;
 
 /// Defines a composite page transition that can be used to combine
 /// multiple transitions, which all run at the same time.
-#[derive(Default)]
 pub struct CompositePageTransition {
     page_transitions: RefCell<Vec<Rc<dyn IPageTransition>>>,
 }
 
+impl Default for CompositePageTransition {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CompositePageTransition {
     pub fn new() -> Self {
-        Self::default()
+        // The casts of the transition to `IPageTransition` (its `ValueTypeRegistration`), which
+        // compiled markup needs before it sets a transition, are registered with the first one
+        // made (#612): every transition of the type is made here.
+        static CASTS: std::sync::Once = std::sync::Once::new();
+        CASTS.call_once(crate::data::core::ValueTypes::register_used::<Self>);
+        Self { page_transitions: RefCell::new(Vec::new()) }
     }
 
     /// The transitions to be executed.

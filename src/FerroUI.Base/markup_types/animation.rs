@@ -520,8 +520,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers what the untyped value conversions need of the types of this file that
 /// no first use shows: the nullable forms and the casts of the types that members of
 /// markup types hold (compiled markup converts a value for such a member before it
-/// sets it, and setting it registers nothing). Every other type registers when it is
-/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
+/// sets it, and setting it registers nothing). The page transitions register their casts
+/// when the first transition of a type is made instead (#612): a cast names the transition's
+/// interface table, and through it the key-frame animations it runs. Every other type
+/// registers when it is first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<dyn IEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
     ValueTypes::register_cast::<Rc<BackEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
@@ -557,10 +559,6 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<SineEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
     ValueTypes::register_cast::<Rc<SplineEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
     ValueTypes::register_cast::<Rc<SpringEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CrossFade>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_cast::<Rc<PageSlide>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_cast::<Rc<Rotate3DTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_cast::<Rc<CompositePageTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
 }
 
 /// Registers every type of this file that registers when it is first used: what the
@@ -848,24 +846,32 @@ impl crate::data::core::ValueTypeRegistration for SpringEasing {
 impl crate::data::core::ValueTypeRegistration for CrossFade {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<CrossFade>>();
+        // Registered by the construction of the first transition of the type.
+        ValueTypes::register_cast::<Rc<CrossFade>, Rc<dyn IPageTransition>>(|transition| transition.clone());
     }
 }
 
 impl crate::data::core::ValueTypeRegistration for PageSlide {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<PageSlide>>();
+        // Registered by the construction of the first transition of the type.
+        ValueTypes::register_cast::<Rc<PageSlide>, Rc<dyn IPageTransition>>(|transition| transition.clone());
     }
 }
 
 impl crate::data::core::ValueTypeRegistration for Rotate3DTransition {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<Rotate3DTransition>>();
+        // Registered by the construction of the first transition of the type.
+        ValueTypes::register_cast::<Rc<Rotate3DTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
     }
 }
 
 impl crate::data::core::ValueTypeRegistration for CompositePageTransition {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<CompositePageTransition>>();
+        // Registered by the construction of the first transition of the type.
+        ValueTypes::register_cast::<Rc<CompositePageTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
     }
 }
 

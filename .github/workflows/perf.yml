@@ -29,8 +29,18 @@ on:
         type: boolean
         required: false
         default: false
+      capi:
+        description: Measure the C samples of the C ABI (hello_world.c, gauge.c) on macOS, full and by use, static with dead stripping and dynamic, with the release and the dist profile, by crate, against the baseline (docs/binary-size.md, section 3.7)
+        type: boolean
+        required: false
+        default: false
       windows:
         description: Also build the ControlCatalog and the WinUI theme gallery on Windows (x86-64) with the release and the dist profile, and report the sizes of their executables (docs/binary-size.md)
+        type: boolean
+        required: false
+        default: false
+      folding:
+        description: Identical code folding at link time (#1001) - Linux (x86-64, dist) with and without lld's --icf=safe and --icf=all, and, with samples and windows, macOS dist without ld64's deduplication and Windows without /OPT:ICF, plus the link line rustc passes
         type: boolean
         required: false
         default: false
@@ -156,6 +166,11 @@ jobs:
       matrix:
         tree: [measured, baseline]
         profile: [release, dist]
+    env:
+      # The MSVC standard library of the Windows image (14.52) refuses the libclang of the image
+      # in the build script of the ANGLE binding ("STL1000: Unexpected compiler version"), as in
+      # the Windows job of ci.yml, which passes the check the same way.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     defaults:
       run:
         shell: bash
@@ -231,6 +246,40 @@ jobs:
             echo "$sample: $(stat -c %s "$file") bytes" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # Identical code folding (#1001): the link line rustc passes for the profile (does it ask for
+      # /OPT:ICF?), then the catalog and hello world linked again with /OPT:NOICF, in a target
+      # folder of their own, for what folding gives.
+      - name: Identical code folding (link line, /OPT:NOICF)
+        if: inputs.folding && matrix.tree == 'measured'
+        working-directory: tree
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target-noicf"
+          # One build for both: the link line shows the options of rustc, then /OPT:NOICF last.
+          export RUSTFLAGS="-C link-arg=/OPT:NOICF"
+          {
+            echo "## Windows x86-64: identical code folding, profile \`$PROFILE\`"
+            echo
+            echo "The options of the link line of hello-world (those of rustc, then the /OPT:NOICF of this step):"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo rustc --locked --profile "$PROFILE" -p hello-world --bin hello-world -- --print=link-args 2>/dev/null \
+            | tr ' ' '\n' | grep -i -E '^"?/(OPT|DEBUG|INCREMENTAL|LTCG)' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo build --locked --profile "$PROFILE" -p control-catalog-desktop --bin control-catalog-desktop
+          cargo build --locked --profile "$PROFILE" -p hello-world --bin hello-world
+          {
+            echo
+            echo "Linked with /OPT:NOICF:"
+            echo
+            echo '```'
+            for app in control-catalog-desktop hello-world; do
+              echo "$app: $(stat -c %s "$CARGO_TARGET_DIR/$PROFILE/$app.exe") bytes"
+            done
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       # What the executable of the catalog is made of, by library: the measured tree with the
       # release profile is linked once more with a map of the linker (`/MAP`), and the code and
       # data of each symbol (the distance to the next one) are summed by the library or the object
@@ -335,6 +384,31 @@ jobs:
               "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # Identical code folding (#1001): ld64 folds some duplicates by default; the dist build of
+      # the ref linked again without it (-no_deduplicate), in a target folder of its own.
+      - name: Without the deduplication of the linker
+        if: inputs.folding && matrix.side == 'ref' && matrix.profile == 'dist'
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          export CARGO_TARGET_DIR="$PWD/target-nodedup"
+          export RUSTFLAGS="-C link-arg=-Wl,-no_deduplicate"
+          {
+            echo "## macOS, ref, profile \`$PROFILE\`, linked with -no_deduplicate (MB: as written, stripped, \`__TEXT,__text\`)"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p nodedup
+          for app in hello-world hello-world-builders winui-theme-gallery control-catalog-desktop; do
+            cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"
+            cp "$CARGO_TARGET_DIR/$PROFILE/$app" "nodedup/$app"
+            strip -o "nodedup/$app.stripped" "nodedup/$app"
+            raw=$(stat -f %z "nodedup/$app"); stripped=$(stat -f %z "nodedup/$app.stripped")
+            text=$(size -m "nodedup/$app" | awk '/Section __text:/ { print $3; exit }')
+            printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
+              "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Breakdown by crate
         if: env.MEASURE == 'true' && matrix.profile == 'release'
         run: |
@@ -359,3 +433,146 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # The C samples of the C ABI (docs/binary-size.md, section 3.7; #978): `hello_world.c` and
+  # `gauge.c` linked against `ferroui-capi` in the full mode and, where the tree has it, by use
+  # (docs/c-abi.md, section 16), statically with dead stripping and dynamically, with the release
+  # and the dist profile, of the ref and of the baseline: one job per tree and profile
+  # (`scripts/capi/size_report.py` of the workflow's own commit, so that a tree from before the
+  # script is measured too), then one table of the ref against the baseline.
+  capi-size:
+    name: C samples (macOS, ${{ matrix.tree }}, ${{ matrix.profile }})
+    if: inputs.capi
+    runs-on: macos-15
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        tree: [measured, baseline]
+        profile: [release, dist]
+    steps:
+      - name: Check out the report scripts
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/capi/size_report.py
+            scripts/capi/size_by_crate.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the tree
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+      - name: Build and measure
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          TREE: ${{ matrix.tree }}
+          PROFILE: ${{ matrix.profile }}
+          REF: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+        run: |
+          python3 tools/scripts/capi/size_report.py --source tree --profile "$PROFILE" --label "$REF" \
+            --work capi-size --json "capi-size-$TREE-$PROFILE.json" --markdown "$GITHUB_STEP_SUMMARY"
+      - name: Keep the numbers
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: capi-size-${{ matrix.tree }}-${{ matrix.profile }}
+          path: capi-size-*.json
+          if-no-files-found: ignore
+
+  capi-size-compare:
+    name: C samples against the baseline
+    if: inputs.capi && inputs.baseline != ''
+    needs: capi-size
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the report scripts
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/capi/size_report.py
+            scripts/capi/size_by_crate.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: capi-size-*
+          merge-multiple: true
+      - name: Compare
+        run: |
+          for profile in release dist; do
+            if [ -f "capi-size-measured-$profile.json" ] && [ -f "capi-size-baseline-$profile.json" ]; then
+              python3 tools/scripts/capi/size_report.py --compare "capi-size-measured-$profile.json" \
+                "capi-size-baseline-$profile.json" --markdown "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+  # Identical code folding at link time on Linux (#1001): the HelloWorld samples, the WinUI theme
+  # gallery and the catalog of the ref with the dist profile, linked as rustc links them, with
+  # lld's --icf=safe (functions whose address is taken are kept) and with --icf=all (for
+  # reference), each in a job of its own. The sizes are those of the executable as written,
+  # stripped, and of its machine code (.text).
+  linux-folding:
+    name: Identical code folding (Linux x86-64, dist, ${{ matrix.folding }})
+    if: inputs.folding
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        folding: [none, safe, all]
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev libicu-dev pkg-config \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev clang lld \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev
+      - name: Build and measure
+        env:
+          FOLDING: ${{ matrix.folding }}
+          REF: ${{ inputs.ref }}
+        run: |
+          case "$FOLDING" in
+            none) export RUSTFLAGS="-C link-arg=-fuse-ld=lld" ;;
+            *) export RUSTFLAGS="-C link-arg=-fuse-ld=lld -C link-arg=-Wl,--icf=$FOLDING" ;;
+          esac
+          {
+            echo "## Linux x86-64, \`$REF\` at \`$(git rev-parse HEAD)\`, dist, folding \`$FOLDING\` (RUSTFLAGS \`$RUSTFLAGS\`)"
+            echo
+            echo "The options of the link line of hello-world:"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo rustc --locked --profile dist -p hello-world --bin hello-world -- --print=link-args 2>/dev/null \
+            | tr ' ' '\n' | grep -E '^"?-(Wl|fuse-ld|B)' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+          {
+            echo '```'
+            echo
+            echo "MB: as written, stripped, .text"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p measured
+          for app in hello-world hello-world-builders winui-theme-gallery control-catalog-desktop; do
+            cargo build --locked --profile dist -p "$app" --bin "$app"
+            cp "target/dist/$app" "measured/$app"
+            strip -o "measured/$app.stripped" "measured/$app"
+            raw=$(stat -c %s "measured/$app"); stripped=$(stat -c %s "measured/$app.stripped")
+            text=$(size -A "measured/$app" | awk '$1 == ".text" { print $2; exit }')
+            printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
+              "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"

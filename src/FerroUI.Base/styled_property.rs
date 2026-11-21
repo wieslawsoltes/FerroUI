@@ -303,7 +303,7 @@ fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
 pub(crate) trait StyledCodec {
     // The untyped write and read of a value of the value type are typed, as the routes of each
     // value type were: a shared route cost an untyped write or read of an enumeration 7 to 8 %
-    // more instructions (docs/binary-size.md, section 4.25).
+    // more instructions (docs/binary-size.md, section 4.27).
 
     /// The write of `value`, a value of the value type, with `priority`; `None` for a value of
     /// another type.

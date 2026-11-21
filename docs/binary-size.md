@@ -36,6 +36,9 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
 - **Direct3D 12 is not used.** On Windows Skia draws with OpenGL ES through ANGLE, which runs on
   Direct3D 11 (as upstream does), with software rendering as the fallback; ANGLE is linked into the
   executable instead of being shipped as a DLL beside it, and is about 4 % of it (section 7).
+- **A C program** linked statically against the C ABI is 36.7 MB with the full library and
+  20.4 MB with the library built by use, which links only the classes it registers (macOS,
+  release, the C hello world; section 3.7).
 
 No functionality was removed, no executable packer is used, and the panic strategy is unchanged.
 
@@ -251,6 +254,48 @@ What the numbers say:
   `ferroui_themes_winui` 15.6, `treedatagrid_demo` 7.4, the colour picker 5.2, Skia 5.1, the
   TreeDataGrid 5.0, ANGLE 6.6 (`libGLESv2` 4.6, `libmozangle` 2.0), the runtime library of
   markup 2.0, the dialogs 1.9, the Windows backend 1.4, HarfBuzz 0.8.
+
+### 3.7 The C ABI: the C samples
+
+A program in another language links `ferroui-capi` (docs/c-abi.md). Its size depends on the mode
+of the library and on the link: the full library (the default features) has the tables of types,
+so every class and the whole Fluent theme are reachable from it; the library built by use
+(`--no-default-features --features desktop`, docs/c-abi.md, section 16) links the classes the
+program registers with their entries and the theme units they need. Linked statically with dead
+stripping, a program keeps what it reaches; a dynamic library keeps every export.
+
+The workflow `Performance` measures `samples/CApi/hello_world.c` and `gauge.c` when it is
+dispatched with `capi` (and a `baseline` to compare with):
+`scripts/capi/size_report.py` builds the library of the tree with `cargo rustc --lib` (all its
+crate types, as `cargo build` writes them) in each mode, links each sample statically
+(`libferroui_capi.a`, the native libraries of `--print native-static-libs`, `-Wl,-dead_strip`, a
+link map) and dynamically, and records the sizes as written and stripped, `size -m` of the static
+program, the stripped dynamic library, and the static program by crate from the link map
+(`scripts/capi/size_by_crate.py`). A tree without the by-use mode is measured in the full mode.
+
+macOS arm64, release, stripped, MB (`size_report.py` on the branch of #978; a library built as a
+static library alone, as in docs/c-abi.md section 16.3, gives programs within 1.5 % of these):
+
+| Program | Static, full | Static, by use | `__TEXT`, full / by use | Dynamic program + library, full / by use |
+| --- | ---: | ---: | ---: | ---: |
+| `hello_world.c` | 36.69 | 20.35 | 31.39 / 17.65 | 36.04 / 31.75 |
+| `gauge.c` | 36.71 | 20.37 | 31.41 / 17.66 | 36.04 / 31.75 |
+| a Rust hello world on main (the range #976 targets) | 16.7 to 20.4 | | | |
+
+`hello_world.c` linked statically, by crate (MB of symbols), full against by use: `ferroui_base`
+14.70 / 8.11, `ferroui_controls` 5.87 / 1.58, native (Skia, HarfBuzz, codecs) 4.65 / 4.65, `core`
+3.74 / 1.79, `ferroui_themes_fluent` 2.01 / 0.38, `ferroui_markup_xaml` 0.54 / 0.27; total 34.44 /
+19.05.
+
+- **By use halves a static program**: the tables of types keep every class (with its metadata and
+  its markup support), and the whole theme keeps every control theme; without them the program
+  keeps the four classes of the hello world, the window, and the units of the theme they root.
+- **A dynamic library does not shrink with the program**: it exports every entry and every call,
+  so it keeps every class; the by-use library is smaller only by the tables (36.00 to 31.72 MB
+  stripped). An application that ships a dynamic library ships one built for it, with the exports
+  of its selection (#977).
+- **The static flags of each toolchain** (`-dead_strip`, `--gc-sections`, `/OPT:REF /OPT:ICF`,
+  SwiftPM, cgo) are in docs/c-abi-languages.md, section 7.
 
 ## 4. The changes
 
@@ -1187,7 +1232,140 @@ trimmed already (the kept units of eight samples, docs/porting/theme-trimming.md
 Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
 `a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call` (`ferroui-build`).
 
-### 4.25 One property store per storage type (#986)
+### 4.25 The initialisation of a class is reached through the class's own use (#612)
+
+A `TypeInfo` names the static initialisation of its class (`class_init`, which registers the
+properties of the class and runs its static constructor). #612 estimated in 2026-11 that this
+pointer kept about 1.5 MB in the bare window: every `TypeInfo` an application reaches would link
+the initialisation of its class. The estimate was measured again on main (`bf8e5e2f5`,
+`samples/HelloWorld`, release, macOS) before anything was changed.
+
+**What the pointer keeps today.** Hello world links the initialisation of 173 classes and types
+(`register_class::init` and `TYPE::class_init` in the symbol table); a smoke run
+(`FERROUI_SMOKE_EXIT_MS=1` under `lldb`, a breakpoint on each) runs 42 of them. On the
+whole-program module of section 2, `scripts/ircut.py --edges` with the references from every
+`TYPE` static to its initialiser removed loses 11.6 kB and no class: the initialisers themselves
+in their outer form. Every class whose initialisation never runs is reached by its own code
+(a property accessor, a constructor, a method) from a path that is linked but not taken. The
+gain the estimate described was taken by the earlier steps (sections 4.12, 4.13, 4.15 and 4.18
+to 4.21), which removed the references that reached a `TypeInfo` without its class.
+
+Taking the pointer out without the tables of types would not be free either: a compiled binding
+path to an attached property (`(local:Owner.Property)`) resolves the owner by its `TypeInfo` and
+looks the property up by name, which initialises an owner that nothing else initialised. That
+needs the generated code to initialise the owner itself, a change of the markup compiler, for
+about 12 kB. The pointer is left as it is.
+
+**What keeps the classes that never run.** Cutting the initialisers of the 130 classes that
+hello world links and its smoke run does not initialise loses at most 674 kB of the module (an
+initialiser inlined into its caller is not seen by the breakpoints, so the root class and the
+focus manager, which always run, are left out of the 130). One root kept most of it:
+
+- **The visual state mappers.** `TemplatedControl::apply_template` asks for the state mapper of
+  the control (the ports of WinUI's `ChangeVisualState`), which was found by downcasts to the six
+  families: button, toggle button, check box, radio button, list box item and text box. The
+  mappers name their classes' properties (`ListBoxItem::is_selected_property`,
+  `TextBox::text_property`), and an accessor initialises its class: every application with a
+  templated control linked the list box item and its selecting items control, the items
+  control, the text box and its presenter, the toggle button, and the panels their
+  initialisations name. Each class of a family now states its mapper from its static
+  constructor (`state_mappers::register`), and a control takes the mapper of its class or of its
+  nearest base class: the answers of the downcasts, as a control of a class exists only after
+  the class is initialised on its thread. `ircut.py` predicted 443 kB and 9 classes from the 5
+  references; the build gives:
+
+| `samples/HelloWorld`, release, macOS | main | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 20,529,288 bytes | 19,949,824 bytes | -579,464 bytes (-2.8 %) |
+| `__TEXT,__text` | 16,257,332 bytes | 15,784,532 bytes | -472,800 bytes (-2.9 %) |
+| Class initialisers linked | 173 | 164 | -9 |
+| Fat LTO `__text` (the build of the trace) | 14,888,284 bytes | 14,477,240 bytes | -411,044 bytes |
+| `dist` file (stripped) | 17,446,112 bytes | 16,980,368 bytes | -465,744 bytes (-2.7 %) |
+| `dist` `__TEXT,__text` | 14,391,440 bytes | 13,975,444 bytes | -415,996 bytes (-2.9 %) |
+
+The catalog and the WinUI gallery use every family, so they link the same classes (built
+together in one invocation, section 2):
+
+| Stripped file / `__TEXT,__text`, macOS | main | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,675,136 / 60,846,200 | 80,659,088 / 60,829,068 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,418,280 | 66,542,192 / 51,421,796 |
+| `winui-gallery`, release | 57,368,984 / 40,124,248 | 57,368,968 / 40,118,076 |
+| `winui-gallery`, `dist` | 47,339,720 / 33,483,900 | 47,339,712 / 33,484,580 |
+
+What is left after the change, by what each initialiser keeps alone (`ircut.py`, the
+candidate's module): 363 kB over 121 classes, none above 93 kB. The largest are real uses on
+paths hello world does not take: the key-frame animation (93 kB), the adorner layer of the focus
+adorner (34 kB), the visual state manager (33 kB; the button's mapper, which the class of the
+caption buttons states, names it), the data validation errors (24 kB) and the page (24 kB). Two roots of another kind, for later: the cast of
+`BorderGapMaskConverter` that `ferroui-controls` registers at start-up (section 4.16) keeps the
+grid it builds in its conversion (125 kB), and the tool tip service, created at start-up as
+upstream does, initialises the tool tip class to follow `ToolTip.Tip` (57 kB).
+
+Tests: `a_class_with_no_mapper_of_its_own_takes_the_one_of_its_family`,
+`a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread`
+(`visual_state/state_mapper_tests.rs`), with the mapper tests of every family.
+
+### 4.26 An interface cast is registered by the construction of its implementation (#612, #566)
+
+Section 4.16 left some registrations at start-up: the casts of the types that members of markup
+types hold, because compiled markup casts such a value before it sets it
+(`rt::cast::<Option<Rc<dyn IValueConverter>>, _>`) and setting a member registers nothing. A
+cast of a concrete type to an interface names the interface table of the type, and through it
+everything its methods call. The dominator tree of the whole-program module of hello world
+(each symbol under the one every path from `main` to it passes through) put two of these
+families at the top of what hello world links and never runs:
+
+- **The page transitions of `ferroui-base`** (`CrossFade`, `PageSlide`, `Rotate3DTransition`,
+  `CompositePageTransition`, cast to `IPageTransition`): their `start` runs key-frame
+  animations, which bring the animation classes, an animator and an animation instance per
+  value type, and the 3D rotation transform. `ircut.py --edges` predicted 893 kB for the four
+  casts.
+- **The converters of `ferroui-controls`** (nine, cast to `IValueConverter` or
+  `IMultiValueConverter`): `BorderGapMaskConverter`, the gap in the border of a group box in the
+  Simple and Fluent themes, builds a grid in its conversion, which kept the grid's layout in an
+  application in the WinUI theme. Predicted 259 kB, 232 kB of it this one cast.
+
+Each of these types now registers its value conversions from its constructor, once per process
+(a `std::sync::Once` around `ValueTypes::register_used::<Self>()`), and its casts moved from the
+start-up list into its `ValueTypeRegistration`. Every value of the type is made there: the
+transitions have private fields, and the converters that were unit structs are
+`#[non_exhaustive]`, made with `new()`, `default()` or `instance()` outside their crate (a
+breaking change of 0.6). Compiled markup makes them through their markup constructors, which
+call these; with the tables of types every type registers at start-up as before. A converter
+or a transition that exists has its casts on every thread. The easings' casts to `Easing`
+stay at start-up: 1.2 kB together.
+
+| `samples/HelloWorld`, release, macOS | 4.25 | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 19,949,824 bytes | 18,563,848 bytes | -1,385,976 bytes (-6.9 %) |
+| `__TEXT,__text` | 15,784,532 bytes | 14,551,128 bytes | -1,233,404 bytes (-7.8 %) |
+| Class initialisers linked | 164 | 150 | -14 |
+| `dist` file (stripped) | 16,980,368 bytes | 15,917,456 bytes | -1,062,912 bytes (-6.3 %) |
+| `dist` `__TEXT,__text` | 13,975,444 bytes | 13,007,668 bytes | -967,776 bytes (-6.9 %) |
+
+With section 4.25, hello world is 9.6 % smaller than on main in release (20,529,288 bytes)
+and 8.8 % in `dist` (17,446,112 bytes). The smoke run prints the same output.
+
+The catalog and the WinUI gallery make transitions and converters, so they keep the code;
+what changes is where the registrations are (one `Once` per constructor instead of one list):
+
+| Stripped file / `__TEXT,__text`, macOS | 4.25 | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,659,088 / 60,829,068 | 80,591,664 / 60,758,972 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,421,796 | 66,542,272 / 51,431,696 |
+| `winui-gallery`, release | 57,368,968 / 40,118,076 | 57,351,336 / 40,089,864 |
+| `winui-gallery`, `dist` | 47,339,712 / 33,484,580 | 47,356,320 / 33,490,164 |
+
+Start-up of hello world (`FERROUI_SMOKE_EXIT_MS=1`, 11 launches of each build, alternating,
+release): main 159 ms, section 4.25 165 ms, this section 161 ms at the median, 147 ms at the
+minimum for all three; within the noise of a machine that was building at the same time.
+
+Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-base`) and
+`a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
+create both through their markup constructors.
+
+### 4.27 One property store per storage type (#986)
 
 The property store was compiled once for every value type of a styled property:
 `EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of

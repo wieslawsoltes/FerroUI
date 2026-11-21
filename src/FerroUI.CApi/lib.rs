@@ -72,7 +72,7 @@ pub use frame::{
     ferro_frame_on, ferro_frame_open, ferro_frame_reuse, ferro_frame_str, ferro_frame_str16,
 };
 pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of, handle_of, object_of};
-pub use ids::{ferro_api_fingerprint, ferro_event_id, ferro_property_id, ferro_type_id};
+pub use ids::{ferro_api_fingerprint, ferro_event_id, ferro_property_id, ferro_selection_fingerprint, ferro_type_id};
 pub use signals::{
     ferro_signal_bind, ferro_signal_free, ferro_signal_get_bool, ferro_signal_get_cstr, ferro_signal_get_f64,
     ferro_signal_get_i64, ferro_signal_new, ferro_signal_set_bool, ferro_signal_set_f64, ferro_signal_set_handle,

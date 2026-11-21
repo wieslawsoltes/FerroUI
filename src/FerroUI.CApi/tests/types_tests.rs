@@ -182,3 +182,12 @@ fn an_entry_registers_its_class() {
         crate::ferro_release(button);
     });
 }
+
+#[test]
+fn the_selection_fingerprint_is_the_one_of_the_build() {
+    let expected = option_env!("FERROUI_CAPI_SELECTION").map_or(0, |text| text.parse::<i64>().expect("a number"));
+    assert_eq!(crate::ferro_selection_fingerprint(), expected, "0 for a library of every class");
+    for (text, value) in [("0", 0), ("42", 42), ("-6457349082854047077", -6457349082854047077), ("-9223372036854775808", i64::MIN)] {
+        assert_eq!(crate::ids::parse_i64(text.as_bytes()), value, "{text}");
+    }
+}

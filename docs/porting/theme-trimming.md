@@ -1703,3 +1703,82 @@ explicit option yet to ship the original text of a consumed document (see the is
 - `tests/GeneratedRustFixture/Library`: `Dictionaries/Part.xaml` is merged into `App.xaml` and its
   directory is embedded. Neither its path nor the canary comment of the file is in `ASSETS`, while
   `Dictionaries/Loose.xaml`, which no document consumes, is.
+
+## 23. What the documents of an ordinary class root (#1002)
+
+`samples/HelloWorld` (a window with text) kept the theme of `Button`, and with it
+`Resources/Button_themeresources.xaml`, `Resources/HyperlinkButton_themeresources.xaml` and part of
+`Resources/Deprecated_themeresources.xaml`. `theme_parts_why.txt` gave the reason "the type
+Button, a root of the dependencies". The dependency is `ferroui-dialogs`, reached through
+`ferroui-native` and `ferroui-themes-winui`. Its one document, `AboutFerroDialog.xaml`, is the
+document of an ordinary class (a `Window`). Its `referenced_types` were `Button`, `DrawingGroup`,
+`DrawingImage`, `GeometryDrawing`, `Grid`, `Image`, `Style`, `TextBlock` and `Window`. Section 11.7
+exports what every document of a crate names, and an application roots what all of its
+dependencies export, so the references of the dialog rooted the themes of every application that
+links the crate. Only `samples/ControlCatalog` constructs the dialog.
+
+### 23.1 References by class
+
+A crate now exports the references of the document of an ordinary class (the group of a class
+that is not constructed from selected units, section 14.1) by class. The `.xamlmeta` gets
+`class_references`: for each class, its full markup name (`x:Class`), `referenced_types` and
+`referenced_keys`. The list is written only when a class names something, so the metadata of
+every other crate is unchanged. Both readers read the list as optional.
+
+Unchanged:
+
+- The references of style and resource groups are assembly-wide (`referenced_types`,
+  `referenced_keys`).
+- So are those of a class constructed from selected units (rooted through its unit graph, so in
+  practice none), and of a document whose `x:Class` the build cannot read.
+- The check of #846 (a theme a direct dependency's documents construct) reads both lists
+  (`MarkupReferencesModel::names_type`).
+
+### 23.2 Live classes
+
+An application adds the references of a class to its roots only when the class is live
+(`live_class_references`). A class is live when:
+
+- its local or full name is a name of the application's sources: `AboutFerroDialog::new()`, or
+  the builder `about_ferro_dialog()`, which the scan records in the case of the type; or
+- the types live with the roots include it. These roots are the documents, the sources, the
+  manifest, the build script, the assembly-wide references of the dependencies, and the
+  references of the classes found live so far, each with its base classes and created classes
+  (`TypeGraph::live`).
+
+The search repeats until nothing changes, so a class whose document constructs another class
+makes that class live too. A base class being live does not make its subclass live. The reason in
+`theme_parts_why.txt` names the class: "the type Button, referenced by the document of the live
+class FerroUI.Dialogs.AboutFerroDialog".
+
+### 23.3 Classes their own crate constructs
+
+The build cannot see a class that the code of its own crate constructs: a window a function
+opens, or a view a view locator makes. The type models record no edge from the application to
+that code. A group states it with `XamlGroup::constructed_by_its_crate()`, and the references of
+its class are then exported assembly-wide, as before. The framework's library crates with
+documents of ordinary classes:
+
+| Crate | Classes | Constructed by its own code | Exported |
+|---|---|---|---|
+| `ferroui-dialogs` | `AboutFerroDialog` | no (only `samples/ControlCatalog`, and the builder of `ferroui-view`) | by class |
+| `ferroui-diagnostics` | `MainWindow`, `MainView`, the pages and the views of DevTools | yes: `DevTools` opens `MainWindow`, and its view locator makes the pages | assembly-wide (`constructed_by_its_crate`) |
+| `ferrodock-ferro-diagnostics` | `RootDockDebug` and the debug views | yes: `root_dock_debug_extensions` constructs the inspector, which shows the views | assembly-wide (`constructed_by_its_crate`) |
+| `ferrodock-ferro-themes-fluent`, `-simple`, `-browser` | `DockFluentTheme`, `DockSimpleTheme`, `BrowserTabTheme` | no (applications construct them, by name) | by class |
+
+The theme crates (`ferroui-themes-*`) construct their classes from selected units, and are
+unchanged.
+
+### 23.4 Tests
+
+- `xaml_metadata.rs` (`class_references_round_trip_through_the_text`) and `model.rs`
+  (`class_references_are_read_by_both_readers`): the list is written and read by both formats,
+  and a file without it reads as none.
+- `theme_roots_tests.rs`:
+  - `the_references_of_an_ordinary_class_root_only_where_the_class_is_live`: a class nothing
+    constructs roots nothing. A class is live when the sources name it, by its local or full
+    name; when a live type creates it; or when the document of another live class constructs it.
+  - `a_unit_kept_for_a_live_class_says_which_class`: the reason names the class.
+- `lib.rs` (`the_references_of_an_ordinary_class_root_the_themes_only_where_it_is_live`): a build
+  of an application whose dependency's class is not constructed keeps only the ambient unit. One
+  that constructs it keeps the theme of `Button`, with the reason that names the class.

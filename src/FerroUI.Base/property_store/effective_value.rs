@@ -271,7 +271,7 @@ impl dyn EffectiveValueDyn {
 ///
 /// `T` is the storage type of the property's value type
 /// ([`StyledValue::Storage`]): the store is compiled once for each storage
-/// type, not once for each value type (docs/binary-size.md, section 4.25).
+/// type, not once for each value type (docs/binary-size.md, section 4.27).
 // Keep the representation unbounded so Clone-only public metadata can name
 // its cold algorithm. Construction, store access and notification impls require
 // a StyledValue storage type; none of the typed fields is erased or recast.
