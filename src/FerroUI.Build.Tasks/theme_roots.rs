@@ -380,6 +380,7 @@ pub fn live_class_references<'c>(
         }
     }
     classes.iter().zip(found).filter(|(_, found)| *found).map(|(class, _)| *class).collect()
+}
 
 /// The target a build compiles for (#1002), from the `cfg` of the build script of the application:
 /// what the conditions of `TypeModel::not_created_on` are evaluated against.

@@ -611,6 +611,7 @@ fn a_unit_kept_for_a_live_class_says_which_class() {
         "defines the theme of Button: the type Button, referenced by the document of the live class Lib.About"
     );
     assert!(button.conservative);
+}
 
 /// A creates edge into a class no code constructs on the target of the build does not hold there
 /// (#1002): the host of a window creates its drawn decorations, which no backend of macOS needs, so
