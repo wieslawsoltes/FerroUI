@@ -290,7 +290,10 @@ fn default_coercion_retains_partial_eq_nan_and_absent_callback_behavior() {
             let entry = owner.values().get_effective_value(property);
             assert_eq!(entry.is_some(), creates_entry);
             if let Some(entry) = entry {
-                assert!(cast_effective_value::<f64>(&*entry).value().is_nan());
+                assert!(matches!(
+                    cast_effective_value::<crate::SmallValue>(&*entry).value(),
+                    crate::SmallValue::F64(value) if value.is_nan()
+                ));
                 assert!(!entry.can_remove());
             }
         }

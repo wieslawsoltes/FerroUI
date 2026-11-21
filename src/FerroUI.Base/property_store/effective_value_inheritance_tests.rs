@@ -375,7 +375,11 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
         let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
         let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
         if !value_equals(&o, &n) {
-            owner.raise_inherited_property_changed(self.state.property, &o, &n, priority);
+            // The stored forms as values of the value type, as the path under test hands them out.
+            let property = self.state.property;
+            with_values(property, Some(&o), &n, |o, n| {
+                owner.raise_inherited_property_changed(property, o.expect("the old value"), n, priority);
+            });
         }
     }
 }

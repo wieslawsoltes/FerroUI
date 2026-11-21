@@ -93,6 +93,15 @@ fn both_not_a_number<T: 'static>(a: &T, b: &T) -> bool {
     if let (Some(Some(a)), Some(Some(b))) = (a.downcast_ref::<Option<f32>>(), b.downcast_ref::<Option<f32>>()) {
         return a.is_nan() && b.is_nan();
     }
+    // The storage forms of the same types: two `NaN` are the same stored value too.
+    if let (Some(a), Some(b)) = (a.downcast_ref::<crate::SmallValue>(), b.downcast_ref::<crate::SmallValue>()) {
+        return a.both_nan(b);
+    }
+    if let (Some(Some(a)), Some(Some(b))) =
+        (a.downcast_ref::<Option<crate::SmallValue>>(), b.downcast_ref::<Option<crate::SmallValue>>())
+    {
+        return a.both_nan(b);
+    }
     false
 }
 

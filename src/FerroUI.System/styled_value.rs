@@ -291,10 +291,191 @@ impl<T: StyledValue> StyledValue for Option<T> {
     }
 }
 
-styled_value!(
-    bool, char, f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, (), String,
-    std::time::Duration,
-);
+styled_value!(char, i8, i16, i128, isize, u8, u16, u128, usize, (), String, std::time::Duration);
+
+/// The common scalar types are kept inline in a [`SmallValue`].
+macro_rules! small_scalars {
+    ($($type_:ty => $variant:ident),* $(,)?) => {
+        $(
+            impl StyledValue for $type_ {
+                type Storage = SmallValue;
+
+                #[inline(always)]
+                fn into_storage(self) -> SmallValue {
+                    SmallValue::$variant(self)
+                }
+
+                #[inline(always)]
+                fn from_storage(storage: SmallValue) -> Self {
+                    match storage {
+                        SmallValue::$variant(value) => value,
+                        _ => SmallValue::foreign(),
+                    }
+                }
+            }
+        )*
+    };
+}
+
+small_scalars!(bool => Bool, i32 => I32, u32 => U32, i64 => I64, u64 => U64, f32 => F32, f64 => F64);
+
+/// A value kept by [`SmallValue::Boxed`]: its comparison, for one compiled form of the store.
+#[doc(hidden)]
+pub trait SmallBoxed: Any {
+    /// Whether `other` holds the same type and an equal value.
+    fn eq_boxed(&self, other: &dyn SmallBoxed) -> bool;
+}
+
+impl<T: PartialEq + 'static> SmallBoxed for T {
+    fn eq_boxed(&self, other: &dyn SmallBoxed) -> bool {
+        let other: &dyn Any = other;
+        other.downcast_ref::<T>().is_some_and(|other| self == other)
+    }
+}
+
+/// The form the property store keeps the common value types in: a tag and the value inline for
+/// the scalars, colors and geometry, and a shared box for other value types that name it as their
+/// storage type ([`styled_boxed_value!`](crate::styled_boxed_value)). One storage type for all of
+/// them, so that the store is compiled once for all of them.
+///
+/// Every read goes through a `match` on the tag or a checked downcast: a value read as another
+/// type panics ([`SmallValue::foreign`]), and no value is reinterpreted. The comparison of the
+/// scalars is that of their type, so `NaN` differs from itself here too; the property store treats
+/// two `NaN` as the same value in `value_equals`, through [`SmallValue::both_nan`].
+#[derive(Clone)]
+pub enum SmallValue {
+    /// A `bool`.
+    Bool(bool),
+    /// An `i32`.
+    I32(i32),
+    /// A `u32`, or a color as its ARGB value.
+    U32(u32),
+    /// An `i64`.
+    I64(i64),
+    /// A `u64`.
+    U64(u64),
+    /// An `f32`.
+    F32(f32),
+    /// An `f64`.
+    F64(f64),
+    /// Two coordinates: a point, a size or a vector.
+    F64x2([f64; 2]),
+    /// Four coordinates: a rectangle, a thickness or a corner radius.
+    F64x4([f64; 4]),
+    /// Any other value type that is kept here.
+    Boxed(Rc<dyn SmallBoxed>),
+}
+
+impl PartialEq for SmallValue {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Bool(a), Self::Bool(b)) => a == b,
+            (Self::I32(a), Self::I32(b)) => a == b,
+            (Self::U32(a), Self::U32(b)) => a == b,
+            (Self::I64(a), Self::I64(b)) => a == b,
+            (Self::U64(a), Self::U64(b)) => a == b,
+            (Self::F32(a), Self::F32(b)) => a == b,
+            (Self::F64(a), Self::F64(b)) => a == b,
+            (Self::F64x2(a), Self::F64x2(b)) => a == b,
+            (Self::F64x4(a), Self::F64x4(b)) => a == b,
+            (Self::Boxed(a), Self::Boxed(b)) => a.eq_boxed(&**b),
+            _ => false,
+        }
+    }
+}
+
+impl SmallValue {
+    /// `value` in a box of its own.
+    #[inline]
+    pub fn boxed<T: PartialEq + 'static>(value: T) -> Self {
+        Self::Boxed(Rc::new(value))
+    }
+
+    /// The value of a box, as `T`. Panics for any other stored value.
+    #[inline]
+    pub fn unboxed<T: Clone + 'static>(self) -> T {
+        self.boxed_ref::<T>().clone()
+    }
+
+    /// The value of a box, borrowed as `T`. Panics for any other stored value.
+    #[inline]
+    pub fn boxed_ref<T: 'static>(&self) -> &T {
+        if let Self::Boxed(value) = self {
+            let value: &dyn Any = &**value;
+            if let Some(value) = value.downcast_ref::<T>() {
+                return value;
+            }
+        }
+        Self::foreign()
+    }
+
+    /// Whether both are the same floating point type and both are not a number.
+    #[inline]
+    pub fn both_nan(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::F64(a), Self::F64(b)) => a.is_nan() && b.is_nan(),
+            (Self::F32(a), Self::F32(b)) => a.is_nan() && b.is_nan(),
+            _ => false,
+        }
+    }
+
+    /// A stored value read as a type it does not hold. The store never does that.
+    #[cold]
+    #[inline(never)]
+    #[track_caller]
+    pub fn foreign<T>() -> T {
+        panic!("a stored value is read as another type")
+    }
+}
+
+impl StyledValue for SmallValue {
+    type Storage = Self;
+    const SHARED_STORAGE: bool = true;
+
+    #[inline(always)]
+    fn into_storage(self) -> Self {
+        self
+    }
+
+    #[inline(always)]
+    fn from_storage(storage: Self) -> Self {
+        storage
+    }
+
+    #[inline(always)]
+    fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
+        read(storage)
+    }
+}
+
+/// Implements [`StyledValue`] for types the property store keeps in the shared box of a
+/// [`SmallValue`].
+#[macro_export]
+macro_rules! styled_boxed_value {
+    ($($type_:ty),* $(,)?) => {
+        $(
+            impl $crate::StyledValue for $type_ {
+                type Storage = $crate::SmallValue;
+
+                #[inline]
+                fn into_storage(self) -> $crate::SmallValue {
+                    $crate::SmallValue::boxed(self)
+                }
+
+                #[inline]
+                fn from_storage(storage: $crate::SmallValue) -> Self {
+                    storage.unboxed()
+                }
+
+                #[inline]
+                fn with_storage<R>(storage: &$crate::SmallValue, read: impl FnOnce(&Self) -> R) -> R {
+                    read(storage.boxed_ref::<Self>())
+                }
+            }
+        )*
+    };
+}
 
 // The value types of other crates that properties of FerroUI hold.
 #[cfg(feature = "locale")]
@@ -397,6 +578,45 @@ mod tests {
         assert!(<Option<EnumValue> as StyledValue>::SHARED_STORAGE);
         assert!(!f64::SHARED_STORAGE);
         assert!(!<Option<String> as StyledValue>::SHARED_STORAGE);
+    }
+
+    #[test]
+    fn a_small_value_is_read_back_as_its_type() {
+        assert!(f64::from_storage(2.5f64.into_storage()) == 2.5);
+        assert!(bool::from_storage(true.into_storage()));
+        assert_eq!(7u32, u32::from_storage(7u32.into_storage()));
+        assert!(SmallValue::SHARED_STORAGE);
+        assert!(!f64::SHARED_STORAGE);
+    }
+
+    #[test]
+    fn nan_differs_from_itself_as_a_small_value_and_both_nan_says_so() {
+        let nan = f64::NAN.into_storage();
+        assert!(nan != nan.clone());
+        assert!(nan.both_nan(&nan.clone()));
+        assert!(!nan.both_nan(&1.0f64.into_storage()));
+        assert!(!f32::NAN.into_storage().both_nan(&nan));
+    }
+
+    #[test]
+    fn a_boxed_value_compares_by_its_type_and_is_read_checked() {
+        let (a, b) = (SmallValue::boxed(String::from("a")), SmallValue::boxed(String::from("a")));
+        assert!(a == b);
+        assert!(a != SmallValue::boxed(1u8));
+        assert_eq!("a", a.boxed_ref::<String>());
+        assert_eq!("a", b.unboxed::<String>());
+    }
+
+    #[test]
+    #[should_panic(expected = "read as another type")]
+    fn a_boxed_value_is_not_read_as_another_type() {
+        let _ = SmallValue::boxed(1u8).boxed_ref::<u16>();
+    }
+
+    #[test]
+    #[should_panic(expected = "read as another type")]
+    fn a_small_value_is_not_read_as_another_type() {
+        let _ = f64::from_storage(SmallValue::Bool(true));
     }
 
     #[test]

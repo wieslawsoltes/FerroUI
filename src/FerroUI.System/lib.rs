@@ -46,7 +46,7 @@ pub use i_disposable::IDisposable;
 pub use subscription::Subscription;
 pub use i_observable::{IObservable, IObserver, ObservableError, SubscribeGuard};
 pub use i_progress::IProgress;
-pub use styled_value::{EnumValue, StyledValue};
+pub use styled_value::{EnumValue, SmallBoxed, SmallValue, StyledValue};
 
 #[cfg(test)]
 mod tests;

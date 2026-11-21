@@ -79,6 +79,23 @@ fn an_effective_value_has_no_field_for_a_base_value_that_is_the_value() {
     assert_eq!(size_of::<EffectiveValue<Thickness>>() - size_of::<EffectiveValue<f64>>(), 24);
 }
 
+/// The memory of the tagged storage, printed for the size report of the experiment
+/// (`cargo test -p ferroui-base --lib small_value_memory -- --nocapture`).
+#[cfg(target_pointer_width = "64")]
+#[test]
+fn small_value_memory() {
+    use crate::SmallValue;
+    println!(
+        "slot: SmallValue {} bytes; EffectiveValue<SmallValue> {} bytes; typed f64 {}, bool {}, Thickness {}",
+        size_of::<SmallValue>(),
+        size_of::<EffectiveValue<SmallValue>>(),
+        size_of::<EffectiveValue<f64>>(),
+        size_of::<EffectiveValue<bool>>(),
+        size_of::<EffectiveValue<Thickness>>(),
+    );
+    assert!(size_of::<SmallValue>() <= 40);
+}
+
 #[test]
 fn a_value_without_an_animation_over_it_is_kept_once() {
     let (owner, property, alive, before) = counted();

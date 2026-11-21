@@ -128,9 +128,9 @@ pub use rounded_rect::RoundedRect;
 pub use size::Size;
 pub use styled_element::{StyledElement, StyledElementImpl, StyledElementImplExt, StyledElementVTable};
 pub use styled_property::{AttachedProperty, StyledProperty};
-pub use ferroui_system::{EnumValue, StyledValue};
+pub use ferroui_system::{EnumValue, SmallValue, StyledValue};
 #[doc(no_inline)]
-pub use ferroui_system::{styled_enum, styled_value};
+pub use ferroui_system::{styled_boxed_value, styled_enum, styled_value};
 #[doc(hidden)]
 pub use ferroui_system::{__styled_enum, __styled_enum_variant};
 pub use thickness::Thickness;

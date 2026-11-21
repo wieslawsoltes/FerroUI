@@ -373,7 +373,7 @@ fn recoercion_keeps_nan_equality() {
         );
         owner.set_value(property, f64::NAN);
         let effective = owner.values().get_effective_value(property).unwrap();
-        let typed = cast_effective_value::<f64>(&*effective);
+        let typed = cast_effective_value::<crate::SmallValue>(&*effective);
         notifications.set(0);
         if original {
             typed.original_coerce_value(&owner);
