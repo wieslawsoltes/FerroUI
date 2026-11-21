@@ -1702,10 +1702,10 @@ version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
+ "ferroui-ident-macros",
  "ferroui-system",
  "icu_locale_core",
  "libc",
- "paste",
  "rust_decimal",
  "rustc-hash 2.1.3",
  "smallvec",
@@ -2248,6 +2248,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-ident-macros"
+version = "0.6.0-preview.1"
+
+[[package]]
 name = "ferroui-inspect"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -2751,7 +2755,6 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "libc",
- "paste",
 ]
 
 [[package]]
@@ -2901,10 +2904,10 @@ dependencies = [
 name = "ferroui-reactiveui"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-ident-macros",
  "ferroui-reactive",
  "ferroui-splat",
  "ferroui-system",
- "paste",
  "uuid",
 ]
 
@@ -5298,12 +5301,6 @@ name = "parlance"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73072a9470554c8e794778acece2312661218aaabb635600957d952cf01c716e"
-
-[[package]]
-name = "paste"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "peniko"
