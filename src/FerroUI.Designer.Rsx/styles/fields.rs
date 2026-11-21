@@ -18,6 +18,7 @@ pub struct RsxStyleField {
     pub getter: String,
     pub type_name: String,
     pub(crate) owner: TargetType,
+    pub(crate) insertable: bool,
     codec: Codec,
 }
 
@@ -207,14 +208,17 @@ pub(crate) fn project_fields(
                 };
                 let getter = path.trim_start_matches("::");
                 fields.entry(getter.to_owned()).or_insert_with(|| {
-                    field(
+                    let mut field = field(
                         getter,
                         property.name,
                         class,
                         namespace,
                         info.type_name,
                         codec,
-                    )
+                    );
+                    field.insertable = member.visibility == "pub"
+                        || getter.starts_with("crate::") && member.visibility == "pub(crate)";
+                    field
                 });
             }
         }
@@ -238,6 +242,7 @@ fn field(
             name: owner.into(),
             namespace,
         },
+        insertable: true,
         codec,
     }
 }

@@ -34,6 +34,19 @@ pub enum RsxStyleEdit {
     },
 }
 
+impl RsxStyleEdit {
+    pub fn target(&self) -> usize {
+        match self {
+            Self::Create { owner, .. } => *owner,
+            Self::CreateNested { style, .. }
+            | Self::Selector { style, .. }
+            | Self::Setter { style, .. }
+            | Self::AddSetter { style, .. }
+            | Self::Remove { style } => *style,
+        }
+    }
+}
+
 impl RsxProjection<'_> {
     pub fn plan_style(&self, edit: &RsxStyleEdit) -> Result<Vec<TextPatch>, String> {
         let mut count = self.style_definitions().len();
@@ -112,6 +125,7 @@ impl RsxProjection<'_> {
                 let field = self
                     .catalog
                     .style_field(getter.trim_start_matches("::"))
+                    .filter(|field| field.insertable)
                     .ok_or("Choose a registered writable Rust style property")?;
                 if style
                     .setters

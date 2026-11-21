@@ -97,6 +97,8 @@ mod resource_editor;
 mod rsx_document;
 mod rsx_placement;
 mod rsx_session;
+mod rsx_style_authoring;
+pub use rsx_style_authoring::rust_style_report;
 mod runtime;
 mod runtime_include_sources;
 mod runtime_outline;

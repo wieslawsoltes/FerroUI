@@ -3,7 +3,7 @@ use crate::edits::{editor_edits, rust_name_edit};
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
-use ferroui_designer::mcp::DesignerMcp;
+use ferroui_designer::mcp::{DesignerMcp, RSX_STYLES, RSX_STYLE_EDIT};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
 use serde::Deserialize;
@@ -39,13 +39,14 @@ pub(crate) fn catalog() -> Value {
         .into_iter()
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
-    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state" | "designer_item_template"))).cloned()
+    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state" | "designer_item_template" | RSX_STYLE_EDIT))).cloned()
         .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::program_edit(name, action)
             || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)
-            || rsx_animation::clip_placement_edit(name, action) || rust_template_edit(name, action)))
+            || rsx_animation::clip_placement_edit(name, action) || rust_template_edit(name, action) || name == RSX_STYLE_EDIT))
         .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
-        "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
+        "xamlEdits":edits.into_iter().filter(|tool| tool["name"] != RSX_STYLE_EDIT)
+            .filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
 }
 
 pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Presentation, String> {
@@ -132,7 +133,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     let needs_selection = match query.name.as_str() {
         "designer_style_catalog" => query.arguments.get("target").is_none(),
-        "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette" => false,
+        "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette" | RSX_STYLES => false,
         _ => true,
     };
     // Reading one explicit definition must never retire a plan made for another
@@ -145,6 +146,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     if query.name == "designer_behaviors" && stage.authored_rsx.is_some() {
         return Err("Behavior collections use authored XAML".into());
+    }
+    if query.name == RSX_STYLES {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        let rust = stage.authored_rsx.as_ref().ok_or("Open an authored RSX view")?;
+        let node = query.arguments["node"].as_u64().and_then(|node| usize::try_from(node).ok());
+        return ferroui_designer::rust_style_report(rust.source(), &rust.projection()?, node);
     }
     if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_property_trace") {
         stage.studio.validate(&query.name, &query.arguments)?;
@@ -203,6 +210,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
     let rust_columns = design.rsx.is_some() && query.name == "designer_columns_edit";
+    let rust_style = design.rsx.is_some() && query.name == RSX_STYLE_EDIT;
     let rust_template = design.rsx.is_some() && rust_template_edit(&query.name, action);
     let rust_names = design.rsx.is_some()
         && query.name == "designer_property"
@@ -216,6 +224,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_placement
         && !rust_names
         && !rust_columns
+        && !rust_style
         && !rust_template
         && !spacing
         && !wrapping
@@ -255,16 +264,22 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
     }
-    if rust_columns || rust_template {
+    if rust_columns || rust_template || rust_style {
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
-            let plan = if rust_columns {
-                ferroui_designer::mcp::rust_column_source_plan
-            } else {
-                ferroui_designer::mcp::rust_template_source_plan
-            };
-            let patches = stage.sources.run(|| plan(&session, design.source, projection, &arguments))?;
+            let patches = stage.sources.run(|| {
+                if rust_style {
+                    ferroui_designer::mcp::rust_style_source_plan(&session, projection, &arguments)
+                } else {
+                    let plan = if rust_columns {
+                        ferroui_designer::mcp::rust_column_source_plan
+                    } else {
+                        ferroui_designer::mcp::rust_template_source_plan
+                    };
+                    plan(&session, design.source, projection, &arguments)
+                }
+            })?;
             let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
             (patches, selection)
         };
@@ -411,6 +426,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         // All actions for these schemas are source-backed.
         "designer_component"
         | "designer_style_edit"
+        | RSX_STYLE_EDIT
         | "designer_palette_edit"
         | "designer_property"
         | "designer_record_property"

@@ -23,6 +23,7 @@ struct StateOwnerMapping {
 }
 
 pub(crate) struct AuthoredRsxFrame {
+    pub(crate) uri: String,
     source: Box<str>,
     invocation: SourceSpan,
     clips: BTreeMap<NodeId, RsxAnimation>,
@@ -40,9 +41,10 @@ impl AuthoredRsxFrame {
         self.catalog.project(&self.source, self.invocation.start)
     }
 
-    pub(crate) fn capture(design: &DesignDocument<'_>) -> Option<Self> {
+    pub(crate) fn capture(design: &DesignDocument<'_>, uri: &str) -> Option<Self> {
         let rsx = design.rsx.as_ref()?;
         Some(Self {
+            uri: uri.into(),
             source: design.source.into(),
             invocation: rsx.invocation,
             clips: design.rsx_animations.clone(),

@@ -29,17 +29,22 @@ pub(super) struct AuthoredPreview {
 
 impl Relay {
     pub(super) fn authored(&self, frame: FrameIdentity) -> Result<&AuthoredPreview, String> {
+        self.require_authored_frame(frame)?;
+        self.authored
+            .as_ref()
+            .ok_or_else(|| "Use an XAML App Preview with scoped authoring support".into())
+    }
+
+    pub(super) fn require_authored_frame(&self, frame: FrameIdentity) -> Result<(), String> {
         let state = self.events.0.lock().unwrap();
         if state.disconnected
             || self.sent != Some((frame.revision, frame.sequence))
             || state.requested != Some(frame.revision)
             || !matches!(state.outcome, Some(Ok(())))
         {
-            return Err("Read the current app-hosted preview frame before authoring XAML".into());
+            return Err("Read the current app-hosted preview frame before editing its source".into());
         }
-        self.authored
-            .as_ref()
-            .ok_or_else(|| "Use an XAML App Preview with scoped authoring support".into())
+        Ok(())
     }
 }
 

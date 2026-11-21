@@ -184,6 +184,7 @@ impl DesignerWorkspace {
         this.connect_focus_order_commands();
         this.connect_preview_checks();
         this.connect_columns();
+        this.connect_rust_styles();
         this.connect_item_templates();
         this.connect_command_bindings();
         this.connect_design_time_commands();
@@ -776,6 +777,7 @@ impl DesignerWorkspace {
         self.refresh_selection_layout();
         self.refresh_property_transfer_commands();
         self.refresh_columns_command();
+        self.refresh_rust_styles_command();
         self.refresh_item_template_command();
         self.refresh_command_binding();
         self.refresh_file_title();
@@ -939,6 +941,8 @@ mod focus_order;
 mod preview_checks;
 #[path = "workspace_columns.rs"]
 mod columns;
+#[path = "workspace_rust_styles.rs"]
+mod rust_styles;
 #[path = "inspector_actions.rs"]
 mod inspector_actions;
 #[path = "workspace_property_trace.rs"]

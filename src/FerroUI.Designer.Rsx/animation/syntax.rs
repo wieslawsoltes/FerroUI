@@ -52,7 +52,7 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         }
     }
     let mut xaml = timeline.to_xaml_authored_keys(TRACK_TARGET).ok()?;
-    if let Some(target) = &target_type {
+    if let Some(target) = target_type.as_ref().or_else(|| builtin_target(&keys, catalog)) {
         target.annotate(&mut xaml);
     }
     Some(RsxAnimation {
@@ -65,6 +65,20 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         target_type,
         keys,
         attachment: None,
+    })
+}
+
+// Rust getters carry their property types even when the selector only names a
+// control. Supply the matching XAML scope for built-in tracks, too.
+fn builtin_target<'a>(keys: &[super::KeySource], catalog: &'a RsxCatalog) -> Option<&'a TargetType> {
+    let owners = keys.iter()
+        .map(|key| catalog.style_field(key.getter.trim_start_matches("::")).map(|field| &field.owner))
+        .collect::<Option<Vec<_>>>()?;
+    let schema = crate::catalog::schema();
+    let type_of = |owner: &TargetType| schema.type_info(&owner.name, owner.namespace.as_deref());
+    owners.iter().copied().find(|owner| {
+        owners.iter().all(|base| owner == base || type_of(owner).zip(type_of(base))
+            .is_some_and(|(target, base)| schema.type_assignable_to(target, base)))
     })
 }
 

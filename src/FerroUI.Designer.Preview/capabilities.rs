@@ -31,6 +31,8 @@ pub(crate) fn initialize() -> Value {
         "controlTemplateAuthoring",
         "propertyTrace",
         "styleComposition",
+        "rustStyleComposition",
+        "hostedRustStyles",
         "projectInventory",
         "tokenHandoff",
         "designFixtures",

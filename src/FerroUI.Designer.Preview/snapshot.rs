@@ -59,7 +59,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     }
     if let Some(stage) = &mut renderer.stage {
         stage.placement_policy = crate::rsx_placement::PlacementPolicy::of(&design);
-        stage.authored_rsx = crate::rsx_animation::AuthoredRsxFrame::capture(&design);
+        stage.authored_rsx = crate::rsx_animation::AuthoredRsxFrame::capture(&design, &input.document.uri);
         stage.rsx_spacing = crate::spacing::RsxOwners::capture(&design);
         stage.project_assets = assets;
     }

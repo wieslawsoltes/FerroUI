@@ -40,6 +40,7 @@ pub(crate) mod authored;
 pub(crate) mod palette;
 mod sources;
 pub(crate) mod styles;
+mod rust_styles;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
@@ -406,7 +407,7 @@ impl Relay {
         } else {
             None
         };
-        let authored_rsx = AuthoredRsxFrame::capture(&document);
+        let authored_rsx = AuthoredRsxFrame::capture(&document, &design.document.uri);
         let states = state.animation_catalog.as_mut().map(|catalog| {
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
         });
@@ -446,7 +447,7 @@ impl Relay {
         self.authored_rsx = authored_rsx;
         self.authored = authored;
         frame.palette_available = self.authored.is_some();
-        frame.styles_available = self.authored.is_some();
+        frame.styles_available = self.authored.is_some() || self.authored_rsx.is_some();
         frame.animation_presentation = presentation;
         Ok(frame)
     }
@@ -479,7 +480,7 @@ impl Relay {
             fixture,
             fixtures,
             palette_available: self.authored.is_some(),
-            styles_available: self.authored.is_some(),
+            styles_available: self.authored.is_some() || self.authored_rsx.is_some(),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,
         }))

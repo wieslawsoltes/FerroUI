@@ -31,6 +31,9 @@ mod grid;
 #[path = "mcp_columns.rs"]
 mod columns;
 pub use columns::{columns_report, rust_column_source_plan};
+#[path = "mcp_rsx_style.rs"]
+mod rsx_style;
+pub use rsx_style::{rust_style_source_plan, RSX_STYLES, RSX_STYLE_EDIT};
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
 pub use item_templates::{rust_template_navigation, rust_template_report, rust_template_source_plan};
@@ -321,6 +324,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(item_templates::tools());
         tools.extend(components::tools());
         tools.extend(style_composition::tools());
+        tools.extend(rsx_style::tools());
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
@@ -355,6 +359,7 @@ impl UiToolProvider for DesignerMcp {
             || name == "designer_property_trace"
             || components::handles(name)
             || style_composition::handles(name)
+            || rsx_style::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
@@ -625,6 +630,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if columns::handles(name) {
             return columns::call(&mut session, name, args);
+        }
+        if rsx_style::handles(name) {
+            return rsx_style::call(&mut session, name, args);
         }
         if item_templates::handles(name) {
             let result = item_templates::call(&mut session, name, args)?;

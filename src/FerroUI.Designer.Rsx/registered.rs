@@ -100,7 +100,8 @@ impl RsxCatalog {
 
     pub(crate) fn style_fields(&self) -> Vec<&RsxStyleField> {
         style_fields::builtins().iter().filter(|(path, _)| !self.style_fields.contains_key(*path))
-            .map(|(_, field)| field).chain(self.style_fields.values()).collect()
+            .map(|(_, field)| field).chain(self.style_fields.values())
+            .filter(|field| field.insertable).collect()
     }
 
     pub(crate) fn animation_property(&self, path: &str) -> Option<&crate::animation::Property> {
